@@ -1019,6 +1019,6 @@ Transient Labs"
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "Company Portfolio",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Company Portfolio" });
+}

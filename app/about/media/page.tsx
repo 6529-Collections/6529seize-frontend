@@ -959,6 +959,6 @@ Punk no background"
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "Media Center",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Media Center" });
+}

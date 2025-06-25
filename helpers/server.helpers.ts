@@ -8,6 +8,7 @@ import {
 } from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { SortDirection } from "../entities/ISort";
 import { ApiIdentity } from "../generated/models/ApiIdentity";
+import { cookies } from "next/headers";
 
 export const getUserProfile = async ({
   user,
@@ -102,6 +103,21 @@ export const getInitialRatersParams = ({
 export const getCommonHeaders = (req: any): Record<string, string> => {
   const authCookie = req?.req.cookies["x-6529-auth"] ?? null;
   const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
+  return {
+    ...(authCookie ? { "x-6529-auth": authCookie } : {}),
+    ...(walletAuthCookie
+      ? { Authorization: `Bearer ${walletAuthCookie}` }
+      : {}),
+  };
+};
+
+export const getAppCommonHeaders = async (): Promise<
+  Record<string, string>
+> => {
+  const cookieStore = await cookies();
+  const authCookie = cookieStore.get("x-6529-auth")?.value;
+  const walletAuthCookie = cookieStore.get("wallet-auth")?.value;
+
   return {
     ...(authCookie ? { "x-6529-auth": authCookie } : {}),
     ...(walletAuthCookie

@@ -4,20 +4,19 @@ import { NextGenCollection } from "@/entities/INextgen";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
-import { headers } from "next/headers";
 import Home from "@/components/home/Home";
+import { getAppCommonHeaders } from "@/helpers/server.helpers";
 
 export default async function HomePage() {
-  const reqHeaders = await headers();
-
+  const headers = await getAppCommonHeaders();
   const featuredNft = await commonApiFetch<NFTWithMemesExtendedData>({
     endpoint: `memes_latest`,
-    headers: Object.fromEntries(reqHeaders),
+    headers,
   }).then(async (responseExtended) => responseExtended);
 
   const featuredNextgen = await commonApiFetch<NextGenCollection>({
     endpoint: `nextgen/featured`,
-    headers: Object.fromEntries(reqHeaders),
+    headers,
   });
 
   return (
@@ -27,7 +26,9 @@ export default async function HomePage() {
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  ogImage: `${process.env.BASE_ENDPOINT}/6529io-banner.png`,
-  twitterCard: "summary_large_image",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({
+    ogImage: `${process.env.BASE_ENDPOINT}/6529io-banner.png`,
+    twitterCard: "summary_large_image",
+  });
+}

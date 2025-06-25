@@ -423,6 +423,6 @@ export default function AboutRulesPage() {
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "6529 Fam Rules",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "6529 Fam Rules" });
+}
