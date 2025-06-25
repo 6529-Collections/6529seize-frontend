@@ -5,7 +5,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
 import TheMemesMint from "@/components/the-memes/TheMemesMint";
-import { getAppCommonHeaders } from "@/helpers/server.helpers";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 
 export default async function TheMemesMintPage() {
   const headers = await getAppCommonHeaders();

@@ -5,7 +5,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
 import Home from "@/components/home/Home";
-import { getAppCommonHeaders } from "@/helpers/server.helpers";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 
 export default async function HomePage() {
   const headers = await getAppCommonHeaders();
