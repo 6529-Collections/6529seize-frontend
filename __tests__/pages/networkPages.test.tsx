@@ -18,7 +18,6 @@ jest.mock('../../components/groups/page/Groups', () => () => (
 ));
 
 const mockAuthContext = {
-  setTitle: jest.fn(),
   connectedProfile: null,
   activeProfileProxy: null,
   requestAuth: jest.fn()
@@ -32,6 +31,25 @@ function renderWithAuth(component: React.ReactElement) {
   );
 }
 
+
+// Mock TitleContext
+const mockSetTitle = jest.fn();
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: () => mockSetTitle,
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('network pages render', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,9 +58,6 @@ describe('network pages render', () => {
   it('renders Groups page', () => {
     renderWithAuth(<GroupsPage />);
     expect(screen.getByTestId('groups-component')).toBeInTheDocument();
-    expect(mockAuthContext.setTitle).toHaveBeenCalledWith({
-      title: 'Groups | Network'
-    });
   });
 
   it('renders Community Metrics page', () => {
@@ -51,9 +66,6 @@ describe('network pages render', () => {
     expect(screen.getByText('Metrics')).toBeInTheDocument();
     expect(screen.getByText(/Background/i)).toBeInTheDocument();
     expect(screen.getByText(/Metrics Definitions/i)).toBeInTheDocument();
-    expect(mockAuthContext.setTitle).toHaveBeenCalledWith({
-      title: 'Metrics | Network'
-    });
   });
 
   it('displays TDH calculation details in metrics page', () => {

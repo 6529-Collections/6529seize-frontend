@@ -4,8 +4,27 @@ import userEvent from "@testing-library/user-event";
 import Auth, { useAuth } from "../../../components/auth/Auth";
 import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
 
+
+// Mock TitleContext
+jest.mock('../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 let walletAddress: string | null = "0x1";
-jest.mock("../../../components/auth/SeizeConnectContext", () => ({
+
+jest.mock('../../../components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: () => ({
     address: walletAddress,
     isConnected: !!walletAddress,
@@ -13,20 +32,20 @@ jest.mock("../../../components/auth/SeizeConnectContext", () => ({
   }),
 }));
 
-jest.mock("@tanstack/react-query", () => ({
+jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(() => ({ data: [] })),
 }));
 
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock('../../../services/api/common-api', () => ({
   commonApiFetch: jest.fn(() => Promise.resolve({ id: "1", handle: "user", query: "user" })),
   commonApiPost: jest.fn(() => Promise.resolve({})),
 }));
 
-jest.mock("wagmi", () => ({
+jest.mock('wagmi', () => ({
   useSignMessage: () => ({ signMessageAsync: jest.fn(), isPending: false }),
 }));
 
-jest.mock("react-bootstrap", () => ({
+jest.mock('react-bootstrap', () => ({
   Modal: Object.assign(
     ({ children }: any) => <div>{children}</div>,
     {
@@ -41,21 +60,11 @@ jest.mock("react-bootstrap", () => ({
   ),
 }));
 
-jest.mock("react-toastify", () => ({
+jest.mock('react-toastify', () => ({
   ToastContainer: () => null,
   toast: jest.fn(),
   Slide: {},
 }));
-
-function Wrapper() {
-  const { title, setTitle } = useAuth();
-  return (
-    <div>
-      <span data-testid="title">{title}</span>
-      <button onClick={() => setTitle({ title: "New" })}>set</button>
-    </div>
-  );
-}
 
 function ShowWaves() {
   const { showWaves } = useAuth();
@@ -71,23 +80,8 @@ describe("Auth", () => {
   beforeEach(() => {
     walletAddress = "0x1";
   });
-  it("updates title via context", async () => {
-    render(
-      <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
-        <Auth>
-          <Wrapper />
-        </Auth>
-      </ReactQueryWrapperContext.Provider>
-    );
-    
-    // Wait for the component to render and check initial title
-    const titleElement = await screen.findByTestId("title");
-    expect(titleElement.textContent).toBe("6529");
-    
-    // Click the set button and wait for the title to update
-    await userEvent.click(screen.getByText("set"));
-    expect(await screen.findByTestId("title")).toHaveTextContent("New");
-  });
+  // Title functionality has been moved to TitleContext
+  // This test is no longer applicable
 
   it("returns showWaves true when wallet and profile", async () => {
     render(
