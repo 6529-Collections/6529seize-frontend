@@ -51,6 +51,24 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 - Place tests in `__tests__` directories or alongside components as `ComponentName.test.tsx`.
 - Mock external dependencies and APIs in tests.
 
+## Next.js Directory Structure
+
+The project supports both the classic `pages/` folder and Next.js `app/` router.
+Legacy routes remain under `pages/`, while all **new** pages must be created
+inside the `app/` directory.
+
+Routes in `app/` should export a `generateMetadata` function using the helper
+`getAppMetadata`:
+
+```ts
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "My Page" });
+}
+```
+
 ## Commit Guidelines
 
 - Follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat:`, `fix:`)
