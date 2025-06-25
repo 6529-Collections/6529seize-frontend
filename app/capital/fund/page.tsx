@@ -411,10 +411,6 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                               </h1>
                             </div>
                             <div className="fusion-title title fusion-title-3 fusion-sep-none fusion-title-text fusion-title-size-three">
-                              <h3
-                                className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
-                                style={{ margin: 0, lineHeight: "1.3" }}
-                              />
                               <p>
                                 <a
                                   href="https://deca.art/punk6529/fundszn1"
