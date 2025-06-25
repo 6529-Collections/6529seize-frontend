@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import styles from "@/styles/Home.module.scss";
 
 import React from "react";
@@ -5,7 +7,7 @@ import { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
 import TheMemesComponent from "@/components/the-memes/TheMemes";
 
-export default async function TheMemesPage() {
+export default function TheMemesPage() {
   return (
     <main className={styles.main}>
       <TheMemesComponent />
