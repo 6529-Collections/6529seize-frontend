@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
 import TheMemesComponent from "@/components/the-memes/TheMemes";
 
-export default function TheMemesPage() {
+export default async function TheMemesPage() {
   return (
     <main className={styles.main}>
       <TheMemesComponent />
