@@ -26,13 +26,15 @@ npm run type-check
 
 ## Programmatic Checks
 
-Before completing any task, ensure the following commands succeed:
+Before completing any coding task, ensure the following commands succeed:
 
 ```bash
 npm run test
 npm run lint
 npm run type-check
 ```
+
+Note: When changing files like readme.md, agents.md or other documentation or in general tasks that aren't supposed to have tests, then there's no need to run tests for that task.
 
 - `npm run test`: Executes all Jest tests and checks code coverage. The command will fail if:
   - Any Jest test fails.
@@ -68,3 +70,7 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 
     Signed-off-by: Jane Developer <12345+jane-dev@users.noreply.github.com>
     ```
+
+## Temporary amendment
+
+You don't need to run tests every time because they are failing on main currently.
