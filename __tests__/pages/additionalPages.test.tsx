@@ -13,18 +13,32 @@ import DeadRingers from '../../pages/museum/6529-fund-szn1/dead-ringers';
 import GenesisPage from '../../pages/museum/6529-fund-szn1/genesis';
 import { AuthContext } from '../../components/auth/Auth';
 
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
-jest.mock('next/router', () => ({ useRouter: () => ({ query: { user: 'alice' } }) }));
+
+// Mock TitleContext
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 jest.mock('../../hooks/useIdentity', () => ({
   useIdentity: () => ({ profile: { handle: 'alice' }, isLoading: false }),
 }));
-jest.mock('../../components/user/user-page-header/UserPageHeader', () => () => <div />);
+
 jest.mock('../../helpers/server.helpers', () => ({
   getCommonHeaders: jest.fn(() => ({})),
   getUserProfile: jest.fn(() => Promise.resolve({ handle: 'alice' })),
   userPageNeedsRedirect: jest.fn(() => false),
-}));
-jest.mock('../../helpers/Helpers', () => ({
   getMetadataForUserPage: jest.fn(() => 'meta'),
 }));
 
