@@ -12,6 +12,7 @@ jobs:
   theme-analysis:
     if: github.event.issue.pull_request && contains(github.event.comment.body, '@review')
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: AI Code Review
         uses: 6529-Collections/ai-code-review-action@themes-init
