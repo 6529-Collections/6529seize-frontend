@@ -5,13 +5,13 @@ permissions:
   pull-requests: write
 
 on:
-  pull_request_review_comment:
+  issue_comment:
     types: [created]
 
 jobs:
   theme-analysis:
     if: |
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@review'))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@review') && github.event.issue.pull_request)
     runs-on: ubuntu-latest
     steps:
       - name: AI Code Review
@@ -23,7 +23,7 @@ jobs:
           SKIP_CROSS_LEVEL_DEDUP: true
 
       - name: Comment PR with Analysis
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'issue_comment'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
