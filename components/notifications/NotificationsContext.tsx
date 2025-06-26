@@ -209,6 +209,7 @@ const handlePushNotificationAction = async (
 };
 
 const resolveRedirectUrl = (notificationData: any) => {
+  
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {
