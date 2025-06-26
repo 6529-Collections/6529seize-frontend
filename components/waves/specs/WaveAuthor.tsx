@@ -4,13 +4,14 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../helpers/image.helpers";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1.5">
       <Link
         href={`/${wave.author.handle}`}
-        className="tw-no-underline hover:tw-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-1.5"
+        className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-1.5"
       >
         {wave.author.pfp ? (
           <img
@@ -21,7 +22,9 @@ export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
         ) : (
           <div className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800" />
         )}
-        <span className="tw-font-medium tw-text-sm">{wave.author.handle}</span>
+        <UserProfileTooltipWrapper user={wave.author.handle ?? wave.author.id}>
+          <span className="tw-font-medium tw-text-sm">{wave.author.handle}</span>
+        </UserProfileTooltipWrapper>
       </Link>
     </div>
   );

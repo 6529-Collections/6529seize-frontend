@@ -9,6 +9,7 @@ import UserCICAndLevel, {
 import { SingleWaveDropPosition } from "../../../waves/drop/SingleWaveDropPosition";
 import { cicToType } from "../../../../helpers/Helpers";
 import Link from "next/link";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
@@ -121,17 +122,19 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               cicType={cicType}
               size={UserCICAndLevelSize.SMALL}
             />
-            <Link
-              href={`/${drop.author.handle}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                window.open(`/${drop.author.handle}`, "_blank");
-              }}
-              className="tw-text-sm tw-text-iron-300 desktop-hover:hover:tw-text-iron-100 tw-transition-colors tw-duration-200 tw-no-underline tw-font-medium tw-truncate"
-            >
-              {drop.author.handle}
-            </Link>
+            <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+              <Link
+                href={`/${drop.author.handle}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  window.open(`/${drop.author.handle}`, "_blank");
+                }}
+                className="tw-text-md tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition-colors tw-duration-200 tw-no-underline desktop-hover:hover:tw-underline tw-font-medium tw-truncate"
+              >
+                {drop.author.handle}
+              </Link>
+            </UserProfileTooltipWrapper>
           </div>
           <div className="tw-flex tw-flex-col @lg:tw-flex-col @[42rem]:tw-flex-row tw-justify-between tw-gap-4 tw-mt-3.5 xl:tw-mt-3">
             <div className="tw-flex tw-items-center tw-gap-x-6">

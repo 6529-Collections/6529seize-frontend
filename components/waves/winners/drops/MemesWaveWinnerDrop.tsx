@@ -23,6 +23,7 @@ import WaveDropActionsOpen from "../../../waves/drops/WaveDropActionsOpen";
 import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropMobileMenuOpen from "../../../waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "../../../waves/drops/time/WaveDropTime";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -97,15 +98,29 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                           size={UserCICAndLevelSize.SMALL}
                         />
                       )}
-                      <Link
-                        href={`/${winner.drop.author?.handle}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="tw-no-underline hover:tw-opacity-80 tw-transition-opacity"
-                      >
-                        <span className="tw-text-sm tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
-                          {winner.drop.author?.handle}
-                        </span>
-                      </Link>
+                      {winner.drop.author?.handle ? (
+                        <UserProfileTooltipWrapper user={winner.drop.author.handle ?? winner.drop.author.id}>
+                          <Link
+                            href={`/${winner.drop.author?.handle}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80 tw-transition-opacity"
+                          >
+                            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
+                              {winner.drop.author?.handle}
+                            </span>
+                          </Link>
+                        </UserProfileTooltipWrapper>
+                      ) : (
+                        <Link
+                          href={`/${winner.drop.author?.handle}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80 tw-transition-opacity"
+                        >
+                          <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
+                            {winner.drop.author?.handle}
+                          </span>
+                        </Link>
+                      )}
 
                       <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
                       

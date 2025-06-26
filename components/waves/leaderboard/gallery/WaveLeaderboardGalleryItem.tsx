@@ -15,6 +15,7 @@ import { VotingModal, MobileVotingModal } from "../../../../components/voting";
 import VotingModalButton from "../../../../components/voting/VotingModalButton";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -112,12 +113,21 @@ export const WaveLeaderboardGalleryItem: React.FC<
 
           {/* Author name aligned to the right */}
           <div className="tw-flex tw-items-center">
-            <Link
-              onClick={(e) => e.stopPropagation()}
-              href={`/${drop.author?.handle}`}
-              className="tw-text-sm tw-truncate tw-no-underline tw-font-medium tw-text-iron-200">
-              {drop.author?.handle || " "}
-            </Link>
+            {drop.author?.handle ? (
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}>
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  href={`/${drop.author?.handle}`}
+                  className="tw-text-sm tw-truncate tw-no-underline tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline">
+                  {drop.author?.handle}
+                </Link>
+              </UserProfileTooltipWrapper>
+            ) : (
+              <span className="tw-text-sm tw-truncate tw-font-medium tw-text-iron-200">
+                {" "}
+              </span>
+            )}
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
