@@ -10,7 +10,7 @@ on:
 
 jobs:
   theme-analysis:
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '@review')
+    if: contains(github.event.comment.body, '@review')
     runs-on: ubuntu-latest
     steps:
       - name: AI Code Review
