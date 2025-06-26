@@ -12,6 +12,21 @@ jest.mock('../../../../components/waves/CreateDropWaveWrapper', () => ({ CreateD
 
 jest.mock('../../../../components/waves/PrivilegedDropCreator', () => ({ __esModule: true, default: (props: any) => <div data-testid="creator" onClick={props.onCancelReplyQuote} data-part={props.activeDrop?.partId} data-action={props.activeDrop?.action} />, DropMode: { BOTH: 'BOTH' } }));
 
+// Mock window.matchMedia for useDeviceInfo hook
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(() => ({
+    matches: false,
+    media: '',
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
 describe('SingleWaveDropChat', () => {
   it('handles reply and reset actions', () => {
     const wave: any = { id: 'w1' };

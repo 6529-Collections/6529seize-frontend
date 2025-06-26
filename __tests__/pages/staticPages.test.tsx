@@ -33,6 +33,24 @@ jest.mock('../../components/distribution-plan-tool/distribution-plan-tool-sideba
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
+
+// Mock TitleContext
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('static pages render', () => {
   it('renders about rules page', () => {
     render(<AboutRules />);

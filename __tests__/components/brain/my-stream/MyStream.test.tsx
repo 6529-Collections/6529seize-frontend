@@ -6,6 +6,35 @@ jest.mock('../../../../components/brain/feed/FeedWrapper', () => ({ __esModule: 
 
 const FeedWrapperMock = require('../../../../components/brain/feed/FeedWrapper').default as jest.Mock;
 
+// Mock TitleContext
+jest.mock('../../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }) => children,
+}));
+
+// Mock MyStreamContext if needed
+jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+  useMyStream: () => ({
+    waveId: null,
+    setWaveId: jest.fn(),
+    isWaveLoading: false,
+    setIsWaveLoading: jest.fn(),
+  }),
+  MyStreamProvider: ({ children }) => children,
+}));
+
+
 describe('MyStream', () => {
   beforeEach(() => {
     FeedWrapperMock.mockClear();

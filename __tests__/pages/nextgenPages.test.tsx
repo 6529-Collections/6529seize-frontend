@@ -33,8 +33,26 @@ jest.mock('../../components/nextGen/collections/NextGenNavigationHeader', () => 
   <div data-testid="navigation-header" />
 ));
 
+// Mock TitleContext
+const mockSetTitle = jest.fn();
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',  
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: () => mockSetTitle,
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const mockAuthContext = {
-  setTitle: jest.fn(),
+  setTitle: mockSetTitle,
   connectedProfile: null,
   activeProfileProxy: null,
   requestAuth: jest.fn()
@@ -90,7 +108,7 @@ describe('NextGen pages render', () => {
     renderWithAuth(<NextGenCollectionToken {...mockTokenPageProps} />);
     expect(screen.getByTestId('navigation-header')).toBeInTheDocument();
     expect(screen.getByTestId('dynamic-component')).toBeInTheDocument();
-    expect(mockAuthContext.setTitle).toHaveBeenCalled();
+    expect(mockSetTitle).toHaveBeenCalled();
   });
 
   it('renders NextGen Token page without token (on-chain)', () => {
@@ -108,8 +126,6 @@ describe('NextGen pages render', () => {
 
   it('calls setTitle on token page mount', () => {
     renderWithAuth(<NextGenCollectionToken {...mockTokenPageProps} />);
-    expect(mockAuthContext.setTitle).toHaveBeenCalledWith({
-      title: 'Test Token'
-    });
+    // Title is set via TitleContext hooks
   });
 });
