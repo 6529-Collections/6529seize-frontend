@@ -1,9 +1,0 @@
-{
-  "comment": {
-    "body": "Hey @claude, can you help with this?"
-  },
-  "issue": {
-    "number": 123,
-    "title": "Test issue"
-  }
-}
