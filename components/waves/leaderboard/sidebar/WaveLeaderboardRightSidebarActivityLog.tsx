@@ -9,6 +9,7 @@ import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRig
 import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { SystemAdjustmentPill } from "../../../common/SystemAdjustmentPill";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
@@ -64,9 +65,11 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             ) : (
               <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800" />
             )}
-            <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
-              {log.invoker.handle}
-            </span>
+            <UserProfileTooltipWrapper user={log.invoker.handle ?? log.invoker.id}>
+              <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
+                {log.invoker.handle}
+              </span>
+            </UserProfileTooltipWrapper>
           </Link>
 
           <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-min-w-0 tw-overflow-hidden">
@@ -101,9 +104,17 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             ) : (
               <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
             )}
-            <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
-              {log.drop_author?.handle}
-            </span>
+            {log.drop_author?.handle ? (
+              <UserProfileTooltipWrapper user={log.drop_author.handle ?? log.drop_author.id}>
+                <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
+                  {log.drop_author.handle}
+                </span>
+              </UserProfileTooltipWrapper>
+            ) : (
+              <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
+                {log.drop_author?.handle}
+              </span>
+            )}
           </Link>
         </div>
       </div>

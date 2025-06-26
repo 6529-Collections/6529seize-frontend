@@ -8,6 +8,7 @@ import UserCICAndLevel, {
 } from "../../../../user/utils/UserCICAndLevel";
 import WinnerDropBadge from "../../../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../../../waves/drops/time/WaveDropTime";
+import UserProfileTooltipWrapper from "../../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -48,17 +49,19 @@ export const WaveLeaderboardDropAuthor: React.FC<
             cicType={cicToType(drop.author.cic)}
             size={UserCICAndLevelSize.SMALL}
           />
-          <Link
-            href={`/${drop.author.handle}`}
-            onClick={(e) => e.stopPropagation()}
-            className="tw-no-underline"
-          >
-            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              {drop.author.handle}
-            </span>
-          </Link>
+          <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+            <Link
+              href={`/${drop.author.handle}`}
+              onClick={(e) => e.stopPropagation()}
+              className="tw-no-underline"
+            >
+              <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                {drop.author.handle}
+              </span>
+            </Link>
+          </UserProfileTooltipWrapper>
 
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <div className="tw-size-[3px] tw-bg-iron-900 tw-rounded-full tw-flex-shrink-0"></div>
 
           <WaveDropTime timestamp={drop.created_at} />
         </div>
