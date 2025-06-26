@@ -4,9 +4,9 @@ import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 
 interface UserProfileTooltipWrapperProps {
-  user: string;
-  children: React.ReactElement;
-  placement?: "top" | "bottom" | "left" | "right";
+  readonly user: string;
+  readonly children: React.ReactElement;
+  readonly placement?: "top" | "bottom" | "left" | "right";
 }
 
 export default function UserProfileTooltipWrapper({ 

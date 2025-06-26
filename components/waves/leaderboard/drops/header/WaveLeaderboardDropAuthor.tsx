@@ -49,7 +49,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
             cicType={cicToType(drop.author.cic)}
             size={UserCICAndLevelSize.SMALL}
           />
-          <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+          <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}

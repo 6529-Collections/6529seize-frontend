@@ -65,7 +65,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             ) : (
               <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800" />
             )}
-            <UserProfileTooltipWrapper user={log.invoker.handle || log.invoker.id}>
+            <UserProfileTooltipWrapper user={log.invoker.handle ?? log.invoker.id}>
               <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
                 {log.invoker.handle}
               </span>
@@ -105,7 +105,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
               <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
             )}
             {log.drop_author?.handle ? (
-              <UserProfileTooltipWrapper user={log.drop_author.handle || log.drop_author.id}>
+              <UserProfileTooltipWrapper user={log.drop_author.handle ?? log.drop_author.id}>
                 <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
                   {log.drop_author.handle}
                 </span>

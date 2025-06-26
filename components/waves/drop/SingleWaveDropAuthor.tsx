@@ -31,7 +31,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({ drop
         cicType={cicToType(drop.author.cic)}
         size={UserCICAndLevelSize.SMALL}
       />
-      <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+      <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
         <span className="tw-text-md tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80">
           {drop.author.handle}
         </span>

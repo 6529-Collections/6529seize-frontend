@@ -39,7 +39,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
             className="tw-no-underline"
           >
             {drop.author?.handle ? (
-              <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
                 <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
                   {drop.author?.handle}
                 </span>

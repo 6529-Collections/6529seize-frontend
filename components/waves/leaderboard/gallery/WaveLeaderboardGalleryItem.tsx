@@ -113,7 +113,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
           {/* Author name aligned to the right */}
           <div className="tw-flex tw-items-center">
             {drop.author?.handle ? (
-              <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   href={`/${drop.author?.handle}`}

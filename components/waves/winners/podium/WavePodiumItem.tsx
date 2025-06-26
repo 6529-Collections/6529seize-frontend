@@ -196,7 +196,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
               <div className="tw-absolute tw-bottom-0 tw-h-3/4 tw-inset-x-0 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
             </div>
 
-            <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+            <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
               <Link
                 href={`/${drop.author.handle}`}
                 onClick={(e) => e.stopPropagation()}

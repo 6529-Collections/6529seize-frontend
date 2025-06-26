@@ -36,7 +36,7 @@ const MemesLeaderboardDropArtistInfo: React.FC<
             />
           )}
           {drop.author?.handle ? (
-            <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+            <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
               <Link
                 href={`/${drop.author?.handle}`}
                 onClick={(e) => e.stopPropagation()}

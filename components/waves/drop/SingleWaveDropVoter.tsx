@@ -46,7 +46,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
           ) : (
             <div className={pfpClasses} />
           )}
-          <UserProfileTooltipWrapper user={voter.voter.handle || voter.voter.id}>
+          <UserProfileTooltipWrapper user={voter.voter.handle ?? voter.voter.id}>
             <span className={`tw-inline-block${shouldLimit ? " tw-truncate tw-max-w-[8rem]" : ""}`}>
               <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
                 {voter.voter.handle}

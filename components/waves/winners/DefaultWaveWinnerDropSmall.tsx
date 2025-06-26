@@ -129,7 +129,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
             </Link>
 
             <div className="tw-flex tw-items-center tw-gap-1.5">
-              <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
                 <Link
                   href={`/${drop.author.handle}`}
                   onClick={(e) => e.stopPropagation()}

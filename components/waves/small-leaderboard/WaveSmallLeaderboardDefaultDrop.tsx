@@ -90,7 +90,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                   ) : (
                     <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
                   )}
-                  <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+                  <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
                     <span className="tw-text-iron-50 tw-text-sm tw-font-semibold">
                       {drop.author.handle}
                     </span>

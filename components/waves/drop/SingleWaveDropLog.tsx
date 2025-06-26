@@ -47,7 +47,7 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
   );
 
   const handleLink = (
-    <UserProfileTooltipWrapper user={log.invoker.handle || log.invoker.id}>
+    <UserProfileTooltipWrapper user={log.invoker.handle ?? log.invoker.id}>
       <Link
         href={`/${log.invoker.handle}`}
         className="tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300"

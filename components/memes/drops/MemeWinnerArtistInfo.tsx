@@ -36,7 +36,7 @@ export default function MemeWinnerArtistInfo({
           )}
           <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-hidden sm:tw-block">
             {drop.author?.handle ? (
-              <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   href={`/${drop.author?.handle}`}

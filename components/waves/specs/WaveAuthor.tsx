@@ -22,7 +22,7 @@ export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
         ) : (
           <div className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800" />
         )}
-        <UserProfileTooltipWrapper user={wave.author.handle || wave.author.id}>
+        <UserProfileTooltipWrapper user={wave.author.handle ?? wave.author.id}>
           <span className="tw-font-medium tw-text-sm">{wave.author.handle}</span>
         </UserProfileTooltipWrapper>
       </Link>

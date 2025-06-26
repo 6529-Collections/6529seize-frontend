@@ -122,7 +122,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                     ) : (
                       <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />
                     )}
-                    <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+                    <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
                       <span className="desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-text-sm tw-font-semibold">
                         {drop.author.handle}
                       </span>

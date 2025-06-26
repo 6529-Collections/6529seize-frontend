@@ -99,7 +99,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         />
                       )}
                       {winner.drop.author?.handle ? (
-                        <UserProfileTooltipWrapper user={winner.drop.author.handle || winner.drop.author.id}>
+                        <UserProfileTooltipWrapper user={winner.drop.author.handle ?? winner.drop.author.id}>
                           <Link
                             href={`/${winner.drop.author?.handle}`}
                             onClick={(e) => e.stopPropagation()}
