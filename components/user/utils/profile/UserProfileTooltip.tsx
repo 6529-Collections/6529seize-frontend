@@ -62,7 +62,7 @@ export default function UserProfileTooltip({
         <div className="tw-flex tw-flex-col">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <span className="tw-text-base tw-font-bold tw-text-iron-50 tw-truncate tw-max-w-[180px]">
-              {profile?.handle || profile?.display}
+              {profile?.handle ?? profile?.display}
             </span>
             {profile && (
               <div className="tw-h-5 tw-w-5">
