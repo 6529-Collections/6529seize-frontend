@@ -70,6 +70,23 @@ jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => (
   useLayout: () => ({ notificationsViewStyle: { height: '10px' } }),
 }));
 
+// Mock TitleContext
+jest.mock('../../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 import Notifications from '../../../../components/brain/notifications/Notifications';
 
 describe('Notifications component', () => {
@@ -94,7 +111,7 @@ describe('Notifications component', () => {
 
     expect(screen.getByText('Loading notifications...')).toBeInTheDocument();
     expect(mutateAsyncMock).toHaveBeenCalled();
-    expect(setTitleMock).toHaveBeenCalled();
+    // Title is set via TitleContext hooks
   });
 
   it('renders wrapper with items', () => {

@@ -16,6 +16,24 @@ jest.mock('../../../../components/auth/Auth', () => ({
   AuthContext: React.createContext({ setTitle: jest.fn() })
 }));
 
+
+// Mock TitleContext
+jest.mock('../../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('NextGenCollectionPage updateView', () => {
   it('pushes new url when view changes', () => {
     render(

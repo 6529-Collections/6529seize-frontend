@@ -3,11 +3,32 @@ import LabPage from "../../../components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "../../../components/the-memes/MemeShared";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
-jest.mock("../../../services/6529api", () => ({ fetchUrl: jest.fn(), fetchAllPages: jest.fn() }));
-jest.mock("../../../hooks/useCapacitor", () => ({ __esModule: true, default: () => ({ platform: 'web' }) }));
-jest.mock("../../../components/auth/Auth", () => ({ useAuth: () => ({ setTitle: jest.fn() }) }));
-jest.mock('../../../components/cookies/CookieConsentContext', () => ({ 
+
+// Mock TitleContext
+jest.mock('../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+jest.mock("../../../components/nothingHereYet/NothingHereYetSummer", () => ({ __esModule: true, default: () => <div data-testid="NothingHereYet" /> }));
+jest.mock("../../../components/nftAttributes/NFTAttributes", () => ({ __esModule: true, default: () => <div data-testid="NFTAttributes" /> }));
+jest.mock("../../../components/nftAttributes/NftStats", () => ({ __esModule: true, NftPageStats: () => <tr data-testid="NftStats" /> }));
+jest.mock("../../../components/rememes/RememePage", () => ({ printMemeReferences: jest.fn(() => <div data-testid="MemeRefs" />) }));
+jest.mock("../../../components/nft-marketplace-links/NFTMarketplaceLinks", () => ({ __esModule: true, default: () => <div data-testid="MarketLinks" /> }));
+jest.mock("next/link", () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
+jest.mock("next/image", () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
+jest.mock("../../../components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(() => ({
     showCookieConsent: false,
     country: 'US',
@@ -16,24 +37,10 @@ jest.mock('../../../components/cookies/CookieConsentContext', () => ({
   }))
 }));
 
-jest.mock("../../../components/download/Download", () => ({ __esModule: true, default: () => <div data-testid="Download" /> }));
-jest.mock("../../../components/latest-activity/LatestActivityRow", () => ({ __esModule: true, default: () => <tr data-testid="activity" /> }));
-jest.mock("../../../components/pagination/Pagination", () => ({ __esModule: true, default: () => <div data-testid="Pagination" /> }));
-jest.mock("../../../components/nft-image/NFTImage", () => ({ __esModule: true, default: () => <div data-testid="NFTImage" /> }));
-jest.mock("../../../components/leaderboard/MemeLabLeaderboard", () => ({ __esModule: true, default: () => <div data-testid="Leaderboard" /> }));
-jest.mock("../../../components/timeline/Timeline", () => ({ __esModule: true, default: () => <div data-testid="Timeline" /> }));
-jest.mock("../../../components/the-memes/ArtistProfileHandle", () => ({ __esModule: true, default: () => <span data-testid="Artist" /> }));
-jest.mock("../../../helpers/nft.helpers", () => ({ getFileTypeFromMetadata: () => "image", getDimensionsFromMetadata: () => ({ width: 100, height: 100 }) }));
-jest.mock("../../../components/nothingHereYet/NothingHereYetSummer", () => ({ __esModule: true, default: () => <div data-testid="NothingHereYet" /> }));
-jest.mock("../../../components/nftAttributes/NFTAttributes", () => ({ __esModule: true, default: () => <div data-testid="NFTAttributes" /> }));
-jest.mock("../../../components/nftAttributes/NftStats", () => ({ __esModule: true, NftPageStats: () => <tr data-testid="NftStats" /> }));
-jest.mock("../../../components/rememes/RememePage", () => ({ printMemeReferences: jest.fn(() => <div data-testid="MemeRefs" />) }));
-jest.mock("../../../components/nft-marketplace-links/NFTMarketplaceLinks", () => ({ __esModule: true, default: () => <div data-testid="MarketLinks" /> }));
-jest.mock("next/link", () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
-jest.mock("next/image", () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
-
 const { useRouter } = require("next/router");
 const { fetchUrl, fetchAllPages } = require("../../../services/6529api");
+jest.mock("next/router");
+jest.mock("../../../services/6529api");
 
 beforeEach(() => {
   jest.clearAllMocks();

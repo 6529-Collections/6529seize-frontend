@@ -5,9 +5,30 @@ import { AuthContext } from '../../components/auth/Auth';
 import { useSeizeConnectContext } from '../../components/auth/SeizeConnectContext';
 import { useRouter } from 'next/router';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+
+// Mock TitleContext
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 jest.mock('../../components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
+}));
+
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
 }));
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (

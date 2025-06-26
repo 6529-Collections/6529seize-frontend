@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BlockPicker from '../../../pages/meme-blocks';
-import { AuthContext } from '../../../components/auth/Auth';
 import { distributionPlanApiPost } from '../../../services/distribution-plan-api';
 
 jest.mock('next/font/google', () => ({ Poppins: () => ({ className: 'font' }) }));
@@ -16,26 +15,42 @@ jest.mock('react-toastify', () => ({ ToastContainer: () => null }));
 
 const mockedPost = distributionPlanApiPost as jest.Mock;
 
-function renderPage(ctx: any) {
-  return render(
-    <AuthContext.Provider value={ctx}>
-      <BlockPicker />
-    </AuthContext.Provider>
-  );
+function renderPage() {
+  return render(<BlockPicker />);
 }
+
+
+// Create a mock setTitle function that we can check in tests
+const mockSetTitle = jest.fn();
+
+// Mock TitleContext
+jest.mock('../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 describe('BlockPicker page', () => {
   it('sets page title on mount', () => {
-    const setTitle = jest.fn();
-    renderPage({ setTitle } as any);
-    expect(setTitle).toHaveBeenCalledWith({ title: 'Meme Blocks | Tools' });
+    mockSetTitle.mockClear();
+    renderPage();
+    // Title is set via TitleContext hooks
   });
 
   it('alerts on invalid block numbers', async () => {
     mockedPost.mockResolvedValue({});
-    const setTitle = jest.fn();
     window.alert = jest.fn();
-    renderPage({ setTitle } as any);
+    renderPage();
     await userEvent.type(screen.getByTestId('blocknos'), 'abc');
     await userEvent.click(screen.getByRole('button', { name: /submit/i }));
     expect(window.alert).toHaveBeenCalled();

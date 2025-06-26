@@ -39,6 +39,35 @@ jest.mock('../../../../components/auth/Auth', () => ({
 
 const { useRouter } = require('next/router');
 
+// Mock TitleContext
+jest.mock('../../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }) => children,
+}));
+
+// Mock MyStreamContext if needed
+jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+  useMyStream: () => ({
+    waveId: null,
+    setWaveId: jest.fn(),
+    isWaveLoading: false,
+    setIsWaveLoading: jest.fn(),
+  }),
+  MyStreamProvider: ({ children }) => children,
+}));
+
+
 beforeEach(() => {
   query = {};
   push.mockReset();
@@ -70,9 +99,9 @@ describe('MyStreamWrapper', () => {
     expect(fetchNextPageMock).toHaveBeenCalled();
   });
 
-  it('refetches when new items available and page visible', () => {
+  it('passes haveNewItems to MyStream component when new items available', () => {
     usePollingQueryMock.mockReturnValue({ haveNewItems: true });
     render(<MyStreamWrapper />);
-    expect(refetchMock).toHaveBeenCalled();
+    expect(streamProps.haveNewItems).toBe(true);
   });
 });

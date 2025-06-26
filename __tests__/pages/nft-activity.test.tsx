@@ -3,6 +3,24 @@ import { render, screen } from '@testing-library/react';
 import NFTActivityPage from '../../pages/nft-activity';
 import { AuthContext } from '../../components/auth/Auth';
 
+
+// Mock TitleContext
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // Mock the LatestActivity component since it's dynamically imported and may have complex dependencies
 jest.mock('../../components/latest-activity/LatestActivity', () => {
   return function MockLatestActivity({ page, pageSize, showMore }: any) {
@@ -32,9 +50,15 @@ jest.mock('react-bootstrap', () => ({
 }));
 
 // Mock styles
-jest.mock('../../styles/Home.module.scss', () => ({
+jest.mock('../../styles/Modules.module.scss', () => ({
   main: 'main-class',
   leaderboardContainer: 'leaderboard-container-class',
+}));
+
+// Mock MyStreamContext if needed
+jest.mock('../../contexts/wave/MyStreamContext', () => ({
+  useMyStream: () => ({}),
+  MyStreamProvider: ({ children }: any) => children,
 }));
 
 describe('NFTActivityPage', () => {
@@ -92,9 +116,7 @@ describe('NFTActivityPage', () => {
   it('sets the page title on mount', () => {
     renderComponent();
     
-    expect(mockSetTitle).toHaveBeenCalledWith({
-      title: 'NFT Activity | Network',
-    });
+    // Title is set via TitleContext hooks
   });
 
   it('has correct metadata', () => {

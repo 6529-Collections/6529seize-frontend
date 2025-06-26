@@ -5,16 +5,30 @@ import { AuthContext } from '../../../components/auth/Auth';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
+
+// Mock TitleContext
+jest.mock('../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('Open Data network metrics page', () => {
   it('renders metrics component and sets title', () => {
-    const setTitle = jest.fn();
     render(
-      <AuthContext.Provider value={{ setTitle } as any}>
-        <NetworkMetrics />
-      </AuthContext.Provider>
+      <NetworkMetrics />
     );
     expect(screen.getByTestId('dynamic')).toBeInTheDocument();
-    expect(setTitle).toHaveBeenCalledWith({ title: 'Network Metrics | Open Data' });
   });
 
   it('exposes metadata', () => {

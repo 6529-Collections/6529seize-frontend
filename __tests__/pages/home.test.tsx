@@ -13,6 +13,24 @@ jest.mock('../../services/api/common-api');
 jest.mock('../../helpers/server.helpers');
 jest.mock('../../hooks/useCapacitor', () => ({ __esModule: true, default: jest.fn(() => ({ platform: 'web' })) }));
 
+// Mock TitleContext
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',  
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+
 const mockNft = {
   id: 1,
   name: 'Mock NFT',

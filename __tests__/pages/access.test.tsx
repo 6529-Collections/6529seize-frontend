@@ -7,6 +7,24 @@ import { useRouter } from 'next/router';
 jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img {...p} /> }));
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 
+// Mock TitleContext
+jest.mock('../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',  
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+
 const useRouterMock = useRouter as jest.Mock;
 
 const TestProvider: React.FC = ({ children }) => (

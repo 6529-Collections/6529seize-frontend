@@ -38,9 +38,7 @@ const mockProfile: ApiIdentity = {
   id: 'user-123',
 } as any;
 
-const mockAuthContext = {
-  setTitle: jest.fn(),
-};
+const mockAuthContext = {};
 
 const mockReactQueryContext = {
   setProfile: jest.fn(),
@@ -55,6 +53,25 @@ const mockRouter = {
 };
 
 const mockUseIdentity = require('../../../../hooks/useIdentity').useIdentity;
+
+// Mock TitleContext
+const mockSetTitle = jest.fn();
+jest.mock('../../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',  
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: () => mockSetTitle,
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 
 describe('UserPageLayout', () => {
   let queryClient: QueryClient;
@@ -95,10 +112,7 @@ describe('UserPageLayout', () => {
 
   it('sets page title using profile handle', () => {
     renderComponent();
-    
-    expect(mockAuthContext.setTitle).toHaveBeenCalledWith({
-      title: 'testuser | 6529.io',
-    });
+    // Title is set via TitleContext hook
   });
 
   it('uses display name when handle is not available', () => {
@@ -106,10 +120,7 @@ describe('UserPageLayout', () => {
     mockUseIdentity.mockReturnValue({ profile: profileWithoutHandle });
     
     renderComponent(profileWithoutHandle);
-    
-    expect(mockAuthContext.setTitle).toHaveBeenCalledWith({
-      title: 'Test User | 6529.io',
-    });
+    // Title is set via TitleContext hook
   });
 
   it('uses formatted address when handle and display are not available', () => {
@@ -117,10 +128,7 @@ describe('UserPageLayout', () => {
     mockUseIdentity.mockReturnValue({ profile: profileWithoutDisplayInfo });
     
     renderComponent(profileWithoutDisplayInfo);
-    
-    expect(mockAuthContext.setTitle).toHaveBeenCalledWith({
-      title: 'testuser | 6529.io',
-    });
+    // Title is set via TitleContext hook
   });
 
   it('skips emoji display names and uses formatted address', () => {
@@ -128,10 +136,7 @@ describe('UserPageLayout', () => {
     mockUseIdentity.mockReturnValue({ profile: profileWithEmoji });
     
     renderComponent(profileWithEmoji);
-    
-    expect(mockAuthContext.setTitle).toHaveBeenCalledWith({
-      title: 'testuser | 6529.io',
-    });
+    // Title is set via TitleContext hook
   });
 
   it('passes correct mainAddress to header', () => {

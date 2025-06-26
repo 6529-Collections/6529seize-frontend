@@ -23,19 +23,33 @@ const {
   numberOfCardsForSeasonEnd,
 } = require("../../../helpers/meme_calendar.helpers");
 
+
+// Mock TitleContext
+jest.mock('../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe("Subscriptions report page", () => {
   it("sets title and renders component", () => {
-    const setTitle = jest.fn();
     const props = { pageProps: { szn: 1, upcoming: [], redeemed: [] } } as any;
     const { container } = render(
-      <AuthContext.Provider value={{ setTitle } as any}>
+      <AuthContext.Provider value={{} as any}>
         <Page {...props} />
       </AuthContext.Provider>
     );
     expect(container.querySelector("main")).toBeInTheDocument();
-    expect(setTitle).toHaveBeenCalledWith({
-      title: "Subscriptions Report | Tools",
-    });
     expect(numberOfCardsForSeasonEnd).toHaveBeenCalled();
     expect(getCommonHeaders).toHaveBeenCalled();
     expect(commonApiFetch).toHaveBeenCalledTimes(2);

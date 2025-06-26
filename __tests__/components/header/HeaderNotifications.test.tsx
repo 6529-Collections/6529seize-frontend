@@ -7,7 +7,10 @@ jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 
 jest.mock('../../../components/auth/Auth', () => ({
   useAuth: jest.fn(),
-  TitleType: { NOTIFICATION: 'NOTIFICATION' },
+}));
+
+jest.mock('../../../contexts/TitleContext', () => ({
+  useTitle: jest.fn(),
 }));
 
 jest.mock('../../../hooks/useUnreadNotifications', () => ({
@@ -19,15 +22,18 @@ jest.mock('../../../components/notifications/NotificationsContext', () => ({
 }));
 
 const { useRouter } = require('next/router');
-const { useAuth, TitleType } = require('../../../components/auth/Auth');
+const { useAuth } = require('../../../components/auth/Auth');
+const { useTitle } = require('../../../contexts/TitleContext');
 const { useUnreadNotifications } = require('../../../hooks/useUnreadNotifications');
 const { useNotificationsContext } = require('../../../components/notifications/NotificationsContext');
 
 describe('HeaderNotifications', () => {
   afterEach(() => jest.clearAllMocks());
 
-  it('shows unread badge and sets title', () => {
-    (useAuth as jest.Mock).mockReturnValue({ connectedProfile: { handle: 'alice' }, setTitle: jest.fn() });
+  it('shows unread badge and sets notification count', () => {
+    const setNotificationCount = jest.fn();
+    (useAuth as jest.Mock).mockReturnValue({ connectedProfile: { handle: 'alice' } });
+    (useTitle as jest.Mock).mockReturnValue({ setTitle: jest.fn(), title: '6529.io', notificationCount: 0, setNotificationCount, setWaveData: jest.fn(), setStreamHasNewItems: jest.fn() });
     (useRouter as jest.Mock).mockReturnValue({ pathname: '/home' });
     const removeAll = jest.fn();
     (useNotificationsContext as jest.Mock).mockReturnValue({ removeAllDeliveredNotifications: removeAll });
@@ -38,13 +44,13 @@ describe('HeaderNotifications', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream/notifications');
     expect(screen.getByRole('link').querySelector('div')).toBeInTheDocument();
     expect(removeAll).not.toHaveBeenCalled();
-    const { setTitle } = (useAuth as jest.Mock).mock.results[0].value;
-    expect(setTitle).toHaveBeenCalledWith({ title: '(2) Notifications | 6529.io', type: TitleType.NOTIFICATION });
+    expect(setNotificationCount).toHaveBeenCalledWith(2);
   });
 
   it('removes delivered notifications when none unread and adjusts link', () => {
-    const setTitle = jest.fn();
-    (useAuth as jest.Mock).mockReturnValue({ connectedProfile: { handle: 'bob' }, setTitle });
+    const setNotificationCount = jest.fn();
+    (useAuth as jest.Mock).mockReturnValue({ connectedProfile: { handle: 'bob' } });
+    (useTitle as jest.Mock).mockReturnValue({ setTitle: jest.fn(), title: '6529.io', notificationCount: 0, setNotificationCount, setWaveData: jest.fn(), setStreamHasNewItems: jest.fn() });
     (useRouter as jest.Mock).mockReturnValue({ pathname: '/my-stream/notifications' });
     const removeAll = jest.fn();
     (useNotificationsContext as jest.Mock).mockReturnValue({ removeAllDeliveredNotifications: removeAll });
@@ -55,6 +61,6 @@ describe('HeaderNotifications', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream/notifications?reload=true');
     expect(screen.getByRole('link').querySelector('div')).toBeNull();
     expect(removeAll).toHaveBeenCalled();
-    expect(setTitle).toHaveBeenCalledWith({ title: null, type: TitleType.NOTIFICATION });
+    expect(setNotificationCount).toHaveBeenCalledWith(0);
   });
 });

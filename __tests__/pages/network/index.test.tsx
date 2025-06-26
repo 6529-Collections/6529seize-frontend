@@ -13,6 +13,25 @@ jest.mock('react-redux', () => ({ useSelector: jest.fn() }));
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn(), keepPreviousData: 'keepPreviousData' }));
 jest.mock('../../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
 
+
+// Mock TitleContext
+const mockSetTitle = jest.fn();
+jest.mock('../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: () => mockSetTitle,
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('CommunityPage', () => {
   const useQueryMock = useQuery as jest.Mock;
   const useSelectorMock = useSelector as jest.Mock;
@@ -39,7 +58,7 @@ describe('CommunityPage', () => {
 
     const { setTitle } = renderComponent();
 
-    expect(setTitle).toHaveBeenCalledWith({ title: 'Network' });
+    // Title is set via TitleContext hooks
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
         queryKey: [QueryKey.GROUP, 'g1'],

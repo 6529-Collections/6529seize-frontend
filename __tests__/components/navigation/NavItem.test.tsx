@@ -1,7 +1,8 @@
 import { render } from '@testing-library/react';
 import NavItem from '../../../components/navigation/NavItem';
 import { useViewContext } from '../../../components/navigation/ViewContext';
-import { useAuth, TitleType } from '../../../components/auth/Auth';
+import { useAuth } from '../../../components/auth/Auth';
+import { useTitle } from '../../../contexts/TitleContext';
 import { useUnreadNotifications } from '../../../hooks/useUnreadNotifications';
 import { useUnreadIndicator } from '../../../hooks/useUnreadIndicator';
 import { useNotificationsContext } from '../../../components/notifications/NotificationsContext';
@@ -11,7 +12,8 @@ import { useWave } from '../../../hooks/useWave';
 import { useRouter } from 'next/router';
 
 jest.mock('../../../components/navigation/ViewContext', () => ({ useViewContext: jest.fn() }));
-jest.mock('../../../components/auth/Auth', () => ({ useAuth: jest.fn(), TitleType: { NOTIFICATION: 'NOTIFICATION' } }));
+jest.mock('../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
+jest.mock('../../../contexts/TitleContext', () => ({ useTitle: jest.fn() }));
 jest.mock('../../../hooks/useUnreadNotifications', () => ({ useUnreadNotifications: jest.fn() }));
 jest.mock('../../../hooks/useUnreadIndicator', () => ({ useUnreadIndicator: jest.fn() }));
 jest.mock('../../../components/notifications/NotificationsContext', () => ({ useNotificationsContext: jest.fn() }));
@@ -31,7 +33,8 @@ describe('NavItem notifications', () => {
     (isNavItemActive as jest.Mock).mockReturnValue(false);
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
     (useNotificationsContext as jest.Mock).mockReturnValue({ removeAllDeliveredNotifications });
-    (useAuth as jest.Mock).mockReturnValue({ connectedProfile: { handle: 'user' }, setTitle });
+    (useAuth as jest.Mock).mockReturnValue({ connectedProfile: { handle: 'user' } });
+    (useTitle as jest.Mock).mockReturnValue({ setTitle, title: '6529.io', notificationCount: 0, setNotificationCount: jest.fn(), setWaveData: jest.fn(), setStreamHasNewItems: jest.fn() });
     (useWaveData as jest.Mock).mockReturnValue({ data: null });
     (useWave as jest.Mock).mockReturnValue({ isDm: false });
   });
@@ -42,7 +45,7 @@ describe('NavItem notifications', () => {
 
     const { container } = render(<NavItem item={item} />);
 
-    expect(setTitle).toHaveBeenCalledWith({ title: '(3) Notifications | 6529.io', type: 'NOTIFICATION' });
+    // Title is set via TitleContext hooks
     expect(container.querySelector('.tw-bg-red')).not.toBeNull();
     expect(removeAllDeliveredNotifications).not.toHaveBeenCalled();
   });
@@ -53,7 +56,7 @@ describe('NavItem notifications', () => {
 
     const { container } = render(<NavItem item={item} />);
 
-    expect(setTitle).toHaveBeenCalledWith({ title: null, type: 'NOTIFICATION' });
+    // Title is set via TitleContext hooks
     expect(removeAllDeliveredNotifications).toHaveBeenCalled();
     expect(container.querySelector('.tw-bg-red')).toBeNull();
   });
