@@ -19,6 +19,7 @@ import type {
   INotificationDropVoted,
   INotificationDropReacted,
 } from "../../../../types/feed.types";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 export const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";
@@ -63,11 +64,13 @@ export default function NotificationDropReacted({
 
     actionElement = (
       <>
-        <Link
-          href={`/${notification.related_identity.handle}`}
-          className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
-          {notification.related_identity.handle}
-        </Link>
+        <UserProfileTooltipWrapper user={notification.related_identity.handle ?? ""}>
+          <Link
+            href={`/${notification.related_identity.handle}`}
+            className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
+            {notification.related_identity.handle}
+          </Link>
+        </UserProfileTooltipWrapper>
         <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
           rated
         </span>
@@ -122,11 +125,13 @@ export default function NotificationDropReacted({
 
     actionElement = (
       <>
-        <Link
-          href={`/${notification.related_identity.handle}`}
-          className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
-          {notification.related_identity.handle}
-        </Link>
+        <UserProfileTooltipWrapper user={notification.related_identity.handle ?? ""}>
+          <Link
+            href={`/${notification.related_identity.handle}`}
+            className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
+            {notification.related_identity.handle}
+          </Link>
+        </UserProfileTooltipWrapper>
         <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
           reacted
         </span>
