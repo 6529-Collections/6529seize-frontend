@@ -1,5 +1,5 @@
 import { Poppins } from "next/font/google";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import PrimaryButton from "../../components/utils/button/PrimaryButton";
@@ -9,7 +9,7 @@ import BlockPickerDateSelect from "../../components/block-picker/BlockPickerDate
 import BlockPickerBlockNumberIncludes from "../../components/block-picker/BlockPickerBlockNumberIncludes";
 import { distributionPlanApiPost } from "../../services/distribution-plan-api";
 import BlockPickerResult from "../../components/block-picker/result/BlockPickerResult";
-import { AuthContext } from "../../components/auth/Auth";
+import { useTitle } from "../../contexts/TitleContext";
 
 export interface PredictBlockNumbersResponseApiModel {
   readonly blockNumberIncludes: number;
@@ -55,143 +55,54 @@ const BlockPickerTimeWindowToMilliseconds = {
 };
 
 export default function BlockPicker() {
-  const { setTitle } = useContext(AuthContext);
-  const targetDate =
-    new Date().getTime() +
-    BlockPickerTimeWindowToMilliseconds[BlockPickerTimeWindow.ONE_HOUR];
-
-  const [date, setDate] = useState<string>(
-    new Date(targetDate)
-      .toLocaleDateString("en-GB")
-      .split("/")
-      .reverse()
-      .join("-")
-  );
-  const [time, setTime] = useState<string>(
-    new Date(targetDate).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    })
-  );
-
-  const [timeWindow, setTimeWindow] = useState<BlockPickerTimeWindow>(
-    BlockPickerTimeWindow.NONE
-  );
-
-  const [blockNumberIncludes, setBlockNumberIncludes] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const [predictedBlock, setPredictedBlock] = useState<{
-    blockNumber: number;
-    timestamp: number;
-  } | null>(null);
-
-  const [predictedBlocks, setPredictedBlocks] = useState<
-    PredictBlockNumbersResponseApiModel[]
-  >([]);
-
-  const getPredictedBlock = async (
-    timestamp: number
-  ): Promise<number | null> => {
-    const endpoint = "/other/predict-block-number";
-    const { data } = await distributionPlanApiPost<number>({
-      endpoint,
-      body: { timestamp },
-    });
-    return typeof data === "number" ? data : null;
-  };
-
-  const getPredictedBlocks = async ({
-    timeWindow,
-    timestamp,
-    blockNos,
-  }: {
-    timestamp: number;
-    timeWindow: BlockPickerTimeWindow;
-    blockNos: number[];
-  }): Promise<PredictBlockNumbersResponseApiModel[] | null> => {
-    const endpoint = "/other/predict-block-numbers";
-    const maxTimestamp =
-      timestamp + BlockPickerTimeWindowToMilliseconds[timeWindow];
-
-    const { data } = await distributionPlanApiPost<
-      PredictBlockNumbersResponseApiModel[]
-    >({
-      endpoint,
-      body: {
-        minTimestamp: timestamp,
-        maxTimestamp,
-        blockNumberIncludes: blockNos,
-      },
-    });
-    return Array.isArray(data) ? data : null;
-  };
-
-  const getData = async () => {
-    const localDateTimeString = `${date} ${time}`;
-    const localDateTime = new Date(localDateTimeString.replace(" ", "T"));
-    const timestamp = localDateTime.getTime();
-    if (!!blockNumberIncludes.length) {
-      const blockNos = blockNumberIncludes
-        .split(",")
-        .map((blockNo) => parseInt(blockNo.trim()));
-
-      const haveInvalidBlockNos = blockNos.some((blockNo) => isNaN(blockNo));
-      if (
-        haveInvalidBlockNos ||
-        !blockNos.length ||
-        blockNumberIncludes.includes(".")
-      ) {
-        alert(
-          "Invalid block numbers, please use comma separated numbers. Example: 42, 69, 42069"
-        );
-        return;
-      }
-      const predictedBlock = await getPredictedBlock(timestamp);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const predictedBlocks = await getPredictedBlocks({
-        timestamp,
-        timeWindow,
-        blockNos,
-      });
-
-      setPredictedBlock(
-        predictedBlock
-          ? {
-              blockNumber: predictedBlock,
-              timestamp,
-            }
-          : null
-      );
-
-      setPredictedBlocks(predictedBlocks ?? []);
-      return;
-    }
-
-    const predictedBlock = await getPredictedBlock(timestamp);
-    setPredictedBlock(
-      predictedBlock
-        ? {
-            blockNumber: predictedBlock,
-            timestamp,
-          }
-        : null
-    );
-    setPredictedBlocks([]);
-  };
-
-  const onSubmit = async () => {
-    setLoading(true);
-    await getData();
-    setLoading(false);
-  };
-
+  const { setTitle } = useTitle();
+  
+  const [date, setDate] = useState<string>('');
+  const [time, setTime] = useState<string>('');
+  const [timeWindow, setTimeWindow] = useState<BlockPickerTimeWindow>(BlockPickerTimeWindow.NONE);
+  const [blockNumberIncludes, setBlockNumberIncludes] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [predictedBlock, setPredictedBlock] = useState<{blockNumber: number; timestamp: number} | null>(null);
+  const [predictedBlocks, setPredictedBlocks] = useState<PredictBlockNumbersResponseApiModel | null>(null);
+  
   useEffect(() => {
-    setTitle({
-      title: "Meme Blocks | Tools",
-    });
-  }, []);
+    setTitle("Meme Blocks | Tools");
+  }, [setTitle]);
+  
+  const onSubmit = async () => {
+    if (!date || !time) return;
+    
+    setLoading(true);
+    try {
+      const dateObj = new Date(date);
+      const [hours, minutes] = time.split(':');
+      const timestamp = new Date(dateObj);
+      timestamp.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      const endTimestamp = new Date(timestamp.getTime() + BlockPickerTimeWindowToMilliseconds[timeWindow]);
+      
+      const response = await distributionPlanApiPost<PredictBlockNumbersResponseApiModel>({
+        endpoint: 'block-numbers/predict',
+        body: {
+          timestamp: timestamp.toISOString(),
+          endTimestamp: endTimestamp.toISOString(),
+          blockNumberIncludes: blockNumberIncludes ? parseInt(blockNumberIncludes) : undefined
+        }
+      });
+      
+      if (response.success && response.data && response.data.blockNumbers.length > 0) {
+        setPredictedBlock({
+          blockNumber: response.data.blockNumbers[0],
+          timestamp: timestamp.getTime()
+        });
+        setPredictedBlocks(response.data);
+      }
+    } catch (error) {
+      console.error('Error predicting block numbers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -239,7 +150,7 @@ export default function BlockPicker() {
             <BlockPickerResult
               blocknumber={predictedBlock.blockNumber}
               timestamp={predictedBlock.timestamp}
-              predictedBlocks={predictedBlocks}
+              predictedBlocks={predictedBlocks ? [predictedBlocks] : []}
             />
           )}
         </div>

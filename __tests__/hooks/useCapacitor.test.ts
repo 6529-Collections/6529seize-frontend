@@ -27,6 +27,7 @@ jest.mock("@capacitor/keyboard", () => ({
       listeners[event] = cb;
       return Promise.resolve({ remove: jest.fn() });
     }),
+    setAccessoryBarVisible: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -69,10 +70,13 @@ describe("useCapacitor", () => {
     });
     expect(result.current.orientation).toBe(1); // LANDSCAPE
 
-    act(() => {
-      listeners.keyboardWillShow();
+    // Wait for async keyboard listeners to be set up
+    await waitFor(() => {
+      act(() => {
+        listeners.keyboardWillShow();
+      });
+      expect(result.current.keyboardVisible).toBe(true);
     });
-    expect(result.current.keyboardVisible).toBe(true);
 
     act(() => {
       listeners.keyboardWillHide();

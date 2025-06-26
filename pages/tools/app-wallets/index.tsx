@@ -1,7 +1,6 @@
 import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../../components/auth/Auth";
+import { useSetTitle } from "../../../contexts/TitleContext";
 
 const AppWalletsComponent = dynamic(
   () => import("../../../components/app-wallets/AppWallets"),
@@ -11,13 +10,7 @@ const AppWalletsComponent = dynamic(
 );
 
 export default function AppWallets() {
-  const { setTitle } = useContext(AuthContext);
-
-  useEffect(() => {
-    setTitle({
-      title: "App Wallets | Tools",
-    });
-  }, []);
+  useSetTitle("App Wallets | Tools");
 
   return (
     <main className={styles.main}>

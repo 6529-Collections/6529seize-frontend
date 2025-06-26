@@ -2,9 +2,9 @@ import styles from "../../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import { LeaderboardFocus } from "../../../../components/leaderboard/Leaderboard";
-import { useContext, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import { AuthContext } from "../../../../components/auth/Auth";
+import { useTitle } from "../../../../contexts/TitleContext";
 
 const Leaderboard = dynamic(
   () => import("../../../../components/leaderboard/Leaderboard"),
@@ -12,7 +12,7 @@ const Leaderboard = dynamic(
 );
 
 export default function CommunityNerdPage(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useTitle();
   const router = useRouter();
   const [focus, setFocus] = useState<LeaderboardFocus>(props.pageProps.focus);
 
@@ -38,10 +38,8 @@ export default function CommunityNerdPage(props: any) {
 
   useEffect(() => {
     const pageTitle = `Network Nerd - ${focus}`;
-    if (title !== pageTitle) {
-      setTitle({ title: pageTitle });
-    }
-  }, [focus, title, setTitle]);
+    setTitle(pageTitle);
+  }, [focus, setTitle]);
 
   return (
     <main className={styles.main}>

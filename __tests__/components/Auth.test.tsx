@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import Auth, { AuthContext, TitleType } from '../../components/auth/Auth';
+import Auth, { AuthContext } from '../../components/auth/Auth';
 import { ReactQueryWrapperContext } from '../../components/react-query-wrapper/ReactQueryWrapper';
+import { mockTitleContextModule } from '../utils/titleTestUtils';
 
 jest.mock('react-toastify', () => ({
   toast: jest.fn(),
@@ -33,31 +34,14 @@ jest.mock('../../components/auth/SeizeConnectContext', () => ({
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: undefined }) }));
 
+// Mock TitleContext
+mockTitleContextModule();
+
 describe('Auth component', () => {
-  it('updates title when setTitle called', async () => {
-    const wrapperValue = { invalidateAll: jest.fn() } as any;
-
-    function Child() {
-      const { title, setTitle } = React.useContext(AuthContext);
-      return (
-        <div>
-          <span data-testid="title">{title}</span>
-          <button onClick={() => setTitle({ title: 'Wave', type: TitleType.WAVE })}>set</button>
-        </div>
-      );
-    }
-
-    render(
-      <ReactQueryWrapperContext.Provider value={wrapperValue}>
-        <Auth>
-          <Child />
-        </Auth>
-      </ReactQueryWrapperContext.Provider>
-    );
-
-    expect(screen.getByTestId('title').textContent).toBe('6529');
-    fireEvent.click(screen.getByText('set'));
-    await waitFor(() => expect(screen.getByTestId('title').textContent).toBe('Wave'));
+  // Note: Title functionality has been moved to TitleContext
+  // This test is no longer applicable as Auth doesn't manage titles anymore
+  it.skip('updates title when setTitle called - moved to TitleContext', async () => {
+    // Title management is now handled by TitleContext, not Auth
   });
 
   it('requestAuth shows toast when no address', async () => {

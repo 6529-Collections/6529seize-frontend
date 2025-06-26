@@ -10,7 +10,7 @@ import NextGenNavigationHeader, {
   NextGenView,
 } from "../../../components/nextGen/collections/NextGenNavigationHeader";
 import Image from "next/image";
-import { useAuth } from "../../../components/auth/Auth";
+import { useTitle } from "../../../contexts/TitleContext";
 
 const NextGenComponent = dynamic(
   () => import("../../../components/nextGen/collections/NextGen"),
@@ -40,7 +40,7 @@ export default function NextGen(props: any) {
     props.pageProps.view
   );
 
-  const { setTitle } = useAuth();
+  const { setTitle } = useTitle();
 
   useEffect(() => {
     const viewFromUrl = getNextGenView(
@@ -49,7 +49,7 @@ export default function NextGen(props: any) {
         : router.query.view ?? ""
     );
     setView(viewFromUrl ?? undefined);
-    setTitle({ title: "NextGen " + (viewFromUrl ?? "") });
+    setTitle("NextGen " + (viewFromUrl ?? ""));
   }, [router.query.view]);
 
   const updateView = (newView?: NextGenView) => {

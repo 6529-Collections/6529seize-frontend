@@ -55,7 +55,7 @@ import {
   MEME_FOCUS,
   MEME_TABS,
 } from "../the-memes/MemeShared";
-import { useAuth } from "../auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 import NftNavigation from "../nft-navigation/NftNavigation";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 
@@ -69,8 +69,6 @@ export default function LabPage(props: Readonly<Props>) {
   const router = useRouter();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { setTitle } = useAuth();
-
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
 
   const [nftId, setNftId] = useState<string>();
@@ -101,11 +99,7 @@ export default function LabPage(props: Readonly<Props>) {
     TypeFilter.ALL
   );
 
-  useEffect(() => {
-    setTitle({
-      title: getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab),
-    });
-  }, [nft, nftId, activeTab]);
+  useSetTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
 
   useEffect(() => {
     if (router.isReady) {

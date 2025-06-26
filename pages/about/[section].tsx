@@ -2,7 +2,7 @@ import styles from "../../styles/Home.module.scss";
 import menuStyles from "../../components/about/About.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import AboutMemes from "../../components/about/AboutMemes";
@@ -24,7 +24,7 @@ import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
 import AboutCopyright from "../../components/about/AboutCopyright";
 import AboutPrimaryAddress from "../../components/about/AboutPrimaryAddress";
-import { AuthContext } from "../../components/auth/Auth";
+import { useTitle } from "../../contexts/TitleContext";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useCookieConsent } from "../../components/cookies/CookieConsentContext";
 
@@ -68,41 +68,23 @@ interface Props {
 }
 
 export default function About(props: any) {
-  const { setTitle } = useContext(AuthContext);
-  const pageProps: Props = props.pageProps;
   const router = useRouter();
-
-  const [section, setSection] = useState<AboutSection>(pageProps.section);
-  const [sectionTitle, setSectionTitle] = useState<string>(
-    pageProps.sectionTitle
-  );
-
-  function setNewSection(section: AboutSection) {
-    setSection(section);
-    setSectionTitle(section.toUpperCase().replaceAll("-", " "));
-  }
-
+  const { setTitle } = useTitle();
+  const { section, sectionTitle, gdrc1Text, releaseNotesText, faqText, ensText } = props.pageProps;
+  
+  const [activeSection, setActiveSection] = useState<AboutSection | undefined>(section);
+  
   useEffect(() => {
-    setSection(pageProps.section);
-    setSectionTitle(pageProps.sectionTitle);
-  }, [pageProps]);
-
-  useEffect(() => {
-    if (section && sectionTitle) {
-      router.push(
-        {
-          pathname: `${section}`,
-        },
-        undefined,
-        { shallow: true }
-      );
-
-      window.scrollTo(0, 0);
-    }
-  }, [section]);
-
-  function printSection() {
-    switch (section) {
+    setTitle(`${sectionTitle} | About`);
+  }, [sectionTitle, setTitle]);
+  
+  const setNewSection = (newSection: AboutSection) => {
+    setActiveSection(newSection);
+    router.push(`/about/${newSection}`, undefined, { shallow: true });
+  };
+  
+  const printSection = () => {
+    switch (activeSection) {
       case AboutSection.MEMES:
         return <AboutMemes />;
       case AboutSection.MEMES_CALENDAR:
@@ -111,8 +93,6 @@ export default function About(props: any) {
         return <AboutMemeLab />;
       case AboutSection.GRADIENTS:
         return <AboutGradients />;
-      case AboutSection.FAQ:
-        return <AboutHTML title="FAQ" html={pageProps.faqText} />;
       case AboutSection.MINTING:
         return <AboutMinting />;
       case AboutSection.LICENSE:
@@ -122,7 +102,7 @@ export default function About(props: any) {
       case AboutSection.CONTACT_US:
         return <AboutContactUs />;
       case AboutSection.RELEASE_NOTES:
-        return <AboutReleaseNotes html={pageProps.releaseNotesText} />;
+        return <AboutReleaseNotes html={releaseNotesText} />;
       case AboutSection.TERMS_OF_SERVICE:
         return <AboutTermsOfService />;
       case AboutSection.PRIVACY_POLICY:
@@ -132,27 +112,25 @@ export default function About(props: any) {
       case AboutSection.DATA_DECENTR:
         return <AboutDataDecentral />;
       case AboutSection.GDRC1:
-        return <AboutGDRC1 html={pageProps.gdrc1Text} />;
+        return <AboutGDRC1 html={gdrc1Text} />;
       case AboutSection.NFT_DELEGATION:
         return <AboutNFTDelegation />;
-      case AboutSection.PRIMARY_ADDRESS:
-        return <AboutPrimaryAddress />;
-      case AboutSection.ENS:
-        return <AboutHTML title="ENS" html={pageProps.ensText} />;
       case AboutSection.SUBSCRIPTIONS:
         return <AboutSubscriptions />;
       case AboutSection.NAKAMOTO_THRESHOLD:
         return <AboutNakamotoThreshold />;
       case AboutSection.COPYRIGHT:
         return <AboutCopyright />;
+      case AboutSection.PRIMARY_ADDRESS:
+        return <AboutPrimaryAddress />;
+      case AboutSection.FAQ:
+        return <AboutHTML html={faqText} title="FAQ" />;
+      case AboutSection.ENS:
+        return <AboutHTML html={ensText} title="ENS" />;
+      default:
+        return null;
     }
-  }
-
-  useEffect(() => {
-    setTitle({
-      title: `${sectionTitle} | About`,
-    });
-  }, [sectionTitle]);
+  };
 
   return (
     <main className={styles.main}>
@@ -163,11 +141,11 @@ export default function About(props: any) {
               <Row>
                 <Col className={menuStyles.aboutMenuLeft}>
                   <AboutMenu
-                    currentSection={section}
+                    currentSection={activeSection}
                     setSection={setNewSection}
                   />
                 </Col>
-                {section && (
+                {activeSection && (
                   <Col className={menuStyles.aboutMenuRight}>
                     {printSection()}
                   </Col>
@@ -176,7 +154,7 @@ export default function About(props: any) {
               <Row className="pt-4">
                 <Col className={menuStyles.aboutMenuLeftFull}>
                   <AboutMenu
-                    currentSection={section}
+                    currentSection={activeSection}
                     setSection={setNewSection}
                   />
                 </Col>
