@@ -23,6 +23,7 @@ interface BaseTDH {
     memes_szn8: TDHBoostBreakdown;
     memes_szn9: TDHBoostBreakdown;
     memes_szn10: TDHBoostBreakdown;
+    memes_szn11: TDHBoostBreakdown;
     memes_genesis: TDHBoostBreakdown;
     memes_nakamoto: TDHBoostBreakdown;
     gradients: TDHBoostBreakdown;
