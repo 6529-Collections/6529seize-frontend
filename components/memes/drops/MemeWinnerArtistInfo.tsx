@@ -7,8 +7,7 @@ import WaveDropAuthorPfp from "../../waves/drops/WaveDropAuthorPfp";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { cicToType, getTimeAgoShort } from "../../../helpers/Helpers";
 import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
-import LazyTippy from "../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface MemeWinnerArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -36,11 +35,17 @@ export default function MemeWinnerArtistInfo({
             />
           )}
           <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-hidden sm:tw-block">
-            <LazyTippy
-              placement="bottom"
-              interactive={false}
-              delay={[500, 200]}
-              content={drop.author?.handle ? <UserProfileTooltip user={drop.author.handle || drop.author.id} /> : null}>
+            {drop.author?.handle ? (
+              <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  href={`/${drop.author?.handle}`}
+                  className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out"
+                >
+                  {drop.author?.handle}
+                </Link>
+              </UserProfileTooltipWrapper>
+            ) : (
               <Link
                 onClick={(e) => e.stopPropagation()}
                 href={`/${drop.author?.handle}`}
@@ -48,7 +53,7 @@ export default function MemeWinnerArtistInfo({
               >
                 {drop.author?.handle}
               </Link>
-            </LazyTippy>
+            )}
           </p>
 
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0 tw-hidden sm:tw-block"></div>

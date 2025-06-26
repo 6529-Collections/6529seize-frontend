@@ -9,8 +9,7 @@ import UserCICAndLevel, {
 import { SingleWaveDropPosition } from "../../../waves/drop/SingleWaveDropPosition";
 import { cicToType } from "../../../../helpers/Helpers";
 import Link from "next/link";
-import LazyTippy from "../../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
@@ -123,11 +122,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               cicType={cicType}
               size={UserCICAndLevelSize.SMALL}
             />
-            <LazyTippy
-              placement="bottom"
-              interactive={false}
-              delay={[500, 200]}
-              content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+            <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
               <Link
                 href={`/${drop.author.handle}`}
                 onClick={(e) => {
@@ -139,7 +134,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               >
                 {drop.author.handle}
               </Link>
-            </LazyTippy>
+            </UserProfileTooltipWrapper>
           </div>
           <div className="tw-flex tw-flex-col @lg:tw-flex-col @[42rem]:tw-flex-row tw-justify-between tw-gap-4 tw-mt-3.5 xl:tw-mt-3">
             <div className="tw-flex tw-items-center tw-gap-x-6">

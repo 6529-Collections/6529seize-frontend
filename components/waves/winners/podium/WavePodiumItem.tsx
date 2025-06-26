@@ -7,8 +7,7 @@ import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
-import LazyTippy from "../../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner;
@@ -197,11 +196,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
               <div className="tw-absolute tw-bottom-0 tw-h-3/4 tw-inset-x-0 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
             </div>
 
-            <LazyTippy
-              placement="bottom"
-              interactive={false}
-              delay={[500, 200]}
-              content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+            <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
               <Link
                 href={`/${drop.author.handle}`}
                 onClick={(e) => e.stopPropagation()}
@@ -226,7 +221,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   </svg>
                 </span>
               </Link>
-            </LazyTippy>
+            </UserProfileTooltipWrapper>
 
             <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2 tw-relative">
               <div className="tw-flex tw-items-center tw-gap-x-1">

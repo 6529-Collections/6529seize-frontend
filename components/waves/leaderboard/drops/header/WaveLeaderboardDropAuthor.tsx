@@ -8,8 +8,7 @@ import UserCICAndLevel, {
 } from "../../../../user/utils/UserCICAndLevel";
 import WinnerDropBadge from "../../../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../../../waves/drops/time/WaveDropTime";
-import LazyTippy from "../../../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -50,11 +49,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
             cicType={cicToType(drop.author.cic)}
             size={UserCICAndLevelSize.SMALL}
           />
-          <LazyTippy
-            placement="bottom"
-            interactive={false}
-            delay={[500, 200]}
-            content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+          <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
@@ -64,7 +59,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
                 {drop.author.handle}
               </span>
             </Link>
-          </LazyTippy>
+          </UserProfileTooltipWrapper>
 
           <div className="tw-size-[3px] tw-bg-iron-900 tw-rounded-full tw-flex-shrink-0"></div>
 

@@ -52,18 +52,20 @@ export default function UserProfileTooltip({
     : null;
 
   return (
-    <div className="tailwind-scope tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-lg tw-p-4 tw-min-w-[280px] tw-max-w-[320px]">
-      <div className="tw-flex tw-gap-x-4">
-        <div className="tw-flex-shrink-0">
-          <DropPfp pfpUrl={profile?.pfp} />
+    <div className="tailwind-scope tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700 tw-rounded-xl tw-p-4 tw-min-w-[280px] tw-max-w-[320px] tw-shadow-xl">
+      <div className="tw-flex tw-flex-col tw-gap-y-2">
+        <div className="tw-flex tw-justify-start">
+          <div className="tw-flex-shrink-0">
+            <DropPfp pfpUrl={profile?.pfp} />
+          </div>
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-y-1 -tw-mt-1">
+        <div className="tw-flex tw-flex-col">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <span className="tw-text-base tw-font-semibold tw-text-iron-50 tw-truncate">
+            <span className="tw-text-base tw-font-bold tw-text-iron-50 tw-truncate tw-max-w-[180px]">
               {profile?.handle || profile?.display}
             </span>
             {profile && (
-              <div className="tw-h-4 tw-w-4">
+              <div className="tw-h-5 tw-w-5">
                 <UserCICTypeIcon cic={profile.cic} />
               </div>
             )}
@@ -71,43 +73,42 @@ export default function UserProfileTooltip({
           {description && (
             <p className="tw-text-xs tw-text-iron-400 tw-mb-0">{description}</p>
           )}
+          {profile && (
+            <div className="tw-mt-1.5">
+              <UserLevel level={profile.level} size="xs" />
+            </div>
+          )}
         </div>
       </div>
-      {profile && (
-        <div className="tw-mt-4">
-          <UserLevel level={profile.level} size="xs" />
-        </div>
-      )}
-
       {aboutStatement && (
-        <p className="tw-text-sm tw-text-iron-300 tw-mt-4 tw-line-clamp-5">
+        <p className="tw-text-sm tw-text-iron-200 tw-line-clamp-6 tw-mb-0 tw-mt-4">
           {aboutStatement.statement_value}
         </p>
       )}
-      <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-2 tw-mt-4">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-1.5 tw-mt-4">
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommasOrDash(profile?.tdh ?? 0)}
           </span>
-          <span className="tw-text-sm tw-text-iron-500">TDH</span>
+          <span className="tw-text-sm tw-text-iron-400">TDH</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommasOrDash(profile?.rep ?? 0)}
           </span>
-          <span className="tw-text-sm tw-text-iron-500">REP</span>
+          <span className="tw-text-sm tw-text-iron-400">REP</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommasOrDash(profile?.cic ?? 0)}
           </span>
-          <span className="tw-text-sm tw-text-iron-500">NIC</span>
+          <span className="tw-text-sm tw-text-iron-400">NIC</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommasOrDash(balance?.total_balance ?? 0)}
           </span>
-          <span className="tw-text-sm tw-text-iron-500">Balance</span>
+          <span className="tw-text-sm tw-text-iron-400">Balance</span>
         </div>
       </div>
     </div>

@@ -6,8 +6,7 @@ import UserCICAndLevel, {
 } from "../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
-import LazyTippy from "../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -47,11 +46,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             />
 
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              <LazyTippy
-                placement="bottom"
-                interactive={false}
-                delay={[500, 200]}
-                content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+              <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
                 <Link
                   onClick={(e) => handleNavigation(e, `/${drop.author.handle}`)}
                   href={`/${drop.author.handle}`}
@@ -59,7 +54,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 >
                   {drop.author.handle}
                 </Link>
-              </LazyTippy>
+              </UserProfileTooltipWrapper>
             </p>
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
             <WaveDropTime timestamp={drop.created_at} />

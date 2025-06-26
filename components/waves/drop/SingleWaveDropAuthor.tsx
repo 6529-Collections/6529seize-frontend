@@ -5,8 +5,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
 import { cicToType } from "../../../helpers/Helpers";
-import LazyTippy from "../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;
@@ -32,15 +31,11 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({ drop
         cicType={cicToType(drop.author.cic)}
         size={UserCICAndLevelSize.SMALL}
       />
-      <LazyTippy
-        placement="bottom"
-        interactive={false}
-        delay={[500, 200]}
-        content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+      <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
         <span className="tw-text-md tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80">
           {drop.author.handle}
         </span>
-      </LazyTippy>
+      </UserProfileTooltipWrapper>
     </Link>
   );
 }; 

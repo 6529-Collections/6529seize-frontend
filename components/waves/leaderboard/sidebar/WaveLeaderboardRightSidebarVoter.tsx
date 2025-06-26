@@ -4,6 +4,7 @@ import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import Tippy from "@tippyjs/react";
 import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
@@ -23,7 +24,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
         <span className="tw-text-iron-400 tw-font-medium tw-flex-shrink-0">{position}.</span>
         <Link
           href={`/${voter.voter.handle}`}
-          className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-max-w-full tw-min-w-0"
+          className="tw-flex tw-items-center tw-gap-2 tw-no-underline desktop-hover:hover:tw-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-max-w-full tw-min-w-0"
         >
           {voter.voter.pfp ? (
             <img
@@ -34,9 +35,11 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           ) : (
             <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
           )}
-          <span className="tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-opacity-80 tw-truncate">
-            {voter.voter.handle}
-          </span>
+          <UserProfileTooltipWrapper user={voter.voter.handle || voter.voter.id}>
+            <span className="tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-opacity-80 tw-truncate">
+              {voter.voter.handle}
+            </span>
+          </UserProfileTooltipWrapper>
         </Link>
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-ml-6">

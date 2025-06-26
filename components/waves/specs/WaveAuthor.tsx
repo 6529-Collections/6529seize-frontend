@@ -4,8 +4,7 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../helpers/image.helpers";
-import LazyTippy from "../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
   return (
@@ -23,13 +22,9 @@ export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
         ) : (
           <div className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800" />
         )}
-        <LazyTippy
-          placement="bottom"
-          interactive={false}
-          delay={[500, 200]}
-          content={<UserProfileTooltip user={wave.author.handle || wave.author.id} />}>
+        <UserProfileTooltipWrapper user={wave.author.handle || wave.author.id}>
           <span className="tw-font-medium tw-text-sm">{wave.author.handle}</span>
-        </LazyTippy>
+        </UserProfileTooltipWrapper>
       </Link>
     </div>
   );

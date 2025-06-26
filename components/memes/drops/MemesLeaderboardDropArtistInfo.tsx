@@ -8,8 +8,7 @@ import WaveDropAuthorPfp from "../../waves/drops/WaveDropAuthorPfp";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../waves/drops/time/WaveDropTime";
-import LazyTippy from "../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -36,11 +35,19 @@ const MemesLeaderboardDropArtistInfo: React.FC<
               size={UserCICAndLevelSize.SMALL}
             />
           )}
-          <LazyTippy
-            placement="bottom"
-            interactive={false}
-            delay={[500, 200]}
-            content={drop.author?.handle ? <UserProfileTooltip user={drop.author.handle || drop.author.id} /> : null}>
+          {drop.author?.handle ? (
+            <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
+              <Link
+                href={`/${drop.author?.handle}`}
+                onClick={(e) => e.stopPropagation()}
+                className="tw-no-underline desktop-hover:hover:tw-underline"
+              >
+                <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                  {drop.author?.handle}
+                </span>
+              </Link>
+            </UserProfileTooltipWrapper>
+          ) : (
             <Link
               href={`/${drop.author?.handle}`}
               onClick={(e) => e.stopPropagation()}
@@ -50,7 +57,7 @@ const MemesLeaderboardDropArtistInfo: React.FC<
                 {drop.author?.handle}
               </span>
             </Link>
-          </LazyTippy>
+          )}
 
           {/* Divider followed by WaveDropTime component */}
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>

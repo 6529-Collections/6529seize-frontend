@@ -8,8 +8,7 @@ import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import { Time } from "../../../helpers/time";
-import LazyTippy from "../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface DefaultWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -130,11 +129,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
             </Link>
 
             <div className="tw-flex tw-items-center tw-gap-1.5">
-              <LazyTippy
-                placement="bottom"
-                interactive={false}
-                delay={[500, 200]}
-                content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+              <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
                 <Link
                   href={`/${drop.author.handle}`}
                   onClick={(e) => e.stopPropagation()}
@@ -144,7 +139,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                     {drop.author.handle}
                   </span>
                 </Link>
-              </LazyTippy>
+              </UserProfileTooltipWrapper>
               <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
               <span className="tw-text-xs tw-text-iron-400 tw-flex-shrink-0">
                 {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}

@@ -10,8 +10,7 @@ import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutc
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
-import LazyTippy from "../../utils/tooltip/LazyTippy";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
@@ -91,15 +90,11 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                   ) : (
                     <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
                   )}
-                  <LazyTippy
-                    placement="bottom"
-                    interactive={false}
-                    delay={[500, 200]}
-                    content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+                  <UserProfileTooltipWrapper user={drop.author.handle || drop.author.id}>
                     <span className="tw-text-iron-50 tw-text-sm tw-font-semibold">
                       {drop.author.handle}
                     </span>
-                  </LazyTippy>
+                  </UserProfileTooltipWrapper>
                   <div className="tw-relative">
                     <div className="tw-size-4 tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset">
                       <span className="tw-text-[9px] tw-text-iron-200">
