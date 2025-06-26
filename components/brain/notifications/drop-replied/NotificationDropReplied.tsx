@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 export default function NotificationDropReplied({
   notification,
@@ -61,11 +62,13 @@ export default function NotificationDropReplied({
               )}
             </div>
             <span className="tw-inline-flex tw-flex-wrap tw-gap-x-1 tw-items-center">
-              <Link
-                href={`/${notification.related_drops[1].author.handle}`}
-                className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
-                {notification.related_drops[1].author.handle}
-              </Link>{" "}
+              <UserProfileTooltipWrapper user={notification.related_drops[1].author.handle ?? ""}>
+                <Link
+                  href={`/${notification.related_drops[1].author.handle}`}
+                  className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
+                  {notification.related_drops[1].author.handle}
+                </Link>
+              </UserProfileTooltipWrapper>{" "}
               <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
                 replied
               </span>{" "}
