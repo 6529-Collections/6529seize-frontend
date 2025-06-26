@@ -5,6 +5,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
 import { cicToType } from "../../../helpers/Helpers";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;
@@ -14,7 +15,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({ drop
   return (
     <Link
       href={`/${drop.author.handle}`}
-      className="tw-flex tw-items-center tw-gap-x-3 tw-no-underline"
+      className="tw-flex tw-items-center tw-gap-x-3 tw-no-underline desktop-hover:hover:tw-underline"
     >
       {drop.author.pfp ? (
         <img
@@ -30,9 +31,11 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({ drop
         cicType={cicToType(drop.author.cic)}
         size={UserCICAndLevelSize.SMALL}
       />
-      <span className="tw-text-md tw-font-medium tw-text-iron-100">
-        {drop.author.handle}
-      </span>
+      <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+        <span className="tw-text-md tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80">
+          {drop.author.handle}
+        </span>
+      </UserProfileTooltipWrapper>
     </Link>
   );
 }; 
