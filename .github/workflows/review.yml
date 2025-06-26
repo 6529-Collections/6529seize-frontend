@@ -5,12 +5,13 @@ permissions:
   pull-requests: write
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  pull_request_review_comment:
+    types: [created]
 
 jobs:
   theme-analysis:
+    if: |
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@review'))
     runs-on: ubuntu-latest
     steps:
       - name: AI Code Review
