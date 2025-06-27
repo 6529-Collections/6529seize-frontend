@@ -309,7 +309,7 @@ export default function WaveDropsAll({
         <WaveDropsReverseContainer
           ref={scrollContainerRef}
           isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
-          hasNextPage={!!waveMessages?.hasNextPage}
+          hasNextPage={!!waveMessages?.hasNextPage && (waveMessages?.drops?.length ?? 0) >= 25}
           onTopIntersection={handleTopIntersection}
           onUserScroll={(direction, isAtBottom) => {
             setIsAtBottom(isAtBottom);

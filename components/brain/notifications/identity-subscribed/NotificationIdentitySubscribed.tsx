@@ -7,6 +7,7 @@ import {
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
 export default function NotificationIdentitySubscribed({
   notification,
@@ -32,11 +33,13 @@ export default function NotificationIdentitySubscribed({
       <div className="tw-flex tw-flex-1 tw-justify-between tw-gap-x-3 tw-gap-y-1">
         <span className="tw-inline tw-flex-wrap tw-items-center">
           <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-            <Link
-              href={`/${notification.related_identity.handle}`}
-              className="tw-no-underline tw-font-semibold">
-              {notification.related_identity.handle}
-            </Link>{" "}
+            <UserProfileTooltipWrapper user={notification.related_identity.handle ?? ""}>
+              <Link
+                href={`/${notification.related_identity.handle}`}
+                className="tw-no-underline tw-font-semibold">
+                {notification.related_identity.handle}
+              </Link>
+            </UserProfileTooltipWrapper>{" "}
             started following you
           </span>{" "}
           <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
