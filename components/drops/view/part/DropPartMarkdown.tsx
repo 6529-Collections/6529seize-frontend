@@ -14,6 +14,7 @@ import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
+
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import DropListItemContentPart, {
   DropListItemContentPartProps,
@@ -461,6 +462,21 @@ function DropPartMarkdown({
     return <>{elements}</>;
   };
 
+  // Pre-process content to preserve multiple line breaks as visual spacing
+  // When users press shift+enter multiple times in the input, we convert
+  // sequences of 4+ newlines into empty paragraphs with non-breaking spaces
+  // This creates proportional visual spacing: more shift+enters = more space
+  let processedContent = partContent;
+  if (processedContent) {
+    processedContent = processedContent.replace(/\n{4,}/g, (match: string) => {
+      // Calculate how many empty paragraphs to create
+      const numParagraphs = Math.floor(match.length / 2) - 1;
+      // Create empty paragraphs with &nbsp; to ensure they render with height
+      const emptyParagraphs = Array(numParagraphs).fill('\n\n&nbsp;').join('');
+      return '\n\n' + emptyParagraphs + '\n\n';
+    });
+  }
+
   return (
     <Markdown
       rehypePlugins={[
@@ -472,10 +488,16 @@ function DropPartMarkdown({
             protocols: ["http", "https"],
           },
         ],
-        [rehypeSanitize],
+        [rehypeSanitize, {
+          allowedTags: ['p', 'br', 'strong', 'em', 'a', 'code', 'pre', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'img'],
+          allowedAttributes: {
+            a: ['href', 'title'],
+            img: ['src', 'alt', 'title']
+          }
+        }],
       ]}
       remarkPlugins={[remarkGfm]}
-      className="tw-w-full tw-space-y-1"
+      className="tw-w-full"
       components={{
         h5: (params) => (
           <h5 className="tw-text-iron-200 tw-break-words word-break">
@@ -545,6 +567,7 @@ function DropPartMarkdown({
         ),
         a: (params) => aHrefRenderer(params),
         img: imgRenderer,
+        br: () => <br />,
         blockquote: (params) => (
           <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
             {customRenderer({
@@ -555,7 +578,7 @@ function DropPartMarkdown({
           </blockquote>
         ),
       }}>
-      {partContent}
+      {processedContent}
     </Markdown>
   );
 }
