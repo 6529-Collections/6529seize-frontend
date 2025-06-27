@@ -65,7 +65,7 @@ const WaveDropPartContentMarkdown: React.FC<
       }
       return;
     }
-    
+
     if (onSave) {
       onSave(editContent);
     }
@@ -116,7 +116,7 @@ const WaveDropPartContentMarkdown: React.FC<
           value={editContent}
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
-          className="tw-w-full tw-p-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-500 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
+          className="tw-w-full tw-p-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-500 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
           placeholder="Edit message..."
           style={{
             fontFamily: "inherit",
@@ -124,21 +124,21 @@ const WaveDropPartContentMarkdown: React.FC<
           }}
         />
         <div className="tw-flex tw-items-center tw-gap-2 tw-mt-1">
-          <div className="tw-text-xs tw-text-iron-500">
-            Escape to{" "}
-            <span 
+          <div className="tw-text-xs tw-text-iron-400">
+            escape to
+            <button
               onClick={handleCancel}
-              className="tw-cursor-pointer tw-text-primary-500 hover:tw-text-primary-400 tw-transition"
+              className="tw-bg-transparent tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium"
             >
               cancel
-            </span>
-            {" • Enter to "}
-            <span 
+            </button>
+            • enter to
+            <button
               onClick={handleSave}
-              className="tw-cursor-pointer tw-text-primary-500 hover:tw-text-primary-400 tw-transition"
+              className="tw-bg-transparent tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium" 
             >
               save
-            </span>
+            </button>
           </div>
         </div>
       </div>

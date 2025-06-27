@@ -1,4 +1,6 @@
 import { memo, useCallback, useEffect, useState, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { selectEditingDropId, setEditingDropId } from "../../../store/editSlice";
 import { useDropUpdateMutation } from "../../../hooks/drops/useDropUpdateMutation";
 import { ApiUpdateDropRequest } from "../../../generated/models/ApiUpdateDropRequest";
 import WaveDropActions from "./WaveDropActions";
@@ -140,7 +142,9 @@ const WaveDrop = ({
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const dispatch = useDispatch();
+  const editingDropId = useSelector(selectEditingDropId);
+  const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const dropUpdateMutation = useDropUpdateMutation();
@@ -222,8 +226,8 @@ const WaveDrop = ({
   }, []);
 
   const handleOnEdit = useCallback(() => {
-    setIsEditing(true);
-  }, []);
+    dispatch(setEditingDropId(drop.id));
+  }, [dispatch, drop.id]);
 
   const handleEditSave = useCallback(async (newContent: string) => {
     const updateRequest: ApiUpdateDropRequest = {
@@ -240,7 +244,7 @@ const WaveDrop = ({
     };
 
     // Optimistically close the editor
-    setIsEditing(false);
+    dispatch(setEditingDropId(null));
 
     // Execute the mutation
     dropUpdateMutation.mutate({
@@ -248,11 +252,11 @@ const WaveDrop = ({
       request: updateRequest,
       currentDrop: drop,
     });
-  }, [drop, activePartIndex, dropUpdateMutation]);
+  }, [drop, activePartIndex, dropUpdateMutation, dispatch]);
 
   const handleEditCancel = useCallback(() => {
-    setIsEditing(false);
-  }, []);
+    dispatch(setEditingDropId(null));
+  }, [dispatch]);
 
   useEffect(() => {
     return () => {
