@@ -46,7 +46,9 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             />
 
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
                 <Link
                   onClick={(e) => handleNavigation(e, `/${drop.author.handle}`)}
                   href={`/${drop.author.handle}`}

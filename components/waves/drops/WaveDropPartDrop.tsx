@@ -13,6 +13,10 @@ interface WaveDropPartDropProps {
   activePartIndex: number;
   setActivePartIndex: (index: number) => void;
   onQuoteClick: (drop: ApiDrop) => void;
+  isEditing?: boolean;
+  isSaving?: boolean;
+  onSave?: (newContent: string) => void;
+  onCancel?: () => void;
 }
 
 const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
@@ -24,6 +28,10 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   activePartIndex,
   setActivePartIndex,
   onQuoteClick,
+  isEditing = false,
+  isSaving = false,
+  onSave,
+  onCancel,
 }) => {
   return (
     <div className="tw-flex tw-gap-x-3 tw-h-full tw-relative">
@@ -41,6 +49,11 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             activePartIndex={activePartIndex}
             setActivePartIndex={setActivePartIndex}
             onQuoteClick={onQuoteClick}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onSave={onSave}
+            onCancel={onCancel}
+            drop={drop}
           />
         </div>
       </div>

@@ -1,4 +1,6 @@
 import { memo, useCallback, useEffect, useState, useRef } from "react";
+import { useDropUpdateMutation } from "../../../hooks/drops/useDropUpdateMutation";
+import { ApiUpdateDropRequest } from "../../../generated/models/ApiUpdateDropRequest";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropReply from "./WaveDropReply";
 import WaveDropContent from "./WaveDropContent";
@@ -138,8 +140,10 @@ const WaveDrop = ({
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
+  const dropUpdateMutation = useDropUpdateMutation();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
@@ -217,6 +221,39 @@ const WaveDrop = ({
     setIsSlideUp(false);
   }, []);
 
+  const handleOnEdit = useCallback(() => {
+    setIsEditing(true);
+  }, []);
+
+  const handleEditSave = useCallback(async (newContent: string) => {
+    const updateRequest: ApiUpdateDropRequest = {
+      parts: drop.parts.map((part, index) => ({
+        content: index === activePartIndex ? newContent : part.content,
+        quoted_drop: part.quoted_drop || null,
+        media: part.media || []
+      })),
+      title: drop.title,
+      metadata: drop.metadata,
+      referenced_nfts: drop.referenced_nfts,
+      mentioned_users: drop.mentioned_users,
+      signature: null,
+    };
+
+    // Optimistically close the editor
+    setIsEditing(false);
+
+    // Execute the mutation
+    dropUpdateMutation.mutate({
+      dropId: drop.id,
+      request: updateRequest,
+      currentDrop: drop,
+    });
+  }, [drop, activePartIndex, dropUpdateMutation]);
+
+  const handleEditCancel = useCallback(() => {
+    setIsEditing(false);
+  }, []);
+
   useEffect(() => {
     return () => {
       if (longPressTimeoutRef.current) {
@@ -291,16 +328,21 @@ const WaveDrop = ({
                 onQuoteClick={onQuoteClick}
                 setLongPressTriggered={setLongPressTriggered}
                 parentContainerRef={parentContainerRef}
+                isEditing={isEditing}
+                isSaving={dropUpdateMutation.isPending}
+                onSave={handleEditSave}
+                onCancel={handleEditCancel}
               />
             </div>
           </div>
         </div>
-        {!isMobile && showReplyAndQuote && (
+        {!isMobile && showReplyAndQuote && !isEditing && (
           <WaveDropActions
             drop={drop}
             activePartIndex={activePartIndex}
             onReply={handleOnReply}
             onQuote={handleOnQuote}
+            onEdit={handleOnEdit}
           />
         )}
         <div className={`tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap`}>
