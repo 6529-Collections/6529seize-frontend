@@ -1,11 +1,13 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
 import { groupSlice } from "./groupSlice";
+import { editSlice } from "./editSlice";
 
 const makeStore = () =>
   configureStore({
     reducer: {
       [groupSlice.name]: groupSlice.reducer,
+      [editSlice.name]: editSlice.reducer,
     },
     devTools: true,
   });

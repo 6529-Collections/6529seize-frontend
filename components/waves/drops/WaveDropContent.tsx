@@ -13,6 +13,10 @@ interface WaveDropContentProps {
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly isEditing?: boolean;
+  readonly isSaving?: boolean;
+  readonly onSave?: (newContent: string) => void;
+  readonly onCancel?: () => void;
 }
 
 const WaveDropContent: React.FC<WaveDropContentProps> = ({
@@ -24,6 +28,10 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   onLongPress,
   setLongPressTriggered,
   parentContainerRef,
+  isEditing = false,
+  isSaving = false,
+  onSave,
+  onCancel,
 }) => {
   return (
     <DropContentWrapper parentContainerRef={parentContainerRef}>
@@ -35,6 +43,10 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
         onQuoteClick={onQuoteClick}
         onLongPress={onLongPress}
         setLongPressTriggered={setLongPressTriggered}
+        isEditing={isEditing}
+        isSaving={isSaving}
+        onSave={onSave}
+        onCancel={onCancel}
       />
     </DropContentWrapper>
   );
