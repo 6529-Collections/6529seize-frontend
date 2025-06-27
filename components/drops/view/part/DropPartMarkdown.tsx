@@ -486,7 +486,7 @@ function DropPartMarkdown({
           rehypeExternalLinks,
           {
             target: "_blank",
-            rel: ["noopener", "noreferrer", "nofollow'"],
+            rel: ["noopener", "noreferrer", "nofollow"],
             protocols: ["http", "https"],
           },
         ],
