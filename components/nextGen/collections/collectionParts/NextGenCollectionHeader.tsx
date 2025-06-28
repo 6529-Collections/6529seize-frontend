@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

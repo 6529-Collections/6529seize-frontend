@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import Toggle from "react-toggle";

@@ -1,3 +1,5 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { useEffect, useState } from "react";
@@ -38,8 +40,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
         <Col
           sm={12}
           md={3}
-          className="pt-4 d-flex align-items-center justify-content-center"
-        >
+          className="pt-4 d-flex align-items-center justify-content-center">
           {profile?.pfp && (
             <Image
               priority
@@ -79,8 +80,9 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                       {index > 0 && ", "}
                       <a
                         key={`link-collection-${c.id}`}
-                        href={`/nextgen/collection/${formatNameForUrl(c.name)}`}
-                      >
+                        href={`/nextgen/collection/${formatNameForUrl(
+                          c.name
+                        )}`}>
                         {c.name}
                       </a>
                     </>

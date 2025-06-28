@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { RatingStats } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
@@ -30,14 +32,12 @@ export default function UserPageRepsItem({
       <button
         onClick={() => setIsEditRepModalOpen(true)}
         disabled={!canEditRep}
-        className="tw-bg-transparent tw-border-none tw-p-0 "
-      >
+        className="tw-bg-transparent tw-border-none tw-p-0 ">
         <span
           className={`${
             canEditRep ? "hover:tw-bg-iron-700" : ""
           } tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 
-           tw-px-3 tw-py-1.5 sm:tw-py-1 tw-transition tw-duration-300 tw-ease-out`}
-        >
+           tw-px-3 tw-py-1.5 sm:tw-py-1 tw-transition tw-duration-300 tw-ease-out`}>
           <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-50">
             {rep.category}
           </span>
@@ -45,16 +45,14 @@ export default function UserPageRepsItem({
           <span
             className={`${
               isPositiveRating ? "tw-text-green" : "tw-text-red"
-            } tw-whitespace-nowrap tw-font-medium tw-text-sm sm:tw-text-md`}
-          >
+            } tw-whitespace-nowrap tw-font-medium tw-text-sm sm:tw-text-md`}>
             <Tippy
               content={`My Rep: ${formatNumberWithCommas(
                 rep.rater_contribution
               )}`}
               theme="dark"
               placement="top"
-              disabled={isTouchScreen || !rep.rater_contribution}
-            >
+              disabled={isTouchScreen ?? !rep.rater_contribution}>
               <span>{formatNumberWithCommas(rep.rating)}</span>
             </Tippy>
           </span>
@@ -71,8 +69,7 @@ export default function UserPageRepsItem({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <UserPageRepModifyModal
               profile={profile}
               category={rep.category}

@@ -56,8 +56,8 @@
 }
 
 .lfgButton {
-  background-color: #39ff14;
-  border-color: #39ff14;
+  background-color: #39ff14 !important;
+  border-color: #39ff14 !important;
   color: variables.$very-dark-grey !important;
 
   &:hover,

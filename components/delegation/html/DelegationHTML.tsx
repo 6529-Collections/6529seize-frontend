@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import styles from "./DelegationHTML.module.scss";
 import { Container, Row, Col } from "react-bootstrap";

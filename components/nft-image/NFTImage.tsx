@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./NFTImage.module.scss";
 import { Col } from "react-bootstrap";
 import { BaseNFT, NFTLite } from "../../entities/INFT";

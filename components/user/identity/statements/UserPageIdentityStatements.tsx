@@ -1,3 +1,5 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
 import { CicStatement } from "../../../../entities/IProfile";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
@@ -134,21 +136,18 @@ export default function UserPageIdentityStatements({
                       </ul>
                     }
                     theme="dark"
-                    placement="top"
-                  >
+                    placement="top">
                     <div
                       tabIndex={0}
                       role="button"
                       aria-label="Statements help"
-                      className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-                    >
+                      className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400">
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
+                        xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                           stroke="currentColor"

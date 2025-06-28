@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useRef, useEffect } from "react";
 
 export function useWaveAbortController() {
@@ -17,16 +19,19 @@ export function useWaveAbortController() {
   /**
    * Sets up and returns an AbortController for the request
    */
-  const createController = useCallback((waveId: string): AbortController => {
-    // Cancel any existing request for this wave
-    cancelFetch(waveId);
+  const createController = useCallback(
+    (waveId: string): AbortController => {
+      // Cancel any existing request for this wave
+      cancelFetch(waveId);
 
-    // Create a new abort controller
-    const controller = new AbortController();
-    abortControllers.current[waveId] = controller;
-    
-    return controller;
-  }, [cancelFetch]);
+      // Create a new abort controller
+      const controller = new AbortController();
+      abortControllers.current[waveId] = controller;
+
+      return controller;
+    },
+    [cancelFetch]
+  );
 
   /**
    * Cleanup function to be called after fetch completes

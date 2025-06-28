@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Address.module.scss";
 import {
   containsEmojis,
@@ -5,11 +7,12 @@ import {
   parseEmojis,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dropdown } from "react-bootstrap";
-import Tippy from "@tippyjs/react";
 import Link from "next/link";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
+import { Tooltip } from "react-tooltip";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export function WalletAddress(props: {
   wallet: string;
@@ -20,6 +23,12 @@ export function WalletAddress(props: {
   hideCopy?: boolean;
   setLinkQueryAddress?: boolean;
 }) {
+  const uniqueId = getRandomObjectId();
+  const uniqueIdEns = getRandomObjectId();
+  const uniqueIdWallet = getRandomObjectId();
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isCopied, setIsCopied] = useState(false);
 
   function resolveDisplay() {
@@ -103,89 +112,112 @@ export function WalletAddress(props: {
             </span>
           )}
           {walletEns ? (
-            <Dropdown className={`${styles.copyDropdown}`} autoClose="outside">
-              <Tippy
-                content={isCopied ? "Copied" : "Copy"}
-                placement={"right"}
-                theme={"light"}
-                hideOnClick={false}>
-                <Dropdown.Toggle
-                  name={`copy-toggle`}
-                  aria-label={`copy-toggle`}>
-                  {props.isUserPage && props.display && (
-                    <span
-                      className={`${styles.address} ${
-                        props.isUserPage ? styles.addressUserPage : ""
-                      }`}>
-                      {formatAddress(props.display)}
-                    </span>
-                  )}
-                  <FontAwesomeIcon
-                    icon={faCopy}
-                    name={`copy-btn`}
-                    aria-label={`copy-btn`}
-                    className={`${styles.copy}`}
-                  />
-                </Dropdown.Toggle>
-              </Tippy>
+            <Dropdown
+              ref={dropdownRef}
+              className={`${styles.copyDropdown}`}
+              autoClose="outside"
+              data-tooltip-id={uniqueId}
+              onToggle={(nextShow: boolean) => {
+                setIsDropdownOpen(nextShow);
+              }}>
+              <Dropdown.Toggle name={`copy-toggle`} aria-label={`copy-toggle`}>
+                {props.isUserPage && props.display && (
+                  <span
+                    className={`${styles.address} ${
+                      props.isUserPage ? styles.addressUserPage : ""
+                    }`}>
+                    {formatAddress(props.display)}
+                  </span>
+                )}
+                <FontAwesomeIcon
+                  icon={faCopy}
+                  name={`copy-btn`}
+                  aria-label={`copy-btn`}
+                  className={`${styles.copy}`}
+                />
+              </Dropdown.Toggle>
               <Dropdown.Menu>
                 {props.display && (
-                  <Tippy
-                    content={isCopied ? "Copied" : "Copy"}
-                    placement={"right"}
-                    theme={"light"}
-                    hideOnClick={false}>
-                    <Dropdown.Item
-                      aria-label={`copy-ens-btn`}
-                      onClick={() => copy(props.displayEns ?? props.display)}
-                      dangerouslySetInnerHTML={{
-                        __html: resolveAddress(),
-                      }}></Dropdown.Item>
-                  </Tippy>
-                )}
-                <Tippy
-                  content={isCopied ? "Copied" : "Copy"}
-                  placement={"right"}
-                  theme={"light"}
-                  hideOnClick={false}>
                   <Dropdown.Item
-                    className={styles.copyDropdownItem}
-                    aria-label={`copy-address-btn`}
-                    onClick={() => copy(props.wallet)}>
-                    {formatAddress(props.wallet as string)}
-                  </Dropdown.Item>
-                </Tippy>
+                    data-tooltip-id={uniqueIdEns}
+                    aria-label={`copy-ens-btn`}
+                    onClick={() => copy(props.displayEns ?? props.display)}
+                    dangerouslySetInnerHTML={{
+                      __html: resolveAddress(),
+                    }}></Dropdown.Item>
+                )}
+
+                <Dropdown.Item
+                  data-tooltip-id={uniqueIdWallet}
+                  className={styles.copyDropdownItem}
+                  aria-label={`copy-address-btn`}
+                  onClick={() => copy(props.wallet)}>
+                  {formatAddress(props.wallet as string)}
+                </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           ) : (
-            <Dropdown className={`${styles.copyDropdown}`} autoClose="outside">
-              <Tippy
-                content={isCopied ? "Copied" : "Copy"}
-                placement={"right"}
-                theme={"light"}
-                hideOnClick={false}>
-                <Dropdown.Toggle
-                  name={`copy-toggle`}
-                  aria-label={`copy-toggle`}
-                  onClick={() => copy(props.wallet)}>
-                  {props.isUserPage && (
-                    <span
-                      className={`${styles.address} ${
-                        props.isUserPage ? styles.addressUserPage : ""
-                      }`}
-                      dangerouslySetInnerHTML={{
-                        __html: resolveAddress(),
-                      }}></span>
-                  )}
-                  <FontAwesomeIcon
-                    icon={faCopy}
-                    name={`copy-btn`}
-                    aria-label={`copy-btn`}
-                    className={`${styles.copy}`}
-                  />
-                </Dropdown.Toggle>
-              </Tippy>
+            <Dropdown
+              ref={dropdownRef}
+              className={`${styles.copyDropdown}`}
+              autoClose="outside"
+              data-tooltip-id={uniqueId}
+              onToggle={(nextShow: boolean) => {
+                setIsDropdownOpen(nextShow);
+              }}>
+              <Dropdown.Toggle
+                name={`copy-toggle`}
+                aria-label={`copy-toggle`}
+                onClick={() => copy(props.wallet)}>
+                {props.isUserPage && (
+                  <span
+                    className={`${styles.address} ${
+                      props.isUserPage ? styles.addressUserPage : ""
+                    }`}
+                    dangerouslySetInnerHTML={{
+                      __html: resolveAddress(),
+                    }}></span>
+                )}
+                <FontAwesomeIcon
+                  icon={faCopy}
+                  name={`copy-btn`}
+                  aria-label={`copy-btn`}
+                  className={`${styles.copy}`}
+                />
+              </Dropdown.Toggle>
             </Dropdown>
+          )}
+          {!isDropdownOpen ? (
+            <Tooltip
+              id={uniqueId}
+              delayShow={150}
+              place="right"
+              opacity={1}
+              variant="light"
+              className="tw-leading-tight">
+              {isCopied ? "Copied" : "Copy"}
+            </Tooltip>
+          ) : (
+            <>
+              <Tooltip
+                id={uniqueIdEns}
+                delayShow={150}
+                place="right"
+                opacity={1}
+                variant="light"
+                className="tw-leading-tight">
+                {isCopied ? "Copied" : "Copy"}
+              </Tooltip>
+              <Tooltip
+                id={uniqueIdWallet}
+                delayShow={150}
+                place="right"
+                opacity={1}
+                variant="light"
+                className="tw-leading-tight">
+                {isCopied ? "Copied" : "Copy"}
+              </Tooltip>
+            </>
           )}
         </>
       )}

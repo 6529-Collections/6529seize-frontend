@@ -1,3 +1,5 @@
+"use client";
+
 import Tippy from "@tippyjs/react";
 import { forwardRef, useState } from "react";
 
@@ -24,7 +26,6 @@ const LazyTippy = forwardRef((props: any, ref: any) => {
 
   return <Tippy {...computedProps} ref={ref} />;
 });
-
 
 LazyTippy.displayName = "LazyTippy";
 export default LazyTippy;

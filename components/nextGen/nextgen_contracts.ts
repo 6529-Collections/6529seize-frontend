@@ -1,4 +1,4 @@
-import { goerli, mainnet, sepolia } from "wagmi/chains";
+import { goerli, mainnet, sepolia } from "viem/chains";
 import {
   NEXTGEN_ADMIN_ABI,
   NEXTGEN_CORE_ABI,

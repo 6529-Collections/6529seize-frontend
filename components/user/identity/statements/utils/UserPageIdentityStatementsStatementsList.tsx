@@ -1,3 +1,5 @@
+"use client";
+
 import { CicStatement } from "../../../../../entities/IProfile";
 import UserPageIdentityStatementsStatement from "./UserPageIdentityStatementsStatement";
 import { useContext, useEffect, useState } from "react";

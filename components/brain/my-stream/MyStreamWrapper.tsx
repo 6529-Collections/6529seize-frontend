@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import MyStream from "./MyStream";
 import { useRouter } from "next/router";
@@ -102,8 +104,7 @@ const MyStreamWrapper: React.FC = () => {
   return (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}
-    >
+      onCancelReplyQuote={onCancelReplyQuote}>
       {component}
     </BrainContent>
   );

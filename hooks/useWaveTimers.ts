@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { ApiWave } from "../generated/models/ApiWave";
 import { Time } from "../helpers/time";
@@ -62,7 +64,6 @@ export function useWaveTimers(
   const actualVotingEndTime = wave
     ? calculateLastDecisionTime(wave)
     : FALLBACK_END_TIME;
-
 
   // State for participation phase
   const [participationPhase, setParticipationPhase] =

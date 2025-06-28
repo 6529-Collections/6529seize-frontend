@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../entities/ISort";
 import CommonTableSortIcon from "../../user/utils/icons/CommonTableSortIcon";
@@ -41,8 +43,7 @@ export default function CommunityMembersTableHeaderSortableContent({
       <span
         className={`${
           isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
-        } tw-transition tw-duration-300 tw-ease-out`}
-      >
+        } tw-transition tw-duration-300 tw-ease-out`}>
         {TITLE[sort]}
       </span>
       {showLoader ? (

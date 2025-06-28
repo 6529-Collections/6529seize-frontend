@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import DistributionPlanStepDone from "./DistributionPlanStepDone";
 import { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
@@ -40,8 +42,6 @@ export default function DistributionPlanStep({
       return <DistributionPlanStepUpcoming step={step} />;
     default:
       assertUnreachable(stepStatus);
-      return null
+      return null;
   }
-
-
 }

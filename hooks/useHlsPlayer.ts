@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import type HlsType from "hls.js";
 
@@ -109,7 +111,8 @@ export function useHlsPlayer({
           case HlsConstructor.ErrorTypes.NETWORK_ERROR:
             // e.g. manifest load error, or segment load error
             if (
-              data.details === HlsConstructor.ErrorDetails.MANIFEST_LOAD_ERROR ||
+              data.details ===
+                HlsConstructor.ErrorDetails.MANIFEST_LOAD_ERROR ||
               data.details === HlsConstructor.ErrorDetails.MANIFEST_LOAD_TIMEOUT
             ) {
               // retry loading after 2s
@@ -257,7 +260,15 @@ export function useHlsPlayer({
       videoEl.load();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, isHls, autoPlay, fallbackSrc, onError, onManifestParsed, cleanupHls]);
+  }, [
+    src,
+    isHls,
+    autoPlay,
+    fallbackSrc,
+    onError,
+    onManifestParsed,
+    cleanupHls,
+  ]);
 
   return {
     /** A ref to the <video> element, which the caller can render. */

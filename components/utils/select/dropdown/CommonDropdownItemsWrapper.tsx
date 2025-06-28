@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactElement, RefObject, useEffect, useState } from "react";
 import CommonDropdownItemsMobileWrapper from "./CommonDropdownItemsMobileWrapper";
 import { createBreakpoint } from "react-use";
@@ -45,8 +47,7 @@ export default function CommonDropdownItemsWrapper({
         <CommonDropdownItemsMobileWrapper
           isOpen={isOpen}
           label={filterLabel}
-          setOpen={setOpen}
-        >
+          setOpen={setOpen}>
           {children}
         </CommonDropdownItemsMobileWrapper>
       ) : (
@@ -55,8 +56,7 @@ export default function CommonDropdownItemsWrapper({
           setOpen={setOpen}
           dynamicPosition={dynamicPosition}
           buttonRef={buttonRef}
-          buttonPosition={buttonPosition}
-        >
+          buttonPosition={buttonPosition}>
           {children}
         </CommonDropdownItemsDefaultWrapper>
       )}

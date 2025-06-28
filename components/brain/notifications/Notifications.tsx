@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useRef, useState } from "react";
 import { useSetTitle } from "../../../contexts/TitleContext";
 import { AuthContext } from "../../auth/Auth";

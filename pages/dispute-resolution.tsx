@@ -1,6 +1,6 @@
 import styles from "../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { AboutSection } from "./about/[section]";
+import { AboutSection } from "@/enums";
 import { useSetTitle } from "../contexts/TitleContext";
 
 export default function DisputeResolution() {

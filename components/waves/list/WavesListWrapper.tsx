@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
@@ -184,15 +186,13 @@ export default function WavesListWrapper({
             onClick={onShowAll}
             className={`tw-group tw-whitespace-nowrap tw-bg-transparent tw-border-none tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center ${
               !isShowAll ? "hover:tw-translate-x-[-8px] -tw-mr-4" : ""
-            }`}
-          >
+            }`}>
             <span
               className={`${
                 !isShowAll
                   ? "group-hover:tw-translate-x-[-4px] tw-transition-transform tw-duration-300 tw-ease-out"
                   : ""
-              }`}
-            >
+              }`}>
               {isShowAll ? "Show less" : "Show all"}
             </span>
             {!isShowAll && (
@@ -202,8 +202,7 @@ export default function WavesListWrapper({
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="currentColor"
-                className="tw-w-4 tw-h-4 tw-ml-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300 tw-ease-out"
-              >
+                className="tw-w-4 tw-h-4 tw-ml-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300 tw-ease-out">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

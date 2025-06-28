@@ -1,5 +1,6 @@
+"use client";
 import styles from "./AppWallet.module.scss";
-import { MutableRefObject, useCallback, useRef, useState } from "react";
+import { RefObject, useCallback, useRef, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +12,7 @@ import { useAppWallets } from "./AppWalletsContext";
 const SEED_MIN_PASS_LENGTH = 6;
 
 const showAppWalletError = (
-  timeoutRef: MutableRefObject<NodeJS.Timeout | null>,
+  timeoutRef: RefObject<NodeJS.Timeout | null>,
   setError: React.Dispatch<React.SetStateAction<string>>,
   message: string
 ) => {

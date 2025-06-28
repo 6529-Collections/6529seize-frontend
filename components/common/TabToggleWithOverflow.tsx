@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 
 interface TabOption {
@@ -56,23 +58,19 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
 
   return (
     <div
-      className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}
-    >
+      className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}>
       {/* Show visible tabs */}
       {visibleTabs.map((option) => (
         <button
           key={option.key}
           onClick={() => handleSelect(option.key)}
           className={`tw-flex-1 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
-            fullWidth
-              ? "tw-text-center tw-justify-center tw-flex"
-              : ""
+            fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
           } ${
             activeKey === option.key
               ? "tw-text-primary-300 tw-border-primary-400"
               : "tw-text-iron-400 hover:tw-text-iron-200 tw-border-transparent"
-          }`}
-        >
+          }`}>
           {option.label}
         </button>
       ))}
@@ -86,16 +84,14 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
               isActiveInOverflow
                 ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
                 : "tw-text-iron-400 hover:tw-text-iron-200"
-            }`}
-          >
+            }`}>
             {isActiveInOverflow
               ? options.find((opt) => opt.key === activeKey)?.label
               : "More"}
             <span
               className={`tw-ml-0.5 tw-inline-flex ${
                 isOverflowOpen ? "tw-rotate-180" : ""
-              } tw-transition-transform tw-duration-200`}
-            >
+              } tw-transition-transform tw-duration-200`}>
               <svg
                 aria-hidden="true"
                 width="10"
@@ -103,8 +99,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
                 viewBox="0 0 8 4"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="tw-opacity-70"
-              >
+                className="tw-opacity-70">
                 <path d="M4 4L0 0H8L4 4Z" fill="currentColor" />
               </svg>
             </span>
@@ -122,8 +117,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
                       activeKey === option.key
                         ? "tw-text-primary-300"
                         : "tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
-                    }`}
-                  >
+                    }`}>
                     {option.label}
                   </button>
                 ))}

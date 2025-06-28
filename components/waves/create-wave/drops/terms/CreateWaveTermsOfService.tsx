@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 
@@ -39,8 +41,7 @@ export default function CreateWaveTermsOfService({
               <div
                 className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${
                   enabled ? "tw-from-primary-300" : "tw-from-iron-600"
-                }`}
-              >
+                }`}>
                 <input
                   id="tos-toggle"
                   type="checkbox"
@@ -55,14 +56,12 @@ export default function CreateWaveTermsOfService({
                       : "tw-bg-iron-700"
                   }`}
                   role="switch"
-                  aria-checked={enabled}
-                >
+                  aria-checked={enabled}>
                   <span
                     aria-hidden="true"
                     className={`tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out ${
                       enabled ? "tw-translate-x-5" : "tw-translate-x-0"
-                    }`}
-                  ></span>
+                    }`}></span>
                 </span>
               </div>
               <span className="tw-mb-0 tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-50 tw-whitespace-nowrap">
@@ -86,8 +85,7 @@ export default function CreateWaveTermsOfService({
               id="terms-of-service-text"
               rows={6}
               className="tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400 tw-caret-primary-400 tw-form-textarea tw-block tw-px-4 tw-py-4 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-600 tw-peer tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
-              placeholder="Enter the terms of service that participants will need to agree to and sign..."
-            ></textarea>
+              placeholder="Enter the terms of service that participants will need to agree to and sign..."></textarea>
           </div>
           <div className="tw-mt-2 tw-flex tw-justify-between tw-text-xs tw-text-iron-400">
             <span>

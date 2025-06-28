@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useRef } from "react";
 import { createBreakpoint } from "react-use";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
@@ -22,7 +24,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
 }) => {
   // Get layout context registration function for measuring
   const { registerRef } = useLayout();
-  
+
   // Get current breakpoint
   const breakpoint = useBreakpoint();
 
@@ -46,12 +48,11 @@ const BrainContent: React.FC<BrainContentProps> = ({
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
-   <div
+      <div
         ref={setPinnedRef}
-        className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-hidden"
-      >
+        className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-hidden">
         {shouldShowPinnedWaves && <BrainContentPinnedWaves />}
-      </div> 
+      </div>
       <div className="tw-flex-1 tw-overflow-hidden">
         <div className="tw-h-full">{children}</div>
       </div>

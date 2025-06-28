@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -148,16 +150,14 @@ const MemesArtSubmissionContainer: React.FC<
                 form.currentStep === SubmissionStep.AGREEMENT
                   ? "tw-max-w-6xl tw-mx-auto"
                   : ""
-              }`}
-            >
+              }`}>
               <motion.h3 className="tw-text-2xl lg:tw-text-3xl tw-font-semibold tw-text-iron-100">
                 Submit Work to The Memes
               </motion.h3>
               <motion.button
                 onClick={onClose}
                 className="tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-size-9 lg:tw-size-10 tw-rounded-full tw-border-0 tw-ring-1 tw-ring-iron-700 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-                aria-label="Close modal"
-              >
+                aria-label="Close modal">
                 <FontAwesomeIcon
                   icon={faXmark}
                   className="tw-size-5 tw-flex-shrink-0"

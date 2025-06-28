@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -9,21 +8,17 @@ import {
 import UserPageGroupsWrapper from "../../components/user/groups/UserPageGroupsWrapper";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { NextPageWithLayout } from "../_app";
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
-  pageProps,
-}) => {
-  return <UserPageGroupsWrapper profile={pageProps.profile} />;
+const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => {
+  return <UserPageGroupsWrapper profile={profile} />;
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageProps }>
+  page: ReactElement<{ profile: ApiIdentity }>
 ) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
+  return <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>;
 };
 
 export default Page;

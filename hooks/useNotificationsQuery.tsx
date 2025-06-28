@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
@@ -106,7 +108,7 @@ export function useNotificationsQuery({
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     enabled: !!identity && !activeProfileProxy,
-    staleTime: 60000
+    staleTime: 60000,
   });
 
   useEffect(() => {

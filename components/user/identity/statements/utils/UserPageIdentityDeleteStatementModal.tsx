@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useRef, useState } from "react";
 import { CicStatement } from "../../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";

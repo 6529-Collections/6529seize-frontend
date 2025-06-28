@@ -1,3 +1,5 @@
+"use client";
+
 import {
   useEffect,
   useRef,
@@ -216,11 +218,7 @@ export default function CreateDrop({
     }
 
     setIsProcessing(false);
-  }, [
-    isProcessing,
-    removeFromQueue,
-    addDropMutation,
-  ]);
+  }, [isProcessing, removeFromQueue, addDropMutation]);
 
   useEffect(() => {
     processQueue();
@@ -273,8 +271,7 @@ export default function CreateDrop({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: ANIMATION_DURATION }}
-          >
+            transition={{ duration: ANIMATION_DURATION }}>
             <CreateDropStormParts
               parts={drop?.parts ?? []}
               mentionedUsers={drop?.mentioned_users ?? []}

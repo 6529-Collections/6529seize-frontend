@@ -10,23 +10,18 @@ import UserPageStats from "../../components/user/stats/UserPageStats";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
-  pageProps,
-}) => {
+const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => {
   const { setProfile } = useContext(ReactQueryWrapperContext);
-  setProfile(pageProps.profile);
-  return <UserPageStats profile={pageProps.profile} />;
+  setProfile(profile);
+  return <UserPageStats profile={profile} />;
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageProps }>
+  page: ReactElement<{ profile: ApiIdentity }>
 ) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
+  return <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>;
 };
 
 export default Page;

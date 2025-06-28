@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import { ApiWaveCreditType } from "../../../generated/models/ObjectSerializer";
 
@@ -186,14 +188,12 @@ export const SingleWaveDropVoteInput: React.FC<
             onMouseLeave={stopPress}
             onTouchStart={() => startPress(true)}
             onTouchEnd={stopPress}
-            className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-emerald-400/50 tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95"
-          >
+            className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-emerald-400/50 tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95">
             <svg
               className="tw-w-4 tw-h-4 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
-              fill="none"
-            >
+              fill="none">
               <path
                 d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
                 stroke="currentColor"
@@ -209,14 +209,12 @@ export const SingleWaveDropVoteInput: React.FC<
             onMouseLeave={stopPress}
             onTouchStart={() => startPress(false)}
             onTouchEnd={stopPress}
-            className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-rose-400/50 tw-text-rose-400 desktop-hover:hover:tw-text-rose-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95"
-          >
+            className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-rose-400/50 tw-text-rose-400 desktop-hover:hover:tw-text-rose-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95">
             <svg
               className="tw-w-4 tw-h-4 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
-              fill="none"
-            >
+              fill="none">
               <path
                 d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
                 stroke="currentColor"
@@ -240,8 +238,7 @@ export const SingleWaveDropVoteInput: React.FC<
               className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
                 percentage,
                 voteValue
-              )}`}
-            >
+              )}`}>
               {percentage > 0 ? "+" : ""}
               {percentage}%
             </button>
@@ -257,8 +254,7 @@ export const SingleWaveDropVoteInput: React.FC<
               className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
                 percentage,
                 voteValue
-              )}`}
-            >
+              )}`}>
               {percentage > 0 ? "+" : ""}
               {percentage}%
             </button>

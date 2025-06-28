@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../../entities/IDBResponse";

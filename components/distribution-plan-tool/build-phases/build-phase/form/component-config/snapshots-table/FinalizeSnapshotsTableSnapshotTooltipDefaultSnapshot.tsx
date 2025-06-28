@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext } from "react";
 import { DistributionPlanToolContext } from "../../../../../DistributionPlanToolContext";
 import { AllowlistOperationCode } from "../../../../../../allowlist-tool/allowlist-tool.types";

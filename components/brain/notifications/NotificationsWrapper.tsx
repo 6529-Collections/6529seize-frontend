@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedNotification } from "../../../types/feed.types";
@@ -59,8 +61,7 @@ export default function NotificationsWrapper({
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
-                viewBox="0 0 24 24"
-              >
+                viewBox="0 0 24 24">
                 <circle
                   className="tw-opacity-25"
                   cx="12"

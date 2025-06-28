@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
 import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";

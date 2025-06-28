@@ -1,3 +1,5 @@
+"use client";
+
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../services/api/common-api";
@@ -43,7 +45,9 @@ export function useWaveFollowers(waveId: string) {
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
   });
 
-  const [followers, setFollowers] = useState<ApiIdentityAndSubscriptionActions[]>([]);
+  const [followers, setFollowers] = useState<
+    ApiIdentityAndSubscriptionActions[]
+  >([]);
   useEffect(
     () => setFollowers(data?.pages.flatMap((page) => page.data) ?? []),
     [data]
@@ -53,7 +57,13 @@ export function useWaveFollowers(waveId: string) {
     if (followers.length < REQUEST_SIZE) {
       return;
     }
-    if (!state || status === "pending" || isFetching || isFetchingNextPage || !hasNextPage) {
+    if (
+      !state ||
+      status === "pending" ||
+      isFetching ||
+      isFetchingNextPage ||
+      !hasNextPage
+    ) {
       return;
     }
     fetchNextPage();

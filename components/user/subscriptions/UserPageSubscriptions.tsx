@@ -1,3 +1,5 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";

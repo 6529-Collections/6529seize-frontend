@@ -1,3 +1,5 @@
+"use client";
+
 import { memo, useCallback, useState } from "react";
 import Link from "next/link";
 import { Drop, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";

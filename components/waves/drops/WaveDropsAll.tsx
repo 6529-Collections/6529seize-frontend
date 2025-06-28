@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "../../drops/view/DropsList";
@@ -21,7 +23,7 @@ import { useWaveIsTyping } from "../../../hooks/useWaveIsTyping";
 import { useAuth } from "../../auth/Auth";
 
 // Add this utility function if not already present in a shared util file
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface WaveDropsAllProps {
   readonly waveId: string;
@@ -117,7 +119,10 @@ export default function WaveDropsAll({
   );
 
   const smoothScrollWithRetries = useCallback(
-    async (maxWaitTimeMs: number = 3000, pollIntervalMs: number = 100): Promise<boolean> => {
+    async (
+      maxWaitTimeMs: number = 3000,
+      pollIntervalMs: number = 100
+    ): Promise<boolean> => {
       const startTime = Date.now();
       while (Date.now() - startTime < maxWaitTimeMs) {
         if (targetDropRef.current) {
@@ -311,8 +316,7 @@ export default function WaveDropsAll({
             if (direction === "up") {
               setUserHasManuallyScrolled(true);
             }
-          }}
-        >
+          }}>
           <DropsList
             scrollContainerRef={scrollContainerRef}
             onReplyClick={setSerialNo}
@@ -344,8 +348,7 @@ export default function WaveDropsAll({
             typingMessage
               ? "tw-opacity-100 tw-visible"
               : "tw-opacity-0 tw-invisible tw-hidden"
-          }`}
-        >
+          }`}>
           <div className="tw-flex tw-items-center tw-gap-x-0.5">
             <FontAwesomeIcon
               icon={faCircle}

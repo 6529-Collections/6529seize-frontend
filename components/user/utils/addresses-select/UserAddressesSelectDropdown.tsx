@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { CommonSelectItem } from "../../../utils/select/CommonSelect";
 import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
@@ -108,7 +110,7 @@ export default function UserAddressesSelectDropdown({
         item.childrenProps ? (
           <UserAddressesSelectDropdownItem wallet={item.childrenProps} />
         ) : (
-          (<></>) // return an empty fragment when item.childrenProps is not available
+          <></> // return an empty fragment when item.childrenProps is not available
         )
       }
     />

@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
@@ -193,14 +195,12 @@ export default function CreateCustomSnapshotForm() {
               <button
                 onClick={() => setIsAddWalletsOpen(true)}
                 type="button"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out"
-              >
+                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out">
                 <svg
                   className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
                   viewBox="0 0 24 24"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                  xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M12 5V19M5 12H19"
                     stroke="currentColor"
@@ -226,8 +226,7 @@ export default function CreateCustomSnapshotForm() {
           onClose={() => setIsAddWalletsOpen(false)}
           title={`Add wallets`}
           modalSize={AllowlistToolModalSize.X_LARGE}
-          showTitle={false}
-        >
+          showTitle={false}>
           <CreateCustomSnapshotFormAddWalletsModal
             fileName={fileName}
             setFileName={setFileName}
