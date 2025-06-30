@@ -1,26 +1,37 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import NextGenCollectionPage from '../../../../pages/nextgen/collection/[collection]/[[...view]]/index';
-import { ContentView } from '../../../../components/nextGen/collections/collectionParts/NextGenCollection';
-import { useRouter } from 'next/router';
+import React from "react";
+import { render } from "@testing-library/react";
+import NextGenCollectionPage from "@/pages/nextgen/collection/[collection]/[[...view]]/index";
+import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { useRouter } from "next/navigation";
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
-
-const push = jest.fn();
-(useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn(), asPath:'/' , query:{} });
-
-let setViewFn: any;
-jest.mock('next/dynamic', () => () => (props: any) => { setViewFn = props.setView; return <div data-testid="collection" />; });
-
-jest.mock('../../../../components/auth/Auth', () => ({
-  AuthContext: React.createContext({ setTitle: jest.fn() })
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
+const push = jest.fn();
+(useRouter as jest.Mock).mockReturnValue({
+  push,
+  replace: jest.fn(),
+  asPath: "/",
+  query: {},
+});
+
+let setViewFn: any;
+jest.mock("next/dynamic", () => () => (props: any) => {
+  setViewFn = props.setView;
+  return <div data-testid="collection" />;
+});
+
+jest.mock("@/components/auth/Auth", () => ({
+  AuthContext: React.createContext({ setTitle: jest.fn() }),
+}));
 
 // Mock TitleContext
-jest.mock('../../../../contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -34,12 +45,15 @@ jest.mock('../../../../contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('NextGenCollectionPage updateView', () => {
-  it('pushes new url when view changes', () => {
+describe("NextGenCollectionPage updateView", () => {
+  it("pushes new url when view changes", () => {
     render(
-      <NextGenCollectionPage pageProps={{ collection: { name: 'Cool' }, view: ContentView.OVERVIEW }} />
+      <NextGenCollectionPage
+        collection={{ name: "Cool" }}
+        view={ContentView.OVERVIEW}
+      />
     );
     setViewFn(ContentView.PROVENANCE);
-    expect(push).toHaveBeenCalledWith('/nextgen/collection/cool/provenance', undefined, { shallow: true });
+    expect(push).toHaveBeenCalledWith("/nextgen/collection/cool/provenance");
   });
 });
