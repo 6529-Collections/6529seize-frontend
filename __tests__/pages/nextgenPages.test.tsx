@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import NextGenCollectionMintPage from "../../pages/nextgen/collection/[collection]/mint";
-import NextGenCollectionToken from "../../pages/nextgen/token/[token]/[[...view]]";
-import { AuthContext } from "../../components/auth/Auth";
+import NextGenCollectionMintPage from "@/pages/nextgen/collection/[collection]/mint";
+import NextGenCollectionToken from "@/pages/nextgen/token/[token]/[[...view]]";
+import { AuthContext } from "@/components/auth/Auth";
 
 jest.mock("next/router", () => ({
   useRouter: () => ({
@@ -16,12 +16,12 @@ jest.mock("next/dynamic", () => () => () => (
   <div data-testid="dynamic-component" />
 ));
 
-jest.mock("../../pages/nextgen/collection/[collection]/[[...view]]", () => ({
+jest.mock("@/pages/nextgen/collection/[collection]/[[...view]]", () => ({
   useShallowRedirect: jest.fn(),
 }));
 
 jest.mock(
-  "../../components/nextGen/collections/collectionParts/NextGenCollectionHeader",
+  "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader",
   () => ({
     NextGenCollectionHead: ({ collection }: any) => (
       <div data-testid="collection-head">{collection?.name}</div>
@@ -35,13 +35,13 @@ jest.mock(
 );
 
 jest.mock(
-  "../../components/nextGen/collections/NextGenNavigationHeader",
+  "@/components/nextGen/collections/NextGenNavigationHeader",
   () => () => <div data-testid="navigation-header" />
 );
 
 // Mock TitleContext
 const mockSetTitle = jest.fn();
-jest.mock("../../contexts/TitleContext", () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
     title: "Test Title",
     setTitle: mockSetTitle,
