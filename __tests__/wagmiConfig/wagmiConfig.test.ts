@@ -1,4 +1,4 @@
-import { getWagmiConfig, getChains } from "@/wagmiConfig/wagmiConfig";
+import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
 import { mainnet, sepolia, goerli } from "viem/chains";
 
 jest.mock("@/wagmiConfig/wagmiConfigWeb", () => ({

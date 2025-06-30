@@ -9,7 +9,6 @@ jest.mock("next/link", () => ({
 }));
 
 jest.mock("react-bootstrap", () => {
-  const React = require("react");
   return {
     Container: (p: any) => <div>{p.children}</div>,
     Row: (p: any) => <div>{p.children}</div>,

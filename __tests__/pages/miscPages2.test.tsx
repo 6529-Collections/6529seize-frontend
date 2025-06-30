@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import React, { useMemo } from "react";
 import WillowShield from "@/pages/museum/genesis/willow-shield";
 import NextGenDistributionPlan from "@/pages/nextgen/collection/[collection]/distribution-plan";
 import JoinOm from "@/pages/om/join-om";
@@ -17,7 +17,7 @@ jest.mock("next/navigation", () => ({
   usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
 }));
-jest.mock("../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(() => Promise.resolve({ data: [] })),
 }));
 global.fetch = jest.fn(() =>
@@ -25,7 +25,7 @@ global.fetch = jest.fn(() =>
 ) as any;
 
 // Mock TitleContext
-jest.mock("../../contexts/TitleContext", () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
     title: "Test Title",
     setTitle: jest.fn(),
@@ -43,11 +43,10 @@ jest.mock("../../contexts/TitleContext", () => ({
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
-    {children}
-  </AuthContext.Provider>
-);
+}) => {
+  const value = useMemo(() => ({ setTitle: jest.fn() }), []);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
 describe("misc pages render", () => {
   it("renders Willow Shield page", () => {

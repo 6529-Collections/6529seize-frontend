@@ -3,10 +3,10 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 // Import directly from the source
-import { LeaderboardFocus } from "../../../../components/leaderboard/Leaderboard";
+import { LeaderboardFocus } from "@/components/leaderboard/Leaderboard";
 
 // Mock the entire Auth module differently
-jest.mock("../../../../components/auth/Auth", () => {
+jest.mock("@/components/auth/Auth", () => {
   const React = require("react");
   const mockSetTitle = jest.fn();
   const AuthContext = React.createContext({
@@ -24,7 +24,6 @@ jest.mock("../../../../components/auth/Auth", () => {
 
 // Mock dynamic import to return a simple component
 jest.mock("next/dynamic", () => () => {
-  const React = require("react");
   const { LeaderboardFocus } = require("@/components/leaderboard/Leaderboard");
 
   return function MockLeaderboard(props: any) {
@@ -69,7 +68,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 // Mock MyStreamContext if needed
-jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     waveId: null,
     setWaveId: jest.fn(),
