@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectEditingDropId, setEditingDropId } from "../../../store/editSlice";
 import { useDropUpdateMutation } from "../../../hooks/drops/useDropUpdateMutation";
 import { ApiUpdateDropRequest } from "../../../generated/models/ApiUpdateDropRequest";
+import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropReply from "./WaveDropReply";
 import WaveDropContent from "./WaveDropContent";
@@ -229,7 +230,14 @@ const WaveDrop = ({
     dispatch(setEditingDropId(drop.id));
   }, [dispatch, drop.id]);
 
-  const handleEditSave = useCallback(async (newContent: string) => {
+  const handleEditSave = useCallback(async (newContent: string, mentions?: ApiDropMentionedUser[]) => {
+    // Clean mentioned users to only include allowed fields for API
+    const cleanedMentions = (mentions || drop.mentioned_users).map(user => ({
+      mentioned_profile_id: user.mentioned_profile_id,
+      handle_in_content: user.handle_in_content,
+      // Exclude current_handle as it's not allowed in update requests
+    }));
+
     const updateRequest: ApiUpdateDropRequest = {
       parts: drop.parts.map((part, index) => ({
         content: index === activePartIndex ? newContent : part.content,
@@ -239,7 +247,7 @@ const WaveDrop = ({
       title: drop.title,
       metadata: drop.metadata,
       referenced_nfts: drop.referenced_nfts,
-      mentioned_users: drop.mentioned_users,
+      mentioned_users: cleanedMentions,
       signature: null,
     };
 
