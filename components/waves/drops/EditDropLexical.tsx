@@ -28,7 +28,7 @@ import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 
-import { MentionNode } from "../../drops/create/lexical/nodes/MentionNode";
+import { MentionNode, $createMentionNode } from "../../drops/create/lexical/nodes/MentionNode";
 import { HashtagNode } from "../../drops/create/lexical/nodes/HashtagNode";
 import { MENTION_TRANSFORMER } from "../../drops/create/lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/HastagTransformer";
@@ -51,15 +51,100 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   const [editor] = useLexicalComposerContext();
   
   useEffect(() => {
-    console.log("=== IMPORT DEBUG ===");
-    console.log("Loading initial content:", initialContent);
-    console.log("Import content length:", initialContent.length);
-    console.log("Import char codes:", Array.from(initialContent).map(c => c.charCodeAt(0)));
+    console.log("🚀 [InitialContentPlugin] Starting import process");
+    console.log("🚀 Initial content:", JSON.stringify(initialContent));
+    
     editor.update(() => {
+      console.log("🚀 [InitialContentPlugin] About to call $convertFromMarkdownString");
+      
+      // Test the regex directly to see if it matches
+      const mentionRegex = /@\[[\w]+\]/g;
+      const matches = Array.from(initialContent.matchAll(mentionRegex));
+      console.log("🚀 [InitialContentPlugin] Regex matches found in content:", matches.length);
+      matches.forEach((match, index) => {
+        console.log(`🚀 [InitialContentPlugin] Match ${index}:`, match[0], "at index", match.index);
+      });
+      
       $convertFromMarkdownString(
         initialContent,
         [...TRANSFORMERS, MENTION_TRANSFORMER, HASHTAG_TRANSFORMER]
       );
+      console.log("🚀 [InitialContentPlugin] $convertFromMarkdownString completed");
+      
+      // Post-process: reconstruct mentions split across text nodes
+      const root = $getRoot();
+      const textNodes = root.getAllTextNodes();
+      console.log("🚀 [InitialContentPlugin] Post-processing", textNodes.length, "text nodes");
+      
+      // Check if any text nodes still contain @[...] patterns (missed by transformer due to splitting)
+      const hasUnprocessedMentions = textNodes.some(node => 
+        /@\[[\w]+\]/.test(node.getTextContent())
+      );
+      
+      console.log("🚀 [InitialContentPlugin] Has unprocessed mentions:", hasUnprocessedMentions);
+      
+      if (!hasUnprocessedMentions) {
+        // Look for mention patterns split across adjacent nodes
+        for (let i = 0; i < textNodes.length - 1; i++) {
+        const currentNode = textNodes[i];
+        const nextNode = textNodes[i + 1];
+        
+        const currentText = currentNode.getTextContent();
+        const nextText = nextNode.getTextContent();
+        
+        console.log(`🔧 [Post-process] Checking nodes ${i} and ${i+1}:`, JSON.stringify(currentText), "||", JSON.stringify(nextText));
+        
+        // Check for @[ at end of current node and word] at start of next
+        const mentionStart = currentText.match(/@\[[\w]*$/);
+        const mentionEnd = nextText.match(/^[\w]*\]/);
+        
+        if (mentionStart && mentionEnd) {
+          const fullMention = mentionStart[0] + mentionEnd[0];
+          const mentionMatch = fullMention.match(/@\[([\w]+)\]/);
+          
+          console.log(`🔧 [Post-process] Found split mention:`, fullMention, "->", mentionMatch);
+          
+          if (mentionMatch) {
+            const handle = mentionMatch[1];
+            const mentionNode = $createMentionNode(`@${handle}`);
+            
+            // Remove the mention part from current node
+            const beforeMention = currentText.substring(0, currentText.length - mentionStart[0].length);
+            
+            // Remove the mention part from next node  
+            const afterMention = nextText.substring(mentionEnd[0].length);
+            
+            console.log(`🔧 [Post-process] Reconstructing: "${beforeMention}" + mention + "${afterMention}"`);
+            
+            // Update or remove current node
+            if (beforeMention) {
+              currentNode.setTextContent(beforeMention);
+            } else {
+              currentNode.remove();
+            }
+            
+            // Insert mention node
+            if (beforeMention) {
+              currentNode.insertAfter(mentionNode);
+            } else {
+              nextNode.insertBefore(mentionNode);
+            }
+            
+            // Update or remove next node
+            if (afterMention) {
+              nextNode.setTextContent(afterMention);
+            } else {
+              nextNode.remove();
+            }
+            
+            console.log(`🔧 [Post-process] Successfully reconstructed mention for @${handle}`);
+            
+            // Refresh the text nodes list since we modified the tree
+            break;
+          }
+        }
+        }
+      }
     });
   }, [editor, initialContent]);
 
@@ -190,13 +275,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     
     editorState.read(() => {
       const markdown = $convertToMarkdownString([...TRANSFORMERS, MENTION_TRANSFORMER, HASHTAG_TRANSFORMER]);
-      console.log("=== SAVE DEBUG ===");
-      console.log("Saving markdown:", markdown);
-      console.log("Markdown length:", markdown.length);
-      console.log("Markdown char codes:", Array.from(markdown).map(c => c.charCodeAt(0)));
-      console.log("Original content:", initialContent);
-      console.log("Original length:", initialContent.length);
-      console.log("Original char codes:", Array.from(initialContent).map(c => c.charCodeAt(0)));
       
       // If no changes, silently exit edit mode without API call
       if (markdown.trim() === initialContent.trim()) {
