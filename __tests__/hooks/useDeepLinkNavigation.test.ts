@@ -1,12 +1,12 @@
-import { renderHook, act } from '@testing-library/react';
-import { useDeepLinkNavigation } from '../../hooks/useDeepLinkNavigation';
-import { useRouter } from 'next/router';
-import { App } from '@capacitor/app';
+import { renderHook, act } from "@testing-library/react";
+import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
+import { useRouter } from "next/navigation";
+import { App } from "@capacitor/app";
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
-jest.mock('@capacitor/app', () => ({ App: { addListener: jest.fn() } }));
+jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
+jest.mock("@capacitor/app", () => ({ App: { addListener: jest.fn() } }));
 const useCapacitorMock = jest.fn(() => ({ isCapacitor: true }));
-jest.mock('../../hooks/useCapacitor', () => () => useCapacitorMock());
+jest.mock("@/hooks/useCapacitor", () => () => useCapacitorMock());
 
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });
@@ -26,18 +26,20 @@ beforeEach(() => {
   });
 });
 
-test('navigates on deep link and cleans up', async () => {
+test("navigates on deep link and cleans up", async () => {
   const { unmount } = renderHook(() => useDeepLinkNavigation());
   await act(async () => {
-    callback({ url: 'seize://navigate/waves/1?foo=bar' });
+    callback({ url: "seize://navigate/waves/1?foo=bar" });
   });
-  expect(push).toHaveBeenCalledWith({ pathname: '/waves/1', query: expect.objectContaining({ foo: 'bar' }) });
+  expect(push).toHaveBeenCalledWith(
+    expect.stringMatching("^/waves/1\\?foo=bar")
+  );
   unmount();
   await Promise.resolve();
   expect(remove).toHaveBeenCalled();
 });
 
-test('does not register when not capacitor', () => {
+test("does not register when not capacitor", () => {
   useCapacitorMock.mockImplementation(() => ({ isCapacitor: false }));
   renderHook(() => useDeepLinkNavigation());
   expect(App.addListener).not.toHaveBeenCalled();

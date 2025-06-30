@@ -46,7 +46,7 @@ export const useDeepLinkNavigation = () => {
       const queryParams: Record<string, string | number> = Object.fromEntries(
         searchParams.entries()
       );
-      queryParams["_t"] = Date.now() / 1000;
+      queryParams["_t"] = Math.floor(Date.now() / 1000);
 
       switch (scope) {
         case DeepLinkScope.NAVIGATE:

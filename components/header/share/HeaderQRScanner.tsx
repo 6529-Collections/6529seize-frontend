@@ -102,7 +102,7 @@ export default function HeaderQRScanner({
           : "";
         const searchParams = new URLSearchParams(queryString);
         queryParams = Object.fromEntries(searchParams.entries());
-        queryParams["_t"] = Date.now() / 1000; // Add timestamp for freshness
+        queryParams["_t"] = Math.floor(Date.now() / 1000);
 
         switch (scope) {
           case DeepLinkScope.NAVIGATE:
