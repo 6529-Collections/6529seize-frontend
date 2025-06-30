@@ -38,7 +38,7 @@ const WaveDropPartContentMarkdown: React.FC<
   if (isEditing) {
     return (
       <EditDropLexical
-        initialContent={part.content || ""}
+        initialContent={part.content ?? ""}
         initialMentions={mentionedUsers}
         waveId={wave.id}
         isSaving={isSaving}
@@ -65,7 +65,7 @@ const WaveDropPartContentMarkdown: React.FC<
           partContent={part.content}
           onQuoteClick={onQuoteClick}
         />
-        {drop && drop.updated_at && drop.updated_at !== drop.created_at && (
+        {drop?.updated_at && drop.updated_at !== drop.created_at && (
           <span className="tw-text-[10px] tw-leading-none tw-text-iron-500 tw-font-normal">
             (edited)
           </span>

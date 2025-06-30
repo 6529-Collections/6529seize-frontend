@@ -9,8 +9,8 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { TRANSFORMERS } from "@lexical/markdown";
 import {
+  TRANSFORMERS,
   $convertFromMarkdownString,
   $convertToMarkdownString,
 } from "@lexical/markdown";
@@ -55,6 +55,71 @@ interface EditDropLexicalProps {
 }
 
 // Plugin to set initial content from markdown
+function reconstructSplitMention(
+  currentNode: any,
+  nextNode: any,
+  mentionStart: RegExpMatchArray,
+  mentionEnd: RegExpMatchArray
+) {
+  const fullMention = mentionStart[0] + mentionEnd[0];
+  const mentionMatch = fullMention.match(/@\[(\w+)\]/);
+
+  if (!mentionMatch) return false;
+
+  const handle = mentionMatch[1];
+  const mentionNode = $createMentionNode(`@${handle}`);
+
+  const currentText = currentNode.getTextContent();
+  const nextText = nextNode.getTextContent();
+
+  // Calculate text before and after mention
+  const beforeMention = currentText.substring(
+    0,
+    currentText.length - mentionStart[0].length
+  );
+  const afterMention = nextText.substring(mentionEnd[0].length);
+
+  // Update or remove current node
+  if (beforeMention) {
+    currentNode.setTextContent(beforeMention);
+    currentNode.insertAfter(mentionNode);
+  } else {
+    currentNode.remove();
+    nextNode.insertBefore(mentionNode);
+  }
+
+  // Update or remove next node
+  if (afterMention) {
+    nextNode.setTextContent(afterMention);
+  } else {
+    nextNode.remove();
+  }
+
+  return true;
+}
+
+function processSplitMentions(textNodes: any[]) {
+  for (let i = 0; i < textNodes.length - 1; i++) {
+    const currentNode = textNodes[i];
+    const nextNode = textNodes[i + 1];
+
+    const currentText = currentNode.getTextContent();
+    const nextText = nextNode.getTextContent();
+
+    // Check for @[ at end of current node and word] at start of next
+    const mentionStart = currentText.match(/@\[\w*$/);
+    const mentionEnd = nextText.match(/^\w*\]/);
+
+    if (mentionStart && mentionEnd) {
+      if (
+        reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
+      ) {
+        break; // Refresh needed after tree modification
+      }
+    }
+  }
+}
+
 function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   const [editor] = useLexicalComposerContext();
 
@@ -72,65 +137,12 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 
       // Check if any text nodes still contain @[...] patterns (missed by transformer due to splitting)
       const hasUnprocessedMentions = textNodes.some((node) =>
-        /@\[[\w]+\]/.test(node.getTextContent())
+        /@\[\w+\]/.test(node.getTextContent())
       );
 
       if (!hasUnprocessedMentions) {
         // Look for mention patterns split across adjacent nodes
-        for (let i = 0; i < textNodes.length - 1; i++) {
-          const currentNode = textNodes[i];
-          const nextNode = textNodes[i + 1];
-
-          const currentText = currentNode.getTextContent();
-          const nextText = nextNode.getTextContent();
-
-          // Check for @[ at end of current node and word] at start of next
-          const mentionStart = currentText.match(/@\[[\w]*$/);
-          const mentionEnd = nextText.match(/^[\w]*\]/);
-
-          if (mentionStart && mentionEnd) {
-            const fullMention = mentionStart[0] + mentionEnd[0];
-            const mentionMatch = fullMention.match(/@\[([\w]+)\]/);
-
-            if (mentionMatch) {
-              const handle = mentionMatch[1];
-              const mentionNode = $createMentionNode(`@${handle}`);
-
-              // Remove the mention part from current node
-              const beforeMention = currentText.substring(
-                0,
-                currentText.length - mentionStart[0].length
-              );
-
-              // Remove the mention part from next node
-              const afterMention = nextText.substring(mentionEnd[0].length);
-
-              // Update or remove current node
-              if (beforeMention) {
-                currentNode.setTextContent(beforeMention);
-              } else {
-                currentNode.remove();
-              }
-
-              // Insert mention node
-              if (beforeMention) {
-                currentNode.insertAfter(mentionNode);
-              } else {
-                nextNode.insertBefore(mentionNode);
-              }
-
-              // Update or remove next node
-              if (afterMention) {
-                nextNode.setTextContent(afterMention);
-              } else {
-                nextNode.remove();
-              }
-
-              // Refresh the text nodes list since we modified the tree
-              break;
-            }
-          }
-        }
+        processSplitMentions(textNodes);
       }
     });
   }, [editor, initialContent]);
@@ -351,14 +363,14 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
       <div className="tw-flex tw-items-center tw-gap-2 tw-mt-1">
         <div className="tw-text-xs tw-text-iron-400">
-          escape to
+          escape to{" "}
           <button
             onClick={onCancel}
             className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
           >
             cancel
           </button>
-          • enter to
+          {" "}• enter to{" "}
           <button
             onClick={handleSave}
             className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"

@@ -12,8 +12,8 @@ export const HASHTAG_TRANSFORMER: TextMatchTransformer = {
     return `#[${textContent.substring(1)}]`;
   },
   // Only process bracketed format to avoid conflicts  
-  regExp: /#\[[\w]+\]/g,
-  importRegExp: /#\[[\w]+\]/g,
+  regExp: /#\[\w+\]/g,
+  importRegExp: /#\[\w+\]/g,
   replace: (textNode, match) => {
     const [fullMatch] = match;
     const fullText = textNode.getTextContent();
