@@ -57,7 +57,7 @@ export default function WaveDropActions({
           />
           <WaveDropActionsCopyLink drop={drop} />
           <WaveDropActionsOpen drop={drop} />
-          {onEdit && !isMemesWave(drop.wave?.id) && <WaveDropActionsEdit drop={drop} onEdit={onEdit} />}
+          {onEdit && drop.drop_type !== ApiDropType.Participatory && <WaveDropActionsEdit drop={drop} onEdit={onEdit} />}
           {canDelete && <WaveDropActionsOptions drop={drop} />}
           <WaveDropActionsAddReaction drop={drop} />
         </div>

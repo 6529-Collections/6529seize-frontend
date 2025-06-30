@@ -10,13 +10,16 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
-import { $convertFromMarkdownString, $convertToMarkdownString } from "@lexical/markdown";
-import { 
-  $getRoot, 
-  EditorState, 
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+} from "@lexical/markdown";
+import {
+  $getRoot,
+  EditorState,
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
-  KEY_ESCAPE_COMMAND 
+  KEY_ESCAPE_COMMAND,
 } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
@@ -28,12 +31,17 @@ import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 
-import { MentionNode, $createMentionNode } from "../../drops/create/lexical/nodes/MentionNode";
+import {
+  MentionNode,
+  $createMentionNode,
+} from "../../drops/create/lexical/nodes/MentionNode";
 import { HashtagNode } from "../../drops/create/lexical/nodes/HashtagNode";
 import { MENTION_TRANSFORMER } from "../../drops/create/lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/HastagTransformer";
 import ExampleTheme from "../../drops/create/lexical/ExampleTheme";
-import NewMentionsPlugin, { NewMentionsPluginHandles } from "../../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import NewMentionsPlugin, {
+  NewMentionsPluginHandles,
+} from "../../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import { MentionedUser } from "../../../entities/IDrop";
 import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
 
@@ -49,100 +57,79 @@ interface EditDropLexicalProps {
 // Plugin to set initial content from markdown
 function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   const [editor] = useLexicalComposerContext();
-  
+
   useEffect(() => {
-    console.log("🚀 [InitialContentPlugin] Starting import process");
-    console.log("🚀 Initial content:", JSON.stringify(initialContent));
-    
     editor.update(() => {
-      console.log("🚀 [InitialContentPlugin] About to call $convertFromMarkdownString");
-      
-      // Test the regex directly to see if it matches
-      const mentionRegex = /@\[[\w]+\]/g;
-      const matches = Array.from(initialContent.matchAll(mentionRegex));
-      console.log("🚀 [InitialContentPlugin] Regex matches found in content:", matches.length);
-      matches.forEach((match, index) => {
-        console.log(`🚀 [InitialContentPlugin] Match ${index}:`, match[0], "at index", match.index);
-      });
-      
-      $convertFromMarkdownString(
-        initialContent,
-        [...TRANSFORMERS, MENTION_TRANSFORMER, HASHTAG_TRANSFORMER]
-      );
-      console.log("🚀 [InitialContentPlugin] $convertFromMarkdownString completed");
-      
+      $convertFromMarkdownString(initialContent, [
+        ...TRANSFORMERS,
+        MENTION_TRANSFORMER,
+        HASHTAG_TRANSFORMER,
+      ]);
+
       // Post-process: reconstruct mentions split across text nodes
       const root = $getRoot();
       const textNodes = root.getAllTextNodes();
-      console.log("🚀 [InitialContentPlugin] Post-processing", textNodes.length, "text nodes");
-      
+
       // Check if any text nodes still contain @[...] patterns (missed by transformer due to splitting)
-      const hasUnprocessedMentions = textNodes.some(node => 
+      const hasUnprocessedMentions = textNodes.some((node) =>
         /@\[[\w]+\]/.test(node.getTextContent())
       );
-      
-      console.log("🚀 [InitialContentPlugin] Has unprocessed mentions:", hasUnprocessedMentions);
-      
+
       if (!hasUnprocessedMentions) {
         // Look for mention patterns split across adjacent nodes
         for (let i = 0; i < textNodes.length - 1; i++) {
-        const currentNode = textNodes[i];
-        const nextNode = textNodes[i + 1];
-        
-        const currentText = currentNode.getTextContent();
-        const nextText = nextNode.getTextContent();
-        
-        console.log(`🔧 [Post-process] Checking nodes ${i} and ${i+1}:`, JSON.stringify(currentText), "||", JSON.stringify(nextText));
-        
-        // Check for @[ at end of current node and word] at start of next
-        const mentionStart = currentText.match(/@\[[\w]*$/);
-        const mentionEnd = nextText.match(/^[\w]*\]/);
-        
-        if (mentionStart && mentionEnd) {
-          const fullMention = mentionStart[0] + mentionEnd[0];
-          const mentionMatch = fullMention.match(/@\[([\w]+)\]/);
-          
-          console.log(`🔧 [Post-process] Found split mention:`, fullMention, "->", mentionMatch);
-          
-          if (mentionMatch) {
-            const handle = mentionMatch[1];
-            const mentionNode = $createMentionNode(`@${handle}`);
-            
-            // Remove the mention part from current node
-            const beforeMention = currentText.substring(0, currentText.length - mentionStart[0].length);
-            
-            // Remove the mention part from next node  
-            const afterMention = nextText.substring(mentionEnd[0].length);
-            
-            console.log(`🔧 [Post-process] Reconstructing: "${beforeMention}" + mention + "${afterMention}"`);
-            
-            // Update or remove current node
-            if (beforeMention) {
-              currentNode.setTextContent(beforeMention);
-            } else {
-              currentNode.remove();
+          const currentNode = textNodes[i];
+          const nextNode = textNodes[i + 1];
+
+          const currentText = currentNode.getTextContent();
+          const nextText = nextNode.getTextContent();
+
+          // Check for @[ at end of current node and word] at start of next
+          const mentionStart = currentText.match(/@\[[\w]*$/);
+          const mentionEnd = nextText.match(/^[\w]*\]/);
+
+          if (mentionStart && mentionEnd) {
+            const fullMention = mentionStart[0] + mentionEnd[0];
+            const mentionMatch = fullMention.match(/@\[([\w]+)\]/);
+
+            if (mentionMatch) {
+              const handle = mentionMatch[1];
+              const mentionNode = $createMentionNode(`@${handle}`);
+
+              // Remove the mention part from current node
+              const beforeMention = currentText.substring(
+                0,
+                currentText.length - mentionStart[0].length
+              );
+
+              // Remove the mention part from next node
+              const afterMention = nextText.substring(mentionEnd[0].length);
+
+              // Update or remove current node
+              if (beforeMention) {
+                currentNode.setTextContent(beforeMention);
+              } else {
+                currentNode.remove();
+              }
+
+              // Insert mention node
+              if (beforeMention) {
+                currentNode.insertAfter(mentionNode);
+              } else {
+                nextNode.insertBefore(mentionNode);
+              }
+
+              // Update or remove next node
+              if (afterMention) {
+                nextNode.setTextContent(afterMention);
+              } else {
+                nextNode.remove();
+              }
+
+              // Refresh the text nodes list since we modified the tree
+              break;
             }
-            
-            // Insert mention node
-            if (beforeMention) {
-              currentNode.insertAfter(mentionNode);
-            } else {
-              nextNode.insertBefore(mentionNode);
-            }
-            
-            // Update or remove next node
-            if (afterMention) {
-              nextNode.setTextContent(afterMention);
-            } else {
-              nextNode.remove();
-            }
-            
-            console.log(`🔧 [Post-process] Successfully reconstructed mention for @${handle}`);
-            
-            // Refresh the text nodes list since we modified the tree
-            break;
           }
-        }
         }
       }
     });
@@ -152,13 +139,13 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 }
 
 // Plugin to handle keyboard shortcuts
-function KeyboardPlugin({ 
-  onSave, 
+function KeyboardPlugin({
+  onSave,
   onCancel,
   isSaving,
   initialContent,
-  mentionsRef
-}: { 
+  mentionsRef,
+}: {
   onSave: () => void;
   onCancel: () => void;
   isSaving: boolean;
@@ -185,16 +172,20 @@ function KeyboardPlugin({
           // Let the mentions plugin handle the Enter key
           return false;
         }
-        
+
         if (event?.shiftKey) {
           // Allow Shift+Enter for new lines
           return false;
         }
-        
+
         if (!isSaving) {
           // Check if content has changed (similar to original logic)
           editor.getEditorState().read(() => {
-            const currentMarkdown = $convertToMarkdownString([...TRANSFORMERS, MENTION_TRANSFORMER, HASHTAG_TRANSFORMER]);
+            const currentMarkdown = $convertToMarkdownString([
+              ...TRANSFORMERS,
+              MENTION_TRANSFORMER,
+              HASHTAG_TRANSFORMER,
+            ]);
             // If no changes, just cancel (silent exit)
             if (currentMarkdown.trim() === initialContent.trim()) {
               onCancel();
@@ -226,7 +217,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   onCancel,
 }) => {
   const [editorState, setEditorState] = useState<EditorState | null>(null);
-  const [mentionedUsers, setMentionedUsers] = useState<ApiDropMentionedUser[]>(initialMentions);
+  const [mentionedUsers, setMentionedUsers] =
+    useState<ApiDropMentionedUser[]>(initialMentions);
   const editorRef = useRef<HTMLDivElement>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
 
@@ -255,33 +247,44 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     setEditorState(editorState);
   }, []);
 
-  const handleMentionSelect = useCallback((user: Omit<MentionedUser, "current_handle">) => {
-    const newMention: ApiDropMentionedUser = {
-      mentioned_profile_id: user.mentioned_profile_id,
-      handle_in_content: user.handle_in_content,
-    };
-    
-    setMentionedUsers(prev => {
-      // Avoid duplicates
-      if (prev.some(m => m.mentioned_profile_id === newMention.mentioned_profile_id)) {
-        return prev;
-      }
-      return [...prev, newMention];
-    });
-  }, []);
+  const handleMentionSelect = useCallback(
+    (user: Omit<MentionedUser, "current_handle">) => {
+      const newMention: ApiDropMentionedUser = {
+        mentioned_profile_id: user.mentioned_profile_id,
+        handle_in_content: user.handle_in_content,
+      };
+
+      setMentionedUsers((prev) => {
+        // Avoid duplicates
+        if (
+          prev.some(
+            (m) => m.mentioned_profile_id === newMention.mentioned_profile_id
+          )
+        ) {
+          return prev;
+        }
+        return [...prev, newMention];
+      });
+    },
+    []
+  );
 
   const handleSave = useCallback(() => {
     if (!editorState) return;
-    
+
     editorState.read(() => {
-      const markdown = $convertToMarkdownString([...TRANSFORMERS, MENTION_TRANSFORMER, HASHTAG_TRANSFORMER]);
-      
+      const markdown = $convertToMarkdownString([
+        ...TRANSFORMERS,
+        MENTION_TRANSFORMER,
+        HASHTAG_TRANSFORMER,
+      ]);
+
       // If no changes, silently exit edit mode without API call
       if (markdown.trim() === initialContent.trim()) {
         onCancel();
         return;
       }
-      
+
       onSave(markdown, mentionedUsers);
     });
   }, [editorState, mentionedUsers, onSave, initialContent, onCancel]);
@@ -289,7 +292,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   // Focus editor when component mounts
   useEffect(() => {
     if (editorRef.current) {
-      const editor = editorRef.current.querySelector('[contenteditable="true"]') as HTMLElement;
+      const editor = editorRef.current.querySelector(
+        '[contenteditable="true"]'
+      ) as HTMLElement;
       if (editor) {
         editor.focus();
         // Set cursor to end
@@ -309,7 +314,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="tw-w-full tw-p-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-500 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[80px]"
+                className="tw-w-full tw-p-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-2 focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
                 style={{
                   fontFamily: "inherit",
                   lineHeight: "1.4",
@@ -328,25 +333,35 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <ListPlugin />
           <LinkPlugin />
-          <NewMentionsPlugin ref={mentionsRef} waveId={waveId} onSelect={handleMentionSelect} />
+          <NewMentionsPlugin
+            ref={mentionsRef}
+            waveId={waveId}
+            onSelect={handleMentionSelect}
+          />
           <InitialContentPlugin initialContent={initialContent} />
-          <KeyboardPlugin onSave={handleSave} onCancel={onCancel} isSaving={isSaving} initialContent={initialContent} mentionsRef={mentionsRef} />
+          <KeyboardPlugin
+            onSave={handleSave}
+            onCancel={onCancel}
+            isSaving={isSaving}
+            initialContent={initialContent}
+            mentionsRef={mentionsRef}
+          />
         </div>
       </LexicalComposer>
-      
+
       <div className="tw-flex tw-items-center tw-gap-2 tw-mt-1">
         <div className="tw-text-xs tw-text-iron-400">
           escape to
           <button
             onClick={onCancel}
-            className="tw-bg-transparent tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium"
+            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
           >
             cancel
           </button>
           • enter to
           <button
             onClick={handleSave}
-            className="tw-bg-transparent tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium"
+            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
           >
             save
           </button>

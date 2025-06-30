@@ -18,25 +18,14 @@ export const MENTION_TRANSFORMER: TextMatchTransformer = {
     const [fullMatch] = match;
     const fullText = textNode.getTextContent();
     
-    console.log("🔥 [MentionTransformer] REPLACE CALLED!");
-    console.log("🔥 Full match found by regex:", JSON.stringify(fullMatch));
-    console.log("🔥 Match object:", match);
-    console.log("🔥 Match index:", match.index);
-    console.log("🔥 TextNode content:", JSON.stringify(fullText));
-    console.log("🔥 TextNode length:", fullText.length);
-    console.log("🔥 Does textNode contain fullMatch?", fullText.includes(fullMatch));
-    
     // Only process if the full match is actually in this text node
     if (!fullText.includes(fullMatch)) {
-      console.log("🔥 SKIPPING: fullMatch not found in textNode");
       return;
     }
     
-    console.log("🔥 PROCESSING: Creating mention node");
     const handle = fullMatch.slice(2, -1); // Remove @[ and ]
     const mentionNode = $createMentionNode(`@${handle}`);
     textNode.replace(mentionNode);
-    console.log("🔥 COMPLETED: Replaced textNode with mentionNode");
   },
   trigger: "@",
   type: "text-match",
