@@ -455,6 +455,37 @@ describe('Edit Drop Integration Flow', () => {
       const apiError = new Error('Network error');
       mockedCommonApiPost.mockRejectedValue(apiError);
 
+      // Set up handlers
+      const handleEdit = () => {
+        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+      };
+
+      const handleSave = async (content: string, mentions: any[]) => {
+        try {
+          await mockedCommonApiPost({
+            endpoint: `drops/${mockDrop.id}`,
+            body: {
+              content,
+              mentioned_users: mentions,
+            },
+          });
+          
+          mockSetToast({
+            message: 'Drop updated successfully',
+            type: 'success',
+          });
+          mockInvalidateDrops();
+          store.dispatch(editSlice.actions.setEditingDropId(null));
+        } catch (error) {
+          mockSetToast({
+            message: 'Failed to update drop. Please try again.',
+            type: 'error',
+          });
+        }
+      };
+
+      (window as any).testHandleSave = handleSave;
+
       renderWithProviders(
         <WaveDrop
           drop={mockDrop}
@@ -469,12 +500,13 @@ describe('Edit Drop Integration Flow', () => {
           onQuote={jest.fn()}
           onReplyClick={jest.fn()}
           onQuoteClick={jest.fn()}
-          onEdit={jest.fn()}
+          onEdit={handleEdit}
         />
       );
 
       // Start edit mode
-      store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+      const editButton = screen.getByTestId('edit-button');
+      await user.click(editButton);
 
       await waitFor(() => {
         expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
@@ -510,6 +542,37 @@ describe('Edit Drop Integration Flow', () => {
         created_at: Date.now() - (6 * 60 * 1000), // 6 minutes ago
       };
 
+      // Set up handlers
+      const handleEdit = () => {
+        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+      };
+
+      const handleSave = async (content: string, mentions: any[]) => {
+        try {
+          await mockedCommonApiPost({
+            endpoint: `drops/${oldDrop.id}`,
+            body: {
+              content,
+              mentioned_users: mentions,
+            },
+          });
+          
+          mockSetToast({
+            message: 'Drop updated successfully',
+            type: 'success',
+          });
+          mockInvalidateDrops();
+          store.dispatch(editSlice.actions.setEditingDropId(null));
+        } catch (error) {
+          mockSetToast({
+            message: 'This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.',
+            type: 'error',
+          });
+        }
+      };
+
+      (window as any).testHandleSave = handleSave;
+
       renderWithProviders(
         <WaveDrop
           drop={oldDrop}
@@ -524,12 +587,13 @@ describe('Edit Drop Integration Flow', () => {
           onQuote={jest.fn()}
           onReplyClick={jest.fn()}
           onQuoteClick={jest.fn()}
-          onEdit={jest.fn()}
+          onEdit={handleEdit}
         />
       );
 
       // Start edit mode
-      store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+      const editButton = screen.getByTestId('edit-button');
+      await user.click(editButton);
 
       await waitFor(() => {
         expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
