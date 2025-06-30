@@ -3,6 +3,7 @@ import { $isMentionNode } from '../../../../../../components/drops/create/lexica
 
 jest.mock('../../../../../../components/drops/create/lexical/nodes/MentionNode', () => ({
   $isMentionNode: jest.fn((n: any) => n && n.type === 'mention'),
+  $createMentionNode: jest.fn((text: string) => ({ type: 'mention', text })),
   MentionNode: class {},
 }));
 
@@ -17,11 +18,41 @@ describe('MENTION_TRANSFORMER', () => {
   });
 
   it('basic config', () => {
+    // regExp should match user input format
     expect(MENTION_TRANSFORMER.regExp.test('@abc')).toBe(true);
-    expect(MENTION_TRANSFORMER.importRegExp.test('@abc')).toBe(true);
-    const obj = {} as any;
-    expect(MENTION_TRANSFORMER.replace(obj)).toBe(obj);
+    expect(MENTION_TRANSFORMER.regExp.test('@[abc]')).toBe(false);
+    // importRegExp should match stored format
+    expect(MENTION_TRANSFORMER.importRegExp.test('@[abc]')).toBe(true);
+    expect(MENTION_TRANSFORMER.importRegExp.test('@abc')).toBe(false);
     expect(MENTION_TRANSFORMER.trigger).toBe('@');
     expect(MENTION_TRANSFORMER.type).toBe('text-match');
+  });
+
+  it('replace function handles bracketed mentions', () => {
+    const mockTextNode = {
+      replace: jest.fn()
+    };
+    const match = ['@[john]'];
+    
+    MENTION_TRANSFORMER.replace(mockTextNode as any, match as any);
+    
+    expect(mockTextNode.replace).toHaveBeenCalledWith({
+      type: 'mention',
+      text: '@john'
+    });
+  });
+
+  it('replace function handles user input mentions', () => {
+    const mockTextNode = {
+      replace: jest.fn()
+    };
+    const match = ['@john'];
+    
+    MENTION_TRANSFORMER.replace(mockTextNode as any, match as any);
+    
+    expect(mockTextNode.replace).toHaveBeenCalledWith({
+      type: 'mention',
+      text: '@john'
+    });
   });
 });
