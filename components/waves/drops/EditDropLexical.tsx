@@ -51,7 +51,10 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   const [editor] = useLexicalComposerContext();
   
   useEffect(() => {
+    console.log("=== IMPORT DEBUG ===");
     console.log("Loading initial content:", initialContent);
+    console.log("Import content length:", initialContent.length);
+    console.log("Import char codes:", Array.from(initialContent).map(c => c.charCodeAt(0)));
     editor.update(() => {
       $convertFromMarkdownString(
         initialContent,
@@ -187,8 +190,13 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     
     editorState.read(() => {
       const markdown = $convertToMarkdownString([...TRANSFORMERS, MENTION_TRANSFORMER, HASHTAG_TRANSFORMER]);
+      console.log("=== SAVE DEBUG ===");
       console.log("Saving markdown:", markdown);
+      console.log("Markdown length:", markdown.length);
+      console.log("Markdown char codes:", Array.from(markdown).map(c => c.charCodeAt(0)));
       console.log("Original content:", initialContent);
+      console.log("Original length:", initialContent.length);
+      console.log("Original char codes:", Array.from(initialContent).map(c => c.charCodeAt(0)));
       
       // If no changes, silently exit edit mode without API call
       if (markdown.trim() === initialContent.trim()) {
@@ -239,7 +247,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           />
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
-          <MarkdownShortcutPlugin transformers={[...TRANSFORMERS, MENTION_TRANSFORMER, HASHTAG_TRANSFORMER]} />
+          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <ListPlugin />
           <LinkPlugin />
           <NewMentionsPlugin ref={mentionsRef} waveId={waveId} onSelect={handleMentionSelect} />

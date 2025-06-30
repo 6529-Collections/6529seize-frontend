@@ -50,7 +50,7 @@ export const useDropUpdateMutation = () => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes("can't be edited after")) {
         setToast({
-          message: "This drop can no longer be edited. Drops have a limited time window for editing after creation.",
+          message: "This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.",
           type: "error",
         });
       } else {
