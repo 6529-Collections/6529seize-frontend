@@ -1,12 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { AuthContext } from '../../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
+/* eslint-disable react/display-name */
+import AboutPage from '@/app/about/[section]/page';
+import { AboutSection } from '@/enums';
 jest.mock('next/router', () => ({ useRouter: () => ({ asPath: '/', push: jest.fn() }) }));
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 
-jest.mock('../../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isIos: true }) }));
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isIos: true }) }));
 
 let country = 'DE';
-jest.mock('../../../components/cookies/CookieConsentContext', () => ({ useCookieConsent: () => ({ country }) }));
+jest.mock('@/components/cookies/CookieConsentContext', () => ({ useCookieConsent: () => ({ country }) }));
 
 const setTitle = jest.fn();
 const Wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => (
@@ -15,7 +19,7 @@ const Wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => (
 
 
 // Mock TitleContext
-jest.mock('../../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),
@@ -32,19 +36,24 @@ jest.mock('../../../contexts/TitleContext', () => ({
 }));
 
 describe('AboutMenu subscriptions row', () => {
-  beforeEach(() => { country = 'DE'; });
-  it('hides subscriptions row when not US', () => {
-    const AboutModule = require('../../../pages/about/[section]');
-    const Comp = AboutModule.default;
-    render(<Comp pageProps={{ section: AboutModule.AboutSection.MEMES, sectionTitle: 'THE MEMES' }} />, { wrapper: Wrapper });
+  beforeEach(() => {
+    country = 'DE';
+  });
+
+  it('hides subscriptions row when not US', async () => {
+    const element = await AboutPage({
+      params: Promise.resolve({ section: AboutSection.MEMES }),
+    } as any);
+    render(element, { wrapper: Wrapper });
     expect(screen.queryByText('Subscriptions')).toBeNull();
   });
 
-  it('shows subscriptions row in US', () => {
+  it('shows subscriptions row in US', async () => {
     country = 'US';
-    const AboutModule = require('../../../pages/about/[section]');
-    const Comp = AboutModule.default;
-    render(<Comp pageProps={{ section: AboutModule.AboutSection.MEMES, sectionTitle: 'THE MEMES' }} />, { wrapper: Wrapper });
+    const element = await AboutPage({
+      params: Promise.resolve({ section: AboutSection.MEMES }),
+    } as any);
+    render(element, { wrapper: Wrapper });
     expect(screen.getAllByText('Subscriptions').length).toBeGreaterThan(0);
   });
 });
