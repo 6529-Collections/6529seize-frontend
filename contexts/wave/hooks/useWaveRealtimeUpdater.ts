@@ -86,12 +86,12 @@ export function useWaveRealtimeUpdater({
           }
         }
       } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          // Fetch was cancelled
-        } else {
-          // Error fetching newest messages
-        }
         // Do not update latestFetchedSerialNo on error
+        if (error instanceof DOMException && error.name === "AbortError") {
+          // Fetch was cancelled - this is expected behavior
+        } else {
+          console.error("Error fetching newest messages:", error);
+        }
       } finally {
         cleanupController(waveId);
         isFetchingNewestRef.current[waveId] = false;

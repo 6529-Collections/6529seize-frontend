@@ -18,10 +18,9 @@ describe('MENTION_TRANSFORMER', () => {
   });
 
   it('basic config', () => {
-    // regExp should match user input format
-    expect(MENTION_TRANSFORMER.regExp.test('@abc')).toBe(true);
-    expect(MENTION_TRANSFORMER.regExp.test('@[abc]')).toBe(false);
-    // importRegExp should match stored format
+    // Both regExp and importRegExp should match bracketed format only
+    expect(MENTION_TRANSFORMER.regExp.test('@[abc]')).toBe(true);
+    expect(MENTION_TRANSFORMER.regExp.test('@abc')).toBe(false);
     expect(MENTION_TRANSFORMER.importRegExp.test('@[abc]')).toBe(true);
     expect(MENTION_TRANSFORMER.importRegExp.test('@abc')).toBe(false);
     expect(MENTION_TRANSFORMER.trigger).toBe('@');
@@ -30,6 +29,7 @@ describe('MENTION_TRANSFORMER', () => {
 
   it('replace function handles bracketed mentions', () => {
     const mockTextNode = {
+      getTextContent: jest.fn(() => '@[john]'),
       replace: jest.fn()
     };
     const match = ['@[john]'];
@@ -42,17 +42,16 @@ describe('MENTION_TRANSFORMER', () => {
     });
   });
 
-  it('replace function handles user input mentions', () => {
+  it('replace function skips when match not in text node', () => {
     const mockTextNode = {
+      getTextContent: jest.fn(() => 'different text'),
       replace: jest.fn()
     };
-    const match = ['@john'];
+    const match = ['@[john]'];
     
     MENTION_TRANSFORMER.replace(mockTextNode as any, match as any);
     
-    expect(mockTextNode.replace).toHaveBeenCalledWith({
-      type: 'mention',
-      text: '@john'
-    });
+    // Should not call replace when match is not in text node
+    expect(mockTextNode.replace).not.toHaveBeenCalled();
   });
 });
