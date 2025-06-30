@@ -62,7 +62,8 @@ function reconstructSplitMention(
   mentionEnd: RegExpMatchArray
 ) {
   const fullMention = mentionStart[0] + mentionEnd[0];
-  const mentionMatch = fullMention.match(/@\[(\w+)\]/);
+  const mentionRegex = /@\[(\w+)\]/;
+  const mentionMatch = mentionRegex.exec(fullMention);
 
   if (!mentionMatch) return false;
 
@@ -363,14 +364,14 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
       <div className="tw-flex tw-items-center tw-gap-2 tw-mt-1">
         <div className="tw-text-xs tw-text-iron-400">
-          escape to{" "}
+          escape to
           <button
             onClick={onCancel}
             className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
           >
             cancel
           </button>
-          {" "}• enter to{" "}
+          • enter to
           <button
             onClick={handleSave}
             className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
