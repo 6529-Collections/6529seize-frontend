@@ -564,6 +564,38 @@ describe('Edit Drop Integration Flow', () => {
       };
       mockedCommonApiPost.mockResolvedValue(updatedDrop);
 
+      // Set up handlers like other tests
+      const handleEdit = () => {
+        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+      };
+
+      const handleSave = async (content: string, mentions: any[]) => {
+        try {
+          const updatedDrop = await mockedCommonApiPost({
+            endpoint: `drops/${mockDrop.id}`,
+            body: {
+              content,
+              mentioned_users: mentions,
+            },
+          });
+          
+          mockSetToast({
+            message: 'Drop updated successfully',
+            type: 'success',
+          });
+          mockInvalidateDrops();
+          store.dispatch(editSlice.actions.setEditingDropId(null));
+        } catch (error) {
+          mockSetToast({
+            message: 'Failed to update drop. Please try again.',
+            type: 'error',
+          });
+        }
+      };
+
+      // Set global handlers for the mock to use
+      (window as any).testHandleSave = handleSave;
+
       renderWithProviders(
         <WaveDrop
           drop={mockDrop}
@@ -578,12 +610,13 @@ describe('Edit Drop Integration Flow', () => {
           onQuote={jest.fn()}
           onReplyClick={jest.fn()}
           onQuoteClick={jest.fn()}
-          onEdit={jest.fn()}
+          onEdit={handleEdit}
         />
       );
 
       // Start edit, make changes, and save
-      store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+      const editButton = screen.getByTestId('edit-button');
+      await user.click(editButton);
 
       await waitFor(() => {
         expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
