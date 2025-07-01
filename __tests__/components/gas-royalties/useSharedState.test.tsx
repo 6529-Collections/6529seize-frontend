@@ -2,11 +2,10 @@ import { renderHook, act } from "@testing-library/react";
 import {
   useSharedState,
   GasRoyaltiesCollectionFocus,
-} from "../../../components/gas-royalties/GasRoyalties";
-import { DateIntervalsSelection } from "../../../enums";
+} from "@/components/gas-royalties/GasRoyalties";
 
 // Mock getDateFilters to simplify URL generation
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   getDateFilters: jest.fn(() => "&from_date=2024-01-01&to_date=2024-01-02"),
 }));
 
