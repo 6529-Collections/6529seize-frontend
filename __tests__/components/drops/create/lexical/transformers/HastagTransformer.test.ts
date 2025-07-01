@@ -15,8 +15,10 @@ describe('HASHTAG_TRANSFORMER', () => {
   });
 
   it('matches hashtags with regex', () => {
-    expect('#hello'.match(HASHTAG_TRANSFORMER.regExp)).toBeTruthy();
-    expect(HASHTAG_TRANSFORMER.importRegExp.test('#hello')).toBe(true);
+    expect('#[hello]'.match(HASHTAG_TRANSFORMER.regExp)).toBeTruthy();
+    expect('#hello'.match(HASHTAG_TRANSFORMER.regExp)).toBeFalsy();
+    expect(HASHTAG_TRANSFORMER.importRegExp.test('#[hello]')).toBe(true);
+    expect(HASHTAG_TRANSFORMER.importRegExp.test('#hello')).toBe(false);
     expect(HASHTAG_TRANSFORMER.trigger).toBe('#');
     expect(HASHTAG_TRANSFORMER.type).toBe('text-match');
   });
