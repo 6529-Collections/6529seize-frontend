@@ -5,8 +5,12 @@ import { useDropUpdateMutation } from '../../hooks/drops/useDropUpdateMutation';
 import { AuthContext } from '../../components/auth/Auth';
 import { ReactQueryWrapperContext } from '../../components/react-query-wrapper/ReactQueryWrapper';
 import { commonApiPost } from '../../services/api/common-api';
-import { ApiDrop } from '../../generated/models/ApiDrop';
 import { ApiUpdateDropRequest } from '../../generated/models/ApiUpdateDropRequest';
+import {
+  createMockDrop,
+  createMockRequest,
+  createErrorWithStatus
+} from '../utils/editDropTestUtils';
 
 // Mock the API
 jest.mock('../../services/api/common-api', () => ({
@@ -27,47 +31,6 @@ describe('Edit Drop Error Scenarios', () => {
   let mockSetToast: jest.Mock;
   let mockInvalidateDrops: jest.Mock;
 
-  const mockDrop: ApiDrop = {
-    id: 'drop-123',
-    serial_no: 1,
-    author: { handle: 'testuser' },
-    wave: { id: 'wave-123' },
-    created_at: Date.now(),
-    updated_at: null,
-    title: null,
-    parts: [{ 
-      part_id: 1, 
-      content: 'Original content', 
-      media: [], 
-      quoted_drop: null, 
-      replies_count: 0, 
-      quotes_count: 0 
-    }],
-    parts_count: 1,
-    referenced_nfts: [],
-    mentioned_users: [],
-    metadata: [],
-    rating: 0,
-    realtime_rating: 0,
-    rating_prediction: 0,
-    top_raters: [],
-    raters_count: 0,
-    context_profile_context: null,
-    subscribed_actions: [],
-    is_signed: false,
-    reply_to: null,
-    rank: null,
-    drop_type: 'Chat' as any,
-    type: 'FULL' as any,
-    stableKey: 'drop-123',
-    stableHash: 'hash-123'
-  };
-
-  const mockRequest: ApiUpdateDropRequest = {
-    content: 'Updated content',
-    mentioned_users: []
-  };
-
   beforeEach(() => {
     queryClient = new QueryClient({
       defaultOptions: {
@@ -78,7 +41,6 @@ describe('Edit Drop Error Scenarios', () => {
     
     mockSetToast = jest.fn();
     mockInvalidateDrops = jest.fn();
-
     jest.clearAllMocks();
   });
 
@@ -102,7 +64,6 @@ describe('Edit Drop Error Scenarios', () => {
     );
   };
 
-  // Test utilities to reduce duplication
   const setupErrorTest = (error: any, customRequest?: Partial<ApiUpdateDropRequest>) => {
     mockedCommonApiPost.mockRejectedValue(error);
     const { result } = renderHook(() => useDropUpdateMutation(), {
@@ -111,10 +72,11 @@ describe('Edit Drop Error Scenarios', () => {
     return {
       result,
       triggerMutation: () => {
+        const request = customRequest ? { ...createMockRequest(), ...customRequest } : createMockRequest();
         result.current.mutate({
           dropId: 'drop-123',
-          request: customRequest ? { ...mockRequest, ...customRequest } : mockRequest,
-          currentDrop: mockDrop,
+          request,
+          currentDrop: createMockDrop(),
         });
       },
     };
@@ -138,19 +100,12 @@ describe('Edit Drop Error Scenarios', () => {
     });
   };
 
-  const createErrorWithStatus = (message: string, status: number) => {
-    const error = new Error(message);
-    (error as any).status = status;
-    return error;
-  };
-
   const testErrorScenario = async (error: any, expectedToastFn = expectGenericErrorToast, customRequest?: Partial<ApiUpdateDropRequest>) => {
     const { triggerMutation } = setupErrorTest(error, customRequest);
     triggerMutation();
     await expectedToastFn();
   };
 
-  // Generic test runner for multiple similar scenarios
   const runErrorTests = (testCases: Array<{ 
     error: any; 
     desc: string; 
@@ -163,6 +118,7 @@ describe('Edit Drop Error Scenarios', () => {
       });
     });
   };
+
 
   // Centralized error test configuration to eliminate all duplication
   const errorTestSuites = {
