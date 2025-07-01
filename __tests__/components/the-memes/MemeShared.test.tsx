@@ -14,7 +14,7 @@ describe("getSharedServerSideProps", () => {
   beforeEach(() => {
     Object.assign(process.env, {
       API_ENDPOINT: "https://test.6529.io",
-      BASE_ENDPOINT: "http://base",
+      BASE_ENDPOINT: "https://base.6529.io",
     });
   });
   afterAll(() => {
@@ -55,7 +55,7 @@ describe("getSharedServerSideProps", () => {
       "https://test.6529.io/api/nfts?contract=0xabc&id=2"
     );
     expect(result.props.name).toBe("The Memes #2");
-    expect(result.props.image).toBe("http://base/6529io.png");
+    expect(result.props.image).toBe("https://base.6529.io/6529io.png");
   });
 });
 

@@ -15,7 +15,7 @@ const MockIpfsService = IpfsService as jest.MockedClass<typeof IpfsService>;
 beforeEach(() => {
   jest.clearAllMocks();
   process.env.IPFS_API_ENDPOINT = "https://test.6529.io";
-  process.env.IPFS_GATEWAY_ENDPOINT = "http://gateway";
+  process.env.IPFS_GATEWAY_ENDPOINT = "https://gateway";
   process.env.IPFS_MFS_PATH = "files";
 });
 
@@ -54,7 +54,7 @@ describe("IpfsContext", () => {
 
   it("resolves ipfs urls to gateway", async () => {
     const url = await resolveIpfsUrl("ipfs://abc");
-    expect(url).toBe("http://gateway/ipfs/abc");
+    expect(url).toBe("https://gateway/ipfs/abc");
   });
 
   it("returns original url if env missing", async () => {

@@ -77,7 +77,7 @@ describe("GradientPage getServerSideProps", () => {
 
   it("uses defaults when api empty", async () => {
     (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
-    process.env.BASE_ENDPOINT = "http://base";
+    process.env.BASE_ENDPOINT = "https://base.6529.io";
     const result = await getServerSideProps(
       { query: { id: "8" } } as any,
       null as any,
@@ -87,10 +87,10 @@ describe("GradientPage getServerSideProps", () => {
       props: {
         id: "8",
         name: "Gradient #8",
-        image: "http://base/6529io.png",
+        image: "https://base.6529.io/6529io.png",
         metadata: {
           title: "Gradient #8",
-          ogImage: "http://base/6529io.png",
+          ogImage: "https://base.6529.io/6529io.png",
           description: "6529 Gradient",
         },
       },

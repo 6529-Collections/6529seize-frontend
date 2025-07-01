@@ -106,13 +106,13 @@ describe("useSharedState", () => {
       result.current.setIsPrimary(true);
     });
     expect(result.current.getUrl("gas")).toBe(
-      `http://example.com/api/gas/collection/memes?&primary=true`
+      `https://example.com/api/gas/collection/memes?&primary=true`
     );
     act(() => {
       result.current.getSharedProps().setBlocks(10, 20);
     });
     expect(result.current.getUrl("gas")).toBe(
-      `http://example.com/api/gas/collection/memes?&from_block=10&to_block=20`
+      `https://example.com/api/gas/collection/memes?&from_block=10&to_block=20`
     );
   });
 

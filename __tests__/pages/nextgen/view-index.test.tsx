@@ -61,7 +61,7 @@ describe("NextGen [[...view]] getServerSideProps", () => {
   beforeEach(() => {
     mockedFetch.mockClear();
     mockedHeaders.mockClear();
-    process.env.BASE_ENDPOINT = "http://base";
+    process.env.BASE_ENDPOINT = "https://base.6529.io";
   });
 
   it("returns collection and parsed view", async () => {
@@ -82,7 +82,7 @@ describe("NextGen [[...view]] getServerSideProps", () => {
         view: NextGenView.ARTISTS,
         metadata: {
           title: "NextGen Artists",
-          ogImage: "http://base/nextgen.png",
+          ogImage: "https://base.6529.io/nextgen.png",
           description: "NextGen",
           twitterCard: "summary_large_image",
         },

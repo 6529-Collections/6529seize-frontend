@@ -62,7 +62,7 @@ const routerPush = jest.fn();
 describe("Rememes component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.API_ENDPOINT = "http://test.6529.io";
+    process.env.API_ENDPOINT = "https://test.6529.io";
     global.fetch = jest.fn(() => Promise.resolve({ json: () => ({}) } as any));
   });
 
