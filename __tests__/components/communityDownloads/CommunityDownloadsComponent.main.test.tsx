@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import CommunityDownloadsComponent from "../../../components/community-downloads/CommunityDownloadsComponent";
-import { fetchUrl } from "../../../services/6529api";
+import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
+import { fetchUrl } from "@/services/6529api";
 
 jest.mock("next/router", () => ({ useRouter: () => ({ isReady: true }) }));
-jest.mock("../../../services/6529api");
+jest.mock("@/services/6529api");
 
-jest.mock("../../../components/pagination/Pagination", () => ({
+jest.mock("@/components/pagination/Pagination", () => ({
   __esModule: true,
   default: (p: any) => (
     <button data-testid="pager" onClick={() => p.setPage(p.page + 1)}>
@@ -22,10 +22,9 @@ jest.mock("react-bootstrap", () => ({
   Table: (p: any) => <table>{p.children}</table>,
 }));
 
-jest.mock(
-  "../../../components/nothingHereYet/NothingHereYetSummer",
-  () => () => <div>NoResults</div>
-);
+jest.mock("@/components/nothingHereYet/NothingHereYetSummer", () => () => (
+  <div>NoResults</div>
+));
 
 const mockFetch = fetchUrl as jest.Mock;
 
@@ -37,7 +36,7 @@ describe("CommunityDownloadsComponent", () => {
   it("fetches and displays downloads", async () => {
     mockFetch.mockResolvedValue({
       count: 1,
-      data: [{ date: "20230101", url: "http://a" }],
+      data: [{ date: "20230101", url: "https://testA.6529.io" }],
     });
     render(
       <CommunityDownloadsComponent title="T" url="https://test.6529.io/data" />
@@ -45,7 +44,9 @@ describe("CommunityDownloadsComponent", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       "https://test.6529.io/data?page_size=25&page=1"
     );
-    expect(await screen.findByText("http://a")).toBeInTheDocument();
+    expect(
+      await screen.findByText("https://testA.6529.io")
+    ).toBeInTheDocument();
   });
 
   it("shows no results when empty", async () => {
@@ -59,15 +60,15 @@ describe("CommunityDownloadsComponent", () => {
   it("fetches next page when pagination clicked", async () => {
     mockFetch.mockResolvedValue({
       count: 60,
-      data: [{ date: "20230101", url: "http://a" }],
+      data: [{ date: "20230101", url: "https://a" }],
     });
     render(
       <CommunityDownloadsComponent title="T" url="https://test.6529.io/data" />
     );
-    await screen.findByText("http://a");
+    await screen.findByText("https://a");
     mockFetch.mockResolvedValue({
       count: 60,
-      data: [{ date: "20230102", url: "http://b" }],
+      data: [{ date: "20230102", url: "https://testB.6529.io" }],
     });
     await userEvent.click(screen.getByTestId("pager"));
     await waitFor(() =>
