@@ -10,7 +10,12 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(),
 }));
 jest.mock("@/hooks/isMobileDevice");
-jest.mock("next/image", () => (props: any) => <img {...props} />);
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
+}));
 
 const { usePathname } = require("next/navigation");
 const mockUseCookieConsent = useCookieConsent as jest.MockedFunction<

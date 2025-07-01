@@ -37,7 +37,9 @@ jest.mock(
 );
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (p: any) => <img {...p} />,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
 }));
 jest.mock("@tippyjs/react", () => (props: any) => (
   <span data-testid="tippy">{props.children}</span>

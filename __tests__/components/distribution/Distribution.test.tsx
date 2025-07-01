@@ -14,7 +14,12 @@ jest.mock("@/services/6529api", () => ({
   fetchUrl: () => fetchUrl(),
 }));
 
-jest.mock("next/image", () => (props: any) => <img {...props} />);
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
+}));
 jest.mock("@/components/the-memes/MemePageMintCountdown", () => () => (
   <div data-testid="mint" />
 ));

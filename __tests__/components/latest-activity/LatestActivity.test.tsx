@@ -16,7 +16,9 @@ jest.mock("../../../components/pagination/Pagination", () => (props: any) => (
 ));
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (p: any) => <img {...p} />,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
 }));
 
 (fetchAllPages as jest.Mock).mockResolvedValue([]);

@@ -11,7 +11,9 @@ jest.mock("@/components/auth/Auth");
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (p: any) => <img {...p} />,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
 }));
 jest.mock("@capacitor/barcode-scanner", () => ({
   CapacitorBarcodeScanner: { scanBarcode: jest.fn() },

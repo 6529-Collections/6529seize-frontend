@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { render, screen } from "@testing-library/react";
 import Home from "@/components/home/Home";
 import { AuthContext } from "@/components/auth/Auth";
@@ -7,7 +7,9 @@ import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (p: any) => <img {...p} />,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
 }));
 jest.mock(
   "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow",
@@ -50,14 +52,23 @@ const mockCollection = { name: "Collection" } as any;
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <CookieConsentProvider>
-    <AuthContext.Provider
-      value={{ setTitle: jest.fn(), connectedProfile: null } as any}>
-      {children}
-    </AuthContext.Provider>
-  </CookieConsentProvider>
-);
+}) => {
+  const setTitle = jest.fn();
+  const authContextValue = useMemo(
+    () => ({
+      setTitle,
+      connectedProfile: null,
+    }),
+    [setTitle]
+  );
+  return (
+    <CookieConsentProvider>
+      <AuthContext.Provider value={authContextValue as any}>
+        {children}
+      </AuthContext.Provider>
+    </CookieConsentProvider>
+  );
+};
 
 describe("Home component", () => {
   it("renders main sections", () => {

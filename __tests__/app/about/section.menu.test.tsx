@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import React, { useMemo } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 /* eslint-disable react/display-name */
 import AboutPage from "@/app/about/[section]/page";
@@ -20,11 +20,12 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 }));
 
 const setTitle = jest.fn();
-const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AuthContext.Provider value={{ setTitle } as any}>
-    {children}
-  </AuthContext.Provider>
-);
+const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const contextValue = useMemo(() => ({ setTitle } as any), [setTitle]);
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
+};
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
