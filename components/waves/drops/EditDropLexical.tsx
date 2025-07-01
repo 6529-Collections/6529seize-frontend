@@ -416,19 +416,21 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       )}
       
       {isApp && (
-        <div className="tw-mt-4">
-          <div className="tw-flex tw-gap-x-3">
+        <div className="tw-mt-3 tw-mb-2">
+          <div className="tw-flex tw-gap-x-2">
             <button
               onClick={onCancel}
-              className="tw-flex-1 tw-bg-iron-800 tw-text-iron-300 tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-iron-700 tw-transition-colors tw-duration-200"
+              disabled={isSaving}
+              className="tw-bg-iron-800 tw-text-iron-300 tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-3 tw-font-medium tw-text-sm active:tw-bg-iron-700 tw-transition-colors tw-duration-150 disabled:tw-opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="tw-flex-1 tw-bg-primary-500 tw-text-white tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-primary-600 tw-transition-colors tw-duration-200"
+              disabled={isSaving}
+              className="tw-bg-primary-500 tw-text-white tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-3 tw-font-medium tw-text-sm active:tw-bg-primary-600 tw-transition-colors tw-duration-150 disabled:tw-opacity-50"
             >
-              Save
+              {isSaving ? "Saving..." : "Save"}
             </button>
           </div>
         </div>

@@ -943,11 +943,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
   }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
 
-  // Hide CreateDrop area on mobile when editing
-  if (isApp && editingDropId) {
-    return null;
-  }
-
   return (
     <div className="tw-flex-grow">
       <CreateDropReplyingWrapper
