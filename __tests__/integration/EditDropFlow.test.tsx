@@ -96,7 +96,6 @@ const TestEditContext = React.createContext<{
 
 // Mock WaveDropPartContentMarkdown to check for edit state
 jest.mock('../../components/waves/drops/WaveDropPartContentMarkdown', () => {
-  const React = require('react');
   const { useSelector } = require('react-redux');
   
   return function MockWaveDropPartContentMarkdown({ part }: any) {

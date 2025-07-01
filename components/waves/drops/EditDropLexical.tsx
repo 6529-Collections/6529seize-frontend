@@ -327,7 +327,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="tw-w-full tw-p-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-2 focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
+                className="tw-w-full tw-p-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
                 style={{
                   fontFamily: "inherit",
                   lineHeight: "1.4",
@@ -362,23 +362,21 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         </div>
       </LexicalComposer>
 
-      <div className="tw-flex tw-items-center tw-gap-2 tw-mt-1">
-        <div className="tw-text-xs tw-text-iron-400">
-          escape to
-          <button
-            onClick={onCancel}
-            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
-          >
-            cancel
-          </button>
-          • enter to
-          <button
-            onClick={handleSave}
-            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
-          >
-            save
-          </button>
-        </div>
+      <div className="tw-flex tw-items-center tw-mt-1 tw-text-xs tw-text-iron-400">
+        escape to{" "}
+        <button
+          onClick={onCancel}
+          className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
+        >
+          cancel
+        </button>
+        {" "}• enter to{" "}
+        <button
+          onClick={handleSave}
+          className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
+        >
+          save
+        </button>
       </div>
     </div>
   );
