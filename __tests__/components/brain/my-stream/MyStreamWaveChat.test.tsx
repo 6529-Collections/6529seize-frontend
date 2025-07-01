@@ -1,5 +1,8 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { editSlice } from '../../../../store/editSlice';
 import MyStreamWaveChat from '../../../../components/brain/my-stream/MyStreamWaveChat';
 
 jest.mock('next/router', () => ({ useRouter: () => ({ replace: replaceMock }) }));
@@ -39,21 +42,39 @@ jest.mock('../../../../components/waves/memes/submission/MobileMemesArtSubmissio
   default: () => <div data-testid="memes-btn" />
 }));
 
+jest.mock('../../../../hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: () => ({ isApp: false }),
+}));
+
 const wave = { id: '10' } as any;
 
 describe('MyStreamWaveChat', () => {
+  let store: any;
+
   beforeEach(() => {
     capturedProps = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
     mockIsMemesWave = false;
+    store = configureStore({
+      reducer: { edit: editSlice.reducer },
+    });
   });
+
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(
+      <Provider store={store}>
+        {component}
+      </Provider>
+    );
+  };
 
   it('handles serialNo param and shows memes button', async () => {
     searchParamsMock.get.mockReturnValue('5');
     mockIsMemesWave = true;
     await act(async () => {
-      render(<MyStreamWaveChat wave={wave} />);
+      renderWithProvider(<MyStreamWaveChat wave={wave} />);
     });
     expect(replaceMock).toHaveBeenCalled();
     expect(capturedProps.initialDrop).toBe(5);
@@ -63,7 +84,7 @@ describe('MyStreamWaveChat', () => {
   it('sets initialDrop null when no param', async () => {
     searchParamsMock.get.mockReturnValue(null);
     await act(async () => {
-      render(<MyStreamWaveChat wave={wave} />);
+      renderWithProvider(<MyStreamWaveChat wave={wave} />);
     });
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedProps.initialDrop).toBeNull();
