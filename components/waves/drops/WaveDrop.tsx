@@ -373,6 +373,7 @@ const WaveDrop = ({
           onReply={handleOnReply}
           onQuote={handleOnQuote}
           onAddReaction={handleOnAddReaction}
+          onEdit={handleOnEdit}
         />
       </div>
     </div>

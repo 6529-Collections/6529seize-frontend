@@ -22,6 +22,7 @@ import {
   KEY_ESCAPE_COMMAND,
 } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $setSelection, FOCUS_COMMAND } from "lexical";
 
 import { ListNode, ListItemNode } from "@lexical/list";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
@@ -44,6 +45,10 @@ import NewMentionsPlugin, {
 } from "../../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import { MentionedUser } from "../../../entities/IDrop";
 import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
+import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import EmojiPlugin from "../../drops/create/lexical/plugins/emoji/EmojiPlugin";
+import { EmojiNode } from "../../drops/create/lexical/nodes/EmojiNode";
 
 interface EditDropLexicalProps {
   initialContent: string;
@@ -152,6 +157,27 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 }
 
 // Plugin to handle keyboard shortcuts
+// Plugin to handle focus on mount
+function FocusPlugin({ isApp }: { isApp: boolean }) {
+  const [editor] = useLexicalComposerContext();
+  
+  useEffect(() => {
+    if (isApp) {
+      // For mobile, single delayed focus to avoid keyboard flicker
+      const timeout = setTimeout(() => {
+        editor.focus();
+      }, 350); // Wait for menu close animation
+      
+      return () => clearTimeout(timeout);
+    } else {
+      // Desktop: immediate focus
+      editor.focus();
+    }
+  }, [editor, isApp]);
+  
+  return null;
+}
+
 function KeyboardPlugin({
   onSave,
   onCancel,
@@ -234,6 +260,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     useState<ApiDropMentionedUser[]>(initialMentions);
   const editorRef = useRef<HTMLDivElement>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
+  const { isApp } = useDeviceInfo();
 
   const initialConfig: InitialConfigType = {
     namespace: "EditDropLexical",
@@ -253,6 +280,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       LinkNode,
       MentionNode,
       HashtagNode,
+      EmojiNode,
     ],
   };
 
@@ -302,23 +330,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     });
   }, [editorState, mentionedUsers, onSave, initialContent, onCancel]);
 
-  // Focus editor when component mounts
-  useEffect(() => {
-    if (editorRef.current) {
-      const editor = editorRef.current.querySelector(
-        '[contenteditable="true"]'
-      ) as HTMLElement;
-      if (editor) {
-        editor.focus();
-        // Set cursor to end
-        const selection = window.getSelection();
-        if (selection) {
-          selection.selectAllChildren(editor);
-          selection.collapseToEnd();
-        }
-      }
-    }
-  }, []);
 
   return (
     <div className="tw-w-full">
@@ -326,13 +337,18 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         <div ref={editorRef}>
           <RichTextPlugin
             contentEditable={
-              <ContentEditable
-                className="tw-w-full tw-p-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
-                style={{
-                  fontFamily: "inherit",
-                  lineHeight: "1.4",
-                }}
-              />
+              <div className="tw-relative">
+                <ContentEditable
+                  className="tw-w-full tw-p-2 tw-pr-10 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
+                  style={{
+                    fontFamily: "inherit",
+                    lineHeight: "1.4",
+                  }}
+                />
+                <div className="tw-absolute tw-top-2 tw-right-2">
+                  <CreateDropEmojiPicker />
+                </div>
+              </div>
             }
             placeholder={
               <div className="tw-absolute tw-top-2 tw-left-3 tw-text-iron-500 tw-text-sm tw-pointer-events-none">
@@ -351,7 +367,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             waveId={waveId}
             onSelect={handleMentionSelect}
           />
+          <EmojiPlugin />
           <InitialContentPlugin initialContent={initialContent} />
+          <FocusPlugin isApp={isApp} />
           <KeyboardPlugin
             onSave={handleSave}
             onCancel={onCancel}
@@ -362,22 +380,43 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         </div>
       </LexicalComposer>
 
-      <div className="tw-flex tw-items-center tw-mt-1 tw-text-xs tw-text-iron-400">
-        escape to{" "}
-        <button
-          onClick={onCancel}
-          className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
-        >
-          cancel
-        </button>
-        {" "}• enter to{" "}
-        <button
-          onClick={handleSave}
-          className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
-        >
-          save
-        </button>
-      </div>
+      {!isApp && (
+        <div className="tw-flex tw-items-center tw-mt-1 tw-text-xs tw-text-iron-400">
+          escape to{" "}
+          <button
+            onClick={onCancel}
+            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
+          >
+            cancel
+          </button>
+          {" "}• enter to{" "}
+          <button
+            onClick={handleSave}
+            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
+          >
+            save
+          </button>
+        </div>
+      )}
+      
+      {isApp && (
+        <div className="tw-mt-4">
+          <div className="tw-flex tw-gap-x-3">
+            <button
+              onClick={onCancel}
+              className="tw-flex-1 tw-bg-iron-800 tw-text-iron-300 tw-border-0 tw-rounded-lg tw-py-3 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-iron-700 tw-transition-colors tw-duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="tw-flex-1 tw-bg-primary-500 tw-text-white tw-border-0 tw-rounded-lg tw-py-3 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-primary-600 tw-transition-colors tw-duration-200"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
