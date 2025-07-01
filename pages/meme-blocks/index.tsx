@@ -128,57 +128,55 @@ export default function BlockPicker() {
   };
 
   return (
-    <>
-      <div className={`tw-bg-neutral-900 ${poppins.className}`}>
-        <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-          <h1 className="tw-text-white pb-4">
-            <span className="font-lightest">Meme</span> Blocks
-          </h1>
-          <div className="tw-w-full tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-5">
-            <div className="tw-w-1/2">
-              <BlockPickerDateSelect
-                date={date}
-                setDate={setDate}
-                time={time}
-                setTime={setTime}
-              />
-            </div>
-
-            <div className="tw-w-1/2">
-              <div className="tw-flex tw-w-full tw-gap-x-4">
-                <BlockPickerTimeWindowSelect
-                  timeWindow={timeWindow}
-                  setTimeWindow={setTimeWindow}
-                />
-                <BlockPickerBlockNumberIncludes
-                  blockNumberIncludes={blockNumberIncludes}
-                  setBlockNumberIncludes={setBlockNumberIncludes}
-                />
-              </div>
-            </div>
-            <div className="tw-mt-6">
-              <div className="tw-w-[5.25rem]">
-                <PrimaryButton
-                  onClicked={onSubmit}
-                  disabled={false}
-                  loading={loading}
-                  padding="tw-px-4 tw-py-3">
-                  Submit
-                </PrimaryButton>
-              </div>
-            </div>
+    <div className={`tw-bg-neutral-900 ${poppins.className}`}>
+      <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+        <h1 className="tw-text-white pb-4">
+          <span className="font-lightest">Meme</span> Blocks
+        </h1>
+        <div className="tw-w-full tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-5">
+          <div className="tw-w-1/2">
+            <BlockPickerDateSelect
+              date={date}
+              setDate={setDate}
+              time={time}
+              setTime={setTime}
+            />
           </div>
 
-          {!loading && !!predictedBlock && (
-            <BlockPickerResult
-              blocknumber={predictedBlock.blockNumber}
-              timestamp={predictedBlock.timestamp}
-              predictedBlocks={predictedBlocks ? [predictedBlocks] : []}
-            />
-          )}
+          <div className="tw-w-1/2">
+            <div className="tw-flex tw-w-full tw-gap-x-4">
+              <BlockPickerTimeWindowSelect
+                timeWindow={timeWindow}
+                setTimeWindow={setTimeWindow}
+              />
+              <BlockPickerBlockNumberIncludes
+                blockNumberIncludes={blockNumberIncludes}
+                setBlockNumberIncludes={setBlockNumberIncludes}
+              />
+            </div>
+          </div>
+          <div className="tw-mt-6">
+            <div className="tw-w-[5.25rem]">
+              <PrimaryButton
+                onClicked={onSubmit}
+                disabled={false}
+                loading={loading}
+                padding="tw-px-4 tw-py-3">
+                Submit
+              </PrimaryButton>
+            </div>
+          </div>
         </div>
+
+        {!loading && !!predictedBlock && (
+          <BlockPickerResult
+            blocknumber={predictedBlock.blockNumber}
+            timestamp={predictedBlock.timestamp}
+            predictedBlocks={predictedBlocks ? [predictedBlocks] : []}
+          />
+        )}
       </div>
-    </>
+    </div>
   );
 }
 

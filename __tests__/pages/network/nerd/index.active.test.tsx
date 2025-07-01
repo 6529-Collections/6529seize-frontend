@@ -62,7 +62,6 @@ describe("CommunityNerdPage", () => {
 
   it("passes focus to leaderboard and sets title", () => {
     renderPage(LeaderboardFocus.TDH);
-    // act(() => {});
     expect(capturedProps.focus).toBe(LeaderboardFocus.TDH);
   });
 

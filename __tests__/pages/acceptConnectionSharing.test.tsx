@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import React, { useMemo } from "react";
 import AcceptConnectionSharing, {
   getServerSideProps,
 } from "@/pages/accept-connection-sharing";
@@ -34,12 +34,19 @@ jest.mock("next/router", () => ({
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <AuthContext.Provider
-    value={{ setTitle: jest.fn(), setToast: jest.fn() } as any}>
-    {children}
-  </AuthContext.Provider>
-);
+}) => {
+  const setTitle = jest.fn();
+  const setToast = jest.fn();
+  const authContextValue = useMemo(
+    () => ({ setTitle, setToast }),
+    [setTitle, setToast]
+  );
+  return (
+    <AuthContext.Provider value={authContextValue as any}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 describe("AcceptConnectionSharing page", () => {
   beforeEach(() => {

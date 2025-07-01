@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { render, screen } from "@testing-library/react";
 import GradientPage, { getServerSideProps } from "@/pages/6529-gradient/[id]";
 import { AuthContext } from "@/components/auth/Auth";
@@ -9,11 +9,15 @@ jest.mock("@/services/6529api");
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
-    {children}
-  </AuthContext.Provider>
-);
+}) => {
+  const setTitle = jest.fn();
+  const authContextValue = useMemo(
+    () => ({ setTitle }),
+    [setTitle]
+  );
+  return <AuthContext.Provider value={authContextValue as any}>{children}</AuthContext.Provider>
+  );
+};
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({

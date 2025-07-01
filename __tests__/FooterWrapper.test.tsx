@@ -3,7 +3,14 @@ import FooterWrapper from "@/FooterWrapper";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { usePathname } from "next/navigation";
 
-jest.mock("@/hooks/useDeviceInfo");
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isMobileDevice: false,
+    hasTouchScreen: false,
+    isApp: false,
+  })),
+}));
 jest.mock("next/navigation", () => ({ usePathname: jest.fn() }));
 jest.mock("@/components/footer/Footer", () => ({
   __esModule: true,

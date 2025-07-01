@@ -4,11 +4,7 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
 }));
-import {
-  getServerSideProps,
-  useShallowRedirect,
-} from "@/pages/nextgen/collection/[collection]/[[...view]]";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
+import { useShallowRedirect } from "@/components/nextGen/nextgen_helpers";
 
 describe("nextgen collection page helpers", () => {
   describe("getServerSideProps", () => {

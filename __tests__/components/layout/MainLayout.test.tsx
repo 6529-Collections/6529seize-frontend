@@ -10,7 +10,11 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => useDeviceInfo(),
+  default: jest.fn(() => ({
+    isMobileDevice: false,
+    hasTouchScreen: false,
+    isApp: false,
+  })),
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => useAuth(),

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import React, { useMemo } from "react";
 import ConsolidationUseCases from "@/pages/consolidation-use-cases";
 import { getServerSideProps as getGroupsProps } from "@/pages/[user]/groups";
 import { getServerSideProps as getStatsProps } from "@/pages/[user]/stats";
@@ -68,11 +68,15 @@ jest.mock("@/components/memelab/MemeLab", () => ({
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
-    {children}
-  </AuthContext.Provider>
-);
+}) => {
+  const setTitle = jest.fn();
+  const authContextValue = useMemo(() => ({ setTitle }), [setTitle]);
+  return (
+    <AuthContext.Provider value={authContextValue as any}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 beforeEach(() => {
   global.fetch = jest.fn(() =>

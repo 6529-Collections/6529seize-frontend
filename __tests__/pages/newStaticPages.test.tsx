@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { render, screen } from "@testing-library/react";
 import About100M from "@/app/about/100m-project/page";
 import FromFibonacciToFidenza from "@/pages/blog/from-fibonacci-to-fidenza";
@@ -13,11 +13,15 @@ jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
-    {children}
-  </AuthContext.Provider>
-);
+}) => {
+  const setTitle = jest.fn();
+  const authContextValue = useMemo(() => ({ setTitle }), [setTitle]);
+  return (
+    <AuthContext.Provider value={authContextValue as any}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 describe("additional static pages render", () => {
   it("renders 100m project page", () => {
