@@ -210,7 +210,8 @@ const createEditHandlers = (store: any, mockSetToast: jest.Mock, mockInvalidateD
       mockInvalidateDrops();
       store.dispatch(editSlice.actions.setEditingDropId(null));
     } catch (error) {
-      // Explicitly handle test error scenario
+      // Explicitly handle test error scenario - log error for debugging
+      console.error('Test error scenario triggered:', error);
       mockSetToast({
         message: 'Failed to update drop. Please try again.',
         type: 'error',
@@ -464,7 +465,8 @@ describe('Edit Drop Integration Flow', () => {
           mockInvalidateDrops();
           store.dispatch(editSlice.actions.setEditingDropId(null));
         } catch (error) {
-          // Explicitly handle time limit error in test
+          // Explicitly handle time limit error in test - log for debugging
+          console.error('Time limit error in test:', error);
           mockSetToast({
             message: 'This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.',
             type: 'error',
