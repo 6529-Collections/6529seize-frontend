@@ -12,6 +12,7 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
+import WaveDropActionsEdit from "./WaveDropActionsEdit";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
@@ -19,6 +20,7 @@ interface WaveDropActionsProps {
   readonly showVoting?: boolean;
   readonly onReply: () => void;
   readonly onQuote: () => void;
+  readonly onEdit?: () => void;
 }
 
 export default function WaveDropActions({
@@ -27,6 +29,7 @@ export default function WaveDropActions({
   showVoting = true,
   onReply,
   onQuote,
+  onEdit,
 }: WaveDropActionsProps) {
   const { connectedProfile } = useContext(AuthContext);
   const { canDelete } = useDropInteractionRules(drop);
@@ -54,6 +57,7 @@ export default function WaveDropActions({
           />
           <WaveDropActionsCopyLink drop={drop} />
           <WaveDropActionsOpen drop={drop} />
+          {onEdit && drop.drop_type !== ApiDropType.Participatory && <WaveDropActionsEdit drop={drop} onEdit={onEdit} />}
           {canDelete && <WaveDropActionsOptions drop={drop} />}
           <WaveDropActionsAddReaction drop={drop} />
         </div>

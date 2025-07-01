@@ -1,4 +1,9 @@
 import { memo, useCallback, useEffect, useState, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { selectEditingDropId, setEditingDropId } from "../../../store/editSlice";
+import { useDropUpdateMutation } from "../../../hooks/drops/useDropUpdateMutation";
+import { ApiUpdateDropRequest } from "../../../generated/models/ApiUpdateDropRequest";
+import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropReply from "./WaveDropReply";
 import WaveDropContent from "./WaveDropContent";
@@ -138,8 +143,12 @@ const WaveDrop = ({
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const dispatch = useDispatch();
+  const editingDropId = useSelector(selectEditingDropId);
+  const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
+  const dropUpdateMutation = useDropUpdateMutation();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
@@ -217,6 +226,46 @@ const WaveDrop = ({
     setIsSlideUp(false);
   }, []);
 
+  const handleOnEdit = useCallback(() => {
+    dispatch(setEditingDropId(drop.id));
+  }, [dispatch, drop.id]);
+
+  const handleEditSave = useCallback(async (newContent: string, mentions?: ApiDropMentionedUser[]) => {
+    // Clean mentioned users to only include allowed fields for API
+    const cleanedMentions = (mentions || drop.mentioned_users).map(user => ({
+      mentioned_profile_id: user.mentioned_profile_id,
+      handle_in_content: user.handle_in_content,
+      // Exclude current_handle as it's not allowed in update requests
+    }));
+
+    const updateRequest: ApiUpdateDropRequest = {
+      parts: drop.parts.map((part, index) => ({
+        content: index === activePartIndex ? newContent : part.content,
+        quoted_drop: part.quoted_drop || null,
+        media: part.media || []
+      })),
+      title: drop.title,
+      metadata: drop.metadata,
+      referenced_nfts: drop.referenced_nfts,
+      mentioned_users: cleanedMentions,
+      signature: null,
+    };
+
+    // Optimistically close the editor
+    dispatch(setEditingDropId(null));
+
+    // Execute the mutation
+    dropUpdateMutation.mutate({
+      dropId: drop.id,
+      request: updateRequest,
+      currentDrop: drop,
+    });
+  }, [drop, activePartIndex, dropUpdateMutation, dispatch]);
+
+  const handleEditCancel = useCallback(() => {
+    dispatch(setEditingDropId(null));
+  }, [dispatch]);
+
   useEffect(() => {
     return () => {
       if (longPressTimeoutRef.current) {
@@ -291,16 +340,21 @@ const WaveDrop = ({
                 onQuoteClick={onQuoteClick}
                 setLongPressTriggered={setLongPressTriggered}
                 parentContainerRef={parentContainerRef}
+                isEditing={isEditing}
+                isSaving={dropUpdateMutation.isPending}
+                onSave={handleEditSave}
+                onCancel={handleEditCancel}
               />
             </div>
           </div>
         </div>
-        {!isMobile && showReplyAndQuote && (
+        {!isMobile && showReplyAndQuote && !isEditing && (
           <WaveDropActions
             drop={drop}
             activePartIndex={activePartIndex}
             onReply={handleOnReply}
             onQuote={handleOnQuote}
+            onEdit={handleOnEdit}
           />
         )}
         <div className={`tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap`}>

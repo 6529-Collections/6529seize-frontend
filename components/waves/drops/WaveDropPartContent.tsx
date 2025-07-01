@@ -18,6 +18,11 @@ interface WaveDropPartContentProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly isEditing?: boolean;
+  readonly isSaving?: boolean;
+  readonly onSave?: (newContent: string) => void;
+  readonly onCancel?: () => void;
+  readonly drop?: ApiDrop;
 }
 
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
@@ -31,6 +36,11 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   activePartIndex,
   setActivePartIndex,
   onQuoteClick,
+  isEditing = false,
+  isSaving = false,
+  onSave,
+  onCancel,
+  drop,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -110,6 +120,11 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               part={activePart}
               wave={wave}
               onQuoteClick={onQuoteClick}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={onSave}
+              onCancel={onCancel}
+              drop={drop}
             />
           </div>
           {!!activePart.media.length && (

@@ -86,17 +86,12 @@ export function useWaveRealtimeUpdater({
           }
         }
       } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          console.log(
-            `[RealtimeUpdater] Fetch newest for wave ${waveId} was cancelled.`
-          );
-        } else {
-          console.error(
-            `[RealtimeUpdater] Error fetching newest messages for ${waveId}:`,
-            error
-          );
-        }
         // Do not update latestFetchedSerialNo on error
+        if (error instanceof DOMException && error.name === "AbortError") {
+          // Fetch was cancelled - this is expected behavior
+        } else {
+          console.error("Error fetching newest messages:", error);
+        }
       } finally {
         cleanupController(waveId);
         isFetchingNewestRef.current[waveId] = false;
@@ -122,8 +117,6 @@ export function useWaveRealtimeUpdater({
       if (!drop?.wave?.id) {
         return;
       }
-
-      console.log("processIncomingDrop", drop, type);
 
       const waveId = drop.wave.id;
 
@@ -156,7 +149,6 @@ export function useWaveRealtimeUpdater({
         const apiDrop = await commonApiFetch<ApiDrop>({
           endpoint: `drops/${drop.id}`,
         });
-        console.log("apiDrop", apiDrop);
         if (apiDrop) {
           updateData({
             key: waveId,

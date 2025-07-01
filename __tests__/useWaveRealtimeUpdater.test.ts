@@ -50,8 +50,9 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.syncNewestMessages).toHaveBeenCalled();
   });
 
-  it("logs on aborted fetch without updating state", async () => {
+  it("handles aborted fetch without logging", async () => {
     const consoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     const store: any = { wave1: { drops: [], latestFetchedSerialNo: 1 } };
     const props = baseProps(store);
     props.syncNewestMessages = jest
@@ -67,8 +68,11 @@ describe("useWaveRealtimeUpdater", () => {
       );
     });
     await flushPromises();
-    expect(consoleLog).toHaveBeenCalled();
+    // AbortError should not be logged (it's expected behavior)
+    expect(consoleLog).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
     consoleLog.mockRestore();
+    consoleError.mockRestore();
   });
 
   it("logs error when fetch fails", async () => {
