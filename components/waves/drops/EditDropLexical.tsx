@@ -335,7 +335,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
               />
             }
             placeholder={
-              <div className="tw-absolute tw-top-2 tw-left-2 tw-text-iron-500 tw-text-sm tw-pointer-events-none">
+              <div className="tw-absolute tw-top-2 tw-left-3 tw-text-iron-500 tw-text-sm tw-pointer-events-none">
                 Edit message...
               </div>
             }

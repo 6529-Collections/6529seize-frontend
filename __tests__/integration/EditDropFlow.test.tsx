@@ -189,15 +189,15 @@ const createMockDrop = (overrides = {}) => ({
   ...overrides
 });
 
-const createEditHandlers = (store: any, mockSetToast: jest.Mock, mockInvalidateDrops: jest.Mock) => {
+const createEditHandlers = (store: any, mockSetToast: jest.Mock, mockInvalidateDrops: jest.Mock, dropId = 'drop-123') => {
   const handleEdit = () => {
-    store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+    store.dispatch(editSlice.actions.setEditingDropId(dropId));
   };
 
   const handleSave = async (content: string, mentions: any[]) => {
     try {
       await mockedCommonApiPost({
-        endpoint: `drops/drop-123`,
+        endpoint: `drops/${dropId}`,
         body: {
           content,
           mentioned_users: mentions,
@@ -223,6 +223,49 @@ const createEditHandlers = (store: any, mockSetToast: jest.Mock, mockInvalidateD
   };
 
   return { handleEdit, handleSave, handleCancel };
+};
+
+const createCustomEditHandlers = (store: any, mockSetToast: jest.Mock, mockInvalidateDrops: jest.Mock, customSaveLogic: (content: string, mentions: any[]) => Promise<void>) => {
+  const handleEdit = () => {
+    store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+  };
+
+  const handleSave = customSaveLogic;
+
+  const handleCancel = () => {
+    store.dispatch(editSlice.actions.setEditingDropId(null));
+  };
+
+  return { handleEdit, handleSave, handleCancel };
+};
+
+const setupEditTest = (user: any) => {
+  return {
+    async startEdit() {
+      const editButton = screen.getByTestId('edit-button');
+      await user.click(editButton);
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
+      });
+    },
+    async editContent(newContent: string) {
+      const editTextarea = screen.getByTestId('edit-content');
+      await user.clear(editTextarea);
+      await user.type(editTextarea, newContent);
+    },
+    async addToContent(additionalContent: string) {
+      const editTextarea = screen.getByTestId('edit-content');
+      await user.type(editTextarea, additionalContent);
+    },
+    async save() {
+      const saveButton = screen.getByTestId('save-button');
+      await user.click(saveButton);
+    },
+    async cancel() {
+      const cancelButton = screen.getByTestId('cancel-button');
+      await user.click(cancelButton);
+    }
+  };
 };
 
 const createWaveDropProps = (drop: any, onEdit?: () => void) => ({
@@ -310,24 +353,12 @@ describe('Edit Drop Integration Flow', () => {
       (window as any).testHandleCancel = handleCancel;
 
       renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
+      const editTest = setupEditTest(user);
 
-      // Step 1: Click edit button
-      const editButton = screen.getByTestId('edit-button');
-      await user.click(editButton);
-
-      // Wait for edit component to appear
-      await waitFor(() => {
-        expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
-      });
-
-      // Step 2: Edit the content
-      const editTextarea = screen.getByTestId('edit-content');
-      await user.clear(editTextarea);
-      await user.type(editTextarea, 'Updated content');
-
-      // Step 3: Save the changes
-      const saveButton = screen.getByTestId('save-button');
-      await user.click(saveButton);
+      // Complete edit flow
+      await editTest.startEdit();
+      await editTest.editContent('Updated content');
+      await editTest.save();
 
       // Step 4: Verify API call was made
       await waitFor(() => {
@@ -356,22 +387,12 @@ describe('Edit Drop Integration Flow', () => {
       (window as any).testHandleCancel = handleCancel;
       
       renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
+      const editTest = setupEditTest(user);
 
-      // Start edit mode
-      const editButton = screen.getByTestId('edit-button');
-      await user.click(editButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
-      });
-
-      // Make some changes
-      const editTextarea = screen.getByTestId('edit-content');
-      await user.type(editTextarea, ' - with changes');
-
-      // Cancel the edit
-      const cancelButton = screen.getByTestId('cancel-button');
-      await user.click(cancelButton);
+      // Complete cancellation flow
+      await editTest.startEdit();
+      await editTest.addToContent(' - with changes');
+      await editTest.cancel();
 
       // Verify no API call was made
       expect(mockedCommonApiPost).not.toHaveBeenCalled();
@@ -383,9 +404,12 @@ describe('Edit Drop Integration Flow', () => {
 
     it('should handle no-changes save gracefully', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop)} />);
+      const { handleEdit } = createEditHandlers(store, mockSetToast, mockInvalidateDrops);
+      
+      renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
+      const editTest = setupEditTest(user);
 
-      // Start edit mode
+      // Start edit mode directly via Redux for this test
       store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
 
       await waitFor(() => {
@@ -393,8 +417,7 @@ describe('Edit Drop Integration Flow', () => {
       });
 
       // Save without making changes
-      const saveButton = screen.getByTestId('save-button');
-      await user.click(saveButton);
+      await editTest.save();
 
       // Verify no API call was made for unchanged content
       expect(mockedCommonApiPost).not.toHaveBeenCalled();
@@ -410,22 +433,12 @@ describe('Edit Drop Integration Flow', () => {
       (window as any).testHandleSave = handleSave;
 
       renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
+      const editTest = setupEditTest(user);
 
-      // Start edit mode
-      const editButton = screen.getByTestId('edit-button');
-      await user.click(editButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
-      });
-
-      // Edit content
-      const editTextarea = screen.getByTestId('edit-content');
-      await user.type(editTextarea, ' - updated');
-
-      // Attempt to save
-      const saveButton = screen.getByTestId('save-button');
-      await user.click(saveButton);
+      // Complete error scenario flow
+      await editTest.startEdit();
+      await editTest.addToContent(' - updated');
+      await editTest.save();
 
       // Verify error toast is shown
       await waitFor(() => {
@@ -441,8 +454,7 @@ describe('Edit Drop Integration Flow', () => {
       mockedCommonApiPost.mockRejectedValue(new Error('This drop can\'t be edited after 5 minutes'));
 
       const oldDrop = createMockDrop({ created_at: Date.now() - (6 * 60 * 1000) });
-      const handleEdit = () => store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
-      const handleSave = async (content: string, mentions: any[]) => {
+      const customSaveLogic = async (content: string, mentions: any[]) => {
         try {
           await mockedCommonApiPost({
             endpoint: `drops/${oldDrop.id}`,
@@ -458,25 +470,16 @@ describe('Edit Drop Integration Flow', () => {
           });
         }
       };
+      const { handleEdit, handleSave } = createCustomEditHandlers(store, mockSetToast, mockInvalidateDrops, customSaveLogic);
 
       (window as any).testHandleSave = handleSave;
       renderWithProviders(<WaveDrop {...createWaveDropProps(oldDrop, handleEdit)} />);
+      const editTest = setupEditTest(user);
 
-      // Start edit mode
-      const editButton = screen.getByTestId('edit-button');
-      await user.click(editButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
-      });
-
-      // Edit content
-      const editTextarea = screen.getByTestId('edit-content');
-      await user.type(editTextarea, ' - updated');
-
-      // Attempt to save
-      const saveButton = screen.getByTestId('save-button');
-      await user.click(saveButton);
+      // Complete time limit violation flow
+      await editTest.startEdit();
+      await editTest.addToContent(' - updated');
+      await editTest.save();
 
       // Verify time limit error toast is shown
       await waitFor(() => {
@@ -501,21 +504,12 @@ describe('Edit Drop Integration Flow', () => {
       (window as any).testHandleSave = handleSave;
 
       renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
+      const editTest = setupEditTest(user);
 
-      // Start edit, make changes, and save
-      const editButton = screen.getByTestId('edit-button');
-      await user.click(editButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('edit-drop-lexical')).toBeInTheDocument();
-      });
-
-      const editTextarea = screen.getByTestId('edit-content');
-      await user.clear(editTextarea);
-      await user.type(editTextarea, 'Updated content');
-
-      const saveButton = screen.getByTestId('save-button');
-      await user.click(saveButton);
+      // Complete UI update flow
+      await editTest.startEdit();
+      await editTest.editContent('Updated content');
+      await editTest.save();
 
       // Verify the edit mode is closed after successful save
       await waitFor(() => {

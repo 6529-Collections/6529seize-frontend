@@ -102,553 +102,164 @@ describe('Edit Drop Error Scenarios', () => {
     );
   };
 
-  describe('Time Limit Violations', () => {
-    it('should handle exact time limit error message', async () => {
-      const timeLimitError = new Error("This drop can't be edited after 5 minutes");
-      mockedCommonApiPost.mockRejectedValue(timeLimitError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.',
-          type: 'error',
+  // Test utilities to reduce duplication
+  const setupErrorTest = (error: any, customRequest?: Partial<ApiUpdateDropRequest>) => {
+    mockedCommonApiPost.mockRejectedValue(error);
+    const { result } = renderHook(() => useDropUpdateMutation(), {
+      wrapper: createWrapper(),
+    });
+    return {
+      result,
+      triggerMutation: () => {
+        result.current.mutate({
+          dropId: 'drop-123',
+          request: customRequest ? { ...mockRequest, ...customRequest } : mockRequest,
+          currentDrop: mockDrop,
         });
+      },
+    };
+  };
+
+  const expectGenericErrorToast = async () => {
+    await waitFor(() => {
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: 'Failed to update drop. Please try again.',
+        type: 'error',
       });
     });
+  };
 
-    it('should handle variation of time limit error message', async () => {
-      const timeLimitError = new Error("Drop can't be edited after 5 minutes have passed");
-      mockedCommonApiPost.mockRejectedValue(timeLimitError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.',
-          type: 'error',
-        });
+  const expectTimeLimitErrorToast = async () => {
+    await waitFor(() => {
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: 'This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.',
+        type: 'error',
       });
     });
+  };
 
-    it('should handle server response with time limit in different format', async () => {
-      const timeLimitError = new Error("Edit time limit exceeded - can't be edited after creation");
-      mockedCommonApiPost.mockRejectedValue(timeLimitError);
+  const createErrorWithStatus = (message: string, status: number) => {
+    const error = new Error(message);
+    (error as any).status = status;
+    return error;
+  };
 
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
+  const testErrorScenario = async (error: any, expectedToastFn = expectGenericErrorToast, customRequest?: Partial<ApiUpdateDropRequest>) => {
+    const { triggerMutation } = setupErrorTest(error, customRequest);
+    triggerMutation();
+    await expectedToastFn();
+  };
 
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.',
-          type: 'error',
-        });
-      });
-    });
-  });
-
-  describe('Network Failures', () => {
-    it('should handle network timeout errors', async () => {
-      const timeoutError = new Error('Network timeout');
-      timeoutError.name = 'TimeoutError';
-      mockedCommonApiPost.mockRejectedValue(timeoutError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
+  // Generic test runner for multiple similar scenarios
+  const runErrorTests = (testCases: Array<{ 
+    error: any; 
+    desc: string; 
+    expectToast?: () => Promise<void>;
+    customRequest?: Partial<ApiUpdateDropRequest>;
+  }>) => {
+    testCases.forEach(({ error, desc, expectToast = expectGenericErrorToast, customRequest }) => {
+      it(`should handle ${desc}`, async () => {
+        await testErrorScenario(error, expectToast, customRequest);
       });
     });
-
-    it('should handle connection refused errors', async () => {
-      const connectionError = new Error('Connection refused');
-      connectionError.name = 'NetworkError';
-      mockedCommonApiPost.mockRejectedValue(connectionError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle fetch abort errors', async () => {
-      const abortError = new DOMException('Request was aborted', 'AbortError');
-      mockedCommonApiPost.mockRejectedValue(abortError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle offline scenarios', async () => {
-      const offlineError = new Error('Failed to fetch');
-      mockedCommonApiPost.mockRejectedValue(offlineError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-  });
-
-  describe('API Rate Limiting', () => {
-    it('should handle 429 Too Many Requests error', async () => {
-      const rateLimitError = new Error('Too Many Requests');
-      (rateLimitError as any).status = 429;
-      mockedCommonApiPost.mockRejectedValue(rateLimitError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle rate limit with retry-after header info', async () => {
-      const rateLimitError = new Error('Rate limit exceeded. Try again in 60 seconds.');
-      mockedCommonApiPost.mockRejectedValue(rateLimitError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-  });
-
-  describe('Permission and Authorization Errors', () => {
-    it('should handle 401 Unauthorized error', async () => {
-      const unauthorizedError = new Error('Unauthorized');
-      (unauthorizedError as any).status = 401;
-      mockedCommonApiPost.mockRejectedValue(unauthorizedError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle 403 Forbidden error', async () => {
-      const forbiddenError = new Error('Forbidden - You do not have permission to edit this drop');
-      (forbiddenError as any).status = 403;
-      mockedCommonApiPost.mockRejectedValue(forbiddenError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle ownership validation error', async () => {
-      const ownershipError = new Error('You can only edit your own drops');
-      mockedCommonApiPost.mockRejectedValue(ownershipError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-  });
-
-  describe('Content Validation Errors', () => {
-    it('should handle content too long error', async () => {
-      const contentError = new Error('Content exceeds maximum allowed length');
-      mockedCommonApiPost.mockRejectedValue(contentError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: { ...mockRequest, content: 'A'.repeat(10000) },
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle invalid mention error', async () => {
-      const mentionError = new Error('Invalid mention format');
-      mockedCommonApiPost.mockRejectedValue(mentionError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle empty content error', async () => {
-      const emptyContentError = new Error('Content cannot be empty');
-      mockedCommonApiPost.mockRejectedValue(emptyContentError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: { ...mockRequest, content: '' },
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-  });
-
-  describe('Concurrent Edit Conflicts', () => {
-    it('should handle concurrent modification error', async () => {
-      const conflictError = new Error('Drop has been modified by another user');
-      (conflictError as any).status = 409;
-      mockedCommonApiPost.mockRejectedValue(conflictError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle version mismatch error', async () => {
-      const versionError = new Error('Drop version mismatch - please refresh and try again');
-      mockedCommonApiPost.mockRejectedValue(versionError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-  });
-
-  describe('Server Errors', () => {
-    it('should handle 500 Internal Server Error', async () => {
-      const serverError = new Error('Internal Server Error');
-      (serverError as any).status = 500;
-      mockedCommonApiPost.mockRejectedValue(serverError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle 502 Bad Gateway error', async () => {
-      const gatewayError = new Error('Bad Gateway');
-      (gatewayError as any).status = 502;
-      mockedCommonApiPost.mockRejectedValue(gatewayError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle 503 Service Unavailable error', async () => {
-      const serviceError = new Error('Service Unavailable');
-      (serviceError as any).status = 503;
-      mockedCommonApiPost.mockRejectedValue(serviceError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-  });
-
-  describe('Unknown and Edge Case Errors', () => {
-    it('should handle null error objects', async () => {
-      mockedCommonApiPost.mockRejectedValue(null);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle undefined error objects', async () => {
-      mockedCommonApiPost.mockRejectedValue(undefined);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle non-string, non-Error objects', async () => {
-      const weirdError = { code: 'WEIRD_ERROR', details: 'Something unexpected' };
-      mockedCommonApiPost.mockRejectedValue(weirdError);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
-    });
-
-    it('should handle promise rejection with number', async () => {
-      mockedCommonApiPost.mockRejectedValue(404);
-
-      const { result } = renderHook(() => useDropUpdateMutation(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        dropId: 'drop-123',
-        request: mockRequest,
-        currentDrop: mockDrop,
-      });
-
-      await waitFor(() => {
-        expect(mockSetToast).toHaveBeenCalledWith({
-          message: 'Failed to update drop. Please try again.',
-          type: 'error',
-        });
-      });
+  };
+
+  // Centralized error test configuration to eliminate all duplication
+  const errorTestSuites = {
+    'Time Limit Violations': {
+      tests: [
+        "This drop can't be edited after 5 minutes",
+        "Drop can't be edited after 5 minutes have passed",
+        "Edit time limit exceeded - can't be edited after creation"
+      ].map((errorMessage, index) => ({
+        error: new Error(errorMessage),
+        desc: `time limit error variation ${index + 1}`,
+        expectToast: expectTimeLimitErrorToast
+      }))
+    },
+    'Network Failures': {
+      tests: [
+        { message: 'Network timeout', name: 'TimeoutError', desc: 'network timeout errors' },
+        { message: 'Connection refused', name: 'NetworkError', desc: 'connection refused errors' },
+        { message: 'Failed to fetch', name: undefined, desc: 'offline scenarios' },
+        { message: 'Request was aborted', isAbortError: true, desc: 'fetch abort errors' }
+      ].map(({ message, name, isAbortError, desc }) => {
+        let error: any;
+        if (isAbortError) {
+          error = new DOMException(message, 'AbortError');
+        } else {
+          error = new Error(message);
+          if (name) error.name = name;
+        }
+        return { error, desc };
+      })
+    },
+    'API Rate Limiting': {
+      tests: [
+        { message: 'Too Many Requests', status: 429, desc: '429 Too Many Requests error' },
+        { message: 'Rate limit exceeded. Try again in 60 seconds.', desc: 'rate limit with retry-after header info' }
+      ].map(({ message, status, desc }) => ({
+        error: status ? createErrorWithStatus(message, status) : new Error(message),
+        desc
+      }))
+    },
+    'Permission and Authorization Errors': {
+      tests: [
+        { message: 'Unauthorized', status: 401, desc: '401 Unauthorized error' },
+        { message: 'Forbidden - You do not have permission to edit this drop', status: 403, desc: '403 Forbidden error' },
+        { message: 'You can only edit your own drops', desc: 'ownership validation error' }
+      ].map(({ message, status, desc }) => ({
+        error: status ? createErrorWithStatus(message, status) : new Error(message),
+        desc
+      }))
+    },
+    'Content Validation Errors': {
+      tests: [
+        { message: 'Content exceeds maximum allowed length', customRequest: { content: 'A'.repeat(10000) } as Partial<ApiUpdateDropRequest>, desc: 'content too long error' },
+        { message: 'Invalid mention format', desc: 'invalid mention error' },
+        { message: 'Content cannot be empty', customRequest: { content: '' } as Partial<ApiUpdateDropRequest>, desc: 'empty content error' }
+      ].map(({ message, customRequest, desc }) => ({
+        error: new Error(message),
+        desc,
+        customRequest
+      }))
+    },
+    'Concurrent Edit Conflicts': {
+      tests: [
+        { message: 'Drop has been modified by another user', status: 409, desc: 'concurrent modification error' },
+        { message: 'Drop version mismatch - please refresh and try again', desc: 'version mismatch error' }
+      ].map(({ message, status, desc }) => ({
+        error: status ? createErrorWithStatus(message, status) : new Error(message),
+        desc
+      }))
+    },
+    'Server Errors': {
+      tests: [
+        { message: 'Internal Server Error', status: 500 },
+        { message: 'Bad Gateway', status: 502 },
+        { message: 'Service Unavailable', status: 503 }
+      ].map(({ message, status }) => ({
+        error: createErrorWithStatus(message, status),
+        desc: `${status} ${message}`
+      }))
+    },
+    'Unknown and Edge Case Errors': {
+      tests: [
+        { value: null, desc: 'null error objects' },
+        { value: undefined, desc: 'undefined error objects' },
+        { value: { code: 'WEIRD_ERROR', details: 'Something unexpected' }, desc: 'non-string, non-Error objects' },
+        { value: 404, desc: 'promise rejection with number' }
+      ].map(({ value, desc }) => ({
+        error: value,
+        desc
+      }))
+    }
+  };
+
+  // Generate all test suites from configuration
+  Object.entries(errorTestSuites).forEach(([suiteName, { tests }]) => {
+    describe(suiteName, () => {
+      runErrorTests(tests);
     });
   });
 });

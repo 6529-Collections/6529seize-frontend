@@ -66,9 +66,9 @@ const WaveDropPartContentMarkdown: React.FC<
           onQuoteClick={onQuoteClick}
         />
         {drop?.updated_at && drop.updated_at !== drop.created_at && (
-          <span className="tw-text-[10px] tw-leading-none tw-text-iron-500 tw-font-normal">
+          <div className="tw-text-[10px] tw-leading-none tw-text-iron-500 tw-font-normal">
             (edited)
-          </span>
+          </div>
         )}
       </div>
       {part.quoted_drop?.drop_id && (
