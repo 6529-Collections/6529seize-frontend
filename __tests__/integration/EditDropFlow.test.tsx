@@ -1,13 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-// Add ResizeObserver polyfill for tests
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -17,6 +10,13 @@ import { ReactQueryWrapperContext } from '../../components/react-query-wrapper/R
 import { editSlice } from '../../store/editSlice';
 import { ApiDropType } from '../../generated/models/ApiDropType';
 import { commonApiPost } from '../../services/api/common-api';
+
+// Add ResizeObserver polyfill for tests
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
 
 // Mock the API
 jest.mock('../../services/api/common-api', () => ({
@@ -151,52 +151,103 @@ jest.mock('../../components/waves/drops/WaveDropPartContentMarkdown', () => {
 
 const mockedCommonApiPost = commonApiPost as jest.MockedFunction<typeof commonApiPost>;
 
+// Test utilities and factories
+const createMockDrop = (overrides = {}) => ({
+  id: 'drop-123',
+  serial_no: 1,
+  author: { handle: 'testuser' },
+  wave: { id: 'wave-123' },
+  created_at: Date.now() - 60000, // 1 minute ago (within edit window)
+  updated_at: null,
+  title: null,
+  parts: [{ 
+    part_id: 1, 
+    content: 'Original content', 
+    media: [], 
+    quoted_drop: null, 
+    replies_count: 0, 
+    quotes_count: 0 
+  }],
+  parts_count: 1,
+  referenced_nfts: [],
+  mentioned_users: [],
+  metadata: [],
+  rating: 0,
+  realtime_rating: 0,
+  rating_prediction: 0,
+  top_raters: [],
+  raters_count: 0,
+  context_profile_context: null,
+  subscribed_actions: [],
+  is_signed: false,
+  reply_to: null,
+  rank: null,
+  drop_type: ApiDropType.Chat,
+  type: 'FULL' as any,
+  stableKey: 'drop-123',
+  stableHash: 'hash-123',
+  ...overrides
+});
+
+const createEditHandlers = (store: any, mockSetToast: jest.Mock, mockInvalidateDrops: jest.Mock) => {
+  const handleEdit = () => {
+    store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
+  };
+
+  const handleSave = async (content: string, mentions: any[]) => {
+    try {
+      await mockedCommonApiPost({
+        endpoint: `drops/drop-123`,
+        body: {
+          content,
+          mentioned_users: mentions,
+        },
+      });
+      
+      mockSetToast({
+        message: 'Drop updated successfully',
+        type: 'success',
+      });
+      mockInvalidateDrops();
+      store.dispatch(editSlice.actions.setEditingDropId(null));
+    } catch (error) {
+      mockSetToast({
+        message: 'Failed to update drop. Please try again.',
+        type: 'error',
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    store.dispatch(editSlice.actions.setEditingDropId(null));
+  };
+
+  return { handleEdit, handleSave, handleCancel };
+};
+
+const createWaveDropProps = (drop: any, onEdit?: () => void) => ({
+  drop,
+  previousDrop: null,
+  nextDrop: null,
+  showWaveInfo: false,
+  activeDrop: null,
+  showReplyAndQuote: true,
+  location: 0 as any,
+  dropViewDropId: null,
+  onReply: jest.fn(),
+  onQuote: jest.fn(),
+  onReplyClick: jest.fn(),
+  onQuoteClick: jest.fn(),
+  onEdit: onEdit || jest.fn(),
+});
+
 describe('Edit Drop Integration Flow', () => {
   let queryClient: QueryClient;
   let store: any;
   let mockSetToast: jest.Mock;
   let mockInvalidateDrops: jest.Mock;
-
-  const mockDrop = {
-    id: 'drop-123',
-    serial_no: 1,
-    author: { handle: 'testuser' },
-    wave: { id: 'wave-123' },
-    created_at: Date.now() - 60000, // 1 minute ago (within edit window)
-    updated_at: null,
-    title: null,
-    parts: [{ 
-      part_id: 1, 
-      content: 'Original content', 
-      media: [], 
-      quoted_drop: null, 
-      replies_count: 0, 
-      quotes_count: 0 
-    }],
-    parts_count: 1,
-    referenced_nfts: [],
-    mentioned_users: [],
-    metadata: [],
-    rating: 0,
-    realtime_rating: 0,
-    rating_prediction: 0,
-    top_raters: [],
-    raters_count: 0,
-    context_profile_context: null,
-    subscribed_actions: [],
-    is_signed: false,
-    reply_to: null,
-    rank: null,
-    drop_type: ApiDropType.Chat,
-    type: 'FULL' as any,
-    stableKey: 'drop-123',
-    stableHash: 'hash-123'
-  };
-
-  const authUser = {
-    handle: 'testuser',
-    profile_id: 'profile-123'
-  };
+  let mockDrop: any;
+  const authUser = { handle: 'testuser', profile_id: 'profile-123' };
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -207,13 +258,12 @@ describe('Edit Drop Integration Flow', () => {
     });
 
     store = configureStore({
-      reducer: {
-        edit: editSlice.reducer,
-      },
+      reducer: { edit: editSlice.reducer },
     });
 
     mockSetToast = jest.fn();
     mockInvalidateDrops = jest.fn();
+    mockDrop = createMockDrop();
 
     // Clear any stored edit content and handlers
     delete (window as any).editContent;
@@ -249,71 +299,17 @@ describe('Edit Drop Integration Flow', () => {
   describe('Complete Edit Flow', () => {
     it('should complete full edit flow: click edit → edit content → save → API call', async () => {
       const user = userEvent.setup();
-      
-      // Mock successful API response
-      const updatedDrop = {
-        ...mockDrop,
+      const updatedDrop = createMockDrop({
         parts: [{ ...mockDrop.parts[0], content: 'Updated content' }],
         updated_at: Date.now(),
-      };
+      });
       mockedCommonApiPost.mockResolvedValue(updatedDrop);
 
-      // Create a function to handle edit that dispatches to Redux and calls the mutation
-      const handleEdit = () => {
-        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
-      };
-
-      // Create a function to handle save that uses the mutation
-      const handleSave = async (content: string, mentions: any[]) => {
-        try {
-          const updatedDrop = await mockedCommonApiPost({
-            endpoint: `drops/${mockDrop.id}`,
-            body: {
-              content,
-              mentioned_users: mentions,
-            },
-          });
-          
-          mockSetToast({
-            message: 'Drop updated successfully',
-            type: 'success',
-          });
-          mockInvalidateDrops();
-          store.dispatch(editSlice.actions.setEditingDropId(null));
-        } catch (error) {
-          mockSetToast({
-            message: 'Failed to update drop. Please try again.',
-            type: 'error',
-          });
-        }
-      };
-
-      const handleCancel = () => {
-        store.dispatch(editSlice.actions.setEditingDropId(null));
-      };
-
-      // Set global handlers for the mock to use
+      const { handleEdit, handleSave, handleCancel } = createEditHandlers(store, mockSetToast, mockInvalidateDrops);
       (window as any).testHandleSave = handleSave;
       (window as any).testHandleCancel = handleCancel;
 
-      // Render the WaveDrop component with edit capability
-      renderWithProviders(
-        <WaveDrop
-          drop={mockDrop}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={false}
-          activeDrop={null}
-          showReplyAndQuote={true}
-          location={0 as any}
-          dropViewDropId={null}
-          onReply={jest.fn()}
-          onQuote={jest.fn()}
-          onReplyClick={jest.fn()}
-          onQuoteClick={jest.fn()}
-          onEdit={handleEdit} // Enable edit functionality with actual handler
-        />
-      );
+      renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
 
       // Step 1: Click edit button
       const editButton = screen.getByTestId('edit-button');
@@ -356,35 +352,10 @@ describe('Edit Drop Integration Flow', () => {
 
     it('should handle edit cancellation flow', async () => {
       const user = userEvent.setup();
-      
-      // Set up handlers
-      const handleEdit = () => {
-        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
-      };
-
-      const handleCancel = () => {
-        store.dispatch(editSlice.actions.setEditingDropId(null));
-      };
-
+      const { handleEdit, handleCancel } = createEditHandlers(store, mockSetToast, mockInvalidateDrops);
       (window as any).testHandleCancel = handleCancel;
       
-      renderWithProviders(
-        <WaveDrop
-          drop={mockDrop}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={false}
-          activeDrop={null}
-          showReplyAndQuote={true}
-          location={0 as any}
-          dropViewDropId={null}
-          onReply={jest.fn()}
-          onQuote={jest.fn()}
-          onReplyClick={jest.fn()}
-          onQuoteClick={jest.fn()}
-          onEdit={handleEdit}
-        />
-      );
+      renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
 
       // Start edit mode
       const editButton = screen.getByTestId('edit-button');
@@ -412,24 +383,7 @@ describe('Edit Drop Integration Flow', () => {
 
     it('should handle no-changes save gracefully', async () => {
       const user = userEvent.setup();
-      
-      renderWithProviders(
-        <WaveDrop
-          drop={mockDrop}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={false}
-          activeDrop={null}
-          showReplyAndQuote={true}
-          location={0 as any}
-          dropViewDropId={null}
-          onReply={jest.fn()}
-          onQuote={jest.fn()}
-          onReplyClick={jest.fn()}
-          onQuoteClick={jest.fn()}
-          onEdit={jest.fn()}
-        />
-      );
+      renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop)} />);
 
       // Start edit mode
       store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
@@ -450,59 +404,12 @@ describe('Edit Drop Integration Flow', () => {
   describe('Error Handling in Integration', () => {
     it('should handle API errors during save', async () => {
       const user = userEvent.setup();
-      
-      // Mock API error
-      const apiError = new Error('Network error');
-      mockedCommonApiPost.mockRejectedValue(apiError);
+      mockedCommonApiPost.mockRejectedValue(new Error('Network error'));
 
-      // Set up handlers
-      const handleEdit = () => {
-        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
-      };
-
-      const handleSave = async (content: string, mentions: any[]) => {
-        try {
-          await mockedCommonApiPost({
-            endpoint: `drops/${mockDrop.id}`,
-            body: {
-              content,
-              mentioned_users: mentions,
-            },
-          });
-          
-          mockSetToast({
-            message: 'Drop updated successfully',
-            type: 'success',
-          });
-          mockInvalidateDrops();
-          store.dispatch(editSlice.actions.setEditingDropId(null));
-        } catch (error) {
-          mockSetToast({
-            message: 'Failed to update drop. Please try again.',
-            type: 'error',
-          });
-        }
-      };
-
+      const { handleEdit, handleSave } = createEditHandlers(store, mockSetToast, mockInvalidateDrops);
       (window as any).testHandleSave = handleSave;
 
-      renderWithProviders(
-        <WaveDrop
-          drop={mockDrop}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={false}
-          activeDrop={null}
-          showReplyAndQuote={true}
-          location={0 as any}
-          dropViewDropId={null}
-          onReply={jest.fn()}
-          onQuote={jest.fn()}
-          onReplyClick={jest.fn()}
-          onQuoteClick={jest.fn()}
-          onEdit={handleEdit}
-        />
-      );
+      renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
 
       // Start edit mode
       const editButton = screen.getByTestId('edit-button');
@@ -531,36 +438,17 @@ describe('Edit Drop Integration Flow', () => {
 
     it('should handle time limit violations', async () => {
       const user = userEvent.setup();
-      
-      // Mock time limit error
-      const timeLimitError = new Error('This drop can\'t be edited after 5 minutes');
-      mockedCommonApiPost.mockRejectedValue(timeLimitError);
+      mockedCommonApiPost.mockRejectedValue(new Error('This drop can\'t be edited after 5 minutes'));
 
-      // Create a drop that's older than 5 minutes
-      const oldDrop = {
-        ...mockDrop,
-        created_at: Date.now() - (6 * 60 * 1000), // 6 minutes ago
-      };
-
-      // Set up handlers
-      const handleEdit = () => {
-        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
-      };
-
+      const oldDrop = createMockDrop({ created_at: Date.now() - (6 * 60 * 1000) });
+      const handleEdit = () => store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
       const handleSave = async (content: string, mentions: any[]) => {
         try {
           await mockedCommonApiPost({
             endpoint: `drops/${oldDrop.id}`,
-            body: {
-              content,
-              mentioned_users: mentions,
-            },
+            body: { content, mentioned_users: mentions },
           });
-          
-          mockSetToast({
-            message: 'Drop updated successfully',
-            type: 'success',
-          });
+          mockSetToast({ message: 'Drop updated successfully', type: 'success' });
           mockInvalidateDrops();
           store.dispatch(editSlice.actions.setEditingDropId(null));
         } catch (error) {
@@ -572,24 +460,7 @@ describe('Edit Drop Integration Flow', () => {
       };
 
       (window as any).testHandleSave = handleSave;
-
-      renderWithProviders(
-        <WaveDrop
-          drop={oldDrop}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={false}
-          activeDrop={null}
-          showReplyAndQuote={true}
-          location={0 as any}
-          dropViewDropId={null}
-          onReply={jest.fn()}
-          onQuote={jest.fn()}
-          onReplyClick={jest.fn()}
-          onQuoteClick={jest.fn()}
-          onEdit={handleEdit}
-        />
-      );
+      renderWithProviders(<WaveDrop {...createWaveDropProps(oldDrop, handleEdit)} />);
 
       // Start edit mode
       const editButton = screen.getByTestId('edit-button');
@@ -620,63 +491,16 @@ describe('Edit Drop Integration Flow', () => {
   describe('Real-time Updates', () => {
     it('should update UI after successful edit', async () => {
       const user = userEvent.setup();
-      
-      const updatedDrop = {
-        ...mockDrop,
+      const updatedDrop = createMockDrop({
         parts: [{ ...mockDrop.parts[0], content: 'Updated content' }],
         updated_at: Date.now(),
-      };
+      });
       mockedCommonApiPost.mockResolvedValue(updatedDrop);
 
-      // Set up handlers like other tests
-      const handleEdit = () => {
-        store.dispatch(editSlice.actions.setEditingDropId('drop-123'));
-      };
-
-      const handleSave = async (content: string, mentions: any[]) => {
-        try {
-          const updatedDrop = await mockedCommonApiPost({
-            endpoint: `drops/${mockDrop.id}`,
-            body: {
-              content,
-              mentioned_users: mentions,
-            },
-          });
-          
-          mockSetToast({
-            message: 'Drop updated successfully',
-            type: 'success',
-          });
-          mockInvalidateDrops();
-          store.dispatch(editSlice.actions.setEditingDropId(null));
-        } catch (error) {
-          mockSetToast({
-            message: 'Failed to update drop. Please try again.',
-            type: 'error',
-          });
-        }
-      };
-
-      // Set global handlers for the mock to use
+      const { handleEdit, handleSave } = createEditHandlers(store, mockSetToast, mockInvalidateDrops);
       (window as any).testHandleSave = handleSave;
 
-      renderWithProviders(
-        <WaveDrop
-          drop={mockDrop}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={false}
-          activeDrop={null}
-          showReplyAndQuote={true}
-          location={0 as any}
-          dropViewDropId={null}
-          onReply={jest.fn()}
-          onQuote={jest.fn()}
-          onReplyClick={jest.fn()}
-          onQuoteClick={jest.fn()}
-          onEdit={handleEdit}
-        />
-      );
+      renderWithProviders(<WaveDrop {...createWaveDropProps(mockDrop, handleEdit)} />);
 
       // Start edit, make changes, and save
       const editButton = screen.getByTestId('edit-button');
