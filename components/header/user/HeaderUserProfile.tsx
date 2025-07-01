@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import { useAuth } from "../../auth/Auth";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useAuth } from "@/components/auth/Auth";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface UserContent {
   readonly label: string;
@@ -86,6 +86,7 @@ export default function HeaderUserProfile({
         )}
         <div className="tw-flex tw-gap-x-2 tw-items-center">
           <div
+            data-testid="status-circle"
             data-tooltip-id="status-tooltip"
             data-tooltip-content={
               isConnected

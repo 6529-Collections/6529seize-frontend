@@ -12,6 +12,8 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "test": "jest --silent --verbose=false --coverageReporters=none",
+    "test-failed-json": "jest --json --outputFile=test-results/jest-results.json ; npm run test-extract-failed-names",
+    "test-extract-failed-names": "node test-results/list-failed-tests.cjs",
     "test:cov": "CI=1 jest --coverage --watchAll=false --verbose=false 2>&1 | grep -A 10 '^FAIL' || true",
     "test:cov:summary": "CI=1 jest --coverage --watchAll=false --silent --reporters=default --verbose=false 2>&1 | grep -E '(PASS|FAIL|failed|passed)' || true",
     "test:cov:verbose": "CI=1 jest --coverage --watchAll=false",

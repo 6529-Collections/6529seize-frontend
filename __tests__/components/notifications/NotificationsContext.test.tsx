@@ -78,7 +78,7 @@ describe("push notification action handling", () => {
   it("redirects based on notification data", async () => {
     const push = jest.fn();
     jest
-      .spyOn(require("next/router"), "useRouter")
+      .spyOn(require("next/navigation"), "useRouter")
       .mockReturnValue({ push } as any);
 
     const addListenerMock = jest.fn((evt, cb) => {

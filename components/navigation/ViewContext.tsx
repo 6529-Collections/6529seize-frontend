@@ -10,8 +10,8 @@ import React, {
   useEffect,
 } from "react";
 import type { ViewKey, NavItem } from "./navTypes";
-import { commonApiFetch } from "../../services/api/common-api";
-import { ApiWave } from "../../generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useSearchParams, useRouter } from "next/navigation";
 
 interface ViewContextType {

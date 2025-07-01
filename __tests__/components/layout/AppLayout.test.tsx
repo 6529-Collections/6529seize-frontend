@@ -4,25 +4,42 @@ import React from "react";
 const useViewContext = jest.fn();
 const registerRef = jest.fn();
 const setHeaderRef = jest.fn();
-const useRouter = jest.fn();
+const usePathname = jest.fn();
+const useSearchParams = jest.fn();
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="header" />);
-jest.mock("../../../components/navigation/ViewContext", () => ({
+jest.mock("@/components/navigation/ViewContext", () => ({
   useViewContext: () => useViewContext(),
 }));
-jest.mock("../../../components/navigation/BottomNavigation", () => () => <div data-testid="bottom-nav" />);
-jest.mock("../../../components/brain/mobile/BrainMobileWaves", () => () => <div data-testid="waves" />);
-jest.mock("../../../components/brain/mobile/BrainMobileMessages", () => () => <div data-testid="messages" />);
-jest.mock("../../../components/brain/my-stream/layout/LayoutContext", () => ({ useLayout: () => ({ registerRef }) }));
-jest.mock("../../../contexts/HeaderContext", () => ({ useHeaderContext: () => ({ setHeaderRef }) }));
-jest.mock("../../../hooks/useDeepLinkNavigation", () => ({ useDeepLinkNavigation: jest.fn() }));
-jest.mock("next/router", () => ({ useRouter: () => useRouter() }));
+jest.mock("@/components/navigation/BottomNavigation", () => () => (
+  <div data-testid="bottom-nav" />
+));
+jest.mock("@/components/brain/mobile/BrainMobileWaves", () => () => (
+  <div data-testid="waves" />
+));
+jest.mock("@/components/brain/mobile/BrainMobileMessages", () => () => (
+  <div data-testid="messages" />
+));
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ registerRef }),
+}));
+jest.mock("@/contexts/HeaderContext", () => ({
+  useHeaderContext: () => ({ setHeaderRef }),
+}));
+jest.mock("@/hooks/useDeepLinkNavigation", () => ({
+  useDeepLinkNavigation: jest.fn(),
+}));
+jest.mock("next/navigation", () => ({
+  usePathname: () => usePathname(),
+  useSearchParams: () => useSearchParams(),
+}));
 
-const AppLayout = require("../../../components/layout/AppLayout").default;
+const AppLayout = require("@/components/layout/AppLayout").default;
 
 describe("AppLayout", () => {
   beforeEach(() => {
-    useRouter.mockReturnValue({ pathname: "/", query: {}, push: jest.fn() });
+    usePathname.mockReturnValue("/");
+    useSearchParams.mockReturnValue({ get: () => null } as any);
   });
 
   it("renders main content when no active view", () => {

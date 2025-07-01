@@ -25,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "Mint | The Memes",
     ogImage: `${process.env.BASE_ENDPOINT}/memes-preview.png`,
+    description: "Collections",
     twitterCard: "summary_large_image",
   });
 }

@@ -1,10 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
-import Page, {
-  getServerSideProps,
-} from "@/pages/tools/app-wallets/[app-wallet-address]";
-import { AuthContext } from "@/components/auth/Auth";
-import { formatAddress } from "@/helpers/Helpers";
+import { getServerSideProps } from "@/pages/tools/app-wallets/[app-wallet-address]";
 
 jest.mock("next/dynamic", () => () => (p: any) => (
   <div data-testid="wallet" {...p} />
@@ -30,15 +25,6 @@ jest.mock("@/contexts/TitleContext", () => ({
   useSetStreamHasNewItems: jest.fn(),
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
-
-const mockedFormat = formatAddress as jest.Mock;
-
-const renderPage = (address: string, setTitle: jest.Mock) =>
-  render(
-    <AuthContext.Provider value={{ setTitle } as any}>
-      <Page pageProps={{ address }} />
-    </AuthContext.Provider>
-  );
 
 describe("App Wallet page", () => {
   it("getServerSideProps returns metadata", async () => {
