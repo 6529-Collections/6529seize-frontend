@@ -69,7 +69,7 @@ jest.mock("@/services/6529api");
 
 beforeEach(() => {
   jest.clearAllMocks();
-  process.env.API_ENDPOINT = "http://api";
+  process.env.API_ENDPOINT = "https://test.6529.io";
   (useRouter as jest.Mock).mockReturnValue({
     isReady: true,
     query: { id: "1" },
@@ -181,7 +181,7 @@ describe("MemeLabPage", () => {
     render(<LabPage wallets={["0xabc"]} />);
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenCalledWith(
-        "http://api/api/lab_extended_data?id=1"
+        "https://test.6529.io/api/lab_extended_data?id=1"
       )
     );
     await waitFor(() =>

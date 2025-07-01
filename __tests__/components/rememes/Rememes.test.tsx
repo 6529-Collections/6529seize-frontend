@@ -68,14 +68,14 @@ describe("Rememes component", () => {
     render(<Rememes />);
     await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
     expect(fetchUrl).toHaveBeenCalledWith(
-      "http://test.6529.io/api/rememes?page_size=40&page=1"
+      "https://test.6529.io/api/rememes?page_size=40&page=1"
     );
     await screen.findByText("Sort: Random");
     await userEvent.click(screen.getByText("Sort: Random"));
     await userEvent.click(screen.getByText(RememeSort.CREATED_ASC));
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenLastCalledWith(
-        "http://test.6529.io/api/rememes?page_size=40&page=1&sort=created_at&sort_direction=desc"
+        "https://test.6529.io/api/rememes?page_size=40&page=1&sort=created_at&sort_direction=desc"
       )
     );
   });

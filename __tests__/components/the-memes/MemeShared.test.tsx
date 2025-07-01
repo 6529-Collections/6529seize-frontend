@@ -13,7 +13,7 @@ const originalEnv = { ...process.env };
 describe("getSharedServerSideProps", () => {
   beforeEach(() => {
     Object.assign(process.env, {
-      API_ENDPOINT: "http://api",
+      API_ENDPOINT: "https://test.6529.io",
       BASE_ENDPOINT: "http://base",
     });
   });
@@ -28,7 +28,9 @@ describe("getSharedServerSideProps", () => {
     const req = { query: { id: "1", focus: MEME_FOCUS.THE_ART } } as any;
     const result = await getSharedServerSideProps(req, MEMELAB_CONTRACT);
     expect(fetchUrl).toHaveBeenCalledWith(
-      "http://api/api/nfts_memelab?contract=" + MEMELAB_CONTRACT + "&id=1"
+      "https://test.6529.io/api/nfts_memelab?contract=" +
+        MEMELAB_CONTRACT +
+        "&id=1"
     );
     expect(result).toEqual({
       props: {
@@ -50,7 +52,7 @@ describe("getSharedServerSideProps", () => {
     const req = { query: { id: "2" } } as any;
     const result = await getSharedServerSideProps(req, "0xabc");
     expect(fetchUrl).toHaveBeenCalledWith(
-      "http://api/api/nfts?contract=0xabc&id=2"
+      "https://test.6529.io/api/nfts?contract=0xabc&id=2"
     );
     expect(result.props.name).toBe("The Memes #2");
     expect(result.props.image).toBe("http://base/6529io.png");
