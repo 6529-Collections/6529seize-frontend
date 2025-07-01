@@ -97,7 +97,7 @@ const TestEditContext = React.createContext<{
 // Mock WaveDropPartContentMarkdown to check for edit state
 jest.mock('../../components/waves/drops/WaveDropPartContentMarkdown', () => {
   const React = require('react');
-  const { useSelector, useContext } = require('react-redux');
+  const { useSelector } = require('react-redux');
   
   return function MockWaveDropPartContentMarkdown({ part }: any) {
     const editState = useSelector((state: any) => state.edit);
@@ -211,6 +211,7 @@ const createEditHandlers = (store: any, mockSetToast: jest.Mock, mockInvalidateD
       mockInvalidateDrops();
       store.dispatch(editSlice.actions.setEditingDropId(null));
     } catch (error) {
+      // Explicitly handle test error scenario
       mockSetToast({
         message: 'Failed to update drop. Please try again.',
         type: 'error',
@@ -464,6 +465,7 @@ describe('Edit Drop Integration Flow', () => {
           mockInvalidateDrops();
           store.dispatch(editSlice.actions.setEditingDropId(null));
         } catch (error) {
+          // Explicitly handle time limit error in test
           mockSetToast({
             message: 'This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.',
             type: 'error',

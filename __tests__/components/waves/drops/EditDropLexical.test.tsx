@@ -6,27 +6,45 @@ import { ApiDropMentionedUser } from '../../../../generated/models/ApiDropMentio
 
 // Mock all Lexical dependencies
 jest.mock('@lexical/list', () => ({
-  ListNode: class MockListNode {},
-  ListItemNode: class MockListItemNode {},
+  ListNode: class MockListNode {
+    static getType() { return 'list'; }
+  },
+  ListItemNode: class MockListItemNode {
+    static getType() { return 'listitem'; }
+  },
 }));
 
 jest.mock('@lexical/rich-text', () => ({
-  HeadingNode: class MockHeadingNode {},
-  QuoteNode: class MockQuoteNode {},
+  HeadingNode: class MockHeadingNode {
+    static getType() { return 'heading'; }
+  },
+  QuoteNode: class MockQuoteNode {
+    static getType() { return 'quote'; }
+  },
 }));
 
 jest.mock('@lexical/react/LexicalHorizontalRuleNode', () => ({
-  HorizontalRuleNode: class MockHorizontalRuleNode {},
+  HorizontalRuleNode: class MockHorizontalRuleNode {
+    static getType() { return 'horizontalrule'; }
+  },
 }));
 
 jest.mock('@lexical/code', () => ({
-  CodeHighlightNode: class MockCodeHighlightNode {},
-  CodeNode: class MockCodeNode {},
+  CodeHighlightNode: class MockCodeHighlightNode {
+    static getType() { return 'code-highlight'; }
+  },
+  CodeNode: class MockCodeNode {
+    static getType() { return 'code'; }
+  },
 }));
 
 jest.mock('@lexical/link', () => ({
-  AutoLinkNode: class MockAutoLinkNode {},
-  LinkNode: class MockLinkNode {},
+  AutoLinkNode: class MockAutoLinkNode {
+    static getType() { return 'autolink'; }
+  },
+  LinkNode: class MockLinkNode {
+    static getType() { return 'link'; }
+  },
 }));
 
 jest.mock('@lexical/react/LexicalComposer', () => ({
@@ -117,12 +135,16 @@ jest.mock('lexical', () => ({
 
 // Mock the custom plugins and nodes
 jest.mock('../../../../components/drops/create/lexical/nodes/MentionNode', () => ({
-  MentionNode: class MockMentionNode {},
+  MentionNode: class MockMentionNode {
+    static getType() { return 'mention'; }
+  },
   $createMentionNode: jest.fn(() => ({ type: 'mention' })),
 }));
 
 jest.mock('../../../../components/drops/create/lexical/nodes/HashtagNode', () => ({
-  HashtagNode: class MockHashtagNode {},
+  HashtagNode: class MockHashtagNode {
+    static getType() { return 'hashtag'; }
+  },
 }));
 
 jest.mock('../../../../components/drops/create/lexical/transformers/MentionTransformer', () => ({
