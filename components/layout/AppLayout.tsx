@@ -9,6 +9,9 @@ import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "../../contexts/HeaderContext";
 import { useDeepLinkNavigation } from "../../hooks/useDeepLinkNavigation";
 import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
+import { useSelector } from "react-redux";
+import { selectEditingDropId } from "../../store/editSlice";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -27,6 +30,9 @@ export default function AppLayout({ children }: Props) {
   const router = useRouter();
   const isSingleDropOpen = typeof router.query.drop === "string";
   const isStreamRoute = router.pathname.startsWith("/my-stream");
+  const editingDropId = useSelector(selectEditingDropId);
+  const { isApp } = useDeviceInfo();
+  const isEditingOnMobile = isApp && editingDropId !== null;
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -51,7 +57,7 @@ export default function AppLayout({ children }: Props) {
       {!isSingleDropOpen && !isStreamRoute && (
         <div className="tw-h-16 tw-w-full" />
       )}
-      {!isSingleDropOpen && <BottomNavigation />}
+      {!isSingleDropOpen && !isEditingOnMobile && <BottomNavigation />}
     </div>
   );
 }

@@ -936,6 +936,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setIsStormMode(true);
   };
 
+  // Clear active reply/quote when entering edit mode on mobile
+  useEffect(() => {
+    if (isApp && editingDropId && activeDrop) {
+      onCancelReplyQuote();
+    }
+  }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
+
   // Hide CreateDrop area on mobile when editing
   if (isApp && editingDropId) {
     return null;

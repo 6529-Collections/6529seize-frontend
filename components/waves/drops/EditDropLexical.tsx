@@ -162,16 +162,32 @@ function FocusPlugin({ isApp }: { isApp: boolean }) {
   const [editor] = useLexicalComposerContext();
   
   useEffect(() => {
-    if (isApp) {
-      // For mobile, single delayed focus to avoid keyboard flicker
-      const timeout = setTimeout(() => {
-        editor.focus();
-      }, 350); // Wait for menu close animation
+    const focusEditor = () => {
+      // Try Lexical's focus first
+      editor.focus();
       
-      return () => clearTimeout(timeout);
+      // Also try DOM focus as fallback
+      requestAnimationFrame(() => {
+        const contentEditable = document.querySelector('[contenteditable="true"]') as HTMLElement;
+        if (contentEditable && document.activeElement !== contentEditable) {
+          contentEditable.focus();
+          contentEditable.click(); // For mobile keyboard
+        }
+      });
+    };
+
+    if (isApp) {
+      // Multiple timing strategies for mobile reliability
+      const timeouts = [
+        setTimeout(focusEditor, 100),  // Quick attempt
+        setTimeout(focusEditor, 350),  // After menu close
+        setTimeout(focusEditor, 600),  // Final attempt
+      ];
+      
+      return () => timeouts.forEach(clearTimeout);
     } else {
       // Desktop: immediate focus
-      editor.focus();
+      focusEditor();
     }
   }, [editor, isApp]);
   
@@ -404,13 +420,13 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <div className="tw-flex tw-gap-x-3">
             <button
               onClick={onCancel}
-              className="tw-flex-1 tw-bg-iron-800 tw-text-iron-300 tw-border-0 tw-rounded-lg tw-py-3 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-iron-700 tw-transition-colors tw-duration-200"
+              className="tw-flex-1 tw-bg-iron-800 tw-text-iron-300 tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-iron-700 tw-transition-colors tw-duration-200"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="tw-flex-1 tw-bg-primary-500 tw-text-white tw-border-0 tw-rounded-lg tw-py-3 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-primary-600 tw-transition-colors tw-duration-200"
+              className="tw-flex-1 tw-bg-primary-500 tw-text-white tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-4 tw-font-semibold tw-text-base active:tw-bg-primary-600 tw-transition-colors tw-duration-200"
             >
               Save
             </button>
