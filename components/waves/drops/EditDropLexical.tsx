@@ -159,15 +159,17 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 // Plugin to handle focus on mount
 function FocusPlugin({ isApp }: { isApp: boolean }) {
   const [editor] = useLexicalComposerContext();
-  
+
   useEffect(() => {
     const focusEditor = () => {
       // Try Lexical's focus first
       editor.focus();
-      
+
       // Also try DOM focus as fallback
       requestAnimationFrame(() => {
-        const contentEditable = document.querySelector('[contenteditable="true"]') as HTMLElement;
+        const contentEditable = document.querySelector(
+          '[contenteditable="true"]'
+        ) as HTMLElement;
         if (contentEditable && document.activeElement !== contentEditable) {
           contentEditable.focus();
           contentEditable.click(); // For mobile keyboard
@@ -178,18 +180,18 @@ function FocusPlugin({ isApp }: { isApp: boolean }) {
     if (isApp) {
       // Multiple timing strategies for mobile reliability
       const timeouts = [
-        setTimeout(focusEditor, 100),  // Quick attempt
-        setTimeout(focusEditor, 350),  // After menu close
-        setTimeout(focusEditor, 600),  // Final attempt
+        setTimeout(focusEditor, 100), // Quick attempt
+        setTimeout(focusEditor, 350), // After menu close
+        setTimeout(focusEditor, 600), // Final attempt
       ];
-      
+
       return () => timeouts.forEach(clearTimeout);
     } else {
       // Desktop: immediate focus
       focusEditor();
     }
   }, [editor, isApp]);
-  
+
   return null;
 }
 
@@ -345,24 +347,21 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     });
   }, [editorState, mentionedUsers, onSave, initialContent, onCancel]);
 
-
   return (
     <div className="tw-w-full">
       <LexicalComposer initialConfig={initialConfig}>
-        <div ref={editorRef}>
+        <div ref={editorRef} className="tw-relative">
           <RichTextPlugin
             contentEditable={
               <div className="tw-relative">
                 <ContentEditable
-                  className="tw-w-full tw-p-2 tw-pr-10 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
+                  className="tw-w-full tw-py-2.5 tw-pl-3 tw-pr-10 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
                   style={{
                     fontFamily: "inherit",
                     lineHeight: "1.4",
                   }}
                 />
-                <div className="tw-absolute tw-top-2 tw-right-2">
-                  <CreateDropEmojiPicker />
-                </div>
+                <CreateDropEmojiPicker top="tw-top-1" />
               </div>
             }
             placeholder={
@@ -403,8 +402,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
           >
             cancel
-          </button>
-          {" "}• enter to{" "}
+          </button>{" "}
+          • enter to{" "}
           <button
             onClick={handleSave}
             className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
@@ -413,7 +412,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           </button>
         </div>
       )}
-      
+
       {isApp && (
         <div className="tw-mt-3 tw-mb-2">
           <div className="tw-flex tw-gap-x-2">
