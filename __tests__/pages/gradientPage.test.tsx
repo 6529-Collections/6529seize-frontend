@@ -11,11 +11,11 @@ const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const setTitle = jest.fn();
-  const authContextValue = useMemo(
-    () => ({ setTitle }),
-    [setTitle]
-  );
-  return <AuthContext.Provider value={authContextValue as any}>{children}</AuthContext.Provider>
+  const authContextValue = useMemo(() => ({ setTitle }), [setTitle]);
+  return (
+    <AuthContext.Provider value={authContextValue as any}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
