@@ -88,7 +88,3 @@ export async function generateMetadata(): Promise<Metadata> {
 
     Signed-off-by: Jane Developer <12345+jane-dev@users.noreply.github.com>
     ```
-
-## Temporary amendment
-
-You don't need to run tests every time because they are failing on main currently.
