@@ -1,24 +1,25 @@
 import React from 'react';
+/* eslint-disable react/display-name */
 import { render, screen } from '@testing-library/react';
-import MediaPage from '../../../../pages/about/media/index';
+import PressPage from '@/app/about/press/page';
 
-jest.mock('../../../../components/header/Header', () => () => <div data-testid="header">Header</div>);
-jest.mock('../../../../components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
+jest.mock('@/components/header/Header', () => () => <div data-testid="header">Header</div>);
+jest.mock('@/components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
 
-describe('MediaPage', () => {
-  const renderComponent = () => render(<MediaPage />);
+describe('PressPage', () => {
+  const renderComponent = () => render(<PressPage />);
 
   it('renders the page title', () => {
     renderComponent();
     const title = document.querySelector('title');
-    expect(title?.textContent).toBe('MEDIA CENTER - 6529.io');
+    expect(title?.textContent).toBe('PRESS - 6529.io');
   });
 
   it('includes canonical link', () => {
     renderComponent();
     const canonical = document.querySelector('link[rel="canonical"]');
     expect(canonical).toBeInTheDocument();
-    expect(canonical?.getAttribute('href')).toBe('/about/media/');
+    expect(canonical?.getAttribute('href')).toBe('/about/press/');
   });
 
   it('includes robots meta tag', () => {
@@ -30,7 +31,7 @@ describe('MediaPage', () => {
   it('includes Open Graph title', () => {
     renderComponent();
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    expect(ogTitle?.getAttribute('content')).toBe('MEDIA CENTER - 6529.io');
+    expect(ogTitle?.getAttribute('content')).toBe('PRESS - 6529.io');
   });
 
   it('has skip to content link', () => {

@@ -6,12 +6,20 @@ const setHeaderRef = jest.fn();
 let pathname = "/";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="header" />);
-jest.mock("../../../hooks/useBreadcrumbs", () => ({ useBreadcrumbs: () => [{ display: "Home", href: "/" }] }));
-jest.mock("../../../contexts/HeaderContext", () => ({ useHeaderContext: () => ({ setHeaderRef }) }));
-jest.mock("../../../components/brain/my-stream/layout/LayoutContext", () => ({ useLayout: () => ({ registerRef }) }));
-jest.mock("next/router", () => ({ useRouter: () => ({ pathname }) }));
+jest.mock("@/hooks/useBreadcrumbs", () => ({
+  useBreadcrumbs: () => [{ display: "Home", href: "/" }],
+}));
+jest.mock("@/contexts/HeaderContext", () => ({
+  useHeaderContext: () => ({ setHeaderRef }),
+}));
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ registerRef }),
+}));
+jest.mock("next/navigation", () => ({
+  usePathname: () => pathname,
+}));
 
-const DesktopLayout = require("../../../components/layout/DesktopLayout").default;
+const DesktopLayout = require("@/components/layout/DesktopLayout").default;
 
 describe("DesktopLayout", () => {
   beforeEach(() => {

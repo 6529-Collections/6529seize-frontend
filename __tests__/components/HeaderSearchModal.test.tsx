@@ -1,22 +1,35 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
-import HeaderSearchModal from "../../components/header/header-search/HeaderSearchModal";
-import { useRouter } from "next/router";
+import { render, screen, fireEvent } from "@testing-library/react";
+import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 
-jest.mock("../../components/header/header-search/HeaderSearchModalItem", () => () => null);
+jest.mock(
+  "@/components/header/header-search/HeaderSearchModalItem",
+  () => () => null
+);
 
-jest.mock("../../hooks/useWaves", () => ({ useWaves: () => ({ waves: [], isFetching: false }) }));
+jest.mock("@/hooks/useWaves", () => ({
+  useWaves: () => ({ waves: [], isFetching: false }),
+}));
 
-jest.mock("../../hooks/useLocalPreference", () => jest.fn(() => ["PROFILES", jest.fn()]));
+jest.mock("@/hooks/useLocalPreference", () =>
+  jest.fn(() => ["PROFILES", jest.fn()])
+);
 
 jest.mock("@tanstack/react-query", () => {
   const actual = jest.requireActual("@tanstack/react-query");
   return {
     ...actual,
-    useQuery: jest.fn(() => ({ data: [{ handle: "bob", wallet: "0x1" }], isFetching: false })),
+    useQuery: jest.fn(() => ({
+      data: [{ handle: "bob", wallet: "0x1" }],
+      isFetching: false,
+    })),
   };
 });
 
-(useRouter as jest.Mock) = jest.fn(() => ({ push: jest.fn(), query: {} }));
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 describe("HeaderSearchModal", () => {
   it("updates input", () => {

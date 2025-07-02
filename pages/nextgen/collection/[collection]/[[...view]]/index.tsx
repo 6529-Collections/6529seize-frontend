@@ -1,20 +1,20 @@
-import styles from "../../../../../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { NextGenCollection } from "../../../../../entities/INextgen";
-import { isEmptyObject } from "../../../../../helpers/Helpers";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { getCommonHeaders } from "../../../../../helpers/server.helpers";
+import { NextGenCollection } from "@/entities/INextgen";
+import { isEmptyObject } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import { getCommonHeaders } from "@/helpers/server.helpers";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
-import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
-import { useTitle } from "../../../../../contexts/TitleContext";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
+import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { useTitle } from "@/contexts/TitleContext";
 
 const NextGenCollectionComponent = dynamic(
   () =>
     import(
-      "../../../../../components/nextGen/collections/collectionParts/NextGenCollection"
+      "@/components/nextGen/collections/collectionParts/NextGenCollection"
     ),
   {
     ssr: false,
@@ -27,22 +27,19 @@ export default function NextGenCollectionPage(props: {
 }) {
   const { setTitle } = useTitle();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const collection: NextGenCollection = props.collection;
   useShallowRedirect(collection.name);
 
   const [view, setView] = useState<ContentView>(props.view);
 
   useEffect(() => {
-    const viewFromUrl = getCollectionView(
-      Array.isArray(router.query.view)
-        ? router.query.view[0]
-        : router.query.view ?? ""
-    );
+    const viewFromUrl = getCollectionView(searchParams?.get("view") ?? "");
     setView(viewFromUrl);
     const viewTitle =
       viewFromUrl !== ContentView.OVERVIEW ? ` | ${viewFromUrl}` : "";
     setTitle(`${collection.name}${viewTitle} | NextGen`);
-  }, [router.query.view, collection.name, setTitle]);
+  }, [searchParams, collection.name, setTitle]);
 
   const updateView = (newView: ContentView) => {
     let path =
@@ -53,7 +50,7 @@ export default function NextGenCollectionPage(props: {
     const newPath = `/nextgen/collection/${formatNameForUrl(
       collection.name
     )}${path}`;
-    router.push(newPath, undefined, { shallow: true });
+    router.push(newPath);
   };
 
   return (
@@ -138,9 +135,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
 
 export function useShallowRedirect(name: string, currentPath?: string) {
   const router = useRouter();
+  const pathname = usePathname();
 
   function getPath() {
-    let p = router.asPath;
+    let p = pathname ?? "";
     if (currentPath) {
       p = p.split(currentPath)[0];
     }
@@ -157,13 +155,7 @@ export function useShallowRedirect(name: string, currentPath?: string) {
   }
 
   useEffect(() => {
-    router.replace(
-      {
-        pathname: getPath(),
-      },
-      undefined,
-      { shallow: true }
-    );
+    router.replace(getPath());
   }, []);
 }
 

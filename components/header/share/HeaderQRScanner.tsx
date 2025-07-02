@@ -102,7 +102,17 @@ export default function HeaderQRScanner({
           : "";
         const searchParams = new URLSearchParams(queryString);
         queryParams = Object.fromEntries(searchParams.entries());
-        queryParams["_t"] = Date.now() / 1000; // Add timestamp for freshness
+        queryParams["_t"] = Math.floor(Date.now() / 1000);
+
+        const stringQueryParams = Object.fromEntries(
+          Object.entries(queryParams).map(([key, value]) => [
+            key,
+            String(value),
+          ])
+        );
+        const queryParamsString = new URLSearchParams(
+          stringQueryParams
+        ).toString();
 
         switch (scope) {
           case DeepLinkScope.NAVIGATE:
@@ -122,7 +132,7 @@ export default function HeaderQRScanner({
 
         // Navigate to the extracted path
         onScanSuccess();
-        const routerPath = `/${path}?${queryParams.toString()}`;
+        const routerPath = `/${path}?${queryParamsString}`;
         router.push(routerPath);
       } else {
         setToast({

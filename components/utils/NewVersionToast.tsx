@@ -3,9 +3,9 @@
 import React, { type JSX } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
-import { useIsVersionStale } from "../../hooks/useIsVersionStale";
+import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { useRouter } from "next/navigation";
-import useDeviceInfo from "../../hooks/useDeviceInfo";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 const NewVersionToast = (): JSX.Element | null => {
   const isVersionStale = useIsVersionStale();

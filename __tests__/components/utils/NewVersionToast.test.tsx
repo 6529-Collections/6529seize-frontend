@@ -2,13 +2,13 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NewVersionToast from "../../../components/utils/NewVersionToast";
 import { useIsVersionStale } from "../../../hooks/useIsVersionStale";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 
 jest.mock("../../../hooks/useIsVersionStale", () => ({
   useIsVersionStale: jest.fn(),
 }));
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
 jest.mock("../../../hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(),
@@ -25,28 +25,28 @@ describe("NewVersionToast", () => {
 
   it("returns null when not stale", () => {
     mockedUseIsVersionStale.mockReturnValue(false);
-    mockedUseRouter.mockReturnValue({ reload: jest.fn() });
+    mockedUseRouter.mockReturnValue({ refresh: jest.fn() });
     mockedUseDeviceInfo.mockReturnValue({ isApp: false });
     const { container } = render(<NewVersionToast />);
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders toast and reloads on click", async () => {
-    const reload = jest.fn();
+  it("renders toast and refreshes on click", async () => {
+    const refresh = jest.fn();
     mockedUseIsVersionStale.mockReturnValue(true);
-    mockedUseRouter.mockReturnValue({ reload });
+    mockedUseRouter.mockReturnValue({ refresh });
     mockedUseDeviceInfo.mockReturnValue({ isApp: true });
 
     const { container } = render(<NewVersionToast />);
     expect(screen.getByText(/new version/i)).toBeInTheDocument();
     expect(container.firstChild).toHaveClass("tw-bottom-24");
     await userEvent.click(screen.getByRole("button"));
-    expect(reload).toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalled();
   });
 
   it("uses bottom-6 class when not in app", () => {
     mockedUseIsVersionStale.mockReturnValue(true);
-    mockedUseRouter.mockReturnValue({ reload: jest.fn() });
+    mockedUseRouter.mockReturnValue({ refresh: jest.fn() });
     mockedUseDeviceInfo.mockReturnValue({ isApp: false });
 
     const { container } = render(<NewVersionToast />);

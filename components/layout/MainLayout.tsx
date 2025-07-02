@@ -1,8 +1,8 @@
 import React, { ReactNode } from "react";
 import Head from "next/head";
-import LayoutWrapper from "../providers/LayoutWrapper";
-import { useTitle } from "../../contexts/TitleContext";
-import ClientOnly from "../client-only/ClientOnly";
+import LayoutWrapper from "@/components/providers/LayoutWrapper";
+import { useTitle } from "@/contexts/TitleContext";
+import ClientOnly from "@/components/client-only/ClientOnly";
 
 interface MainLayoutProps {
   children: ReactNode;

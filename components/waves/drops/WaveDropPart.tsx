@@ -13,6 +13,10 @@ interface WaveDropPartProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
+  readonly isEditing?: boolean;
+  readonly isSaving?: boolean;
+  readonly onSave?: (newContent: string) => void;
+  readonly onCancel?: () => void;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds
@@ -27,6 +31,10 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     onQuoteClick,
     onLongPress,
     setLongPressTriggered,
+    isEditing = false,
+    isSaving = false,
+    onSave,
+    onCancel,
   }) => {
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
@@ -114,6 +122,10 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
             activePartIndex={activePartIndex}
             setActivePartIndex={setActivePartIndex}
             onQuoteClick={onQuoteClick}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onSave={onSave}
+            onCancel={onCancel}
           />
         </div>
       </div>
