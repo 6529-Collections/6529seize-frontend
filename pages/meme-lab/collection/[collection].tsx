@@ -2,7 +2,6 @@ import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useSetTitle } from "../../../contexts/TitleContext";
 import { useAuth } from "../../../components/auth/Auth";
-import { useRouter } from "next/router";
 
 const LabCollectionComponent = dynamic(
   () => import("../../../components/memelab/MemeLabCollection"),
@@ -11,14 +10,10 @@ const LabCollectionComponent = dynamic(
   }
 );
 
-export default function MemeLabIndex(props: any) {
+export default function MemeLabIndex(props: { readonly name: string }) {
   const { connectedProfile } = useAuth();
-  const router = useRouter();
-  
-  // Get collection from router for client-side navigation
-  const collection = (router.query.collection as string) || props.collection;
-  const collectionName = collection ? collection.replaceAll("-", " ") : "";
-  const pagenameFull = `Collection ${collectionName} | Meme Lab`;
+
+  const pagenameFull = `Collection ${props.name} | Meme Lab`;
   useSetTitle(pagenameFull);
 
   return (
@@ -32,12 +27,11 @@ export default function MemeLabIndex(props: any) {
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const collection = req.query.collection;
-  let name = `${collection.replaceAll("-", " ")}`;
+  const name = `${collection.replaceAll("-", " ")}`;
 
   return {
     props: {
-      collection: collection,
-      name: name,
+      name,
       metadata: {
         title: name,
         description: "Meme Lab",

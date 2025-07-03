@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 import UserPageActivityTabs from "./tabs/UserPageActivityTabs";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -6,8 +8,6 @@ import UserPageStatsActivityWallet from "./wallet/UserPageStatsActivityWallet";
 import UserPageStatsActivityDistributions from "./distributions/UserPageStatsActivityDistributions";
 import UserPageStatsActivityTDHHistory from "./tdh-history/UserPageStatsActivityTDHHistory";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-
-
 
 export enum USER_PAGE_ACTIVITY_TAB {
   WALLET_ACTIVITY = "WALLET_ACTIVITY",

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   CreateWaveOutcomeConfig,
@@ -124,16 +126,14 @@ export default function CreateWaveOutcomesRepRank({
         <button
           onClick={onCancel}
           type="button"
-          className="tw-bg-iron-800 tw-border-iron-700 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
-        >
+          className="tw-bg-iron-800 tw-border-iron-700 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
           Cancel
         </button>
         <PrimaryButton
           onClicked={onSubmit}
           disabled={false}
           loading={false}
-          padding="tw-px-4 tw-py-3"
-        >
+          padding="tw-px-4 tw-py-3">
           Save
         </PrimaryButton>
       </div>

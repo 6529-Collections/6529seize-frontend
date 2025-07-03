@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { DropMetadata } from "../../../../../entities/IDrop";
 import CreateDropMetadataItems from "../../utils/metadata/CreateDropMetadataItems";
@@ -30,15 +32,13 @@ export default function CreateDropFullDesktopMetadata({
     <div>
       <label
         htmlFor="metadata-form"
-        className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm"
-      >
+        className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
         Metadata
       </label>
       <form
         id="metadata-form"
         onSubmit={onSubmit}
-        className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-3 tw-w-full"
-      >
+        className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-3 tw-w-full">
         <div className="tw-w-full">
           <input
             ref={metadataKeyRef}
@@ -64,15 +64,13 @@ export default function CreateDropFullDesktopMetadata({
           type="submit"
           aria-label="Add metadata"
           title="Add metadata"
-          className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2.5 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-        >
+          className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2.5 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
           <svg
             className="tw-w-5 tw-h-5 tw-flex"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12 5V19M5 12H19"
               stroke="currentColor"

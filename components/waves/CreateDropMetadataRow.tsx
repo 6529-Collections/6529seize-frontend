@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { CreateDropMetadataType } from "./CreateDropContent";
 import Tippy from "@tippyjs/react";
@@ -78,18 +80,16 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
                 : "focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-primary-400 tw-bg-iron-900 tw-ring-iron-700 tw-text-iron-50 tw-pl-3"
             } tw-py-2.5`}
           />
-          {metadata.required && (
-            metadata.type === "NUMBER" ? (
+          {metadata.required &&
+            (metadata.type === "NUMBER" ? (
               <svg
                 className="tw-size-3.5 tw-flex-shrink-0 tw-absolute tw-left-3 tw-top-[15px] tw-text-iron-400"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 256 512"
-                aria-hidden="true"
-              >
+                aria-hidden="true">
                 <path
                   fill="currentColor"
-                  d="M160 64c0-11.8-6.5-22.6-16.9-28.2s-23-5-32.8 1.6l-96 64C-.5 111.2-4.4 131 5.4 145.8s29.7 18.7 44.4 8.9L96 123.8V416H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h96 96c17.7 0 32-14.3 32-32s-14.3-32-32-32H160V64z"
-                ></path>
+                  d="M160 64c0-11.8-6.5-22.6-16.9-28.2s-23-5-32.8 1.6l-96 64C-.5 111.2-4.4 131 5.4 145.8s29.7 18.7 44.4 8.9L96 123.8V416H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h96 96c17.7 0 32-14.3 32-32s-14.3-32-32-32H160V64z"></path>
               </svg>
             ) : (
               <svg
@@ -97,18 +97,15 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M4 7C4 6.06812 4 5.60218 4.15224 5.23463C4.35523 4.74458 4.74458 4.35523 5.23463 4.15224C5.60218 4 6.06812 4 7 4H17C17.9319 4 18.3978 4 18.7654 4.15224C19.2554 4.35523 19.6448 4.74458 19.8478 5.23463C20 5.60218 20 6.06812 20 7M9 20H15M12 4V20"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
-                  strokeLinejoin="round"
-                ></path>
+                  strokeLinejoin="round"></path>
               </svg>
-            )
-          )}
+            ))}
         </div>
         <div className="tw-w-full">
           <input
@@ -140,21 +137,18 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
               disabled || metadata.required
                 ? "tw-text-iron-600 tw-cursor-not-allowed"
                 : "tw-text-iron-400 hover:tw-text-error"
-            }`}
-          >
+            }`}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="tw-size-4"
-            >
+              className="tw-size-4">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M6 18 18 6M6 6l12 12"
-              ></path>
+                d="M6 18 18 6M6 6l12 12"></path>
             </svg>
           </button>
         </div>

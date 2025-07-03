@@ -12,6 +12,8 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "test": "jest --silent --verbose=false --coverageReporters=none",
+    "test-json": "jest --json --outputFile=test-results/jest-results.json ; npm run test-extract-failed-names",
+    "test-extract-failed-names": "node test-results/list-failed-tests.cjs",
     "test:cov": "CI=1 jest --coverage --watchAll=false --verbose=false 2>&1 | grep -A 10 '^FAIL' || true",
     "test:cov:summary": "CI=1 jest --coverage --watchAll=false --silent --reporters=default --verbose=false 2>&1 | grep -E '(PASS|FAIL|failed|passed)' || true",
     "test:cov:verbose": "CI=1 jest --coverage --watchAll=false",
@@ -81,6 +83,7 @@
     "react-bootstrap": "^2.10.3",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "19.1.0",
+    "react-error-boundary": "^6.0.0",
     "react-markdown": "^9.0.1",
     "react-redux": "^9.1.2",
     "react-scroll": "^1.9.0",
@@ -99,8 +102,8 @@
     "three": "^0.163.0",
     "use-debounce": "^10.0.3",
     "uuid": "^10.0.0",
-    "viem": "^2.15.1",
-    "wagmi": "^2.10.3"
+    "viem": "^2.31.3",
+    "wagmi": "^2.15.6"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",
@@ -131,6 +134,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "knip": "^5.50.5",
     "nodemon": "^3.1.4",
+    "pino-pretty": "^13.0.0",
     "playwright": "^1.52.0",
     "postcss": "^8.4.38",
     "tailwind-scrollbar": "^3.1.0",

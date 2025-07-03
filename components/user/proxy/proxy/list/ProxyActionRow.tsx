@@ -1,3 +1,5 @@
+"use client";
+
 import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
 import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";

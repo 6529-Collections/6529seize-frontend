@@ -1,16 +1,17 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import MemePageMintCountdown from "../../../components/the-memes/MemePageMintCountdown";
-import useManifoldClaim, {
+import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
+import {
+  useManifoldClaim,
   ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
-} from "../../../hooks/useManifoldClaim";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { CookieConsentProvider } from "../../../components/cookies/CookieConsentContext";
+} from "@/hooks/useManifoldClaim";
+import useCapacitor from "@/hooks/useCapacitor";
+import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 
-jest.mock("../../../hooks/useManifoldClaim");
-jest.mock("../../../hooks/useCapacitor");
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock("@/hooks/useManifoldClaim");
+jest.mock("@/hooks/useCapacitor");
+jest.mock("@/services/api/common-api", () => ({
   __esModule: true,
   commonApiFetch: jest.fn((opts: { endpoint: string }) => {
     if (opts.endpoint === "policies/country-check") {

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useRef } from "react";
 import { useLayout } from "../layout/LayoutContext";
 import { useWave } from "../../../../hooks/useWave";
@@ -43,4 +45,3 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({ wave }) => {
     </div>
   );
 };
-

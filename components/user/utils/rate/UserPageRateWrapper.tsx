@@ -1,3 +1,5 @@
+"use client";
+
 import { RateMatter } from "../../../../entities/IProfile";
 import { useContext, useEffect, useState } from "react";
 import { amIUser } from "../../../../helpers/Helpers";
@@ -7,7 +9,6 @@ import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-
 
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.NIC]: "NIC rate",

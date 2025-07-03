@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "../../NextGen.module.scss";
 import { useReadContract, useReadContracts } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";

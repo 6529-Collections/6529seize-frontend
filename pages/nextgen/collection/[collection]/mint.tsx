@@ -18,8 +18,10 @@ const NextGenCollectionMintComponent = dynamic(
   }
 );
 
-export default function NextGenCollectionMintPage(props: any) {
-  const collection: NextGenCollection = props.pageProps.collection;
+export default function NextGenCollectionMintPage(props: {
+  readonly collection: NextGenCollection;
+}) {
+  const collection = props.collection;
   useShallowRedirect(collection.name, "/mint");
 
   return (

@@ -1,4 +1,6 @@
-import { useCallback, useRef } from 'react';
+"use client";
+
+import { useCallback, useRef } from "react";
 
 /**
  * Props for the useDragAndDrop hook
@@ -9,7 +11,7 @@ interface UseDragAndDropProps {
   /** Callback for when a file is dropped */
   onFileDrop: (file: File) => void;
   /** Callback to set the visual state during drag events */
-  setVisualState: (state: 'idle' | 'dragging') => void;
+  setVisualState: (state: "idle" | "dragging") => void;
 }
 
 /**
@@ -30,69 +32,84 @@ interface DragAndDropHandlers {
 
 /**
  * Hook for managing drag and drop interactions
- * 
+ *
  * Provides event handlers and ref for implementing drag and drop functionality.
- * 
+ *
  * @param props Hook props
  * @returns Object with ref and event handlers
  */
 const useDragAndDrop = ({
   enabled,
   onFileDrop,
-  setVisualState
+  setVisualState,
 }: UseDragAndDropProps): DragAndDropHandlers => {
   const dropAreaRef = useRef<HTMLDivElement>(null);
-  
+
   // Properly typed drag event handlers
-  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>): void => {
-    if (!enabled) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    setVisualState('dragging');
-  }, [enabled, setVisualState]);
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent<HTMLDivElement>): void => {
+      if (!enabled) return;
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>): void => {
-    if (!enabled) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    // Keep the dragging state active
-    setVisualState('dragging');
-  }, [enabled, setVisualState]);
+      e.preventDefault();
+      e.stopPropagation();
+      setVisualState("dragging");
+    },
+    [enabled, setVisualState]
+  );
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>): void => {
-    if (!enabled) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Only reset if leaving the component (not entering child elements)
-    if (dropAreaRef.current && !dropAreaRef.current.contains(e.relatedTarget as Node)) {
-      setVisualState('idle');
-    }
-  }, [enabled, dropAreaRef, setVisualState]);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent<HTMLDivElement>): void => {
+      if (!enabled) return;
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>): void => {
-    if (!enabled) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onFileDrop(e.dataTransfer.files[0]);
-    } else {
-      // Reset if no files were dropped
-      setVisualState('idle');
-    }
-  }, [enabled, onFileDrop, setVisualState]);
-  
+      e.preventDefault();
+      e.stopPropagation();
+      // Keep the dragging state active
+      setVisualState("dragging");
+    },
+    [enabled, setVisualState]
+  );
+
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent<HTMLDivElement>): void => {
+      if (!enabled) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Only reset if leaving the component (not entering child elements)
+      if (
+        dropAreaRef.current &&
+        !dropAreaRef.current.contains(e.relatedTarget as Node)
+      ) {
+        setVisualState("idle");
+      }
+    },
+    [enabled, dropAreaRef, setVisualState]
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>): void => {
+      if (!enabled) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        onFileDrop(e.dataTransfer.files[0]);
+      } else {
+        // Reset if no files were dropped
+        setVisualState("idle");
+      }
+    },
+    [enabled, onFileDrop, setVisualState]
+  );
+
   return {
     dropAreaRef,
     handleDragEnter,
     handleDragOver,
     handleDragLeave,
-    handleDrop
+    handleDrop,
   };
 };
 

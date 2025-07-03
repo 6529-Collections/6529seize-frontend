@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../services/6529api";

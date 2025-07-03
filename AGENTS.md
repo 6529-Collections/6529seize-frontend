@@ -26,13 +26,15 @@ npm run type-check
 
 ## Programmatic Checks
 
-Before completing any task, ensure the following commands succeed:
+Before completing any coding task, ensure the following commands succeed:
 
 ```bash
 npm run test
 npm run lint
 npm run type-check
 ```
+
+Note: When changing files like readme.md, agents.md or other documentation or in general tasks that aren't supposed to have tests, then there's no need to run tests for that task.
 
 - `npm run test`: Executes all Jest tests and checks code coverage. The command will fail if:
   - Any Jest test fails.
@@ -48,6 +50,24 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 - Follow existing code style and naming conventions.
 - Place tests in `__tests__` directories or alongside components as `ComponentName.test.tsx`.
 - Mock external dependencies and APIs in tests.
+
+## Next.js Directory Structure
+
+The project supports both the classic `pages/` folder and Next.js `app/` router.
+Legacy routes remain under `pages/`, while all **new** pages must be created
+inside the `app/` directory.
+
+Routes in `app/` should export a `generateMetadata` function using the helper
+`getAppMetadata`:
+
+```ts
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "My Page" });
+}
+```
 
 ## Commit Guidelines
 

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { type JSX, useMemo } from "react";
 import { useSetWaveData } from "../../../contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
@@ -37,18 +39,21 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       );
     },
   });
-  
+
   // Get new drops count from the waves list
   const newDropsCount = useMemo(() => {
     // Check both regular waves and direct messages
-    const waveFromList = waves.list.find(w => w.id === waveId) || 
-                       directMessages.list.find(w => w.id === waveId);
+    const waveFromList =
+      waves.list.find((w) => w.id === waveId) ??
+      directMessages.list.find((w) => w.id === waveId);
     return waveFromList?.newDropsCount.count ?? 0;
   }, [waves.list, directMessages.list, waveId]);
-  
+
   // Update wave data in title context
-  useSetWaveData(wave ? { name: wave.name, newItemsCount: newDropsCount } : null);
-  
+  useSetWaveData(
+    wave ? { name: wave.name, newItemsCount: newDropsCount } : null
+  );
+
   // Create a stable key for proper remounting
   const stableWaveKey = `wave-${waveId}`;
 
@@ -93,8 +98,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   return (
     <div
       className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
-      key={stableWaveKey}
-    >
+      key={stableWaveKey}>
       {/* Don't render tab container for simple waves */}
       {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
 

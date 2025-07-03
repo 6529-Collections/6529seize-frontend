@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./TheMemes.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,7 +13,7 @@ import {
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
@@ -28,6 +30,7 @@ import {
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 interface Meme {
   meme: number;
@@ -66,6 +69,7 @@ export function printVolumeTypeDropdown(
 
 export default function TheMemesComponent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { connectedProfile } = useContext(AuthContext);
   const [connectedConsolidationKey, setConnectedConsolidationKey] =
@@ -76,47 +80,47 @@ export default function TheMemesComponent() {
 
   const [routerLoaded, setRouterLoaded] = useState(false);
 
+  useSetTitle("The Memes | Collections");
+
   useEffect(() => {
-    if (router.isReady) {
-      let initialSortDir = SortDirection.ASC;
-      let initialSort = MemesSort.AGE;
-      let initialSzn = 0;
+    let initialSortDir = SortDirection.ASC;
+    let initialSort = MemesSort.AGE;
+    let initialSzn = 0;
 
-      const routerSortDir = router.query.sort_dir;
-      if (routerSortDir) {
-        const resolvedRouterSortDir = Object.values(SortDirection).find(
-          (sd) => sd === routerSortDir
-        );
-        if (resolvedRouterSortDir) {
-          initialSortDir = resolvedRouterSortDir;
-        }
+    const routerSortDir = searchParams?.get("sort_dir");
+    if (routerSortDir) {
+      const resolvedRouterSortDir = Object.values(SortDirection).find(
+        (sd) => sd === routerSortDir
+      );
+      if (resolvedRouterSortDir) {
+        initialSortDir = resolvedRouterSortDir;
       }
-
-      const routerSort = router.query.sort;
-      if (routerSort) {
-        const resolvedRouterSort = Object.values(MemesSort).find(
-          (sd) => sd === routerSort
-        );
-        if (resolvedRouterSort) {
-          initialSort = resolvedRouterSort;
-        }
-      }
-
-      const routerSzn = router.query.szn;
-      if (routerSzn) {
-        if (Array.isArray(routerSzn)) {
-          initialSzn = parseInt(routerSzn[0]);
-        } else {
-          initialSzn = parseInt(routerSzn);
-        }
-      }
-
-      setSort(initialSort);
-      setSortDir(initialSortDir);
-      setSelectedSeason(initialSzn);
-      setRouterLoaded(true);
     }
-  }, [router.isReady]);
+
+    const routerSort = searchParams?.get("sort");
+    if (routerSort) {
+      const resolvedRouterSort = Object.values(MemesSort).find(
+        (sd) => sd === routerSort
+      );
+      if (resolvedRouterSort) {
+        initialSort = resolvedRouterSort;
+      }
+    }
+
+    const routerSzn = searchParams?.get("szn");
+    if (routerSzn) {
+      if (Array.isArray(routerSzn)) {
+        initialSzn = parseInt(routerSzn[0]);
+      } else {
+        initialSzn = parseInt(routerSzn);
+      }
+    }
+
+    setSort(initialSort);
+    setSortDir(initialSortDir);
+    setSelectedSeason(initialSzn);
+    setRouterLoaded(true);
+  }, [searchParams]);
 
   const getNftsNextPage = () => {
     let mySort: string = sort;
@@ -179,26 +183,12 @@ export default function TheMemesComponent() {
   }, []);
 
   useEffect(() => {
-    if (routerLoaded) {
-      if (selectedSeason > 0) {
-        router.replace(
-          {
-            query: { szn: selectedSeason, sort: sort, sort_dir: sortDir },
-          },
-          undefined,
-          { shallow: true }
-        );
-      } else {
-        router.replace(
-          {
-            query: { sort: sort, sort_dir: sortDir },
-          },
-          undefined,
-          { shallow: true }
-        );
-      }
+    let queryString = `sort=${sort}&sort_dir=${sortDir}`;
+    if (selectedSeason > 0) {
+      queryString += `&szn=${selectedSeason}`;
     }
-  }, [sort, sortDir, selectedSeason, routerLoaded]);
+    router.push(`the-memes?${queryString}`);
+  }, [sort, sortDir, selectedSeason]);
 
   useEffect(() => {
     const myMemesMap = new Map<number, Meme>();
@@ -423,7 +413,7 @@ export default function TheMemesComponent() {
               {/* Page header - visible on all devices */}
               <Row>
                 <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                  <span className="d-flex align-items-center gap-3">
+                  <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="no-wrap mb-0">
                       <span className="font-lightest">The</span> Memes
                     </h1>

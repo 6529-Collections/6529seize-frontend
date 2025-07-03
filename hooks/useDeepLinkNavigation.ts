@@ -1,4 +1,6 @@
-import { useRouter } from "next/router";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
 import { useCallback, useEffect } from "react";
 import useCapacitor from "./useCapacitor";
@@ -14,8 +16,13 @@ export const useDeepLinkNavigation = () => {
 
   const doNavigation = useCallback(
     (pathname: string, query: Record<string, string | number>) => {
-      console.log("Deep Link Navigation", pathname, query);
-      router.push({ pathname, query });
+      const searchParams = new URLSearchParams(
+        Object.entries(query).map(([key, value]) => [key, String(value)])
+      );
+      const url = `${pathname}?${searchParams.toString()}`;
+
+      console.log("Deep Link Navigation", url);
+      router.push(url);
     },
     [router]
   );
@@ -39,7 +46,7 @@ export const useDeepLinkNavigation = () => {
       const queryParams: Record<string, string | number> = Object.fromEntries(
         searchParams.entries()
       );
-      queryParams["_t"] = Date.now() / 1000;
+      queryParams["_t"] = Math.floor(Date.now() / 1000);
 
       switch (scope) {
         case DeepLinkScope.NAVIGATE:

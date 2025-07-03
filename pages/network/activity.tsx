@@ -31,17 +31,15 @@ export interface CommunityActivityPageProps {
   readonly logsPage: CountlessPage<ProfileActivityLog>;
 }
 
-export default function CommunityActivityPage({
-  pageProps,
-}: {
-  readonly pageProps: CommunityActivityPageProps;
-}) {
+export default function CommunityActivityPage(
+  props: Readonly<CommunityActivityPageProps>
+) {
   useSetTitle("Activity | Network");
 
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
   initCommunityActivityPage({
     activityLogs: {
-      data: pageProps.logsPage,
+      data: props.logsPage,
       params: INITIAL_ACTIVITY_LOGS_PARAMS,
     },
   });

@@ -1,6 +1,15 @@
-jest.mock("next/image", () => (props: any) => <img {...props} />);
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
+}));
 import { render, screen } from "@testing-library/react";
-import { NextGenTokenImage, getNextGenImageUrl, getNextGenIconUrl } from "../../../components/nextGen/collections/nextgenToken/NextGenTokenImage";
+import {
+  NextGenTokenImage,
+  getNextGenImageUrl,
+  getNextGenIconUrl,
+} from "../../../components/nextGen/collections/nextgenToken/NextGenTokenImage";
 
 const token = {
   id: 1,

@@ -1,3 +1,5 @@
+"use client";
+
 import { EditorState } from "lexical";
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import CreateDropFullDesktop, {
@@ -135,8 +137,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onFileRemove={onFileRemove}
           onViewChange={onViewChange}
           onDrop={onDrop}
-          onDropPart={onDropPart}
-        >
+          onDropPart={onDropPart}>
           {children}
         </CreateDropFullDesktop>
       ),
@@ -167,8 +168,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onFileRemove={onFileRemove}
           onViewChange={onViewChange}
           onDrop={onDrop}
-          onDropPart={onDropPart}
-        >
+          onDropPart={onDropPart}>
           {children}
         </CreateDropFullMobile>
       ),

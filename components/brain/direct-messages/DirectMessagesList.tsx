@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef, useEffect, useContext } from "react";
 import UnifiedWavesListWaves, {
   UnifiedWavesListWavesHandle,
@@ -23,7 +25,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
-  
+
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
@@ -95,8 +97,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     return (
       <div
         id="my-stream-connect"
-        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-h-full tw-p-6 tailwind-scope"
-      >
+        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-h-full tw-p-6 tailwind-scope">
         <Image
           priority
           loading="eager"
@@ -117,9 +118,9 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
         {!isApp && (
-        <div className="tw-px-4 tw-mb-4">
-          <BrainLeftSidebarCreateADirectMessageButton />
-        </div>
+          <div className="tw-px-4 tw-mb-4">
+            <BrainLeftSidebarCreateADirectMessageButton />
+          </div>
         )}
 
         <UnifiedWavesListWaves

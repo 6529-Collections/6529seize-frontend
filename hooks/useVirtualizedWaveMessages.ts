@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback, useRef, useReducer } from "react";
 import { useMyStreamWaveMessages } from "../contexts/wave/MyStreamContext";
 

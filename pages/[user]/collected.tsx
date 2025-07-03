@@ -10,21 +10,16 @@ import {
 import UserPageCollected from "../../components/user/collected/UserPageCollected";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
-  pageProps,
-}) => {
-  return <UserPageCollected profile={pageProps.profile} />;
+const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => {
+  return <UserPageCollected profile={profile} />;
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageProps }>
+  page: ReactElement<{ profile: ApiIdentity }>
 ) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
+  return <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>;
 };
 
 export default Page;

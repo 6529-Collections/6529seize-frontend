@@ -1,4 +1,13 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type JSX } from "react";
+"use client";
+
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type JSX,
+} from "react";
 import CreateDropCompact, {
   CreateDropCompactHandles,
 } from "../compact/CreateDropCompact";
@@ -140,8 +149,8 @@ const CreateDropWrapper = forwardRef<
     const [files, setFiles] = useState<File[]>([]);
 
     const onFileRemove = (file: File) => {
-      setFiles(prev => prev.filter(f => f !== file));
-    }
+      setFiles((prev) => prev.filter((f) => f !== file));
+    };
 
     const onMetadataEdit = ({ data_key, data_value }: DropMetadata) => {
       const index = metadata.findIndex((m) => m.data_key === data_key);
@@ -224,7 +233,7 @@ const CreateDropWrapper = forwardRef<
           files
         );
       }
-      return files
+      return files;
     };
 
     const getMissingRequiredMedia = (): ApiWaveParticipationRequirement[] => {
@@ -430,8 +439,7 @@ const CreateDropWrapper = forwardRef<
           setFiles={setFiles}
           onFileRemove={onFileRemove}
           onDrop={onDrop}
-          onDropPart={onStormDropPart}
-        >
+          onDropPart={onStormDropPart}>
           {children}
         </CreateDropCompact>
       ),
@@ -464,8 +472,7 @@ const CreateDropWrapper = forwardRef<
           setFiles={setFiles}
           onFileRemove={onFileRemove}
           onDrop={onDrop}
-          onDropPart={onStormDropPart}
-        >
+          onDropPart={onStormDropPart}>
           {children}
         </CreateDropFull>
       ),

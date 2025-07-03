@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useState } from "react";
 import DistributionPlanAddOperationBtn from "../common/DistributionPlanAddOperationBtn";
 import { DistributionPlanToolContext } from "../DistributionPlanToolContext";

@@ -1,3 +1,5 @@
+"use client";
+
 import { memo, useCallback, useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectEditingDropId, setEditingDropId } from "../../../store/editSlice";
@@ -69,13 +71,17 @@ const getColorClasses = ({
   if (isActiveDrop) {
     return "tw-bg-[#3CCB7F]/10 tw-border-l tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0 tw-mt-1";
   }
-  
+
   if (!isDrop) {
     const isWaveView = location === DropLocation.WAVE;
-    const hoverClass = isWaveView ? "desktop-hover:hover:tw-bg-iron-800/50" : "";
-    const ringClasses = !isWaveView ? "tw-ring-1 tw-ring-inset tw-ring-iron-800" : "";
+    const hoverClass = isWaveView
+      ? "desktop-hover:hover:tw-bg-iron-800/50"
+      : "";
+    const ringClasses = !isWaveView
+      ? "tw-ring-1 tw-ring-inset tw-ring-iron-800"
+      : "";
     const bgClass = !isWaveView ? "tw-bg-iron-900" : "";
-    
+
     return `${bgClass} ${ringClasses} ${hoverClass}`.trim();
   }
 
@@ -100,9 +106,10 @@ const getDropClasses = (
 
   const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop, location });
 
-  const locationClasses = location === DropLocation.MY_STREAM || location === DropLocation.PROFILE
-    ? streamClasses
-    : chatDropClasses;
+  const locationClasses =
+    location === DropLocation.MY_STREAM || location === DropLocation.PROFILE
+      ? streamClasses
+      : chatDropClasses;
 
   return `${baseClasses} ${groupingClass} ${locationClasses} ${rankClasses}`.trim();
 };
@@ -312,9 +319,7 @@ const WaveDrop = ({
     <div
       className={`${
         isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
-      } ${
-        isProfileView ? "tw-mb-3" : ""
-      } tw-w-full`}>
+      } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}>
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
@@ -383,7 +388,8 @@ const WaveDrop = ({
             onEdit={handleOnEdit}
           />
         )}
-        <div className={`tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap`}>
+        <div
+          className={`tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap`}>
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}

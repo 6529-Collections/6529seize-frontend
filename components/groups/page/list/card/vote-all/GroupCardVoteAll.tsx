@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useRef, useState } from "react";
 import { CommunityMemberOverview } from "../../../../../../entities/IProfile";
 import { ApiGroupFull } from "../../../../../../generated/models/ApiGroupFull";

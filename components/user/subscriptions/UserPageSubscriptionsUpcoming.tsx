@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./UserPageSubscriptions.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
@@ -107,8 +109,7 @@ function SubscriptionExpandButton(
   return (
     <button
       className="btn-link decoration-none"
-      onClick={() => props.setExpanded(!props.expanded)}
-    >
+      onClick={() => props.setExpanded(!props.expanded)}>
       {props.expanded ? (
         <>
           Show Less <FontAwesomeIcon icon={faChevronCircleUp} height={"20px"} />
@@ -218,8 +219,7 @@ function SubscriptionRow(
               <Tippy
                 placement="right"
                 theme="light"
-                content="No changes allowed on minting day"
-              >
+                content="No changes allowed on minting day">
                 <span>
                   - Minting Today{" "}
                   <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CICType,
   RatingWithProfileInfoAndLevel,
@@ -67,8 +69,7 @@ export default function ProfileRatersTableItem({
           <div className="tw-inline-flex tw-items-center tw-space-x-1">
             <Link
               href={profileRoute}
-              className="tw-no-underline tw-p-0 tw-flex tw-items-center"
-            >
+              className="tw-no-underline tw-p-0 tw-flex tw-items-center">
               <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-100">
                 {rating.handle}
               </span>
@@ -78,8 +79,7 @@ export default function ProfileRatersTableItem({
       </td>
       <td className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-2.5 tw-text-right">
         <span
-          className={`tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium ${ratingColor}`}
-        >
+          className={`tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium ${ratingColor}`}>
           {ratingStr}
         </span>
       </td>

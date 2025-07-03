@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";

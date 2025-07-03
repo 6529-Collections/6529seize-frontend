@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../../generated/models/ApiDrop";

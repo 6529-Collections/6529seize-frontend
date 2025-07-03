@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../entities/ISort";
 import CircleLoader, {
@@ -29,15 +31,13 @@ export default function ProfileRatersTableHeaderSortableCell({
   return (
     <th
       onClick={() => onSortTypeClick(sortType)}
-      className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-3.5 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-    >
+      className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-3.5 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
       <span
         className={`${
           isActive
             ? "tw-text-primary-400"
             : "group-hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
-        }`}
-      >
+        }`}>
         {title}
       </span>
       {isLoading && isActive ? (

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { ReactNode, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
@@ -48,7 +50,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     setHydrated(true);
   }, []);
-
 
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const { data: drop } = useQuery<ApiDrop>({
@@ -110,9 +111,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const hasWave = Boolean(router.query.wave);
 
-  // Simple fix: sync notifications route to mobile view  
+  // Simple fix: sync notifications route to mobile view
   useEffect(() => {
-    if (router.pathname === '/my-stream/notifications') {
+    if (router.pathname === "/my-stream/notifications") {
       setActiveView(BrainView.NOTIFICATIONS);
     }
   }, [router.pathname]);
@@ -222,8 +223,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="tw-flex-1"
-        >
+          className="tw-flex-1">
           {viewComponents[activeView]}
         </motion.div>
       </AnimatePresence>

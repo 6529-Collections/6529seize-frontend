@@ -1,6 +1,6 @@
 import styles from "./About.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
-import { AboutSection } from "../../pages/about/[section]";
+import { AboutSection } from "@/enums";
 
 export default function AboutPrivacyPolicy() {
   return (

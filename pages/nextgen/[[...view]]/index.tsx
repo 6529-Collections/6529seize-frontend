@@ -32,13 +32,14 @@ const NextgenAboutComponent = dynamic(
   { ssr: false }
 );
 
-export default function NextGen(props: any) {
+export default function NextGen(props: {
+  readonly collection: NextGenCollection;
+  readonly view: NextGenView;
+}) {
   const router = useRouter();
-  const collection: NextGenCollection = props.pageProps.collection;
+  const collection = props.collection;
 
-  const [view, setView] = useState<NextGenView | undefined>(
-    props.pageProps.view
-  );
+  const [view, setView] = useState<NextGenView | undefined>(props.view);
 
   const { setTitle } = useTitle();
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
@@ -170,8 +172,7 @@ export default function CreateSnapshotForm() {
       <CreateSnapshotFormSearchCollection setCollection={setCollection} />
       <form
         className="tw-flex tw-flex-wrap tw-gap-y-5 tw-mt-8"
-        onSubmit={handleSubmit}
-      >
+        onSubmit={handleSubmit}>
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <div className="tw-flex-1">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
@@ -214,14 +215,12 @@ export default function CreateSnapshotForm() {
                 <Tippy
                   content="Use etherscan.io to find previous block numbers"
                   placement="top"
-                  theme="dark"
-                >
+                  theme="dark">
                   <svg
                     className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
                     viewBox="0 0 24 24"
                     fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                    xmlns="http://www.w3.org/2000/svg">
                     <path
                       d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                       stroke="currentColor"
@@ -255,14 +254,12 @@ export default function CreateSnapshotForm() {
                 <Tippy
                   content="Example: 1,3,54-78"
                   placement="top"
-                  theme="dark"
-                >
+                  theme="dark">
                   <svg
                     className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
                     viewBox="0 0 24 24"
                     fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                    xmlns="http://www.w3.org/2000/svg">
                     <path
                       d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                       stroke="currentColor"

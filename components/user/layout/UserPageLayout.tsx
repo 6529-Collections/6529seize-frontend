@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode, useContext, useEffect, useState } from "react";
 import { containsEmojis, formatAddress } from "../../../helpers/Helpers";
 import UserPageHeader from "../user-page-header/UserPageHeader";

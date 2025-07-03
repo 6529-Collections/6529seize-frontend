@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";

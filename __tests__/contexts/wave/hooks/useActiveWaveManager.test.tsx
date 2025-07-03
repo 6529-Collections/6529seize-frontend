@@ -1,32 +1,39 @@
-import { renderHook, act } from '@testing-library/react';
-import { useActiveWaveManager } from '../../../../contexts/wave/hooks/useActiveWaveManager';
-import { useRouter } from 'next/router';
+import { renderHook, act } from "@testing-library/react";
+import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
+import { useRouter, useSearchParams } from "next/navigation";
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 
 const push = jest.fn();
 const router: any = { query: {}, push };
 (useRouter as jest.Mock).mockReturnValue(router);
 
-describe('useActiveWaveManager', () => {
-  it('reads wave from query and updates via setActiveWave', () => {
-    router.query = { wave: 'abc' };
+describe("useActiveWaveManager", () => {
+  it("reads wave from query and updates via setActiveWave", () => {
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams({ wave: "abc" })
+    );
     const { result, rerender } = renderHook(() => useActiveWaveManager());
-    expect(result.current.activeWaveId).toBe('abc');
+    expect(result.current.activeWaveId).toBe("abc");
 
     act(() => {
-      result.current.setActiveWave('def');
+      result.current.setActiveWave("def");
     });
-    expect(push).toHaveBeenLastCalledWith('/my-stream?wave=def', undefined, { shallow: true });
-    
+    expect(push).toHaveBeenLastCalledWith("/my-stream?wave=def");
+
     // Simulate router query change to trigger state update
-    router.query = { wave: 'def' };
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams({ wave: "def" })
+    );
     rerender();
-    expect(result.current.activeWaveId).toBe('def');
+    expect(result.current.activeWaveId).toBe("def");
 
     act(() => {
       result.current.setActiveWave(null);
     });
-    expect(push).toHaveBeenLastCalledWith('/my-stream', undefined, { shallow: true });
+    expect(push).toHaveBeenLastCalledWith("/my-stream");
   });
 });

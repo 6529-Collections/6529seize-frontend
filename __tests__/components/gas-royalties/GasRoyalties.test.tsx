@@ -17,15 +17,33 @@ jest.mock("../../../services/6529api", () => ({
   fetchUrl: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock("../../../components/dotLoader/DotLoader", () => () => <span data-testid="loader" />);
-jest.mock("../../../components/downloadUrlWidget/DownloadUrlWidget", () => (props: any) => (
-  <button data-testid="download" data-name={props.name} data-url={props.url} />
+jest.mock("../../../components/dotLoader/DotLoader", () => () => (
+  <span data-testid="loader" />
 ));
-jest.mock("../../../components/datePickerModal/DatePickerModal", () => (props: any) => (
-  <div data-testid={`${props.mode}-picker`} />
+jest.mock(
+  "../../../components/downloadUrlWidget/DownloadUrlWidget",
+  () => (props: any) =>
+    (
+      <button
+        data-testid="download"
+        data-name={props.name}
+        data-url={props.url}
+      />
+    )
+);
+jest.mock(
+  "../../../components/datePickerModal/DatePickerModal",
+  () => (props: any) => <div data-testid={`${props.mode}-picker`} />
+);
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
+}));
+jest.mock("@tippyjs/react", () => (props: any) => (
+  <span data-testid="tippy">{props.children}</span>
 ));
-jest.mock("next/image", () => ({ __esModule: true, default: (p: any) => <img {...p} /> }));
-jest.mock("@tippyjs/react", () => (props: any) => <span data-testid="tippy">{props.children}</span>);
 
 beforeEach(() => {
   (require("next/router").default.push as jest.Mock).mockClear();
@@ -45,7 +63,7 @@ it("renders download widget and triggers focus change", async () => {
       is_custom_blocks={false}
       focus={GasRoyaltiesCollectionFocus.MEMES}
       setFocus={setFocus}
-      getUrl={() => "http://api/file"}
+      getUrl={() => "https://test.6529.io/file"}
       setSelectedArtist={jest.fn()}
       setIsPrimary={jest.fn()}
       setIsCustomBlocks={jest.fn()}
@@ -56,7 +74,9 @@ it("renders download widget and triggers focus change", async () => {
   );
   const download = await screen.findByTestId("download");
   expect(download.getAttribute("data-name")).toBe("gas_the-memes_today.csv");
-  expect(download.getAttribute("data-url")).toBe("http://api/file&download=true");
+  expect(download.getAttribute("data-url")).toBe(
+    "https://test.6529.io/file&download=true"
+  );
   const memeLab = screen.getByText("Meme Lab");
   fireEvent.click(memeLab);
   expect(setFocus).toHaveBeenCalledWith(GasRoyaltiesCollectionFocus.MEMELAB);
@@ -86,13 +106,13 @@ describe("useSharedState", () => {
       result.current.setIsPrimary(true);
     });
     expect(result.current.getUrl("gas")).toBe(
-      `http://example.com/api/gas/collection/memes?&primary=true`
+      `https://example.com/api/gas/collection/memes?&primary=true`
     );
     act(() => {
       result.current.getSharedProps().setBlocks(10, 20);
     });
     expect(result.current.getUrl("gas")).toBe(
-      `http://example.com/api/gas/collection/memes?&from_block=10&to_block=20`
+      `https://example.com/api/gas/collection/memes?&from_block=10&to_block=20`
     );
   });
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch, {
@@ -41,9 +43,9 @@ export default function GroupCreateRep({
                 Set the giver, rep category, and minimum rep.
               </p>
             </div>
-            <PositiveOnlyToggle 
-              positiveOnly={positiveOnly} 
-              setPositiveOnly={setPositiveOnly} 
+            <PositiveOnlyToggle
+              positiveOnly={positiveOnly}
+              setPositiveOnly={setPositiveOnly}
             />
           </div>
           {rep.user_identity && rep.direction && (

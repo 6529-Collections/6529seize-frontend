@@ -1,3 +1,5 @@
+"use client";
+
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { useRouter } from "next/router";

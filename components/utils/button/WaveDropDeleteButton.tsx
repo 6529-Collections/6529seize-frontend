@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
@@ -27,8 +29,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
     <>
       <button
         className={className || defaultButtonClasses}
-        onClick={onDeleteClick}
-      >
+        onClick={onDeleteClick}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -36,8 +37,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
           strokeWidth="1.5"
           aria-hidden="true"
           stroke="currentColor"
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 tw-text-red"
-        >
+          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 tw-text-red">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -53,8 +53,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
             key="modal"
             elementClasses="tw-absolute tw-z-50"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <DropsListItemDeleteDropModal
               drop={drop}
               closeModal={() => setIsDeleteModalOpen(false)}

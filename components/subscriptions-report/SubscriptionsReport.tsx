@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col } from "react-bootstrap";
 import {
   SubscriptionCounts,
@@ -39,7 +41,7 @@ export default function SubscriptionsReportComponent() {
     RedeemedSubscriptionCounts[]
   >([]);
   const [totalRedeemed, setTotalRedeemed] = useState(0);
-  const [redeemedPage, setRedeemedPage] = useState<number | null>(null);
+  const [redeemedPage, setRedeemedPage] = useState<number>(1);
 
   const [dates, setDates] = useState<Time[]>([]);
 
@@ -89,13 +91,10 @@ export default function SubscriptionsReportComponent() {
           ? 1
           : 0;
 
-        console.log("add days", addDays);
-
         setRedeemedCounts(redeemed.data);
         setTotalRedeemed(redeemed.count);
         setUpcomingCounts(upcoming);
         setDates(getMintingDates(upcoming.length, addDays));
-        setRedeemedPage(1);
         setRemainingMintsForSeason(remainingMintsForSeason);
       } finally {
         setRedeemedLoading(false);
@@ -106,7 +105,7 @@ export default function SubscriptionsReportComponent() {
   }, []);
 
   useEffect(() => {
-    if (redeemedPage === null) return;
+    if (redeemedLoading) return;
     const fetchData = async () => {
       setRedeemedLoading(true);
       try {

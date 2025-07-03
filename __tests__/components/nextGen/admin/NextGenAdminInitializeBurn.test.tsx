@@ -1,15 +1,20 @@
 // @ts-nocheck
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import NextGenAdminInitializeBurn from '../../../../components/nextGen/admin/NextGenAdminInitializeBurn';
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import NextGenAdminInitializeBurn from "../../../../components/nextGen/admin/NextGenAdminInitializeBurn";
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="write-status" />);
+jest.mock(
+  "../../../../components/nextGen/NextGenContractWriteStatus",
+  () => () => <div data-testid="write-status" />
+);
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
 
-jest.mock('../../../../services/6529api', () => ({ postData: jest.fn() }));
+jest.mock("../../../../services/6529api", () => ({ postData: jest.fn() }));
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
   useGlobalAdmin: jest.fn(),
   useFunctionAdmin: jest.fn(),
   useCollectionIndex: jest.fn(),
@@ -19,15 +24,15 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useMinterContractWrite: jest.fn(),
 }));
 
-jest.mock('uuid', () => ({ v4: () => 'test-uuid' }));
+jest.mock("uuid", () => ({ v4: () => "test-uuid" }));
 
-jest.mock('wagmi', () => ({
+jest.mock("wagmi", () => ({
   useReadContract: jest.fn(),
   useSignMessage: jest.fn(),
 }));
 
-import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
-import { postData } from '../../../../services/6529api';
+import { useSeizeConnectContext } from "../../../../components/auth/SeizeConnectContext";
+import { postData } from "../../../../services/6529api";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -36,8 +41,8 @@ import {
   useParsedCollectionIndex,
   getCollectionIdsForAddress,
   useMinterContractWrite,
-} from '../../../../components/nextGen/nextgen_helpers';
-import { useReadContract, useSignMessage } from 'wagmi';
+} from "../../../../components/nextGen/nextgen_helpers";
+import { useReadContract, useSignMessage } from "wagmi";
 
 const signMessageState: any = {
   signMessage: jest.fn(),
@@ -51,7 +56,12 @@ const signMessageState: any = {
 const contractWriteState: any = {
   writeContract: jest.fn(),
   reset: jest.fn(),
-  params: { address: '0xabc', abi: [], chainId: 1, functionName: 'initializeBurn' },
+  params: {
+    address: "0xabc",
+    abi: [],
+    chainId: 1,
+    functionName: "initializeBurn",
+  },
   isLoading: false,
   isSuccess: false,
   isError: false,
@@ -61,54 +71,60 @@ const contractWriteState: any = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: '0x1' });
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: "0x1" });
   (useGlobalAdmin as jest.Mock).mockReturnValue({ data: true });
   (useFunctionAdmin as jest.Mock).mockReturnValue({ data: true });
   (useCollectionIndex as jest.Mock).mockReturnValue({ data: 3 });
   (useParsedCollectionIndex as jest.Mock).mockReturnValue(3);
   (useCollectionAdmin as jest.Mock).mockReturnValue({ data: [] });
-  (getCollectionIdsForAddress as jest.Mock).mockReturnValue(['1', '2']);
+  (getCollectionIdsForAddress as jest.Mock).mockReturnValue(["1", "2"]);
   (useSignMessage as jest.Mock).mockImplementation(() => signMessageState);
   (useReadContract as jest.Mock).mockReturnValue({ data: false });
   (useMinterContractWrite as jest.Mock).mockReturnValue(contractWriteState);
-  process.env.API_ENDPOINT = 'http://api';
+  process.env.API_ENDPOINT = "https://test.6529.io";
 });
 
 function renderComponent() {
   return render(<NextGenAdminInitializeBurn close={() => {}} />);
 }
 
-test('shows validation errors when required fields missing', () => {
+test("shows validation errors when required fields missing", () => {
   renderComponent();
-  fireEvent.click(screen.getByText('Submit'));
-  expect(screen.getByText('Burn Collection id is required')).toBeInTheDocument();
-  expect(screen.getByText('Mint Collection id is required')).toBeInTheDocument();
+  fireEvent.click(screen.getByText("Submit"));
+  expect(
+    screen.getByText("Burn Collection id is required")
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Mint Collection id is required")
+  ).toBeInTheDocument();
 });
 
-test('calls signMessage when form is valid', async () => {
+test("calls signMessage when form is valid", async () => {
   const user = userEvent.setup();
   renderComponent();
-  const selects = screen.getAllByRole('combobox');
-  await user.selectOptions(selects[0], '1');
-  await user.selectOptions(selects[1], '2');
-  const radios = screen.getAllByRole('radio');
+  const selects = screen.getAllByRole("combobox");
+  await user.selectOptions(selects[0], "1");
+  await user.selectOptions(selects[1], "2");
+  const radios = screen.getAllByRole("radio");
   await user.click(radios[0]);
-  await user.click(screen.getByText('Submit'));
-  expect(signMessageState.signMessage).toHaveBeenCalledWith({ message: 'test-uuid' });
+  await user.click(screen.getByText("Submit"));
+  expect(signMessageState.signMessage).toHaveBeenCalledWith({
+    message: "test-uuid",
+  });
 });
 
-test('writes contract after successful sign message and api call', async () => {
+test("writes contract after successful sign message and api call", async () => {
   (postData as jest.Mock).mockResolvedValue({ status: 200, response: {} });
   const user = userEvent.setup();
   const { rerender } = renderComponent();
-  const selects = screen.getAllByRole('combobox');
-  await user.selectOptions(selects[0], '1');
-  await user.selectOptions(selects[1], '2');
-  const radios = screen.getAllByRole('radio');
+  const selects = screen.getAllByRole("combobox");
+  await user.selectOptions(selects[0], "1");
+  await user.selectOptions(selects[1], "2");
+  const radios = screen.getAllByRole("radio");
   await user.click(radios[0]);
-  await user.click(screen.getByText('Submit'));
+  await user.click(screen.getByText("Submit"));
   signMessageState.isSuccess = true;
-  signMessageState.data = 'sig';
+  signMessageState.data = "sig";
   await act(async () => {
     rerender(<NextGenAdminInitializeBurn close={() => {}} />);
   });
@@ -116,6 +132,6 @@ test('writes contract after successful sign message and api call', async () => {
   await act(async () => {});
   expect(contractWriteState.writeContract).toHaveBeenCalledWith({
     ...contractWriteState.params,
-    args: ['1', '2', true],
+    args: ["1", "2", true],
   });
 });

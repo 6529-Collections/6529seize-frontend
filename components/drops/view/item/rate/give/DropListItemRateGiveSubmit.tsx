@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useState, useCallback, useRef, useEffect } from "react";
 import { DropRateChangeRequest } from "../../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
