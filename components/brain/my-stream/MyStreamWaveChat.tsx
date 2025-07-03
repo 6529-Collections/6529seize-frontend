@@ -111,7 +111,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
         initialDrop={initialDrop}
         dropId={null}
       />
-      {/* Hide entire CreateDropWaveWrapper on mobile during edit mode */}
       {!(isApp && editingDropId) && (
         <div className="tw-mt-auto">
           <CreateDropWaveWrapper>
