@@ -43,6 +43,9 @@ describe("AppLayout", () => {
   let store: any;
 
   beforeEach(() => {
+    store = configureStore({
+      reducer: { edit: editSlice.reducer },
+    });
     usePathname.mockReturnValue("/");
     useSearchParams.mockReturnValue({ get: () => null } as any);
   });
