@@ -14,6 +14,8 @@ import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import StoreSetup from "@/components/providers/StoreSetup";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import { Viewport } from "next";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorPage from "./error-page";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
@@ -35,7 +37,9 @@ export default function RootLayout({
         <StoreSetup>
           <Providers>
             <DynamicHeadTitle />
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <ErrorBoundary fallback={<ErrorPage />}>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </ErrorBoundary>
           </Providers>
         </StoreSetup>
       </body>
