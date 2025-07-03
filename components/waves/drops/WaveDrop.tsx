@@ -175,18 +175,24 @@ const WaveDrop = ({
 
   const handleLongPress = useCallback(() => {
     if (!isMobile) return;
+    // Cancel any active edit mode first
+    if (editingDropId) {
+      dispatch(setEditingDropId(null));
+    }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [isMobile]);
+  }, [isMobile, editingDropId, dispatch]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (!isMobile) return;
+      // Don't allow mobile menu when in edit mode
+      if (isEditing) return;
       const touch = e.touches[0];
       touchStartPosition.current = { x: touch.clientX, y: touch.clientY };
       longPressTimeoutRef.current = setTimeout(handleLongPress, 500);
     },
-    [isMobile, handleLongPress]
+    [isMobile, handleLongPress, isEditing]
   );
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
@@ -213,20 +219,33 @@ const WaveDrop = ({
   }, []);
 
   const handleOnReply = useCallback(() => {
+    // Cancel any active edit mode first
+    if (editingDropId) {
+      dispatch(setEditingDropId(null));
+    }
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex].part_id });
-  }, [onReply, drop, activePartIndex]);
+  }, [onReply, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnQuote = useCallback(() => {
+    // Cancel any active edit mode first
+    if (editingDropId) {
+      dispatch(setEditingDropId(null));
+    }
     setIsSlideUp(false);
     onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
-  }, [onQuote, drop, activePartIndex]);
+  }, [onQuote, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnAddReaction = useCallback(() => {
+    // Cancel any active edit mode first
+    if (editingDropId) {
+      dispatch(setEditingDropId(null));
+    }
     setIsSlideUp(false);
-  }, []);
+  }, [editingDropId, dispatch]);
 
   const handleOnEdit = useCallback(() => {
+    setIsSlideUp(false);  // Close mobile menu when entering edit mode
     dispatch(setEditingDropId(drop.id));
   }, [dispatch, drop.id]);
 
@@ -273,6 +292,13 @@ const WaveDrop = ({
       }
     };
   }, []);
+
+  // Close mobile menu if in edit mode
+  useEffect(() => {
+    if (isEditing && isSlideUp) {
+      setIsSlideUp(false);
+    }
+  }, [isEditing]);
 
   const dropClasses = getDropClasses(
     isActiveDrop,
@@ -373,6 +399,7 @@ const WaveDrop = ({
           onReply={handleOnReply}
           onQuote={handleOnQuote}
           onAddReaction={handleOnAddReaction}
+          onEdit={handleOnEdit}
         />
       </div>
     </div>

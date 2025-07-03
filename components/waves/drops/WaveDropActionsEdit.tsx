@@ -36,7 +36,7 @@ export default function WaveDropActionsEdit({
         place="top"
         style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
       >
-        <span className="tw-text-xs">Edit</span>
+        <span className="tw-text-xs">Edit Message</span>
       </Tooltip>
     </>
   );
