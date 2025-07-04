@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback, useState, useRef } from "react";
+import React, { createContext, useContext, useCallback, useState, useRef, useMemo } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ApiWave } from "../../generated/models/ApiWave";
 
@@ -89,15 +89,15 @@ export const WaveEligibilityProvider: React.FC<WaveEligibilityProviderProps> = (
   }, [eligibility, updateEligibility]);
 
   const getEligibility = useCallback((waveId: string): WaveEligibility | null => {
-    return eligibility[waveId] || null;
+    return eligibility[waveId] ?? null;
   }, [eligibility]);
 
-  const value: WaveEligibilityContextType = {
+  const value: WaveEligibilityContextType = useMemo(() => ({
     eligibility,
     updateEligibility,
     refreshEligibility,
     getEligibility,
-  };
+  }), [eligibility, updateEligibility, refreshEligibility, getEligibility]);
 
   return (
     <WaveEligibilityContext.Provider value={value}>
