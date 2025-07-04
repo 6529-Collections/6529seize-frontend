@@ -114,6 +114,7 @@ jest.mock('@lexical/react/LexicalComposerContext', () => ({
         read: (fn: () => void) => fn(),
       }),
       registerCommand: jest.fn(() => jest.fn()),
+      focus: jest.fn(),
     },
   ],
 }));
@@ -155,6 +156,17 @@ jest.mock('../../../../components/drops/create/lexical/transformers/HastagTransf
   HASHTAG_TRANSFORMER: { type: 'hashtag-transformer' },
 }));
 
+jest.mock('../../../../components/drops/create/lexical/nodes/EmojiNode', () => ({
+  EmojiNode: class MockEmojiNode {
+    static getType() { return 'emoji'; }
+  },
+}));
+
+jest.mock('../../../../components/drops/create/lexical/plugins/emoji/EmojiPlugin', () => ({
+  __esModule: true,
+  default: () => <div data-testid="emoji-plugin" />,
+}));
+
 jest.mock('../../../../components/drops/create/lexical/ExampleTheme', () => ({
   __esModule: true,
   default: {},
@@ -172,6 +184,16 @@ jest.mock('../../../../components/drops/create/lexical/plugins/mentions/Mentions
     }),
   };
 });
+
+jest.mock('../../../../components/waves/CreateDropEmojiPicker', () => ({
+  __esModule: true,
+  default: () => <div data-testid="emoji-picker" />,
+}));
+
+jest.mock('../../../../hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: () => ({ isApp: false }),
+}));
 
 describe('EditDropLexical', () => {
   const defaultProps = {
@@ -204,6 +226,8 @@ describe('EditDropLexical', () => {
       expect(screen.getByTestId('list-plugin')).toBeInTheDocument();
       expect(screen.getByTestId('link-plugin')).toBeInTheDocument();
       expect(screen.getByTestId('mentions-plugin')).toBeInTheDocument();
+      expect(screen.getByTestId('emoji-plugin')).toBeInTheDocument();
+      expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
     });
 
     it('renders save and cancel buttons', () => {
