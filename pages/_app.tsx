@@ -54,6 +54,7 @@ import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
 import { PageSSRMetadata } from "../helpers/Types";
 import { TitleProvider } from "../contexts/TitleContext";
+import { WaveEligibilityProvider } from "../contexts/wave/WaveEligibilityContext";
 
 export function getChains() {
   const chains: Chain[] = [mainnet];
@@ -265,10 +266,11 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                   <AppWalletsProvider>
                     <SeizeConnectProvider>
                       <Auth>
-                        <NotificationsProvider>
-                          <CookieConsentProvider>
-                            <EULAConsentProvider>
-                              <AppWebSocketProvider>
+                        <WaveEligibilityProvider>
+                          <NotificationsProvider>
+                            <CookieConsentProvider>
+                              <EULAConsentProvider>
+                                <AppWebSocketProvider>
                                 <TitleProvider>
                                   <HeaderProvider>
                                     <MainLayout metadata={metadata}>
@@ -283,10 +285,11 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                                   {appWalletPasswordModal.modal}
                                   <NewVersionToast />
                                 </TitleProvider>
-                              </AppWebSocketProvider>
-                            </EULAConsentProvider>
-                          </CookieConsentProvider>
-                        </NotificationsProvider>
+                                </AppWebSocketProvider>
+                              </EULAConsentProvider>
+                            </CookieConsentProvider>
+                          </NotificationsProvider>
+                        </WaveEligibilityProvider>
                       </Auth>
                     </SeizeConnectProvider>
                   </AppWalletsProvider>
