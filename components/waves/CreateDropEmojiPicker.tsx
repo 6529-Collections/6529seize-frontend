@@ -40,8 +40,7 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
       // Ensure editor is focused and state is updated
       requestAnimationFrame(() => {
         editor.focus();
-        // Force OnChangePlugin to fire by getting current state
-        const currentState = editor.getEditorState();
+        // Force OnChangePlugin to fire with empty update
         editor.update(() => {
           // Empty update to trigger onChange
         });
