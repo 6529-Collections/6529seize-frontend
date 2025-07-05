@@ -36,6 +36,16 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
         const emojiNode = $createTextNode(emojiText);
         $insertNodes([emojiNode]);
       });
+      
+      // Ensure editor is focused and state is updated
+      requestAnimationFrame(() => {
+        editor.focus();
+        // Force OnChangePlugin to fire by getting current state
+        const currentState = editor.getEditorState();
+        editor.update(() => {
+          // Empty update to trigger onChange
+        });
+      });
     }
     setShowPicker(false);
   };
