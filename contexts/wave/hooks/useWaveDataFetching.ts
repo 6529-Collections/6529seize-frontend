@@ -9,6 +9,7 @@ import {
   createEmptyWaveMessages,
   fetchNewestWaveMessages,
 } from "../utils/wave-messages-utils";
+import { useWaveEligibility } from "../WaveEligibilityContext";
 
 // Define the limit constant used by the fetch utility
 const FETCH_NEWEST_LIMIT = 50;
@@ -23,6 +24,8 @@ export function useWaveDataFetching({
 
   const { cancelFetch, createController, cleanupController } =
     useWaveAbortController();
+
+  const { updateEligibility } = useWaveEligibility();
 
   /**
    * Checks if a wave already has data, returns true if loading should continue
@@ -116,7 +119,7 @@ export function useWaveDataFetching({
       const controller = createController(waveId);
 
       // Create a new promise with the abort signal
-      const fetchPromise = fetchWaveMessages(waveId, null, controller.signal)
+      const fetchPromise = fetchWaveMessages(waveId, null, controller.signal, updateEligibility)
         .then((drops) => handleFetchSuccess(waveId, drops))
         .catch((error) => {
           handleFetchError(waveId, error);
@@ -166,7 +169,8 @@ export function useWaveDataFetching({
               waveId,
               currentSinceSerialNo,
               FETCH_NEWEST_LIMIT,
-              signal
+              signal,
+              updateEligibility
             );
 
           // Check if aborted during the fetch utility call

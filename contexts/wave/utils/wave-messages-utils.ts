@@ -21,12 +21,14 @@ import {
  * @param waveId The ID of the wave to fetch messages for
  * @param serialNo Optional serial number to fetch messages before (for pagination)
  * @param signal Optional AbortSignal for cancellation
+ * @param updateEligibility Optional function to update wave eligibility in centralized store
  * @returns Array of ApiDrop with wave data attached, or null if the request fails
  */
 export async function fetchWaveMessages(
   waveId: string,
   serialNo: number | null,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  updateEligibility?: (waveId: string, eligibility: any) => void
 ): Promise<ApiDrop[] | null> {
   const params: Record<string, string> = {
     limit: WAVE_DROPS_PARAMS.limit.toString(),
@@ -41,6 +43,16 @@ export async function fetchWaveMessages(
       params,
       signal,
     });
+
+    // Update centralized eligibility if callback provided
+    if (updateEligibility && data.wave) {
+      updateEligibility(waveId, {
+        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_admin: data.wave.authenticated_user_admin,
+      });
+    }
 
     return data.drops.map((drop) => ({
       ...drop,
@@ -320,7 +332,8 @@ export async function fetchNewestWaveMessages(
   waveId: string,
   sinceSerialNo: number | null,
   limit: number,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  updateEligibility?: (waveId: string, eligibility: any) => void
 ): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> {
   const params: Record<string, string> = {
     limit: limit.toString(),
@@ -337,6 +350,16 @@ export async function fetchNewestWaveMessages(
       params,
       signal,
     });
+
+    // Update centralized eligibility if callback provided
+    if (updateEligibility && data.wave) {
+      updateEligibility(waveId, {
+        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_admin: data.wave.authenticated_user_admin,
+      });
+    }
 
     const fetchedDrops = data.drops.map((drop) => ({
       ...drop,
