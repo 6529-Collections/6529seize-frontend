@@ -21,6 +21,7 @@ import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 
 export default function Providers({
   children,
@@ -39,30 +40,32 @@ export default function Providers({
                 <AppWalletsProvider>
                   <SeizeConnectProvider>
                     <Auth>
-                      <NotificationsProvider>
-                        <CookieConsentProvider>
-                          <EULAConsentProvider>
-                            <AppWebSocketProvider>
-                              <TitleProvider>
-                                <HeaderProvider>
-                                  <ScrollPositionProvider>
-                                    <ViewProvider>
-                                      <NavigationHistoryProvider>
-                                        <LayoutProvider>
-                                          <MyStreamProvider>
-                                            {children}
-                                          </MyStreamProvider>
-                                        </LayoutProvider>
-                                      </NavigationHistoryProvider>
-                                    </ViewProvider>
-                                  </ScrollPositionProvider>
-                                </HeaderProvider>
-                              </TitleProvider>
-                              <NewVersionToast />
-                            </AppWebSocketProvider>
-                          </EULAConsentProvider>
-                        </CookieConsentProvider>
-                      </NotificationsProvider>
+                      <WaveEligibilityProvider>
+                        <NotificationsProvider>
+                          <CookieConsentProvider>
+                            <EULAConsentProvider>
+                              <AppWebSocketProvider>
+                                <TitleProvider>
+                                  <HeaderProvider>
+                                    <ScrollPositionProvider>
+                                      <ViewProvider>
+                                        <NavigationHistoryProvider>
+                                          <LayoutProvider>
+                                            <MyStreamProvider>
+                                              {children}
+                                            </MyStreamProvider>
+                                          </LayoutProvider>
+                                        </NavigationHistoryProvider>
+                                      </ViewProvider>
+                                    </ScrollPositionProvider>
+                                  </HeaderProvider>
+                                </TitleProvider>
+                                <NewVersionToast />
+                              </AppWebSocketProvider>
+                            </EULAConsentProvider>
+                          </CookieConsentProvider>
+                        </NotificationsProvider>
+                      </WaveEligibilityProvider>
                     </Auth>
                   </SeizeConnectProvider>
                 </AppWalletsProvider>

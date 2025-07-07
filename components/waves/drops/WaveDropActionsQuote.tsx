@@ -4,6 +4,7 @@ import React, { useContext } from "react";
 import { Tooltip } from "react-tooltip";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
+import { useWaveEligibility } from "../../../contexts/wave/WaveEligibilityContext";
 
 interface WaveDropActionsQuoteProps {
   readonly drop: ApiDrop;
@@ -16,20 +17,24 @@ const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
   drop,
 }) => {
   const { setToast } = useContext(AuthContext);
+  const { getEligibility } = useWaveEligibility();
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  // Use same optimistic approach as Reply
+  
+  // Check centralized eligibility first, fallback to drop's eligibility
+  const waveEligibility = getEligibility(drop.wave.id);
+  const isEligibleToChat = waveEligibility?.authenticated_user_eligible_to_chat ?? 
+                          drop.wave.authenticated_user_eligible_to_chat;
+  
   const canQuote = !isTemporaryDrop;
 
   const handleQuoteClick = () => {
-    // Check if we have the permission flag and it's false
-    if (drop.wave.authenticated_user_eligible_to_chat === false) {
+    if (isEligibleToChat === false) {
       setToast({
         message: "You are not eligible to chat in this wave",
         type: "error",
       });
       return;
     }
-    // Otherwise, proceed optimistically
     onQuote();
   };
 

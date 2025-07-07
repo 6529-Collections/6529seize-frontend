@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import WaveDropActionsReply from '../../../../components/waves/drops/WaveDropActionsReply';
+import { WaveEligibilityProvider } from '../../../../contexts/wave/WaveEligibilityContext';
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -18,7 +19,11 @@ describe('WaveDropActionsReply', () => {
   it('enables reply when allowed', async () => {
     const user = userEvent.setup();
     const onReply = jest.fn();
-    render(<WaveDropActionsReply drop={baseDrop} activePartIndex={0} onReply={onReply} />);
+    render(
+      <WaveEligibilityProvider>
+        <WaveDropActionsReply drop={baseDrop} activePartIndex={0} onReply={onReply} />
+      </WaveEligibilityProvider>
+    );
 
     const btn = screen.getByRole('button', { name: 'Reply to drop' });
     expect(btn).not.toBeDisabled();
@@ -30,7 +35,11 @@ describe('WaveDropActionsReply', () => {
     const user = userEvent.setup();
     const onReply = jest.fn();
     const drop = { ...baseDrop, id: 'temp-123' };
-    render(<WaveDropActionsReply drop={drop} activePartIndex={0} onReply={onReply} />);
+    render(
+      <WaveEligibilityProvider>
+        <WaveDropActionsReply drop={drop} activePartIndex={0} onReply={onReply} />
+      </WaveEligibilityProvider>
+    );
 
     const btn = screen.getByRole('button', { name: 'Reply to drop' });
     expect(btn).toBeDisabled();
