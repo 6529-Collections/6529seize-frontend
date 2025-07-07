@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Delegation.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
@@ -80,14 +82,12 @@ export function DelegationFormLabel(
     <Form.Label
       column
       sm={props.span ?? 3}
-      className="d-flex align-items-center"
-    >
+      className="d-flex align-items-center">
       {props.title}
       <Tippy content={props.tooltip} placement={"top"} theme={"light"}>
         <FontAwesomeIcon
           className={styles.infoIcon}
-          icon={faInfoCircle}
-        ></FontAwesomeIcon>
+          icon={faInfoCircle}></FontAwesomeIcon>
       </Tippy>
     </Form.Label>
   );
@@ -167,8 +167,7 @@ export function DelegationFormOptionsFormGroup(
         <Form.Select
           className={`${styles.formInput}`}
           value={props.selected}
-          onChange={(e) => props.setSelected(e.target.value)}
-        >
+          onChange={(e) => props.setSelected(e.target.value)}>
           <option value="" disabled>
             Select
           </option>
@@ -212,16 +211,14 @@ export function DelegationFormCollectionFormGroup(
         <Form.Select
           className={`${styles.formInput}`}
           value={props.collection}
-          onChange={(e) => props.setCollection(e.target.value)}
-        >
+          onChange={(e) => props.setCollection(e.target.value)}>
           <option value="0" disabled>
             Select Collection
           </option>
           {collections.map((sc) => (
             <option
               key={`add-delegation-select-collection-${sc.contract}`}
-              value={sc.contract}
-            >
+              value={sc.contract}>
               {`${sc.display}`}
             </option>
           ))}
@@ -263,8 +260,7 @@ function DelegationButtons(
       {props.showCancel && (
         <button
           className={styles.newDelegationCancelBtn}
-          onClick={() => props.onHide()}
-        >
+          onClick={() => props.onHide()}>
           Cancel
         </button>
       )}
@@ -274,8 +270,7 @@ function DelegationButtons(
         }`}
         onClick={() => {
           props.onSubmit();
-        }}
-      >
+        }}>
         Submit{" "}
         {props.isLoading && (
           <div className="d-inline">
@@ -370,17 +365,14 @@ export function DelegationSubmitGroups(
         <Form.Label
           column
           sm={4}
-          className="d-flex align-items-center"
-        ></Form.Label>
+          className="d-flex align-items-center"></Form.Label>
         <Col
           sm={8}
-          className="d-flex align-items-center justify-content-center"
-        >
+          className="d-flex align-items-center justify-content-center">
           {props.showCancel && (
             <button
               className={styles.newDelegationCancelBtn}
-              onClick={() => props.onHide()}
-            >
+              onClick={() => props.onHide()}>
               Cancel
             </button>
           )}
@@ -391,8 +383,7 @@ export function DelegationSubmitGroups(
             onClick={(e) => {
               e.preventDefault();
               submitDelegation();
-            }}
-          >
+            }}>
             {props.submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
               <div className="d-inline">
@@ -407,8 +398,7 @@ export function DelegationSubmitGroups(
       {(errors.length > 0 || props.gasError) && (
         <Form.Group
           as={Row}
-          className={`pt-2 pb-2 ${styles.newDelegationError}`}
-        >
+          className={`pt-2 pb-2 ${styles.newDelegationError}`}>
           <Form.Label column sm={4} className="d-flex align-items-center">
             Errors
           </Form.Label>
@@ -493,14 +483,12 @@ export function DelegationCloseButton(
       content={`Cancel ${props.title}`}
       delay={250}
       placement={"top"}
-      theme={"light"}
-    >
+      theme={"light"}>
       <FontAwesomeIcon
         aria-label={`Cancel ${props.title}`}
         className={styles.closeNewDelegationForm}
         icon={faTimesCircle}
-        onClick={() => props.onHide()}
-      ></FontAwesomeIcon>
+        onClick={() => props.onHide()}></FontAwesomeIcon>
     </Tippy>
   );
 }

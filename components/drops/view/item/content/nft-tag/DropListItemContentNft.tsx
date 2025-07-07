@@ -1,3 +1,5 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
 import { ReferencedNft } from "../../../../../../entities/IDrop";
 import {
@@ -75,14 +77,12 @@ export default function DropListItemContentNft({
   const nftHref = getNftHref();
   const target = getTarget();
 
-
   return (
     <Link
       onClick={(e) => e.stopPropagation()}
       href={nftHref}
       className="tw-no-underline"
-      target={target}
-    >
+      target={target}>
       <div className="tw-mt-2 tw-gap-y-2 tw-flex tw-flex-col" ref={elementRef}>
         <div className="tw-w-full tw-h-64">
           {nft && (

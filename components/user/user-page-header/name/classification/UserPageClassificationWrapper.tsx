@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import PencilIcon, { PencilIconSize } from "../../../../utils/icons/PencilIcon";

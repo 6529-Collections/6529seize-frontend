@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import {
@@ -377,8 +379,7 @@ export default function UserPageRepModifyModal({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
-          >
+            className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6">
             <UserPageRepModifyModalHeader
               handleOrWallet={
                 profile.query ?? profile.handle ?? profile.display
@@ -404,8 +405,7 @@ export default function UserPageRepModifyModal({
                       viewBox="0 0 24 24"
                       fill="none"
                       aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
+                      xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M12 5V19M5 12H19"
                         stroke="currentColor"
@@ -419,8 +419,7 @@ export default function UserPageRepModifyModal({
                       viewBox="0 0 24 24"
                       fill="none"
                       aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
+                      xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M5 12H19"
                         stroke="currentColor"
@@ -462,8 +461,7 @@ export default function UserPageRepModifyModal({
                       !isSaveDisabled
                         ? "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
                         : "tw-cursor-not-allowed tw-opacity-50"
-                    } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid  tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}
-                  >
+                    } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid  tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}>
                     {mutating ? (
                       <div className="tw-w-8">
                         <CircleLoader />
@@ -475,8 +473,7 @@ export default function UserPageRepModifyModal({
                   <button
                     onClick={onClose}
                     type="button"
-                    className="tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-                  >
+                    className="tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
                     Cancel
                   </button>
                 </div>

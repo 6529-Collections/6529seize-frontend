@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useUnreadNotifications } from "./useUnreadNotifications";
 import { useMyStream } from "../contexts/wave/MyStreamContext";
@@ -42,10 +44,10 @@ export function useUnreadIndicator({
         // Use the count property which tracks actual unread drops
         return (dm?.newDropsCount?.count ?? 0) > 0;
       });
-      
+
       setHasUnread(hasUnreadMessages);
     }
   }, [type, handle, haveUnreadNotifications, directMessages.list]);
 
   return { hasUnread };
-} 
+}

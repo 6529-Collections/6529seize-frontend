@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 import { useState, useEffect, useRef } from "react";

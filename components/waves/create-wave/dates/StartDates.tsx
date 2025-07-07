@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
@@ -111,8 +113,7 @@ export default function StartDates({
             </div>
           )}
         </div>
-      }
-    >
+      }>
       {/* Calendar Selection */}
       <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
         <div className="tw-col-span-1">

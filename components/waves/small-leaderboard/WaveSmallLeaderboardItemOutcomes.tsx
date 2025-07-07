@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -129,7 +131,10 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           {!!nicTotal && (
             <div className="tw-flex tw-items-center tw-justify-between">
               <div className="tw-flex tw-items-center tw-gap-2">
-                <FontAwesomeIcon icon={faAddressCard} className="tw-size-4 tw-text-blue-300/70" />
+                <FontAwesomeIcon
+                  icon={faAddressCard}
+                  className="tw-size-4 tw-text-blue-300/70"
+                />
                 <span className="tw-text-xs tw-font-medium tw-text-iron-300">
                   NIC
                 </span>
@@ -142,7 +147,10 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           {!!repTotal && (
             <div className="tw-flex tw-items-center tw-justify-between">
               <div className="tw-flex tw-items-center tw-gap-2">
-                <FontAwesomeIcon icon={faStar} className="tw-size-4 tw-text-purple-300/70" />
+                <FontAwesomeIcon
+                  icon={faStar}
+                  className="tw-size-4 tw-text-purple-300/70"
+                />
                 <span className="tw-text-xs tw-font-medium tw-text-iron-300">
                   Rep
                 </span>
@@ -155,10 +163,12 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           {manualOutcomes.map((outcome) => (
             <div
               key={outcome}
-              className="tw-flex tw-items-center tw-justify-between"
-            >
+              className="tw-flex tw-items-center tw-justify-between">
               <div className="tw-flex tw-items-center tw-gap-2">
-                <FontAwesomeIcon icon={faAward} className="tw-size-4 tw-text-amber-300/70" />
+                <FontAwesomeIcon
+                  icon={faAward}
+                  className="tw-size-4 tw-text-amber-300/70"
+                />
                 <span className="tw-text-xs tw-font-medium tw-text-amber-100/90">
                   {outcome}
                 </span>
@@ -176,28 +186,35 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
       placement="top"
       animation="shift-away"
       visible={isTouch ? isOpen : undefined}
-      onClickOutside={() => setIsOpen(false)}
-    >
+      onClickOutside={() => setIsOpen(false)}>
       <button
         onClick={handleClick}
         className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${
           isMobile ? "tw-gap-4" : "tw-gap-2"
         } tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${
           isTouch ? "tw-cursor-pointer" : ""
-        }`}
-      >
+        }`}>
         <span className="tw-text-xs tw-font-medium tw-text-iron-200">
           Outcome:
         </span>
         <div className="tw-flex tw-items-center tw-gap-2">
           {!!nicTotal && (
-            <FontAwesomeIcon icon={faAddressCard} className="tw-size-4 tw-text-blue-300/70 tw-flex-shrink-0" />
+            <FontAwesomeIcon
+              icon={faAddressCard}
+              className="tw-size-4 tw-text-blue-300/70 tw-flex-shrink-0"
+            />
           )}
           {!!repTotal && (
-            <FontAwesomeIcon icon={faStar} className="tw-size-4 tw-text-purple-300/70 tw-flex-shrink-0" />
+            <FontAwesomeIcon
+              icon={faStar}
+              className="tw-size-4 tw-text-purple-300/70 tw-flex-shrink-0"
+            />
           )}
           {manualOutcomes.length > 0 && (
-            <FontAwesomeIcon icon={faAward} className="tw-size-4 tw-text-amber-300/70 tw-flex-shrink-0" />
+            <FontAwesomeIcon
+              icon={faAward}
+              className="tw-size-4 tw-text-amber-300/70 tw-flex-shrink-0"
+            />
           )}
         </div>
       </button>

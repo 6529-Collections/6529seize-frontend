@@ -60,3 +60,28 @@ export enum CommunityMembersSortOption {
   REP = "rep",
   NIC = "nic",
 }
+
+export enum AboutSection {
+  MEMES = "the-memes",
+  MEMES_CALENDAR = "memes-calendar",
+  MEME_LAB = "meme-lab",
+  GRADIENTS = "6529-gradient",
+  FAQ = "faq",
+  MISSION = "mission",
+  RELEASE_NOTES = "release-notes",
+  CONTACT_US = "contact-us",
+  TERMS_OF_SERVICE = "terms-of-service",
+  PRIVACY_POLICY = "privacy-policy",
+  COOKIE_POLICY = "cookie-policy",
+  LICENSE = "license",
+  MINTING = "minting",
+  APPLY = "apply",
+  DATA_DECENTR = "data-decentralization",
+  GDRC1 = "gdrc1",
+  NFT_DELEGATION = "nft-delegation",
+  PRIMARY_ADDRESS = "primary-address",
+  ENS = "ens",
+  SUBSCRIPTIONS = "subscriptions",
+  NAKAMOTO_THRESHOLD = "nakamoto-threshold",
+  COPYRIGHT = "copyright",
+}

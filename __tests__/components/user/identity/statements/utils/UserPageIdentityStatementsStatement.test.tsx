@@ -1,30 +1,42 @@
-import { render, screen, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import UserPageIdentityStatementsStatement from '../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatement';
-import { STATEMENT_TYPE } from '../../../../../../helpers/Types';
-import { useRouter } from 'next/router';
+import { render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import UserPageIdentityStatementsStatement from "../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatement";
+import { STATEMENT_TYPE } from "../../../../../../helpers/Types";
+import { useRouter } from "next/router";
 
-jest.mock('../../../../../../components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton', () => ({
+jest.mock(
+  "../../../../../../components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="delete-button" />,
+  })
+);
+
+jest.mock("@tippyjs/react", () => ({
   __esModule: true,
-  default: () => <div data-testid="delete-button" />,
+  default: ({ children }: any) => <div>{children}</div>,
 }));
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
-
 const mockCopyToClipboard = jest.fn();
-jest.mock('react-use', () => ({ useCopyToClipboard: () => [null, mockCopyToClipboard] }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock("react-use", () => ({
+  useCopyToClipboard: () => [null, mockCopyToClipboard],
+}));
+jest.mock("next/router", () => ({ useRouter: jest.fn() }));
 
 const mockedUseRouter = useRouter as jest.Mock;
 
 function setMatchMedia(matches: boolean) {
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockReturnValue({ matches, addListener: jest.fn(), removeListener: jest.fn() }),
+    value: jest.fn().mockReturnValue({
+      matches,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+    }),
   });
 }
 
-describe('UserPageIdentityStatementsStatement', () => {
+describe("UserPageIdentityStatementsStatement", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockedUseRouter.mockReturnValue({ isReady: true });
@@ -36,19 +48,19 @@ describe('UserPageIdentityStatementsStatement', () => {
     jest.useRealTimers();
   });
 
-it("copies text when copy button clicked", async () => {
+  it("copies text when copy button clicked", async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    const statement = { 
-      statement_value: 'test-value', 
-      statement_type: STATEMENT_TYPE.X 
+    const statement = {
+      statement_value: "test-value",
+      statement_type: STATEMENT_TYPE.X,
     } as any;
     const profile = {} as any;
-    
+
     render(
-      <UserPageIdentityStatementsStatement 
-        statement={statement} 
-        profile={profile} 
-        canEdit={false} 
+      <UserPageIdentityStatementsStatement
+        statement={statement}
+        profile={profile}
+        canEdit={false}
       />
     );
 
@@ -57,29 +69,38 @@ it("copies text when copy button clicked", async () => {
       jest.advanceTimersByTime(0);
     });
 
-    const copyButton = screen.getByRole('button', { name: /copy/i });
-    
+    const copyButton = screen.getByRole("button", { name: /copy/i });
+
     await act(async () => {
       await user.click(copyButton);
     });
 
-    expect(mockCopyToClipboard).toHaveBeenCalledWith('test-value');
-    
+    expect(mockCopyToClipboard).toHaveBeenCalledWith("test-value");
+
     // Check that the text changed to "Copied!"
-    expect(screen.getByText('Copied!')).toBeInTheDocument();
-    
+    expect(screen.getByText("Copied!")).toBeInTheDocument();
+
     // Fast-forward time to check that the text reverts
     await act(async () => {
       jest.advanceTimersByTime(1000);
     });
-    
-    expect(screen.getByText('test-value')).toBeInTheDocument();
+
+    expect(screen.getByText("test-value")).toBeInTheDocument();
   });
 
-  it('shows external link when canOpen is true', () => {
-    const statement = { statement_value: 'http://x.com', statement_type: STATEMENT_TYPE.X } as any;
+  it("shows external link when canOpen is true", () => {
+    const statement = {
+      statement_value: "https://x.com",
+      statement_type: STATEMENT_TYPE.X,
+    } as any;
     const profile = {} as any;
-    render(<UserPageIdentityStatementsStatement statement={statement} profile={profile} canEdit={false} />);
-    expect(screen.getByRole('link')).toHaveAttribute('href', 'http://x.com');
+    render(
+      <UserPageIdentityStatementsStatement
+        statement={statement}
+        profile={profile}
+        canEdit={false}
+      />
+    );
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://x.com");
   });
 });

@@ -1,49 +1,5 @@
 @use "../../styles/variables.scss";
 
-.aboutMenuLeft {
-  width: 15%;
-  flex: none;
-
-  a {
-    cursor: pointer;
-    text-decoration: none !important;
-  }
-}
-
-.aboutMenuLeftItem {
-  cursor: pointer;
-  &:hover {
-    color: variables.$lightest-grey;
-  }
-}
-
-.aboutMenuLeftItemActive {
-  text-decoration: underline;
-}
-
-.aboutMenuRight {
-  width: 85%;
-}
-
-.aboutMenuLeftFull {
-  width: 100%;
-  display: none;
-}
-
-@media only screen and (max-width: 1000px) {
-  .aboutMenuLeft {
-    display: none;
-  }
-
-  .aboutMenuLeftFull {
-    display: block;
-  }
-
-  .aboutMenuRight {
-    width: 100%;
-  }
-}
-
 .calendarTable {
   border: 1px solid variables.$almost-very-dark-grey !important;
   tr td {

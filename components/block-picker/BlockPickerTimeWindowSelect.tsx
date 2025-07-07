@@ -1,3 +1,5 @@
+"use client";
+
 import { motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -70,8 +72,7 @@ export default function BlockPickerTimeWindowSelect({
           onClick={(e) => {
             e.stopPropagation();
             toggleOpen();
-          }}
-        >
+          }}>
           <span className="tw-block tw-truncate">{title}</span>
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
             <svg
@@ -79,8 +80,7 @@ export default function BlockPickerTimeWindowSelect({
               className="tw-h-5 tw-w-5 tw-text-zinc-400"
               viewBox="0 0 24 24"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -98,8 +98,7 @@ export default function BlockPickerTimeWindowSelect({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-            >
+              transition={{ duration: 0.2 }}>
               <div className="tw-rounded-lg tw-overflow-hidden">
                 <BlockPickerTimeWindowSelectList
                   setTimeWindow={onTimeWindowSelect}

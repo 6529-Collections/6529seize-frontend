@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { ProfileActivityLogProxyActionCreated } from "../../../../entities/IProfile";
 import { PROFILE_PROXY_ACTION_LABELS } from "../../../../entities/IProxy";

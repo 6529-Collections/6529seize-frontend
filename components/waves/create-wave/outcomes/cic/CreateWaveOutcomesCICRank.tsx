@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   CreateWaveOutcomeConfig,
@@ -114,8 +116,7 @@ export default function CreateWaveOutcomesCICRank({
             onClicked={onSubmit}
             disabled={false}
             loading={false}
-            padding="tw-px-4 tw-py-3"
-          >
+            padding="tw-px-4 tw-py-3">
             Save
           </PrimaryButton>
         </div>

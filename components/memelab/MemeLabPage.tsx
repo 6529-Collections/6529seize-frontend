@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./MemeLab.module.scss";
 
 import { Fragment, useEffect, useState } from "react";
@@ -1208,7 +1210,7 @@ export default function LabPage(props: Readonly<Props>) {
             {nftMeta && nft && (
               <>
                 <Row className="pt-2">
-                  <Col>
+                  <Col className="d-flex">
                     <NftNavigation
                       nftId={nft.id}
                       path="/meme-lab"

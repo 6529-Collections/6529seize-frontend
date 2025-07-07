@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
@@ -33,8 +35,7 @@ export default function DropAuthorHandle({
   if (amIAuthor) {
     return (
       <p
-        className={`${textClasses} tw-font-semibold tw-mb-0 tw-leading-none tw-text-iron-50`}
-      >
+        className={`${textClasses} tw-font-semibold tw-mb-0 tw-leading-none tw-text-iron-50`}>
         {handle}
       </p>
     );
@@ -42,13 +43,11 @@ export default function DropAuthorHandle({
 
   return (
     <p
-      className={`${textClasses} tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-50`}
-    >
+      className={`${textClasses} tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-50`}>
       <Link
         onClick={(e) => e.stopPropagation()}
         href={`/${handle}`}
-        className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-      >
+        className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
         {handle}
       </Link>
     </p>

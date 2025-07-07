@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode, useEffect, useRef, useState } from "react";
 import GroupsSidebarToggle from "../../groups/sidebar/GroupsSidebarToggle";
 import GroupsSidebar from "../../groups/sidebar/GroupsSidebar";
@@ -116,8 +118,7 @@ export default function SidebarLayout({
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
           !open ? "tw-ml-0" : "tw-ml-[320px]"
-        }`}
-      >
+        }`}>
         <GroupsSidebarToggle
           ref={openButtonRef}
           open={open}
@@ -130,8 +131,7 @@ export default function SidebarLayout({
             className={`tw-fixed tw-z-40 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500  tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transform tw-transition tw-duration-300 tw-ease-out ${
               !open ? "-tw-translate-x-full" : ""
             }`}
-            ref={sidebarRef}
-          >
+            ref={sidebarRef}>
             <div className="tw-bg-iron-950 tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
               <GroupsSidebar />
             </div>
@@ -140,8 +140,7 @@ export default function SidebarLayout({
             <div
               className={` tw-transform tw-transition-all tw-duration-300 tw-ease-out ${
                 animateContentMarginLeft ? "tw-ml-[320px]" : " tw-ml-0"
-              }`}
-            >
+              }`}>
               {init && children}
             </div>
           </div>

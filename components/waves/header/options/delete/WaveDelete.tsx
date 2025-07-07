@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
@@ -17,8 +19,7 @@ export default function WaveDelete({ wave }: { readonly wave: ApiWave }) {
         className="tw-flex tw-items-center tw-bg-transparent tw-w-full tw-border-none tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-red hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
         role="menuitem"
         tabIndex={-1}
-        id="options-menu-0-item-0"
-      >
+        id="options-menu-0-item-0">
         Delete
       </button>
       <CommonAnimationWrapper mode="sync" initial={true}>
@@ -27,8 +28,7 @@ export default function WaveDelete({ wave }: { readonly wave: ApiWave }) {
             key="modal"
             elementClasses="tw-absolute tw-z-50"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <WaveDeleteModal
               wave={wave}
               closeModal={() => setIsDeleteModalOpen(false)}

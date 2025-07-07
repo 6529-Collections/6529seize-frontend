@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import GroupCreateConfig from "./config/GroupCreateConfig";
 import GroupCreateActions from "./actions/GroupCreateActions";
@@ -143,15 +145,12 @@ export default function GroupCreate({
   }, [connectedProfile, groupConfig]);
 
   const onSetIAmIncluded = (newState: boolean) => {
-    const primaryWallet =
-      connectedProfile?.primary_wallet?.toLowerCase();
+    const primaryWallet = connectedProfile?.primary_wallet?.toLowerCase();
     if (!primaryWallet) {
       return;
     }
     const consolidatedAddresses =
-      connectedProfile?.wallets?.map((w) =>
-        w.wallet.toLowerCase()
-      ) ?? [];
+      connectedProfile?.wallets?.map((w) => w.wallet.toLowerCase()) ?? [];
     const currentAddresses = groupConfig.group.identity_addresses ?? [];
     const newAddresses = currentAddresses.filter(
       (address) => !consolidatedAddresses.includes(address.toLowerCase())

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
 import {
@@ -36,8 +38,6 @@ export default function CreateWaveGroup({
   readonly groups: WaveGroupsConfig;
   readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
 }) {
-
-
   const getSelectedGroupId = () => {
     switch (groupType) {
       case CreateWaveGroupConfigType.ADMIN:
@@ -105,16 +105,16 @@ export default function CreateWaveGroup({
           />
         )}
       </div>
-      
+
       {/* Display description for admin delete permission when enabled */}
-      {isNotChatWave && 
-       groupType === CreateWaveGroupConfigType.ADMIN && 
-       adminCanDeleteDrops && (
-        <p className="tw-mt-2 tw-text-sm tw-text-iron-400">
-          Admins will be able to delete drops after they've been submitted.
-        </p>
-      )}
-      
+      {isNotChatWave &&
+        groupType === CreateWaveGroupConfigType.ADMIN &&
+        adminCanDeleteDrops && (
+          <p className="tw-mt-2 tw-text-sm tw-text-iron-400">
+            Admins will be able to delete drops after they've been submitted.
+          </p>
+        )}
+
       <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
         <CommonBorderedRadioButton
           type={CreateWaveGroupStatus.NONE}

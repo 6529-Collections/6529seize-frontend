@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Address.module.scss";
 import { numberWithCommas, parseEmojis } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

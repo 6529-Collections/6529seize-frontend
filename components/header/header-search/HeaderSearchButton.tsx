@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import clsx from "clsx";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -31,8 +33,7 @@ export default function HeaderSearchButton() {
           isApp
             ? "tw-bg-black"
             : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
-        )}
-      >
+        )}>
         <MagnifyingGlassIcon
           className={clsx("tw-flex-shrink-0", iconSizeClasses)}
         />
@@ -43,8 +44,7 @@ export default function HeaderSearchButton() {
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <HeaderSearchModal onClose={() => setIsOpen(false)} />
           </CommonAnimationOpacity>
         )}

@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
@@ -8,9 +10,9 @@ import React, {
   useEffect,
 } from "react";
 import type { ViewKey, NavItem } from "./navTypes";
-import { useRouter } from "next/router";
-import { commonApiFetch } from "../../services/api/common-api";
-import { ApiWave } from "../../generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface ViewContextType {
   activeView: ViewKey | null;
@@ -24,12 +26,14 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeView, setActiveView] = useState<ViewKey | null>(null);
   const [lastVisitedWave, setLastVisitedWave] = useState<string | null>(null);
   const [lastVisitedDm, setLastVisitedDm] = useState<string | null>(null);
 
   useEffect(() => {
-    const { wave, view } = router.query;
+    const wave = searchParams?.get("wave");
+    const view = searchParams?.get("view");
 
     const getWave = async () => {
       const res = await commonApiFetch<ApiWave>({
@@ -53,28 +57,20 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     } else {
       setActiveView(null);
     }
-  }, [router.asPath]);
+  }, [searchParams]);
 
   const handleNavClick = useCallback(
     async (item: NavItem) => {
       if (item.kind === "route") {
-        await router.push(item.href, undefined, { shallow: true });
+        router.push(item.href);
       } else if (item.viewKey === "waves" && lastVisitedWave) {
-        await router.push(`/my-stream?wave=${lastVisitedWave}`, undefined, {
-          shallow: true,
-        });
+        router.push(`/my-stream?wave=${lastVisitedWave}`);
       } else if (item.viewKey === "waves") {
-        await router.push("/my-stream?view=waves", undefined, {
-          shallow: true,
-        });
+        router.push("/my-stream?view=waves");
       } else if (item.viewKey === "messages" && lastVisitedDm) {
-        await router.push(`/my-stream?wave=${lastVisitedDm}`, undefined, {
-          shallow: true,
-        });
+        router.push(`/my-stream?wave=${lastVisitedDm}`);
       } else if (item.viewKey === "messages") {
-        await router.push("/my-stream?view=messages", undefined, {
-          shallow: true,
-        });
+        router.push("/my-stream?view=messages");
       }
     },
     [router, lastVisitedWave, lastVisitedDm]
@@ -84,12 +80,10 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     (v: ViewKey) => {
       if (v === "messages") {
         setLastVisitedDm(null);
-        router.push("/my-stream?view=messages", undefined, {
-          shallow: true,
-        });
+        router.push("/my-stream?view=messages");
       } else if (v === "waves") {
         setLastVisitedWave(null);
-        router.push("/my-stream?view=waves", undefined, { shallow: true });
+        router.push("/my-stream?view=waves");
       }
     },
     [router, setLastVisitedDm, setLastVisitedWave]

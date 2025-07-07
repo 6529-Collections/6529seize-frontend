@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import ProfileActivityLogsFilterList from "./ProfileActivityLogsFilterList";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
@@ -49,8 +51,9 @@ export default function ProfileActivityLogsFilter({
       <div className="tw-w-full">
         <div
           ref={listRef}
-          className={`${user ? "tw-px-4 sm:tw-px-6" : ""} tw-w-full sm:tw-max-w-xs`}
-        >
+          className={`${
+            user ? "tw-px-4 sm:tw-px-6" : ""
+          } tw-w-full sm:tw-max-w-xs`}>
           <div className="tw-relative">
             <button
               type="button"
@@ -59,8 +62,7 @@ export default function ProfileActivityLogsFilter({
               onClick={(e) => {
                 e.stopPropagation();
                 toggleOpen();
-              }}
-            >
+              }}>
               <span className="tw-block tw-truncate tw-text-iron-400 tw-font-normal tw-text-base">
                 {title}
               </span>
@@ -70,8 +72,7 @@ export default function ProfileActivityLogsFilter({
                   className="tw-h-5 tw-w-5 tw-text-iron-100"
                   viewBox="0 0 24 24"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                  xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M6 9L12 15L18 9"
                     stroke="currentColor"
@@ -88,8 +89,7 @@ export default function ProfileActivityLogsFilter({
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                >
+                  transition={{ duration: 0.2 }}>
                   <ProfileActivityLogsFilterList
                     selected={selected}
                     options={options}

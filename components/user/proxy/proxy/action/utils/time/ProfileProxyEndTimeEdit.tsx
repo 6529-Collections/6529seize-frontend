@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
 import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
@@ -62,7 +64,10 @@ export default function ProfileProxyEndTimeEdit({
       });
     },
     onSuccess: () => {
-      if (!profileProxy.granted_to?.handle || !profileProxy.created_by?.handle) {
+      if (
+        !profileProxy.granted_to?.handle ||
+        !profileProxy.created_by?.handle
+      ) {
         return;
       }
       onProfileProxyModify({
@@ -129,8 +134,7 @@ export default function ProfileProxyEndTimeEdit({
               onClick={setViewMode}
               type="button"
               disabled={submitting}
-              className="tw-w-full sm:tw-w-auto tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-            >
+              className="tw-w-full sm:tw-w-auto tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out">
               Cancel
             </button>
             <button
@@ -141,8 +145,7 @@ export default function ProfileProxyEndTimeEdit({
                 !isChangedAndValid
                   ? "tw-opacity-50"
                   : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
-            >
+              } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
               <div className="tw-flex tw-items-center tw-space-x-2">
                 {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
                 <span>Update</span>

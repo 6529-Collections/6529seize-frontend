@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { SingleWaveDropHeader } from "./SingleWaveDropHeader";
 import { SingleWaveDropInfoPanel } from "./SingleWaveDropInfoPanel";
@@ -22,9 +24,13 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   const { data: wave } = useWaveData({
     waveId: drop?.wave.id ?? null,
     onWaveNotFound: () => {
-      router.push({ pathname: router.pathname, query: { wave: null } }, undefined, {
-        shallow: true,
-      });
+      router.push(
+        { pathname: router.pathname, query: { wave: null } },
+        undefined,
+        {
+          shallow: true,
+        }
+      );
     },
   });
   const [activeTab, setActiveTab] = useState<SingleWaveDropTab>(
@@ -57,8 +63,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
         <div
           className={`${
             activeTab === SingleWaveDropTab.CHAT ? "tw-flex" : "tw-hidden"
-          } lg:tw-flex lg:tw-flex-1 `}
-        >
+          } lg:tw-flex lg:tw-flex-1 `}>
           {wave && drop && <SingleWaveDropChat wave={wave} drop={drop} />}
         </div>
       </div>

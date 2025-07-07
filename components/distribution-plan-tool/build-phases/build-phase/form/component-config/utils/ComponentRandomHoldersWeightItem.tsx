@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import {
   ComponentRandomHoldersWeightItemI,
@@ -34,8 +36,7 @@ export default function ComponentRandomHoldersWeightItem({
       />
       <label
         className="tw-cursor-pointer tw-ml-3 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-neutral-100"
-        htmlFor={htmlFor}
-      >
+        htmlFor={htmlFor}>
         {item.name}
       </label>
     </div>

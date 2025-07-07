@@ -1,3 +1,5 @@
+"use client";
+
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
 import WaveDropActionsQuote from "./WaveDropActionsQuote";
@@ -36,8 +38,11 @@ export default function WaveDropActions({
   const { isMemesWave } = useSeizeSettings();
 
   // Hide voting for participation drops in memes waves
-  const shouldShowVoting = showVoting && 
-    !(drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave?.id));
+  const shouldShowVoting =
+    showVoting &&
+    !(
+      drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave?.id)
+    );
 
   return (
     <div className="tw-absolute tw-z-20 tw-right-2 tw-top-0 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">

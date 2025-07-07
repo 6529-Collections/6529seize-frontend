@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import NFTImage from "../../components/nft-image/NFTImage";
 
-jest.mock("next/image", () => ({ __esModule: true, default: (p: any) => <img {...p} /> }));
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
+}));
 
 const baseNft: any = {
   id: 1,
@@ -16,7 +21,15 @@ const baseNft: any = {
 
 describe("NFTImage", () => {
   it("renders image fallback", () => {
-    render(<NFTImage nft={baseNft} animation={false} height={300} balance={1} showUnseized={false} />);
+    render(
+      <NFTImage
+        nft={baseNft}
+        animation={false}
+        height={300}
+        balance={1}
+        showUnseized={false}
+      />
+    );
     expect(screen.getByRole("img")).toHaveAttribute("src", baseNft.scaled);
   });
 });

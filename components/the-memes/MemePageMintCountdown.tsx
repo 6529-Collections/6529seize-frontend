@@ -1,6 +1,9 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import { MEMES_CONTRACT, MEMES_MANIFOLD_PROXY_CONTRACT } from "../../constants";
-import useManifoldClaim, {
+import {
+  useManifoldClaim,
   ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,

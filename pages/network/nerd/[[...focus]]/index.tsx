@@ -11,10 +11,12 @@ const Leaderboard = dynamic(
   { ssr: false }
 );
 
-export default function CommunityNerdPage(props: any) {
+export default function CommunityNerdPage(props: {
+  readonly focus: LeaderboardFocus;
+}) {
   const { setTitle } = useTitle();
   const router = useRouter();
-  const [focus, setFocus] = useState<LeaderboardFocus>(props.pageProps.focus);
+  const [focus, setFocus] = useState<LeaderboardFocus>(props.focus);
 
   const syncPath = useCallback(
     (newFocus: LeaderboardFocus) => {

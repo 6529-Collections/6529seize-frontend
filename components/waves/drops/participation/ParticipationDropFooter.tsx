@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";

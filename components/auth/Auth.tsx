@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Auth.module.scss";
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";

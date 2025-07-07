@@ -16,8 +16,10 @@ const NextGenCollectionMintingPlanComponent = dynamic(
   { ssr: false }
 );
 
-export default function NextGenCollectionTokensPage(props: any) {
-  const collection: NextGenCollection = props.pageProps.collection;
+export default function NextGenCollectionTokensPage(props: {
+  readonly collection: NextGenCollection;
+}) {
+  const collection = props.collection;
   useShallowRedirect(collection.name, "/distribution-plan");
 
   return (

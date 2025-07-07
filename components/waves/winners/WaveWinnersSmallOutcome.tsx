@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import Tippy from "@tippyjs/react";
 import { ApiWave } from "../../../generated/models/ApiWave";
@@ -10,10 +12,9 @@ interface WaveWinnersSmallOutcomeProps {
   readonly wave: ApiWave;
 }
 
-export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = ({
-  drop,
-  wave,
-}) => {
+export const WaveWinnersSmallOutcome: React.FC<
+  WaveWinnersSmallOutcomeProps
+> = ({ drop, wave }) => {
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -50,15 +51,13 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
           {nicOutcomes.map((nicOutcome) => (
             <div
               key={`NIC-${nicOutcome.value}`}
-              className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40"
-            >
+              className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40">
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
                   className="tw-size-4 tw-text-[#A4C2DB] tw-flex-shrink-0"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
-                  fill="none"
-                >
+                  fill="none">
                   <path
                     d="M9 6.75H15M9 12H15M9 17.25H12M3.75 19.5H20.25C21.0784 19.5 21.75 18.8284 21.75 18V6C21.75 5.17157 21.0784 4.5 20.25 4.5H3.75C2.92157 4.5 2.25 5.17157 2.25 6V18C2.25 18.8284 2.92157 19.5 3.75 19.5Z"
                     stroke="currentColor"
@@ -79,16 +78,14 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
           {repOutcomes.map((repOutcome) => (
             <div
               key={`REP-${repOutcome.category}-${repOutcome.value}`}
-              className="tw-p-2 tw-flex tw-flex-col tw-gap-y-1 tw-rounded-lg tw-bg-iron-800/40"
-            >
+              className="tw-p-2 tw-flex tw-flex-col tw-gap-y-1 tw-rounded-lg tw-bg-iron-800/40">
               <div className="tw-flex tw-items-center tw-justify-between">
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <svg
                     className="tw-size-4 tw-text-[#C3B5D9] tw-flex-shrink-0"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
-                    fill="none"
-                  >
+                    fill="none">
                     <path
                       d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
                       stroke="currentColor"
@@ -111,15 +108,13 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
           {manualOutcomes.map((outcome) => (
             <div
               key={`MANUAL-${outcome.description}`}
-              className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40"
-            >
+              className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40">
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
                   className="tw-size-4 tw-text-[#D4C5AA] tw-flex-shrink-0"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
-                  fill="none"
-                >
+                  fill="none">
                   <path
                     d="M12 18v-3m0-3v.01M12.75 3.25h-1.5L8.5 7H4.75l.5 3.5L2 13l3.25 2.5-.5 3.5h3.75l2.75 3.75h1.5L15.5 19h3.75l-.5-3.5L22 13l-3.25-2.5.5-3.5H15.5l-2.75-3.75z"
                     stroke="currentColor"
@@ -145,15 +140,13 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
       placement="top"
       animation="shift-away"
       visible={isTouch ? isOpen : undefined}
-      onClickOutside={() => setIsOpen(false)}
-    >
+      onClickOutside={() => setIsOpen(false)}>
       <button
         onClick={(e) => {
           e.stopPropagation();
           handleClick(e);
         }}
-        className="tw-border-0 tw-rounded-lg tw-flex tw-items-center tw-gap-2 tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-      >
+        className="tw-border-0 tw-rounded-lg tw-flex tw-items-center tw-gap-2 tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700">
         <span className="tw-text-xs tw-font-normal tw-text-iron-200">
           Outcome:
         </span>
@@ -163,8 +156,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
               className="tw-size-4 tw-text-[#A4C2DB] tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
-              fill="none"
-            >
+              fill="none">
               <path
                 d="M9 6.75H15M9 12H15M9 17.25H12M3.75 19.5H20.25C21.0784 19.5 21.75 18.8284 21.75 18V6C21.75 5.17157 21.0784 4.5 20.25 4.5H3.75C2.92157 4.5 2.25 5.17157 2.25 6V18C2.25 18.8284 2.92157 19.5 3.75 19.5Z"
                 stroke="currentColor"
@@ -179,8 +171,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
               className="tw-size-4 tw-text-[#C3B5D9] tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
-              fill="none"
-            >
+              fill="none">
               <path
                 d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
                 stroke="currentColor"
@@ -193,8 +184,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
               className="tw-size-4 tw-text-[#D4C5AA] tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
-              fill="none"
-            >
+              fill="none">
               <path
                 d="M12 18v-3m0-3v.01M12.75 3.25h-1.5L8.5 7H4.75l.5 3.5L2 13l3.25 2.5-.5 3.5h3.75l2.75 3.75h1.5L15.5 19h3.75l-.5-3.5L22 13l-3.25-2.5.5-3.5H15.5l-2.75-3.75z"
                 stroke="currentColor"
@@ -208,4 +198,4 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
       </button>
     </Tippy>
   );
-}; 
+};

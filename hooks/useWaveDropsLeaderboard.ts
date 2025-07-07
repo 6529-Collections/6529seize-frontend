@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import {
@@ -34,15 +36,13 @@ interface UseWaveDropsLeaderboardProps {
   readonly pausePolling?: boolean;
 }
 
-const SORT_DIRECTION_MAP: Record<
-  WaveDropsLeaderboardSort,
-  string | undefined
-> = {
-  [WaveDropsLeaderboardSort.RANK]: undefined,
-  [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
-  [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
-  [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
-};
+const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> =
+  {
+    [WaveDropsLeaderboardSort.RANK]: undefined,
+    [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
+    [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
+    [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
+  };
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;

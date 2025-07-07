@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { NextGenToken } from "../../../../entities/INextgen";
 import useDownloader from "react-use-downloader";

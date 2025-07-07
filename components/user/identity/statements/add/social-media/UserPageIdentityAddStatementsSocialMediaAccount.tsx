@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import UserPageIdentityAddStatementsSocialMediaAccountHeader from "./UserPageIdentityAddStatementsSocialMediaAccountHeader";
 import {

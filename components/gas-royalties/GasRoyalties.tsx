@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./GasRoyalties.module.scss";
 import { Row, Col, Dropdown, Container } from "react-bootstrap";
 import { DateIntervalsSelection } from "../../enums";

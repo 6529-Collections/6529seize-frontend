@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useContext } from "react";
 import { useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from "viem";

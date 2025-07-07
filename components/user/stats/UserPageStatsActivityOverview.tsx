@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./UserPageStats.module.scss";
 import { numberWithCommas } from "../../../helpers/Helpers";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";

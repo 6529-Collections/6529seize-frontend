@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createContext,
   useContext,
@@ -8,7 +10,7 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { useRouter } from "next/router";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ViewKey } from "../components/navigation/navTypes";
 import { useViewContext } from "../components/navigation/ViewContext";
 import { mainSegment, sameMainPath } from "../helpers/navigation.helpers";
@@ -38,14 +40,19 @@ const MAX_STACK = 50;
 export const NavigationHistoryProvider: React.FC<{
   readonly children: ReactNode;
 }> = ({ children }) => {
-  const router = useRouter();
   const { hardBack } = useViewContext();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
+  const fullPath =
+    pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
   const historyRef = useRef<StackEntry[]>([
-    { type: "route", path: mainSegment(router.asPath) },
+    { type: "route", path: mainSegment(fullPath) },
   ]);
   const [index, setIndex] = useState(0);
   const skipNext = useRef(false);
+  const prevPathRef = useRef<string>("");
 
   const canGoBack = useMemo(() => {
     if (index === 0) return false;
@@ -75,34 +82,37 @@ export const NavigationHistoryProvider: React.FC<{
   }, []);
 
   useEffect(() => {
-    const handleRouteChange = (url: string) => {
-      if (skipNext.current) {
-        skipNext.current = false;
-        return;
-      }
-      const isProfile = router.pathname.startsWith("/[user]");
-      const isMyStream = url.startsWith("/my-stream") && url.includes("wave=");
+    const url = fullPath;
 
-      let pathKey: string;
-      if (isProfile) {
-        pathKey = mainSegment(url);
-      } else if (isMyStream) {
-        pathKey = url.split("&")[0];
-      } else {
-        pathKey = url.split(/[?#]/)[0];
-      }
-      // avoid pushing if previous route entry (ignoring trailing views) has same main segment
-      let i = historyRef.current.length - 1;
-      while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
-      const lastRoute = i >= 0 ? historyRef.current[i] : null;
-      const isDuplicate =
-        lastRoute?.type === "route" && lastRoute.path === pathKey;
-      if (isDuplicate) return;
+    if (skipNext.current) {
+      skipNext.current = false;
+      return;
+    }
+
+    if (url === prevPathRef.current) return;
+    prevPathRef.current = url;
+
+    const isProfile = pathname?.startsWith("/[user]");
+    const isMyStream = url.startsWith("/my-stream") && url.includes("wave=");
+
+    let pathKey: string;
+    if (isProfile) {
+      pathKey = mainSegment(url);
+    } else if (isMyStream) {
+      pathKey = url.split("&")[0];
+    } else {
+      pathKey = url.split(/[?#]/)[0];
+    }
+
+    let i = historyRef.current.length - 1;
+    while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
+    const lastRoute = i >= 0 ? historyRef.current[i] : null;
+    const isDuplicate =
+      lastRoute?.type === "route" && lastRoute.path === pathKey;
+    if (!isDuplicate) {
       pushStack({ type: "route", path: pathKey });
-    };
-    router.events.on("routeChangeComplete", handleRouteChange);
-    return () => router.events.off("routeChangeComplete", handleRouteChange);
-  }, [router.events, pushStack]);
+    }
+  }, [fullPath, pathname, searchParams, pushStack]);
 
   const pushView = useCallback(
     (view: ViewKey) => {
@@ -131,7 +141,7 @@ export const NavigationHistoryProvider: React.FC<{
       }
 
       if (targetIndex < 0) {
-        router.back();
+        window.history.back();
         return prev;
       }
 

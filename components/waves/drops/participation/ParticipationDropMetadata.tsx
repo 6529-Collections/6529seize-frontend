@@ -1,3 +1,5 @@
+"use client";
+
 import { ApiDropMetadata } from "../../../../generated/models/ApiDropMetadata";
 import Tippy from "@tippyjs/react";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
@@ -20,8 +22,7 @@ const MetadataItem: React.FC<{ meta: ApiDropMetadata }> = ({ meta }) => {
         disabled={isMobile}
         content={meta.data_value}
         placement="top"
-        theme="dark"
-      >
+        theme="dark">
         <span className="tw-text-iron-200 tw-text-xs tw-font-medium tw-line-clamp-2">
           {meta.data_value}
         </span>
@@ -64,16 +65,14 @@ export default function ParticipationDropMetadata({
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
-              >
+                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
                 Show less
               </button>
             </>
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
-            >
+              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
               Show all
             </button>
           ))}

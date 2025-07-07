@@ -1,3 +1,5 @@
+"use client";
+
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { commonApiFetch } from "../../../services/api/common-api";

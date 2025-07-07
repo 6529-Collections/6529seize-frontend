@@ -1,12 +1,16 @@
+"use client";
+
 import React, { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import BrainLeftSidebarSearchWaveDropdown from "./BrainLeftSidebarSearchWaveDropdown";
 
 interface BrainLeftSidebarSearchWaveProps {
-  readonly listType: 'waves' | 'messages';
+  readonly listType: "waves" | "messages";
 }
 
-const BrainLeftSidebarSearchWave: React.FC<BrainLeftSidebarSearchWaveProps> = ({ listType }) => {
+const BrainLeftSidebarSearchWave: React.FC<BrainLeftSidebarSearchWaveProps> = ({
+  listType,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const onFocusChange = (newV: boolean) => {
     if (newV) {
@@ -35,13 +39,11 @@ const BrainLeftSidebarSearchWave: React.FC<BrainLeftSidebarSearchWaveProps> = ({
         className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3 sm:tw-top-2.5 tw-h-5 tw-w-5 tw-text-iron-300"
         viewBox="0 0 20 20"
         fill="currentColor"
-        aria-hidden="true"
-      >
+        aria-hidden="true">
         <path
           fillRule="evenodd"
           d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-          clipRule="evenodd"
-        ></path>
+          clipRule="evenodd"></path>
       </svg>
       <input
         type="text"
@@ -50,7 +52,7 @@ const BrainLeftSidebarSearchWave: React.FC<BrainLeftSidebarSearchWaveProps> = ({
         onChange={(e) => onSearchCriteriaChange(e.target.value)}
         onFocus={() => onFocusChange(true)}
         onBlur={() => onFocusChange(false)}
-        onKeyDown={e => {
+        onKeyDown={(e) => {
           if (e.key === "Enter" && searchCriteria.trim()) {
             e.preventDefault();
             setSearchCriteria("");

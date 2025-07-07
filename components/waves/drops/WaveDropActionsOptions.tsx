@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import CommonAnimationWrapper from "../../utils/animation/CommonAnimationWrapper";
@@ -23,8 +25,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
         }}
         className="tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
         aria-label="Delete drop"
-        data-tooltip-id={`delete-${drop.id}`}
-      >
+        data-tooltip-id={`delete-${drop.id}`}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -32,8 +33,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
           strokeWidth="1.5"
           aria-hidden="true"
           stroke="currentColor"
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
-        >
+          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -44,8 +44,11 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
       <Tooltip
         id={`delete-${drop.id}`}
         place="top"
-        style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
-      >
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}>
         <span className="tw-text-xs">Delete</span>
       </Tooltip>
       <CommonAnimationWrapper mode="sync" initial={true}>
@@ -54,8 +57,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
             key="modal"
             elementClasses="tw-absolute tw-z-50"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <DropsListItemDeleteDropModal
               drop={drop}
               closeModal={() => setIsDeleteModalOpen(false)}
