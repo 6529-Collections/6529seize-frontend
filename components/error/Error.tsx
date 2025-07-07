@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 
-export default function Error() {
+export default function ErrorComponent() {
   const { setTitle } = useTitle();
   useEffect(() => {
     setTitle("6529 Error");

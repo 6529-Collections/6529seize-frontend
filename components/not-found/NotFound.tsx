@@ -32,22 +32,4 @@ export default function NotFound() {
       </a>
     </div>
   );
-
-  return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-justify-start tw-pt-[100px]">
-      <Image
-        priority
-        loading="eager"
-        width="0"
-        height="0"
-        style={{ height: "auto", width: "100px" }}
-        src="/SummerGlasses.svg"
-        alt="SummerGlasses"
-      />
-      <h2>404 | PAGE NOT FOUND</h2>
-      <a href="/" className="pt-3 tw-text-md tw-font-semibold">
-        TAKE ME HOME
-      </a>
-    </div>
-  );
 }
