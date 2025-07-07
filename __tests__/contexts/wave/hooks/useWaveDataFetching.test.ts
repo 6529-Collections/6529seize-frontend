@@ -56,7 +56,7 @@ describe('useWaveDataFetching', () => {
 
     expect(setLoadingState).toHaveBeenCalledWith('wave1', true);
     expect(createController).toHaveBeenCalledWith('wave1');
-    expect(fetchWaveMessages).toHaveBeenCalledWith('wave1', null, expect.any(Object));
+    expect(fetchWaveMessages).toHaveBeenCalledWith('wave1', null, expect.any(Object), expect.any(Function));
     expect(updateData).toHaveBeenNthCalledWith(1, { key: 'wave1', drops: [] });
     expect(updateData).toHaveBeenLastCalledWith({ key: 'wave1', drops: [{ id: 'd1' }] });
   });
@@ -84,7 +84,7 @@ describe('useWaveDataFetching', () => {
     const { result, updateData } = setup({ wave1: { drops: [] } });
 
     const res = await result.current.syncNewestMessages('wave1', 10, new AbortController().signal);
-    expect(fetchNewestWaveMessages).toHaveBeenCalledWith('wave1', 10, 50, expect.any(Object));
+    expect(fetchNewestWaveMessages).toHaveBeenCalledWith('wave1', 10, 50, expect.any(Object), expect.any(Function));
     expect(updateData).toHaveBeenCalledWith({ key: 'wave1', drops: [{ id: 'd' }] });
     expect(res).toEqual({ drops: [{ id: 'd', serial_no: 11 }], highestSerialNo: 11 });
   });

@@ -3,6 +3,7 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { SingleWaveDropLogs } from "./SingleWaveDropLogs";
 import { SingleWaveDropVoters } from "./SingleWaveDropVoters";
 import Download, { getFileInfoFromUrl } from "../../download/Download";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 interface SingleWaveDropInfoDetailsProps {
   readonly drop: ExtendedDrop | undefined;
@@ -40,7 +41,7 @@ export const SingleWaveDropInfoDetails: React.FC<
           />
         </div>
       )}
-      {drop && <SingleWaveDropVoters drop={drop} />}
+      {drop && drop.drop_type !== ApiDropType.Winner && <SingleWaveDropVoters drop={drop} />}
       {drop && <SingleWaveDropLogs drop={drop} />}
     </div>
   );
