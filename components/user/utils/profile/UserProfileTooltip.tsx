@@ -1,3 +1,5 @@
+"use client"
+
 import DropPfp from "../../../drops/create/utils/DropPfp";
 import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
 import { useIdentity } from "../../../../hooks/useIdentity";

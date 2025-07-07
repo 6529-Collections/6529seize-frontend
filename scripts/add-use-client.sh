@@ -7,6 +7,7 @@ grep -rl 'useEffect\|useState\|useRouter\|useRef\|useReducer\|useContext' compon
       echo "📌 Patching: $file"
       tmpfile=$(mktemp)
       echo '"use client"' > "$tmpfile"
+      echo >> "$tmpfile"
       cat "$file" >> "$tmpfile"
       mv "$tmpfile" "$file"
     fi

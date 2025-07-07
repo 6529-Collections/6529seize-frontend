@@ -1,3 +1,5 @@
+"use client"
+
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
 import { fetchAboutSectionFile } from "./about.helpers";
