@@ -1,3 +1,5 @@
+"use client"
+
 import { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
