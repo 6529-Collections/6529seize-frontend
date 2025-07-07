@@ -64,5 +64,8 @@ export function getAppMetadata(
     twitter: {
       card: twitterCard,
     },
+    other: {
+      version: process.env.VERSION ?? "",
+    },
   };
 }

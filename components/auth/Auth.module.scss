@@ -1,18 +1,18 @@
 @use "../../styles/variables.scss";
 
 .signModalHeader {
-  background-color: variables.$bg-color-2;
-  color: variables.$font-color;
+  background-color: variables.$bg-color-2 !important;
+  color: variables.$font-color !important;
   border: 1px solid variables.$lighter-grey !important;
-  border-radius: 0;
+  border-radius: 0 !important;
 }
 
 .signModalContent {
-  background-color: variables.$bg-color-2;
-  color: variables.$font-color;
-  border-top: 0;
+  background-color: variables.$bg-color-2 !important;
+  color: variables.$font-color !important;
+  border-top: 0 !important;
   border-bottom: 1px solid variables.$lighter-grey !important;
   border-left: 1px solid variables.$lighter-grey !important;
   border-right: 1px solid variables.$lighter-grey !important;
-  border-radius: 0;
+  border-radius: 0 !important;
 }

@@ -16,6 +16,7 @@ import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import { Viewport } from "next";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./error-page";
+import Head from "next/head";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
@@ -33,6 +34,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Head>
+        <link rel="preconnect" href={process.env.API_ENDPOINT} />
+        <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
+      </Head>
       <body>
         <StoreSetup>
           <Providers>
