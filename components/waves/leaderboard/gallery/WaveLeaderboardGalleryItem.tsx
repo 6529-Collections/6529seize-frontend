@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import MediaDisplay from "../../../drops/view/item/content/media/MediaDisplay";
@@ -82,8 +84,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
         className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-w-full tw-text-left tw-bg-transparent`}
         onClick={handleImageClick}
         onKeyDown={handleKeyDown}
-        type="button"
-      >
+        type="button">
         <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
           <MediaDisplay
             media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
@@ -113,17 +114,19 @@ export const WaveLeaderboardGalleryItem: React.FC<
           {/* Author name aligned to the right */}
           <div className="tw-flex tw-items-center">
             {drop.author?.handle ? (
-              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}>
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   href={`/${drop.author?.handle}`}
-                  className="tw-text-sm tw-truncate tw-no-underline tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
-                >
+                  className="tw-text-sm tw-truncate tw-no-underline tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline">
                   {drop.author?.handle}
                 </Link>
               </UserProfileTooltipWrapper>
             ) : (
-              <span className="tw-text-sm tw-truncate tw-font-medium tw-text-iron-200"> </span>
+              <span className="tw-text-sm tw-truncate tw-font-medium tw-text-iron-200">
+                {" "}
+              </span>
             )}
           </div>
         </div>
@@ -142,8 +145,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
               strokeWidth="2.25"
               stroke="currentColor"
               aria-hidden="true"
-              className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500"
-            >
+              className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

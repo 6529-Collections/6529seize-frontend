@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext } from "react";
 import { Tooltip } from "react-tooltip";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
@@ -24,7 +26,7 @@ const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
                           drop.wave.authenticated_user_eligible_to_chat;
   
   const canQuote = !isTemporaryDrop;
-  
+
   const handleQuoteClick = () => {
     if (isEligibleToChat === false) {
       setToast({
@@ -40,23 +42,19 @@ const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
     <>
       <button
         className={`tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
-          !canQuote
-            ? "tw-opacity-50 tw-cursor-default"
-            : "tw-cursor-pointer"
+          !canQuote ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
         }`}
         onClick={canQuote ? handleQuoteClick : undefined}
         disabled={!canQuote}
         aria-label="Quote drop"
-        data-tooltip-id={!isTemporaryDrop ? `quote-${drop.id}` : undefined}
-      >
+        data-tooltip-id={!isTemporaryDrop ? `quote-${drop.id}` : undefined}>
         <svg
           className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
             !canQuote ? "tw-opacity-50" : ""
           }`}
           viewBox="0 0 24 24"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M4.9486 14.4306C4.45605 15.6736 3.67749 16.904 2.63489 18.0883C2.3031 18.4652 2.26098 19.0031 2.53015 19.4268C2.73742 19.7528 3.08606 19.9384 3.4552 19.9384C3.5592 19.9384 3.66504 19.9238 3.76941 19.8934C5.97913 19.2478 11.1335 16.9546 11.272 9.62448C11.3254 6.79404 9.25526 4.3624 6.55958 4.08847C5.07385 3.93978 3.5874 4.42245 2.48584 5.41818C1.38281 6.41501 0.75 7.8381 0.75 9.32309C0.75 11.8005 2.50854 13.967 4.9486 14.4306ZM3.49145 6.53109C4.19201 5.89791 5.07385 5.56063 6.00879 5.56063C6.14099 5.56063 6.27429 5.56722 6.40796 5.58114C8.33313 5.77632 9.8108 7.54 9.77198 9.59591C9.6764 14.6679 6.93018 16.9513 4.65601 17.9726C5.37561 16.9992 5.94104 15.998 6.34314 14.9832C6.49988 14.5881 6.47388 14.1465 6.27209 13.7715C6.06079 13.3781 5.68396 13.0991 5.23901 13.0057C3.50683 12.6435 2.25 11.0944 2.25 9.32308C2.25 8.26181 2.70263 7.24411 3.49145 6.53109Z"
             fill="currentColor"
@@ -71,8 +69,11 @@ const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
         <Tooltip
           id={`quote-${drop.id}`}
           place="top"
-          style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
-        >
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+          }}>
           <span className="tw-text-xs">Quote</span>
         </Tooltip>
       )}

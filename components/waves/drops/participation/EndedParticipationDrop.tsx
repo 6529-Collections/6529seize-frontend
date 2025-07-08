@@ -1,3 +1,5 @@
+"use client";
+
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";

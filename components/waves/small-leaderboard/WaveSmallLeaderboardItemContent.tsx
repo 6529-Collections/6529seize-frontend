@@ -1,3 +1,5 @@
+"use client";
+
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useEffect, useRef, useState } from "react";
 import Tippy from "@tippyjs/react";
@@ -30,8 +32,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
       <div
         ref={contentRef}
         onClick={() => onDropClick(drop)}
-        className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden tw-space-y-3"
-      >
+        className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden tw-space-y-3">
         {!!drop.parts[0].media.length && (
           <WaveDropPartContentMedias
             activePart={drop.parts[0]}
@@ -56,8 +57,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
               className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
-              aria-hidden="true"
-            >
+              aria-hidden="true">
               <path
                 d="M3.75 13.5L14.25 2.25L12 10.5H20.25L9.75 21.75L12 13.5H3.75Z"
                 stroke="currentColor"
@@ -74,8 +74,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
               className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
-              fill="none"
-            >
+              fill="none">
               <path
                 d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
                 stroke="currentColor"
@@ -92,8 +91,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
               className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
-              fill="none"
-            >
+              fill="none">
               <path
                 d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
                 stroke="currentColor"

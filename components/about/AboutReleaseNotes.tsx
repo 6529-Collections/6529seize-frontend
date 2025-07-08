@@ -1,11 +1,16 @@
+"use client"
+
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
+import { fetchAboutSectionFile } from "./about.helpers";
+import { useEffect, useState } from "react";
 
-interface Props {
-  html: string;
-}
+export default function AboutReleaseNotes() {
+  const [html, setHtml] = useState<string>("");
+  useEffect(() => {
+    fetchAboutSectionFile("release_notes").then(setHtml);
+  }, []);
 
-export default function AboutReleaseNotes(props: Readonly<Props>) {
   return (
     <Container>
       <Row>
@@ -19,7 +24,7 @@ export default function AboutReleaseNotes(props: Readonly<Props>) {
         <Col
           className={styles.htmlContainer}
           dangerouslySetInnerHTML={{
-            __html: props.html,
+            __html: html,
           }}></Col>
       </Row>
     </Container>

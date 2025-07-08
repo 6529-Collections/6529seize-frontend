@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { RatingStats } from "../../../../../entities/IProfile";
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
@@ -32,16 +34,14 @@ export default function UserPageRepRepsTableItem({
           ? "hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer even:tw-bg-iron-900"
           : "even:tw-bg-iron-900"
       }
-      onClick={onTableClick}
-    >
+      onClick={onTableClick}>
       <td className="tw-max-w-[12rem] lg:tw-max-w-[20rem] tw-truncate tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-iron-50">
         <span>{rep.category}</span>
       </td>
       <td
         className={`${
           isPositiveRating ? "tw-text-green" : "tw-text-red"
-        } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right`}
-      >
+        } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right`}>
         {formatNumberWithCommas(rep.rating)}
       </td>
       <td className="tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right tw-text-iron-400">
@@ -52,8 +52,7 @@ export default function UserPageRepRepsTableItem({
           <td
             className={`${
               isPositiveRaterContribution ? "tw-text-green" : "tw-text-red"
-            } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right`}
-          >
+            } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right`}>
             {rep.rater_contribution
               ? formatNumberWithCommas(rep.rater_contribution)
               : " "}
@@ -64,8 +63,7 @@ export default function UserPageRepRepsTableItem({
                 key="modal"
                 elementClasses="tw-absolute tw-z-10"
                 elementRole="dialog"
-                onClicked={(e) => e.stopPropagation()}
-              >
+                onClicked={(e) => e.stopPropagation()}>
                 <UserPageRepModifyModal
                   profile={profile}
                   category={rep.category}

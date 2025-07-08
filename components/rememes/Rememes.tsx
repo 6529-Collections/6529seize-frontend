@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
 import { fetchUrl } from "../../services/6529api";
@@ -207,7 +209,7 @@ export default function Rememes() {
           <Container className="pt-4">
             <Row className="mb-3">
               <Col xs={12} sm={8} md={9} className="pb-3 pb-sm-0">
-                <span className="d-flex align-items-center gap-3">
+                <span className="d-flex align-items-center gap-3 flex-wrap">
                   <span className="d-flex align-items-center gap-2">
                     <Image
                       loading={"eager"}

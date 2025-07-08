@@ -1,7 +1,7 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
-import {
-  ApiProfileRepRatesState,
-} from "../../../../entities/IProfile";
+import { ApiProfileRepRatesState } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
@@ -127,7 +127,10 @@ export default function UserPageRepNewRepSearchHeader({
         </>
       )}
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-        <span>Your Rep assigned to {profile.query ?? profile.handle ?? profile.display}:</span>
+        <span>
+          Your Rep assigned to{" "}
+          {profile.query ?? profile.handle ?? profile.display}:
+        </span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
           {repRates ? formatNumberWithCommas(activeRepRates.rated) : ""}
         </span>

@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState, useEffect, useContext } from "react";
 import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
 import { usePrefetchNotifications } from "../../../hooks/useNotificationsQuery";

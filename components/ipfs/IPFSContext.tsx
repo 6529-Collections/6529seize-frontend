@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
@@ -55,7 +57,7 @@ export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useIpfsService = (): IpfsService => {
   const context = useContext(IpfsContext);
-  if ((!context || !context.ipfsService) ) {
+  if (!context?.ipfsService) {
     throw new Error("useIpfsService must be used within an IpfsProvider");
   }
   return context.ipfsService;

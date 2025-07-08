@@ -2,6 +2,7 @@ import { MEMELAB_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { BaseNFT } from "../../entities/INFT";
+import { getAppMetadata } from "../providers/metadata";
 
 export enum MEME_FOCUS {
   LIVE = "live",
@@ -26,28 +27,25 @@ export interface MemeTab {
   title: string;
 }
 
-export async function getSharedServerSideProps(
-  req: any,
+async function getMetadataProps(
   contract: string,
+  id: string,
+  focus: string,
   isDistribution: boolean = false
 ) {
-  const { id, focus } = req.query;
   let urlPath = "nfts";
   let name = `The Memes #${id}`;
-  let description = "";
+  let description = "Collections";
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";
     name = `Meme Lab #${id}`;
-  }
-  if (isDistribution) {
-    name = `${name} | Distribution`;
   }
   const response = await fetchUrl(
     `${process.env.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
   );
   let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
   if (response?.data?.length > 0) {
-    description = name;
+    description = `${name} | ${description}`;
     name = `${response.data[0].name}`;
     if (response.data[0].thumbnail) {
       image = response.data[0].thumbnail;
@@ -56,22 +54,65 @@ export async function getSharedServerSideProps(
     }
   }
 
-  if (focus) {
+  if (focus && focus !== MEME_FOCUS.LIVE) {
     const tab = MEME_TABS.find((t) => t.focus === focus);
-    if (tab && tab.focus !== MEME_FOCUS.LIVE) {
+    if (tab) {
       name = `${name} | ${tab.title}`;
     }
+  } else if (isDistribution) {
+    name = `${name} | Distribution`;
   }
+
+  return {
+    title: name,
+    description: description,
+    ogImage: image,
+  };
+}
+
+export async function getSharedAppServerSideProps(
+  contract: string,
+  id: string,
+  focus: string,
+  isDistribution: boolean = false
+) {
+  const { title, description, ogImage } = await getMetadataProps(
+    contract,
+    id,
+    focus,
+    isDistribution
+  );
+
+  return getAppMetadata({
+    title,
+    description: description,
+    ogImage,
+    twitterCard: "summary",
+  });
+}
+
+export async function getSharedServerSideProps(
+  req: any,
+  contract: string,
+  isDistribution: boolean = false
+) {
+  const { id, focus } = req.query;
+  const { title, description, ogImage } = await getMetadataProps(
+    contract,
+    id,
+    focus,
+    isDistribution
+  );
 
   return {
     props: {
       id: id,
-      name: name,
-      image: image,
+      name: title,
+      image: ogImage,
       metadata: {
-        title: name,
-        description: description,
-        ogImage: image,
+        title,
+        description,
+        ogImage,
         twitterCard: "summary",
       },
     },

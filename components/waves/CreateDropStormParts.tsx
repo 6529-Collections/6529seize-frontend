@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { CreateDropPart, ReferencedNft } from "../../entities/IDrop";
 import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
@@ -52,8 +54,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
                 <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
                   <Link
                     href={`/${connectedProfile?.handle}`}
-                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-                  >
+                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
                     {connectedProfile?.handle ?? "user"}
                   </Link>
                 </p>
@@ -68,8 +69,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
+                    transition={{ duration: 0.3 }}>
                     <CreateDropStormPart
                       partIndex={partIndex}
                       part={part}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { useEffect, useState } from "react";

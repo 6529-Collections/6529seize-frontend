@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useEffect, type JSX } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../generated/models/ObjectSerializer";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
@@ -206,8 +208,7 @@ export default function SnapshotExcludeOtherSnapshots({
         showNextBtn={!!selectedOptions.length}
         isDisabled={!selectedOptions.length}
         onSkip={onSkip}
-        onNext={onNext}
-      >
+        onNext={onNext}>
         <ComponentConfigMeta
           tags={[]}
           walletsCount={localUniqueWalletsCount}

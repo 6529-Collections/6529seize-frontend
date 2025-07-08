@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
@@ -215,7 +217,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           <WaveDropMobileMenuFollow drop={drop} onFollowChange={closeMenu} />
         )}
         {!isAuthor && (
-          <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
+          <WaveDropActionsRate
+            drop={drop}
+            isMobile={true}
+            onRated={closeMenu}
+          />
         )}
         {showOptions && onEdit && drop.drop_type !== ApiDropType.Participatory && (
           <WaveDropMobileMenuEdit drop={drop} onEdit={onEdit} onEditTriggered={closeMenu} />

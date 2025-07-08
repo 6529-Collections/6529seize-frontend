@@ -1,3 +1,5 @@
+"use client";
+
 import React, { forwardRef, useRef, useEffect, useCallback } from "react";
 import { useIntersectionObserver } from "../../../hooks/scroll/useIntersectionObserver";
 import TextSelectionOverlay from "./TextSelectionOverlay";
@@ -17,63 +19,73 @@ interface WaveDropsReverseContainerProps {
 export const WaveDropsReverseContainer = forwardRef<
   HTMLDivElement,
   WaveDropsReverseContainerProps
->(({ children, onTopIntersection, isFetchingNextPage, hasNextPage, onUserScroll }, ref) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const topSentinelRef = useRef<HTMLDivElement>(null);
-  const lastScrollTop = useRef<number>(0);
-  const isAtBottom = useRef<boolean>(true);
-  const scrollRafId = useRef<number | null>(null);
-
-  const handleIntersection = useCallback(
-    (entry: IntersectionObserverEntry) => {
-      if (entry.isIntersecting) {
-        onTopIntersection();
-      }
-    },
-    [onTopIntersection]
-  );
-
-  useIntersectionObserver(
-    topSentinelRef,
+>(
+  (
     {
-      root: scrollContainerRef.current,
-      rootMargin: "1px 0px 0px 0px",
-      threshold: 0,
+      children,
+      onTopIntersection,
+      isFetchingNextPage,
+      hasNextPage,
+      onUserScroll,
     },
-    handleIntersection,
-    !!scrollContainerRef.current && !isFetchingNextPage
-  );
+    ref
+  ) => {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const topSentinelRef = useRef<HTMLDivElement>(null);
+    const lastScrollTop = useRef<number>(0);
+    const isAtBottom = useRef<boolean>(true);
+    const scrollRafId = useRef<number | null>(null);
 
-  const handleScroll = useCallback(() => {
-    if (scrollRafId.current) {
-      cancelAnimationFrame(scrollRafId.current);
-    }
-    scrollRafId.current = requestAnimationFrame(() => {
-      const container = scrollContainerRef.current;
-      if (!container) return;
-      const { scrollTop } = container;
-      // In a flex-col-reverse container, we're at the visual bottom when scrollTop is near 0
-      const currentIsAtBottom = scrollTop > -5;
-      isAtBottom.current = currentIsAtBottom;
-      // In a flex-col-reverse container, scrolling "up" means the scrollTop is increasing
-      // and scrolling "down" means the scrollTop is decreasing
-      const direction = scrollTop < lastScrollTop.current ? "up" : "down";
-      onUserScroll?.(direction, currentIsAtBottom);
-      lastScrollTop.current = scrollTop;
-      scrollRafId.current = null;
-    });
-  }, [onUserScroll]);
+    const handleIntersection = useCallback(
+      (entry: IntersectionObserverEntry) => {
+        if (entry.isIntersecting) {
+          onTopIntersection();
+        }
+      },
+      [onTopIntersection]
+    );
 
-  // Cleanup for any pending animation frames
-  useEffect(() => {
-    return () => {
+    useIntersectionObserver(
+      topSentinelRef,
+      {
+        root: scrollContainerRef.current,
+        rootMargin: "1px 0px 0px 0px",
+        threshold: 0,
+      },
+      handleIntersection,
+      !!scrollContainerRef.current && !isFetchingNextPage
+    );
+
+    const handleScroll = useCallback(() => {
       if (scrollRafId.current) {
         cancelAnimationFrame(scrollRafId.current);
       }
-    };
-  }, []);
+      scrollRafId.current = requestAnimationFrame(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+        const { scrollTop } = container;
+        // In a flex-col-reverse container, we're at the visual bottom when scrollTop is near 0
+        const currentIsAtBottom = scrollTop > -5;
+        isAtBottom.current = currentIsAtBottom;
+        // In a flex-col-reverse container, scrolling "up" means the scrollTop is increasing
+        // and scrolling "down" means the scrollTop is decreasing
+        const direction = scrollTop < lastScrollTop.current ? "up" : "down";
+        onUserScroll?.(direction, currentIsAtBottom);
+        lastScrollTop.current = scrollTop;
+        scrollRafId.current = null;
+      });
+    }, [onUserScroll]);
 
-  React.useImperativeHandle(ref, () => scrollContainerRef.current!);
+    // Cleanup for any pending animation frames
+    useEffect(() => {
+      return () => {
+        if (scrollRafId.current) {
+          cancelAnimationFrame(scrollRafId.current);
+        }
+      };
+    }, []);
+
+    React.useImperativeHandle(ref, () => scrollContainerRef.current!);
 
   return (
     <TextSelectionOverlay containerRef={scrollContainerRef}>

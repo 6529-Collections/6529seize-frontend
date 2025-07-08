@@ -1,9 +1,17 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { IFeedItemDropReplied } from "../../../../../types/feed.types";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
-import { DropSize, ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import Drop, { DropInteractionParams, DropLocation } from "../../../../waves/drops/Drop";
+import {
+  DropSize,
+  ExtendedDrop,
+} from "../../../../../helpers/waves/drop.helpers";
+import Drop, {
+  DropInteractionParams,
+  DropLocation,
+} from "../../../../waves/drops/Drop";
 
 export default function FeedItemDropReplied({
   item,
@@ -22,11 +30,15 @@ export default function FeedItemDropReplied({
 }) {
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
-    router.push(`/my-stream?wave=${item.item.reply.wave.id}&serialNo=${serialNo}/`);
+    router.push(
+      `/my-stream?wave=${item.item.reply.wave.id}&serialNo=${serialNo}/`
+    );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
+    router.push(
+      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+    );
   };
 
   return (

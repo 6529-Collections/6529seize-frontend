@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Prenodes.module.scss";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";

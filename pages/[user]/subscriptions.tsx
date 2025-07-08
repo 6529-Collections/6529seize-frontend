@@ -9,12 +9,13 @@ import {
 import UserPageSubscriptions from "../../components/user/subscriptions/UserPageSubscriptions";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
-  pageProps,
-}) => <UserPageSubscriptions profile={pageProps.profile} />;
-Page.getLayout = (page: ReactElement<{ pageProps: UserPageProps }>) => (
-  <UserPageLayout profile={page.props.pageProps.profile}>{page}</UserPageLayout>
+const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => (
+  <UserPageSubscriptions profile={profile} />
+);
+Page.getLayout = (page: ReactElement<{ profile: ApiIdentity }>) => (
+  <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>
 );
 
 export default Page;

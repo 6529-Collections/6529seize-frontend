@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
@@ -24,8 +26,7 @@ export default function HeaderProxyNewModal({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="tw-overflow-hidden sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
-          >
+            className="tw-overflow-hidden sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6">
             <div className="tw-flex tw-justify-between">
               <div className="tw-max-w-xl sm:tw-flex sm:tw-space-x-4">
                 <div>
@@ -36,8 +37,7 @@ export default function HeaderProxyNewModal({
                       height="24"
                       viewBox="0 0 24 24"
                       fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
+                      xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M7.5 12L10.5 15L16.5 9M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                         stroke="currentColor"
@@ -53,8 +53,7 @@ export default function HeaderProxyNewModal({
                         viewBox="0 0 336 336"
                         fill="none"
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
+                        xmlns="http://www.w3.org/2000/svg">
                         <mask
                           id="mask0_8902_8329"
                           style={{ maskType: "alpha" }}
@@ -62,8 +61,7 @@ export default function HeaderProxyNewModal({
                           x="0"
                           y="0"
                           width="336"
-                          height="336"
-                        >
+                          height="336">
                           <rect
                             width="336"
                             height="336"
@@ -101,8 +99,7 @@ export default function HeaderProxyNewModal({
                             cy="0"
                             r="1"
                             gradientUnits="userSpaceOnUse"
-                            gradientTransform="translate(168 168) rotate(90) scale(168 168)"
-                          >
+                            gradientTransform="translate(168 168) rotate(90) scale(168 168)">
                             <stop />
                             <stop offset="1" stopOpacity="0" />
                           </radialGradient>
@@ -130,16 +127,14 @@ export default function HeaderProxyNewModal({
                   aria-label="Close"
                   title="Close"
                   onClick={() => onClose(dontShowAgain)}
-                  className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-                >
+                  className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out">
                   <svg
                     className="tw-h-6 tw-w-6"
                     aria-hidden="true"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth="1.5"
-                    stroke="currentColor"
-                  >
+                    stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -174,8 +169,7 @@ export default function HeaderProxyNewModal({
                         height="24"
                         viewBox="0 0 24 24"
                         fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
+                        xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M6 9L12 15L18 9"
                           stroke="currentColor"
@@ -191,8 +185,7 @@ export default function HeaderProxyNewModal({
                       <div className="tw-py-2 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
                         <div
                           role="list"
-                          className="tw-flex tw-flex-col tw-gap-y-2 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0"
-                        >
+                          className="tw-flex tw-flex-col tw-gap-y-2 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
                           <div className="tw-flex tw-flex-col tw-px-2 tw-gap-y-2 tw-mx-0">
                             <div className="tw-h-full">
                               <div className="tw-bg-iron-700 tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
@@ -217,8 +210,7 @@ export default function HeaderProxyNewModal({
                                       viewBox="0 0 24 24"
                                       fill="none"
                                       aria-hidden="true"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
+                                      xmlns="http://www.w3.org/2000/svg">
                                       <path
                                         d="M20 6L9 17L4 12"
                                         stroke="currentColor"
@@ -263,8 +255,7 @@ export default function HeaderProxyNewModal({
                                 height="24"
                                 viewBox="0 0 24 24"
                                 fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path
                                   d="M16 17L21 12M21 12L16 7M21 12H9M12 17C12 17.93 12 18.395 11.8978 18.7765C11.6204 19.8117 10.8117 20.6204 9.77646 20.8978C9.39496 21 8.92997 21 8 21H7.5C6.10218 21 5.40326 21 4.85195 20.7716C4.11687 20.4672 3.53284 19.8831 3.22836 19.1481C3 18.5967 3 17.8978 3 16.5V7.5C3 6.10217 3 5.40326 3.22836 4.85195C3.53284 4.11687 4.11687 3.53284 4.85195 3.22836C5.40326 3 6.10218 3 7.5 3H8C8.92997 3 9.39496 3 9.77646 3.10222C10.8117 3.37962 11.6204 4.18827 11.8978 5.22354C12 5.60504 12 6.07003 12 7"
                                   stroke="currentColor"
@@ -297,8 +288,7 @@ export default function HeaderProxyNewModal({
                 <div className="tw-ml-3 tw-text-sm tw-leading-6">
                   <label
                     htmlFor="dontShowAgain"
-                    className="tw-cursor-pointer tw-font-medium tw-text-iron-300"
-                  >
+                    className="tw-cursor-pointer tw-font-medium tw-text-iron-300">
                     Don&apos;t show again
                   </label>
                 </div>

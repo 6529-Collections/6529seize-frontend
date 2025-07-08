@@ -1,3 +1,5 @@
+"use client";
+
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
@@ -76,12 +78,24 @@ export default function Drops() {
       return;
     }
 
-    if (status === "pending" || isFetching || isFetchingNextPage || !hasNextPage) {
+    if (
+      status === "pending" ||
+      isFetching ||
+      isFetchingNextPage ||
+      !hasNextPage
+    ) {
       return;
     }
 
     fetchNextPage();
-  }, [drops.length, status, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage]);
+  }, [
+    drops.length,
+    status,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  ]);
 
   useEffect(() => {
     const options = {

@@ -1,4 +1,15 @@
-import React, { createContext, useState, useContext, ReactNode, RefObject, useRef, useCallback, useMemo } from 'react';
+"use client";
+
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  RefObject,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 
 interface HeaderContextType {
   headerRef: RefObject<HTMLDivElement | null>;
@@ -8,7 +19,9 @@ interface HeaderContextType {
 
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 
-export const HeaderProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const HeaderProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const headerRefInternal = useRef<HTMLDivElement | null>(null);
   // We need a state to trigger re-renders in consumers when the ref changes
   const [refState, setRefState] = useState<HTMLDivElement | null>(null);
@@ -20,14 +33,17 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   }, []);
 
-  const contextValue = useMemo(() => ({
-    // Provide the mutable ref object directly
-    headerRef: headerRefInternal,
-    // Provide the function to update the ref and trigger state change
-    setHeaderRef: setHeaderRef,
-    // Provide the state value
-    refState: refState,
-  }), [setHeaderRef, refState]);
+  const contextValue = useMemo(
+    () => ({
+      // Provide the mutable ref object directly
+      headerRef: headerRefInternal,
+      // Provide the function to update the ref and trigger state change
+      setHeaderRef: setHeaderRef,
+      // Provide the state value
+      refState: refState,
+    }),
+    [setHeaderRef, refState]
+  );
 
   return (
     <HeaderContext.Provider value={contextValue}>
@@ -39,7 +55,7 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 export const useHeaderContext = (): HeaderContextType => {
   const context = useContext(HeaderContext);
   if (context === undefined) {
-    throw new Error('useHeaderContext must be used within a HeaderProvider');
+    throw new Error("useHeaderContext must be used within a HeaderProvider");
   }
   return context;
-}; 
+};

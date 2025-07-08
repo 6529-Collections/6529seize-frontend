@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import {
@@ -229,8 +231,7 @@ export default function ComponentSelectRandomHolders({
                   isError
                     ? "tw-ring-error focus-within:tw-ring-error"
                     : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-neutral-700"
-                }`}
-                >
+                }`}>
                   <input
                     type="number"
                     value={value}
@@ -256,8 +257,7 @@ export default function ComponentSelectRandomHolders({
                   !seed.length
                     ? "tw-ring-error focus-within:tw-ring-error"
                     : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-neutral-700"
-                }`}
-                >
+                }`}>
                   <input
                     type="text"
                     value={seed}
@@ -270,18 +270,17 @@ export default function ComponentSelectRandomHolders({
             </div>
           </div>
           <ComponentConfigNextBtn
-          showSkipBtn={true}
-          showNextBtn={!isDisabled}
-          onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
-          onNext={onRandomHolders}
-          isDisabled={isDisabled}
-        >
-          <ComponentConfigMeta
-            tags={[]}
-            walletsCount={localUniqueWalletsCount}
-            isLoading={isLoadingUniqueWalletsCount}
-          />
-        </ComponentConfigNextBtn>
+            showSkipBtn={true}
+            showNextBtn={!isDisabled}
+            onSkip={() => onNextStep(PhaseConfigStep.COMPONENT_ADD_SPOTS)}
+            onNext={onRandomHolders}
+            isDisabled={isDisabled}>
+            <ComponentConfigMeta
+              tags={[]}
+              walletsCount={localUniqueWalletsCount}
+              isLoading={isLoadingUniqueWalletsCount}
+            />
+          </ComponentConfigNextBtn>
         </div>
       </div>
     </div>

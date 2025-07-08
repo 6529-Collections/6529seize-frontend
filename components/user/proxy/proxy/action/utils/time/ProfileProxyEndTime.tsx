@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
 import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
@@ -39,8 +41,7 @@ export default function ProfileProxyEndTime({
           type="button"
           aria-label="Edit end time"
           className="tw-group tw-bg-transparent tw-border-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-          onClick={onEndTimeEdit}
-        >
+          onClick={onEndTimeEdit}>
           <PencilIcon size={PencilIconSize.SMALL} />
         </button>
       )}

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
@@ -173,8 +175,11 @@ export default function WaveDropFollowAuthor({
       <Tooltip
         id={`follow-author-${drop.id}`}
         place="top"
-        style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
-      >
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}>
         <span className="tw-text-xs">{tooltipText[followState]}</span>
       </Tooltip>
     </>

@@ -1,3 +1,5 @@
+"use client";
+
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { useContext, useEffect, useState } from "react";
@@ -94,8 +96,7 @@ export default function ComponentAddSpots({
         showNextBtn={!isDisabled}
         onSkip={() => undefined}
         onNext={onAddSpots}
-        isDisabled={isDisabled}
-      >
+        isDisabled={isDisabled}>
         <ComponentConfigMeta
           tags={[]}
           walletsCount={uniqueWalletsCount}

@@ -1,6 +1,6 @@
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Image from "next/image";
-import { AboutSection } from "../../pages/about/[section]";
+import { AboutSection } from "@/enums";
 import Link from "next/link";
 
 export default function AboutMemes() {

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
@@ -31,8 +33,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-bg-gray-600/80 tw-backdrop-blur-sm tw-overflow-hidden"
-          onClick={onClose}
-        >
+          onClick={onClose}>
           <div className="tw-fixed tw-inset-2 md:tw-inset-4 tw-flex tw-items-center tw-justify-center">
             <motion.div
               initial={{ opacity: 0 }}
@@ -43,8 +44,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
               ref={modalRef}
               onClick={(e) => {
                 e.stopPropagation();
-              }}
-            >
+              }}>
               <div className="tw-h-full tw-overflow-hidden tw-flex tw-flex-col">
                 <MemesArtSubmissionContainer onClose={onClose} wave={wave} />
               </div>

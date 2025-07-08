@@ -27,7 +27,9 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (p: any) => <img {...p} />,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
 }));
 
 jest.mock("../../../../../components/dotLoader/DotLoader", () => () => (
@@ -64,28 +66,25 @@ function setup(traits: any, response: any) {
 
 describe("NextGenTraitSets", () => {
   it("shows complete trait set message when all values seized", async () => {
-    await setup(
-      [{ trait: "Palette", values: ["Red", "Blue"] }],
-      {
-        count: 1,
-        data: [
-          {
-            owner: "0x1",
-            normalised_handle: "alice",
-            handle: "alice",
-            level: 1,
-            tdh: 1,
-            rep_score: 0,
-            consolidation_display: "",
-            distinct_values_count: 2,
-            token_values: [
-              { value: "Red", tokens: [1] },
-              { value: "Blue", tokens: [2] },
-            ],
-          },
-        ],
-      }
-    );
+    await setup([{ trait: "Palette", values: ["Red", "Blue"] }], {
+      count: 1,
+      data: [
+        {
+          owner: "0x1",
+          normalised_handle: "alice",
+          handle: "alice",
+          level: 1,
+          tdh: 1,
+          rep_score: 0,
+          consolidation_display: "",
+          distinct_values_count: 2,
+          token_values: [
+            { value: "Red", tokens: [1] },
+            { value: "Blue", tokens: [2] },
+          ],
+        },
+      ],
+    });
 
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: `nextgen/collections/${collection.id}/traits`,
@@ -98,6 +97,4 @@ describe("NextGenTraitSets", () => {
     expect(screen.getByText("Collectors Count: 1")).toBeInTheDocument();
     expect(screen.getByText("alice")).toBeInTheDocument();
   });
-
 });
-

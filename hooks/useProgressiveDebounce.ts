@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 
 interface DebounceOptions {
@@ -22,18 +24,12 @@ export const useProgressiveDebounce = (
     }, delayRef.current);
 
     // Adjust delay for next call
-    delayRef.current = Math.min(
-      maxDelay,
-      delayRef.current * increaseFactor
-    );
+    delayRef.current = Math.min(maxDelay, delayRef.current * increaseFactor);
 
     return () => {
       clearTimeout(handler);
       // Optionally adjust delay on cleanup
-      delayRef.current = Math.max(
-        minDelay,
-        delayRef.current / decreaseFactor
-      );
+      delayRef.current = Math.max(minDelay, delayRef.current / decreaseFactor);
     };
   }, dependencies); // eslint-disable-line react-hooks/exhaustive-deps
 };

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropLocation } from "./Drop";

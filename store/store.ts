@@ -1,24 +1,19 @@
-import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
 import { groupSlice } from "./groupSlice";
 import { editSlice } from "./editSlice";
 
-const makeStore = () =>
+export const makeStore = () =>
   configureStore({
     reducer: {
       [groupSlice.name]: groupSlice.reducer,
       [editSlice.name]: editSlice.reducer,
     },
-    devTools: true,
+    devTools: process.env.NODE_ENV !== "production",
   });
 
-type AppStore = ReturnType<typeof makeStore>;
+export type AppStore = ReturnType<typeof makeStore>;
 export type AppState = ReturnType<AppStore["getState"]>;
-type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  AppState,
-  unknown,
-  Action
->;
+export type AppDispatch = AppStore["dispatch"];
 
 export const wrapper = createWrapper<AppStore>(makeStore);

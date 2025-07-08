@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";

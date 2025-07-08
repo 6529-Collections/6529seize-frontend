@@ -1,3 +1,5 @@
+"use client";
+
 import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Pagination.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

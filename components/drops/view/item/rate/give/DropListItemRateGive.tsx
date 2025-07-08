@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
@@ -210,19 +212,16 @@ export default function DropListItemRateGive({
       content={
         <div className="tw-text-center">
           <span
-            className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-          >
+            className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}>
             {getRateText()}
           </span>
         </div>
-      }
-    >
+      }>
       <div className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
         <div
           className={`${
             isMobile ? "tw-gap-x-4" : ""
-          } tw-w-full tw-inline-flex tw-items-center tw-gap-x-1`}
-        >
+          } tw-w-full tw-inline-flex tw-items-center tw-gap-x-1`}>
           <DropListItemRateGiveChangeButton
             canVote={canVote}
             type={RateChangeType.DECREASE}

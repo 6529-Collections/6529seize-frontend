@@ -167,21 +167,24 @@ export const ALL_USE_CASES = [
   CONSOLIDATION_USE_CASE,
 ];
 
-export default function DelegationsDocumentation(props: any) {
+export default function DelegationsDocumentation(props: {
+  readonly section: DelegationCenterSection;
+  readonly addressQuery: string;
+  readonly collectionQuery: string;
+  readonly useCaseQuery: number;
+  readonly path: string[];
+}) {
   useSetTitle("Delegation | 6529.io");
-  const pageProps = props.pageProps;
   const router = useRouter();
-  const section = pageProps.section;
+  const section = props.section;
   const [addressQuery, setAddressQuery] = useState<string>(
-    pageProps.addressQuery ?? ""
+    props.addressQuery ?? ""
   );
   const [collectionQuery, setCollectionQuery] = useState<string>(
-    pageProps.collectionQuery ?? ""
+    props.collectionQuery ?? ""
   );
-  const [useCaseQuery, setUseCaseQuery] = useState<number>(
-    pageProps.useCaseQuery
-  );
-  
+  const [useCaseQuery, setUseCaseQuery] = useState<number>(props.useCaseQuery);
+
   function getQueryParams(s: DelegationCenterSection) {
     let queryParams: { [key: string]: string | number } = {};
     if (
@@ -211,9 +214,9 @@ export default function DelegationsDocumentation(props: any) {
 
   const updatePath = (s: DelegationCenterSection) => {
     if (s) {
-      if (s === DelegationCenterSection.HTML && pageProps.path) {
+      if (s === DelegationCenterSection.HTML && props.path) {
         router.push({
-          pathname: `/delegation/${pageProps.path.join("/")}`,
+          pathname: `/delegation/${props.path.join("/")}`,
         });
       } else {
         const queryParams = getQueryParams(s);
@@ -249,7 +252,7 @@ export default function DelegationsDocumentation(props: any) {
     <main className={styles.main}>
       <DelegationCenterMenu
         section={section}
-        path={props.pageProps.path}
+        path={props.path}
         setActiveSection={(s) => updatePath(s)}
         address_query={addressQuery}
         setAddressQuery={setAddressQuery}

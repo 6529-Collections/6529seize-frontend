@@ -1,3 +1,5 @@
+"use client";
+
 import React, { memo, useState, useEffect, useRef } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropPartDrop from "./WaveDropPartDrop";
@@ -108,9 +110,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         role={isTemporaryDrop || !onDropContentClick ? undefined : "button"}
         tabIndex={isTemporaryDrop || !onDropContentClick ? undefined : 0}
         onKeyDown={(e) =>
-          !isTemporaryDrop  && e.key === "Enter" && handleClick()
-        }
-      >
+          !isTemporaryDrop && e.key === "Enter" && handleClick()
+        }>
         <div className="tw-relative tw-overflow-hidden  tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDropPartDrop
             drop={drop}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useReducer, useEffect, useCallback } from "react";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";

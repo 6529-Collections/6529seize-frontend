@@ -1,3 +1,5 @@
+"use client";
+
 import { ProxyMode } from "../UserPageProxy";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -45,15 +47,13 @@ export default function ProxyList({
             <PrimaryButton
               loading={false}
               disabled={false}
-              onClicked={() => onModeChange(ProxyMode.CREATE)}
-            >
+              onClicked={() => onModeChange(ProxyMode.CREATE)}>
               <svg
                 className="tw-w-5 tw-h-5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M12 5V19M5 12H19"
                   stroke="currentColor"

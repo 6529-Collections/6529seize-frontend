@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../entities/ISort";
 
@@ -65,8 +67,7 @@ export default function CommonTableSortIcon({
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <path
         d="M12 20V4M12 4L6 10M12 4L18 10"
         stroke="currentColor"

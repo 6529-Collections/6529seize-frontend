@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useState } from "react";
 

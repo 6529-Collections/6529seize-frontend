@@ -1,3 +1,5 @@
+"use client"
+
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../services/api/common-api";
 import { ApiUpdateDropRequest } from "../../generated/models/ApiUpdateDropRequest";

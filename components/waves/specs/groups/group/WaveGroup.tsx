@@ -1,3 +1,5 @@
+"use client";
+
 import { ApiWaveScope } from "../../../../../generated/models/ApiWaveScope";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
@@ -41,7 +43,10 @@ export default function WaveGroup({
       <div className="tw-flex tw-gap-x-4">
         <WaveGroupTitle type={type} />
         {showEdit && (
-          <div className={isMobile ? "" : "tw-hidden desktop-hover:group-hover:tw-block"}>
+          <div
+            className={
+              isMobile ? "" : "tw-hidden desktop-hover:group-hover:tw-block"
+            }>
             <WaveGroupEditButtons
               wave={wave}
               type={type}

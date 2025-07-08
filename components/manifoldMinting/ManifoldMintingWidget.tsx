@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./ManifoldMinting.module.scss";
 import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
@@ -16,13 +18,13 @@ import {
   getTransactionLink,
 } from "../../helpers/Helpers";
 import {
-  MANIFOLD_NETWORK,
   ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { Time } from "../../helpers/time";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { MANIFOLD_NETWORK } from "@/constants";
 
 export default function ManifoldMintingWidget(
   props: Readonly<{

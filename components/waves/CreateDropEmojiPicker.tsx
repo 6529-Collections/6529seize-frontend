@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, FC, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Picker from "@emoji-mart/react";

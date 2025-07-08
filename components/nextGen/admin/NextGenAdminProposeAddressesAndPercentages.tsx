@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";

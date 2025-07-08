@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, type JSX } from "react";
 import { CreateWaveStepStatus } from "../../../../types/waves.types";
 import { useDebounce } from "react-use";
@@ -33,8 +35,7 @@ export default function CreateWavesMainStepIcon({
         className="tw-text-white"
         viewBox="0 0 13 11"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+        xmlns="http://www.w3.org/2000/svg">
         <path
           fillRule="evenodd"
           clipRule="evenodd"
@@ -49,8 +50,7 @@ export default function CreateWavesMainStepIcon({
         height="8"
         viewBox="0 0 8 8"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+        xmlns="http://www.w3.org/2000/svg">
         <circle cx="4" cy="4" r="4" fill="white" />
       </svg>
     ),
@@ -61,8 +61,7 @@ export default function CreateWavesMainStepIcon({
         className="tw-text-iron-500"
         viewBox="0 0 8 8"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+        xmlns="http://www.w3.org/2000/svg">
         <circle cx="4" cy="4" r="4" fill="currentColor" />
       </svg>
     ),
@@ -71,8 +70,7 @@ export default function CreateWavesMainStepIcon({
   return (
     <span
       data-testid="wave-step-icon"
-      className={`${WRAPPER_CLASSES[stepStatus]} tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-transform tw-transition tw-ease-out tw-duration-300`}
-    >
+      className={`${WRAPPER_CLASSES[stepStatus]} tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-transform tw-transition tw-ease-out tw-duration-300`}>
       {components[debounceStepStatus]}
     </span>
   );

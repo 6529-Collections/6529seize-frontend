@@ -1,17 +1,22 @@
-import { AboutSection } from "../../pages/about/[section]";
+import { AboutSection } from "@/enums";
 
 export default function Footer() {
-  function printLink(href: string, text: string) {
+  function printLink(href: string, text: string, newTab: boolean = false) {
     return (
-      <a href={href} target="_blank" rel="noreferrer">
+      <a href={href} target={newTab ? "_blank" : "_self"} rel="noreferrer">
         {text}
       </a>
     );
   }
 
-  function printLinkWithImage(href: string, img: string, text: string) {
+  function printLinkWithImage(
+    href: string,
+    img: string,
+    text: string,
+    newTab: boolean = true
+  ) {
     return (
-      <a href={href} target="_blank" rel="noreferrer">
+      <a href={href} target={newTab ? "_blank" : "_self"} rel="noreferrer">
         <img
           width="0"
           height="0"
@@ -71,11 +76,11 @@ export default function Footer() {
         {printSeparator()}
         {printLink(`/about/${AboutSection.LICENSE}`, "License")}
         {printSeparator()}
-        {printLink("https://api.6529.io/docs", "API Documentation")}
+        {printLink("https://api.6529.io/docs", "API Documentation", true)}
         {printSeparator()}
         {printLink(`/about/${AboutSection.CONTACT_US}`, "Contact Us")}
         {printSeparator()}
-        {printLink("https://status.6529.io/", "Status")}
+        {printLink("https://status.6529.io/", "Status", true)}
       </span>
     </footer>
   );

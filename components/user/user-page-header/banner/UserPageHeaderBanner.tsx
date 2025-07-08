@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import PencilIcon from "../../../utils/icons/PencilIcon";
@@ -25,15 +27,13 @@ export default function UserPageHeaderBanner({
         background: `linear-gradient(45deg, ${
           profile?.banner1 ?? defaultBanner1
         } 0%, ${profile?.banner2 ?? defaultBanner2} 100%)`,
-      }}
-    >
+      }}>
       {canEdit && (
         <div className="">
           <button
             onClick={() => setIsEditOpen(true)}
             className="tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-p-0"
-            aria-label="Edit banner image"
-          >
+            aria-label="Edit banner image">
             <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
               <div className="tw-absolute tw-bottom-4 tw-right-4">
                 <PencilIcon />
@@ -48,8 +48,7 @@ export default function UserPageHeaderBanner({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <UserPageHeaderEditBanner
               profile={profile}
               defaultBanner1={defaultBanner1}

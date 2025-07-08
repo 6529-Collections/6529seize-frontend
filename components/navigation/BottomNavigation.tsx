@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useRef } from "react";
 import NavItem from "./NavItem";
 import type { NavItem as NavItemData } from "./navTypes";
@@ -80,20 +82,17 @@ const BottomNavigation: React.FC = () => {
   return (
     <nav
       ref={setMobileNavRef}
-      className="tw-fixed tw-left-0 tw-w-full tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-z-50"
-    >
+      className="tw-fixed tw-left-0 tw-w-full tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-z-50">
       <div className="tw-h-full">
         <ul
           className="tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)]
-    tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl tw-mx-auto"
-        >
+    tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl tw-mx-auto">
           {items.map((item) => (
             <li
               key={item.name}
               className={`tw-flex tw-flex-1 tw-justify-center tw-items-end ${
                 item.name === "Stream" ? "-tw-translate-y-1" : ""
-              } tw-h-full tw-min-w-0`}
-            >
+              } tw-h-full tw-min-w-0`}>
               <NavItem item={item} />
             </li>
           ))}

@@ -88,43 +88,51 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
 }
 
 export async function middleware(req: NextRequest) {
-  const redirectResponse = handleRedirects(req);
-  if (redirectResponse) {
-    return redirectResponse;
-  }
+  try {
+    const redirectResponse = handleRedirects(req);
+    if (redirectResponse) {
+      return redirectResponse;
+    }
 
-  const { pathname } = req.nextUrl;
+    const { pathname } = req.nextUrl;
 
-  if (
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname.endsWith("favicon.ico") ||
-    pathname.endsWith(".jpeg") ||
-    pathname.endsWith(".png") ||
-    pathname.startsWith("/sitemap") ||
-    pathname.startsWith("/robots.txt")
-  ) {
-    return NextResponse.next();
-  }
-
-  if (pathname != "/access" && pathname != "/restricted") {
-    const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
-      value: process.env.STAGING_API_KEY ?? "",
-    };
-    const r = await fetch(`${process.env.API_ENDPOINT}/api/`, {
-      headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
-    });
-
-    if (r.status === 401) {
-      req.nextUrl.pathname = "/access";
-      req.nextUrl.search = "";
-      return NextResponse.redirect(req.nextUrl);
-    } else if (r.status === 403) {
-      req.nextUrl.pathname = "/restricted";
-      req.nextUrl.search = "";
-      return NextResponse.redirect(req.nextUrl);
-    } else {
+    if (
+      pathname.startsWith("/api") ||
+      pathname.startsWith("/_next") ||
+      pathname.endsWith("favicon.ico") ||
+      pathname.endsWith(".jpeg") ||
+      pathname.endsWith(".png") ||
+      pathname.endsWith(".gif") ||
+      pathname.endsWith(".svg") ||
+      pathname.endsWith(".webp") ||
+      pathname.startsWith("/sitemap") ||
+      pathname.startsWith("/robots.txt") ||
+      pathname.startsWith("/error")
+    ) {
       return NextResponse.next();
     }
+
+    if (pathname != "/access" && pathname != "/restricted") {
+      const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
+        value: process.env.STAGING_API_KEY ?? "",
+      };
+      const r = await fetch(`${process.env.API_ENDPOINT}/api/`, {
+        headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
+      });
+
+      if (r.status === 401) {
+        req.nextUrl.pathname = "/access";
+        req.nextUrl.search = "";
+        return NextResponse.redirect(req.nextUrl);
+      } else if (r.status === 403) {
+        req.nextUrl.pathname = "/restricted";
+        req.nextUrl.search = "";
+        return NextResponse.redirect(req.nextUrl);
+      } else {
+        return NextResponse.next();
+      }
+    }
+  } catch (error) {
+    return NextResponse.redirect(new URL("/error", req.url));
   }
 }

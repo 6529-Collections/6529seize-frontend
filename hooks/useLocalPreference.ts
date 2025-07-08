@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+"use client";
+
+import { useState, useEffect } from "react";
 
 /**
  * A hook for managing user preferences stored in localStorage
- * 
+ *
  * @param key The localStorage key to use
  * @param defaultValue The default value to use if no preference is found
  * @param validator Optional function to validate stored value
@@ -15,23 +17,23 @@ function useLocalPreference<T>(
 ): [T, (newValue: T) => void] {
   // Initialize state with a function to avoid unnecessary localStorage lookups
   const [preference, setPreference] = useState<T>(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return defaultValue; // Return default during SSR
     }
 
     try {
       // Try to get the value from localStorage
       const storedValue = localStorage.getItem(key);
-      
+
       // If there's no stored value, return the default
       if (storedValue === null) return defaultValue;
-      
+
       // Parse the stored value
       const parsedValue = JSON.parse(storedValue);
-      
+
       // If a validator is provided, check if the value is valid
       if (validator && !validator(parsedValue)) return defaultValue;
-      
+
       return parsedValue;
     } catch (e) {
       // If there's an error reading from localStorage, return the default
@@ -39,12 +41,11 @@ function useLocalPreference<T>(
       return defaultValue;
     }
   });
-  
 
   // Listen for storage events from other tabs
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === "undefined") return;
+
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === key && event.newValue) {
         try {
@@ -59,17 +60,17 @@ function useLocalPreference<T>(
         }
       }
     };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
+
+    window.addEventListener("storage", handleStorageChange);
+
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [key, validator, setPreference]);
 
   // Renamed wrapper function that updates state and localStorage
   const updatePreference = (newValue: T) => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       setPreference(newValue);
       return;
     }
@@ -77,7 +78,7 @@ function useLocalPreference<T>(
     try {
       // Save to state
       setPreference(newValue);
-      
+
       // Save to localStorage
       localStorage.setItem(key, JSON.stringify(newValue));
     } catch (e) {

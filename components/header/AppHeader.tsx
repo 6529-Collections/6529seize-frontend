@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
@@ -5,7 +7,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useAuth } from "../auth/Auth";
 import { useIdentity } from "../../hooks/useIdentity";
-import { useRouter } from "next/router";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useViewContext } from "../navigation/ViewContext";
 import { useWaveById } from "../../hooks/useWaveById";
 import BackButton from "../navigation/BackButton";
@@ -22,7 +24,8 @@ export default function AppHeader(props: Readonly<Props>) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
-  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
@@ -35,7 +38,7 @@ export default function AppHeader(props: Readonly<Props>) {
     return profile?.pfp ?? null;
   })();
 
-  const pathSegments = router.asPath.split("?")[0].split("/").filter(Boolean);
+  const pathSegments = (pathname ?? "").split("/").filter(Boolean);
   const basePath = pathSegments.length ? pathSegments[0] : "";
   const pageTitle = pathSegments.length
     ? pathSegments[pathSegments.length - 1]
@@ -44,9 +47,11 @@ export default function AppHeader(props: Readonly<Props>) {
     : "Home";
 
   const waveId =
-    typeof router.query.wave === "string" ? router.query.wave : null;
+    typeof searchParams?.get("wave") === "string"
+      ? searchParams?.get("wave")
+      : null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
-  const isProfileRoute = router.pathname.startsWith("/[user]");
+  const isProfileRoute = pathname?.startsWith("/[user]");
 
   const showBackButton =
     (!!waveId && activeView === null) || (isProfileRoute && canGoBack);

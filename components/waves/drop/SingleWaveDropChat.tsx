@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useRef, useState } from "react";
 import { ApiDrop, ApiWave } from "../../../generated/models/ObjectSerializer";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -81,12 +83,12 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     <div className="tw-flex-1">
       <div
         ref={contentWrapperRef}
-        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-relative"
-      >
+        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-relative">
         <div className="tw-relative tw-h-full">
           <div className="tw-h-full tw-w-full tw-flex tw-items-stretch">
             <div className={containerClassName} style={containerStyle}>
-              <div className={`tw-flex-1 tw-min-h-0 ${isApp ? "tw-mb-20" : ""}`}>
+              <div
+                className={`tw-flex-1 tw-min-h-0 ${isApp ? "tw-mb-20" : ""}`}>
                 <WaveDropsAll
                   waveId={wave.id}
                   onReply={({
@@ -128,11 +130,9 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                   isApp
                     ? "tw-fixed tw-bottom-0 tw-left-0 tw-right-0 tw-bg-iron-950 tw-z-10"
                     : "tw-mt-auto"
-                }`}
-              >
+                }`}>
                 <CreateDropWaveWrapper
-                  context={CreateDropWaveWrapperContext.SINGLE_DROP}
-                >
+                  context={CreateDropWaveWrapperContext.SINGLE_DROP}>
                   <PrivilegedDropCreator
                     activeDrop={activeDrop}
                     onCancelReplyQuote={resetActiveDrop}

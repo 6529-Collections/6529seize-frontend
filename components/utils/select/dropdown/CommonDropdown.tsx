@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { useAnimate } from "framer-motion";
 import { CommonSelectProps } from "../CommonSelect";
@@ -129,8 +131,7 @@ export default function CommonDropdown<T, U = unknown>(
           } ${
             size === "md" ? "tw-py-3" : "tw-py-2.5"
           } tw-w-full tw-text-left tw-relative tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-10 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}
-        >
+          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}>
           {label}
           {sortDirection && (
             <span className="-tw-mt-0.5 tw-ml-2">
@@ -144,8 +145,7 @@ export default function CommonDropdown<T, U = unknown>(
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -164,8 +164,7 @@ export default function CommonDropdown<T, U = unknown>(
         buttonPosition={buttonPosition}
         filterLabel={filterLabel}
         dynamicPosition={dynamicPosition}
-        onIsMobile={setIsMobile}
-      >
+        onIsMobile={setIsMobile}>
         {Object.values(items).map((item, i) => (
           <CommonDropdownItem
             key={item.key}
@@ -175,8 +174,7 @@ export default function CommonDropdown<T, U = unknown>(
             activeItem={activeItem}
             sortDirection={sortDirection}
             isMobile={isMobile}
-            setSelected={onSelect}
-          >
+            setSelected={onSelect}>
             {renderItemChildren?.(item)}
           </CommonDropdownItem>
         ))}

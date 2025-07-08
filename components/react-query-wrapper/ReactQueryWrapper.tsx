@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useMemo } from "react";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import {

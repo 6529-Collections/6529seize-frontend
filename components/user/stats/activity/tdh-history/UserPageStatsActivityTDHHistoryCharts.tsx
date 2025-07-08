@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { TDHHistory } from "../../../../../entities/ITDH";
 import UserPageStatsActivityTDHHistoryChart from "./UserPageStatsActivityTDHHistoryChart";

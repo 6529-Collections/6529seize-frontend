@@ -1,3 +1,5 @@
+"use client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEULAConsent } from "./EULAConsentContext";
 import { useEffect, useRef, useState } from "react";

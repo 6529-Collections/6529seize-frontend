@@ -9,21 +9,16 @@ import {
 import UserPageWavesWrapper from "../../components/user/waves/UserPageWavesWrapper";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
-  pageProps,
-}) => {
-  return <UserPageWavesWrapper profile={pageProps.profile} />;
-};
+const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => (
+  <UserPageWavesWrapper profile={profile} />
+);
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageProps }>
+  page: ReactElement<{ profile: ApiIdentity }>
 ) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
+  return <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>;
 };
 
 export default Page;
