@@ -54,7 +54,10 @@ describe("CreateDropEmojiPicker", () => {
   const mockUseLexical = useLexicalComposerContext as jest.Mock;
 
   // Fake editor: update is a no-op function (does not execute callback)
-  const fakeEditor = { update: jest.fn() };
+  const fakeEditor = { 
+    update: jest.fn(),
+    focus: jest.fn()
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();

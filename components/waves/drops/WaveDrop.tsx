@@ -354,7 +354,7 @@ const WaveDrop = ({
             <div
               className={
                 shouldGroupWithPreviousDrop && !isProfileView
-                  ? "tw-ml-[3.25rem] tw-py-[0.15625rem]"
+                  ? "tw-ml-[3.25rem]"
                   : ""
               }>
               <WaveDropContent
