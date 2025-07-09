@@ -1,6 +1,7 @@
 @use "../../styles/variables.scss";
 
 .signModalHeader {
+  padding: 1rem;
   background-color: variables.$bg-color-2 !important;
   color: variables.$font-color !important;
   border: 1px solid variables.$lighter-grey !important;

@@ -26,31 +26,31 @@ export enum MEMES_SEASON {
 }
 
 export enum MemesSort {
-  AGE = "age",
-  EDITION_SIZE = "edition_size",
-  MEME = "meme",
-  HODLERS = "hodlers",
-  TDH = "tdh",
-  UNIQUE_PERCENT = "percent_unique",
-  UNIQUE_PERCENT_EX_MUSEUM = "percent_unique_cleaned",
-  FLOOR_PRICE = "floor_price",
-  MARKET_CAP = "market_cap",
-  VOLUME = "volume",
-  HIGHEST_OFFER = "highest_offer",
+  AGE = "Age",
+  EDITION_SIZE = "Edition Size",
+  MEME = "Meme",
+  HODLERS = "Collectors",
+  TDH = "TDH",
+  UNIQUE_PERCENT = "Unique %",
+  UNIQUE_PERCENT_EX_MUSEUM = "Unique % Exc. Museum",
+  FLOOR_PRICE = "Floor Price",
+  MARKET_CAP = "Market Cap",
+  VOLUME = "Volume",
+  HIGHEST_OFFER = "Highest Offer",
 }
 
 export enum MemeLabSort {
-  AGE = "age",
-  EDITION_SIZE = "edition-size",
-  HODLERS = "collectors",
-  ARTISTS = "artists",
-  COLLECTIONS = "collections",
-  UNIQUE_PERCENT = "unique",
-  UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
-  FLOOR_PRICE = "floor-price",
-  MARKET_CAP = "market-cap",
-  VOLUME = "volume",
-  HIGHEST_OFFER = "highest-offer",
+  AGE = "Age",
+  EDITION_SIZE = "Edition Size",
+  HODLERS = "Collectors",
+  ARTISTS = "Artists",
+  COLLECTIONS = "Collections",
+  UNIQUE_PERCENT = "Unique %",
+  UNIQUE_PERCENT_EX_MUSEUM = "Unique % Exc. Museum",
+  FLOOR_PRICE = "Floor Price",
+  MARKET_CAP = "Market Cap",
+  VOLUME = "Volume",
+  HIGHEST_OFFER = "Highest Offer",
 }
 
 export enum CommunityMembersSortOption {
