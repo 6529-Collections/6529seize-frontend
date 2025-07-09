@@ -56,6 +56,76 @@ const getNodeType = (isStartNode: boolean, isEndNode: boolean): string => {
   return 'middle';
 };
 
+// Helper to process text node for selection
+const processTextNode = (
+  nodeInfo: any,
+  startY: number,
+  endY: number,
+  minY: number,
+  maxY: number,
+  extractNodeText: Function,
+  startX: number,
+  endX: number
+) => {
+  const { node, rect, dropElement } = nodeInfo;
+  
+  // Check if this node should be included in the range
+  if (rect.bottom < minY || rect.top > maxY) return null;
+
+  // Determine node type relative to selection
+  const isStartNode = rect.top <= startY && rect.bottom >= startY;
+  const isEndNode = rect.top <= endY && rect.bottom >= endY;
+  const isMiddleNode = !isStartNode && !isEndNode;
+  
+  // Check if this node should be included
+  if (!shouldIncludeNode(rect, minY, maxY, isMiddleNode)) {
+    return null;
+  }
+  
+  // Get the text content for this node
+  const nodeText = extractNodeText(node, isStartNode, isEndNode, startX, startY, endX, endY);
+  
+  if (nodeText === null || !nodeText.trim()) {
+    return null;
+  }
+  
+  return { nodeText, dropElement };
+};
+
+// Helper to create a highlight span for a single node
+const createHighlightForNode = (node: Node, spanId: string): HTMLSpanElement | null => {
+  const range = document.createRange();
+  range.setStart(node, 0);
+  range.setEnd(node, node.textContent?.length || 0);
+  
+  if (range.collapsed || !range.toString().trim()) {
+    return null;
+  }
+  
+  try {
+    const span = document.createElement('span');
+    span.className = 'custom-text-highlight';
+    span.dataset.highlightId = spanId;
+    
+    // Use surroundContents to wrap the selected text
+    range.surroundContents(span);
+    return span;
+  } catch (e) {
+    // If surroundContents fails, try extracting and reinserting
+    try {
+      const contents = range.extractContents();
+      const span = document.createElement('span');
+      span.className = 'custom-text-highlight';
+      span.dataset.highlightId = spanId;
+      span.appendChild(contents);
+      range.insertNode(span);
+      return span;
+    } catch (e2) {
+      return null;
+    }
+  }
+};
+
 export const useTextSelection = (containerRef: React.RefObject<HTMLElement | null>) => {
   const [state, setState] = useState<TextSelectionState>({
     isSelecting: false,
@@ -258,48 +328,36 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       let isFirstNode = true;
 
       for (const nodeInfo of textNodeInfos) {
-        const { node, rect, dropElement } = nodeInfo;
+        const result = processTextNode(
+          nodeInfo,
+          startY,
+          endY,
+          minY,
+          maxY,
+          extractNodeText,
+          startX,
+          endX
+        );
         
-        // Check if this node should be included in the range
-        if (rect.bottom < minY || rect.top > maxY) continue;
-
-        // Determine node type relative to selection
-        const isStartNode = rect.top <= startY && rect.bottom >= startY;
-        const isEndNode = rect.top <= endY && rect.bottom >= endY;
-        const isMiddleNode = !isStartNode && !isEndNode;
+        if (!result) continue;
         
-        // Check if this node should be included
-        if (!shouldIncludeNode(rect, minY, maxY, isMiddleNode)) {
-          continue;
-        }
-
+        const { nodeText, dropElement } = result;
 
         // Add line break when moving to a different drop
         if (!isFirstNode && dropElement !== lastDropElement && lastDropElement !== null) {
           selectedText += '\n';
         }
         
-        // Get the text content for this node
-        const nodeText = extractNodeText(node, isStartNode, isEndNode, startX, startY, endX, endY);
-        
-        // Skip if we couldn't extract text (precise position not found)
-        if (nodeText === null) {
-          continue;
-        }
-        
-        
         // Add the text with proper spacing
-        if (nodeText.trim()) {
-          if (!isFirstNode && dropElement === lastDropElement) {
-            // Same drop, add space if needed
-            if (!selectedText.endsWith(' ') && !nodeText.startsWith(' ')) {
-              selectedText += ' ';
-            }
+        if (!isFirstNode && dropElement === lastDropElement) {
+          // Same drop, add space if needed
+          if (!selectedText.endsWith(' ') && !nodeText.startsWith(' ')) {
+            selectedText += ' ';
           }
-          selectedText += nodeText;
-          lastDropElement = dropElement;
-          isFirstNode = false;
         }
+        selectedText += nodeText;
+        lastDropElement = dropElement;
+        isFirstNode = false;
       }
 
       if (!selectedText.trim()) return null;
@@ -335,42 +393,12 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         // Skip nodes outside our range
         if (nodeRect.bottom < minY || nodeRect.top > maxY) continue;
 
-        // Create a range for this specific node
-        const range = document.createRange();
+        // Create highlight for this node
+        const spanId = `highlight-${Date.now()}-${spans.length}`;
+        const span = createHighlightForNode(node, spanId);
         
-        // Always try to highlight any node that's in our selection
-        range.setStart(node, 0);
-        range.setEnd(node, node.textContent?.length || 0);
-        
-
-        // Only create span if range has content
-        
-        if (!range.collapsed && range.toString().trim()) {
-          try {
-            const span = document.createElement('span');
-            span.className = 'custom-text-highlight';
-            span.dataset.highlightId = `highlight-${Date.now()}-${spans.length}`;
-            
-            
-            // Use surroundContents to wrap the selected text
-            range.surroundContents(span);
-            spans.push(span);
-            
-          } catch (e) {
-            // If surroundContents fails (e.g., range spans multiple elements),
-            // try extracting and reinserting the content
-            try {
-              const contents = range.extractContents();
-              const span = document.createElement('span');
-              span.className = 'custom-text-highlight';
-              span.dataset.highlightId = `highlight-${Date.now()}-${spans.length}`;
-              span.appendChild(contents);
-              range.insertNode(span);
-              spans.push(span);
-            } catch (e2) {
-              // Span creation failed, skip this node
-            }
-          }
+        if (span) {
+          spans.push(span);
         }
       }
 
@@ -619,7 +647,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     const textToCopy = state.selection.text;
     
     // Try modern clipboard API first
-    if (navigator.clipboard && navigator.clipboard.writeText) {
+    if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(textToCopy).catch((err) => {
         // Fallback: dispatch copy event
         try {
