@@ -175,10 +175,10 @@ export function VolumeTypeDropdown({
   setVolumeType,
   setVolumeSort,
 }: {
-  isVolumeSort: boolean;
-  selectedVolumeSort: VolumeType;
-  setVolumeType: (volumeType: VolumeType) => void;
-  setVolumeSort: () => void;
+  readonly isVolumeSort: boolean;
+  readonly selectedVolumeSort: VolumeType;
+  readonly setVolumeType: (volumeType: VolumeType) => void;
+  readonly setVolumeSort: () => void;
 }) {
   const volumeTypes = Object.values(VolumeType);
 

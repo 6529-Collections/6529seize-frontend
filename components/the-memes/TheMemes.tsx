@@ -3,16 +3,12 @@
 import styles from "./TheMemes.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
-import {
-  capitalizeEveryWord,
-  numberWithCommas,
-  printMintDate,
-} from "../../helpers/Helpers";
+import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
 import { useRouter, useSearchParams } from "next/navigation";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
