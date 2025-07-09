@@ -14,6 +14,48 @@ interface TextSelectionState {
   highlightSpans: HTMLSpanElement[];
 }
 
+// Helper function to check if a node is already highlighted
+const isNodeHighlighted = (node: Node): boolean => {
+  let parentElement = node.parentElement;
+  while (parentElement) {
+    if (parentElement.classList.contains('custom-text-highlight')) {
+      return true;
+    }
+    parentElement = parentElement.parentElement;
+  }
+  return false;
+};
+
+// Helper function to handle auto-scroll when dragging near edges
+const handleAutoScroll = (container: HTMLElement, clientY: number) => {
+  const rect = container.getBoundingClientRect();
+  const scrollSpeed = 5;
+  const edgeThreshold = 50;
+  
+  if (clientY < rect.top + edgeThreshold) {
+    container.scrollTop -= scrollSpeed;
+  } else if (clientY > rect.bottom - edgeThreshold) {
+    container.scrollTop += scrollSpeed;
+  }
+};
+
+// Helper to determine if a node should be included in selection
+const shouldIncludeNode = (rect: DOMRect, minY: number, maxY: number, isMiddleNode: boolean): boolean => {
+  if (!isMiddleNode) return true;
+  
+  // For middle nodes, be stricter about inclusion to prevent extra content
+  const tolerance = 2; // pixels
+  return rect.top >= minY + tolerance && rect.bottom <= maxY - tolerance;
+};
+
+// Helper to get node type
+const getNodeType = (isStartNode: boolean, isEndNode: boolean): string => {
+  if (isStartNode && isEndNode) return 'start+end';
+  if (isStartNode) return 'start';
+  if (isEndNode) return 'end';
+  return 'middle';
+};
+
 export const useTextSelection = (containerRef: React.RefObject<HTMLElement | null>) => {
   const [state, setState] = useState<TextSelectionState>({
     isSelecting: false,
@@ -137,7 +179,6 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
   }
 
   const getAllTextNodesInRange = useCallback((container: HTMLElement, startX: number, startY: number, endX: number, endY: number): TextNodeInfo[] => {
-    console.log('🔍 getAllTextNodesInRange called with range:', { startX, startY, endX, endY });
     const textNodes: TextNodeInfo[] = [];
     
     // Calculate selection rectangle
@@ -189,19 +230,12 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
           visualTop: rect.top
         });
         
-        console.log('✅ Including text node:', {
-          text: node.textContent.substring(0, 50) + '...',
-          nodeRect: { left: nodeLeft, top: nodeTop, right: nodeRight, bottom: nodeBottom },
-          dropElement: dropElement?.tagName,
-          visualTop: rect.top
-        });
       }
     }
 
     // Sort by visual position (top to bottom as user sees it)
     textNodes.sort((a, b) => a.visualTop - b.visualTop);
     
-    console.log('📊 Total text nodes found:', textNodes.length, 'sorted by visual position');
     return textNodes;
   }, []);
 
@@ -213,12 +247,6 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       const minY = Math.min(startY, endY);
       const maxY = Math.max(startY, endY);
       
-      console.log('🎯 calculateSelection called:', {
-        startCoords: { x: startX, y: startY },
-        endCoords: { x: endX, y: endY },
-        calculatedRange: { minY, maxY },
-        rangeDifference: maxY - minY
-      });
       
       const textNodeInfos = getAllTextNodesInRange(containerRef.current, startX, startY, endX, endY);
       
@@ -240,32 +268,11 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         const isEndNode = rect.top <= endY && rect.bottom >= endY;
         const isMiddleNode = !isStartNode && !isEndNode;
         
-        // For middle nodes, be stricter about inclusion to prevent extra content
-        if (isMiddleNode) {
-          // Only include middle nodes that are FULLY within the selection bounds
-          // Add a small tolerance for rounding errors
-          const tolerance = 2; // pixels
-          if (rect.top < minY + tolerance || rect.bottom > maxY - tolerance) {
-            console.log('🚫 Skipping middle node outside bounds:', {
-              text: node.textContent?.substring(0, 30) + '...',
-              nodeTop: rect.top,
-              nodeBottom: rect.bottom,
-              selectionTop: minY,
-              selectionBottom: maxY,
-              reason: 'Middle node extends outside selection'
-            });
-            continue; // Skip nodes that extend outside selection
-          }
+        // Check if this node should be included
+        if (!shouldIncludeNode(rect, minY, maxY, isMiddleNode)) {
+          continue;
         }
 
-        console.log('✅ Including node in text:', {
-          text: node.textContent?.substring(0, 30) + '...',
-          nodeType: isStartNode ? 'start' : isEndNode ? 'end' : 'middle',
-          nodeTop: rect.top,
-          nodeBottom: rect.bottom,
-          selectionTop: minY,
-          selectionBottom: maxY
-        });
 
         // Add line break when moving to a different drop
         if (!isFirstNode && dropElement !== lastDropElement && lastDropElement !== null) {
@@ -277,14 +284,9 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         
         // Skip if we couldn't extract text (precise position not found)
         if (nodeText === null) {
-          console.log('⚠️ Skipping node - cannot determine precise character position');
           continue;
         }
         
-        console.log('📍 Extracted text from node:', {
-          nodeType: isStartNode && isEndNode ? 'start+end' : isStartNode ? 'start' : isEndNode ? 'end' : 'middle',
-          text: nodeText.substring(0, 30) + '...'
-        });
         
         // Add the text with proper spacing
         if (nodeText.trim()) {
@@ -302,10 +304,8 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
 
       if (!selectedText.trim()) return null;
 
-      console.log('📝 Built formatted text:', selectedText.substring(0, 100) + '...');
       return { startX, startY, endX, endY, text: selectedText };
     } catch (e) {
-      console.error('Selection error:', e);
       return null;
     }
   }, [containerRef, getAllTextNodesInRange, extractNodeText]);
@@ -319,27 +319,14 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       // Get all text nodes in the selection range
       const minY = Math.min(selection.startY, selection.endY);
       const maxY = Math.max(selection.startY, selection.endY);
-      console.log('🎨 createHighlightSpans called for selection:', {
-        coords: { startX: selection.startX, startY: selection.startY, endX: selection.endX, endY: selection.endY },
-        range: { minY, maxY },
-        text: selection.text.substring(0, 50) + '...'
-      });
       
       const textNodeInfos = getAllTextNodesInRange(containerRef.current, selection.startX, selection.startY, selection.endX, selection.endY);
       const textNodes = textNodeInfos.map(info => info.node);
       
-      console.log('🎨 Found nodes for highlighting:', textNodes.length);
 
       for (const node of textNodes) {
         // Skip nodes that are already inside a highlight span
-        let parentElement = node.parentElement;
-        while (parentElement) {
-          if (parentElement.classList.contains('custom-text-highlight')) {
-            break; // Skip this node, it's already highlighted
-          }
-          parentElement = parentElement.parentElement;
-        }
-        if (parentElement) continue; // Skip if we found a highlight ancestor
+        if (isNodeHighlighted(node)) continue;
 
         const nodeRange = document.createRange();
         nodeRange.selectNodeContents(node);
@@ -355,19 +342,8 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         range.setStart(node, 0);
         range.setEnd(node, node.textContent?.length || 0);
         
-        console.log('🎨 Highlighting node fully:', {
-          nodeText: node.textContent?.substring(0, 30) + '...',
-          rangeText: range.toString().substring(0, 30) + '...'
-        });
 
         // Only create span if range has content
-        console.log('🎨 Range created for node:', {
-          nodeText: node.textContent?.substring(0, 30) + '...',
-          rangeText: range.toString(),
-          collapsed: range.collapsed,
-          startOffset: range.startOffset,
-          endOffset: range.endOffset
-        });
         
         if (!range.collapsed && range.toString().trim()) {
           try {
@@ -375,13 +351,11 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
             span.className = 'custom-text-highlight';
             span.dataset.highlightId = `highlight-${Date.now()}-${spans.length}`;
             
-            console.log('🎨 Creating highlight span with text:', range.toString().substring(0, 30) + '...');
             
             // Use surroundContents to wrap the selected text
             range.surroundContents(span);
             spans.push(span);
             
-            console.log('🎨 Successfully created highlight span');
           } catch (e) {
             // If surroundContents fails (e.g., range spans multiple elements),
             // try extracting and reinserting the content
@@ -394,7 +368,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
               range.insertNode(span);
               spans.push(span);
             } catch (e2) {
-              console.warn('Could not create highlight span:', e2);
+              // Span creation failed, skip this node
             }
           }
         }
@@ -402,7 +376,6 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
 
       return spans;
     } catch (e) {
-      console.error('Highlight error:', e);
       return [];
     }
   }, [containerRef, getTextNodeAtPoint, getAllTextNodesInRange]);
@@ -553,7 +526,6 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         if (e.clipboardData && state.selection?.text) {
           e.preventDefault();
           e.clipboardData.setData('text/plain', state.selection.text);
-          console.log('Copy intercepted and handled with custom text');
         }
       };
       
@@ -561,9 +533,8 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       copyListenerRef.current = handleCopy;
       document.addEventListener('copy', handleCopy);
       
-      console.log('Browser selection populated with:', sel.toString().substring(0, 50) + '...');
     } catch (e) {
-      console.error('Error populating browser selection:', e);
+      // Error populating browser selection
     }
   }, [state.selection, cleanupTempSelectionElement]);
 
@@ -646,21 +617,34 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     if (!state.selection?.text) return;
 
     const textToCopy = state.selection.text;
-    navigator.clipboard.writeText(textToCopy).catch(() => {
-      // Fallback for older browsers
-      const textarea = document.createElement('textarea');
-      textarea.value = textToCopy;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        document.execCommand('copy');
-      } catch (err) {
-        console.warn('Copy failed:', err);
-      }
-      document.body.removeChild(textarea);
-    });
+    
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).catch((err) => {
+        // Fallback: dispatch copy event
+        try {
+          const copyEvent = new ClipboardEvent('copy', {
+            clipboardData: new DataTransfer(),
+            bubbles: true,
+            cancelable: true
+          });
+          // Set the data on the event
+          Object.defineProperty(copyEvent, 'clipboardData', {
+            value: {
+              setData: (type: string, data: string) => {
+                if (type === 'text/plain') {
+                  // Store for manual fallback
+                }
+              },
+              getData: () => textToCopy
+            }
+          });
+          document.dispatchEvent(copyEvent);
+        } catch (fallbackErr) {
+          // All copy methods failed
+        }
+      });
+    }
   }, [state.selection]);
 
 
