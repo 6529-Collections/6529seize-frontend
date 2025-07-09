@@ -25,7 +25,6 @@ export const TextSelectionOverlay: React.FC<TextSelectionOverlayProps> = ({
         e.stopPropagation();
         // Ensure browser selection is populated before context menu
         handlers.populateBrowserSelection();
-        return;
       }
     };
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 interface SelectModeContextType {
   isSelectMode: boolean;
@@ -10,12 +10,17 @@ const SelectModeContext = createContext<SelectModeContextType | undefined>(undef
 export const SelectModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isSelectMode, setIsSelectMode] = useState(false);
 
-  const toggleSelectMode = () => {
+  const toggleSelectMode = useCallback(() => {
     setIsSelectMode(prev => !prev);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    isSelectMode,
+    toggleSelectMode
+  }), [isSelectMode, toggleSelectMode]);
 
   return (
-    <SelectModeContext.Provider value={{ isSelectMode, toggleSelectMode }}>
+    <SelectModeContext.Provider value={value}>
       {children}
     </SelectModeContext.Provider>
   );
