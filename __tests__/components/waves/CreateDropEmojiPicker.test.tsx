@@ -134,6 +134,10 @@ describe("CreateDropEmojiPicker", () => {
 
   it("uses mobile dialog on mobile screens and inserts emoji", async () => {
     mockUseIsMobile.mockReturnValue(true);
+    
+    // Clear the mock call count before this test
+    fakeEditor.update.mockClear();
+    
     render(<CreateDropEmojiPicker />);
     const toggleButton = screen.getByRole("button", { hidden: true });
 
