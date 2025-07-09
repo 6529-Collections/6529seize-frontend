@@ -65,6 +65,8 @@
     /* Split the background into independent fragments per line to prevent overlaps */
     box-decoration-break: clone !important;
     -webkit-box-decoration-break: clone !important;
+    /* Prevent highlight from interfering with hover states */
+    pointer-events: none !important;
   }
 }
 

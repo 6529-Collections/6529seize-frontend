@@ -70,17 +70,24 @@ const processTextNode = (
   // Check if this node should be included in the range
   if (rect.bottom < minY || rect.top > maxY) return null;
 
-  // Determine node type relative to selection
-  const isStartNode = rect.top <= startY && rect.bottom >= startY;
-  const isEndNode = rect.top <= endY && rect.bottom >= endY;
+  // Determine selection direction and node types
+  const isTopToBottom = startY < endY;
+  const actualStartY = isTopToBottom ? startY : endY;
+  const actualEndY = isTopToBottom ? endY : startY;
+  
+  const isStartNode = rect.top <= actualStartY && rect.bottom >= actualStartY;
+  const isEndNode = rect.top <= actualEndY && rect.bottom >= actualEndY;
   const isMiddleNode = !isStartNode && !isEndNode;
   
-  
-  
-  
-  // Check if this node should be included
+  // Check if this node should be included - be more lenient for nodes near mentions
   if (!shouldIncludeNode(rect, minY, maxY, isMiddleNode)) {
-    return null;
+    // Additional check for nodes that might be part of a sentence with mentions
+    // If this node is very close to the selection area, include it
+    const tolerance = 5; // pixels
+    const isNearSelection = rect.bottom >= minY - tolerance && rect.top <= maxY + tolerance;
+    if (!isNearSelection) {
+      return null;
+    }
   }
   
   // For middle nodes that are clearly within the selection, include full text
@@ -90,8 +97,10 @@ const processTextNode = (
     return { nodeText, dropElement };
   }
   
-  // Get the text content for this node
-  const nodeText = extractNodeText(node, isStartNode, isEndNode, startX, startY, endX, endY);
+  // Get the text content for this node - pass actual coordinates based on direction
+  const actualStartX = isTopToBottom ? startX : endX;
+  const actualEndX = isTopToBottom ? endX : startX;
+  const nodeText = extractNodeText(node, isStartNode, isEndNode, actualStartX, actualStartY, actualEndX, actualEndY);
   
   if (nodeText === null || !nodeText.trim()) {
     return null;
@@ -315,22 +324,31 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         return nodeText;
       }
       
+      // Be more lenient with edge detection for nodes near mentions
+      const edgeTolerance = 10; // pixels
+      
       // Check if we're at the edges of the selection
-      if (nodeRect.left < selectionLeft && nodeRect.right > selectionLeft) {
-        // This node contains the start of the selection
-        // Try to get precise start position
+      if (nodeRect.left < selectionLeft + edgeTolerance && nodeRect.right > selectionLeft - edgeTolerance) {
+        // This node contains or is near the start of the selection
         const startPos = getTextNodeAtPoint(selectionLeft, startY);
         if (startPos && startPos.node === node) {
           return nodeText.substring(startPos.offset);
         }
+        // If we can't get precise position but node is close, include from start
+        if (nodeRect.right > selectionLeft) {
+          return nodeText;
+        }
       }
       
-      if (nodeRect.left < selectionRight && nodeRect.right > selectionRight) {
-        // This node contains the end of the selection
-        // Try to get precise end position
+      if (nodeRect.left < selectionRight + edgeTolerance && nodeRect.right > selectionRight - edgeTolerance) {
+        // This node contains or is near the end of the selection
         const endPos = getTextNodeAtPoint(selectionRight, endY);
         if (endPos && endPos.node === node) {
           return nodeText.substring(0, endPos.offset);
+        }
+        // If we can't get precise position but node is close, include to end
+        if (nodeRect.left < selectionRight) {
+          return nodeText;
         }
       }
       
@@ -424,17 +442,34 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
           parent = parent.parentElement;
         }
         
-        textNodes.push({
-          node,
-          rect,
-          dropElement,
-          visualTop: rect.top
-        });
+        // Check if text node is clipped by any overflow:hidden ancestor
+        let isClipped = false;
+        let checkElement = node.parentElement;
+        while (checkElement && checkElement !== container) {
+          const styles = window.getComputedStyle(checkElement);
+          if (styles.overflow === 'hidden' || styles.overflowY === 'hidden') {
+            const parentRect = checkElement.getBoundingClientRect();
+            // If the text node is below the visible area of its overflow:hidden container
+            if (nodeTop >= parentRect.bottom) {
+              isClipped = true;
+              break;
+            }
+          }
+          checkElement = checkElement.parentElement;
+        }
         
+        if (!isClipped) {
+          textNodes.push({
+            node,
+            rect,
+            dropElement,
+            visualTop: rect.top
+          });
+        }
       }
     }
 
-    // Sort by visual position (top to bottom as user sees it)
+    // Always sort by visual position (top to bottom) to maintain document order
     textNodes.sort((a, b) => a.visualTop - b.visualTop);
     
     return textNodes;
@@ -448,9 +483,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       const minY = Math.min(startY, endY);
       const maxY = Math.max(startY, endY);
       
-      
       const textNodeInfos = getAllTextNodesInRange(containerRef.current, startX, startY, endX, endY);
-      
       
       if (textNodeInfos.length === 0) return null;
 
