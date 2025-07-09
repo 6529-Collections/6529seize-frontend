@@ -26,18 +26,6 @@ const isNodeHighlighted = (node: Node): boolean => {
   return false;
 };
 
-// Helper function to handle auto-scroll when dragging near edges
-const handleAutoScroll = (container: HTMLElement, clientY: number) => {
-  const rect = container.getBoundingClientRect();
-  const scrollSpeed = 5;
-  const edgeThreshold = 50;
-  
-  if (clientY < rect.top + edgeThreshold) {
-    container.scrollTop -= scrollSpeed;
-  } else if (clientY > rect.bottom - edgeThreshold) {
-    container.scrollTop += scrollSpeed;
-  }
-};
 
 // Helper to determine if a node should be included in selection
 const shouldIncludeNode = (rect: DOMRect, minY: number, maxY: number, isMiddleNode: boolean): boolean => {
@@ -48,26 +36,36 @@ const shouldIncludeNode = (rect: DOMRect, minY: number, maxY: number, isMiddleNo
   return rect.top >= minY + tolerance && rect.bottom <= maxY - tolerance;
 };
 
-// Helper to get node type
-const getNodeType = (isStartNode: boolean, isEndNode: boolean): string => {
-  if (isStartNode && isEndNode) return 'start+end';
-  if (isStartNode) return 'start';
-  if (isEndNode) return 'end';
-  return 'middle';
+
+// Helper to check if a text node is inside a mention link
+const isNodeInMention = (node: Node): boolean => {
+  let parent = node.parentElement;
+  while (parent) {
+    if (parent.tagName === 'A' && (parent.textContent?.startsWith('@') || parent.textContent?.startsWith('#'))) {
+      return true;
+    }
+    parent = parent.parentElement;
+  }
+  return false;
 };
 
 // Helper to process text node for selection
+interface SelectionBounds {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  minY: number;
+  maxY: number;
+}
+
 const processTextNode = (
   nodeInfo: any,
-  startY: number,
-  endY: number,
-  minY: number,
-  maxY: number,
-  extractNodeText: Function,
-  startX: number,
-  endX: number
+  bounds: SelectionBounds,
+  extractNodeText: Function
 ) => {
   const { node, rect, dropElement } = nodeInfo;
+  const { startX, startY, endX, endY, minY, maxY } = bounds;
   
   // Check if this node should be included in the range
   if (rect.bottom < minY || rect.top > maxY) return null;
@@ -77,9 +75,19 @@ const processTextNode = (
   const isEndNode = rect.top <= endY && rect.bottom >= endY;
   const isMiddleNode = !isStartNode && !isEndNode;
   
+  
+  
+  
   // Check if this node should be included
   if (!shouldIncludeNode(rect, minY, maxY, isMiddleNode)) {
     return null;
+  }
+  
+  // For middle nodes that are clearly within the selection, include full text
+  if (isMiddleNode && rect.top >= minY && rect.bottom <= maxY) {
+    const nodeText = node.textContent || '';
+    if (!nodeText.trim()) return null;
+    return { nodeText, dropElement };
   }
   
   // Get the text content for this node
@@ -126,6 +134,46 @@ const createHighlightForNode = (node: Node, spanId: string): HTMLSpanElement | n
   }
 };
 
+// Helper to create a precise highlight that matches the extracted text
+const createPreciseHighlightForNode = (node: Node, extractedText: string, spanId: string): HTMLSpanElement | null => {
+  const fullText = node.textContent || '';
+  
+  // If extracted text is the full node text, use the original function
+  if (extractedText === fullText) {
+    return createHighlightForNode(node, spanId);
+  }
+  
+  // Find where the extracted text starts and ends in the full text
+  const startIndex = fullText.indexOf(extractedText);
+  if (startIndex === -1) {
+    // If we can't find the text, highlight the whole node as fallback
+    return createHighlightForNode(node, spanId);
+  }
+  
+  const endIndex = startIndex + extractedText.length;
+  
+  try {
+    const range = document.createRange();
+    range.setStart(node, startIndex);
+    range.setEnd(node, endIndex);
+    
+    if (range.collapsed || !range.toString().trim()) {
+      return null;
+    }
+    
+    const span = document.createElement('span');
+    span.className = 'custom-text-highlight';
+    span.dataset.highlightId = spanId;
+    
+    // Use surroundContents to wrap the selected text
+    range.surroundContents(span);
+    return span;
+  } catch (e) {
+    // If precise highlighting fails, fall back to whole node
+    return createHighlightForNode(node, spanId);
+  }
+};
+
 export const useTextSelection = (containerRef: React.RefObject<HTMLElement | null>) => {
   const [state, setState] = useState<TextSelectionState>({
     isSelecting: false,
@@ -139,29 +187,23 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tempSelectionElementRef = useRef<HTMLDivElement | null>(null);
 
-  // Detect when scrolling to avoid interfering
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      isScrollingRef.current = true;
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+  // Utility function to remove highlight spans from DOM
+  const removeHighlightSpans = useCallback((container: HTMLElement) => {
+    const highlights = container.querySelectorAll('span.custom-text-highlight');
+    highlights.forEach(span => {
+      const parent = span.parentNode;
+      if (parent) {
+        // Move all children out of the span
+        while (span.firstChild) {
+          parent.insertBefore(span.firstChild, span);
+        }
+        // Remove the empty span
+        parent.removeChild(span);
+        // Normalize to merge adjacent text nodes
+        parent.normalize();
       }
-      scrollTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 150);
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [containerRef]);
+    });
+  }, []);
 
   const getTextNodeAtPoint = useCallback((x: number, y: number): { node: Node; offset: number } | null => {
     // Use native browser APIs to find text at coordinates
@@ -176,6 +218,35 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         return { node: range.startContainer, offset: range.startOffset };
       }
     }
+    
+    // Fallback: try to find text node at point using elementFromPoint
+    const element = document.elementFromPoint(x, y);
+    if (element) {
+      // Walk through text nodes to find one at this position
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+      
+      let node;
+      while (node = walker.nextNode()) {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          const rect = range.getBoundingClientRect();
+          if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+            // Estimate offset based on position
+            const textLength = node.textContent.length;
+            const relativeX = x - rect.left;
+            const charWidth = rect.width / textLength;
+            const offset = Math.round(relativeX / charWidth);
+            return { node, offset: Math.max(0, Math.min(offset, textLength)) };
+          }
+        }
+      }
+    }
+    
     return null;
   }, []);
 
@@ -207,20 +278,71 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
   ): string | null => {
     const nodeText = node.textContent || '';
     
+    // For mentions, we'll use a simpler approach
+    const inMention = isNodeInMention(node);
+    
     // Both start and end in same node
     if (isStartNode && isEndNode && startX !== undefined && startY !== undefined && endX !== undefined && endY !== undefined) {
+      if (inMention) {
+        // For mentions, include the whole thing if any part is selected
+        return nodeText;
+      }
+      
       const startPos = getTextNodeAtPoint(startX, startY);
       const endPos = getTextNodeAtPoint(endX, endY);
+      
+      // If we found exact positions in this node, use them
       if (startPos?.node === node && endPos?.node === node) {
         const startOffset = Math.min(startPos.offset, endPos.offset);
         const endOffset = Math.max(startPos.offset, endPos.offset);
         return nodeText.substring(startOffset, endOffset);
       }
+      
+      // Special case: Check if this node is part of a mention-adjacent text flow
+      // This happens when selecting "testing @mention, more text" where nodes are split
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const nodeRect = range.getBoundingClientRect();
+      
+      // Special handling for single-line selections where getTextNodeAtPoint fails
+      // This often happens with text split by mentions
+      const selectionLeft = Math.min(startX, endX);
+      const selectionRight = Math.max(startX, endX);
+      
+      // Check if the selection clearly spans across this node
+      if (nodeRect.left >= selectionLeft && nodeRect.right <= selectionRight) {
+        // Node is completely within selection - include it
+        return nodeText;
+      }
+      
+      // Check if we're at the edges of the selection
+      if (nodeRect.left < selectionLeft && nodeRect.right > selectionLeft) {
+        // This node contains the start of the selection
+        // Try to get precise start position
+        const startPos = getTextNodeAtPoint(selectionLeft, startY);
+        if (startPos && startPos.node === node) {
+          return nodeText.substring(startPos.offset);
+        }
+      }
+      
+      if (nodeRect.left < selectionRight && nodeRect.right > selectionRight) {
+        // This node contains the end of the selection
+        // Try to get precise end position
+        const endPos = getTextNodeAtPoint(selectionRight, endY);
+        if (endPos && endPos.node === node) {
+          return nodeText.substring(0, endPos.offset);
+        }
+      }
+      
       return null;
     }
     
     // Start node only
     if (isStartNode && startX !== undefined && startY !== undefined) {
+      if (inMention) {
+        // For mentions at start, include the whole mention
+        return nodeText;
+      }
       const startPos = getTextNodeAtPoint(startX, startY);
       if (startPos?.node === node) {
         return nodeText.substring(startPos.offset);
@@ -230,6 +352,10 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     
     // End node only
     if (isEndNode && endX !== undefined && endY !== undefined) {
+      if (inMention) {
+        // For mentions at end, include the whole mention
+        return nodeText;
+      }
       const endPos = getTextNodeAtPoint(endX, endY);
       if (endPos?.node === node) {
         return nodeText.substring(0, endPos.offset);
@@ -260,7 +386,12 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     const walker = document.createTreeWalker(
       container,
       NodeFilter.SHOW_TEXT,
-      null
+      {
+        acceptNode: () => {
+          // Accept all text nodes, even those inside mention/handle elements
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
     );
 
     let node;
@@ -320,6 +451,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       
       const textNodeInfos = getAllTextNodesInRange(containerRef.current, startX, startY, endX, endY);
       
+      
       if (textNodeInfos.length === 0) return null;
 
       // Build formatted text with proper spacing and line breaks
@@ -327,21 +459,23 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       let lastDropElement: Element | null = null;
       let isFirstNode = true;
 
+      // Track processed nodes to avoid duplicates
+      const processedNodes = new Set<Node>();
+      
       for (const nodeInfo of textNodeInfos) {
-        const result = processTextNode(
-          nodeInfo,
-          startY,
-          endY,
-          minY,
-          maxY,
-          extractNodeText,
-          startX,
-          endX
-        );
+        // Skip if we've already processed this node
+        if (processedNodes.has(nodeInfo.node)) {
+          continue;
+        }
+        
+        const bounds: SelectionBounds = { startX, startY, endX, endY, minY, maxY };
+        const result = processTextNode(nodeInfo, bounds, extractNodeText);
         
         if (!result) continue;
         
         const { nodeText, dropElement } = result;
+        
+        processedNodes.add(nodeInfo.node);
 
         // Add line break when moving to a different drop
         if (!isFirstNode && dropElement !== lastDropElement && lastDropElement !== null) {
@@ -379,10 +513,11 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       const maxY = Math.max(selection.startY, selection.endY);
       
       const textNodeInfos = getAllTextNodesInRange(containerRef.current, selection.startX, selection.startY, selection.endX, selection.endY);
-      const textNodes = textNodeInfos.map(info => info.node);
       
 
-      for (const node of textNodes) {
+      for (const nodeInfo of textNodeInfos) {
+        const node = nodeInfo.node;
+        
         // Skip nodes that are already inside a highlight span
         if (isNodeHighlighted(node)) continue;
 
@@ -393,9 +528,24 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
         // Skip nodes outside our range
         if (nodeRect.bottom < minY || nodeRect.top > maxY) continue;
 
-        // Create highlight for this node
+        // Use the same logic as text extraction to determine what to highlight
+        const bounds: SelectionBounds = { 
+          startX: selection.startX, 
+          startY: selection.startY, 
+          endX: selection.endX, 
+          endY: selection.endY, 
+          minY, 
+          maxY 
+        };
+        
+        const result = processTextNode(nodeInfo, bounds, extractNodeText);
+        if (!result) continue; // Skip nodes that wouldn't be included in selection
+        
+        const { nodeText } = result;
+        
+        // Create precise highlight based on what text would actually be selected
         const spanId = `highlight-${Date.now()}-${spans.length}`;
-        const span = createHighlightForNode(node, spanId);
+        const span = createPreciseHighlightForNode(node, nodeText, spanId);
         
         if (span) {
           spans.push(span);
@@ -406,25 +556,35 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     } catch (e) {
       return [];
     }
-  }, [containerRef, getTextNodeAtPoint, getAllTextNodesInRange]);
+  }, [containerRef, getAllTextNodesInRange, processTextNode, extractNodeText]);
 
-  // Utility function to remove highlight spans from DOM
-  const removeHighlightSpans = useCallback((container: HTMLElement) => {
-    const highlights = container.querySelectorAll('span.custom-text-highlight');
-    highlights.forEach(span => {
-      const parent = span.parentNode;
-      if (parent) {
-        // Move all children out of the span
-        while (span.firstChild) {
-          parent.insertBefore(span.firstChild, span);
-        }
-        // Remove the empty span
-        parent.removeChild(span);
-        // Normalize to merge adjacent text nodes
-        parent.normalize();
+
+  // Detect when scrolling to avoid interfering
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      // Don't treat auto-scroll during selection as user scrolling
+      if (state.isSelecting) return;
+      
+      isScrollingRef.current = true;
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
       }
-    });
-  }, []);
+      scrollTimeoutRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 150);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [containerRef, state.isSelecting]);
 
   // Cleanup temp selection element
   const cleanupTempSelectionElement = useCallback(() => {
@@ -471,9 +631,15 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     // Don't interfere during scrolling
     if (isScrollingRef.current) return;
 
-    // Check if clicking on interactive elements
+    // Check if clicking on interactive elements (but allow links for text selection)
     const target = e.target as HTMLElement;
-    if (target.closest('button, a, input, textarea, select')) return;
+    if (target.closest('button, input, textarea, select')) return;
+    
+    // For links, we'll allow selection but prevent default click behavior
+    const linkElement = target.closest('a');
+    if (linkElement) {
+      e.preventDefault();
+    }
     
     startPointRef.current = {
       x: e.clientX,
@@ -648,7 +814,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     
     // Try modern clipboard API first
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(textToCopy).catch((err) => {
+      navigator.clipboard.writeText(textToCopy).catch(() => {
         // Fallback: dispatch copy event
         try {
           const copyEvent = new ClipboardEvent('copy', {
@@ -659,7 +825,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
           // Set the data on the event
           Object.defineProperty(copyEvent, 'clipboardData', {
             value: {
-              setData: (type: string, data: string) => {
+              setData: (type: string) => {
                 if (type === 'text/plain') {
                   // Store for manual fallback
                 }
@@ -668,7 +834,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
             }
           });
           document.dispatchEvent(copyEvent);
-        } catch (fallbackErr) {
+        } catch {
           // All copy methods failed
         }
       });

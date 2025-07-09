@@ -38,12 +38,19 @@
 
   /* Custom selection mode for drops area */
   .drops-custom-selection {
-    /* Allow text cursor to show we can select */
-    cursor: text;
+    /* Default cursor for the container */
+    cursor: default;
+    
+    /* Text cursor only on actual text content elements */
+    p, h1, h2, h3, h4, h5, h6, li, code, 
+    span.tw-align-middle, span.emoji-text-node,
+    span:not(.emoji-node):not(.emoji-node-big) {
+      cursor: text;
+    }
     
     /* Ensure links and buttons remain clickable and allow selection in them */
     a, button, input, textarea, select {
-      cursor: pointer;
+      cursor: pointer !important;
       user-select: auto;
       -webkit-user-select: auto;
       -moz-user-select: auto;

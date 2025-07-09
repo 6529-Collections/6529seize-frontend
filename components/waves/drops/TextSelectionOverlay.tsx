@@ -111,21 +111,25 @@ export const TextSelectionOverlay: React.FC<TextSelectionOverlayProps> = ({
     };
   }, [state.selection, handlers]);
 
-  // Clear selection when clicking outside
-  useEffect(() => {
+  // Clear selection when clicking outside - DISABLED for now to fix scroll issue
+  // TODO: Re-implement this in a way that doesn't interfere with scrolling
+  /* useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       // Don't clear on right-click
       if (e.button === 2) return;
       
+      // Don't clear during active selection (while dragging)
+      if (state.isSelecting) return;
+      
+      // Only clear if clicking outside the container and we have a selection
       if (!containerRef.current?.contains(e.target as Node) && state.selection) {
         handlers.clearSelection();
       }
     };
 
-    // Use capture so it fires before any child handlers that might re-insert spans
     document.addEventListener('click', handleOutsideClick, true);
     return () => document.removeEventListener('click', handleOutsideClick, true);
-  }, [containerRef, state.selection, handlers]);
+  }, [containerRef, state.selection, state.isSelecting, handlers]); */
 
   return (
     <>
