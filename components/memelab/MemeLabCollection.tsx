@@ -237,7 +237,13 @@ export default function LabCollection(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  {printSortButtons(sort, setSort, setVolumeType, true)}
+                  {printSortButtons(
+                    sort,
+                    volumeType,
+                    setSort,
+                    setVolumeType,
+                    true
+                  )}
                 </Col>
               </Row>
               {nftsLoaded &&
