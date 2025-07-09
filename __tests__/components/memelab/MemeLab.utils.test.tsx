@@ -1,32 +1,39 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { getInitialRouterValues, printSortButtons, printNftContent } from '../../../components/memelab/MemeLab';
-import { MemeLabSort } from '../../../enums';
-import { VolumeType, LabNFT, LabExtendedData } from '../../../entities/INFT';
-import { NextRouter } from 'next/router';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import {
+  getInitialRouterValues,
+  printSortButtons,
+  printNftContent,
+} from "../../../components/memelab/MemeLab";
+import { MemeLabSort } from "../../../enums";
+import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
+import { NextRouter } from "next/router";
 
-jest.mock('next/link', () => ({__esModule:true, default: ({href,children}:any) => <a href={href}>{children}</a>}));
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ href, children }: any) => <a href={href}>{children}</a>,
+}));
 
 function createNft(): LabNFT {
   return {
     id: 1,
-    contract: '0x',
+    contract: "0x",
     created_at: new Date(),
     mint_price: 0,
     supply: 1,
-    name: 'N',
-    collection: '',
-    token_type: '',
-    description: '',
-    artist: 'artist',
-    artist_seize_handle: '',
-    uri: '',
-    icon: '',
-    thumbnail: '',
-    scaled: '',
-    image: '',
-    animation: '',
+    name: "N",
+    collection: "",
+    token_type: "",
+    description: "",
+    artist: "artist",
+    artist_seize_handle: "",
+    uri: "",
+    icon: "",
+    thumbnail: "",
+    scaled: "",
+    image: "",
+    animation: "",
     market_cap: 1,
     floor_price: 2,
     total_volume_last_24_hours: 3,
@@ -60,45 +67,69 @@ const nftMeta: LabExtendedData = {
   percent_unique_not_burnt: 0,
   percent_unique_not_burnt_rank: 0,
   meme_references: [],
-  metadata_collection: 'col',
-  name: 'n',
-  website: '',
+  metadata_collection: "col",
+  name: "n",
+  website: "",
 };
 
-describe('MemeLab utilities', () => {
-  it('parses router query for initial values', () => {
-    const router = { query: { sort: MemeLabSort.HODLERS, sort_dir: 'DESC' } } as unknown as NextRouter;
+describe("MemeLab utilities", () => {
+  it("parses router query for initial values", () => {
+    const router = {
+      query: { sort: MemeLabSort.HODLERS, sort_dir: "DESC" },
+    } as unknown as NextRouter;
     const { initialSortDir, initialSort } = getInitialRouterValues(router);
     expect(initialSort).toBe(MemeLabSort.HODLERS);
-    expect(initialSortDir).toBe('DESC');
+    expect(initialSortDir).toBe("DESC");
   });
 
-  it('falls back to defaults for invalid router values', () => {
-    const router = { query: { sort: 'bad', sort_dir: 'bad' } } as unknown as NextRouter;
+  it("falls back to defaults for invalid router values", () => {
+    const router = {
+      query: { sort: "bad", sort_dir: "bad" },
+    } as unknown as NextRouter;
     const { initialSortDir, initialSort } = getInitialRouterValues(router);
     expect(initialSort).toBe(MemeLabSort.AGE);
-    expect(initialSortDir).toBe('ASC');
+    expect(initialSortDir).toBe("ASC");
   });
 
-  it('renders sort buttons and triggers callbacks', async () => {
+  it("renders sort buttons and triggers callbacks", async () => {
     const setSort = jest.fn();
     const setVolume = jest.fn();
-    render(<div>{printSortButtons(MemeLabSort.AGE, setSort, setVolume)}</div>);
-    await userEvent.click(screen.getByRole('button', { name: 'Edition-size' }));
+    render(
+      <div>
+        {printSortButtons(
+          MemeLabSort.AGE,
+          VolumeType.ALL_TIME,
+          setSort,
+          setVolume
+        )}
+      </div>
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Edition-size" }));
     expect(setSort).toHaveBeenCalled();
   });
 
-  it('prints nft content based on sort', () => {
+  it("prints nft content based on sort", () => {
     const nft = createNft();
-    render(<div>{printNftContent(nft, MemeLabSort.FLOOR_PRICE, [nftMeta], VolumeType.ALL_TIME)}</div>);
+    render(
+      <div>
+        {printNftContent(
+          nft,
+          MemeLabSort.FLOOR_PRICE,
+          [nftMeta],
+          VolumeType.ALL_TIME
+        )}
+      </div>
+    );
     expect(screen.getByText(/Floor Price/)).toBeInTheDocument();
   });
 
-  it('prints volume info for selected period', () => {
+  it("prints volume info for selected period", () => {
     const nft = createNft();
     const { container } = render(
-      <div>{printNftContent(nft, MemeLabSort.VOLUME, [nftMeta], VolumeType.DAYS_7)}</div>
+      <div>
+        {printNftContent(nft, MemeLabSort.VOLUME, [nftMeta], VolumeType.DAYS_7)}
+      </div>
     );
-    expect(container.textContent).toContain('Volume (7 Days):');
+    expect(container.textContent).toContain("Volume (7 Days):");
   });
 });
