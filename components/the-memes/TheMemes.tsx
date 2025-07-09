@@ -31,40 +31,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { VolumeTypeDropdown } from "./MemeShared";
 
 interface Meme {
   meme: number;
   meme_name: string;
-}
-
-export function printVolumeTypeDropdown(
-  isVolumeSort: boolean,
-  setVolumeType: (volumeType: VolumeType) => void,
-  setVolumeSort: () => void
-) {
-  return (
-    <Dropdown
-      className={`${styles.volumeDropdown} ${
-        isVolumeSort ? styles.volumeDropdownEnabled : ""
-      }`}
-      drop={"down-centered"}>
-      <Dropdown.Toggle>Volume</Dropdown.Toggle>
-      <Dropdown.Menu>
-        {Object.values(VolumeType).map((vol) => (
-          <Dropdown.Item
-            key={vol}
-            onClick={() => {
-              setVolumeType(vol);
-              if (!isVolumeSort) {
-                setVolumeSort();
-              }
-            }}>
-            {vol}
-          </Dropdown.Item>
-        ))}
-      </Dropdown.Menu>
-    </Dropdown>
-  );
 }
 
 export default function TheMemesComponent() {
@@ -470,7 +441,7 @@ export default function TheMemesComponent() {
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col>
+                <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
                   {Object.values(MemesSort)
                     .filter((v) => v != MemesSort.VOLUME)
                     .map((v) => (
@@ -481,13 +452,12 @@ export default function TheMemesComponent() {
                         select={() => setSort(v)}
                       />
                     ))}
-                  {printVolumeTypeDropdown(
-                    sort === MemesSort.VOLUME,
-                    setVolumeType,
-                    () => {
-                      setSort(MemesSort.VOLUME);
-                    }
-                  )}
+                  <VolumeTypeDropdown
+                    isVolumeSort={sort === MemesSort.VOLUME}
+                    selectedVolumeSort={volumeType}
+                    setVolumeType={setVolumeType}
+                    setVolumeSort={() => setSort(MemesSort.VOLUME)}
+                  />
                 </Col>
               </Row>
               {nfts.length > 0 && sort === MemesSort.MEME
@@ -515,15 +485,18 @@ export function SortButton(
     select: () => void;
   }>
 ) {
-  const name = capitalizeEveryWord(props.sort.replace("_", " "));
+  const isActive = props.currentSort === props.sort;
 
   return (
     <button
+      type="button"
       onClick={() => props.select()}
-      className={`btn-link ${styles.sort} ${
-        props.currentSort != props.sort ? styles.disabled : ""
+      className={`tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-no-underline tw-cursor-pointer tw-transition-colors tw-duration-200 ${
+        isActive
+          ? "tw-text-white tw-font-semibold"
+          : "tw-text-gray-400 hover:tw-text-white"
       }`}>
-      {name}
+      {props.sort}
     </button>
   );
 }
