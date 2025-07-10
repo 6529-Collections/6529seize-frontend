@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import csvParser from "csv-parser";

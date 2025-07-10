@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";

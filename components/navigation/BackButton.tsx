@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
 import { useRouter } from "next/router";
@@ -6,7 +8,6 @@ import Spinner from "../utils/Spinner";
 import { useWaveData } from "../../hooks/useWaveData";
 import { useWave } from "../../hooks/useWave";
 import { useViewContext } from "./ViewContext";
-
 
 export default function BackButton() {
   const { canGoBack, goBack } = useNavigationHistoryContext();
@@ -35,7 +36,11 @@ export default function BackButton() {
     onWaveNotFound: () => {
       const newQuery = { ...router.query } as Record<string, any>;
       delete newQuery.wave;
-      router.replace({ pathname: router.pathname, query: newQuery }, undefined, { shallow: true });
+      router.replace(
+        { pathname: router.pathname, query: newQuery },
+        undefined,
+        { shallow: true }
+      );
     },
   });
 
@@ -73,8 +78,7 @@ export default function BackButton() {
       type="button"
       aria-label="Back"
       onClick={handleClick}
-      className="tw-flex tw-items-center tw-justify-center tw-h-10 tw-w-10 tw-bg-transparent tw-border-none"
-    >
+      className="tw-flex tw-items-center tw-justify-center tw-h-10 tw-w-10 tw-bg-transparent tw-border-none">
       {loading ? (
         <Spinner />
       ) : (

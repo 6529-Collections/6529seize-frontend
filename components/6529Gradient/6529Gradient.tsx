@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./6529Gradient.module.scss";
 import { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
@@ -159,7 +161,7 @@ export default function GradientsComponent(props: Readonly<Props>) {
               {/* Page header - visible on all devices */}
               <Row>
                 <Col className="d-flex align-items-center justify-content-between mb-3">
-                  <span className="d-flex align-items-center gap-3">
+                  <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="mb-0">
                       <span className="font-lightest">6529</span> Gradient
                     </h1>

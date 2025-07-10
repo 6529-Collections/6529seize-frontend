@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faCheck } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +13,7 @@ interface DecisionPointDropdownProps {
 
 export default function DecisionPointDropdown({
   value,
-  onChange
+  onChange,
 }: DecisionPointDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -19,12 +21,13 @@ export default function DecisionPointDropdown({
   const [iconScope, animateIcon] = useAnimate();
 
   const options = [
-    { value: Period.WEEKS, label: 'Weeks' },
-    { value: Period.DAYS, label: 'Days' },
-    { value: Period.HOURS, label: 'Hours' }
+    { value: Period.WEEKS, label: "Weeks" },
+    { value: Period.DAYS, label: "Days" },
+    { value: Period.HOURS, label: "Hours" },
   ];
 
-  const selectedOption = options.find(option => option.value === value) || options[0];
+  const selectedOption =
+    options.find((option) => option.value === value) || options[0];
 
   useEffect(() => {
     if (isOpen) {
@@ -34,14 +37,17 @@ export default function DecisionPointDropdown({
     }
   }, [isOpen, animateIcon]);
 
-  const handleSelect = (option: typeof options[0]) => {
+  const handleSelect = (option: (typeof options)[0]) => {
     onChange(option.value);
     setIsOpen(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -59,14 +65,13 @@ export default function DecisionPointDropdown({
         type="button"
         aria-haspopup="true"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-flex tw-items-center tw-justify-between tw-w-full tw-bg-iron-800 lg:tw-bg-iron-900 tw-border-0 tw-rounded-r-lg tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-iron-300 tw-px-3 tw-py-4 tw-text-sm tw-transition tw-duration-300 tw-ease-out"
-      >
+        className="tw-flex tw-items-center tw-justify-between tw-w-full tw-bg-iron-800 lg:tw-bg-iron-900 tw-border-0 tw-rounded-r-lg tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-iron-300 tw-px-3 tw-py-4 tw-text-sm tw-transition tw-duration-300 tw-ease-out">
         <span>{selectedOption.label}</span>
         <div className="tw-pointer-events-none tw-flex tw-items-center">
-          <FontAwesomeIcon 
+          <FontAwesomeIcon
             ref={iconScope}
-            icon={faChevronDown} 
-            className="tw-ml-2 tw-size-4 tw-transition-transform tw-duration-200" 
+            icon={faChevronDown}
+            className="tw-ml-2 tw-size-4 tw-transition-transform tw-duration-200"
           />
         </div>
       </button>
@@ -79,8 +84,7 @@ export default function DecisionPointDropdown({
                 <button
                   type="button"
                   onClick={() => handleSelect(option)}
-                  className="tw-flex tw-items-center tw-justify-between tw-w-full tw-px-3 tw-py-2.5 tw-text-sm tw-text-left hover:tw-bg-iron-700 tw-bg-transparent tw-border-none tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                >
+                  className="tw-flex tw-items-center tw-justify-between tw-w-full tw-px-3 tw-py-2.5 tw-text-sm tw-text-left hover:tw-bg-iron-700 tw-bg-transparent tw-border-none tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                   <div className="tw-flex tw-items-center">
                     <span className="tw-text-sm tw-font-medium tw-text-white">
                       {option.label}
@@ -100,4 +104,4 @@ export default function DecisionPointDropdown({
       )}
     </div>
   );
-} 
+}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
 import { ApiRateMatter } from "../../../../../generated/models/ApiRateMatter";
@@ -64,8 +66,7 @@ export default function GroupCardActionWrapper({
                 style={{
                   width: progress,
                   transition: "width 0.5s ease-out",
-                }}
-              ></div>
+                }}></div>
             </div>
           </div>
         ) : (

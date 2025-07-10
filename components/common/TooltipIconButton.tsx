@@ -1,3 +1,5 @@
+"use client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { useState } from "react";
@@ -42,13 +44,11 @@ export default function TooltipIconButton({
       onClick={(e) => {
         e.stopPropagation();
         onClick?.(e);
-      }}
-    >
+      }}>
       <FontAwesomeIcon icon={icon} className={iconClassName} />
       {showTooltip && (
         <div
-          className={`tw-absolute ${getPositionClasses()} ${tooltipWidth} tw-p-3 tw-bg-iron-900 tw-text-iron-100 tw-text-xs tw-rounded-lg tw-shadow-lg tw-z-10`}
-        >
+          className={`tw-absolute ${getPositionClasses()} ${tooltipWidth} tw-p-3 tw-bg-iron-900 tw-text-iron-100 tw-text-xs tw-rounded-lg tw-shadow-lg tw-z-10`}>
           {tooltipText}
         </div>
       )}

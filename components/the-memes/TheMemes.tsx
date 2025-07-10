@@ -1,17 +1,15 @@
+"use client";
+
 import styles from "./TheMemes.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
-import {
-  capitalizeEveryWord,
-  numberWithCommas,
-  printMintDate,
-} from "../../helpers/Helpers";
-import { useRouter } from "next/router";
+import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
+import { useRouter, useSearchParams } from "next/navigation";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
@@ -28,44 +26,17 @@ import {
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { VolumeTypeDropdown } from "./MemeShared";
 
 interface Meme {
   meme: number;
   meme_name: string;
 }
 
-export function printVolumeTypeDropdown(
-  isVolumeSort: boolean,
-  setVolumeType: (volumeType: VolumeType) => void,
-  setVolumeSort: () => void
-) {
-  return (
-    <Dropdown
-      className={`${styles.volumeDropdown} ${
-        isVolumeSort ? styles.volumeDropdownEnabled : ""
-      }`}
-      drop={"down-centered"}>
-      <Dropdown.Toggle>Volume</Dropdown.Toggle>
-      <Dropdown.Menu>
-        {Object.values(VolumeType).map((vol) => (
-          <Dropdown.Item
-            key={vol}
-            onClick={() => {
-              setVolumeType(vol);
-              if (!isVolumeSort) {
-                setVolumeSort();
-              }
-            }}>
-            {vol}
-          </Dropdown.Item>
-        ))}
-      </Dropdown.Menu>
-    </Dropdown>
-  );
-}
-
 export default function TheMemesComponent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { connectedProfile } = useContext(AuthContext);
   const [connectedConsolidationKey, setConnectedConsolidationKey] =
@@ -76,50 +47,53 @@ export default function TheMemesComponent() {
 
   const [routerLoaded, setRouterLoaded] = useState(false);
 
+  useSetTitle("The Memes | Collections");
+
   useEffect(() => {
-    if (router.isReady) {
-      let initialSortDir = SortDirection.ASC;
-      let initialSort = MemesSort.AGE;
-      let initialSzn = 0;
+    let initialSortDir = SortDirection.ASC;
+    let initialSort = MemesSort.AGE;
+    let initialSzn = 0;
 
-      const routerSortDir = router.query.sort_dir;
-      if (routerSortDir) {
-        const resolvedRouterSortDir = Object.values(SortDirection).find(
-          (sd) => sd === routerSortDir
-        );
-        if (resolvedRouterSortDir) {
-          initialSortDir = resolvedRouterSortDir;
-        }
+    const routerSortDir = searchParams?.get("sort_dir");
+    if (routerSortDir) {
+      const resolvedRouterSortDir = Object.values(SortDirection).find(
+        (sd) => sd === routerSortDir
+      );
+      if (resolvedRouterSortDir) {
+        initialSortDir = resolvedRouterSortDir;
       }
-
-      const routerSort = router.query.sort;
-      if (routerSort) {
-        const resolvedRouterSort = Object.values(MemesSort).find(
-          (sd) => sd === routerSort
-        );
-        if (resolvedRouterSort) {
-          initialSort = resolvedRouterSort;
-        }
-      }
-
-      const routerSzn = router.query.szn;
-      if (routerSzn) {
-        if (Array.isArray(routerSzn)) {
-          initialSzn = parseInt(routerSzn[0]);
-        } else {
-          initialSzn = parseInt(routerSzn);
-        }
-      }
-
-      setSort(initialSort);
-      setSortDir(initialSortDir);
-      setSelectedSeason(initialSzn);
-      setRouterLoaded(true);
     }
-  }, [router.isReady]);
+
+    const routerSort = searchParams?.get("sort");
+    if (routerSort) {
+      const resolvedRouterSort = Object.values(MemesSort).find(
+        (sd) => sd === routerSort
+      );
+      if (resolvedRouterSort) {
+        initialSort = resolvedRouterSort;
+      }
+    }
+
+    const routerSzn = searchParams?.get("szn");
+    if (routerSzn) {
+      if (Array.isArray(routerSzn)) {
+        initialSzn = parseInt(routerSzn[0]);
+      } else {
+        initialSzn = parseInt(routerSzn);
+      }
+    }
+
+    setSort(initialSort);
+    setSortDir(initialSortDir);
+    setSelectedSeason(initialSzn);
+    setRouterLoaded(true);
+  }, [searchParams]);
 
   const getNftsNextPage = () => {
-    let mySort: string = sort;
+    let mySort: string =
+      Object.keys(MemesSort).find(
+        (k) => MemesSort[k as keyof typeof MemesSort] === sort
+      ) ?? "";
     if (sort === MemesSort.VOLUME) {
       switch (volumeType) {
         case VolumeType.HOURS_24:
@@ -140,7 +114,9 @@ export default function TheMemesComponent() {
     if (selectedSeason > 0) {
       seasonFilter = `&season=${selectedSeason}`;
     }
-    return `${process.env.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
+    return `${
+      process.env.API_ENDPOINT
+    }/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort.toLowerCase()}${seasonFilter}`;
   };
 
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
@@ -179,26 +155,12 @@ export default function TheMemesComponent() {
   }, []);
 
   useEffect(() => {
-    if (routerLoaded) {
-      if (selectedSeason > 0) {
-        router.replace(
-          {
-            query: { szn: selectedSeason, sort: sort, sort_dir: sortDir },
-          },
-          undefined,
-          { shallow: true }
-        );
-      } else {
-        router.replace(
-          {
-            query: { sort: sort, sort_dir: sortDir },
-          },
-          undefined,
-          { shallow: true }
-        );
-      }
+    let queryString = `sort=${sort}&sort_dir=${sortDir}`;
+    if (selectedSeason > 0) {
+      queryString += `&szn=${selectedSeason}`;
     }
-  }, [sort, sortDir, selectedSeason, routerLoaded]);
+    router.push(`the-memes?${queryString}`);
+  }, [sort, sortDir, selectedSeason]);
 
   useEffect(() => {
     const myMemesMap = new Map<number, Meme>();
@@ -423,7 +385,7 @@ export default function TheMemesComponent() {
               {/* Page header - visible on all devices */}
               <Row>
                 <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                  <span className="d-flex align-items-center gap-3">
+                  <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="no-wrap mb-0">
                       <span className="font-lightest">The</span> Memes
                     </h1>
@@ -480,7 +442,7 @@ export default function TheMemesComponent() {
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col>
+                <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
                   {Object.values(MemesSort)
                     .filter((v) => v != MemesSort.VOLUME)
                     .map((v) => (
@@ -491,13 +453,12 @@ export default function TheMemesComponent() {
                         select={() => setSort(v)}
                       />
                     ))}
-                  {printVolumeTypeDropdown(
-                    sort === MemesSort.VOLUME,
-                    setVolumeType,
-                    () => {
-                      setSort(MemesSort.VOLUME);
-                    }
-                  )}
+                  <VolumeTypeDropdown
+                    isVolumeSort={sort === MemesSort.VOLUME}
+                    selectedVolumeSort={volumeType}
+                    setVolumeType={setVolumeType}
+                    setVolumeSort={() => setSort(MemesSort.VOLUME)}
+                  />
                 </Col>
               </Row>
               {nfts.length > 0 && sort === MemesSort.MEME
@@ -525,15 +486,18 @@ export function SortButton(
     select: () => void;
   }>
 ) {
-  const name = capitalizeEveryWord(props.sort.replace("_", " "));
+  const isActive = props.currentSort === props.sort;
 
   return (
     <button
+      type="button"
       onClick={() => props.select()}
-      className={`btn-link ${styles.sort} ${
-        props.currentSort != props.sort ? styles.disabled : ""
+      className={`tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-no-underline tw-cursor-pointer tw-transition-colors tw-duration-200 ${
+        isActive
+          ? "tw-text-white tw-font-semibold"
+          : "tw-text-gray-400 hover:tw-text-white"
       }`}>
-      {name}
+      {props.sort}
     </button>
   );
 }

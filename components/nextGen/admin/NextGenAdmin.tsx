@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import styles from "./NextGenAdmin.module.scss";

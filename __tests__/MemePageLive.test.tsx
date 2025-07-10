@@ -48,7 +48,7 @@ jest.mock("../services/api/common-api", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
-  process.env.API_ENDPOINT = "http://api";
+  process.env.API_ENDPOINT = "https://test.6529.io";
 });
 
 afterEach(() => {
@@ -164,7 +164,7 @@ describe("MemePageLiveSubMenu sorting", () => {
     render(<MemePageLiveSubMenu show nft={nft} />);
 
     expect(mockFetchUrl).toHaveBeenCalledWith(
-      `http://api/api/nfts_memelab?sort_direction=asc&meme_id=${nft.id}`
+      `https://test.6529.io/api/nfts_memelab?sort_direction=asc&meme_id=${nft.id}`
     );
     await waitFor(() =>
       expect(screen.getByText("Random Rememe")).toBeInTheDocument()

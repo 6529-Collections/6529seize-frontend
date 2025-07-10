@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useState } from "react";
 import { ApiWave } from "../../../../generated/models/ObjectSerializer";
 import MemesArtSubmissionModal from "../MemesArtSubmissionModal";
@@ -76,15 +78,13 @@ const MobileMemesArtSubmissionBtn: React.FC<
             ? "tw-bg-primary-600 tw-border-primary-600 tw-animate-pulse"
             : "tw-bg-primary-500 tw-border-primary-500 desktop-hover:hover:tw-bg-primary-600 desktop-hover:hover:tw-border-primary-600"
         }`}
-        aria-label={getAriaLabel()}
-      >
+        aria-label={getAriaLabel()}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="tw-size-6 tw-flex-shrink-0"
           fill="none"
           viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+          stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

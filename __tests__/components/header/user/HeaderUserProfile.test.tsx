@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import HeaderUserProfile from "../../../../components/header/user/HeaderUserProfile";
+import HeaderUserProfile from "@/components/header/user/HeaderUserProfile";
 import React from "react";
 
 jest.mock("next/link", () => ({
@@ -7,24 +7,26 @@ jest.mock("next/link", () => ({
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
 }));
 
-jest.mock("@tippyjs/react", () => (props: any) => (
-  <div data-testid="tippy" data-content={props.content}>
-    {props.children}
-  </div>
-));
+jest.mock("react-tooltip", () => ({
+  Tooltip: (props) => (
+    <div data-testid="tooltip" {...props}>
+      {props.children}
+    </div>
+  ),
+}));
 
-jest.mock("../../../../components/auth/Auth", () => ({
+jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
 
-jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-const { useAuth } = require("../../../../components/auth/Auth");
+const { useAuth } = require("@/components/auth/Auth");
 const {
   useSeizeConnectContext,
-} = require("../../../../components/auth/SeizeConnectContext");
+} = require("@/components/auth/SeizeConnectContext");
 
 function setup(options: any) {
   (useAuth as jest.Mock).mockReturnValue({
@@ -55,9 +57,11 @@ describe("HeaderUserProfile", () => {
     expect(screen.getByText("proxy")).toBeInTheDocument();
     expect(screen.getByText("Proxy")).toBeInTheDocument();
     expect(link.querySelector("img")!).toHaveAttribute("src", "proxy.png");
-    expect(screen.getByTestId("tippy")).toHaveAttribute(
-      "data-content",
-      "Connected and Authenticated",
+
+    const circle = screen.getByTestId("status-circle");
+    expect(circle).toHaveAttribute(
+      "data-tooltip-content",
+      "Connected and Authenticated"
     );
   });
 
@@ -75,9 +79,11 @@ describe("HeaderUserProfile", () => {
     expect(screen.getByText("alice")).toBeInTheDocument();
     expect(link.querySelector("img")!).toHaveAttribute("src", "alice.png");
     expect(screen.queryByText("Proxy")).toBeNull();
-    expect(screen.getByTestId("tippy")).toHaveAttribute(
-      "data-content",
-      "Authenticated (wallet not connected)",
+
+    const circle = screen.getByTestId("status-circle");
+    expect(circle).toHaveAttribute(
+      "data-tooltip-content",
+      "Authenticated (wallet not connected)"
     );
   });
 

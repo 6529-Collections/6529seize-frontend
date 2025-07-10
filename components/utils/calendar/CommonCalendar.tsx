@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { generateCalendar } from "../../../helpers/calendar/calendar.helpers";
 import CommonCalendarDay from "./CommonCalendarDay";
@@ -38,7 +40,7 @@ export default function CommonCalendar({
     }
     return initialMonth;
   });
-  
+
   const [year, setYear] = useState(() => {
     if (selectedTimestamp) {
       return new Date(selectedTimestamp).getFullYear();
@@ -82,15 +84,13 @@ export default function CommonCalendar({
         type="button"
         aria-label="Previous month"
         className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute 
-              tw-left-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-      >
+              tw-left-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
         <svg
           className="tw-h-6 tw-w-6"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M15 18L9 12L15 6"
             stroke="currentColor"
@@ -104,15 +104,13 @@ export default function CommonCalendar({
         onClick={setNextMonth}
         type="button"
         aria-label="Next month"
-        className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute tw-right-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-      >
+        className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute tw-right-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
         <svg
           className="tw-h-6 tw-w-6"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M9 18L15 12L9 6"
             stroke="currentColor"

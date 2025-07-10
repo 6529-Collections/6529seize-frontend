@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Transaction } from "../../../../../../../entities/ITransaction";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
@@ -6,7 +8,7 @@ import {
   getProfileTargetRoute,
 } from "../../../../../../../helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { UserPageTabType } from "../../../../../layout/UserPageTabs";
 
 export default function UserPageStatsActivityWalletTableRowSecondAddress({
@@ -16,7 +18,8 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   readonly transaction: Transaction;
   readonly type: TransactionType;
 }) {
-  const router = useRouter();
+  const pathname = usePathname();
+
   const TYPE_TO_ACTION: Record<TransactionType, string> = {
     [TransactionType.AIRDROPPED]: "to",
     [TransactionType.RECEIVED_AIRDROP]: "from",
@@ -71,7 +74,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   const { display, address } = getWalletDisplayAndAddress();
   const path = getProfileTargetRoute({
     handleOrWallet: address,
-    router,
+    pathname: pathname ?? "",
     defaultPath: UserPageTabType.STATS,
   });
 

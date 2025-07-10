@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useState, useContext, useEffect } from "react";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import {

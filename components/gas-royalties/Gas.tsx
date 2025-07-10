@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";

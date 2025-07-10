@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 
 import WaveDropQuote from "./WaveDropQuote";
@@ -51,9 +53,7 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
       setDrop({ ...targetDrop, wave: data.wave });
     }
   }, [data]);
-  return (
-    <WaveDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />
-  );
+  return <WaveDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />;
 };
 
 export default WaveDropQuoteWithSerialNo;

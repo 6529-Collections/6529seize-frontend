@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiCreateGroup } from "../../../../../generated/models/ApiCreateGroup";
 import { AuthContext } from "../../../../auth/Auth";
@@ -179,8 +181,7 @@ export default function GroupCreateActions({
           <div
             className={`${
               isActionsDisabled ? "" : "tw-from-primary-400 tw-to-primary-500"
-            }  tw-bg-gradient-to-b tw-p-[1px] tw-flex tw-rounded-lg`}
-          >
+            }  tw-bg-gradient-to-b tw-p-[1px] tw-flex tw-rounded-lg`}>
             <button
               onClick={onSave}
               disabled={isActionsDisabled}
@@ -189,8 +190,7 @@ export default function GroupCreateActions({
                 isActionsDisabled
                   ? "tw-opacity-50 tw-text-iron-300"
                   : "tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out`}
-            >
+              } tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out`}>
               <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-2">
                 {mutating && <CircleLoader />}
                 <span>Create</span>

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import {
   getCreateWaveNextStep,
@@ -20,7 +22,10 @@ export default function CreateWaveActions({
   readonly config: CreateWaveConfig;
   readonly step: CreateWaveStep;
   readonly submitting: boolean;
-  readonly setStep: (step: CreateWaveStep, direction: "forward" | "backward") => void;
+  readonly setStep: (
+    step: CreateWaveStep,
+    direction: "forward" | "backward"
+  ) => void;
   readonly onComplete: () => Promise<void>;
 }) {
   const onNextStep = async (): Promise<void> => {
@@ -51,7 +56,9 @@ export default function CreateWaveActions({
     <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-gap-x-4 tw-items-center tw-justify-between">
       <div className="-tw-ml-6">
         {previousStep && (
-          <CreateWaveBackStep onPreviousStep={() => setStep(previousStep, "backward")} />
+          <CreateWaveBackStep
+            onPreviousStep={() => setStep(previousStep, "backward")}
+          />
         )}
       </div>
       <div className="tw-ml-auto">

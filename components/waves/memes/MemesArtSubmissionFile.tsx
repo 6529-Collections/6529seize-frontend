@@ -1,4 +1,12 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+"use client";
+
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../auth/Auth";
 
@@ -65,12 +73,17 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     fileInputRef.current?.click();
   }, []);
 
-  const { dropAreaRef, handleDragEnter, handleDragOver, handleDragLeave, handleDrop } =
-    useDragAndDrop({
-      enabled: !artworkUploaded,
-      onFileDrop: processFile,
-      setVisualState,
-    });
+  const {
+    dropAreaRef,
+    handleDragEnter,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useDragAndDrop({
+    enabled: !artworkUploaded,
+    onFileDrop: processFile,
+    setVisualState,
+  });
 
   const { handleKeyDown } = useAccessibility({
     isActive: !artworkUploaded,
@@ -142,11 +155,17 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         tw-relative tw-w-full tw-h-full
         tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950
         tw-rounded-xl tw-overflow-hidden tw-group
-        ${visualState === "dragging" ? "tw-border-2 tw-border-primary-500/60" : ""}
+        ${
+          visualState === "dragging"
+            ? "tw-border-2 tw-border-primary-500/60"
+            : ""
+        }
         ${visualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""}
-        ${visualState === "idle" && !artworkUploaded
-          ? "hover:tw-border hover:tw-border-iron-700/80"
-          : ""}
+        ${
+          visualState === "idle" && !artworkUploaded
+            ? "hover:tw-border hover:tw-border-iron-700/80"
+            : ""
+        }
         tw-transition-all tw-duration-300
         ${artworkUploaded ? "" : "tw-cursor-pointer"}
       `}
@@ -160,8 +179,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       aria-label="Upload artwork"
       onKeyDown={handleKeyDown}
       aria-describedby={error ? "file-upload-error" : undefined}
-      data-testid="artwork-upload-area"
-    >
+      data-testid="artwork-upload-area">
       {/* Hidden <input> for selecting the file */}
       <input
         ref={fileInputRef}

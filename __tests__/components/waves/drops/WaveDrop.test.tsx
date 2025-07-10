@@ -1,7 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import WaveDrop from '../../../../components/waves/drops/WaveDrop';
 import useIsMobileDevice from '../../../../hooks/isMobileDevice';
+import { editSlice } from '../../../../store/editSlice';
 
 jest.mock('../../../../components/waves/drops/WaveDropActions', () => (props: any) => <div data-testid="actions" />);
 jest.mock('../../../../components/waves/drops/WaveDropReply', () => () => <div data-testid="reply" />);
@@ -14,7 +17,38 @@ jest.mock('../../../../components/waves/drops/WaveDropMobileMenu', () => () => <
 
 jest.mock('../../../../hooks/isMobileDevice');
 
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(() => ({
+    query: {},
+    push: jest.fn(),
+    pathname: '/',
+  })),
+}));
+
+jest.mock('../../../../hooks/drops/useDropUpdateMutation', () => ({
+  useDropUpdateMutation: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
 const isMobileMock = useIsMobileDevice as jest.Mock;
+
+// Create a test store
+const createTestStore = () => configureStore({
+  reducer: {
+    edit: editSlice.reducer,
+  },
+});
+
+const renderWithRedux = (component: React.ReactElement) => {
+  const store = createTestStore();
+  return render(
+    <Provider store={store}>
+      {component}
+    </Provider>
+  );
+};
 
 const drop: any = {
   id: '1',
@@ -48,7 +82,7 @@ const drop: any = {
 describe('WaveDrop', () => {
   it('shows actions on desktop', () => {
     isMobileMock.mockReturnValue(false);
-    const { getByTestId } = render(
+    const { getByTestId } = renderWithRedux(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -69,7 +103,7 @@ describe('WaveDrop', () => {
 
   it('hides actions on mobile', () => {
     isMobileMock.mockReturnValue(true);
-    const { queryByTestId } = render(
+    const { queryByTestId } = renderWithRedux(
       <WaveDrop
         drop={drop}
         previousDrop={null}

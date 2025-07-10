@@ -1,7 +1,12 @@
+"use client";
+
 import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AuthContext } from "../../../auth/Auth";
-import { useWaveDropsLeaderboard, WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
+import {
+  useWaveDropsLeaderboard,
+  WaveDropsLeaderboardSort,
+} from "../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";

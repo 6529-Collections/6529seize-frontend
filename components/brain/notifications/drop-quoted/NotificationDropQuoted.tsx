@@ -1,3 +1,5 @@
+"use client";
+
 import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { INotificationDropQuoted } from "../../../../types/feed.types";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
@@ -22,7 +24,7 @@ export default function NotificationDropQuoted({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
-  
+
   const navigateToWave = (waveId: string, serialNo: number) => {
     router.push(`/my-stream?wave=${waveId}&serialNo=${serialNo}/`);
   };

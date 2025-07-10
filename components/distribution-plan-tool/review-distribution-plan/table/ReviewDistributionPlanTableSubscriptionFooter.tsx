@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useState } from "react";
 import { commonApiPost } from "../../../../services/api/common-api";
 import CircleLoader from "../../common/CircleLoader";

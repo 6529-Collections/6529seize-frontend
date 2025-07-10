@@ -1137,7 +1137,7 @@ CITIES 1-10"
                                 <a href="/om/partnership-request/">
                                   <u>here</u>
                                 </a>
-                                .
+                                {"."}
                               </p>
                               <h3 style={{ color: "#000000" }}>
                                 SPACES/LAND/DISTRICT DROPS?

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import PencilIcon from "../../../utils/icons/PencilIcon";
@@ -24,8 +26,7 @@ export default function UserPageHeaderNameWrapper({
         aria-label="Edit profile name"
         className={`${
           canEdit ? "hover:tw-text-neutral-400" : ""
-        } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}
-      >
+        } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}>
         {children}
         {canEdit && (
           <div className="group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-text-neutral-400">
@@ -41,8 +42,7 @@ export default function UserPageHeaderNameWrapper({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <UserPageHeaderEditName
               profile={profile}
               onClose={() => setIsEditNameOpen(false)}

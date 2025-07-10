@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
@@ -46,7 +48,7 @@ type View =
   | "notifications"
   | "myStreamFeed"
   | "mobileWaves"
-  | "mobileAbout"
+  | "mobileAbout";
 
 // Helper function to calculate height style
 const calculateHeightStyle = (

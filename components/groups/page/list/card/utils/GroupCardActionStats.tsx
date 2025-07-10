@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiRateMatter } from "../../../../../../generated/models/ApiRateMatter";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";

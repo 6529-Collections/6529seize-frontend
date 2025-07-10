@@ -12,14 +12,8 @@
 export * from "./WebSocketTypes";
 
 // Context and Provider
-;
-;
-
 // Hooks
-export { useWebSocket,  } from "./useWebSocket";
-;
-;
-
+export { useWebSocket } from "./useWebSocket";
 // Default configuration
 export const DEFAULT_WEBSOCKET_CONFIG = {
   url:

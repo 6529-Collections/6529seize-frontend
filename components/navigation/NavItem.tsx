@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
 import { motion } from "framer-motion";
@@ -18,7 +20,8 @@ interface Props {
 }
 
 const NavItem = ({ item }: Props) => {
-  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { activeView, handleNavClick } = useViewContext();
 
   const { name } = item;
@@ -28,7 +31,9 @@ const NavItem = ({ item }: Props) => {
 
   // Determine if the current wave (if any) is a DM
   const waveIdFromQuery =
-    typeof router.query.wave === "string" ? router.query.wave : null;
+    typeof searchParams?.get("wave") === "string"
+      ? searchParams?.get("wave")
+      : null;
   const { data: waveData } = useWaveData({
     waveId: waveIdFromQuery,
     // Minimal onWaveNotFound, actual handling of not found is likely elsewhere
@@ -70,8 +75,7 @@ const NavItem = ({ item }: Props) => {
         aria-label={name}
         aria-disabled="true"
         disabled
-        className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-full tw-h-16 tw-opacity-40 tw-pointer-events-none tw-min-w-0"
-      >
+        className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-full tw-h-16 tw-opacity-40 tw-pointer-events-none tw-min-w-0">
         <div className="tw-flex tw-items-center tw-justify-center">
           {item.iconComponent ? (
             <item.iconComponent
@@ -98,7 +102,8 @@ const NavItem = ({ item }: Props) => {
 
   const isActive = isNavItemActive(
     item,
-    router,
+    pathname ?? "",
+    searchParams ?? new URLSearchParams(),
     activeView,
     isCurrentWaveDmValue
   );
@@ -110,8 +115,7 @@ const NavItem = ({ item }: Props) => {
       aria-current={isActive ? "page" : undefined}
       onClick={() => handleNavClick(item)}
       className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors 
-      tw-w-full tw-h-16 tw-min-w-0"
-    >
+      tw-w-full tw-h-16 tw-min-w-0">
       {isActive && (
         <motion.div
           layoutId="nav-indicator"

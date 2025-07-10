@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
@@ -23,7 +25,9 @@ import { useWebsocketStatus } from "../../services/websocket/useWebSocketMessage
 import useCapacitor from "../../hooks/useCapacitor";
 import { ApiLightDrop } from "../../generated/models/ApiLightDrop";
 import { NextPageProps } from "./hooks/useWavePagination";
-import useEnhancedWavesList, { MinimalWave } from "./hooks/useEnhancedWavesList";
+import useEnhancedWavesList, {
+  MinimalWave,
+} from "./hooks/useEnhancedWavesList";
 
 // Define nested structures for context data
 interface WavesContextData {

@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "../NextGen.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
@@ -10,7 +12,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import { formatNameForUrl } from "../../nextgen_helpers";
 import useCapacitor from "../../../../hooks/useCapacitor";
-import { faArrowCircleRight, faPlayCircle, faPauseCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowCircleRight,
+  faPlayCircle,
+  faPauseCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;

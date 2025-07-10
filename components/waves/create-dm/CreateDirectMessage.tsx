@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
@@ -69,7 +71,9 @@ export default function CreateDirectMessage({
           .map((i) => i.primary_wallet ?? i.wallet)
           .filter((i) => i !== null),
       });
-      router.push(`/my-stream?view=messages&wave=${wave.id}`, undefined, { shallow: true });
+      router.push(`/my-stream?view=messages&wave=${wave.id}`, undefined, {
+        shallow: true,
+      });
     } catch (error) {
       console.error(error);
       setToast({
@@ -100,8 +104,7 @@ export default function CreateDirectMessage({
     tw-bg-primary-500 tw-text-white tw-border-primary-500 
     hover:tw-bg-primary-600 hover:tw-border-primary-600
     focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600
-    disabled:tw-bg-gray-300 disabled:tw-text-gray-500 disabled:tw-border-gray-300 disabled:hover:tw-bg-gray-300 disabled:tw-cursor-not-allowed"
-        >
+    disabled:tw-bg-gray-300 disabled:tw-text-gray-500 disabled:tw-border-gray-300 disabled:hover:tw-bg-gray-300 disabled:tw-cursor-not-allowed">
           {isCreating ? (
             <CircleLoader size={CircleLoaderSize.MEDIUM} />
           ) : (

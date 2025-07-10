@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
@@ -36,16 +38,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 <Tippy
                   content="List view"
                   touch={["hold", 500]}
-                  placement="top"
-                >
+                  placement="top">
                   <button
                     className={`tw-w-8 tw-h-7 ${
                       viewMode === "list"
                         ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
                         : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
                     } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center`}
-                    onClick={() => onViewModeChange("list")}
-                  >
+                    onClick={() => onViewModeChange("list")}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -53,8 +53,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
                       stroke="currentColor"
-                      className="tw-size-5 tw-flex-shrink-0"
-                    >
+                      className="tw-size-5 tw-flex-shrink-0">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -66,16 +65,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 <Tippy
                   content="Grid view"
                   touch={["hold", 500]}
-                  placement="top"
-                >
+                  placement="top">
                   <button
                     className={`tw-w-8 tw-h-7 ${
                       viewMode === "grid"
                         ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
                         : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
                     } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center`}
-                    onClick={() => onViewModeChange("grid")}
-                  >
+                    onClick={() => onViewModeChange("grid")}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -83,8 +80,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
                       stroke="currentColor"
-                      className="tw-size-5 tw-flex-shrink-0"
-                    >
+                      className="tw-size-5 tw-flex-shrink-0">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -102,21 +98,18 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           <div
             className={`tw-w-auto tw-mb-4  ${
               isMemesWave ? "tw-ml-auto lg:tw-hidden" : ""
-            }`}
-          >
+            }`}>
             <PrimaryButton
               loading={false}
               disabled={false}
               onClicked={onCreateDrop}
-              padding="tw-px-3 tw-py-1.5"
-            >
+              padding="tw-px-3 tw-py-1.5">
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0 -tw-ml-1"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                aria-hidden="true"
-              >
+                aria-hidden="true">
                 <path
                   fillRule="evenodd"
                   d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"

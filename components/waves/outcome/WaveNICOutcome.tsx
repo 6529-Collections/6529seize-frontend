@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useEffect, useState } from "react";
 import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
@@ -11,12 +13,11 @@ interface WaveNICOutcomeProps {
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
 
-export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
-  outcome,
-}) => {
+export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({ outcome }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const winnersCount = outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
+  const winnersCount =
+    outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
 
   const getAmounts = (): number[] => {
@@ -40,13 +41,12 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-950"
-      >
+        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-950">
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-4">
             <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-[#A4C2DB]/20 tw-to-[#A4C2DB]/10 tw-shadow-inner">
-              <FontAwesomeIcon 
-                icon={faAddressCard} 
+              <FontAwesomeIcon
+                icon={faAddressCard}
                 className="tw-size-5 tw-text-[#A4C2DB] tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(164,194,219,0.5)]"
               />
             </div>
@@ -76,8 +76,7 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
               aria-hidden="true"
               className="tw-flex-shrink-0 tw-size-4 tw-text-iron-400"
               animate={{ rotate: isOpen ? 0 : -90 }}
-              transition={{ duration: 0.2 }}
-            >
+              transition={{ duration: 0.2 }}>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -95,14 +94,12 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50"
-          >
+            className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50">
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
               {amounts.map((amount, i) => (
                 <div
                   key={`wave-nic-outcome-${amount}-${i}`}
-                  className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#A4C2DB]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300"
-                >
+                  className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#A4C2DB]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300">
                   <div className="tw-flex tw-items-center tw-gap-4">
                     <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-[#A4C2DB]/10 tw-to-[#A4C2DB]/5 tw-text-[#A4C2DB] tw-text-sm tw-font-semibold">
                       {i + 1}
@@ -117,8 +114,7 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
               {!showAll && totalCount > DEFAULT_AMOUNTS_TO_SHOW && (
                 <button
                   onClick={() => setShowAll(true)}
-                  className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-[#A4C2DB]/80 tw-text-sm hover:tw-text-[#A4C2DB] tw-transition-all tw-duration-300"
-                >
+                  className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-[#A4C2DB]/80 tw-text-sm hover:tw-text-[#A4C2DB] tw-transition-all tw-duration-300">
                   <span>View more</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
                   <span className="tw-ml-1 tw-text-iron-400">
@@ -132,4 +128,4 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
       </AnimatePresence>
     </div>
   );
-}; 
+};

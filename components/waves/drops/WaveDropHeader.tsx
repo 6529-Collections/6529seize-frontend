@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { cicToType } from "../../../helpers/Helpers";
@@ -6,6 +8,7 @@ import UserCICAndLevel, {
 } from "../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
+import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -45,13 +48,15 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             />
 
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              <Link
-                onClick={(e) => handleNavigation(e, `/${drop.author.handle}`)}
-                href={`/${drop.author.handle}`}
-                className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-              >
-                {drop.author.handle}
-              </Link>
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}>
+                <Link
+                  onClick={(e) => handleNavigation(e, `/${drop.author.handle}`)}
+                  href={`/${drop.author.handle}`}
+                  className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out">
+                  {drop.author.handle}
+                </Link>
+              </UserProfileTooltipWrapper>
             </p>
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
             <WaveDropTime timestamp={drop.created_at} />
@@ -66,8 +71,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)
             }
             href={`/my-stream?wave=${drop.wave.id}`}
-            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-          >
+            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
             {drop.wave.name}
           </Link>
         )}

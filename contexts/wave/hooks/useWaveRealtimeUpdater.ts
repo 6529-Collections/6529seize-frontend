@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useRef } from "react";
 import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMessage";
 import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
@@ -5,6 +7,7 @@ import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { commonApiFetch } from "../../../services/api/common-api";
+import { useWaveEligibility } from "../WaveEligibilityContext";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly registerWave: (waveId: string) => void;
@@ -39,6 +42,8 @@ export function useWaveRealtimeUpdater({
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
+  const { refreshEligibility } = useWaveEligibility();
+  const tabJustBecameVisibleRef = useRef<boolean>(false);
 
   // Function to cleanup abort controllers
   const cleanupController = useCallback((waveId: string) => {
@@ -86,17 +91,12 @@ export function useWaveRealtimeUpdater({
           }
         }
       } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          console.log(
-            `[RealtimeUpdater] Fetch newest for wave ${waveId} was cancelled.`
-          );
-        } else {
-          console.error(
-            `[RealtimeUpdater] Error fetching newest messages for ${waveId}:`,
-            error
-          );
-        }
         // Do not update latestFetchedSerialNo on error
+        if (error instanceof DOMException && error.name === "AbortError") {
+          // Fetch was cancelled - this is expected behavior
+        } else {
+          console.error("Error fetching newest messages:", error);
+        }
       } finally {
         cleanupController(waveId);
         isFetchingNewestRef.current[waveId] = false;
@@ -123,9 +123,13 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
-      console.log("processIncomingDrop", drop, type);
-
       const waveId = drop.wave.id;
+
+      // Check if tab just became visible and refresh eligibility
+      if (tabJustBecameVisibleRef.current) {
+        tabJustBecameVisibleRef.current = false;
+        refreshEligibility(waveId);
+      }
 
       const currentData = getData(waveId);
 
@@ -156,7 +160,6 @@ export function useWaveRealtimeUpdater({
         const apiDrop = await commonApiFetch<ApiDrop>({
           endpoint: `drops/${drop.id}`,
         });
-        console.log("apiDrop", apiDrop);
         if (apiDrop) {
           updateData({
             key: waveId,
@@ -253,6 +256,21 @@ export function useWaveRealtimeUpdater({
       );
     }
   );
+
+  // Handle tab visibility changes - refresh eligibility when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // Mark that tab just became visible, eligibility will be refreshed
+        // on the next WebSocket message for any wave
+        tabJustBecameVisibleRef.current = true;
+        console.log("[WaveRealtimeUpdater] Tab became visible, will refresh eligibility on next message");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   // Cleanup: Cancel all ongoing fetches on unmount
   useEffect(() => {

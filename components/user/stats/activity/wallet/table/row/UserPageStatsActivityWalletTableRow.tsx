@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Transaction } from "../../../../../../../entities/ITransaction";
 import CommonTimeAgo from "../../../../../../utils/CommonTimeAgo";

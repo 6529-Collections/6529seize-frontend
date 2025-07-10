@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import GroupsList from "../../groups/page/list/GroupsList";
 import { AuthContext } from "../../auth/Auth";

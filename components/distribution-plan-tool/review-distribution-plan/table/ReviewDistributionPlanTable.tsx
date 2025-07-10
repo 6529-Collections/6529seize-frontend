@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import DistributionPlanTableWrapper from "../../common/DistributionPlanTableWrapper";
 import ReviewDistributionPlanTableBody from "./ReviewDistributionPlanTableBody";

@@ -10,7 +10,6 @@ import {
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
 import { CICType } from "../entities/IProfile";
-import { NextRouter } from "next/router";
 import {
   USER_PAGE_TAB_META,
   UserPageTabType,
@@ -619,18 +618,18 @@ export const getStringAsNumberOrZero = (value: string): number => {
 };
 export const getProfileTargetRoute = ({
   handleOrWallet,
-  router,
+  pathname,
   defaultPath,
 }: {
   readonly handleOrWallet: string;
-  readonly router: NextRouter;
+  readonly pathname: string;
   readonly defaultPath: UserPageTabType;
 }): string => {
   if (!handleOrWallet.length) {
     return "/404";
   }
-  if (router.route.includes("[user]")) {
-    return router.route.replace("[user]", handleOrWallet);
+  if (pathname.includes("[user]")) {
+    return pathname.replace("[user]", handleOrWallet);
   }
   return `/${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
 };
@@ -792,3 +791,13 @@ export const getMetadataForUserPage = (
     twitterCard: "summary_large_image",
   };
 };
+
+export async function fetchFileContent(filePath: string): Promise<string> {
+  try {
+    const res = await fetch(filePath);
+    if (!res.ok) return "";
+    return await res.text();
+  } catch {
+    return "";
+  }
+}

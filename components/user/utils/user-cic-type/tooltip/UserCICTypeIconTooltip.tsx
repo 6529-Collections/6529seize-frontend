@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import {
   CICType,
@@ -66,8 +68,6 @@ export default function UserCICTypeIconTooltip({
     enabled: !!profile.handle,
     placeholderData: keepPreviousData,
   });
-
-
 
   return (
     <div className="tw-p-3">

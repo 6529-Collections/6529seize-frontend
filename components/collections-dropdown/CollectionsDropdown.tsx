@@ -1,6 +1,8 @@
+"use client";
+
 import styles from "./CollectionsDropdown.module.scss";
 import { Dropdown } from "react-bootstrap";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 type CollectionType = "memes" | "gradient" | "nextgen" | "memelab" | "rememes";
 
@@ -15,7 +17,7 @@ const COLLECTIONS: CollectionItem[] = [
   { id: "gradient", name: "Gradient", path: "/6529-gradient" },
   { id: "nextgen", name: "NextGen", path: "/nextgen" },
   { id: "memelab", name: "Meme Lab", path: "/meme-lab" },
-  { id: "rememes", name: "ReMemes", path: "/rememes" }
+  { id: "rememes", name: "ReMemes", path: "/rememes" },
 ];
 
 interface Props {
@@ -24,12 +26,13 @@ interface Props {
 
 export default function CollectionsDropdown(props: Readonly<Props>) {
   const router = useRouter();
-  const activeCollection = COLLECTIONS.find(c => c.id === props.activePage) || COLLECTIONS[0];
-  
+  const activeCollection =
+    COLLECTIONS.find((c) => c.id === props.activePage) || COLLECTIONS[0];
+
   const handleSelect = (collectionPath: string) => {
     router.push(collectionPath);
   };
-  
+
   return (
     <Dropdown className={styles.collectionsDropdown}>
       <Dropdown.Toggle variant="outline-light">

@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./LatestActivity.module.scss";
 import homeStyles from "../../styles/Home.module.scss";
 import { useState, useEffect } from "react";

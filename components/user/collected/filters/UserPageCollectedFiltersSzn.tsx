@@ -26,6 +26,7 @@ export default function UserPageCollectedFiltersSzn({
     [MEMES_SEASON.SZN9]: "SZN 9",
     [MEMES_SEASON.SZN10]: "SZN 10",
     [MEMES_SEASON.SZN11]: "SZN 11",
+    [MEMES_SEASON.SZN12]: "SZN 12",
   };
 
   const items: CommonSelectItem<SelectedType>[] = [

@@ -1,3 +1,5 @@
+"use client";
+
 import { Poppins } from "next/font/google";
 import "react-toastify/dist/ReactToastify.css";
 import { useSetTitle } from "../../../contexts/TitleContext";

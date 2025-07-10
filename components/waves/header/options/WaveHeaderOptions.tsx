@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -25,15 +27,13 @@ export default function WaveHeaderOptions({
         onClick={(e) => {
           e.stopPropagation();
           setIsOptionsOpen(!isOptionsOpen);
-        }}
-      >
+        }}>
         <span className="tw-sr-only">Open options</span>
         <svg
           className="tw-size-5 tw-flex-shrink-0"
           viewBox="0 0 20 20"
           fill="currentColor"
-          aria-hidden="true"
-        >
+          aria-hidden="true">
           <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
         </svg>
       </button>
@@ -48,8 +48,7 @@ export default function WaveHeaderOptions({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
+            transition={{ duration: 0.2 }}>
             <div>
               <WaveDelete wave={wave} />
             </div>

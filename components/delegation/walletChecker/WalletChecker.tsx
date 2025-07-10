@@ -1,3 +1,5 @@
+"use client";
+
 import { Fragment, useEffect, useState } from "react";
 import styles from "./WalletChecker.module.scss";
 import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";

@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "../NextGen.module.scss";
 import { useState, useEffect, Fragment } from "react";
 import { Container, Row, Col, Accordion } from "react-bootstrap";

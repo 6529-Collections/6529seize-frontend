@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./TheMemes.module.scss";
 
 import { useContext, useEffect, useState } from "react";
@@ -6,7 +8,6 @@ import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 
 import { Transaction } from "../../entities/ITransaction";
-import { useRouter } from "next/router";
 import { ConsolidatedTDH } from "../../entities/ITDH";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
@@ -29,13 +30,20 @@ import { useTitle } from "../../contexts/TitleContext";
 import { commonApiFetch } from "../../services/api/common-api";
 import MemePageMintCountdown from "./MemePageMintCountdown";
 import Link from "next/link";
-import { getMemeTabTitle, MemeTab, MEME_TABS, MEME_FOCUS } from "./MemeShared";
+import {
+  getMemeTabTitle,
+  MEME_TABS,
+  MEME_FOCUS,
+  TabButton,
+} from "./MemeShared";
 import NftNavigation from "../nft-navigation/NftNavigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
-export default function MemePage() {
+export default function MemePage({ nftId }: { readonly nftId: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
@@ -43,8 +51,6 @@ export default function MemePage() {
   useEffect(() => {
     setConnectedWallets(connectedProfile?.wallets?.map((w) => w.wallet) ?? []);
   }, [connectedProfile]);
-
-  const [nftId, setNftId] = useState<string>();
 
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
 
@@ -64,54 +70,24 @@ export default function MemePage() {
   }, [nft, nftId, activeTab]);
 
   useEffect(() => {
-    if (router.isReady) {
-      let initialFocus = MEME_FOCUS.LIVE;
-      const routerFocus = router.query.focus;
-      if (routerFocus) {
-        const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
-          (sd) => sd === routerFocus
-        );
-        if (resolvedRouterFocus) {
-          initialFocus = resolvedRouterFocus;
-        }
-      }
-      if (router.query.id) {
-        setNftId(router.query.id as string);
-        if (activeTab !== initialFocus) {
-          setActiveTab(initialFocus);
-        } else {
-          router.replace(
-            {
-              query: {
-                id: router.query.id,
-                focus: initialFocus,
-              },
-            },
-            undefined,
-            { shallow: true }
-          );
-        }
+    let initialFocus = MEME_FOCUS.LIVE;
+    const routerFocus = searchParams?.get("focus");
+    if (routerFocus) {
+      const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
+        (sd) => sd === routerFocus
+      );
+      if (resolvedRouterFocus) {
+        initialFocus = resolvedRouterFocus;
       }
     }
-  }, [router.isReady, router.query.id]);
+    setActiveTab(initialFocus);
+  }, [searchParams]);
 
   useEffect(() => {
-    if (activeTab && router.isReady) {
-      let query: any = { id: nftId };
-      if (activeTab) {
-        query.focus = activeTab;
-      }
-      if (router.query != query) {
-        router.replace(
-          {
-            query: query,
-          },
-          undefined,
-          { shallow: true }
-        );
-      }
+    if (activeTab) {
+      router.push(`/the-memes/${nftId}?focus=${activeTab}`);
     }
-  }, [activeTab, router.isReady]);
+  }, [activeTab]);
 
   useEffect(() => {
     if (nftId) {
@@ -280,7 +256,7 @@ export default function MemePage() {
             {nftMeta && nft && (
               <>
                 <Row className="pt-3 pb-3">
-                  <Col className="d-flex align-items-center justify-content-between">
+                  <Col className="d-flex">
                     <NftNavigation
                       nftId={nft.id}
                       path="/the-memes"
@@ -304,7 +280,7 @@ export default function MemePage() {
                   </Col>
                 </Row>
                 <Row className="pt-3 pb-3">
-                  <Col>
+                  <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
                     {MEME_TABS.map((tab) => (
                       <TabButton
                         key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
@@ -322,25 +298,5 @@ export default function MemePage() {
         </Col>
       </Row>
     </Container>
-  );
-}
-
-function TabButton(
-  props: Readonly<{
-    tab: MemeTab;
-    activeTab: MEME_FOCUS | undefined;
-    setActiveTab: (focus: MEME_FOCUS) => void;
-  }>
-) {
-  return (
-    <button
-      className={`btn-link ${styles.tabFocus} ${
-        props.activeTab === props.tab.focus ? styles.tabFocusActive : ""
-      }`}
-      onClick={() => {
-        props.setActiveTab(props.tab.focus);
-      }}>
-      {props.tab.title}
-    </button>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
@@ -29,7 +31,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
   });
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
-  
+
   // Access layout context for pre-calculated styles
   const { contentContainerStyle } = useLayout();
 
@@ -77,7 +79,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
       { shallow: true }
     );
   };
-  
+
   const isDropOpen =
     drop &&
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
@@ -96,15 +98,11 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
           layout={!isDropOpen}
           className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
           transition={{ duration: 0.3 }}
-          style={{ transition: "none" }}
-        >
-          <div 
+          style={{ transition: "none" }}>
+          <div
             className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-w-full tw-overflow-hidden"
-            style={contentContainerStyle}
-          >
-            <BrainLeftSidebar 
-              activeWaveId={router.query.wave as string}
-            />
+            style={contentContainerStyle}>
+            <BrainLeftSidebar activeWaveId={router.query.wave as string} />
             <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
               {children}
               {isDropOpen && (

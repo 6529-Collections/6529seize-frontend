@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback, useEffect } from "react";
 import { SortDirection } from "../../entities/ISort";
 import { cicToType } from "../../helpers/Helpers";

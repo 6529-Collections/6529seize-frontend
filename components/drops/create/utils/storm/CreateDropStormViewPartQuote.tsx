@@ -1,3 +1,5 @@
+"use client";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiQuotedDrop } from "../../../../../generated/models/ApiQuotedDrop";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";

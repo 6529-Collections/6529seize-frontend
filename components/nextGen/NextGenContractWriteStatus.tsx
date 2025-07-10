@@ -1,3 +1,5 @@
+"use client";
+
 import { useWaitForTransactionReceipt } from "wagmi";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "./nextgen_contracts";

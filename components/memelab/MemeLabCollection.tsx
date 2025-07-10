@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./MemeLab.module.scss";
 
 import { useContext, useEffect, useState } from "react";
@@ -235,7 +237,13 @@ export default function LabCollection(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  {printSortButtons(sort, setSort, setVolumeType, true)}
+                  {printSortButtons(
+                    sort,
+                    volumeType,
+                    setSort,
+                    setVolumeType,
+                    true
+                  )}
                 </Col>
               </Row>
               {nftsLoaded &&

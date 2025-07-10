@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
@@ -25,122 +27,130 @@ export interface UnifiedWavesListWavesHandle {
 const UnifiedWavesListWaves = forwardRef<
   UnifiedWavesListWavesHandle,
   UnifiedWavesListWavesProps
->(({ waves, onHover, scrollContainerRef, hideToggle, hidePin, hideHeaders }, ref) => {
-  const [following, setFollowing] = useShowFollowingWaves();
-  const listContainerRef = useRef<HTMLDivElement>(null);
-  const { connectedProfile, activeProfileProxy } = useAuth();
+>(
+  (
+    { waves, onHover, scrollContainerRef, hideToggle, hidePin, hideHeaders },
+    ref
+  ) => {
+    const [following, setFollowing] = useShowFollowingWaves();
+    const listContainerRef = useRef<HTMLDivElement>(null);
+    const { connectedProfile, activeProfileProxy } = useAuth();
 
-  const isConnectedIdentity = useMemo(() => {
-    return !!connectedProfile?.handle && !activeProfileProxy;
-  }, [connectedProfile?.handle, activeProfileProxy]);
+    const isConnectedIdentity = useMemo(() => {
+      return !!connectedProfile?.handle && !activeProfileProxy;
+    }, [connectedProfile?.handle, activeProfileProxy]);
 
-  // Split waves into pinned and regular waves (no separate active section)
-  const { pinnedWaves, regularWaves } = useMemo(() => {
-    const pinned: MinimalWave[] = [];
-    const regular: MinimalWave[] = [];
+    // Split waves into pinned and regular waves (no separate active section)
+    const { pinnedWaves, regularWaves } = useMemo(() => {
+      const pinned: MinimalWave[] = [];
+      const regular: MinimalWave[] = [];
 
-    waves.forEach((wave) => {
-      if (wave.isPinned) {
-        // Add pinned waves to the pinned section
-        pinned.push(wave);
-      } else {
-        // All unpinned waves go to the regular section
-        regular.push(wave);
-      }
-    });
+      waves.forEach((wave) => {
+        if (wave.isPinned) {
+          // Add pinned waves to the pinned section
+          pinned.push(wave);
+        } else {
+          // All unpinned waves go to the regular section
+          regular.push(wave);
+        }
+      });
 
-    // No special sorting for active waves - keep them in their original position
-    return {
-      pinnedWaves: pinned,
-      regularWaves: regular,
-    };
-  }, [waves]);
+      // No special sorting for active waves - keep them in their original position
+      return {
+        pinnedWaves: pinned,
+        regularWaves: regular,
+      };
+    }, [waves]);
 
-  const virtual = useVirtualizedWaves(
-    regularWaves,
-    "unified-waves-regular",
-    scrollContainerRef,
-    listContainerRef,
-    62,
-    5
-  );
+    const virtual = useVirtualizedWaves(
+      regularWaves,
+      "unified-waves-regular",
+      scrollContainerRef,
+      listContainerRef,
+      62,
+      5
+    );
 
-  useImperativeHandle(ref, () => ({
-    containerRef: virtual.containerRef as React.RefObject<HTMLDivElement>,
-    sentinelRef: virtual.sentinelRef as React.RefObject<HTMLDivElement>,
-  }));
+    useImperativeHandle(ref, () => ({
+      containerRef: virtual.containerRef as React.RefObject<HTMLDivElement>,
+      sentinelRef: virtual.sentinelRef as React.RefObject<HTMLDivElement>,
+    }));
 
-  if (!waves.length) {
-    return null;
-  }
+    if (!waves.length) {
+      return null;
+    }
 
-  const joinedToggle = !hideToggle && isConnectedIdentity ? (
-    <CommonSwitch
-      label="Joined"
-      isOn={following}
-      setIsOn={setFollowing}
-    />
-  ) : null;
+    const joinedToggle =
+      !hideToggle && isConnectedIdentity ? (
+        <CommonSwitch label="Joined" isOn={following} setIsOn={setFollowing} />
+      ) : null;
 
-  return (
-    <div className="tw-flex tw-flex-col">
-      {!hideHeaders && pinnedWaves.length > 0 && (
-        <>
-          <SectionHeader label="Pinned" icon={faThumbtack} />
-          <div className="tw-flex tw-flex-col tw-mb-3">
-            {pinnedWaves.map((wave) => (
-              <div key={wave.id}>
-                <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-      {regularWaves.length > 0 && (
-        <>
-         {!hideHeaders && (
-            <SectionHeader label="All Waves" rightContent={joinedToggle} />
-          )}
-          <div
-            ref={listContainerRef}
-            style={{ height: virtual.totalHeight, position: "relative" }}
-          >
-            {virtual.virtualItems.map((v) => {
-              if (v.index === regularWaves.length) {
+    return (
+      <div className="tw-flex tw-flex-col">
+        {!hideHeaders && pinnedWaves.length > 0 && (
+          <>
+            <SectionHeader label="Pinned" icon={faThumbtack} />
+            <div className="tw-flex tw-flex-col tw-mb-3">
+              {pinnedWaves.map((wave) => (
+                <div key={wave.id}>
+                  <BrainLeftSidebarWave
+                    wave={wave}
+                    onHover={onHover}
+                    showPin={!hidePin}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {regularWaves.length > 0 && (
+          <>
+            {!hideHeaders && (
+              <SectionHeader label="All Waves" rightContent={joinedToggle} />
+            )}
+            <div
+              ref={listContainerRef}
+              style={{ height: virtual.totalHeight, position: "relative" }}>
+              {virtual.virtualItems.map((v) => {
+                if (v.index === regularWaves.length) {
+                  return (
+                    <div
+                      key="sentinel"
+                      ref={virtual.sentinelRef}
+                      style={{
+                        position: "absolute",
+                        top: v.start,
+                        height: v.size,
+                        width: "100%",
+                      }}
+                    />
+                  );
+                }
+                const wave = regularWaves[v.index];
                 return (
                   <div
-                    key="sentinel"
-                    ref={virtual.sentinelRef}
+                    key={wave.id}
                     style={{
                       position: "absolute",
                       top: v.start,
                       height: v.size,
                       width: "100%",
-                    }}
-                  />
+                    }}>
+                    <BrainLeftSidebarWave
+                      wave={wave}
+                      onHover={onHover}
+                      showPin={!hidePin}
+                    />
+                  </div>
                 );
-              }
-              const wave = regularWaves[v.index];
-              return (
-                <div
-                  key={wave.id}
-                  style={{
-                    position: "absolute",
-                    top: v.start,
-                    height: v.size,
-                    width: "100%",
-                  }}
-                >
-                  <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </div>
-  );
-});
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+);
 
 UnifiedWavesListWaves.displayName = "UnifiedWavesListWaves";
 export default UnifiedWavesListWaves;

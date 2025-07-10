@@ -1,10 +1,12 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useMemo } from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
 } from "@capacitor/push-notifications";
 import { Device, DeviceInfo } from "@capacitor/device";
-import { NextRouter, useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
 import {
@@ -168,7 +170,7 @@ const registerPushNotification = async (
 };
 
 const handlePushNotificationAction = async (
-  router: NextRouter,
+  router: ReturnType<typeof useRouter>,
   notification: PushNotificationSchema,
   profile?: ApiIdentity
 ) => {
@@ -209,6 +211,7 @@ const handlePushNotificationAction = async (
 };
 
 const resolveRedirectUrl = (notificationData: any) => {
+  
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {

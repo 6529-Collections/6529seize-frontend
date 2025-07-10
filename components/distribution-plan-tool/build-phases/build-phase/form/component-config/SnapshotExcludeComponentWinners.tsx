@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
@@ -36,9 +38,7 @@ export default function SnapshotExcludeComponentWinners({
   title: string;
   onClose: () => void;
 }) {
-  const { setToasts } = useContext(
-    DistributionPlanToolContext
-  );
+  const { setToasts } = useContext(DistributionPlanToolContext);
   const [options, setOptions] = useState<
     AllowlistToolSelectMenuMultipleOption[]
   >([
@@ -208,8 +208,7 @@ export default function SnapshotExcludeComponentWinners({
         showNextBtn={!!selectedOptions.length}
         isDisabled={!selectedOptions.length}
         onSkip={() => onNextStep(PhaseConfigStep.SNAPSHOT_SELECT_TOKEN_IDS)}
-        onNext={() => onExcludePreviousWinners()}
-      >
+        onNext={() => onExcludePreviousWinners()}>
         <ComponentConfigMeta
           tags={[]}
           walletsCount={localUniqueWalletsCount}

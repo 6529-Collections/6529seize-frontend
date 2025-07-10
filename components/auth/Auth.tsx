@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Auth.module.scss";
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
@@ -33,7 +35,6 @@ import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRe
 import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
-
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
@@ -476,7 +477,6 @@ export default function Auth({
     setShowWaves(getShowWaves());
   }, [connectedProfile, activeProfileProxy, address]);
 
-
   return (
     <AuthContext.Provider
       value={{
@@ -501,9 +501,9 @@ export default function Auth({
         backdrop="static"
         keyboard={false}
         centered>
-        <Modal.Header className={styles.signModalHeader}>
+        <div className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
-        </Modal.Header>
+        </div>
         <Modal.Body className={styles.signModalContent}>
           <p className="mt-2 mb-2">
             To connect your wallet, you will need to sign a message to confirm

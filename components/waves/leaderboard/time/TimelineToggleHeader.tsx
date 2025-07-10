@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   calculateTimeLeft,
@@ -123,8 +125,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
   return (
     <div
       className="tw-@container tw-px-4 tw-py-2 tw-bg-iron-800/95 tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/80 tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-sm"
-      onClick={() => setIsOpen(!isOpen)}
-    >
+      onClick={() => setIsOpen(!isOpen)}>
       {/* Mobile: Show pause info at the top (only when paused) */}
       {isPaused && currentPause && (
         <div className="tw-block @[700px]:tw-hidden tw-text-sm tw-font-medium tw-mb-2">
@@ -138,8 +139,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
             <span
               className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap tw-tracking-tight ${
                 hasNextDecision ? "tw-text-iron-100" : "tw-text-iron-400"
-              }`}
-            >
+              }`}>
               {hasNextDecision ? "Next winner:" : "Announcement history"}
             </span>
 
@@ -165,16 +165,14 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
 
         <button
           className="tw-w-7 tw-h-7 tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
-          aria-label={isOpen ? "Collapse" : "Expand"}
-        >
+          aria-label={isOpen ? "Collapse" : "Expand"}>
           <svg
             className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 tw-flex-shrink-0 ${
               isOpen ? "tw-rotate-180" : ""
             } tw-transition-all tw-duration-300 tw-ease-in-out`}
             viewBox="0 0 20 20"
             aria-hidden="true"
-            fill="currentColor"
-          >
+            fill="currentColor">
             <path
               fillRule="evenodd"
               d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"

@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../auth/Auth";
 import Link from "next/link";
@@ -56,8 +58,7 @@ export default function UserPageIdentityHeaderCICRateStats({
     <div
       className={`${
         isTooltip ? "tw-text-sm" : "tw-text-base"
-      } tw-flex tw-flex-col tw-space-y-1`}
-    >
+      } tw-flex tw-flex-col tw-space-y-1`}>
       {!!activeProfileProxy && (
         <span className="tw-block tw-text-iron-300 tw-font-normal">
           <span>You are acting as proxy for:</span>

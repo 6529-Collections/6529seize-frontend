@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useScrollBehavior = () => {
@@ -21,10 +23,10 @@ export const useScrollBehavior = () => {
     if (scrollContainerRef.current) {
       // For a flex-col-reverse container, old messages (top) need max scrollTop
       const container = scrollContainerRef.current;
-      
+
       // Calculate maximum scroll position
       const maxScrollPosition = container.scrollHeight - container.clientHeight;
-      
+
       // Set scroll position directly
       container.scrollTo({
         top: -maxScrollPosition,
@@ -40,7 +42,7 @@ export const useScrollBehavior = () => {
 
       // In a flex-reversed container:
       const newIsAtBottom = scrollTop < 5; // Visual bottom is at scrollTop near 0
-      
+
       // For flex-col-reverse, we may need to check large negative values
       // Visual top is at the most negative scrollTop value
       const maxNegativeScroll = -(scrollHeight - clientHeight);

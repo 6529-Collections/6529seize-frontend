@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
@@ -71,16 +73,14 @@ const WaveDropMobileMenuFollow: React.FC<WaveDropMobileMenuFollowProps> = ({
       disabled={mutating}
       className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
         mutating ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
-      } tw-transition-colors tw-duration-200`}
-    >
+      } tw-transition-colors tw-duration-200`}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
         strokeWidth="1.5"
         stroke="currentColor"
-        className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300"
-      >
+        className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"

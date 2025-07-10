@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
@@ -10,6 +12,8 @@ import React, {
   useState,
 } from "react";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
+import { useSelector } from "react-redux";
+import { selectEditingDropId } from "../../store/editSlice";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -388,6 +392,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { send } = useWebSocket();
   const breakpoint = useBreakpoint();
   const { isApp } = useDeviceInfo();
+  const editingDropId = useSelector(selectEditingDropId);
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
@@ -932,6 +937,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     finalizeAndAddDropPart();
     setIsStormMode(true);
   };
+
+  // Clear active reply/quote when entering edit mode on mobile
+  useEffect(() => {
+    if (isApp && editingDropId && activeDrop) {
+      onCancelReplyQuote();
+    }
+  }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
 
   return (
     <div className="tw-flex-grow">

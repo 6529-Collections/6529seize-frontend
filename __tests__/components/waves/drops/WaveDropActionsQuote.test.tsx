@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import WaveDropActionsQuote from '../../../../components/waves/drops/WaveDropActionsQuote';
 import { AuthContext } from '../../../../components/auth/Auth';
+import { WaveEligibilityProvider } from '../../../../contexts/wave/WaveEligibilityContext';
 
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children }: any) => <div>{children}</div>
@@ -13,9 +14,11 @@ describe('WaveDropActionsQuote', () => {
   
   const renderWithAuth = (component: React.ReactElement) => {
     return render(
-      <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
-        {component}
-      </AuthContext.Provider>
+      <WaveEligibilityProvider>
+        <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
+          {component}
+        </AuthContext.Provider>
+      </WaveEligibilityProvider>
     );
   };
 

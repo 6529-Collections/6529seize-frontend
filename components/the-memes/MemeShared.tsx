@@ -1,7 +1,11 @@
 import { MEMELAB_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
 import { areEqualAddresses } from "../../helpers/Helpers";
-import { BaseNFT } from "../../entities/INFT";
+import { BaseNFT, VolumeType } from "../../entities/INFT";
+import { getAppMetadata } from "../providers/metadata";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 
 export enum MEME_FOCUS {
   LIVE = "live",
@@ -26,28 +30,25 @@ export interface MemeTab {
   title: string;
 }
 
-export async function getSharedServerSideProps(
-  req: any,
+async function getMetadataProps(
   contract: string,
+  id: string,
+  focus: string,
   isDistribution: boolean = false
 ) {
-  const { id, focus } = req.query;
   let urlPath = "nfts";
   let name = `The Memes #${id}`;
-  let description = "";
+  let description = "Collections";
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";
     name = `Meme Lab #${id}`;
-  }
-  if (isDistribution) {
-    name = `${name} | Distribution`;
   }
   const response = await fetchUrl(
     `${process.env.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
   );
   let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
   if (response?.data?.length > 0) {
-    description = name;
+    description = `${name} | ${description}`;
     name = `${response.data[0].name}`;
     if (response.data[0].thumbnail) {
       image = response.data[0].thumbnail;
@@ -56,22 +57,65 @@ export async function getSharedServerSideProps(
     }
   }
 
-  if (focus) {
+  if (focus && focus !== MEME_FOCUS.LIVE) {
     const tab = MEME_TABS.find((t) => t.focus === focus);
-    if (tab && tab.focus !== MEME_FOCUS.LIVE) {
+    if (tab) {
       name = `${name} | ${tab.title}`;
     }
+  } else if (isDistribution) {
+    name = `${name} | Distribution`;
   }
+
+  return {
+    title: name,
+    description: description,
+    ogImage: image,
+  };
+}
+
+export async function getSharedAppServerSideProps(
+  contract: string,
+  id: string,
+  focus: string,
+  isDistribution: boolean = false
+) {
+  const { title, description, ogImage } = await getMetadataProps(
+    contract,
+    id,
+    focus,
+    isDistribution
+  );
+
+  return getAppMetadata({
+    title,
+    description: description,
+    ogImage,
+    twitterCard: "summary",
+  });
+}
+
+export async function getSharedServerSideProps(
+  req: any,
+  contract: string,
+  isDistribution: boolean = false
+) {
+  const { id, focus } = req.query;
+  const { title, description, ogImage } = await getMetadataProps(
+    contract,
+    id,
+    focus,
+    isDistribution
+  );
 
   return {
     props: {
       id: id,
-      name: name,
-      image: image,
+      name: title,
+      image: ogImage,
       metadata: {
-        title: name,
-        description: description,
-        ogImage: image,
+        title,
+        description,
+        ogImage,
         twitterCard: "summary",
       },
     },
@@ -98,4 +142,90 @@ export function getMemeTabTitle(
     }
   }
   return t;
+}
+
+export function TabButton(
+  props: Readonly<{
+    tab: MemeTab;
+    activeTab: MEME_FOCUS | undefined;
+    setActiveTab: (focus: MEME_FOCUS) => void;
+  }>
+) {
+  const isActive = props.activeTab === props.tab.focus;
+
+  return (
+    <button
+      type="button"
+      className={`tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-no-underline tw-cursor-pointer tw-transition-colors tw-duration-200 ${
+        isActive
+          ? "tw-text-white tw-font-semibold"
+          : "tw-text-gray-400 hover:tw-text-white"
+      }`}
+      onClick={() => {
+        props.setActiveTab(props.tab.focus);
+      }}>
+      {props.tab.title}
+    </button>
+  );
+}
+
+export function VolumeTypeDropdown({
+  isVolumeSort,
+  selectedVolumeSort,
+  setVolumeType,
+  setVolumeSort,
+}: {
+  readonly isVolumeSort: boolean;
+  readonly selectedVolumeSort: VolumeType;
+  readonly setVolumeType: (volumeType: VolumeType) => void;
+  readonly setVolumeSort: () => void;
+}) {
+  const volumeTypes = Object.values(VolumeType);
+
+  function handleSelect(vol: VolumeType) {
+    setVolumeType(vol);
+    if (!isVolumeSort) {
+      setVolumeSort();
+    }
+  }
+
+  return (
+    <Menu as="div" className="tw-relative tw-inline-block">
+      <MenuButton
+        type="button"
+        className={`tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-no-underline tw-cursor-pointer tw-flex tw-items-center tw-gap-1 tw-transition-colors tw-duration-200 ${
+          isVolumeSort
+            ? "tw-text-white tw-font-semibold"
+            : "tw-text-gray-400 hover:tw-text-white"
+        }`}>
+        <span>
+          Volume{" "}
+          {isVolumeSort && selectedVolumeSort && (
+            <span>({selectedVolumeSort})</span>
+          )}
+        </span>
+        <FontAwesomeIcon icon={faChevronDown} className="tw-w-3 tw-h-3" />
+      </MenuButton>
+
+      <MenuItems className="tw-absolute tw-right-0 tw-mt-1 tw-min-w-[10rem] tw-bg-black tw-rounded-b tw-shadow-lg tw-z-50 unselectable tw-pb-1">
+        <div className="tw-h-1 tw-bg-white"></div>
+        {volumeTypes.map((vol) => (
+          <MenuItem key={vol} as="div">
+            {({ focus }) => (
+              <button
+                type="button"
+                onClick={() => handleSelect(vol)}
+                className={`tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-base tw-transition-colors tw-duration-200 tw-bg-black tw-border-0 tw-outline-none ${
+                  focus
+                    ? "tw-bg-gray-700 tw-text-white"
+                    : "tw-text-white hover:tw-bg-gray-700"
+                }`}>
+                {vol}
+              </button>
+            )}
+          </MenuItem>
+        ))}
+      </MenuItems>
+    </Menu>
+  );
 }

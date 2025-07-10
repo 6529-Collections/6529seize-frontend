@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
@@ -41,8 +43,7 @@ export default function UserPageIdentityAddStatements({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
             ref={modalRef}
-            className={`${VIEW_W_CLASS[activeView]} tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}
-          >
+            className={`${VIEW_W_CLASS[activeView]} tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
             <UserPageIdentityAddStatementsViews
               profile={profile}
               activeView={activeView}

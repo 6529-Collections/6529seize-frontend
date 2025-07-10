@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import {
   DistributionPlanToolContext,
@@ -105,8 +107,7 @@ export default function BuildPhases() {
       {selectedPhase && (
         <AllowlistToolAnimationWrapper mode="wait" initial={true}>
           <AllowlistToolAnimationOpacity
-            key={`selected-phase-${selectedPhase.id}`}
-          >
+            key={`selected-phase-${selectedPhase.id}`}>
             <BuildPhase
               onNextStep={onNextStep}
               selectedPhase={selectedPhase}

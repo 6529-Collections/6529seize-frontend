@@ -77,3 +77,7 @@ node_modules/
 tasks.json
 tasks/ 
 .coverage-progress.json
+
+# Jest
+jest-failed-tests.txt
+jest-results.json

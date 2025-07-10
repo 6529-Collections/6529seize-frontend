@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Rememes.module.scss";
 
 import { useEffect, useState } from "react";

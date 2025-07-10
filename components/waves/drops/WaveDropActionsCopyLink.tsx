@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
@@ -42,16 +44,14 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         onClick={copyToClipboard}
         disabled={isDisabled}
         aria-label="Copy link"
-        data-tooltip-id={!isDisabled ? `copy-link-${drop.id}` : undefined}
-      >
+        data-tooltip-id={!isDisabled ? `copy-link-${drop.id}` : undefined}>
         <svg
           className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
-          stroke="currentColor"
-        >
+          stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -63,8 +63,11 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         <Tooltip
           id={`copy-link-${drop.id}`}
           place="top"
-          style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
-        >
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+          }}>
           <span className="tw-text-xs">{getLinkText()}</span>
         </Tooltip>
       )}

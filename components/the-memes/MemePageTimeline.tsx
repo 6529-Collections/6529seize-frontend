@@ -1,3 +1,5 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { NFT, NFTHistory } from "../../entities/INFT";

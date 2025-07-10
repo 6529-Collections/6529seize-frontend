@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   useEffect,
   useLayoutEffect,
@@ -72,23 +74,22 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
     <div className="tw-relative">
       <div
         ref={contentRef}
-        className="tw-overflow-y-hidden tw-transition-all tw-duration-300"
-      >
+        className={`tw-overflow-y-hidden tw-transition-all tw-duration-300 ${
+          exceedsThreshold && !isExpanded ? "tw-max-h-[1000px]" : ""
+        }`}>
         {children}
         {exceedsThreshold && !isExpanded && (
           <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-24 tw-bg-gradient-to-t tw-from-iron-900 tw-to-transparent tw-flex tw-items-end tw-justify-center tw-pb-4">
             <button
               onClick={toggleExpand}
-              className="tw-bg-gray-800 tw-border-0 tw-text-sm tw-text-gray-300 tw-px-4 tw-py-2 tw-rounded-full tw-shadow-md desktop-hover:hover:tw-bg-gray-700 tw-hover:text-white tw-transition-colors tw-duration-200 tw-flex tw-items-center tw-space-x-2"
-            >
+              className="tw-bg-iron-700 tw-border-0 tw-text-sm tw-text-iron-300 tw-ring-1 tw-ring-iron-650 tw-px-3 tw-py-2 tw-rounded-full tw-shadow-md desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-600 tw-transition-colors tw-duration-200 tw-flex tw-items-center tw-space-x-2">
               <span>Show full drop</span>
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0"
                 fill="currentColor"
                 aria-hidden="true"
                 viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
                   fillRule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"

@@ -11,10 +11,8 @@ const GradientPageComponent = dynamic(
   }
 );
 
-export default function GradientPageIndex(props: any) {
-  const pageProps = props.pageProps;
-  const pagenameFull = `${pageProps.name} | 6529.io`;
-  
+export default function GradientPageIndex(props: { readonly name: string }) {
+  const pagenameFull = `${props.name} | 6529.io`;
   useSetTitle(pagenameFull);
 
   return (

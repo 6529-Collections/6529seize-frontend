@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
 import { NextGenToken } from "../../../../entities/INextgen";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
