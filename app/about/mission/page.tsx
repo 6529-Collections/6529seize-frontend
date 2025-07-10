@@ -52,7 +52,7 @@ export default function AboutMissionPage() {
       <meta property="og:title" content="6529 MISSION - 6529.io" />
       <meta
         property="og:description"
-        content="THE 6529 MISSION IS TO ACCELERATE THE DEVELOPMENT OF AN OPEN METAVERSE"
+        content="THE 6529 MISSION IS TO ACCELERATE OF AN OPEN METAVERSE"
       />
       <meta property="og:url" content="/about/mission/" />
       <meta
@@ -362,37 +362,94 @@ export default function AboutMissionPage() {
         tabIndex={-1}
         href="#"
         aria-hidden="true">
-        Page load link
+        {" "}
+        6529 MISSION{" "}
       </a>
+      <div id="fb-root" />
       <div className="avada-footer-scripts">
-        <div
-          id="sticky-social-icons-container"
-          className="design-sharp alignment-right with-animation">
-          <ul>
-            <li className="fab-fa-twitter">
+        <div id="sticky-social-icons">
+          <div className="ssi-social-icons">
+            <div className="ssi-twitter">
               <a
-                href="https://twitter.com/punk6529"
+                className="ssi-social-icon"
+                href="https://twitter.com/6529Museum"
                 target="_blank"
-                className="fab-fa-twitter">
+                rel="noopener noreferrer">
                 <i className="fab fa-twitter" />
               </a>
-            </li>{" "}
-          </ul>
+            </div>
+            <div className="ssi-discord">
+              <a
+                className="ssi-social-icon"
+                href="https://discord.gg/6529Museum"
+                target="_blank"
+                rel="noopener noreferrer">
+                <i className="fab fa-discord" />
+              </a>
+            </div>
+            <div className="ssi-opensea">
+              <a
+                className="ssi-social-icon"
+                href="https://opensea.io/collection/6529-museum"
+                target="_blank"
+                rel="noopener noreferrer">
+                <i className="fab fa-opensea" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-      <section
-        className="to-top-container to-top-right"
-        aria-labelledby="awb-to-top-label">
-        <a href="#" id="toTop" className="fusion-top-top-link">
-          <span id="awb-to-top-label" className="screen-reader-text">
-            Go to Top
-          </span>
-        </a>
-      </section>
+      <div className="fusion-sliding-bar-wrapper">
+        <div className="fusion-sliding-bar">
+          <div className="fusion-sliding-bar-content">
+            <div className="fusion-sliding-bar-content-inner">
+              <div className="fusion-sliding-bar-content-text">
+                <div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap">
+                  <div
+                    className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"
+                    style={{
+                      backgroundSize: "cover",
+                      width: "100%",
+                      marginTop: 0,
+                      paddingRight: "1.92%",
+                      marginBottom: 20,
+                      paddingLeft: "1.92%",
+                    }}>
+                    <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <div className="fusion-text fusion-text-1">
+                        <p>
+                          <strong>
+                            We are building the infrastructure to allow the
+                            physical world to exit to the metaverse.
+                          </strong>
+                        </p>
+                        <p>
+                          <strong>
+                            We are building the infrastructure to allow the
+                            physical world to exit to the metaverse.
+                          </strong>
+                        </p>
+                        <p>
+                          <strong>
+                            We are building the infrastructure to allow the
+                            physical world to exit to the metaverse.
+                          </strong>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "6529 Mission" });
-}
+export const metadata: Metadata = getAppMetadata({
+  title: "6529 MISSION",
+  description:
+    "THE 6529 MISSION IS TO ACCELERATE THE DEVELOPMENT OF AN OPEN METAVERSE",
+});
