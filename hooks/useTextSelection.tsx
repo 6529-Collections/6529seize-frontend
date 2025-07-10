@@ -59,6 +59,37 @@ interface SelectionBounds {
   maxY: number;
 }
 
+const getSelectionDirection = (startY: number, endY: number) => {
+  const isTopToBottom = startY < endY;
+  return {
+    isTopToBottom,
+    actualStartY: isTopToBottom ? startY : endY,
+    actualEndY: isTopToBottom ? endY : startY
+  };
+};
+
+const getNodeTypes = (rect: DOMRect, actualStartY: number, actualEndY: number) => {
+  const isStartNode = rect.top <= actualStartY && rect.bottom >= actualStartY;
+  const isEndNode = rect.top <= actualEndY && rect.bottom >= actualEndY;
+  const isMiddleNode = !isStartNode && !isEndNode;
+  return { isStartNode, isEndNode, isMiddleNode };
+};
+
+const shouldIncludeNodeInSelection = (rect: DOMRect, minY: number, maxY: number, isMiddleNode: boolean) => {
+  if (shouldIncludeNode(rect, minY, maxY, isMiddleNode)) {
+    return true;
+  }
+  
+  // Additional check for nodes that might be part of a sentence with mentions
+  // If this node is very close to the selection area, include it
+  const tolerance = 5; // pixels
+  const isNearSelection = rect.bottom >= minY - tolerance && rect.top <= maxY + tolerance;
+  if (!isNearSelection) {
+    return false;
+  }
+  return true;
+};
+
 const processTextNode = (
   nodeInfo: any,
   bounds: SelectionBounds,
@@ -70,24 +101,12 @@ const processTextNode = (
   // Check if this node should be included in the range
   if (rect.bottom < minY || rect.top > maxY) return null;
 
-  // Determine selection direction and node types
-  const isTopToBottom = startY < endY;
-  const actualStartY = isTopToBottom ? startY : endY;
-  const actualEndY = isTopToBottom ? endY : startY;
+  const { isTopToBottom, actualStartY, actualEndY } = getSelectionDirection(startY, endY);
+  const { isStartNode, isEndNode, isMiddleNode } = getNodeTypes(rect, actualStartY, actualEndY);
   
-  const isStartNode = rect.top <= actualStartY && rect.bottom >= actualStartY;
-  const isEndNode = rect.top <= actualEndY && rect.bottom >= actualEndY;
-  const isMiddleNode = !isStartNode && !isEndNode;
-  
-  // Check if this node should be included - be more lenient for nodes near mentions
-  if (!shouldIncludeNode(rect, minY, maxY, isMiddleNode)) {
-    // Additional check for nodes that might be part of a sentence with mentions
-    // If this node is very close to the selection area, include it
-    const tolerance = 5; // pixels
-    const isNearSelection = rect.bottom >= minY - tolerance && rect.top <= maxY + tolerance;
-    if (!isNearSelection) {
-      return null;
-    }
+  // Check if this node should be included
+  if (!shouldIncludeNodeInSelection(rect, minY, maxY, isMiddleNode)) {
+    return null;
   }
   
   // For middle nodes that are clearly within the selection, include full text
@@ -214,50 +233,56 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     });
   }, []);
 
-  const getTextNodeAtPoint = useCallback((x: number, y: number): { node: Node; offset: number } | null => {
-    // Use native browser APIs to find text at coordinates
+  // Helper to try browser's native caret position APIs
+  const tryBrowserCaretAPI = useCallback((x: number, y: number): { node: Node; offset: number } | null => {
     if ('caretPositionFromPoint' in document) {
       const pos = (document as any).caretPositionFromPoint(x, y);
       if (pos?.offsetNode?.nodeType === Node.TEXT_NODE) {
         return { node: pos.offsetNode, offset: pos.offset };
       }
-    } else if ('caretRangeFromPoint' in document) {
+    }
+    if ('caretRangeFromPoint' in document) {
       const range = (document as any).caretRangeFromPoint(x, y);
       if (range?.startContainer?.nodeType === Node.TEXT_NODE) {
         return { node: range.startContainer, offset: range.startOffset };
       }
     }
+    return null;
+  }, []);
+
+  // Helper to find text node using tree walker fallback
+  const findTextNodeFallback = useCallback((element: Element, x: number, y: number): { node: Node; offset: number } | null => {
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
     
-    // Fallback: try to find text node at point using elementFromPoint
-    const element = document.elementFromPoint(x, y);
-    if (element) {
-      // Walk through text nodes to find one at this position
-      const walker = document.createTreeWalker(
-        element,
-        NodeFilter.SHOW_TEXT,
-        null
-      );
-      
-      let node;
-      while (node = walker.nextNode()) {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
-          const range = document.createRange();
-          range.selectNodeContents(node);
-          const rect = range.getBoundingClientRect();
-          if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-            // Estimate offset based on position
-            const textLength = node.textContent.length;
-            const relativeX = x - rect.left;
-            const charWidth = rect.width / textLength;
-            const offset = Math.round(relativeX / charWidth);
-            return { node, offset: Math.max(0, Math.min(offset, textLength)) };
-          }
+    let node;
+    while (node = walker.nextNode()) {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const rect = range.getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+          const textLength = node.textContent.length;
+          const relativeX = x - rect.left;
+          const charWidth = rect.width / textLength;
+          const offset = Math.round(relativeX / charWidth);
+          return { node, offset: Math.max(0, Math.min(offset, textLength)) };
         }
       }
     }
-    
     return null;
   }, []);
+
+  const getTextNodeAtPoint = useCallback((x: number, y: number): { node: Node; offset: number } | null => {
+    const browserResult = tryBrowserCaretAPI(x, y);
+    if (browserResult) return browserResult;
+    
+    const element = document.elementFromPoint(x, y);
+    if (element) {
+      return findTextNodeFallback(element, x, y);
+    }
+    
+    return null;
+  }, [tryBrowserCaretAPI, findTextNodeFallback]);
 
   // Auto-scroll container when dragging near edges
   const handleAutoScroll = useCallback((container: HTMLElement, clientY: number) => {
@@ -274,6 +299,103 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       container.scrollTop -= scrollSpeed;
     }
   }, []);
+
+  // Helper to get exact text positions in node
+  const getExactNodePositions = useCallback((
+    node: Node,
+    nodeText: string,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number
+  ): string | null => {
+    const startPos = getTextNodeAtPoint(startX, startY);
+    const endPos = getTextNodeAtPoint(endX, endY);
+    
+    if (startPos?.node === node && endPos?.node === node) {
+      const startOffset = Math.min(startPos.offset, endPos.offset);
+      const endOffset = Math.max(startPos.offset, endPos.offset);
+      return nodeText.substring(startOffset, endOffset);
+    }
+    return null;
+  }, [getTextNodeAtPoint]);
+
+  // Helper to check if node is completely within selection bounds
+  const checkNodeWithinSelection = useCallback((
+    nodeRect: DOMRect,
+    nodeText: string,
+    selectionLeft: number,
+    selectionRight: number
+  ): string | null => {
+    if (nodeRect.left >= selectionLeft && nodeRect.right <= selectionRight) {
+      return nodeText;
+    }
+    return null;
+  }, []);
+
+  // Helper to handle selection edge cases with tolerance
+  const handleSelectionEdges = useCallback((
+    node: Node,
+    nodeRect: DOMRect,
+    nodeText: string,
+    selectionLeft: number,
+    selectionRight: number,
+    startY: number,
+    edgeTolerance: number
+  ): string | null => {
+    // Check left edge
+    if (nodeRect.left < selectionLeft + edgeTolerance && nodeRect.right > selectionLeft - edgeTolerance) {
+      const startPos = getTextNodeAtPoint(selectionLeft, startY);
+      if (startPos && startPos.node === node) {
+        return nodeText.substring(startPos.offset);
+      }
+      if (nodeRect.right > selectionLeft) {
+        return nodeText;
+      }
+    }
+    
+    // Check right edge
+    if (nodeRect.left < selectionRight + edgeTolerance && nodeRect.right > selectionRight - edgeTolerance) {
+      const endPos = getTextNodeAtPoint(selectionRight, startY);
+      if (endPos && endPos.node === node) {
+        return nodeText.substring(0, endPos.offset);
+      }
+      if (nodeRect.left < selectionRight) {
+        return nodeText;
+      }
+    }
+    
+    return null;
+  }, [getTextNodeAtPoint]);
+
+  // Helper to extract text from node with precise boundaries
+  const extractTextFromBothBounds = useCallback((
+    node: Node,
+    nodeText: string,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number
+  ): string | null => {
+    // Try exact positions first
+    const exactResult = getExactNodePositions(node, nodeText, startX, startY, endX, endY);
+    if (exactResult !== null) return exactResult;
+    
+    // Get node rectangle and selection bounds
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const nodeRect = range.getBoundingClientRect();
+    const selectionLeft = Math.min(startX, endX);
+    const selectionRight = Math.max(startX, endX);
+    
+    // Check if node is completely within selection
+    const withinResult = checkNodeWithinSelection(nodeRect, nodeText, selectionLeft, selectionRight);
+    if (withinResult !== null) return withinResult;
+    
+    // Handle edge cases with tolerance
+    const edgeTolerance = 10;
+    return handleSelectionEdges(node, nodeRect, nodeText, selectionLeft, selectionRight, startY, edgeTolerance);
+  }, [getExactNodePositions, checkNodeWithinSelection, handleSelectionEdges]);
 
   // Extract text from a node with optional start/end offsets
   const extractNodeText = useCallback((
@@ -293,72 +415,15 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     // Both start and end in same node
     if (isStartNode && isEndNode && startX !== undefined && startY !== undefined && endX !== undefined && endY !== undefined) {
       if (inMention) {
-        // For mentions, include the whole thing if any part is selected
         return nodeText;
       }
       
-      const startPos = getTextNodeAtPoint(startX, startY);
-      const endPos = getTextNodeAtPoint(endX, endY);
-      
-      // If we found exact positions in this node, use them
-      if (startPos?.node === node && endPos?.node === node) {
-        const startOffset = Math.min(startPos.offset, endPos.offset);
-        const endOffset = Math.max(startPos.offset, endPos.offset);
-        return nodeText.substring(startOffset, endOffset);
-      }
-      
-      // Special case: Check if this node is part of a mention-adjacent text flow
-      // This happens when selecting "testing @mention, more text" where nodes are split
-      const range = document.createRange();
-      range.selectNodeContents(node);
-      const nodeRect = range.getBoundingClientRect();
-      
-      // Special handling for single-line selections where getTextNodeAtPoint fails
-      // This often happens with text split by mentions
-      const selectionLeft = Math.min(startX, endX);
-      const selectionRight = Math.max(startX, endX);
-      
-      // Check if the selection clearly spans across this node
-      if (nodeRect.left >= selectionLeft && nodeRect.right <= selectionRight) {
-        // Node is completely within selection - include it
-        return nodeText;
-      }
-      
-      // Be more lenient with edge detection for nodes near mentions
-      const edgeTolerance = 10; // pixels
-      
-      // Check if we're at the edges of the selection
-      if (nodeRect.left < selectionLeft + edgeTolerance && nodeRect.right > selectionLeft - edgeTolerance) {
-        // This node contains or is near the start of the selection
-        const startPos = getTextNodeAtPoint(selectionLeft, startY);
-        if (startPos && startPos.node === node) {
-          return nodeText.substring(startPos.offset);
-        }
-        // If we can't get precise position but node is close, include from start
-        if (nodeRect.right > selectionLeft) {
-          return nodeText;
-        }
-      }
-      
-      if (nodeRect.left < selectionRight + edgeTolerance && nodeRect.right > selectionRight - edgeTolerance) {
-        // This node contains or is near the end of the selection
-        const endPos = getTextNodeAtPoint(selectionRight, endY);
-        if (endPos && endPos.node === node) {
-          return nodeText.substring(0, endPos.offset);
-        }
-        // If we can't get precise position but node is close, include to end
-        if (nodeRect.left < selectionRight) {
-          return nodeText;
-        }
-      }
-      
-      return null;
+      return extractTextFromBothBounds(node, nodeText, startX, startY, endX, endY);
     }
     
     // Start node only
     if (isStartNode && startX !== undefined && startY !== undefined) {
       if (inMention) {
-        // For mentions at start, include the whole mention
         return nodeText;
       }
       const startPos = getTextNodeAtPoint(startX, startY);
@@ -371,7 +436,6 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     // End node only
     if (isEndNode && endX !== undefined && endY !== undefined) {
       if (inMention) {
-        // For mentions at end, include the whole mention
         return nodeText;
       }
       const endPos = getTextNodeAtPoint(endX, endY);
@@ -383,7 +447,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     
     // Middle node - return full text
     return nodeText;
-  }, [getTextNodeAtPoint]);
+  }, [getTextNodeAtPoint, extractTextFromBothBounds]);
 
   interface TextNodeInfo {
     node: Node;
@@ -392,10 +456,73 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     visualTop: number;
   }
 
+  // Helper to check if rectangle intersects with selection bounds
+  const checkRectangleIntersection = useCallback((
+    rect: DOMRect,
+    minX: number,
+    maxX: number,
+    minY: number,
+    maxY: number
+  ): boolean => {
+    return !(rect.right < minX || rect.left > maxX || rect.bottom < minY || rect.top > maxY);
+  }, []);
+
+  // Helper to find closest drop element
+  const findDropElement = useCallback((node: Node, container: HTMLElement): Element | null => {
+    let parent = node.parentElement;
+    while (parent && parent !== container) {
+      if (parent.classList.contains('tw-group') || parent.getAttribute('data-drop-id')) {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+    return null;
+  }, []);
+
+  // Helper to check if text node is clipped by overflow:hidden
+  const isNodeClipped = useCallback((node: Node, container: HTMLElement): boolean => {
+    let checkElement = node.parentElement;
+    while (checkElement && checkElement !== container) {
+      const styles = window.getComputedStyle(checkElement);
+      if (styles.overflow === 'hidden' || styles.overflowY === 'hidden') {
+        const parentRect = checkElement.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const nodeRect = range.getBoundingClientRect();
+        if (nodeRect.top >= parentRect.bottom) {
+          return true;
+        }
+      }
+      checkElement = checkElement.parentElement;
+    }
+    return false;
+  }, []);
+
+  // Helper to process single text node for range collection
+  const processSingleTextNode = useCallback((node: Node, container: HTMLElement, minX: number, maxX: number, minY: number, maxY: number): TextNodeInfo | null => {
+    if (!node.textContent?.trim()) return null;
+    
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const rect = range.getBoundingClientRect();
+    
+    if (!checkRectangleIntersection(rect, minX, maxX, minY, maxY)) return null;
+    
+    const dropElement = findDropElement(node, container);
+    
+    if (isNodeClipped(node, container)) return null;
+    
+    return {
+      node,
+      rect,
+      dropElement,
+      visualTop: rect.top
+    };
+  }, [checkRectangleIntersection, findDropElement, isNodeClipped]);
+
   const getAllTextNodesInRange = useCallback((container: HTMLElement, startX: number, startY: number, endX: number, endY: number): TextNodeInfo[] => {
     const textNodes: TextNodeInfo[] = [];
     
-    // Calculate selection rectangle
     const minX = Math.min(startX, endX);
     const maxX = Math.max(startX, endX);
     const minY = Math.min(startY, endY);
@@ -405,135 +532,145 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       container,
       NodeFilter.SHOW_TEXT,
       {
-        acceptNode: () => {
-          // Accept all text nodes, even those inside mention/handle elements
-          return NodeFilter.FILTER_ACCEPT;
-        }
+        acceptNode: () => NodeFilter.FILTER_ACCEPT
       }
     );
 
     let node;
     while (node = walker.nextNode()) {
-      if (!node.textContent?.trim()) continue;
-      
-      // Get the position of the text node
-      const range = document.createRange();
-      range.selectNodeContents(node);
-      const rect = range.getBoundingClientRect();
-      
-      // Check if this text node intersects with our selection rectangle
-      const nodeLeft = rect.left;
-      const nodeRight = rect.right;
-      const nodeTop = rect.top;
-      const nodeBottom = rect.bottom;
-      
-      // Rectangle intersection check
-      const intersects = !(nodeRight < minX || nodeLeft > maxX || nodeBottom < minY || nodeTop > maxY);
-      
-      if (intersects) {
-        // Find the closest drop element (look for component with drop data)
-        let dropElement: Element | null = null;
-        let parent = node.parentElement;
-        while (parent && parent !== container) {
-          if (parent.classList.contains('tw-group') || parent.getAttribute('data-drop-id')) {
-            dropElement = parent;
-            break;
-          }
-          parent = parent.parentElement;
-        }
-        
-        // Check if text node is clipped by any overflow:hidden ancestor
-        let isClipped = false;
-        let checkElement = node.parentElement;
-        while (checkElement && checkElement !== container) {
-          const styles = window.getComputedStyle(checkElement);
-          if (styles.overflow === 'hidden' || styles.overflowY === 'hidden') {
-            const parentRect = checkElement.getBoundingClientRect();
-            // If the text node is below the visible area of its overflow:hidden container
-            if (nodeTop >= parentRect.bottom) {
-              isClipped = true;
-              break;
-            }
-          }
-          checkElement = checkElement.parentElement;
-        }
-        
-        if (!isClipped) {
-          textNodes.push({
-            node,
-            rect,
-            dropElement,
-            visualTop: rect.top
-          });
-        }
+      const nodeInfo = processSingleTextNode(node, container, minX, maxX, minY, maxY);
+      if (nodeInfo) {
+        textNodes.push(nodeInfo);
       }
     }
 
-    // Always sort by visual position (top to bottom) to maintain document order
     textNodes.sort((a, b) => a.visualTop - b.visualTop);
-    
     return textNodes;
+  }, [processSingleTextNode]);
+
+  // Helper to check if drop should be included in selection
+  const shouldIncludeDrop = useCallback((
+    dropElement: Element | null,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    minY: number,
+    maxY: number
+  ): boolean => {
+    if (!dropElement) return true;
+    
+    const dropRect = dropElement.getBoundingClientRect();
+    const selectionIntersectsDrop = !(
+      dropRect.right < Math.min(startX, endX) ||
+      dropRect.left > Math.max(startX, endX) ||
+      dropRect.bottom < minY ||
+      dropRect.top > maxY
+    );
+    
+    const isCompletelyAboveSelection = dropRect.bottom < Math.min(startY, endY);
+    return selectionIntersectsDrop && !isCompletelyAboveSelection;
+  }, []);
+
+  // Helper to process nodes in a drop group
+  const processDropNodes = useCallback((
+    nodeInfos: TextNodeInfo[],
+    processedNodes: Set<Node>,
+    bounds: SelectionBounds
+  ): string[] => {
+    const dropTexts: string[] = [];
+    
+    for (const nodeInfo of nodeInfos) {
+      if (processedNodes.has(nodeInfo.node)) continue;
+      
+      const result = processTextNode(nodeInfo, bounds, extractNodeText);
+      if (!result) continue;
+      
+      const { nodeText } = result;
+      dropTexts.push(nodeText);
+      processedNodes.add(nodeInfo.node);
+    }
+    
+    return dropTexts;
+  }, [extractNodeText]);
+
+  // Helper to format drop text with proper spacing
+  const formatDropText = useCallback((
+    dropTexts: string[],
+    selectedText: string,
+    dropElement: Element | null,
+    lastDropElement: Element | null,
+    isFirstNode: boolean
+  ): { text: string; shouldAdd: boolean } => {
+    if (dropTexts.length === 0) return { text: '', shouldAdd: false };
+    
+    let result = selectedText;
+    
+    // Add line break when moving to a different drop
+    if (!isFirstNode && dropElement !== lastDropElement && lastDropElement !== null) {
+      result += '\n';
+    }
+    
+    const dropText = dropTexts.join(' ').replace(/\s+/g, ' ').trim();
+    if (!dropText) return { text: result, shouldAdd: false };
+    
+    // Add space if needed when continuing same drop
+    if (!isFirstNode && dropElement === lastDropElement) {
+      if (!result.endsWith(' ') && !dropText.startsWith(' ')) {
+        result += ' ';
+      }
+    }
+    
+    result += dropText;
+    return { text: result, shouldAdd: true };
   }, []);
 
   const calculateSelection = useCallback((startX: number, startY: number, endX: number, endY: number): SelectionRange | null => {
     if (!containerRef.current) return null;
 
     try {
-      // Get all text nodes in the vertical range
       const minY = Math.min(startY, endY);
       const maxY = Math.max(startY, endY);
       
       const textNodeInfos = getAllTextNodesInRange(containerRef.current, startX, startY, endX, endY);
-      
       if (textNodeInfos.length === 0) return null;
 
-      // Build formatted text with proper spacing and line breaks
       let selectedText = '';
       let lastDropElement: Element | null = null;
       let isFirstNode = true;
-
-      // Track processed nodes to avoid duplicates
       const processedNodes = new Set<Node>();
       
+      // Group nodes by drop element
+      const dropGroups = new Map<Element | null, typeof textNodeInfos>();
       for (const nodeInfo of textNodeInfos) {
-        // Skip if we've already processed this node
-        if (processedNodes.has(nodeInfo.node)) {
-          continue;
+        const dropElement = nodeInfo.dropElement;
+        if (!dropGroups.has(dropElement)) {
+          dropGroups.set(dropElement, []);
         }
+        dropGroups.get(dropElement)!.push(nodeInfo);
+      }
+
+      // Process each drop group
+      for (const [dropElement, nodeInfos] of Array.from(dropGroups.entries())) {
+        if (!shouldIncludeDrop(dropElement, startX, startY, endX, endY, minY, maxY)) continue;
         
         const bounds: SelectionBounds = { startX, startY, endX, endY, minY, maxY };
-        const result = processTextNode(nodeInfo, bounds, extractNodeText);
+        const dropTexts = processDropNodes(nodeInfos, processedNodes, bounds);
         
-        if (!result) continue;
-        
-        const { nodeText, dropElement } = result;
-        
-        processedNodes.add(nodeInfo.node);
-
-        // Add line break when moving to a different drop
-        if (!isFirstNode && dropElement !== lastDropElement && lastDropElement !== null) {
-          selectedText += '\n';
+        const formatResult = formatDropText(dropTexts, selectedText, dropElement, lastDropElement, isFirstNode);
+        if (formatResult.shouldAdd) {
+          selectedText = formatResult.text;
+          lastDropElement = dropElement;
+          isFirstNode = false;
         }
-        
-        // Add the text with proper spacing
-        if (!isFirstNode && dropElement === lastDropElement) {
-          // Same drop, add space if needed
-          if (!selectedText.endsWith(' ') && !nodeText.startsWith(' ')) {
-            selectedText += ' ';
-          }
-        }
-        selectedText += nodeText;
-        lastDropElement = dropElement;
-        isFirstNode = false;
       }
 
       if (!selectedText.trim()) return null;
-
       return { startX, startY, endX, endY, text: selectedText };
     } catch (e) {
       return null;
     }
-  }, [containerRef, getAllTextNodesInRange, extractNodeText]);
+  }, [containerRef, getAllTextNodesInRange, shouldIncludeDrop, processDropNodes, formatDropText]);
 
   const createHighlightSpans = useCallback((selection: SelectionRange): HTMLSpanElement[] => {
     if (!containerRef.current) return [];
@@ -765,6 +902,34 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     }
   }, [state.selection, cleanupTempSelectionElement]);
 
+  const updateSelectionDisplay = useCallback((start: {x: number, y: number}, currentX: number, currentY: number) => {
+    // Clear any native selection that might have appeared
+    const nativeSelection = window.getSelection();
+    if (nativeSelection && nativeSelection.rangeCount > 0) {
+      nativeSelection.removeAllRanges();
+    }
+
+    // Check minimum drag distance
+    const distance = Math.hypot(currentX - start.x, currentY - start.y);
+    if (distance < 5) return;
+
+    const selection = calculateSelection(start.x, start.y, currentX, currentY);
+    if (selection) {
+      // Clear any existing spans before creating new ones
+      const container = containerRef.current;
+      if (container) {
+        removeHighlightSpans(container);
+      }
+      
+      const highlightSpans = createHighlightSpans(selection);
+      setState({
+        isSelecting: true,
+        selection,
+        highlightSpans
+      });
+    }
+  }, [calculateSelection, createHighlightSpans, removeHighlightSpans, containerRef]);
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!state.isSelecting || !startPointRef.current) return;
 
@@ -783,33 +948,9 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       const start = startPointRef.current;
       if (!start) return;
 
-      // Clear any native selection that might have appeared
-      const nativeSelection = window.getSelection();
-      if (nativeSelection && nativeSelection.rangeCount > 0) {
-        nativeSelection.removeAllRanges();
-      }
-
-      // Check minimum drag distance
-      const distance = Math.hypot(e.clientX - start.x, e.clientY - start.y);
-      if (distance < 5) return;
-
-      const selection = calculateSelection(start.x, start.y, e.clientX, e.clientY);
-      if (selection) {
-        // Clear any existing spans before creating new ones
-        const container = containerRef.current;
-        if (container) {
-          removeHighlightSpans(container);
-        }
-        
-        const highlightSpans = createHighlightSpans(selection);
-        setState({
-          isSelecting: true,
-          selection,
-          highlightSpans
-        });
-      }
+      updateSelectionDisplay(start, e.clientX, e.clientY);
     });
-  }, [state.isSelecting, containerRef, calculateSelection, createHighlightSpans, removeHighlightSpans, handleAutoScroll]);
+  }, [state.isSelecting, handleAutoScroll, updateSelectionDisplay]);
 
   const handleMouseUp = useCallback((e: MouseEvent) => {
     if (!state.isSelecting) return;
