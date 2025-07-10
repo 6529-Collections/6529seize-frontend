@@ -90,7 +90,10 @@ export default function TheMemesComponent() {
   }, [searchParams]);
 
   const getNftsNextPage = () => {
-    let mySort: string = sort;
+    let mySort: string =
+      Object.keys(MemesSort).find(
+        (k) => MemesSort[k as keyof typeof MemesSort] === sort
+      ) ?? "";
     if (sort === MemesSort.VOLUME) {
       switch (volumeType) {
         case VolumeType.HOURS_24:
@@ -111,7 +114,9 @@ export default function TheMemesComponent() {
     if (selectedSeason > 0) {
       seasonFilter = `&season=${selectedSeason}`;
     }
-    return `${process.env.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
+    return `${
+      process.env.API_ENDPOINT
+    }/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort.toLowerCase()}${seasonFilter}`;
   };
 
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
