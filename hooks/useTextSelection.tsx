@@ -397,6 +397,40 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     return handleSelectionEdges(node, nodeRect, nodeText, selectionLeft, selectionRight, startY, edgeTolerance);
   }, [getExactNodePositions, checkNodeWithinSelection, handleSelectionEdges]);
 
+  // Helper for handling start node text extraction
+  const extractStartNodeText = useCallback((
+    node: Node,
+    nodeText: string,
+    startX: number,
+    startY: number,
+    inMention: boolean
+  ): string | null => {
+    if (inMention) return nodeText;
+    
+    const startPos = getTextNodeAtPoint(startX, startY);
+    if (startPos?.node === node) {
+      return nodeText.substring(startPos.offset);
+    }
+    return null;
+  }, [getTextNodeAtPoint]);
+
+  // Helper for handling end node text extraction
+  const extractEndNodeText = useCallback((
+    node: Node,
+    nodeText: string,
+    endX: number,
+    endY: number,
+    inMention: boolean
+  ): string | null => {
+    if (inMention) return nodeText;
+    
+    const endPos = getTextNodeAtPoint(endX, endY);
+    if (endPos?.node === node) {
+      return nodeText.substring(0, endPos.offset);
+    }
+    return null;
+  }, [getTextNodeAtPoint]);
+
   // Extract text from a node with optional start/end offsets
   const extractNodeText = useCallback((
     node: Node, 
@@ -408,46 +442,27 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     endY?: number
   ): string | null => {
     const nodeText = node.textContent || '';
-    
-    // For mentions, we'll use a simpler approach
     const inMention = isNodeInMention(node);
     
     // Both start and end in same node
     if (isStartNode && isEndNode && startX !== undefined && startY !== undefined && endX !== undefined && endY !== undefined) {
-      if (inMention) {
-        return nodeText;
-      }
-      
+      if (inMention) return nodeText;
       return extractTextFromBothBounds(node, nodeText, startX, startY, endX, endY);
     }
     
     // Start node only
     if (isStartNode && startX !== undefined && startY !== undefined) {
-      if (inMention) {
-        return nodeText;
-      }
-      const startPos = getTextNodeAtPoint(startX, startY);
-      if (startPos?.node === node) {
-        return nodeText.substring(startPos.offset);
-      }
-      return null;
+      return extractStartNodeText(node, nodeText, startX, startY, inMention);
     }
     
     // End node only
     if (isEndNode && endX !== undefined && endY !== undefined) {
-      if (inMention) {
-        return nodeText;
-      }
-      const endPos = getTextNodeAtPoint(endX, endY);
-      if (endPos?.node === node) {
-        return nodeText.substring(0, endPos.offset);
-      }
-      return null;
+      return extractEndNodeText(node, nodeText, endX, endY, inMention);
     }
     
     // Middle node - return full text
     return nodeText;
-  }, [getTextNodeAtPoint, extractTextFromBothBounds]);
+  }, [extractTextFromBothBounds, extractStartNodeText, extractEndNodeText]);
 
   interface TextNodeInfo {
     node: Node;
