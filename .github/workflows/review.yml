@@ -3,9 +3,13 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   ai-code-review:
-    # Only run on PR comments that contain "@review"
     if: github.event.issue.pull_request && contains(github.event.comment.body, '@review')
     runs-on: ubuntu-latest
 
@@ -22,16 +26,20 @@ jobs:
               pull_number: context.issue.number
             });
 
-            core.setOutput('head_sha', pr.head.sha);
-            core.setOutput('head_ref', pr.head.ref);
-            core.setOutput('base_sha', pr.base.sha);
-            core.setOutput('base_ref', pr.base.ref);
-            core.setOutput('pr_number', pr.number);
+            return {
+              head_sha: pr.head.sha,
+              head_ref: pr.head.ref,
+              base_sha: pr.base.sha,
+              base_ref: pr.base.ref,
+              pr_number: pr.number,
+              head_repo: pr.head.repo.full_name
+            };
 
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.pr-info.outputs.head_sha }}
+          repository: ${{ fromJson(steps.pr-info.outputs.result).head_repo }}
+          ref: ${{ fromJson(steps.pr-info.outputs.result).head_ref }}
           fetch-depth: 0
 
       - name: AI Code Review Analysis
@@ -39,9 +47,27 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
-          max-atomic-size: '15'
+          max-atomic-size: "15"
         env:
-          # Help the action understand the PR context
-          GITHUB_HEAD_REF: ${{ steps.pr-info.outputs.head_ref }}
-          GITHUB_BASE_REF: ${{ steps.pr-info.outputs.base_ref }}
-          PR_NUMBER: ${{ steps.pr-info.outputs.pr_number }}
+          # Override GitHub context to simulate a pull_request event
+          GITHUB_EVENT_NAME: "pull_request"
+          GITHUB_HEAD_REF: ${{ fromJson(steps.pr-info.outputs.result).head_ref }}
+          GITHUB_BASE_REF: ${{ fromJson(steps.pr-info.outputs.result).base_ref }}
+          # Create a minimal pull_request context
+          GITHUB_CONTEXT: |
+            {
+              "event_name": "pull_request",
+              "payload": {
+                "pull_request": {
+                  "number": ${{ fromJson(steps.pr-info.outputs.result).pr_number }},
+                  "head": {
+                    "sha": "${{ fromJson(steps.pr-info.outputs.result).head_sha }}",
+                    "ref": "${{ fromJson(steps.pr-info.outputs.result).head_ref }}"
+                  },
+                  "base": {
+                    "sha": "${{ fromJson(steps.pr-info.outputs.result).base_sha }}",
+                    "ref": "${{ fromJson(steps.pr-info.outputs.result).base_ref }}"
+                  }
+                }
+              }
+            }
