@@ -1,7 +1,80 @@
 import React from 'react';
-import { render, screen, fireEvent, renderHook } from '@testing-library/react';
-import { act } from '@testing-library/react';
+import { render, screen, fireEvent, renderHook, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { SelectModeProvider, useSelectMode } from '../../contexts/SelectModeContext';
+
+// Helper components to reduce nesting
+const TestComponent = ({ onContextValue }: { onContextValue: (value: any) => void }) => {
+  const contextValue = useSelectMode();
+  onContextValue(contextValue);
+  return <div>Test</div>;
+};
+
+const ToggleButton = () => {
+  const { isSelectMode, toggleSelectMode } = useSelectMode();
+  return (
+    <button onClick={toggleSelectMode} data-testid="toggle-btn">
+      {isSelectMode ? 'Exit Select Mode' : 'Enter Select Mode'}
+    </button>
+  );
+};
+
+const StatusDisplay = () => {
+  const { isSelectMode } = useSelectMode();
+  return (
+    <div data-testid="status">
+      Status: {isSelectMode ? 'Selecting' : 'Normal'}
+    </div>
+  );
+};
+
+const MultiToggleComponent = () => {
+  const { isSelectMode, toggleSelectMode } = useSelectMode();
+  return (
+    <div>
+      <button onClick={toggleSelectMode} data-testid="toggle-1">
+        Toggle 1
+      </button>
+      <button onClick={toggleSelectMode} data-testid="toggle-2">
+        Toggle 2
+      </button>
+      <div data-testid="mode-display">
+        Mode: {isSelectMode ? 'ON' : 'OFF'}
+      </div>
+    </div>
+  );
+};
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div data-testid="error">Something went wrong</div>;
+    }
+    return this.props.children;
+  }
+}
+
+const ThrowingComponent = () => {
+  const { isSelectMode, toggleSelectMode } = useSelectMode();
+  
+  if (isSelectMode) {
+    throw new Error('Test error');
+  }
+  
+  return <button onClick={toggleSelectMode}>Toggle</button>;
+};
 
 describe('SelectModeContext', () => {
   describe('SelectModeProvider', () => {
@@ -18,15 +91,13 @@ describe('SelectModeContext', () => {
 
     it('should provide default context values', () => {
       let contextValue: any;
-
-      const TestComponent = () => {
-        contextValue = useSelectMode();
-        return <div>Test</div>;
+      const handleContextValue = (value: any) => {
+        contextValue = value;
       };
 
       render(
         <SelectModeProvider>
-          <TestComponent />
+          <TestComponent onContextValue={handleContextValue} />
         </SelectModeProvider>
       );
 
@@ -113,24 +184,6 @@ describe('SelectModeContext', () => {
 
   describe('integration with components', () => {
     it('should allow components to toggle select mode', () => {
-      const ToggleButton = () => {
-        const { isSelectMode, toggleSelectMode } = useSelectMode();
-        return (
-          <button onClick={toggleSelectMode} data-testid="toggle-btn">
-            {isSelectMode ? 'Exit Select Mode' : 'Enter Select Mode'}
-          </button>
-        );
-      };
-
-      const StatusDisplay = () => {
-        const { isSelectMode } = useSelectMode();
-        return (
-          <div data-testid="status">
-            Status: {isSelectMode ? 'Selecting' : 'Normal'}
-          </div>
-        );
-      };
-
       render(
         <SelectModeProvider>
           <ToggleButton />
@@ -156,23 +209,6 @@ describe('SelectModeContext', () => {
     });
 
     it('should handle multiple toggle operations', () => {
-      const MultiToggleComponent = () => {
-        const { isSelectMode, toggleSelectMode } = useSelectMode();
-        return (
-          <div>
-            <button onClick={toggleSelectMode} data-testid="toggle-1">
-              Toggle 1
-            </button>
-            <button onClick={toggleSelectMode} data-testid="toggle-2">
-              Toggle 2
-            </button>
-            <div data-testid="mode-display">
-              Mode: {isSelectMode ? 'ON' : 'OFF'}
-            </div>
-          </div>
-        );
-      };
-
       render(
         <SelectModeProvider>
           <MultiToggleComponent />
@@ -268,38 +304,6 @@ describe('SelectModeContext', () => {
 
   describe('error boundaries', () => {
     it('should handle errors gracefully', () => {
-      const ThrowingComponent = () => {
-        const { isSelectMode, toggleSelectMode } = useSelectMode();
-        
-        if (isSelectMode) {
-          throw new Error('Test error');
-        }
-        
-        return <button onClick={toggleSelectMode}>Toggle</button>;
-      };
-
-      class ErrorBoundary extends React.Component<
-        { children: React.ReactNode },
-        { hasError: boolean }
-      > {
-        constructor(props: { children: React.ReactNode }) {
-          super(props);
-          this.state = { hasError: false };
-        }
-
-        static getDerivedStateFromError() {
-          return { hasError: true };
-        }
-
-        render() {
-          if (this.state.hasError) {
-            return <div data-testid="error">Something went wrong</div>;
-          }
-
-          return this.props.children;
-        }
-      }
-
       render(
         <ErrorBoundary>
           <SelectModeProvider>
@@ -322,11 +326,20 @@ describe('SelectModeContext', () => {
       let outerContext: any;
       let innerContext: any;
 
+      const captureOuterContext = (context: any) => {
+        outerContext = context;
+      };
+
+      const captureInnerContext = (context: any) => {
+        innerContext = context;
+      };
+
       const OuterComponent = () => {
-        outerContext = useSelectMode();
+        const context = useSelectMode();
+        captureOuterContext(context);
         return (
           <div>
-            <div data-testid="outer">Outer: {outerContext.isSelectMode ? 'ON' : 'OFF'}</div>
+            <div data-testid="outer">Outer: {context.isSelectMode ? 'ON' : 'OFF'}</div>
             <SelectModeProvider>
               <InnerComponent />
             </SelectModeProvider>
@@ -335,9 +348,10 @@ describe('SelectModeContext', () => {
       };
 
       const InnerComponent = () => {
-        innerContext = useSelectMode();
+        const context = useSelectMode();
+        captureInnerContext(context);
         return (
-          <div data-testid="inner">Inner: {innerContext.isSelectMode ? 'ON' : 'OFF'}</div>
+          <div data-testid="inner">Inner: {context.isSelectMode ? 'ON' : 'OFF'}</div>
         );
       };
 

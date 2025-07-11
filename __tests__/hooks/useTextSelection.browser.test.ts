@@ -9,8 +9,8 @@ import {
   cleanupTestContainer,
   createMockRange,
   createMockTreeWalker,
-  testBrowserScenario,
-  testGetSelectionImplementation
+  testMouseEventHandling,
+  testBrowserAPI
 } from '../utils/textSelectionTestUtils';
 
 // Setup common mocks
@@ -42,45 +42,28 @@ describe('useTextSelection Browser Compatibility', () => {
 
     it('should use caretRangeFromPoint in Chrome', () => {
       const mocks = createBrowserMock('chrome');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      
+      const setupChromeCaretRange = () => {
+        // Mock successful caretRangeFromPoint response
+        mocks.caretRangeFromPoint.mockReturnValue({
+          startContainer: { nodeType: Node.TEXT_NODE },
+          startOffset: 5
+        });
+      };
 
-      // Mock successful caretRangeFromPoint response
-      mocks.caretRangeFromPoint.mockReturnValue({
-        startContainer: { nodeType: Node.TEXT_NODE },
-        startOffset: 5
-      });
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      act(() => {
-        result.current.handlers.handleMouseDown(mouseEvent);
-      });
-
+      const result = testBrowserAPI(setupChromeCaretRange, useTextSelection, containerRef);
       expect(result.current.state.isSelecting).toBe(true);
     });
 
     it('should handle caretRangeFromPoint returning null', () => {
       const mocks = createBrowserMock('chrome');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      
+      const setupNullCaretRange = () => {
+        mocks.caretRangeFromPoint.mockReturnValue(null);
+        mocks.elementFromPoint.mockReturnValue(document.createElement('div'));
+      };
 
-      mocks.caretRangeFromPoint.mockReturnValue(null);
-      mocks.elementFromPoint.mockReturnValue(document.createElement('div'));
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      expect(() => {
-        act(() => {
-          result.current.handlers.handleMouseDown(mouseEvent);
-        });
-      }).not.toThrow();
+      testBrowserAPI(setupNullCaretRange, useTextSelection, containerRef);
     });
   });
 
@@ -91,44 +74,27 @@ describe('useTextSelection Browser Compatibility', () => {
 
     it('should use caretPositionFromPoint in Firefox', () => {
       const mocks = createBrowserMock('firefox');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      
+      const setupFirefoxCaretPosition = () => {
+        mocks.caretPositionFromPoint.mockReturnValue({
+          offsetNode: { nodeType: Node.TEXT_NODE },
+          offset: 3
+        });
+      };
 
-      mocks.caretPositionFromPoint.mockReturnValue({
-        offsetNode: { nodeType: Node.TEXT_NODE },
-        offset: 3
-      });
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      act(() => {
-        result.current.handlers.handleMouseDown(mouseEvent);
-      });
-
+      const result = testBrowserAPI(setupFirefoxCaretPosition, useTextSelection, containerRef);
       expect(result.current.state.isSelecting).toBe(true);
     });
 
     it('should handle caretPositionFromPoint returning null', () => {
       const mocks = createBrowserMock('firefox');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      
+      const setupNullCaretPosition = () => {
+        mocks.caretPositionFromPoint.mockReturnValue(null);
+        mocks.elementFromPoint.mockReturnValue(document.createElement('div'));
+      };
 
-      mocks.caretPositionFromPoint.mockReturnValue(null);
-      mocks.elementFromPoint.mockReturnValue(document.createElement('div'));
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      expect(() => {
-        act(() => {
-          result.current.handlers.handleMouseDown(mouseEvent);
-        });
-      }).not.toThrow();
+      testBrowserAPI(setupNullCaretPosition, useTextSelection, containerRef);
     });
   });
 
@@ -139,47 +105,30 @@ describe('useTextSelection Browser Compatibility', () => {
 
     it('should work with Safari-specific behaviors', () => {
       const mocks = createBrowserMock('safari');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      
+      const setupSafariBehavior = () => {
+        mocks.caretRangeFromPoint.mockReturnValue({
+          startContainer: { nodeType: Node.TEXT_NODE },
+          startOffset: 2
+        });
+      };
 
-      mocks.caretRangeFromPoint.mockReturnValue({
-        startContainer: { nodeType: Node.TEXT_NODE },
-        startOffset: 2
-      });
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      act(() => {
-        result.current.handlers.handleMouseDown(mouseEvent);
-      });
-
+      const result = testBrowserAPI(setupSafariBehavior, useTextSelection, containerRef);
       expect(result.current.state.isSelecting).toBe(true);
     });
 
     it('should handle Safari selection quirks', () => {
       const mocks = createBrowserMock('safari');
-      const { result } = renderHook(() => useTextSelection(containerRef));
-
-      // Safari sometimes returns different values
-      mocks.caretRangeFromPoint.mockReturnValue({
-        startContainer: { nodeType: Node.ELEMENT_NODE }, // Not a text node
-        startOffset: 0
-      });
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      expect(() => {
-        act(() => {
-          result.current.handlers.handleMouseDown(mouseEvent);
+      
+      const setupSafariQuirks = () => {
+        // Safari sometimes returns different values
+        mocks.caretRangeFromPoint.mockReturnValue({
+          startContainer: { nodeType: Node.ELEMENT_NODE }, // Not a text node
+          startOffset: 0
         });
-      }).not.toThrow();
+      };
+
+      testBrowserAPI(setupSafariQuirks, useTextSelection, containerRef);
     });
   });
 
@@ -190,66 +139,47 @@ describe('useTextSelection Browser Compatibility', () => {
 
     it('should work without modern caret APIs', () => {
       const mocks = createBrowserMock('legacy');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      
+      const setupLegacyFallback = () => {
+        // Setup fallback mocks
+        const mockElement = document.createElement('div');
+        const mockTextNode = document.createTextNode('sample text');
+        mockElement.appendChild(mockTextNode);
 
-      // Setup fallback mocks
-      const mockElement = document.createElement('div');
-      const mockTextNode = document.createTextNode('sample text');
-      mockElement.appendChild(mockTextNode);
+        mocks.elementFromPoint.mockReturnValue(mockElement);
+        mocks.createTreeWalker.mockReturnValue(createMockTreeWalker(mockTextNode));
+        mocks.createRange.mockReturnValue(createMockRange({
+          getBoundingClientRect: jest.fn(() => ({
+            left: 90,
+            right: 110,
+            top: 90,
+            bottom: 110,
+            width: 20,
+            height: 20
+          }))
+        }));
+      };
 
-      mocks.elementFromPoint.mockReturnValue(mockElement);
-      mocks.createTreeWalker.mockReturnValue(createMockTreeWalker(mockTextNode));
-      mocks.createRange.mockReturnValue(createMockRange({
-        getBoundingClientRect: jest.fn(() => ({
-          left: 90,
-          right: 110,
-          top: 90,
-          bottom: 110,
-          width: 20,
-          height: 20
-        }))
-      }));
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      expect(() => {
-        act(() => {
-          result.current.handlers.handleMouseDown(mouseEvent);
-        });
-      }).not.toThrow();
-
+      const result = testBrowserAPI(setupLegacyFallback, useTextSelection, containerRef);
       expect(result.current.state.isSelecting).toBe(true);
     });
 
     it('should handle complete API unavailability gracefully', () => {
       const mocks = createBrowserMock('legacy');
-      const { result } = renderHook(() => useTextSelection(containerRef));
-
-      // Mock all APIs to be unavailable or throw errors
-      mocks.elementFromPoint.mockReturnValue(null);
-      mocks.createTreeWalker.mockImplementation(() => {
-        throw new Error('TreeWalker not supported');
-      });
-      mocks.createRange.mockImplementation(() => {
-        throw new Error('Range not supported');
-      });
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      expect(() => {
-        act(() => {
-          result.current.handlers.handleMouseDown(mouseEvent);
+      
+      const setupUnavailableAPIs = () => {
+        // Mock all APIs to be unavailable or throw errors
+        mocks.elementFromPoint.mockReturnValue(null);
+        mocks.createTreeWalker.mockImplementation(() => {
+          throw new Error('TreeWalker not supported');
         });
-      }).not.toThrow();
+        mocks.createRange.mockImplementation(() => {
+          throw new Error('Range not supported');
+        });
+      };
 
+      const result = testBrowserAPI(setupUnavailableAPIs, useTextSelection, containerRef);
+      
       // Should still initialize but may not work fully
       expect(result.current.state.isSelecting).toBe(true);
     });
@@ -297,45 +227,40 @@ describe('useTextSelection Browser Compatibility', () => {
       // Test different getSelection scenarios
       const testCases = [
         // Standard implementation
-        {
-          getSelection: () => ({
-            removeAllRanges: jest.fn(),
-            addRange: jest.fn(),
-            rangeCount: 0,
-            empty: jest.fn()
-          })
-        },
+        () => ({
+          removeAllRanges: jest.fn(),
+          addRange: jest.fn(),
+          rangeCount: 0,
+          empty: jest.fn()
+        }),
         // Implementation without empty method (older browsers)
-        {
-          getSelection: () => ({
-            removeAllRanges: jest.fn(),
-            addRange: jest.fn(),
-            rangeCount: 0
-          })
-        },
+        () => ({
+          removeAllRanges: jest.fn(),
+          addRange: jest.fn(),
+          rangeCount: 0
+        }),
         // Null getSelection (edge case)
-        {
-          getSelection: () => null
-        }
+        () => null
       ];
 
-      testCases.forEach(({ getSelection }) => {
-        (window.getSelection as jest.Mock).mockImplementation(getSelection);
+      const testGetSelectionImpl = (getSelectionImpl: () => any) => {
+        (window.getSelection as jest.Mock).mockImplementation(getSelectionImpl);
 
         expect(() => {
           act(() => {
             result.current.handlers.clearSelection();
           });
         }).not.toThrow();
-      });
+      };
+
+      testCases.forEach(testGetSelectionImpl);
     });
   });
 
   describe('Browser-specific range behavior', () => {
     it('should handle different range implementations', () => {
       const mocks = createBrowserMock('chrome');
-      const { result } = renderHook(() => useTextSelection(containerRef));
-
+      
       // Test different range behaviors
       const mockRanges = [
         // Standard range
@@ -367,37 +292,22 @@ describe('useTextSelection Browser Compatibility', () => {
         }
       ];
 
-      mockRanges.forEach((mockRange) => {
-        mocks.createRange.mockReturnValue(mockRange);
-
-        const mouseEvent = new MouseEvent('mousedown', {
-          button: 0,
-          clientX: 100,
-          clientY: 100
-        });
+      const testRangeImplementation = (mockRange: any) => {
+        const setupRangeMock = () => {
+          mocks.createRange.mockReturnValue(mockRange);
+        };
         
-        // Add target property to the event
-        const targetElement = document.createElement('div');
-        targetElement.closest = jest.fn().mockReturnValue(null);
-        Object.defineProperty(mouseEvent, 'target', {
-          value: targetElement,
-          configurable: true
-        });
+        testBrowserAPI(setupRangeMock, useTextSelection, containerRef);
+      };
 
-        expect(() => {
-          act(() => {
-            result.current.handlers.handleMouseDown(mouseEvent);
-          });
-        }).not.toThrow();
-      });
+      mockRanges.forEach(testRangeImplementation);
     });
   });
 
   describe('Browser-specific CSS getComputedStyle', () => {
     it('should handle different getComputedStyle implementations', () => {
       const mocks = createBrowserMock('chrome');
-      const { result } = renderHook(() => useTextSelection(containerRef));
-
+      
       // Test different getComputedStyle scenarios
       const testCases = [
         // Standard implementation
@@ -410,74 +320,45 @@ describe('useTextSelection Browser Compatibility', () => {
         () => null
       ];
 
-      testCases.forEach((getComputedStyleImpl) => {
-        mocks.getComputedStyle.mockImplementation(getComputedStyleImpl);
-
-        const mouseEvent = new MouseEvent('mousedown', {
-          button: 0,
-          clientX: 100,
-          clientY: 100
-        });
+      const testGetComputedStyleImpl = (getComputedStyleImpl: () => any) => {
+        const setupGetComputedStyle = () => {
+          mocks.getComputedStyle.mockImplementation(getComputedStyleImpl);
+        };
         
-        // Add target property to the event
-        const targetElement = document.createElement('div');
-        targetElement.closest = jest.fn().mockReturnValue(null);
-        Object.defineProperty(mouseEvent, 'target', {
-          value: targetElement,
-          configurable: true
-        });
+        testBrowserAPI(setupGetComputedStyle, useTextSelection, containerRef);
+      };
 
-        expect(() => {
-          act(() => {
-            result.current.handlers.handleMouseDown(mouseEvent);
-          });
-        }).not.toThrow();
-      });
+      testCases.forEach(testGetComputedStyleImpl);
     });
   });
 
   describe('Mobile browser compatibility', () => {
     it('should handle touch-based browsers', () => {
       const mocks = createBrowserMock('chrome');
-      const { result } = renderHook(() => useTextSelection(containerRef));
-
-      // Simulate touch browser behavior (limited API support)
-      mocks.caretRangeFromPoint.mockReturnValue(null);
-      mocks.elementFromPoint.mockReturnValue(null);
-
-      const touchEvent = new MouseEvent('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
       
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(touchEvent, 'target', {
-        value: targetElement,
-        configurable: true
-      });
+      const setupTouchBrowser = () => {
+        // Simulate touch browser behavior (limited API support)
+        mocks.caretRangeFromPoint.mockReturnValue(null);
+        mocks.elementFromPoint.mockReturnValue(null);
+      };
 
-      expect(() => {
-        act(() => {
-          result.current.handlers.handleMouseDown(touchEvent);
-        });
-      }).not.toThrow();
-
+      const result = testBrowserAPI(setupTouchBrowser, useTextSelection, containerRef);
       expect(result.current.state.isSelecting).toBe(true);
     });
 
     it('should handle viewport and zoom differences', () => {
       const mocks = createBrowserMock('safari');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      
+      const setupViewportTest = () => {
+        // Simulate coordinates that might be affected by mobile viewport/zoom
+        mocks.caretRangeFromPoint.mockReturnValue({
+          startContainer: { nodeType: Node.TEXT_NODE },
+          startOffset: 1
+        });
+      };
 
-      // Simulate coordinates that might be affected by mobile viewport/zoom
-      mocks.caretRangeFromPoint.mockReturnValue({
-        startContainer: { nodeType: Node.TEXT_NODE },
-        startOffset: 1
-      });
-
+      setupViewportTest();
+      
       // Test with various coordinate scenarios
       const coordinates = [
         { x: 50, y: 50 },   // Normal coordinates
@@ -486,27 +367,14 @@ describe('useTextSelection Browser Compatibility', () => {
         { x: 1000, y: 1000 } // Large coordinates
       ];
 
-      coordinates.forEach(({ x, y }) => {
-        const mouseEvent = new MouseEvent('mousedown', {
-          button: 0,
+      const testCoordinate = ({ x, y }: { x: number; y: number }) => {
+        testMouseEventHandling(useTextSelection, containerRef, {
           clientX: x,
           clientY: y
         });
-        
-        // Add target property to the event
-        const targetElement = document.createElement('div');
-        targetElement.closest = jest.fn().mockReturnValue(null);
-        Object.defineProperty(mouseEvent, 'target', {
-          value: targetElement,
-          configurable: true
-        });
+      };
 
-        expect(() => {
-          act(() => {
-            result.current.handlers.handleMouseDown(mouseEvent);
-          });
-        }).not.toThrow();
-      });
+      coordinates.forEach(testCoordinate);
     });
   });
 });

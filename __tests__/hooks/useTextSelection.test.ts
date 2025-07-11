@@ -435,11 +435,13 @@ describe('useTextSelection', () => {
         configurable: true
       });
       
-      expect(() => {
+      const handleErrorEvent = () => {
         act(() => {
           result.current.handlers.handleMouseDown(errorEvent);
         });
-      }).not.toThrow();
+      };
+
+      expect(handleErrorEvent).not.toThrow();
     });
 
     it('should handle missing DOM methods gracefully', () => {
@@ -460,11 +462,13 @@ describe('useTextSelection', () => {
         configurable: true
       });
       
-      expect(() => {
+      const handleMissingApiEvent = () => {
         act(() => {
           result.current.handlers.handleMouseDown(missingApiEvent);
         });
-      }).not.toThrow();
+      };
+
+      expect(handleMissingApiEvent).not.toThrow();
     });
   });
 });

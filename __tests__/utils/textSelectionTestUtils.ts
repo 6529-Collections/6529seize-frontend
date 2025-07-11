@@ -325,3 +325,86 @@ export const testGetSelectionImplementation = (
     });
   }).not.toThrow();
 };
+
+/**
+ * Helper to test mouse event handling without deep nesting
+ */
+export const testMouseEventHandling = (
+  useTextSelection: any,
+  containerRef: { current: HTMLElement | null },
+  eventOptions: { button?: number; clientX?: number; clientY?: number } = {}
+) => {
+  const { result } = renderHook(() => useTextSelection(containerRef));
+  
+  const mouseEvent = createMouseEventWithTarget('mousedown', {
+    button: 0,
+    clientX: 100,
+    clientY: 100,
+    ...eventOptions
+  });
+
+  expect(() => {
+    act(() => {
+      result.current.handlers.handleMouseDown(mouseEvent);
+    });
+  }).not.toThrow();
+  
+  return result;
+};
+
+/**
+ * Helper to test browser API scenarios
+ */
+export const testBrowserAPI = (
+  apiSetup: () => void,
+  useTextSelection: any,
+  containerRef: { current: HTMLElement | null }
+) => {
+  apiSetup();
+  
+  const { result } = renderHook(() => useTextSelection(containerRef));
+  
+  const mouseEvent = createMouseEventWithTarget('mousedown', {
+    button: 0,
+    clientX: 100,
+    clientY: 100
+  });
+
+  expect(() => {
+    act(() => {
+      result.current.handlers.handleMouseDown(mouseEvent);
+    });
+  }).not.toThrow();
+  
+  return result;
+};
+
+/**
+ * Helper to test performance scenarios
+ */
+export const testPerformanceScenario = (
+  setup: () => void,
+  useTextSelection: any,
+  containerRef: { current: HTMLElement | null },
+  assertions?: (result: any) => void
+) => {
+  setup();
+  
+  const { result } = renderHook(() => useTextSelection(containerRef));
+  
+  const mouseEvent = createMouseEventWithTarget('mousedown', {
+    button: 0,
+    clientX: 100,
+    clientY: 100
+  });
+
+  act(() => {
+    result.current.handlers.handleMouseDown(mouseEvent);
+  });
+
+  if (assertions) {
+    assertions(result);
+  }
+  
+  return result;
+};

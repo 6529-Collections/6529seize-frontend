@@ -5,7 +5,8 @@ import {
   cleanupTextSelectionMocks,
   createMouseEventWithTarget,
   createTestContainer,
-  cleanupTestContainer
+  cleanupTestContainer,
+  testPerformanceScenario
 } from '../utils/textSelectionTestUtils';
 
 // Mock RAF for controlled timing
@@ -127,40 +128,34 @@ describe('useTextSelection Performance Tests', () => {
     });
 
     it('should efficiently process large amounts of text content', () => {
-      // Create drops with large text content
-      const largeText = 'Lorem ipsum '.repeat(1000); // ~11KB of text
-      
-      for (let i = 0; i < 50; i++) {
-        const dropElement = document.createElement('div');
-        dropElement.className = 'tw-group';
-        dropElement.setAttribute('data-drop-id', `large-text-drop${i}`);
+      const setupLargeTextContent = () => {
+        // Create drops with large text content
+        const largeText = 'Lorem ipsum '.repeat(1000); // ~11KB of text
         
-        const textElement = document.createElement('div');
-        textElement.textContent = largeText;
-        dropElement.appendChild(textElement);
+        for (let i = 0; i < 50; i++) {
+          const dropElement = document.createElement('div');
+          dropElement.className = 'tw-group';
+          dropElement.setAttribute('data-drop-id', `large-text-drop${i}`);
+          
+          const textElement = document.createElement('div');
+          textElement.textContent = largeText;
+          dropElement.appendChild(textElement);
+          
+          mockContainer.appendChild(dropElement);
+        }
         
-        mockContainer.appendChild(dropElement);
-      }
-      
-      document.body.appendChild(mockContainer);
+        document.body.appendChild(mockContainer);
+        
+        const startTime = performance.now();
+        mockPerformanceNow.mockReturnValue(startTime);
+      };
 
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const assertTextHandling = (result: any) => {
+        // Should handle large text efficiently
+        expect(result.current.state.isSelecting).toBe(true);
+      };
 
-      const startTime = performance.now();
-      mockPerformanceNow.mockReturnValue(startTime);
-
-      const mouseEvent = createMouseEventWithTarget('mousedown', {
-        button: 0,
-        clientX: 100,
-        clientY: 100
-      });
-
-      act(() => {
-        result.current.handlers.handleMouseDown(mouseEvent);
-      });
-
-      // Should handle large text efficiently
-      expect(result.current.state.isSelecting).toBe(true);
+      testPerformanceScenario(setupLargeTextContent, useTextSelection, containerRef, assertTextHandling);
     });
   });
 
@@ -499,31 +494,24 @@ describe('useTextSelection Performance Tests', () => {
         }}
       ];
 
-      testScenarios.forEach(({ name, setup }) => {
-        setup();
+      const testApiScenario = ({ name, setup }: { name: string; setup: () => void }) => {
+        const setupScenario = () => {
+          setup();
+          const startTime = performance.now();
+          mockPerformanceNow.mockReturnValue(startTime);
+        };
 
-        const { result } = renderHook(() => useTextSelection(containerRef));
+        const assertPerformance = (result: any) => {
+          const endTime = performance.now() + 10; // Should complete within 10ms
+          mockPerformanceNow.mockReturnValue(endTime);
+          // Should maintain consistent performance across scenarios
+          expect(result.current.state.isSelecting).toBe(true);
+        };
 
-        const startTime = performance.now();
-        mockPerformanceNow.mockReturnValue(startTime);
+        testPerformanceScenario(setupScenario, useTextSelection, containerRef, assertPerformance);
+      };
 
-        // Test performance consistency
-        const mouseEvent = createMouseEventWithTarget('mousedown', {
-          button: 0,
-          clientX: 100,
-          clientY: 100
-        });
-
-        act(() => {
-          result.current.handlers.handleMouseDown(mouseEvent);
-        });
-
-        const endTime = startTime + 10; // Should complete within 10ms
-        mockPerformanceNow.mockReturnValue(endTime);
-
-        // Should maintain consistent performance across scenarios
-        expect(result.current.state.isSelecting).toBe(true);
-      });
+      testScenarios.forEach(testApiScenario);
     });
 
     it('should handle performance variations in getComputedStyle', () => {
