@@ -499,18 +499,25 @@ describe('useTextSelection Performance Tests', () => {
       const createScenarioSetup = (setup: () => void) => {
         return () => {
           setup();
-          const startTime = performance.now();
-          mockPerformanceNow.mockReturnValue(startTime);
+          setupPerformanceTiming();
         };
+      };
+      
+      const setupPerformanceTiming = () => {
+        const startTime = performance.now();
+        mockPerformanceNow.mockReturnValue(startTime);
       };
 
       const createPerformanceAssertion = () => {
         return (result: any) => {
-          const endTime = performance.now() + 10; // Should complete within 10ms
-          mockPerformanceNow.mockReturnValue(endTime);
-          // Should maintain consistent performance across scenarios
+          assertPerformanceTiming();
           expect(result.current.state.isSelecting).toBe(true);
         };
+      };
+      
+      const assertPerformanceTiming = () => {
+        const endTime = performance.now() + 10; // Should complete within 10ms
+        mockPerformanceNow.mockReturnValue(endTime);
       };
 
       const testApiScenario = ({ name, setup }: { name: string; setup: () => void }) => {

@@ -205,24 +205,29 @@ describe('useTextSelection Browser Compatibility', () => {
         { nodeType: Node.COMMENT_NODE, shouldWork: false }
       ];
 
-      const testNodeTypeHandling = ({ nodeType }: { nodeType: number }) => {
+      const setupNodeTypeMock = (nodeType: number) => {
         mocks.caretRangeFromPoint.mockReturnValue({
           startContainer: { nodeType },
           startOffset: 0
         });
-
+      };
+      
+      const testNodeTypeHandling = ({ nodeType }: { nodeType: number }) => {
+        setupNodeTypeMock(nodeType);
         const mouseEvent = createMouseEventWithTarget('mousedown', {
           button: 0,
           clientX: 100,
           clientY: 100
         });
-
+        testMouseDownAction(mouseEvent);
+      };
+      
+      const testMouseDownAction = (mouseEvent: MouseEvent) => {
         const handleMouseDownAction = () => {
           act(() => {
             result.current.handlers.handleMouseDown(mouseEvent);
           });
         };
-
         expect(handleMouseDownAction).not.toThrow();
       };
 
@@ -253,15 +258,21 @@ describe('useTextSelection Browser Compatibility', () => {
         () => null
       ];
 
-      const testGetSelectionImpl = (getSelectionImpl: () => any) => {
+      const setupGetSelectionMock = (getSelectionImpl: () => any) => {
         (window.getSelection as jest.Mock).mockImplementation(getSelectionImpl);
-
+      };
+      
+      const testGetSelectionImpl = (getSelectionImpl: () => any) => {
+        setupGetSelectionMock(getSelectionImpl);
+        testClearSelectionAction();
+      };
+      
+      const testClearSelectionAction = () => {
         const clearSelectionAction = () => {
           act(() => {
             result.current.handlers.clearSelection();
           });
         };
-
         expect(clearSelectionAction).not.toThrow();
       };
 
@@ -345,8 +356,10 @@ describe('useTextSelection Browser Compatibility', () => {
 
       const testGetComputedStyleImpl = (getComputedStyleImpl: () => any) => {
         setupGetComputedStyleMock(getComputedStyleImpl);
-        testBrowserAPI(() => {}, useTextSelection, containerRef);
+        testBrowserAPI(emptySetup, useTextSelection, containerRef);
       };
+      
+      const emptySetup = () => {};
 
       testCases.forEach(testGetComputedStyleImpl);
     });
