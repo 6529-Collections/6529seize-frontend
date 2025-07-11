@@ -3,7 +3,6 @@ import { useTextSelection } from '../../hooks/useTextSelection';
 import {
   setupTextSelectionTestMocks,
   cleanupTextSelectionMocks,
-  createTestContainer,
   cleanupTestContainer
 } from '../utils/textSelectionTestUtils';
 

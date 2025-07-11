@@ -8,7 +8,9 @@ import {
   createTestContainer,
   cleanupTestContainer,
   createMockRange,
-  createMockTreeWalker
+  createMockTreeWalker,
+  testBrowserScenario,
+  testGetSelectionImplementation
 } from '../utils/textSelectionTestUtils';
 
 // Setup common mocks
@@ -265,7 +267,7 @@ describe('useTextSelection Browser Compatibility', () => {
         { nodeType: Node.COMMENT_NODE, shouldWork: false }
       ];
 
-      testCases.forEach(({ nodeType, shouldWork }) => {
+      const testNodeTypeHandling = ({ nodeType }: { nodeType: number }) => {
         mocks.caretRangeFromPoint.mockReturnValue({
           startContainer: { nodeType },
           startOffset: 0
@@ -282,7 +284,9 @@ describe('useTextSelection Browser Compatibility', () => {
             result.current.handlers.handleMouseDown(mouseEvent);
           });
         }).not.toThrow();
-      });
+      };
+
+      testCases.forEach(testNodeTypeHandling);
     });
   });
 

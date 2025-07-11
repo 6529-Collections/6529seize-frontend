@@ -1,9 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import TextSelectionOverlay from '../../../../components/waves/drops/TextSelectionOverlay';
 import {
   createTestContainer,
-  cleanupTestContainer,
   createMockSelectionState,
   createMockSelectingState,
   setupOverlayEventMocks,
@@ -139,13 +138,6 @@ describe('TextSelectionOverlay', () => {
 
     it('should not add event listeners when container is null', () => {
       const nullRef = { current: null };
-      
-      // Mock addEventListener for this test to track calls
-      const mockAddEventListener = jest.fn();
-      const mockElement = {
-        addEventListener: mockAddEventListener,
-        removeEventListener: jest.fn()
-      };
       
       // Override the mock to return null container
       mockUseTextSelection.mockReturnValue({

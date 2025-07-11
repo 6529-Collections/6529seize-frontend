@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { renderHook, act } from '@testing-library/react';
+import { render, screen, fireEvent, renderHook } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { SelectModeProvider, useSelectMode } from '../../contexts/SelectModeContext';
 
 describe('SelectModeContext', () => {
@@ -71,9 +71,9 @@ describe('SelectModeContext', () => {
       const originalError = console.error;
       console.error = jest.fn();
 
-      expect(() => {
-        renderHook(() => useSelectMode());
-      }).toThrow('useSelectMode must be used within a SelectModeProvider');
+      const renderHookWithoutProvider = () => renderHook(() => useSelectMode());
+
+      expect(renderHookWithoutProvider).toThrow('useSelectMode must be used within a SelectModeProvider');
 
       console.error = originalError;
     });

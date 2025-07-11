@@ -5,8 +5,7 @@ import {
   cleanupTextSelectionMocks,
   createMouseEventWithTarget,
   createTestContainer,
-  cleanupTestContainer,
-  createMockRange
+  cleanupTestContainer
 } from '../utils/textSelectionTestUtils';
 
 // Mock RAF for controlled timing
@@ -532,9 +531,11 @@ describe('useTextSelection Performance Tests', () => {
 
       // Mock slow getComputedStyle
       const slowGetComputedStyle = jest.fn().mockImplementation(() => {
-        // Simulate slow operation
+        // Simulate slow operation with a 1ms delay
         const start = Date.now();
-        while (Date.now() - start < 1) {} // 1ms delay
+        while (Date.now() - start < 1) {
+          // Intentional delay loop
+        }
         return { overflow: 'visible', overflowY: 'visible' };
       });
 

@@ -1,6 +1,7 @@
 /**
  * Shared utilities for text selection tests to reduce code duplication
  */
+import { renderHook, act } from '@testing-library/react';
 
 // Browser mock types
 export type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'legacy';
@@ -29,48 +30,25 @@ export const createBrowserMock = (browserType: BrowserType): MockBrowserAPIs => 
     getComputedStyle: jest.fn()
   };
 
-  switch (browserType) {
-    case 'chrome':
-      // Chrome supports caretRangeFromPoint
-      Object.defineProperty(document, 'caretRangeFromPoint', {
-        value: mocks.caretRangeFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretPositionFromPoint;
-      break;
-
-    case 'firefox':
-      // Firefox supports caretPositionFromPoint
-      Object.defineProperty(document, 'caretPositionFromPoint', {
-        value: mocks.caretPositionFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretRangeFromPoint;
-      break;
-
-    case 'safari':
-      // Safari supports caretRangeFromPoint
-      Object.defineProperty(document, 'caretRangeFromPoint', {
-        value: mocks.caretRangeFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretPositionFromPoint;
-      break;
-
-    case 'edge':
-      // Edge supports caretRangeFromPoint
-      Object.defineProperty(document, 'caretRangeFromPoint', {
-        value: mocks.caretRangeFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretPositionFromPoint;
-      break;
-
-    case 'legacy':
-      // Legacy browser with no caret APIs
-      delete (document as any).caretPositionFromPoint;
-      delete (document as any).caretRangeFromPoint;
-      break;
+  // Configure browser-specific APIs
+  if (browserType === 'firefox') {
+    // Firefox supports caretPositionFromPoint
+    Object.defineProperty(document, 'caretPositionFromPoint', {
+      value: mocks.caretPositionFromPoint,
+      configurable: true
+    });
+    delete (document as any).caretRangeFromPoint;
+  } else if (browserType === 'legacy') {
+    // Legacy browser with no caret APIs
+    delete (document as any).caretPositionFromPoint;
+    delete (document as any).caretRangeFromPoint;
+  } else {
+    // Chrome, Safari, Edge all support caretRangeFromPoint
+    Object.defineProperty(document, 'caretRangeFromPoint', {
+      value: mocks.caretRangeFromPoint,
+      configurable: true
+    });
+    delete (document as any).caretPositionFromPoint;
   }
 
   // Common APIs available in all browsers
@@ -300,4 +278,50 @@ export const createMockMouseEvent = (
   event.preventDefault = jest.fn();
   event.stopPropagation = jest.fn();
   return event;
+};
+
+/**
+ * Test helper to reduce nesting in browser compatibility tests
+ */
+export const testBrowserScenario = (
+  scenario: { name: string; setup: () => void },
+  containerRef: { current: HTMLElement | null },
+  useTextSelection: any
+) => {
+  scenario.setup();
+  
+  const { result } = renderHook(() => useTextSelection(containerRef));
+  
+  const mouseEvent = createMouseEventWithTarget('mousedown', {
+    button: 0,
+    clientX: 100,
+    clientY: 100
+  });
+  
+  expect(() => {
+    act(() => {
+      result.current.handlers.handleMouseDown(mouseEvent);
+    });
+  }).not.toThrow();
+  
+  expect(result.current.state.isSelecting).toBe(true);
+};
+
+/**
+ * Test helper for getSelection implementations
+ */
+export const testGetSelectionImplementation = (
+  getSelectionImpl: () => any,
+  useTextSelection: any,
+  containerRef: { current: HTMLElement | null }
+) => {
+  (window.getSelection as jest.Mock).mockImplementation(getSelectionImpl);
+  
+  const { result } = renderHook(() => useTextSelection(containerRef));
+  
+  expect(() => {
+    act(() => {
+      result.current.handlers.clearSelection();
+    });
+  }).not.toThrow();
 };
