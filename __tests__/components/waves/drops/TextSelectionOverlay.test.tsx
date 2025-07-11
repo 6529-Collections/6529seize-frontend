@@ -1,6 +1,15 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TextSelectionOverlay from '../../../../components/waves/drops/TextSelectionOverlay';
+import {
+  createTestContainer,
+  cleanupTestContainer,
+  createMockSelectionState,
+  createMockSelectingState,
+  setupOverlayEventMocks,
+  createMockKeyboardEvent,
+  createMockMouseEvent
+} from '../../../utils/textSelectionTestUtils';
 
 // Mock the useTextSelection hook
 const mockHandlers = {
@@ -30,15 +39,7 @@ const mockUseTextSelection = require('../../../../hooks/useTextSelection').useTe
 
 // Mock DOM APIs
 beforeAll(() => {
-  // Mock event listener methods
-  Element.prototype.addEventListener = jest.fn();
-  Element.prototype.removeEventListener = jest.fn();
-  Document.prototype.addEventListener = jest.fn();
-  Document.prototype.removeEventListener = jest.fn();
-  
-  // Mock preventDefault and stopPropagation
-  Event.prototype.preventDefault = jest.fn();
-  Event.prototype.stopPropagation = jest.fn();
+  setupOverlayEventMocks();
 });
 
 afterEach(() => {
@@ -62,7 +63,7 @@ describe('TextSelectionOverlay', () => {
   let mockContainer: HTMLDivElement;
 
   beforeEach(() => {
-    mockContainer = document.createElement('div');
+    mockContainer = createTestContainer('overlay-test');
     mockContainer.setAttribute('data-testid', 'container');
     containerRef = { current: mockContainer };
   });
@@ -170,17 +171,7 @@ describe('TextSelectionOverlay', () => {
       const { rerender } = renderComponent();
       
       // Set up active selection state with text
-      const stateWithSelection = {
-        isSelecting: false,
-        selection: {
-          startX: 100,
-          startY: 100,
-          endX: 200,
-          endY: 120,
-          text: 'selected text'
-        },
-        highlightSpans: []
-      };
+      const stateWithSelection = createMockSelectionState();
       
       // Update the mock to return the new state
       mockUseTextSelection.mockReturnValue({
@@ -204,10 +195,7 @@ describe('TextSelectionOverlay', () => {
 
       expect(captureHandler).toBeDefined();
 
-      const rightClickEvent = new MouseEvent('mousedown', { button: 2 });
-      // Mock preventDefault and stopPropagation for this specific event
-      rightClickEvent.preventDefault = jest.fn();
-      rightClickEvent.stopPropagation = jest.fn();
+      const rightClickEvent = createMockMouseEvent('mousedown', 2);
       
       captureHandler(rightClickEvent);
 
@@ -264,17 +252,7 @@ describe('TextSelectionOverlay', () => {
       const { rerender } = renderComponent();
       
       // Set up active selection state with text
-      const stateWithSelection = {
-        isSelecting: false,
-        selection: {
-          startX: 100,
-          startY: 100,
-          endX: 200,
-          endY: 120,
-          text: 'selected text'
-        },
-        highlightSpans: []
-      };
+      const stateWithSelection = createMockSelectionState();
       
       // Update the mock to return the new state
       mockUseTextSelection.mockReturnValue({
@@ -296,9 +274,7 @@ describe('TextSelectionOverlay', () => {
         .pop(); // Get the most recent one
       const contextMenuHandler = contextMenuHandlerCall?.[1];
 
-      const contextMenuEvent = new MouseEvent('contextmenu');
-      // Mock stopPropagation for this specific event
-      contextMenuEvent.stopPropagation = jest.fn();
+      const contextMenuEvent = createMockMouseEvent('contextmenu');
       
       contextMenuHandler(contextMenuEvent);
 
@@ -308,11 +284,7 @@ describe('TextSelectionOverlay', () => {
 
     it('should handle selectstart during active selection', () => {
       // Set up selecting state
-      const selectingState = {
-        isSelecting: true,
-        selection: null,
-        highlightSpans: []
-      };
+      const selectingState = createMockSelectingState();
       
       // Update the mock to return the selecting state
       mockUseTextSelection.mockReturnValue({
@@ -338,11 +310,7 @@ describe('TextSelectionOverlay', () => {
 
     it('should not prevent selectstart on interactive elements', () => {
       // Set up selecting state
-      const selectingState = {
-        isSelecting: true,
-        selection: null,
-        highlightSpans: []
-      };
+      const selectingState = createMockSelectingState();
       
       // Update the mock to return the selecting state
       mockUseTextSelection.mockReturnValue({
@@ -372,11 +340,7 @@ describe('TextSelectionOverlay', () => {
 
     it('should handle mouse move during selection', () => {
       // Set up selecting state
-      const selectingState = {
-        isSelecting: true,
-        selection: null,
-        highlightSpans: []
-      };
+      const selectingState = createMockSelectingState();
       
       // Update the mock to return the selecting state
       mockUseTextSelection.mockReturnValue({
@@ -389,9 +353,7 @@ describe('TextSelectionOverlay', () => {
       const mouseMoveHandler = (Document.prototype.addEventListener as jest.Mock).mock.calls
         .find(call => call[0] === 'mousemove')?.[1];
 
-      const mouseMoveEvent = new MouseEvent('mousemove');
-      // Mock preventDefault for this specific event
-      mouseMoveEvent.preventDefault = jest.fn();
+      const mouseMoveEvent = createMockMouseEvent('mousemove');
       
       mouseMoveHandler(mouseMoveEvent);
 
@@ -405,9 +367,7 @@ describe('TextSelectionOverlay', () => {
       const mouseMoveHandler = (Document.prototype.addEventListener as jest.Mock).mock.calls
         .find(call => call[0] === 'mousemove')?.[1];
 
-      const mouseMoveEvent = new MouseEvent('mousemove');
-      // Mock preventDefault for this specific event
-      mouseMoveEvent.preventDefault = jest.fn();
+      const mouseMoveEvent = createMockMouseEvent('mousemove');
       
       mouseMoveHandler(mouseMoveEvent);
 
@@ -431,17 +391,7 @@ describe('TextSelectionOverlay', () => {
   describe('keyboard shortcuts', () => {
     it('should handle Ctrl+C copy shortcut', () => {
       // Set up active selection state with text
-      const stateWithSelection = {
-        isSelecting: false,
-        selection: {
-          startX: 100,
-          startY: 100,
-          endX: 200,
-          endY: 120,
-          text: 'selected text'
-        },
-        highlightSpans: []
-      };
+      const stateWithSelection = createMockSelectionState();
       
       // Update the mock to return the new state
       mockUseTextSelection.mockReturnValue({
@@ -454,12 +404,7 @@ describe('TextSelectionOverlay', () => {
       const keyDownHandler = (Document.prototype.addEventListener as jest.Mock).mock.calls
         .find(call => call[0] === 'keydown')?.[1];
 
-      const ctrlCEvent = new KeyboardEvent('keydown', {
-        ctrlKey: true,
-        key: 'c'
-      });
-      // Mock preventDefault for this specific event
-      ctrlCEvent.preventDefault = jest.fn();
+      const ctrlCEvent = createMockKeyboardEvent('c', { ctrlKey: true });
 
       keyDownHandler(ctrlCEvent);
 
@@ -469,17 +414,7 @@ describe('TextSelectionOverlay', () => {
 
     it('should handle Cmd+C copy shortcut on Mac', () => {
       // Set up active selection state with text
-      const stateWithSelection = {
-        isSelecting: false,
-        selection: {
-          startX: 100,
-          startY: 100,
-          endX: 200,
-          endY: 120,
-          text: 'selected text'
-        },
-        highlightSpans: []
-      };
+      const stateWithSelection = createMockSelectionState();
       
       // Update the mock to return the new state
       mockUseTextSelection.mockReturnValue({
@@ -492,12 +427,7 @@ describe('TextSelectionOverlay', () => {
       const keyDownHandler = (Document.prototype.addEventListener as jest.Mock).mock.calls
         .find(call => call[0] === 'keydown')?.[1];
 
-      const cmdCEvent = new KeyboardEvent('keydown', {
-        metaKey: true,
-        key: 'c'
-      });
-      // Mock preventDefault for this specific event
-      cmdCEvent.preventDefault = jest.fn();
+      const cmdCEvent = createMockKeyboardEvent('c', { metaKey: true });
 
       keyDownHandler(cmdCEvent);
 
@@ -507,17 +437,7 @@ describe('TextSelectionOverlay', () => {
 
     it('should handle Escape key to clear selection', () => {
       // Set up active selection state with text
-      const stateWithSelection = {
-        isSelecting: false,
-        selection: {
-          startX: 100,
-          startY: 100,
-          endX: 200,
-          endY: 120,
-          text: 'selected text'
-        },
-        highlightSpans: []
-      };
+      const stateWithSelection = createMockSelectionState();
       
       // Update the mock to return the new state
       mockUseTextSelection.mockReturnValue({
@@ -530,11 +450,7 @@ describe('TextSelectionOverlay', () => {
       const keyDownHandler = (Document.prototype.addEventListener as jest.Mock).mock.calls
         .find(call => call[0] === 'keydown')?.[1];
 
-      const escapeEvent = new KeyboardEvent('keydown', {
-        key: 'Escape'
-      });
-      // Mock preventDefault for this specific event
-      escapeEvent.preventDefault = jest.fn();
+      const escapeEvent = createMockKeyboardEvent('Escape');
 
       keyDownHandler(escapeEvent);
 
@@ -548,12 +464,7 @@ describe('TextSelectionOverlay', () => {
       const keyDownHandler = (Document.prototype.addEventListener as jest.Mock).mock.calls
         .find(call => call[0] === 'keydown')?.[1];
 
-      const ctrlCEvent = new KeyboardEvent('keydown', {
-        ctrlKey: true,
-        key: 'c'
-      });
-      // Mock preventDefault for this specific event
-      ctrlCEvent.preventDefault = jest.fn();
+      const ctrlCEvent = createMockKeyboardEvent('c', { ctrlKey: true });
 
       keyDownHandler(ctrlCEvent);
 
@@ -563,17 +474,7 @@ describe('TextSelectionOverlay', () => {
 
     it('should ignore non-shortcut keys', () => {
       // Set up active selection state with text
-      const stateWithSelection = {
-        isSelecting: false,
-        selection: {
-          startX: 100,
-          startY: 100,
-          endX: 200,
-          endY: 120,
-          text: 'selected text'
-        },
-        highlightSpans: []
-      };
+      const stateWithSelection = createMockSelectionState();
       
       // Update the mock to return the new state
       mockUseTextSelection.mockReturnValue({
@@ -586,11 +487,7 @@ describe('TextSelectionOverlay', () => {
       const keyDownHandler = (Document.prototype.addEventListener as jest.Mock).mock.calls
         .find(call => call[0] === 'keydown')?.[1];
 
-      const regularKeyEvent = new KeyboardEvent('keydown', {
-        key: 'a'
-      });
-      // Mock preventDefault for this specific event
-      regularKeyEvent.preventDefault = jest.fn();
+      const regularKeyEvent = createMockKeyboardEvent('a');
 
       keyDownHandler(regularKeyEvent);
 

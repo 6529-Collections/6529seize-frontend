@@ -1,5 +1,13 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTextSelection } from '../../hooks/useTextSelection';
+import {
+  setupTextSelectionTestMocks,
+  cleanupTextSelectionMocks,
+  createMouseEventWithTarget,
+  createTestContainer,
+  cleanupTestContainer,
+  createMockRange
+} from '../utils/textSelectionTestUtils';
 
 // Mock RAF for controlled timing
 const mockRequestAnimationFrame = jest.fn();
@@ -9,6 +17,8 @@ const mockCancelAnimationFrame = jest.fn();
 const mockPerformanceNow = jest.fn();
 
 beforeAll(() => {
+  setupTextSelectionTestMocks();
+  
   global.requestAnimationFrame = mockRequestAnimationFrame;
   global.cancelAnimationFrame = mockCancelAnimationFrame;
   
@@ -16,50 +26,10 @@ beforeAll(() => {
     value: mockPerformanceNow,
     configurable: true
   });
-
-  // Mock DOM APIs
-  Object.defineProperty(document, 'createRange', {
-    value: jest.fn(() => ({
-      selectNodeContents: jest.fn(),
-      getBoundingClientRect: jest.fn(() => ({
-        left: 0, right: 100, top: 0, bottom: 20, width: 100, height: 20
-      })),
-      collapsed: false,
-      toString: jest.fn(() => 'text')
-    })),
-    configurable: true
-  });
-
-  Object.defineProperty(document, 'createTreeWalker', {
-    value: jest.fn(() => ({
-      nextNode: jest.fn().mockReturnValue(null)
-    })),
-    configurable: true
-  });
-
-  Object.defineProperty(document, 'elementFromPoint', {
-    value: jest.fn(),
-    configurable: true
-  });
-
-  Object.defineProperty(window, 'getComputedStyle', {
-    value: jest.fn(() => ({ overflow: 'visible', overflowY: 'visible' })),
-    configurable: true
-  });
-
-  Object.defineProperty(window, 'getSelection', {
-    value: jest.fn(() => ({
-      removeAllRanges: jest.fn(),
-      addRange: jest.fn(),
-      rangeCount: 0,
-      empty: jest.fn()
-    })),
-    configurable: true
-  });
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  cleanupTextSelectionMocks();
 });
 
 describe('useTextSelection Performance Tests', () => {
@@ -67,14 +37,12 @@ describe('useTextSelection Performance Tests', () => {
   let mockContainer: HTMLElement;
 
   beforeEach(() => {
-    mockContainer = document.createElement('div');
+    mockContainer = createTestContainer('performance-test');
     containerRef = { current: mockContainer };
   });
 
   afterEach(() => {
-    if (mockContainer && document.body.contains(mockContainer)) {
-      document.body.removeChild(mockContainer);
-    }
+    cleanupTestContainer(mockContainer);
   });
 
   describe('Large DOM tree handling', () => {
@@ -104,18 +72,10 @@ describe('useTextSelection Performance Tests', () => {
       mockPerformanceNow.mockReturnValue(initEndTime);
 
       // Test mouse events on large DOM
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       const eventStartTime = initEndTime + 1;
@@ -154,18 +114,10 @@ describe('useTextSelection Performance Tests', () => {
       const { result } = renderHook(() => useTextSelection(containerRef));
 
       // Should handle deep nesting without stack overflow
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       expect(() => {
@@ -198,18 +150,10 @@ describe('useTextSelection Performance Tests', () => {
       const startTime = performance.now();
       mockPerformanceNow.mockReturnValue(startTime);
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       act(() => {
@@ -226,18 +170,10 @@ describe('useTextSelection Performance Tests', () => {
       const { result } = renderHook(() => useTextSelection(containerRef));
 
       // Start selection
-      const startMouseEvent = new MouseEvent('mousedown', {
+      const startMouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(startMouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       act(() => {
@@ -278,18 +214,10 @@ describe('useTextSelection Performance Tests', () => {
         return 1;
       });
 
-      const startMouseEvent = new MouseEvent('mousedown', {
+      const startMouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(startMouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       act(() => {
@@ -368,18 +296,10 @@ describe('useTextSelection Performance Tests', () => {
 
       // Simulate repeated selection operations
       for (let i = 0; i < 100; i++) {
-        const mouseDownEvent = new MouseEvent('mousedown', {
+        const mouseDownEvent = createMouseEventWithTarget('mousedown', {
           button: 0,
           clientX: 100 + i,
           clientY: 100 + i
-        });
-        
-        // Add target property to the event
-        const targetElement = document.createElement('div');
-        targetElement.closest = jest.fn().mockReturnValue(null);
-        Object.defineProperty(mouseDownEvent, 'target', {
-          value: targetElement,
-          configurable: true
         });
 
         act(() => {
@@ -445,18 +365,10 @@ describe('useTextSelection Performance Tests', () => {
         document.body.appendChild(container);
 
         // Trigger some events
-        const mouseEvent = new MouseEvent('mousedown', {
+        const mouseEvent = createMouseEventWithTarget('mousedown', {
           button: 0,
           clientX: 100,
           clientY: 100
-        });
-        
-        // Add target property to the event
-        const targetElement = document.createElement('div');
-        targetElement.closest = jest.fn().mockReturnValue(null);
-        Object.defineProperty(mouseEvent, 'target', {
-          value: targetElement,
-          configurable: true
         });
 
         act(() => {
@@ -518,18 +430,10 @@ describe('useTextSelection Performance Tests', () => {
       });
 
       // Create a valid selection first by simulating mouse events
-      const startEvent = new MouseEvent('mousedown', {
+      const startEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(startEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       // Start selection
@@ -605,18 +509,10 @@ describe('useTextSelection Performance Tests', () => {
         mockPerformanceNow.mockReturnValue(startTime);
 
         // Test performance consistency
-        const mouseEvent = new MouseEvent('mousedown', {
+        const mouseEvent = createMouseEventWithTarget('mousedown', {
           button: 0,
           clientX: 100,
           clientY: 100
-        });
-        
-        // Add target property to the event
-        const targetElement = document.createElement('div');
-        targetElement.closest = jest.fn().mockReturnValue(null);
-        Object.defineProperty(mouseEvent, 'target', {
-          value: targetElement,
-          configurable: true
         });
 
         act(() => {
@@ -651,18 +547,10 @@ describe('useTextSelection Performance Tests', () => {
       mockPerformanceNow.mockReturnValue(startTime);
 
       // Should still perform adequately with slow DOM APIs
-      const slowEvent = new MouseEvent('mousedown', {
+      const slowEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(slowEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
       
       act(() => {

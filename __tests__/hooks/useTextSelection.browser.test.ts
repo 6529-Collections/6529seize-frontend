@@ -1,102 +1,23 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTextSelection } from '../../hooks/useTextSelection';
+import {
+  createBrowserMock,
+  setupTextSelectionTestMocks,
+  cleanupTextSelectionMocks,
+  createMouseEventWithTarget,
+  createTestContainer,
+  cleanupTestContainer,
+  createMockRange,
+  createMockTreeWalker
+} from '../utils/textSelectionTestUtils';
 
-// Mock browser-specific APIs for different browser scenarios
-const createBrowserMock = (browserType: 'chrome' | 'firefox' | 'safari' | 'edge' | 'legacy') => {
-  const mocks = {
-    caretPositionFromPoint: jest.fn(),
-    caretRangeFromPoint: jest.fn(),
-    createRange: jest.fn(),
-    createTreeWalker: jest.fn(),
-    elementFromPoint: jest.fn(),
-    getSelection: jest.fn(),
-    getComputedStyle: jest.fn()
-  };
-
-  switch (browserType) {
-    case 'chrome':
-      // Chrome supports caretRangeFromPoint
-      Object.defineProperty(document, 'caretRangeFromPoint', {
-        value: mocks.caretRangeFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretPositionFromPoint;
-      break;
-
-    case 'firefox':
-      // Firefox supports caretPositionFromPoint
-      Object.defineProperty(document, 'caretPositionFromPoint', {
-        value: mocks.caretPositionFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretRangeFromPoint;
-      break;
-
-    case 'safari':
-      // Safari supports caretRangeFromPoint
-      Object.defineProperty(document, 'caretRangeFromPoint', {
-        value: mocks.caretRangeFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretPositionFromPoint;
-      break;
-
-    case 'edge':
-      // Edge supports caretRangeFromPoint
-      Object.defineProperty(document, 'caretRangeFromPoint', {
-        value: mocks.caretRangeFromPoint,
-        configurable: true
-      });
-      delete (document as any).caretPositionFromPoint;
-      break;
-
-    case 'legacy':
-      // Legacy browser with no caret APIs
-      delete (document as any).caretPositionFromPoint;
-      delete (document as any).caretRangeFromPoint;
-      break;
-  }
-
-  // Common APIs available in all browsers
-  Object.defineProperty(document, 'createRange', {
-    value: mocks.createRange,
-    configurable: true
-  });
-
-  Object.defineProperty(document, 'createTreeWalker', {
-    value: mocks.createTreeWalker,
-    configurable: true
-  });
-
-  Object.defineProperty(document, 'elementFromPoint', {
-    value: mocks.elementFromPoint,
-    configurable: true
-  });
-
-  Object.defineProperty(window, 'getSelection', {
-    value: mocks.getSelection,
-    configurable: true
-  });
-
-  Object.defineProperty(window, 'getComputedStyle', {
-    value: mocks.getComputedStyle,
-    configurable: true
-  });
-
-  return mocks;
-};
-
-// Mock RAF for all tests
+// Setup common mocks
 beforeAll(() => {
-  global.requestAnimationFrame = jest.fn((cb) => {
-    cb(0);
-    return 0;
-  });
-  global.cancelAnimationFrame = jest.fn();
+  setupTextSelectionTestMocks();
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  cleanupTextSelectionMocks();
 });
 
 describe('useTextSelection Browser Compatibility', () => {
@@ -104,20 +25,12 @@ describe('useTextSelection Browser Compatibility', () => {
   let mockContainer: HTMLElement;
 
   beforeEach(() => {
-    mockContainer = document.createElement('div');
-    mockContainer.innerHTML = `
-      <div class="tw-group" data-drop-id="drop1">
-        <p>Sample text content for testing</p>
-      </div>
-    `;
-    document.body.appendChild(mockContainer);
+    mockContainer = createTestContainer('drop1');
     containerRef = { current: mockContainer };
   });
 
   afterEach(() => {
-    if (mockContainer && document.body.contains(mockContainer)) {
-      document.body.removeChild(mockContainer);
-    }
+    cleanupTestContainer(mockContainer);
   });
 
   describe('Chrome browser compatibility', () => {
@@ -135,16 +48,10 @@ describe('useTextSelection Browser Compatibility', () => {
         startOffset: 5
       });
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      Object.defineProperty(mouseEvent, 'target', {
-        value: document.createElement('div'),
-        configurable: true
       });
 
       act(() => {
@@ -161,16 +68,10 @@ describe('useTextSelection Browser Compatibility', () => {
       mocks.caretRangeFromPoint.mockReturnValue(null);
       mocks.elementFromPoint.mockReturnValue(document.createElement('div'));
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      Object.defineProperty(mouseEvent, 'target', {
-        value: document.createElement('div'),
-        configurable: true
       });
 
       expect(() => {
@@ -195,18 +96,10 @@ describe('useTextSelection Browser Compatibility', () => {
         offset: 3
       });
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       act(() => {
@@ -223,18 +116,10 @@ describe('useTextSelection Browser Compatibility', () => {
       mocks.caretPositionFromPoint.mockReturnValue(null);
       mocks.elementFromPoint.mockReturnValue(document.createElement('div'));
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       expect(() => {
@@ -259,18 +144,10 @@ describe('useTextSelection Browser Compatibility', () => {
         startOffset: 2
       });
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       act(() => {
@@ -290,18 +167,10 @@ describe('useTextSelection Browser Compatibility', () => {
         startOffset: 0
       });
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       expect(() => {
@@ -327,17 +196,8 @@ describe('useTextSelection Browser Compatibility', () => {
       mockElement.appendChild(mockTextNode);
 
       mocks.elementFromPoint.mockReturnValue(mockElement);
-
-      const mockTreeWalker = {
-        nextNode: jest.fn()
-          .mockReturnValueOnce(mockTextNode)
-          .mockReturnValue(null)
-      };
-
-      mocks.createTreeWalker.mockReturnValue(mockTreeWalker);
-
-      const mockRange = {
-        selectNodeContents: jest.fn(),
+      mocks.createTreeWalker.mockReturnValue(createMockTreeWalker(mockTextNode));
+      mocks.createRange.mockReturnValue(createMockRange({
         getBoundingClientRect: jest.fn(() => ({
           left: 90,
           right: 110,
@@ -346,22 +206,12 @@ describe('useTextSelection Browser Compatibility', () => {
           width: 20,
           height: 20
         }))
-      };
+      }));
 
-      mocks.createRange.mockReturnValue(mockRange);
-
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       expect(() => {
@@ -386,18 +236,10 @@ describe('useTextSelection Browser Compatibility', () => {
         throw new Error('Range not supported');
       });
 
-      const mouseEvent = new MouseEvent('mousedown', {
+      const mouseEvent = createMouseEventWithTarget('mousedown', {
         button: 0,
         clientX: 100,
         clientY: 100
-      });
-      
-      // Add target property to the event
-      const targetElement = document.createElement('div');
-      targetElement.closest = jest.fn().mockReturnValue(null);
-      Object.defineProperty(mouseEvent, 'target', {
-        value: targetElement,
-        configurable: true
       });
 
       expect(() => {
@@ -429,16 +271,10 @@ describe('useTextSelection Browser Compatibility', () => {
           startOffset: 0
         });
 
-        const mouseEvent = new MouseEvent('mousedown', {
+        const mouseEvent = createMouseEventWithTarget('mousedown', {
           button: 0,
           clientX: 100,
           clientY: 100
-        });
-        
-        // Add target property to the event
-        Object.defineProperty(mouseEvent, 'target', {
-          value: document.createElement('div'),
-          configurable: true
         });
 
         expect(() => {

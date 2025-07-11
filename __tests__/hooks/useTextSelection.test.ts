@@ -1,5 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTextSelection } from '../../hooks/useTextSelection';
+import {
+  setupTextSelectionTestMocks,
+  cleanupTextSelectionMocks,
+  createTestContainer,
+  cleanupTestContainer
+} from '../utils/textSelectionTestUtils';
 
 // Mock DOM APIs that aren't available in jsdom
 const mockCaretPositionFromPoint = jest.fn();
@@ -10,7 +16,9 @@ const mockCreateTreeWalker = jest.fn();
 
 // Setup DOM mocks
 beforeAll(() => {
-  // Mock browser APIs
+  setupTextSelectionTestMocks();
+  
+  // Override with specific mocks for this test file
   Object.defineProperty(document, 'caretPositionFromPoint', {
     value: mockCaretPositionFromPoint,
     configurable: true
@@ -36,34 +44,14 @@ beforeAll(() => {
     configurable: true
   });
 
-  // Mock getSelection
-  Object.defineProperty(window, 'getSelection', {
-    value: jest.fn(() => ({
-      removeAllRanges: jest.fn(),
-      addRange: jest.fn(),
-      rangeCount: 0,
-      empty: jest.fn()
-    })),
-    configurable: true
-  });
-
-  // Mock elementFromPoint
   Object.defineProperty(document, 'elementFromPoint', {
     value: jest.fn(),
     configurable: true
   });
-
-  // Mock requestAnimationFrame
-  global.requestAnimationFrame = jest.fn((cb) => {
-    cb(0);
-    return 0;
-  });
-
-  global.cancelAnimationFrame = jest.fn();
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  cleanupTextSelectionMocks();
 });
 
 describe('useTextSelection', () => {
@@ -71,7 +59,7 @@ describe('useTextSelection', () => {
   let mockContainer: HTMLElement;
 
   beforeEach(() => {
-    // Create a mock container element
+    // Create a mock container element with multiple drops
     mockContainer = document.createElement('div');
     mockContainer.innerHTML = `
       <div class="tw-group" data-drop-id="drop1">
@@ -87,9 +75,7 @@ describe('useTextSelection', () => {
   });
 
   afterEach(() => {
-    if (mockContainer && document.body.contains(mockContainer)) {
-      document.body.removeChild(mockContainer);
-    }
+    cleanupTestContainer(mockContainer);
   });
 
   describe('initialization', () => {
