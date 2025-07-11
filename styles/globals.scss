@@ -35,6 +35,39 @@
       -ms-user-select: none;
     }
   }
+
+  /* Custom selection mode for drops area */
+  .drops-custom-selection {
+    /* Default cursor for the container */
+    cursor: default;
+    
+    /* Text cursor only on actual text content elements */
+    p, h1, h2, h3, h4, h5, h6, li, code, 
+    span.tw-align-middle, span.emoji-text-node,
+    span:not(.emoji-node):not(.emoji-node-big) {
+      cursor: text;
+    }
+    
+    /* Ensure links and buttons remain clickable and allow selection in them */
+    a, button, input, textarea, select {
+      cursor: pointer !important;
+      user-select: auto;
+      -webkit-user-select: auto;
+      -moz-user-select: auto;
+      -ms-user-select: auto;
+    }
+  }
+
+  /* Custom text highlight styling - higher specificity */
+  span.custom-text-highlight,
+  .drops-custom-selection span.custom-text-highlight {
+    background: rgba(30, 144, 255, 0.3) !important;
+    /* Split the background into independent fragments per line to prevent overlaps */
+    box-decoration-break: clone !important;
+    -webkit-box-decoration-break: clone !important;
+    /* Prevent highlight from interfering with hover states */
+    pointer-events: none !important;
+  }
 }
 
 #seize-web3-network-switch {
