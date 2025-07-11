@@ -264,7 +264,6 @@ export function useWaveRealtimeUpdater({
         // Mark that tab just became visible, eligibility will be refreshed
         // on the next WebSocket message for any wave
         tabJustBecameVisibleRef.current = true;
-        console.log("[WaveRealtimeUpdater] Tab became visible, will refresh eligibility on next message");
       }
     };
 

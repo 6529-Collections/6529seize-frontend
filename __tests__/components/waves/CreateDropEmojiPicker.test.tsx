@@ -54,7 +54,10 @@ describe("CreateDropEmojiPicker", () => {
   const mockUseLexical = useLexicalComposerContext as jest.Mock;
 
   // Fake editor: update is a no-op function (does not execute callback)
-  const fakeEditor = { update: jest.fn() };
+  const fakeEditor = { 
+    update: jest.fn(),
+    focus: jest.fn()
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -131,6 +134,10 @@ describe("CreateDropEmojiPicker", () => {
 
   it("uses mobile dialog on mobile screens and inserts emoji", async () => {
     mockUseIsMobile.mockReturnValue(true);
+    
+    // Clear the mock call count before this test
+    fakeEditor.update.mockClear();
+    
     render(<CreateDropEmojiPicker />);
     const toggleButton = screen.getByRole("button", { hidden: true });
 
