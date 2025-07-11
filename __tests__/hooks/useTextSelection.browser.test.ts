@@ -140,6 +140,15 @@ describe('useTextSelection Browser Compatibility', () => {
     it('should work without modern caret APIs', () => {
       const mocks = createBrowserMock('legacy');
       
+      const createMockBoundingClientRect = () => ({
+        left: 90,
+        right: 110,
+        top: 90,
+        bottom: 110,
+        width: 20,
+        height: 20
+      });
+      
       const setupLegacyFallback = () => {
         // Setup fallback mocks
         const mockElement = document.createElement('div');
@@ -148,14 +157,7 @@ describe('useTextSelection Browser Compatibility', () => {
 
         mocks.elementFromPoint.mockReturnValue(mockElement);
         mocks.createTreeWalker.mockReturnValue(createMockTreeWalker(mockTextNode));
-        const mockBoundingClientRect = jest.fn(() => ({
-          left: 90,
-          right: 110,
-          top: 90,
-          bottom: 110,
-          width: 20,
-          height: 20
-        }));
+        const mockBoundingClientRect = jest.fn(createMockBoundingClientRect);
         
         mocks.createRange.mockReturnValue(createMockRange({
           getBoundingClientRect: mockBoundingClientRect
@@ -215,11 +217,13 @@ describe('useTextSelection Browser Compatibility', () => {
           clientY: 100
         });
 
-        expect(() => {
+        const handleMouseDownAction = () => {
           act(() => {
             result.current.handlers.handleMouseDown(mouseEvent);
           });
-        }).not.toThrow();
+        };
+
+        expect(handleMouseDownAction).not.toThrow();
       };
 
       testCases.forEach(testNodeTypeHandling);
@@ -269,39 +273,42 @@ describe('useTextSelection Browser Compatibility', () => {
     it('should handle different range implementations', () => {
       const mocks = createBrowserMock('chrome');
       
-      // Test different range behaviors
-      const mockRanges = [
-        // Standard range
-        {
+      const createErrorRange = () => {
+        const throwBoundingClientRectError = () => {
+          throw new Error('getBoundingClientRect failed');
+        };
+        
+        return {
           selectNodeContents: jest.fn(),
-          getBoundingClientRect: jest.fn(() => ({
-            left: 0, right: 100, top: 0, bottom: 20, width: 100, height: 20
-          })),
+          getBoundingClientRect: jest.fn(throwBoundingClientRectError),
           collapsed: false,
           toString: jest.fn(() => 'text')
-        },
-        // Range that throws on getBoundingClientRect (some edge cases)
-        (() => {
-          const throwBoundingClientRectError = () => {
-            throw new Error('getBoundingClientRect failed');
-          };
-          
-          return {
-            selectNodeContents: jest.fn(),
-            getBoundingClientRect: jest.fn(throwBoundingClientRectError),
-            collapsed: false,
-            toString: jest.fn(() => 'text')
-          };
-        })(),
-        // Collapsed range
-        {
-          selectNodeContents: jest.fn(),
-          getBoundingClientRect: jest.fn(() => ({
-            left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0
-          })),
-          collapsed: true,
-          toString: jest.fn(() => '')
-        }
+        };
+      };
+
+      const createStandardRange = () => ({
+        selectNodeContents: jest.fn(),
+        getBoundingClientRect: jest.fn(() => ({
+          left: 0, right: 100, top: 0, bottom: 20, width: 100, height: 20
+        })),
+        collapsed: false,
+        toString: jest.fn(() => 'text')
+      });
+
+      const createCollapsedRange = () => ({
+        selectNodeContents: jest.fn(),
+        getBoundingClientRect: jest.fn(() => ({
+          left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0
+        })),
+        collapsed: true,
+        toString: jest.fn(() => '')
+      });
+
+      // Test different range behaviors
+      const mockRanges = [
+        createStandardRange(),
+        createErrorRange(),
+        createCollapsedRange()
       ];
 
       const testRangeImplementation = (mockRange: any) => {
@@ -332,12 +339,13 @@ describe('useTextSelection Browser Compatibility', () => {
         () => null
       ];
 
+      const setupGetComputedStyleMock = (getComputedStyleImpl: () => any) => {
+        mocks.getComputedStyle.mockImplementation(getComputedStyleImpl);
+      };
+
       const testGetComputedStyleImpl = (getComputedStyleImpl: () => any) => {
-        const setupGetComputedStyle = () => {
-          mocks.getComputedStyle.mockImplementation(getComputedStyleImpl);
-        };
-        
-        testBrowserAPI(setupGetComputedStyle, useTextSelection, containerRef);
+        setupGetComputedStyleMock(getComputedStyleImpl);
+        testBrowserAPI(() => {}, useTextSelection, containerRef);
       };
 
       testCases.forEach(testGetComputedStyleImpl);
