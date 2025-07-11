@@ -148,15 +148,17 @@ describe('useTextSelection Browser Compatibility', () => {
 
         mocks.elementFromPoint.mockReturnValue(mockElement);
         mocks.createTreeWalker.mockReturnValue(createMockTreeWalker(mockTextNode));
+        const mockBoundingClientRect = jest.fn(() => ({
+          left: 90,
+          right: 110,
+          top: 90,
+          bottom: 110,
+          width: 20,
+          height: 20
+        }));
+        
         mocks.createRange.mockReturnValue(createMockRange({
-          getBoundingClientRect: jest.fn(() => ({
-            left: 90,
-            right: 110,
-            top: 90,
-            bottom: 110,
-            width: 20,
-            height: 20
-          }))
+          getBoundingClientRect: mockBoundingClientRect
         }));
       };
 
@@ -167,15 +169,19 @@ describe('useTextSelection Browser Compatibility', () => {
     it('should handle complete API unavailability gracefully', () => {
       const mocks = createBrowserMock('legacy');
       
+      const throwTreeWalkerError = () => {
+        throw new Error('TreeWalker not supported');
+      };
+      
+      const throwRangeError = () => {
+        throw new Error('Range not supported');
+      };
+      
       const setupUnavailableAPIs = () => {
         // Mock all APIs to be unavailable or throw errors
         mocks.elementFromPoint.mockReturnValue(null);
-        mocks.createTreeWalker.mockImplementation(() => {
-          throw new Error('TreeWalker not supported');
-        });
-        mocks.createRange.mockImplementation(() => {
-          throw new Error('Range not supported');
-        });
+        mocks.createTreeWalker.mockImplementation(throwTreeWalkerError);
+        mocks.createRange.mockImplementation(throwRangeError);
       };
 
       const result = testBrowserAPI(setupUnavailableAPIs, useTextSelection, containerRef);
@@ -246,11 +252,13 @@ describe('useTextSelection Browser Compatibility', () => {
       const testGetSelectionImpl = (getSelectionImpl: () => any) => {
         (window.getSelection as jest.Mock).mockImplementation(getSelectionImpl);
 
-        expect(() => {
+        const clearSelectionAction = () => {
           act(() => {
             result.current.handlers.clearSelection();
           });
-        }).not.toThrow();
+        };
+
+        expect(clearSelectionAction).not.toThrow();
       };
 
       testCases.forEach(testGetSelectionImpl);
@@ -273,14 +281,18 @@ describe('useTextSelection Browser Compatibility', () => {
           toString: jest.fn(() => 'text')
         },
         // Range that throws on getBoundingClientRect (some edge cases)
-        {
-          selectNodeContents: jest.fn(),
-          getBoundingClientRect: jest.fn(() => {
+        (() => {
+          const throwBoundingClientRectError = () => {
             throw new Error('getBoundingClientRect failed');
-          }),
-          collapsed: false,
-          toString: jest.fn(() => 'text')
-        },
+          };
+          
+          return {
+            selectNodeContents: jest.fn(),
+            getBoundingClientRect: jest.fn(throwBoundingClientRectError),
+            collapsed: false,
+            toString: jest.fn(() => 'text')
+          };
+        })(),
         // Collapsed range
         {
           selectNodeContents: jest.fn(),

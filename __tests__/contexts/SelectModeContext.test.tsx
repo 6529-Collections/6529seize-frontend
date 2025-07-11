@@ -142,7 +142,7 @@ describe('SelectModeContext', () => {
       const originalError = console.error;
       console.error = jest.fn();
 
-      const renderHookWithoutProvider = () => renderHook(() => useSelectMode());
+      const renderHookWithoutProvider = () => renderHook(useSelectMode);
 
       expect(renderHookWithoutProvider).toThrow('useSelectMode must be used within a SelectModeProvider');
 

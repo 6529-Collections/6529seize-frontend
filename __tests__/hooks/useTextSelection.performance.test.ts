@@ -120,11 +120,13 @@ describe('useTextSelection Performance Tests', () => {
         clientY: 100
       });
 
-      expect(() => {
+      const handleMouseDownAction = () => {
         act(() => {
           result.current.handlers.handleMouseDown(mouseEvent);
         });
-      }).not.toThrow();
+      };
+
+      expect(handleMouseDownAction).not.toThrow();
     });
 
     it('should efficiently process large amounts of text content', () => {
