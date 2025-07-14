@@ -62,6 +62,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
             key={drop.id}
             drop={drop}
             onDropClick={onDropClick}
+            activeSort={sort}
           />
         ))}
 

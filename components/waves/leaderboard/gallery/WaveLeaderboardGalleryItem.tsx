@@ -16,16 +16,18 @@ import VotingModalButton from "../../../../components/voting/VotingModalButton";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly artFocused?: boolean; // New prop to activate art-focused mode
+  readonly activeSort?: WaveDropsLeaderboardSort;
 }
 
 export const WaveLeaderboardGalleryItem: React.FC<
   WaveLeaderboardGalleryItemProps
-> = ({ drop, onDropClick, artFocused = true }) => {
+> = ({ drop, onDropClick, artFocused = true, activeSort }) => {
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
   const { canShowVote } = useDropInteractionRules(drop);
@@ -135,6 +137,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
           <WaveLeaderboardGalleryItemVotes
             drop={drop}
             variant={artFocused ? "subtle" : "default"}
+            activeSort={activeSort}
           />
 
           <div className="tw-flex tw-items-center tw-gap-x-1.5">
