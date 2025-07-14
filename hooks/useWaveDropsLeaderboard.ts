@@ -77,6 +77,18 @@ export function useWaveDropsLeaderboard({
     ApiDropsLeaderboardPage | undefined
   >(undefined);
   const isTabVisible = useTabVisibility();
+  const [currentSort, setCurrentSort] = useState(sort);
+
+  // Detect sort changes
+  const isSortChanging = currentSort !== sort;
+
+  useEffect(() => {
+    if (currentSort !== sort) {
+      setCurrentSort(sort);
+      setDrops([]);
+      setHasInitialized(false);
+    }
+  }, [sort, currentSort]);
 
   const sortDirection = SORT_DIRECTION_MAP[sort];
 
@@ -293,7 +305,7 @@ export function useWaveDropsLeaderboard({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching: isFetching || !hasInitialized,
+    isFetching: isFetching || !hasInitialized || isSortChanging,
     isFetchingNextPage,
     refetch,
     haveNewDrops,

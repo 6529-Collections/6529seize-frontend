@@ -104,13 +104,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     } tw-relative tw-rounded-lg`;
 
     // Apply image effects with animation when highlighting
+    const highlightAnimation = isHighlighting ? "tw-animate-gallery-reveal" : "";
+    
     const imageContainerClass = artFocused
-      ? `tw-ml-0.5 tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer desktop-hover:hover:tw-border-iron-700 tw-transform tw-duration-300 tw-ease-out touch-none tw-ring-0 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-600 ${
-          isHighlighting ? "tw-animate-gallery-reveal" : ""
-        }`
-      : `tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out touch-none ${
-          isHighlighting ? "tw-animate-gallery-reveal" : ""
-        }`;
+      ? `tw-ml-0.5 tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer desktop-hover:hover:tw-border-iron-700 tw-transform tw-duration-300 tw-ease-out touch-none tw-ring-0 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-600 ${highlightAnimation}`
+      : `tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out touch-none ${highlightAnimation}`;
 
     return (
       <div className={containerClass}>
