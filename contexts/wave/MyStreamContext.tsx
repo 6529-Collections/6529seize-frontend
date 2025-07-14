@@ -28,6 +28,7 @@ import { NextPageProps } from "./hooks/useWavePagination";
 import useEnhancedWavesList, {
   MinimalWave,
 } from "./hooks/useEnhancedWavesList";
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -88,6 +89,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
+  const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   // Instantiate the data manager, passing the updater function from the store
   const waveDataManager = useWaveDataManager({
@@ -103,6 +105,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     registerWave: waveDataManager.registerWave,
     syncNewestMessages: waveDataManager.syncNewestMessages,
     removeDrop: waveMessagesStore.removeDrop,
+    removeWaveDeliveredNotifications,
   });
 
   useEffect(() => {
@@ -129,7 +132,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     if (!isCapacitor) {
       return;
     }
-    
+
     // Check if app transitioned from background to foreground
     if (!prevIsActiveRef.current && isActive) {
       // App just became active, do exactly what WebSocket connect does
@@ -139,7 +142,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       wavesHookData.refetchAllWaves();
       wavesHookData.resetAllWavesNewDropsCount();
     }
-    
+
     // Update the ref for next comparison
     prevIsActiveRef.current = isActive;
   }, [isActive, isCapacitor, activeWaveId, waveDataManager, wavesHookData]);

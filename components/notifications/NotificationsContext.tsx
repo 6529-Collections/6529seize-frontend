@@ -9,10 +9,7 @@ import { Device, DeviceInfo } from "@capacitor/device";
 import { useRouter } from "next/navigation";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
-import {
-  commonApiPost,
-  commonApiPostWithoutBodyAndResponse,
-} from "../../services/api/common-api";
+import { commonApiPost } from "../../services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 
@@ -92,14 +89,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         await handlePushNotificationAction(
           router,
           action.notification,
+          isIos,
           profile
         );
-
-        if (isIos) {
-          await PushNotifications.removeDeliveredNotifications({
-            notifications: [action.notification],
-          });
-        }
       }
     );
 
@@ -114,7 +106,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const removeWaveDeliveredNotifications = async (waveId: string) => {
-    if (isCapacitor) {
+    if (isIos) {
       const deliveredNotifications =
         await PushNotifications.getDeliveredNotifications();
       const waveNotifications = deliveredNotifications.notifications.filter(
@@ -127,7 +119,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const removeAllDeliveredNotifications = async () => {
-    if (isCapacitor) {
+    if (isIos) {
       await PushNotifications.removeAllDeliveredNotifications();
     }
   };
@@ -172,6 +164,7 @@ const registerPushNotification = async (
 const handlePushNotificationAction = async (
   router: ReturnType<typeof useRouter>,
   notification: PushNotificationSchema,
+  isIos: boolean,
   profile?: ApiIdentity
 ) => {
   console.log("Push notification action performed", notification);
@@ -187,31 +180,22 @@ const handlePushNotificationAction = async (
     return;
   }
 
-  const notificationId = notificationData.notification_id;
-  await commonApiPostWithoutBodyAndResponse({
-    endpoint: `notifications/${notificationId}/read`,
-  })
-    .then(() => {
-      console.log("Notification marked as read", notificationId);
-    })
-    .catch((error) => {
-      console.error(
-        "Error marking notification as read",
-        notificationId,
-        error
-      );
-    })
-    .finally(() => {
-      const redirectUrl = resolveRedirectUrl(notificationData);
-      if (redirectUrl) {
-        console.log("Redirecting to", redirectUrl);
-        router.push(redirectUrl);
-      }
+  if (isIos) {
+    await PushNotifications.removeDeliveredNotifications({
+      notifications: [notification],
     });
+  }
+
+  const redirectUrl = resolveRedirectUrl(notificationData);
+  if (redirectUrl) {
+    console.log("Redirecting to", redirectUrl);
+    router.push(redirectUrl);
+  } else {
+    console.log("No redirect url found in notification data", notificationData);
+  }
 };
 
 const resolveRedirectUrl = (notificationData: any) => {
-  
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {
