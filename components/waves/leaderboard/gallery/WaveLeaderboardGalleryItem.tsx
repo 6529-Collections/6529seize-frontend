@@ -38,6 +38,8 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const [previousSort, setPreviousSort] = useState(activeSort);
 
     useEffect(() => {
+      let timer: NodeJS.Timeout | null = null;
+      
       // Skip animation on first render unless animationKey is set
       if (isFirstRender) {
         setIsFirstRender(false);
@@ -46,23 +48,24 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
         // Animate on mount if animationKey is set (indicating a sort change)
         if (animationKey > 0) {
           setIsHighlighting(true);
-          const timer = setTimeout(() => {
+          timer = setTimeout(() => {
             setIsHighlighting(false);
           }, 700);
-          return () => clearTimeout(timer);
         }
-        return;
-      }
-
-      // Only animate if sort actually changed
-      if (previousSort !== activeSort) {
+      } else if (previousSort !== activeSort) {
+        // Only animate if sort actually changed
         setPreviousSort(activeSort);
         setIsHighlighting(true);
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           setIsHighlighting(false);
         }, 700);
-        return () => clearTimeout(timer);
       }
+
+      return () => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+      };
     }, [activeSort, animationKey, isFirstRender, previousSort]);
 
     // Consider the user has voted even if the rating is 0

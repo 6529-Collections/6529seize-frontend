@@ -32,6 +32,7 @@ describe("useWaveRealtimeUpdater", () => {
       .fn()
       .mockResolvedValue({ drops: null, highestSerialNo: null }),
     removeDrop: jest.fn(),
+    removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
   });
 
   it("optimistically adds drop and syncs newest messages", async () => {

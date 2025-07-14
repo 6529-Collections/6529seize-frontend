@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
+import { debounce } from "lodash";
 import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
 import { useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../services/api/common-api";
@@ -26,7 +27,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
 }) => {
   const queryClient = useQueryClient();
   
-  const prefetchSort = (targetSort: WaveDropsLeaderboardSort) => {
+  const prefetchSortImmediate = useCallback((targetSort: WaveDropsLeaderboardSort) => {
     if (!waveId || targetSort === sort) return;
     
     const sortDirection = SORT_DIRECTION_MAP[targetSort];
@@ -78,11 +79,21 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         staleTime: 60000,
         ...getDefaultQueryRetry(),
       })
-      .catch(() => {
-        // Silently handle prefetch errors
-        // Prefetch failures shouldn't block the UI
+      .catch((error) => {
+        // Log prefetch errors for debugging while not blocking the UI
+        console.warn('Failed to prefetch leaderboard data:', {
+          waveId,
+          targetSort,
+          error: error.message || error
+        });
       });
-  };
+  }, [queryClient, waveId, sort]);
+
+  // Debounce prefetch to prevent excessive network requests on rapid hover events
+  const prefetchSort = useMemo(
+    () => debounce(prefetchSortImmediate, 300),
+    [prefetchSortImmediate]
+  );
   
   const getButtonClassName = (buttonSort: WaveDropsLeaderboardSort) => {
     const baseClass =
