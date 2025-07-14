@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import {
   keepPreviousData,
@@ -174,28 +174,34 @@ export function useWaveDropsLeaderboard({
     ...getDefaultQueryRetry(),
   });
 
+  const processedDrops = useMemo(() => {
+    if (!data?.pages) return [];
+    
+    const mappedDrops = mapToExtendedDrops(
+      data.pages.map((page) => ({
+        wave: page.wave,
+        drops: page.drops,
+      })),
+      []
+    );
+    
+    const uniqueDrops = generateUniqueKeys(mappedDrops, []);
+    
+    if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
+      return uniqueDrops.filter(
+        (drop) => drop.context_profile_context?.rating !== 0
+      );
+    }
+    
+    return uniqueDrops;
+  }, [data, sort]);
+
   useEffect(() => {
-    if (!data) return;
-    setDrops((prev) => {
-      const newDrops = data?.pages
-        ? mapToExtendedDrops(
-            data.pages.map((page) => ({
-              wave: page.wave,
-              drops: page.drops,
-            })),
-            prev
-          )
-        : [];
-      const uniqueDrops = generateUniqueKeys(newDrops, prev);
-      if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
-        return uniqueDrops.filter(
-          (drop) => drop.context_profile_context?.rating !== 0
-        );
-      }
-      return uniqueDrops;
-    });
-    setHasInitialized(true);
-  }, [data]);
+    if (processedDrops.length > 0 || (data && !data.pages?.length)) {
+      setDrops(processedDrops);
+      setHasInitialized(true);
+    }
+  }, [processedDrops, data]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 

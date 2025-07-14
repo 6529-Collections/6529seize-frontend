@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { AuthContext } from "../../../auth/Auth";
@@ -32,11 +32,12 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   // Always use art-focused mode in grid view
 
   // Filter drops to only include those with media
-  const dropsWithMedia =
-    drops?.filter(
+  const dropsWithMedia = useMemo(() => {
+    return drops?.filter(
       (drop) =>
         drop.parts && drop.parts.length > 0 && drop.parts[0].media?.length > 0
     ) || [];
+  }, [drops]);
 
   if (isFetching && dropsWithMedia.length === 0) {
     return (
@@ -57,12 +58,13 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   return (
     <div className="tw-@container">
       <div className="tw-grid @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-8">
-        {dropsWithMedia.map((drop) => (
+        {dropsWithMedia.map((drop, index) => (
           <WaveLeaderboardGalleryItem
             key={drop.id}
             drop={drop}
             onDropClick={onDropClick}
             activeSort={sort}
+            index={index}
           />
         ))}
 
