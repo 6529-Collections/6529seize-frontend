@@ -48,6 +48,19 @@
       cursor: text;
     }
     
+    /* Override text cursor for excluded elements */
+    [data-text-selection-exclude="true"] {
+      p, h1, h2, h3, h4, h5, h6, li, code, 
+      span.tw-align-middle, span.emoji-text-node,
+      span:not(.emoji-node):not(.emoji-node-big) {
+        cursor: pointer !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+      }
+    }
+    
     /* Ensure links and buttons remain clickable and allow selection in them */
     a, button, input, textarea, select {
       cursor: pointer !important;
@@ -67,6 +80,13 @@
     -webkit-box-decoration-break: clone !important;
     /* Prevent highlight from interfering with hover states */
     pointer-events: none !important;
+  }
+
+  /* Simple text selection exclusion - preserve existing cursors */
+  [data-text-selection-exclude="true"] a,
+  [data-text-selection-exclude="true"] button,
+  [data-text-selection-exclude="true"] [role="button"] {
+    cursor: pointer !important;
   }
 }
 
