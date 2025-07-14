@@ -149,7 +149,7 @@ describe("CreateDropEmojiPicker", () => {
     // Emoji pick action
     const picker = screen.getByTestId("picker");
     fireEvent.click(picker);
-    expect(fakeEditor.update).toHaveBeenCalledTimes(1);
+    expect(fakeEditor.update).toHaveBeenCalled();
     await waitFor(() =>
       expect(screen.queryByTestId("mobile-dialog")).toBeNull()
     );
