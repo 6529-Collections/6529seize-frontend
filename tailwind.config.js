@@ -117,24 +117,6 @@ module.exports = {
             transform: 'translateY(0) perspective(1000px) rotateX(0)'
           }
         },
-        'shimmer': {
-          '0%': { 
-            transform: 'translateX(-100%)'
-          },
-          '100%': { 
-            transform: 'translateX(100%)'
-          }
-        },
-        'border-glow': {
-          '0%, 100%': { 
-            borderColor: 'rgba(132, 134, 144, 0.3)',
-            boxShadow: '0 0 0 rgba(132, 134, 144, 0)'
-          },
-          '50%': { 
-            borderColor: 'rgba(132, 134, 144, 0.6)',
-            boxShadow: '0 0 20px rgba(132, 134, 144, 0.2)'
-          }
-        }
       },
       animation: {
         'loading-bar': 'loading-bar 1.5s infinite',
@@ -144,9 +126,7 @@ module.exports = {
         'spin-slow': 'spin 15s linear infinite',
         'fadeIn': 'fadeIn 0.3s ease-out forwards',
         'shake': 'shake 0.3s ease-in-out',
-        'gallery-reveal': 'gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards',
-        'shimmer': 'shimmer 1.5s ease-in-out',
-        'border-glow': 'border-glow 1.2s ease-in-out'
+        'gallery-reveal': 'gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
       },
       backgroundSize: {
         'gradient-pos': '200% 200%',

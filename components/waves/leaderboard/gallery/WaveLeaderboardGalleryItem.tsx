@@ -23,11 +23,11 @@ interface WaveLeaderboardGalleryItemProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly artFocused?: boolean; // New prop to activate art-focused mode
   readonly activeSort?: WaveDropsLeaderboardSort;
-  readonly index?: number;
+  readonly animationKey?: number;
 }
 
 export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
-  ({ drop, onDropClick, artFocused = true, activeSort, index = 0 }) => {
+  ({ drop, onDropClick, artFocused = true, activeSort, animationKey = 0 }) => {
     const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
@@ -39,6 +39,15 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     useEffect(() => {
       if (isFirstRender) {
         setIsFirstRender(false);
+        
+        // Animate on mount if animationKey is set (indicating a sort change)
+        if (animationKey > 0) {
+          setIsHighlighting(true);
+          const timer = setTimeout(() => {
+            setIsHighlighting(false);
+          }, 700);
+          return () => clearTimeout(timer);
+        }
         return;
       }
 
@@ -49,7 +58,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       }, 700);
 
       return () => clearTimeout(timer);
-    }, [activeSort]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [activeSort, animationKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Consider the user has voted even if the rating is 0
     const hasUserVoted = drop.context_profile_context?.rating !== undefined;
@@ -237,8 +246,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     );
   },
   (prevProps, nextProps) => {
-    // Force re-render when activeSort changes
-    if (prevProps.activeSort !== nextProps.activeSort) {
+    // Force re-render when activeSort or animationKey changes
+    if (prevProps.activeSort !== nextProps.activeSort ||
+        prevProps.animationKey !== nextProps.animationKey) {
       return false;
     }
 
@@ -246,8 +256,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     return (
       prevProps.drop.id === nextProps.drop.id &&
       prevProps.onDropClick === nextProps.onDropClick &&
-      prevProps.artFocused === nextProps.artFocused &&
-      prevProps.index === nextProps.index
+      prevProps.artFocused === nextProps.artFocused
     );
   }
 );

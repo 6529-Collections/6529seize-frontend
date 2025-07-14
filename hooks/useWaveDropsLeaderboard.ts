@@ -130,7 +130,7 @@ export function useWaveDropsLeaderboard({
       },
       initialPageParam: null,
       getNextPageParam,
-      pages: 3,
+      pages: 1,
       staleTime: 60000,
       ...getDefaultQueryRetry(),
     });
