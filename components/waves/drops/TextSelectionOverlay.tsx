@@ -32,8 +32,15 @@ export const TextSelectionOverlay: React.FC<TextSelectionOverlayProps> = ({
       // Skip right clicks - already handled in capture phase
       if (e.button === 2) return;
       
-      // Only prevent default for non-interactive elements during left click
       const target = e.target as HTMLElement;
+      
+      // Check if clicking on excluded elements
+      const isExcluded = target.closest('[data-text-selection-exclude="true"], .text-selection-exclude');
+      if (isExcluded) {
+        return;
+      }
+      
+      // Only prevent default for non-interactive elements during left click
       if (!target.closest('button, a, input, textarea, select') && e.button === 0) {
         // Don't prevent default immediately - let's see if user is making a long drag first
         // e.preventDefault();
@@ -53,10 +60,18 @@ export const TextSelectionOverlay: React.FC<TextSelectionOverlayProps> = ({
     };
 
     const handleSelectStart = (e: Event) => {
+      const target = e.target as Node;
+      const element = target.nodeType === Node.ELEMENT_NODE ? target as HTMLElement : target.parentElement;
+      
+      // Check if trying to select excluded elements
+      const isExcluded = element?.closest('[data-text-selection-exclude="true"], .text-selection-exclude');
+      if (isExcluded) {
+        e.preventDefault();
+        return;
+      }
+      
       // Only prevent selectstart if we're actively doing custom selection
       if (state.isSelecting) {
-        const target = e.target as Node;
-        const element = target.nodeType === Node.ELEMENT_NODE ? target as HTMLElement : target.parentElement;
         if (!element?.closest('button, a, input, textarea, select')) {
           e.preventDefault();
         }

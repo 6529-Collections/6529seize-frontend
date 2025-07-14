@@ -79,12 +79,12 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
         }`}>
         {children}
         {exceedsThreshold && !isExpanded && (
-          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-24 tw-bg-gradient-to-t tw-from-iron-950 tw-to-transparent tw-flex tw-items-end tw-justify-center tw-pb-4">
+          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-24 tw-bg-gradient-to-t tw-from-iron-900 tw-to-transparent tw-flex tw-items-end tw-justify-center tw-pb-4" data-text-selection-exclude="true">
             <button
               onClick={toggleExpand}
-              className="tw-bg-iron-700 tw-border-0 tw-text-sm tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-px-3 tw-py-2 tw-rounded-full tw-shadow-md desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-600 tw-transition-colors tw-duration-200 tw-flex tw-items-center tw-space-x-2"
+              className="tw-bg-iron-700 tw-border-0 tw-text-sm tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-px-3 tw-py-2 tw-rounded-full tw-shadow-md desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-650 tw-transition tw-duration-200 tw-flex tw-items-center tw-space-x-2"
             >
-              <span>Show full drop</span>
+              Show full drop
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0"
                 fill="currentColor"

@@ -322,8 +322,10 @@ describe('TextSelectionOverlay', () => {
         value: button
       });
 
-      // Mock closest to return the button (interactive element)
-      button.closest = jest.fn().mockReturnValue(button);
+      // Mock closest to return null for exclusion check, then button for interactive element check
+      button.closest = jest.fn()
+        .mockReturnValueOnce(null) // First call for exclusion check
+        .mockReturnValueOnce(button); // Second call for interactive element check
 
       selectStartHandler(selectStartEvent);
 

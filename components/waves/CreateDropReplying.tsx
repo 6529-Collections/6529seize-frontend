@@ -20,7 +20,7 @@ export default function CreateDropReplying({
   };
 
   return (
-    <div className="-tw-mt-2 tw-flex tw-justify-between tw-items-center">
+    <div className="-tw-mt-2 tw-flex tw-justify-between tw-items-center" data-text-selection-exclude="true">
       <span className="tw-text-xs tw-text-iron-400">
         {ACTION_LABELS[action]}{" "}
         <span className="tw-text-green tw-text-xs tw-font-semibold">
