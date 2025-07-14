@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import {
-  keepPreviousData,
   useInfiniteQuery,
   useQuery,
   useQueryClient,
@@ -168,7 +167,6 @@ export function useWaveDropsLeaderboard({
     },
     initialPageParam: null,
     getNextPageParam,
-    placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle && !pausePolling,
     staleTime: 60000,
     ...getDefaultQueryRetry(),
