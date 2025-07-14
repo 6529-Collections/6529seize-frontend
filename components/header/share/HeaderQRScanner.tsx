@@ -88,11 +88,12 @@ export default function HeaderQRScanner({
       let queryParams: Record<string, string | number> = {};
 
       if (url.origin === baseEndpoint) {
-        const resolvedPath = url.pathname;
+        const resolvedPath = `${url.pathname}${url.search}`;
         onScanSuccess();
+        console.log("Resolved path:", resolvedPath);
         router.push(resolvedPath);
-        return;
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
+        console.log("Processing deep link");
         const resolvedUrl = content.replace(`${appScheme}://`, "");
         const [scope, ...pathParts] = resolvedUrl.split("?")[0].split("/");
 
@@ -114,6 +115,10 @@ export default function HeaderQRScanner({
           stringQueryParams
         ).toString();
 
+        console.log("Scope:", scope);
+        console.log("Path parts:", pathParts);
+        console.log("Query params string:", queryParamsString);
+
         switch (scope) {
           case DeepLinkScope.NAVIGATE:
             path = `/${pathParts.join("/")}`;
@@ -133,6 +138,7 @@ export default function HeaderQRScanner({
         // Navigate to the extracted path
         onScanSuccess();
         const routerPath = `/${path}?${queryParamsString}`;
+        console.log("Router path:", routerPath);
         router.push(routerPath);
       } else {
         setToast({
