@@ -517,6 +517,12 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
   const processSingleTextNode = useCallback((node: Node, container: HTMLElement, minX: number, maxX: number, minY: number, maxY: number): TextNodeInfo | null => {
     if (!node.textContent?.trim()) return null;
     
+    // Check if node is inside an excluded element
+    const element = node.parentElement;
+    if (element?.closest('[data-text-selection-exclude="true"], .text-selection-exclude')) {
+      return null;
+    }
+    
     const range = document.createRange();
     range.selectNodeContents(node);
     const rect = range.getBoundingClientRect();
