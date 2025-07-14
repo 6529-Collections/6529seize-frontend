@@ -88,10 +88,9 @@ export default function HeaderQRScanner({
       let queryParams: Record<string, string | number> = {};
 
       if (url.origin === baseEndpoint) {
-        const resolvedPath = url.pathname;
+        const resolvedPath = `${url.pathname}${url.search}`;
         onScanSuccess();
         router.push(resolvedPath);
-        return;
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
         const resolvedUrl = content.replace(`${appScheme}://`, "");
         const [scope, ...pathParts] = resolvedUrl.split("?")[0].split("/");
@@ -132,7 +131,9 @@ export default function HeaderQRScanner({
 
         // Navigate to the extracted path
         onScanSuccess();
-        const routerPath = `/${path}?${queryParamsString}`;
+        const routerPath = `${path}${
+          queryParamsString ? `?${queryParamsString}` : ""
+        }`;
         router.push(routerPath);
       } else {
         setToast({
