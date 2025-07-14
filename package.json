@@ -26,14 +26,14 @@
     "type-check": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@capacitor/app": "^7.0.0",
-    "@capacitor/barcode-scanner": "^2.0.0",
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/device": "^7.0.0",
-    "@capacitor/filesystem": "^7.0.0",
-    "@capacitor/keyboard": "^7.0.0",
-    "@capacitor/push-notifications": "^7.0.0",
-    "@capacitor/share": "^7.0.0",
+    "@capacitor/app": "7.0.1",
+    "@capacitor/barcode-scanner": "^2.0.3",
+    "@capacitor/core": "7.4.1",
+    "@capacitor/device": "7.0.1",
+    "@capacitor/filesystem": "7.1.2",
+    "@capacitor/keyboard": "7.0.1",
+    "@capacitor/push-notifications": "7.0.1",
+    "@capacitor/share": "7.0.1",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -106,7 +106,6 @@
     "wagmi": "^2.15.6"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.0.0",
     "@next/bundle-analyzer": "15.3.2",
     "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.6.3",
