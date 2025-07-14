@@ -89,7 +89,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         await handlePushNotificationAction(
           router,
           action.notification,
-          isIos,
           profile
         );
       }
@@ -105,6 +104,50 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handlePushNotificationAction = async (
+    router: ReturnType<typeof useRouter>,
+    notification: PushNotificationSchema,
+    profile?: ApiIdentity
+  ) => {
+    console.log("Push notification action performed", notification);
+    const notificationData = notification.data;
+    const notificationProfileId = notificationData.profile_id;
+
+    if (
+      profile &&
+      notificationProfileId &&
+      notificationProfileId !== profile.id
+    ) {
+      console.log("Notification profile id does not match connected profile");
+      return;
+    }
+
+    void removeDeliveredNotifications([notification]);
+
+    const redirectUrl = resolveRedirectUrl(notificationData);
+    if (redirectUrl) {
+      console.log("Redirecting to", redirectUrl);
+      router.push(redirectUrl);
+    } else {
+      console.log(
+        "No redirect url found in notification data",
+        notificationData
+      );
+    }
+  };
+
+  const removeDeliveredNotifications = async (
+    notifications: PushNotificationSchema[]
+  ) => {
+    if (isIos) {
+      try {
+        await PushNotifications.removeDeliveredNotifications({ notifications });
+      } catch (error) {
+        console.error("Error removing delivered notifications", error);
+      }
+    }
+  };
+
   const removeWaveDeliveredNotifications = async (waveId: string) => {
     if (isIos) {
       const deliveredNotifications =
@@ -112,15 +155,17 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       const waveNotifications = deliveredNotifications.notifications.filter(
         (notification) => notification.data.wave_id === waveId
       );
-      await PushNotifications.removeDeliveredNotifications({
-        notifications: waveNotifications,
-      });
+      await removeDeliveredNotifications(waveNotifications);
     }
   };
 
   const removeAllDeliveredNotifications = async () => {
     if (isIos) {
-      await PushNotifications.removeAllDeliveredNotifications();
+      try {
+        await PushNotifications.removeAllDeliveredNotifications();
+      } catch (error) {
+        console.error("Error removing all delivered notifications", error);
+      }
     }
   };
 
@@ -158,40 +203,6 @@ const registerPushNotification = async (
     console.log("Push registration success", response);
   } catch (error) {
     console.error("Push registration error", error);
-  }
-};
-
-const handlePushNotificationAction = async (
-  router: ReturnType<typeof useRouter>,
-  notification: PushNotificationSchema,
-  isIos: boolean,
-  profile?: ApiIdentity
-) => {
-  console.log("Push notification action performed", notification);
-  const notificationData = notification.data;
-  const notificationProfileId = notificationData.profile_id;
-
-  if (
-    profile &&
-    notificationProfileId &&
-    notificationProfileId !== profile.id
-  ) {
-    console.log("Notification profile id does not match connected profile");
-    return;
-  }
-
-  if (isIos) {
-    await PushNotifications.removeDeliveredNotifications({
-      notifications: [notification],
-    });
-  }
-
-  const redirectUrl = resolveRedirectUrl(notificationData);
-  if (redirectUrl) {
-    console.log("Redirecting to", redirectUrl);
-    router.push(redirectUrl);
-  } else {
-    console.log("No redirect url found in notification data", notificationData);
   }
 };
 
