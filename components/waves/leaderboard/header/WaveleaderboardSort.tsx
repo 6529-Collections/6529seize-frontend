@@ -40,43 +40,48 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       },
     ];
     
-    queryClient.prefetchInfiniteQuery({
-      queryKey,
-      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-        const params: Record<string, string> = {
-          page_size: WAVE_DROPS_PARAMS.limit.toString(),
-          sort: targetSort,
-        };
+    queryClient
+      .prefetchInfiniteQuery({
+        queryKey,
+        queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+          const params: Record<string, string> = {
+            page_size: WAVE_DROPS_PARAMS.limit.toString(),
+            sort: targetSort,
+          };
 
-        if (sortDirection) {
-          params.sort_direction = sortDirection;
-        }
-
-        if (pageParam) {
-          params.page = `${pageParam}`;
-        }
-
-        return await commonApiFetch<ApiDropsLeaderboardPage>({
-          endpoint: `waves/${waveId}/leaderboard`,
-          params,
-        });
-      },
-      initialPageParam: null,
-      getNextPageParam: (lastPage: ApiDropsLeaderboardPage) => {
-        if (targetSort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
-          const haveZeroVotes = lastPage.drops.some(
-            (drop) => drop.context_profile_context?.rating === 0
-          );
-          if (haveZeroVotes) {
-            return null;
+          if (sortDirection) {
+            params.sort_direction = sortDirection;
           }
-        }
-        return lastPage.next ? lastPage.page + 1 : null;
-      },
-      pages: 1,
-      staleTime: 60000,
-      ...getDefaultQueryRetry(),
-    });
+
+          if (pageParam) {
+            params.page = `${pageParam}`;
+          }
+
+          return await commonApiFetch<ApiDropsLeaderboardPage>({
+            endpoint: `waves/${waveId}/leaderboard`,
+            params,
+          });
+        },
+        initialPageParam: null,
+        getNextPageParam: (lastPage: ApiDropsLeaderboardPage) => {
+          if (targetSort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
+            const haveZeroVotes = lastPage.drops.some(
+              (drop) => drop.context_profile_context?.rating === 0
+            );
+            if (haveZeroVotes) {
+              return null;
+            }
+          }
+          return lastPage.next ? lastPage.page + 1 : null;
+        },
+        pages: 1,
+        staleTime: 60000,
+        ...getDefaultQueryRetry(),
+      })
+      .catch(() => {
+        // Silently handle prefetch errors
+        // Prefetch failures shouldn't block the UI
+      });
   };
   
   const getButtonClassName = (buttonSort: WaveDropsLeaderboardSort) => {

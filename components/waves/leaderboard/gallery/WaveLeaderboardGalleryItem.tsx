@@ -35,10 +35,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
 
     // Trigger card highlight animation when sort changes
     const [isFirstRender, setIsFirstRender] = useState(true);
+    const [previousSort, setPreviousSort] = useState(activeSort);
 
     useEffect(() => {
+      // Skip animation on first render unless animationKey is set
       if (isFirstRender) {
         setIsFirstRender(false);
+        setPreviousSort(activeSort);
         
         // Animate on mount if animationKey is set (indicating a sort change)
         if (animationKey > 0) {
@@ -51,14 +54,16 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
         return;
       }
 
-      // Animate on any sort change after first render
-      setIsHighlighting(true);
-      const timer = setTimeout(() => {
-        setIsHighlighting(false);
-      }, 700);
-
-      return () => clearTimeout(timer);
-    }, [activeSort, animationKey]); // eslint-disable-line react-hooks/exhaustive-deps
+      // Only animate if sort actually changed
+      if (previousSort !== activeSort) {
+        setPreviousSort(activeSort);
+        setIsHighlighting(true);
+        const timer = setTimeout(() => {
+          setIsHighlighting(false);
+        }, 700);
+        return () => clearTimeout(timer);
+      }
+    }, [activeSort, animationKey, isFirstRender, previousSort]);
 
     // Consider the user has voted even if the rating is 0
     const hasUserVoted = drop.context_profile_context?.rating !== undefined;
