@@ -1,7 +1,11 @@
 /**
  * Shared utilities for text selection tests to reduce code duplication
  */
+import React from 'react';
 import { renderHook, act } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { editSlice } from '../../store/editSlice';
 
 // Browser mock types
 export type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'legacy';
@@ -15,6 +19,27 @@ export interface MockBrowserAPIs {
   getSelection: jest.Mock;
   getComputedStyle: jest.Mock;
 }
+
+/**
+ * Creates a Redux store for testing
+ */
+export const createTestStore = () => configureStore({
+  reducer: {
+    edit: editSlice.reducer,
+  },
+});
+
+/**
+ * Creates a Redux wrapper for renderHook
+ */
+export const createReduxWrapper = () => {
+  const store = createTestStore();
+  return ({ children }: { children: React.ReactNode }) => (
+    <Provider store={store}>
+      {children}
+    </Provider>
+  );
+};
 
 /**
  * Creates browser-specific API mocks for different browser scenarios
@@ -334,7 +359,9 @@ export const testMouseEventHandling = (
   containerRef: { current: HTMLElement | null },
   eventOptions: { button?: number; clientX?: number; clientY?: number } = {}
 ) => {
-  const { result } = renderHook(() => useTextSelection(containerRef));
+  const { result } = renderHook(() => useTextSelection(containerRef), {
+    wrapper: createReduxWrapper()
+  });
   
   const mouseEvent = createMouseEventWithTarget('mousedown', {
     button: 0,
@@ -362,7 +389,9 @@ export const testBrowserAPI = (
 ) => {
   apiSetup();
   
-  const { result } = renderHook(() => useTextSelection(containerRef));
+  const { result } = renderHook(() => useTextSelection(containerRef), {
+    wrapper: createReduxWrapper()
+  });
   
   const mouseEvent = createMouseEventWithTarget('mousedown', {
     button: 0,
@@ -390,7 +419,9 @@ export const testPerformanceScenario = (
 ) => {
   setup();
   
-  const { result } = renderHook(() => useTextSelection(containerRef));
+  const { result } = renderHook(() => useTextSelection(containerRef), {
+    wrapper: createReduxWrapper()
+  });
   
   const mouseEvent = createMouseEventWithTarget('mousedown', {
     button: 0,

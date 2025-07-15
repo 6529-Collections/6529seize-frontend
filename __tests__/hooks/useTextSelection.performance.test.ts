@@ -6,7 +6,8 @@ import {
   createMouseEventWithTarget,
   createTestContainer,
   cleanupTestContainer,
-  testPerformanceScenario
+  testPerformanceScenario,
+  createReduxWrapper
 } from '../utils/textSelectionTestUtils';
 
 // Mock RAF for controlled timing
@@ -66,7 +67,9 @@ describe('useTextSelection Performance Tests', () => {
       const startTime = performance.now();
       mockPerformanceNow.mockReturnValue(startTime);
 
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       const initEndTime = startTime + 10; // 10ms for initialization
       mockPerformanceNow.mockReturnValue(initEndTime);
@@ -111,7 +114,9 @@ describe('useTextSelection Performance Tests', () => {
       
       document.body.appendChild(mockContainer);
 
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       // Should handle deep nesting without stack overflow
       const mouseEvent = createMouseEventWithTarget('mousedown', {
@@ -163,7 +168,9 @@ describe('useTextSelection Performance Tests', () => {
 
   describe('Rapid event processing', () => {
     it('should handle rapid mousemove events without lag', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       // Start selection
       const startMouseEvent = createMouseEventWithTarget('mousedown', {
@@ -201,7 +208,9 @@ describe('useTextSelection Performance Tests', () => {
     });
 
     it('should throttle expensive operations during rapid events', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       // Mock RAF to control execution timing
       let rafCallback: (() => void) | null = null;
@@ -244,7 +253,9 @@ describe('useTextSelection Performance Tests', () => {
     });
 
     it('should handle burst of keyboard events efficiently', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       // Set up a selection
       act(() => {
@@ -288,7 +299,9 @@ describe('useTextSelection Performance Tests', () => {
 
   describe('Memory usage optimization', () => {
     it('should not create memory leaks during repeated operations', () => {
-      const { result, unmount } = renderHook(() => useTextSelection(containerRef));
+      const { result, unmount } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
 
       // Simulate repeated selection operations
       for (let i = 0; i < 100; i++) {
@@ -327,7 +340,9 @@ describe('useTextSelection Performance Tests', () => {
     });
 
     it('should efficiently manage highlight spans', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       // Create many highlight spans through repeated selections
       for (let i = 0; i < 50; i++) {
@@ -354,7 +369,9 @@ describe('useTextSelection Performance Tests', () => {
         containerElements.push(container);
         const ref = { current: container };
 
-        const { result, unmount } = renderHook(() => useTextSelection(ref));
+        const { result, unmount } = renderHook(() => useTextSelection(ref), {
+          wrapper: createReduxWrapper()
+        });
 
         // Add some content
         container.innerHTML = `<div class="tw-group" data-drop-id="drop${i}"><p>Text ${i}</p></div>`;
@@ -383,7 +400,9 @@ describe('useTextSelection Performance Tests', () => {
 
   describe('Browser selection performance', () => {
     it('should efficiently populate browser selection for large text', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       const largeText = 'Lorem ipsum dolor sit amet, '.repeat(500); // ~14KB
 
@@ -416,7 +435,9 @@ describe('useTextSelection Performance Tests', () => {
     });
 
     it('should handle frequent copy operations without blocking', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       // Mock clipboard for fast resolution
       const mockWriteText = jest.fn().mockResolvedValue(undefined);
@@ -530,7 +551,9 @@ describe('useTextSelection Performance Tests', () => {
     });
 
     it('should handle performance variations in getComputedStyle', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+      wrapper: createReduxWrapper()
+    });
 
       // Mock slow getComputedStyle
       const slowGetComputedStyle = jest.fn().mockImplementation(() => {

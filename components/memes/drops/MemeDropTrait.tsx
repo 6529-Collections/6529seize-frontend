@@ -1,7 +1,7 @@
 import React from "react";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { FIELD_TO_LABEL_MAP } from "../../waves/memes/traits/schema";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface MemeDropTraitProps {
@@ -37,15 +37,25 @@ const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value }) => {
       <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-font-normal">
         {label}:
       </span>
-      <Tippy
-        disabled={isMobile}
-        content={convertedValue}
-        placement="top"
-        theme="dark">
-        <span className="tw-text-iron-50 tw-text-sm tw-font-medium tw-truncate">
+      <>
+        <span 
+          className="tw-text-iron-50 tw-text-sm tw-font-medium tw-truncate"
+          data-tooltip-id={`meme-drop-trait-${label}`}>
           {convertedValue}
         </span>
-      </Tippy>
+        {!isMobile && (
+          <Tooltip
+            id={`meme-drop-trait-${label}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}>
+            <span className="tw-text-xs">{convertedValue}</span>
+          </Tooltip>
+        )}
+      </>
     </div>
   );
 };
