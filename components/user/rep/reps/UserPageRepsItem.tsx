@@ -52,7 +52,7 @@ export default function UserPageRepsItem({
               >
                 {formatNumberWithCommas(rep.rating)}
               </span>
-              {!isTouchScreen && rep.rater_contribution && (
+              {(!isTouchScreen && !!rep.rater_contribution) ? (
                 <Tooltip
                   id={`rep-${rep.category}-${rep.rating}`}
                   place="top"
@@ -64,7 +64,7 @@ export default function UserPageRepsItem({
                 >
                   My Rep: {formatNumberWithCommas(rep.rater_contribution)}
                 </Tooltip>
-              )}
+              ) : null}
             </>
           </span>
 
