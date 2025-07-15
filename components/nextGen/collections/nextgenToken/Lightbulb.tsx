@@ -23,7 +23,7 @@ export default function Lightbulb(
         <Tooltip
           id="lightbulb-blackbox"
           content="Blackbox"
-          place="bottom"
+         place="bottom"
           delayShow={100}
           style={{
             backgroundColor: "#1F2937",
@@ -49,7 +49,7 @@ export default function Lightbulb(
       <Tooltip
         id="lightbulb-lightbox"
         content="Lightbox"
-        place="bottom"
+       place="bottom"
         delayShow={100}
         style={{
           backgroundColor: "#1F2937",

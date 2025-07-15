@@ -179,7 +179,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           />
           <Tooltip
             id={`live-tooltip-${props.token.id}`}
-            place="bottom"
+           place="bottom"
             style={{
               backgroundColor: "#1F2937",
               color: "white",
@@ -251,7 +251,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               />
               <Tooltip
                 id={`download-tooltip-${props.token.id}`}
-                place="bottom"
+               place="bottom"
                 style={{
                   backgroundColor: "#1F2937",
                   color: "white",
@@ -286,7 +286,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           />
           <Tooltip
             id={`external-tooltip-${props.token.id}`}
-            place="bottom"
+           place="bottom"
             style={{
               backgroundColor: "#1F2937",
               color: "white",
@@ -303,7 +303,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           />
           <Tooltip
             id={`fullscreen-tooltip-${props.token.id}`}
-            place="bottom"
+           place="bottom"
             style={{
               backgroundColor: "#1F2937",
               color: "white",

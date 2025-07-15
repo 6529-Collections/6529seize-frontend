@@ -224,7 +224,7 @@ export default function DropListItemRateGiveClap({
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   return (
     <LazyTippy
-      placement="top"
+      place="top"
       interactive={false}
       disabled={canVote}
       content={<div>{VOTE_STATE_ERRORS[voteState]}</div>}>

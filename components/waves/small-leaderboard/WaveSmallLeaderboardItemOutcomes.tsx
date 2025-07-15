@@ -224,7 +224,8 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           padding: "4px 8px",
         }}
         clickable={true}
-        events={isTouch ? ['click'] : ['mouseenter', 'mouseleave']}
+        openEvents={isTouch ? { click: true } : { mouseenter: true }}
+        closeEvents={isTouch ? { click: true } : { mouseleave: true }}
         globalCloseEvents={isTouch ? { clickOutsideAnchor: true } : {}}
       >
         {tooltipContent}

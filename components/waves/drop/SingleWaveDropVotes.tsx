@@ -75,7 +75,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
                 {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
               </Tooltip>
             </div>
-          ))
+          ))}
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
           <span className="tw-text-sm tw-font-medium tw-text-iron-100">

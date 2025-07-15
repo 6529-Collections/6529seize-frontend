@@ -278,7 +278,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   color: "white",
                   padding: "4px 8px",
                 }}
-                place="bottom"
+               place="bottom"
                 delayShow={250}>
                 {`${showFilters ? "Hide" : "Show"} Filters${
                   selectedTraitValues.length > 0

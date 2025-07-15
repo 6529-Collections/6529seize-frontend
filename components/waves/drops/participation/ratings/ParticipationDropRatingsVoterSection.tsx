@@ -1,3 +1,4 @@
+import React from "react";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
@@ -56,7 +57,7 @@ export default function ParticipationDropRatingsVoterSection({
                 {drop.wave.voting_credit_type}
               </Tooltip>
             </div>
-          ))
+          ))}
           {drop.raters_count > 5 && (
             <div
               className={`tw-relative tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900 tw-ring-1 ${theme.ring} ${theme.text} tw-text-[10px] tw-font-medium hover:tw-scale-110 tw-transition-transform`}

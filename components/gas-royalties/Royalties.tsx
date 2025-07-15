@@ -173,13 +173,14 @@ export default function RoyaltiesComponent() {
                               data-tooltip-id="primary-proceeds-tooltip"></FontAwesomeIcon>
                             <Tooltip
                               id="primary-proceeds-tooltip"
-                              content="Total Minter payments less the Manifold fee"
                               style={{
                                 backgroundColor: "#1F2937",
                                 color: "white",
                                 padding: "4px 8px",
                               }}
-                            />
+                            >
+                              Total Minter payments less the Manifold fee
+                            </Tooltip>
                           </>
                         )}
                       </div>
@@ -197,13 +198,14 @@ export default function RoyaltiesComponent() {
                             data-tooltip-id="artist-split-tooltip"></FontAwesomeIcon>
                           <Tooltip
                             id="artist-split-tooltip"
-                            content={getTippyArtistsContent()}
                             style={{
                               backgroundColor: "#1F2937",
                               color: "white",
                               padding: "4px 8px",
                             }}
-                          />
+                          >
+                            {getTippyArtistsContent()}
+                          </Tooltip>
                         </>
                       </div>
                     </th>
