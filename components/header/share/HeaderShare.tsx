@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import useCapacitor from "../../../hooks/useCapacitor";
@@ -80,6 +80,7 @@ function HeaderQRModal({
   readonly onClose: () => void;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const isMobile = useIsMobileDevice();
 
@@ -112,6 +113,11 @@ function HeaderQRModal({
     let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
       routerPath = routerPath.slice(0, -1);
+    }
+
+    const searchParamsString = searchParams?.toString() ?? "";
+    if (searchParamsString) {
+      routerPath += `?${searchParamsString}`;
     }
 
     const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
