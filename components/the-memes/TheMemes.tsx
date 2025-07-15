@@ -66,11 +66,11 @@ export default function TheMemesComponent() {
 
     const routerSort = searchParams?.get("sort");
     if (routerSort) {
-      const resolvedRouterSort = Object.values(MemesSort).find(
-        (sd) => sd === routerSort
+      const resolvedKey = Object.keys(MemesSort).find(
+        (k) => k.toLowerCase() === routerSort.toLowerCase()
       );
-      if (resolvedRouterSort) {
-        initialSort = resolvedRouterSort;
+      if (resolvedKey) {
+        initialSort = MemesSort[resolvedKey as keyof typeof MemesSort];
       }
     }
 
@@ -155,7 +155,11 @@ export default function TheMemesComponent() {
   }, []);
 
   useEffect(() => {
-    let queryString = `sort=${sort}&sort_dir=${sortDir}`;
+    const sortKey =
+      Object.keys(MemesSort).find(
+        (k) => MemesSort[k as keyof typeof MemesSort] === sort
+      )?.toLowerCase() ?? "";
+    let queryString = `sort=${sortKey}&sort_dir=${sortDir}`;
     if (selectedSeason > 0) {
       queryString += `&szn=${selectedSeason}`;
     }
