@@ -4,11 +4,7 @@ import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
 import { useCallback, useEffect } from "react";
 import useCapacitor from "./useCapacitor";
-
-export enum DeepLinkScope {
-  NAVIGATE = "navigate",
-  SHARE_CONNECTION = "share-connection",
-}
+import { resolveDeepLink } from "@/helpers/deep-link.helpers";
 
 export const useDeepLinkNavigation = () => {
   const { isCapacitor } = useCapacitor();
@@ -27,42 +23,28 @@ export const useDeepLinkNavigation = () => {
     [router]
   );
 
+  const handleDeepLink = useCallback(
+    (deepLinkUrl: string) => {
+      const resolved = resolveDeepLink(deepLinkUrl);
+
+      if (resolved) {
+        doNavigation(resolved.pathname, resolved.queryParams);
+      } else {
+        console.log("Unknown or invalid deep link:", deepLinkUrl);
+      }
+    },
+    [doNavigation]
+  );
+
   useEffect(() => {
     if (!isCapacitor) return;
 
     const listener = App.addListener("appUrlOpen", (data) => {
-      const urlString = data.url;
-
-      const schemeEndIndex = urlString.indexOf("://") + 3;
-      const urlWithoutScheme = urlString.slice(schemeEndIndex);
-
-      const [scope, ...pathParts] = urlWithoutScheme.split("?")[0].split("/");
-
-      const queryString = urlWithoutScheme.includes("?")
-        ? urlWithoutScheme.split("?")[1]
-        : "";
-
-      const searchParams = new URLSearchParams(queryString);
-      const queryParams: Record<string, string | number> = Object.fromEntries(
-        searchParams.entries()
-      );
-      queryParams["_t"] = Math.floor(Date.now() / 1000);
-
-      switch (scope) {
-        case DeepLinkScope.NAVIGATE:
-          doNavigation(`/${pathParts.join("/")}`, queryParams);
-          break;
-        case DeepLinkScope.SHARE_CONNECTION:
-          doNavigation("/accept-connection-sharing", queryParams);
-          break;
-        default:
-          console.log("Unknown Deep Link Scope", scope);
-          break;
-      }
+      handleDeepLink(data.url);
     });
 
     return () => {
       listener.then((handle) => handle.remove());
     };
-  }, [doNavigation]);
+  }, [handleDeepLink]);
 };

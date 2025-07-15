@@ -12,6 +12,7 @@ import { useAuth } from "../auth/Auth";
 import { commonApiPost } from "../../services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
+import { resolvePushNotificationRedirectUrl } from "@/helpers/push-notifications.helpers";
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
@@ -21,18 +22,6 @@ type NotificationsContextType = {
 const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
-
-const redirectConfig = {
-  path: ({ path }: { path: string }) => `/${path}`,
-  profile: ({ handle }: { handle: string }) => `/${handle}`,
-  "the-memes": ({ id }: { id: string }) => `/the-memes/${id}`,
-  "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
-  "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
-  waves: ({ wave_id, drop_id }: { wave_id: string; drop_id: string }) => {
-    let base = `/my-stream?wave=${wave_id}`;
-    return drop_id ? `${base}&serialNo=${drop_id}` : base;
-  },
-};
 
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -124,7 +113,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     void removeDeliveredNotifications([notification]);
 
-    const redirectUrl = resolveRedirectUrl(notificationData);
+    const redirectUrl = resolvePushNotificationRedirectUrl(notificationData);
     if (redirectUrl) {
       console.log("Redirecting to", redirectUrl);
       router.push(redirectUrl);
@@ -203,32 +192,6 @@ const registerPushNotification = async (
     console.log("Push registration success", response);
   } catch (error) {
     console.error("Push registration error", error);
-  }
-};
-
-const resolveRedirectUrl = (notificationData: any) => {
-  const { redirect, ...params } = notificationData;
-
-  if (!redirect) {
-    console.log(
-      "No redirect type found in notification data",
-      notificationData
-    );
-    return null;
-  }
-
-  const resolveFn = redirectConfig[redirect as keyof typeof redirectConfig];
-
-  if (!resolveFn) {
-    console.error("Unknown redirect type", redirect);
-    return null;
-  }
-
-  try {
-    return resolveFn(params);
-  } catch (error) {
-    console.error("Error resolving redirect URL", error);
-    return null;
   }
 };
 

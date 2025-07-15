@@ -6,11 +6,11 @@ import {
 } from "@capacitor/barcode-scanner";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { useAuth } from "../../auth/Auth";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useAuth } from "@/components/auth/Auth";
 import Image from "next/image";
-import { areEqualURLS } from "../../../helpers/Helpers";
-import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
+import { areEqualURLS } from "@/helpers/Helpers";
+import { DeepLinkScope } from "@/helpers/deep-link.helpers";
 
 export default function HeaderQRScanner({
   onScanSuccess,

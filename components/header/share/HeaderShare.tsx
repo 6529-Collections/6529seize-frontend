@@ -11,19 +11,19 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-import useCapacitor from "../../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import {
   getRefreshToken,
   getWalletAddress,
   getWalletRole,
-} from "../../../services/auth/auth.utils";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
+} from "@/services/auth/auth.utils";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 import Tippy from "@tippyjs/react";
-import { useElectron } from "../../../hooks/useElectron";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useElectron } from "@/hooks/useElectron";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import yaml from "js-yaml";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
-import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
+import { DeepLinkScope } from "@/helpers/deep-link.helpers";
 
 const QRCode = require("qrcode");
 

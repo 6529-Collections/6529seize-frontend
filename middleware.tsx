@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { API_AUTH_COOKIE } from "./constants";
+import { API_AUTH_COOKIE } from "@/constants";
+import { resolveDeepLink } from "@/helpers/deep-link.helpers";
+import { resolvePushNotificationRedirectUrl } from "./helpers/push-notifications.helpers";
 
 const redirectMappings = [
   { url: "/6529-dubai/", target: "/" },
@@ -110,6 +112,43 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/error")
     ) {
       return NextResponse.next();
+    }
+
+    const deepLink = req.nextUrl.searchParams.get("__deeplink");
+
+    if (deepLink) {
+      const result = resolveDeepLink(deepLink);
+
+      if (result) {
+        const { pathname, queryParams } = result;
+        const newUrl = req.nextUrl.clone();
+        newUrl.pathname = pathname;
+
+        // Replace query params
+        newUrl.search = "";
+        for (const [key, value] of Object.entries(queryParams)) {
+          newUrl.searchParams.set(key, String(value));
+        }
+
+        return NextResponse.rewrite(newUrl);
+      }
+    }
+
+    const pushData = req.nextUrl.searchParams.get("__push_data");
+
+    if (pushData) {
+      const decoded = decodeURIComponent(pushData);
+      const pushDataObj = JSON.parse(decoded);
+      const resolvedPath = resolvePushNotificationRedirectUrl(pushDataObj);
+      if (resolvedPath) {
+        const [pathname, search = ""] = resolvedPath.split("?");
+
+        const newUrl = req.nextUrl.clone();
+        newUrl.pathname = pathname;
+        newUrl.search = search ? `?${search}` : "";
+
+        return NextResponse.rewrite(newUrl);
+      }
     }
 
     if (pathname != "/access" && pathname != "/restricted") {

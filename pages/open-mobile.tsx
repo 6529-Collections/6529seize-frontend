@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { ShareMobileApp } from "../components/header/share/HeaderShareMobileApps";
-import ClientOnly from "../components/client-only/ClientOnly";
-import { DeepLinkScope } from "../hooks/useDeepLinkNavigation";
+import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
+import ClientOnly from "@/components/client-only/ClientOnly";
+import { DeepLinkScope } from "@/helpers/deep-link.helpers";
 
 const OpenMobilePage = () => {
   const router = useRouter();
