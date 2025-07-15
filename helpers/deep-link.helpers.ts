@@ -11,14 +11,16 @@ export function resolveDeepLink(
   }
 
   try {
-    const schemeEndIndex = deepLinkUrl.indexOf("://") + 3;
-    const urlWithoutScheme = deepLinkUrl.slice(schemeEndIndex);
+    // Check if it includes a scheme
+    let pathPart = deepLinkUrl;
+    if (deepLinkUrl.includes("://")) {
+      const schemeEndIndex = deepLinkUrl.indexOf("://") + 3;
+      pathPart = deepLinkUrl.slice(schemeEndIndex);
+    }
 
-    const [scope, ...pathParts] = urlWithoutScheme.split("?")[0].split("/");
+    const [rawPath, queryString = ""] = pathPart.split("?");
 
-    const queryString = urlWithoutScheme.includes("?")
-      ? urlWithoutScheme.split("?")[1]
-      : "";
+    const [scope, ...pathParts] = rawPath.split("/");
 
     const searchParams = new URLSearchParams(queryString);
     const queryParams: Record<string, string | number> = Object.fromEntries(
