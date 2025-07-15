@@ -1,4 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { selectEditingDropId } from '../store/editSlice';
 
 interface SelectionRange {
   startX: number;
@@ -208,6 +210,8 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     selection: null,
     highlightSpans: []
   });
+  
+  const editingDropId = useSelector(selectEditingDropId);
 
   const startPointRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const rafIdRef = useRef<number | null>(null);
@@ -519,7 +523,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     
     // Check if node is inside an excluded element
     const element = node.parentElement;
-    if (element?.closest('[data-text-selection-exclude="true"], .text-selection-exclude')) {
+    if (element?.closest('[data-text-selection-exclude="true"], .text-selection-exclude, [data-editor-mode="true"]')) {
       return null;
     }
     
@@ -821,6 +825,9 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
     
     // Don't interfere during scrolling
     if (isScrollingRef.current) return;
+    
+    // Don't allow text selection when any drop is being edited
+    if (editingDropId) return;
 
     // Check if clicking on interactive elements (but allow links for text selection)
     const target = e.target as HTMLElement;
@@ -856,7 +863,7 @@ export const useTextSelection = (containerRef: React.RefObject<HTMLElement | nul
       selection.removeAllRanges();
       selection.empty?.(); // Alternative method for older browsers
     }
-  }, [containerRef]);
+  }, [containerRef, editingDropId]);
 
   // Global copy event listener reference
   const copyListenerRef = useRef<((e: ClipboardEvent) => void) | null>(null);

@@ -350,7 +350,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   }, [editorState, mentionedUsers, onSave, initialContent, onCancel]);
 
   return (
-    <div className="tw-w-full">
+    <div className="tw-w-full" data-editor-mode="true">
       <LexicalComposer initialConfig={initialConfig}>
         <div ref={editorRef} className="tw-relative">
           <RichTextPlugin
