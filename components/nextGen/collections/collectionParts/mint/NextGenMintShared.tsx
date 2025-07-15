@@ -1,6 +1,6 @@
 import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { Form, Row, Col } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
@@ -33,14 +33,21 @@ export function NextGenMintingFor(
     <Form.Group as={Row} className="pb-2">
       <Form.Label column sm={12} className="d-flex align-items-center">
         {props.title}
-        <Tippy
-          content={`The address you are minting for`}
-          placement={"top"}
-          theme={"light"}>
-          <FontAwesomeIcon
-            className={styles.infoIcon}
-            icon={faInfoCircle}></FontAwesomeIcon>
-        </Tippy>
+        <FontAwesomeIcon
+          className={styles.infoIcon}
+          icon={faInfoCircle}
+          data-tooltip-id="mint-for-address-info">
+        </FontAwesomeIcon>
+        <Tooltip 
+          id="mint-for-address-info"
+          content="The address you are minting for"
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white", 
+            padding: "4px 8px",
+          }}
+        />
       </Form.Label>
       <Col sm={12}>
         <Form.Select

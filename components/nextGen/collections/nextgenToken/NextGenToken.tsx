@@ -17,7 +17,7 @@ import {
 } from "../collectionParts/NextGenCollection";
 import { isNullAddress } from "../../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
 import {
@@ -106,6 +106,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
       <FontAwesomeIcon
         title="Previous Token"
         icon={faChevronCircleLeft}
+        data-tooltip-id={hasPreviousToken ? `prev-token-${props.token.id}` : undefined}
         onClick={() => {
           if (!hasPreviousToken) {
             return;
@@ -124,14 +125,23 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         }}
       />
     );
-    if (hasPreviousToken) {
-      return (
-        <Tippy content={"Previous Token"} theme={"light"} delay={100}>
-          {prev}
-        </Tippy>
-      );
-    }
-    return prev;
+    return (
+      <>
+        {prev}
+        {hasPreviousToken && (
+          <Tooltip
+            id={`prev-token-${props.token.id}`}
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            Previous Token
+          </Tooltip>
+        )}
+      </>
+    );
   }
 
   function printNextToken() {
@@ -139,6 +149,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     const next = (
       <FontAwesomeIcon
         icon={faChevronCircleRight}
+        data-tooltip-id={hasNextToken ? `next-token-${props.token.id}` : undefined}
         onClick={() => {
           if (!hasNextToken) {
             return;
@@ -157,14 +168,23 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         }}
       />
     );
-    if (hasNextToken) {
-      return (
-        <Tippy content={"Next Token"} theme={"light"} delay={100}>
-          {next}
-        </Tippy>
-      );
-    }
-    return next;
+    return (
+      <>
+        {next}
+        {hasNextToken && (
+          <Tooltip
+            id={`next-token-${props.token.id}`}
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            Next Token
+          </Tooltip>
+        )}
+      </>
+    );
   }
 
   function printToken() {
@@ -181,12 +201,23 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                         <h1 className="mb-0 font-color">{props.token.name}</h1>
                         {(props.token.burnt ||
                           isNullAddress(props.token.owner)) && (
-                          <Tippy content={"Burnt"} theme={"light"} delay={100}>
+                          <>
                             <FontAwesomeIcon
                               icon={faFire}
+                              data-tooltip-id={`burnt-token-${props.token.id}`}
                               style={{ height: "35px", color: "#c51d34" }}
                             />
-                          </Tippy>
+                            <Tooltip
+                              id={`burnt-token-${props.token.id}`}
+                              style={{
+                                backgroundColor: "#1F2937",
+                                color: "white",
+                                padding: "4px 8px",
+                              }}
+                            >
+                              Burnt
+                            </Tooltip>
+                          </>
                         )}
                       </span>
                       <NextGenBackToCollectionPageLink

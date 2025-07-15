@@ -18,7 +18,7 @@ import {
   getWalletRole,
 } from "../../../services/auth/auth.utils";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { useElectron } from "../../../hooks/useElectron";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import yaml from "js-yaml";
@@ -303,22 +303,28 @@ function HeaderQRModal({
         {url && (
           <div className="d-flex align-items-center gap-2 mt-2">
             <div className={styles.url}>{url}</div>
-            <Tippy
-              placement="top"
+            <FontAwesomeIcon
+              icon={faCopy}
+              className={`${styles.urlCopy} ${
+                urlCopied ? styles.copied : ""
+              }`}
+              data-tooltip-id="copy-url-tooltip"
+              onClick={() => {
+                navigator.clipboard.writeText(url);
+                setUrlCopied(true);
+                setTimeout(() => setUrlCopied(false), 500);
+              }}
+            />
+            <Tooltip
+              id="copy-url-tooltip"
+              place="top"
               content={urlCopied ? "Copied!" : "Copy URL"}
-              hideOnClick={isMobile}>
-              <FontAwesomeIcon
-                icon={faCopy}
-                className={`${styles.urlCopy} ${
-                  urlCopied ? styles.copied : ""
-                }`}
-                onClick={() => {
-                  navigator.clipboard.writeText(url);
-                  setUrlCopied(true);
-                  setTimeout(() => setUrlCopied(false), 500);
-                }}
-              />
-            </Tippy>
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            />
           </div>
         )}
       </>

@@ -7,7 +7,7 @@ import {
   cicToType,
 } from "../../../helpers/Helpers";
 import UserLevel from "../../user/utils/level/UserLevel";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import UserCICTypeIcon from "../../user/utils/user-cic-type/UserCICTypeIcon";
 import { isEthereumAddress } from "../../../helpers/AllowlistToolHelpers";
 import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
@@ -75,14 +75,21 @@ export default function CommunityMembersTableRow({
         className={`tw-px-4 tw-text-right tw-tabular-nums tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}>
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2">
           {formatNumberWithCommasOrDash(member.cic)}
-          <Tippy
-            placement={"top"}
-            interactive={false}
-            content={CIC_TO_TEXT[cicToType(member.cic)]}>
-            <div className="tw-h-5 tw-w-5">
-              <UserCICTypeIcon cic={member.cic} />
-            </div>
-          </Tippy>
+          <div 
+            className="tw-h-5 tw-w-5"
+            data-tooltip-id={`cic-tooltip-${member.detail_view_key}`}>
+            <UserCICTypeIcon cic={member.cic} />
+          </div>
+          <Tooltip
+            id={`cic-tooltip-${member.detail_view_key}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}>
+            {CIC_TO_TEXT[cicToType(member.cic)]}
+          </Tooltip>
         </div>
       </td>
       <td className="tw-px-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3">

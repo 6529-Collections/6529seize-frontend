@@ -1,6 +1,6 @@
 import DistributionPlanTableRowWrapper from "../../../../../common/DistributionPlanTableRowWrapper";
 import { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import FinalizeSnapshotsTableSnapshotTooltip from "./FinalizeSnapshotsTableSnapshotTooltip";
 import FinalizeSnapshotsTableExcludedSnapshotsTooltip from "./FinalizeSnapshotsTableExcludedSnapshotsTooltip";
 import FinalizeSnapshotsTableExcludedComponentsTooltip from "./FinalizeSnapshotsTableExcludedComponentsTooltip";
@@ -19,21 +19,49 @@ export default function FinalizeSnapshotsTableRow({
     <DistributionPlanTableRowWrapper>
       <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-xs tw-font-medium tw-text-white sm:tw-pl-6">
         {row.snapshot?.name}
-        <Tippy
-          content={
-            <FinalizeSnapshotsTableSnapshotTooltip
-              snapshotId={row.snapshot?.id ?? null}
-              snapshotType={row.snapshot?.poolType ?? null}
-            />
-          }
-          placement="top"
-          maxWidth={500}
+        <svg
+          className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          data-tooltip-id={`snapshot-info-${row.groupSnapshotId}`}
         >
+          <path
+            d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <Tooltip
+          id={`snapshot-info-${row.groupSnapshotId}`}
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+            maxWidth: "500px",
+          }}
+        >
+          <FinalizeSnapshotsTableSnapshotTooltip
+            snapshotId={row.snapshot?.id ?? null}
+            snapshotType={row.snapshot?.poolType ?? null}
+          />
+        </Tooltip>
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+        {row.uniqueWalletsCount}
+      </td>
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+        {row.excludeSnapshotsText}
+        {!!row.excludeSnapshots.length && (
           <svg
             className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            data-tooltip-id={`excluded-snapshots-${row.groupSnapshotId}`}
           >
             <path
               d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
@@ -43,68 +71,55 @@ export default function FinalizeSnapshotsTableRow({
               strokeLinejoin="round"
             />
           </svg>
-        </Tippy>
-      </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
-        {row.uniqueWalletsCount}
-      </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
-        {row.excludeSnapshotsText}
-        {!!row.excludeSnapshots.length && (
-          <Tippy
-            content={
-              <FinalizeSnapshotsTableExcludedSnapshotsTooltip
-                excludedSnapshots={row.excludeSnapshots}
-              />
-            }
-            placement="top"
-            maxWidth={500}
+          <Tooltip
+            id={`excluded-snapshots-${row.groupSnapshotId}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+              maxWidth: "500px",
+            }}
           >
-            <svg
-              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Tippy>
+            <FinalizeSnapshotsTableExcludedSnapshotsTooltip
+              excludedSnapshots={row.excludeSnapshots}
+            />
+          </Tooltip>
         )}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
         {row.excludeComponentWinnersText}
         {!!row.excludeComponentWinners.length && (
-          <Tippy
-            content={
-              <FinalizeSnapshotsTableExcludedComponentsTooltip
-                excludedComponents={row.excludeComponentWinners}
-                phases={phases}
-              />
-            }
-            placement="top"
-            maxWidth={500}
+          <svg
+            className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            data-tooltip-id={`excluded-components-${row.groupSnapshotId}`}
           >
-            <svg
-              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Tippy>
+            <path
+              d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <Tooltip
+            id={`excluded-components-${row.groupSnapshotId}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+              maxWidth: "500px",
+            }}
+          >
+            <FinalizeSnapshotsTableExcludedComponentsTooltip
+              excludedComponents={row.excludeComponentWinners}
+              phases={phases}
+            />
+          </Tooltip>
         )}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
