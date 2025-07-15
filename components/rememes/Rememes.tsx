@@ -17,7 +17,7 @@ import {
   numberWithCommas,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import DotLoader from "../dotLoader/DotLoader";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
@@ -284,19 +284,28 @@ export default function Rememes() {
                       </Dropdown.Menu>
                     </Dropdown>
                     {selectedSorting === RememeSort.RANDOM && (
-                      <Tippy
-                        content="Refresh results"
-                        placement="top"
-                        theme="light"
-                        delay={250}>
+                      <>
                         <FontAwesomeIcon
                           icon={faRefresh}
                           className={styles.buttonIcon}
                           onClick={() => {
                             fetchResults(page);
                           }}
+                          data-tooltip-id="refresh-rememes-results"
                         />
-                      </Tippy>
+                        <Tooltip
+                          id="refresh-rememes-results"
+                          place="top"
+                          delayShow={250}
+                          style={{
+                            backgroundColor: "#f8f9fa",
+                            color: "#212529",
+                            padding: "4px 8px",
+                          }}
+                        >
+                          Refresh results
+                        </Tooltip>
+                      </>
                     )}
                   </span>
                   <span className="d-flex flex-wrap align-items-center justify-content-between gap-2">

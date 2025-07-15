@@ -19,7 +19,7 @@ import CircleLoader, {
 } from "../../distribution-plan-tool/common/CircleLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",
@@ -151,16 +151,12 @@ export default function UserFollowBtn({
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
       {onDirectMessage && following && (
-        <Tippy
-          content="Direct Message"
-          placement="left"
-          theme="dark"
-          delay={250}
-        >
+        <>
           <button
             onClick={onDirectMessage}
             aria-label="Send direct message"
             className="tw-px-3 tw-py-3 tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
+            data-tooltip-id={`dm-${handle}`}
           >
             {directMessageLoading ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />
@@ -168,7 +164,19 @@ export default function UserFollowBtn({
               <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4" />
             )}
           </button>
-        </Tippy>
+          <Tooltip
+            id={`dm-${handle}`}
+            place="left"
+            delayShow={250}
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            Direct Message
+          </Tooltip>
+        </>
       )}
       <button
         onClick={onFollow}

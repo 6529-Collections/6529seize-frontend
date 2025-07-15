@@ -16,7 +16,7 @@ import {
 import { Spinner } from "../../dotLoader/DotLoader";
 import Toggle from "react-toggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import {
   getMintingDates,
   isMintingToday,
@@ -216,15 +216,23 @@ function SubscriptionRow(
           <span className="d-flex align-items-center gap-2">
             {props.title} #{props.subscription.token_id}{" "}
             {props.minting_today ? (
-              <Tippy
-                placement="right"
-                theme="light"
-                content="No changes allowed on minting day">
-                <span>
+              <>
+                <span data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
                   - Minting Today{" "}
                   <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
                 </span>
-              </Tippy>
+                <Tooltip
+                  id={`minting-today-${props.subscription.token_id}`}
+                  place="right"
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    color: "#212529",
+                    padding: "4px 8px",
+                  }}
+                >
+                  No changes allowed on minting day
+                </Tooltip>
+              </>
             ) : (
               <span className="font-color-silver">
                 {props.date.toIsoDateString()} / {props.date.toDayName()}

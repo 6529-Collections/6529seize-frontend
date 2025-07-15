@@ -1,6 +1,6 @@
 import React from "react";
 import { DropRequirementType } from "./CreateDropContentRequirements";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 
 interface CreateDropContentRequirementsItemProps {
   readonly isValid: boolean;
@@ -50,41 +50,13 @@ const CreateDropContentRequirementsItem: React.FC<
   };
 
   return (
-    <Tippy
-      content={
-        <div className="tw-p-2 tw-bg-iron-900 tw-rounded-md tw-shadow-lg">
-          {isValid ? (
-            <p className="tw-text-green tw-text-sm tw-font-medium">
-              All requirements met. Good job!
-            </p>
-          ) : (
-            <div>
-              <p className="tw-text-[#FEDF89] tw-font-medium tw-mb-2">
-                {requirementType === DropRequirementType.MEDIA
-                  ? "Missing required media:"
-                  : "Missing required metadata:"}
-              </p>
-              <ul className="tw-list-disc tw-list-inside tw-text-white">
-                {missingItems.map((item) => (
-                  <li key={item} className="tw-capitalize">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <p className="tw-text-iron-300 tw-mt-2 tw-text-sm">
-                Please add the missing {requirementType.toLowerCase()} to
-                proceed.
-              </p>
-            </div>
-          )}
-        </div>
-      }
-    >
+    <>
       <button
         className={`tw-flex tw-bg-transparent tw-border-none tw-items-center tw-gap-x-1.5 ${getButtonColorClass()}`}
         onClick={handleClick}
         type="button"
         disabled={disabled}
+        data-tooltip-id={`requirement-${requirementType}-${isValid}`}
       >
         {isValid ? (
           <svg
@@ -121,7 +93,42 @@ const CreateDropContentRequirementsItem: React.FC<
         )}
         <span className="tw-text-xs">{LABELS[requirementType]}</span>
       </button>
-    </Tippy>
+      <Tooltip
+        id={`requirement-${requirementType}-${isValid}`}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        <div className="tw-p-2 tw-bg-iron-900 tw-rounded-md tw-shadow-lg">
+          {isValid ? (
+            <p className="tw-text-green tw-text-sm tw-font-medium">
+              All requirements met. Good job!
+            </p>
+          ) : (
+            <div>
+              <p className="tw-text-[#FEDF89] tw-font-medium tw-mb-2">
+                {requirementType === DropRequirementType.MEDIA
+                  ? "Missing required media:"
+                  : "Missing required metadata:"}
+              </p>
+              <ul className="tw-list-disc tw-list-inside tw-text-white">
+                {missingItems.map((item) => (
+                  <li key={item} className="tw-capitalize">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="tw-text-iron-300 tw-mt-2 tw-text-sm">
+                Please add the missing {requirementType.toLowerCase()} to
+                proceed.
+              </p>
+            </div>
+          )}
+        </div>
+      </Tooltip>
+    </>
   );
 };
 

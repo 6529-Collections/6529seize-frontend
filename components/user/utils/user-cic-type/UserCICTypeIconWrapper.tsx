@@ -1,5 +1,5 @@
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 import UserCICTypeIcon from "./UserCICTypeIcon";
 
@@ -9,14 +9,20 @@ export default function UserCICTypeIconWrapper({
   readonly profile: ApiIdentity;
 }) {
   return (
-    <Tippy
-      placement={"auto"}
-      interactive={true}
-      content={<UserCICTypeIconTooltip profile={profile} />}
-    >
-      <div>
+    <>
+      <div data-tooltip-id={`cic-type-${profile.id}`}>
         <UserCICTypeIcon cic={profile.cic} />
       </div>
-    </Tippy>
+      <Tooltip
+        id={`cic-type-${profile.id}`}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        <UserCICTypeIconTooltip profile={profile} />
+      </Tooltip>
+    </>
   );
 }

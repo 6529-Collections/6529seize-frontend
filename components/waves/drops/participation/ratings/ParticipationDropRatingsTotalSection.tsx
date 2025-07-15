@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import { RatingsSectionProps, RatingsData } from "./types";
 import VoteBreakdownTooltip from "./tooltips/VoteBreakdownTooltip";
@@ -18,13 +18,6 @@ export default function ParticipationDropRatingsTotalSection({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1">
-      <Tippy
-        content={<VoteBreakdownTooltip drop={drop} ratingsData={ratingsData} />}
-        interactive={true}
-        placement="bottom-start"
-        appendTo={() => document.body}
-        zIndex={1000}
-      ></Tippy>
       <div
         className={`tw-relative tw-inline-flex tw-items-baseline tw-gap-x-1 ${theme.indicator}`}
       >
@@ -35,9 +28,22 @@ export default function ParticipationDropRatingsTotalSection({
             {currentRating < 0 && "-"}
             {formatNumberWithCommas(Math.abs(currentRating))}
           </span>{" "}
-          <span className="tw-text-sm tw-font-normal tw-text-iron-400 tw-cursor-help">
+          <span 
+            className="tw-text-sm tw-font-normal tw-text-iron-400 tw-cursor-help"
+            data-tooltip-id={`total-rating-${drop.id}`}
+          >
             Total {drop.wave.voting_credit_type}
           </span>
+          <Tooltip
+            id={`total-rating-${drop.id}`}
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            <VoteBreakdownTooltip drop={drop} ratingsData={ratingsData} />
+          </Tooltip>
         </span>
         <DropVoteProgressing
           current={currentRating}

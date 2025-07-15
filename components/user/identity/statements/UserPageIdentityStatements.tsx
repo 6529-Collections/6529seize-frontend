@@ -12,7 +12,7 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 import UserPageIdentityStatementsNFTAccounts from "./nft-accounts/UserPageIdentityStatementsNFTAccounts";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageIdentityStatements({
@@ -119,29 +119,14 @@ export default function UserPageIdentityStatements({
                   />
                 </div>
                 <div className="tw-absolute tw-right-2 lg:tw-right-4 tw-top-2 xl:tw-top-4">
-                  <Tippy
-                    content={
-                      <ul className="tw-pl-4 tw-list-disc tw-text-iron-300 tw-font-normal tw-space-y-1">
-                        <li>All statements are optional.</li>
-                        <li>
-                          All statements are fully and permanently public.
-                        </li>
-                        <li>
-                          Seize does not connect to social media accounts or
-                          verify posts.
-                        </li>
-                        <li>
-                          The community will rate the accuracy of statements.
-                        </li>
-                      </ul>
-                    }
-                    theme="dark"
-                    placement="top">
+                  <>
                     <div
                       tabIndex={0}
                       role="button"
                       aria-label="Statements help"
-                      className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400">
+                      className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+                      data-tooltip-id="statements-help"
+                    >
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
                         viewBox="0 0 24 24"
@@ -157,7 +142,30 @@ export default function UserPageIdentityStatements({
                         />
                       </svg>
                     </div>
-                  </Tippy>
+                    <Tooltip
+                      id="statements-help"
+                      place="top"
+                      style={{
+                        backgroundColor: "#1F2937",
+                        color: "white",
+                        padding: "4px 8px",
+                      }}
+                    >
+                      <ul className="tw-pl-4 tw-list-disc tw-text-iron-300 tw-font-normal tw-space-y-1">
+                        <li>All statements are optional.</li>
+                        <li>
+                          All statements are fully and permanently public.
+                        </li>
+                        <li>
+                          Seize does not connect to social media accounts or
+                          verify posts.
+                        </li>
+                        <li>
+                          The community will rate the accuracy of statements.
+                        </li>
+                      </ul>
+                    </Tooltip>
+                  </>
                 </div>
               </div>
             </div>
