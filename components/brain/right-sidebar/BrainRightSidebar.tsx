@@ -58,8 +58,8 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col
         tw-w-[20.5rem] tw-border-l-2 tw-border-iron-800 tw-border-solid tw-border-y-0 
         tw-border-r-0 tw-shadow-2xl
-        lg:tw-bg-opacity-95 xl:tw-bg-opacity-100
-        lg:tw-backdrop-blur xl:tw-backdrop-blur-none"
+        lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100
+        lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none"
       initial={false}
       animate={{ x: isCollapsed ? "100%" : 0 }}
       transition={{

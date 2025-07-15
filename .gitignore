@@ -85,3 +85,4 @@ jest-results.json
 # Claude Code project configuration
 claude.md
 CLAUDE.md
+.claude/

@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import {
-  keepPreviousData,
   useInfiniteQuery,
   useQuery,
   useQueryClient,
@@ -78,6 +77,18 @@ export function useWaveDropsLeaderboard({
     ApiDropsLeaderboardPage | undefined
   >(undefined);
   const isTabVisible = useTabVisibility();
+  const [currentSort, setCurrentSort] = useState(sort);
+
+  // Detect sort changes
+  const isSortChanging = currentSort !== sort;
+
+  useEffect(() => {
+    if (currentSort !== sort) {
+      setCurrentSort(sort);
+      setDrops([]);
+      setHasInitialized(false);
+    }
+  }, [sort, currentSort]);
 
   const sortDirection = SORT_DIRECTION_MAP[sort];
 
@@ -130,7 +141,7 @@ export function useWaveDropsLeaderboard({
       },
       initialPageParam: null,
       getNextPageParam,
-      pages: 3,
+      pages: 1,
       staleTime: 60000,
       ...getDefaultQueryRetry(),
     });
@@ -168,34 +179,39 @@ export function useWaveDropsLeaderboard({
     },
     initialPageParam: null,
     getNextPageParam,
-    placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle && !pausePolling,
     staleTime: 60000,
     ...getDefaultQueryRetry(),
   });
 
+  const processedDrops = useMemo(() => {
+    if (!data?.pages) return [];
+    
+    const mappedDrops = mapToExtendedDrops(
+      data.pages.map((page) => ({
+        wave: page.wave,
+        drops: page.drops,
+      })),
+      []
+    );
+    
+    const uniqueDrops = generateUniqueKeys(mappedDrops, []);
+    
+    if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
+      return uniqueDrops.filter(
+        (drop) => drop.context_profile_context?.rating !== 0
+      );
+    }
+    
+    return uniqueDrops;
+  }, [data, sort]);
+
   useEffect(() => {
-    if (!data) return;
-    setDrops((prev) => {
-      const newDrops = data?.pages
-        ? mapToExtendedDrops(
-            data.pages.map((page) => ({
-              wave: page.wave,
-              drops: page.drops,
-            })),
-            prev
-          )
-        : [];
-      const uniqueDrops = generateUniqueKeys(newDrops, prev);
-      if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
-        return uniqueDrops.filter(
-          (drop) => drop.context_profile_context?.rating !== 0
-        );
-      }
-      return uniqueDrops;
-    });
-    setHasInitialized(true);
-  }, [data]);
+    if (processedDrops.length > 0 || (data && !data.pages?.length)) {
+      setDrops(processedDrops);
+      setHasInitialized(true);
+    }
+  }, [processedDrops, data]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 
@@ -289,7 +305,7 @@ export function useWaveDropsLeaderboard({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching: isFetching || !hasInitialized,
+    isFetching: isFetching || !hasInitialized || isSortChanging,
     isFetchingNextPage,
     refetch,
     haveNewDrops,

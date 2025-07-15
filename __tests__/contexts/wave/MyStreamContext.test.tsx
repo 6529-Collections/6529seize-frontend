@@ -75,6 +75,13 @@ jest.mock("../../../services/websocket/useWebSocketMessage", () => ({
 
 jest.mock("../../../hooks/useCapacitor", () => () => ({ isCapacitor: false }));
 
+jest.mock("../../../components/notifications/NotificationsContext", () => ({
+  useNotificationsContext: () => ({
+    removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+    removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 describe("MyStreamProvider integration", () => {
   it("delegates wave actions to underlying hooks", () => {
     function TestComponent() {
