@@ -457,12 +457,12 @@ export default function TheMemesComponent() {
                         select={() => setSort(v)}
                       />
                     ))}
-                  <VolumeTypeDropdown
-                    isVolumeSort={sort === MemesSort.VOLUME}
-                    selectedVolumeSort={volumeType}
-                    setVolumeType={setVolumeType}
-                    setVolumeSort={() => setSort(MemesSort.VOLUME)}
-                  />
+                  {printVolumeTypeDropdown(
+                    sort === MemesSort.VOLUME,
+                    setVolumeType,
+                    () => setSort(MemesSort.VOLUME),
+                    volumeType
+                  )}
                 </Col>
               </Row>
               {nfts.length > 0 && sort === MemesSort.MEME

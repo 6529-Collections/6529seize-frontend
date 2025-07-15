@@ -27,7 +27,7 @@ import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
-import { VolumeTypeDropdown } from "../the-memes/MemeShared";
+import { printVolumeTypeDropdown } from "../the-memes/TheMemes";
 
 interface Props {
   wallets: string[];
@@ -98,12 +98,12 @@ export function printSortButtons(
           select={() => setSort(v)}
         />
       ))}
-      <VolumeTypeDropdown
-        isVolumeSort={sort === MemeLabSort.VOLUME}
-        selectedVolumeSort={volumeType}
-        setVolumeType={setVolumeType}
-        setVolumeSort={() => setSort(MemeLabSort.VOLUME)}
-      />
+      {printVolumeTypeDropdown(
+        sort === MemeLabSort.VOLUME,
+        setVolumeType,
+        () => setSort(MemeLabSort.VOLUME),
+        volumeType
+      )}
     </>
   );
 }
