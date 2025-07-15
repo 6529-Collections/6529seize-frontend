@@ -116,8 +116,12 @@ export async function middleware(req: NextRequest) {
 
     const deepLink = req.nextUrl.searchParams.get("__deeplink");
 
+    console.log("deepLink", deepLink);
+
     if (deepLink) {
       const result = resolveDeepLink(deepLink);
+
+      console.log("deepLink resolve result", result);
 
       if (result) {
         const { pathname, queryParams } = result;
@@ -130,22 +134,31 @@ export async function middleware(req: NextRequest) {
           newUrl.searchParams.set(key, String(value));
         }
 
+        console.log("deepLink rewrite url", newUrl);
+
         return NextResponse.rewrite(newUrl);
       }
     }
 
     const pushData = req.nextUrl.searchParams.get("__push_data");
 
+    console.log("pushData", pushData);
+
     if (pushData) {
       const decoded = decodeURIComponent(pushData);
       const pushDataObj = JSON.parse(decoded);
       const resolvedPath = resolvePushNotificationRedirectUrl(pushDataObj);
+
+      console.log("pushData resolve result", resolvedPath);
+
       if (resolvedPath) {
         const [pathname, search = ""] = resolvedPath.split("?");
 
         const newUrl = req.nextUrl.clone();
         newUrl.pathname = pathname;
         newUrl.search = search ? `?${search}` : "";
+
+        console.log("pushData rewrite url", newUrl);
 
         return NextResponse.rewrite(newUrl);
       }
