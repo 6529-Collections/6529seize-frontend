@@ -319,6 +319,8 @@ function HeaderQRModal({
               id="copy-url-tooltip"
               place="top"
               content={urlCopied ? "Copied!" : "Copy URL"}
+              openEvents={isMobile ? { click: true } : { mouseenter: true }}
+              closeEvents={isMobile ? { click: true } : { mouseleave: true }}
               style={{
                 backgroundColor: "#1F2937",
                 color: "white",

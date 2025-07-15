@@ -65,3 +65,13 @@ Object.defineProperty(window, "matchMedia", {
 
 // Default API endpoint needed for service tests
 process.env.API_ENDPOINT = process.env.API_ENDPOINT || "https://example.com";
+
+// Mock ResizeObserver for react-tooltip
+global.ResizeObserver = class ResizeObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};

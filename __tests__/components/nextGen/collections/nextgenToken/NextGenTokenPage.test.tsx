@@ -29,13 +29,16 @@ jest.mock('../../../../../components/nextGen/collections/collectionParts/NextGen
 }));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: (props: any) => <svg data-testid={props.icon.iconName} style={props.style} onClick={props.onClick} />,
+  FontAwesomeIcon: (props: any) => <svg data-testid={props.icon.iconName} style={props.style} onClick={props.onClick} data-tooltip-id={props['data-tooltip-id']} />,
 }));
 
-jest.mock('@tippyjs/react', () => {
-  const React = require('react');
-  return { __esModule: true, default: ({ children }: any) => <span data-testid='tippy'>{children}</span> };
-});
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
+  ),
+}));
 
 jest.mock('../../../../../helpers/Helpers', () => ({
   isNullAddress: jest.fn(() => false),
@@ -59,14 +62,18 @@ describe('NextGenTokenPage navigation', () => {
     renderComponent();
     const prev = screen.getByTestId('circle-chevron-left');
     expect(prev.getAttribute('style')).toContain('color: rgb(154, 154, 154)');
-    expect(prev.parentElement?.getAttribute('data-testid')).not.toBe('tippy');
+    // When disabled, no tooltip should be present
+    expect(prev.getAttribute('data-tooltip-id')).toBeFalsy();
   });
 
   it('enables previous button when not first token', () => {
     renderComponent({ token: { ...baseProps.token, normalised_id: 1, id: 2 } });
     const prev = screen.getByTestId('circle-chevron-left');
     expect(prev.getAttribute('style')).toContain('color: rgb(255, 255, 255)');
-    expect(prev.parentElement?.getAttribute('data-testid')).toBe('tippy');
+    // When enabled, the icon should have a tooltip id
+    expect(prev.getAttribute('data-tooltip-id')).toBeTruthy();
+    // And the tooltip should be present in the document
+    expect(screen.getByTestId('tooltip-prev-token-2')).toBeInTheDocument();
   });
 
   it('shows burnt icon when burnt', () => {
