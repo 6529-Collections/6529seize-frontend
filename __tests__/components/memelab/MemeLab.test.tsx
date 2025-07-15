@@ -10,6 +10,12 @@ import { MemeLabSort } from "../../../enums";
 import { SortDirection } from "../../../entities/ISort";
 import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
 
+(global as any).ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 jest.mock("../../../components/the-memes/TheMemes", () => ({
   SortButton: (p: any) => (
     <button data-testid="sort" onClick={() => p.select()}>
@@ -107,7 +113,7 @@ describe("MemeLab utilities", () => {
       setNfts
     );
     expect(router.replace).toHaveBeenCalledWith(
-      { query: { sort: MemeLabSort.AGE, sort_dir: SortDirection.ASC } },
+      { query: { sort: 'age', sort_dir: 'asc' } },
       undefined,
       { shallow: true }
     );

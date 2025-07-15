@@ -57,7 +57,7 @@ export default function TheMemesComponent() {
     const routerSortDir = searchParams?.get("sort_dir");
     if (routerSortDir) {
       const resolvedRouterSortDir = Object.values(SortDirection).find(
-        (sd) => sd === routerSortDir
+        (sd) => sd.toLowerCase() === routerSortDir.toLowerCase()
       );
       if (resolvedRouterSortDir) {
         initialSortDir = resolvedRouterSortDir;
@@ -159,7 +159,7 @@ export default function TheMemesComponent() {
       Object.keys(MemesSort).find(
         (k) => MemesSort[k as keyof typeof MemesSort] === sort
       )?.toLowerCase() ?? "";
-    let queryString = `sort=${sortKey}&sort_dir=${sortDir}`;
+    let queryString = `sort=${sortKey}&sort_dir=${sortDir.toLowerCase()}`;
     if (selectedSeason > 0) {
       queryString += `&szn=${selectedSeason}`;
     }
@@ -503,5 +503,21 @@ export function SortButton(
       }`}>
       {props.sort}
     </button>
+  );
+}
+
+export function printVolumeTypeDropdown(
+  isVolumeSort: boolean,
+  setVolumeType: (volumeType: VolumeType) => void,
+  setVolumeSort: () => void,
+  selectedVolumeSort: VolumeType = VolumeType.ALL_TIME
+) {
+  return (
+    <VolumeTypeDropdown
+      isVolumeSort={isVolumeSort}
+      selectedVolumeSort={selectedVolumeSort}
+      setVolumeType={setVolumeType}
+      setVolumeSort={setVolumeSort}
+    />
   );
 }

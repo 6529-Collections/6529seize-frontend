@@ -10,6 +10,12 @@ import { MemeLabSort } from "../../../enums";
 import { SortDirection } from "../../../entities/ISort";
 import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
 
+(global as any).ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 jest.mock("../../../components/the-memes/TheMemes", () => ({
   SortButton: ({ sort, select }: any) => (
     <button data-testid={`sort-${sort}`} onClick={select} />

@@ -39,8 +39,11 @@ export function getInitialRouterValues(router: NextRouter) {
 
   const routerSortDir = router.query.sort_dir;
   if (routerSortDir) {
+    const routerSortDirStr = Array.isArray(routerSortDir)
+      ? routerSortDir[0]
+      : routerSortDir;
     const resolvedRouterSortDir = Object.values(SortDirection).find(
-      (sd) => sd === routerSortDir
+      (sd) => sd.toLowerCase() === routerSortDirStr.toLowerCase()
     );
     if (resolvedRouterSortDir) {
       initialSortDir = resolvedRouterSortDir;
@@ -49,11 +52,19 @@ export function getInitialRouterValues(router: NextRouter) {
 
   const routerSort = router.query.sort;
   if (routerSort) {
-    const resolvedRouterSort = Object.values(MemeLabSort).find(
-      (sd) => sd === routerSort
+    const routerSortStr = Array.isArray(routerSort) ? routerSort[0] : routerSort;
+    const resolvedKey = Object.keys(MemeLabSort).find(
+      (k) => k.toLowerCase() === routerSortStr.toLowerCase()
     );
-    if (resolvedRouterSort) {
-      initialSort = resolvedRouterSort;
+    if (resolvedKey) {
+      initialSort = MemeLabSort[resolvedKey as keyof typeof MemeLabSort];
+    } else {
+      const resolvedVal = Object.values(MemeLabSort).find(
+        (v) => v.toLowerCase() === routerSortStr.toLowerCase()
+      );
+      if (resolvedVal) {
+        initialSort = resolvedVal as MemeLabSort;
+      }
     }
   }
 
@@ -180,9 +191,13 @@ export function sortChanged(
   setLabArtists?: (artists: string[]) => void,
   setLabCollections?: (collections: string[]) => void
 ) {
+  const sortKey =
+    Object.keys(MemeLabSort).find(
+      (k) => MemeLabSort[k as keyof typeof MemeLabSort] === sort
+    )?.toLowerCase() ?? "";
   const newQuery: any = {
-    sort: sort,
-    sort_dir: sortDir,
+    sort: sortKey,
+    sort_dir: sortDir.toLowerCase(),
   };
   if (collectionName) {
     newQuery.collection = collectionName?.replaceAll(" ", "-");

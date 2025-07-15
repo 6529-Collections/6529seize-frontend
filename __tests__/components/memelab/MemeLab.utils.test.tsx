@@ -10,6 +10,12 @@ import { MemeLabSort } from "../../../enums";
 import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
 import { NextRouter } from "next/router";
 
+(global as any).ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
@@ -75,7 +81,7 @@ const nftMeta: LabExtendedData = {
 describe("MemeLab utilities", () => {
   it("parses router query for initial values", () => {
     const router = {
-      query: { sort: MemeLabSort.HODLERS, sort_dir: "DESC" },
+      query: { sort: 'hodlers', sort_dir: "DESC" },
     } as unknown as NextRouter;
     const { initialSortDir, initialSort } = getInitialRouterValues(router);
     expect(initialSort).toBe(MemeLabSort.HODLERS);
