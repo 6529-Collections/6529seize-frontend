@@ -2,7 +2,7 @@ import React from "react";
 
 import CreateDropMetadataRow from "./CreateDropMetadataRow";
 import { CreateDropMetadataType } from "./CreateDropContent";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 
 interface CreateDropMetadataProps {
   readonly metadata: CreateDropMetadataType[];
@@ -34,23 +34,12 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
         <span>
           <span className="tw-text-xs tw-text-iron-300">Add Metadata</span>
         </span>
-        <Tippy
-          content={
-            <div className="tw-text-center">
-              <span
-                className={`tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-              >
-                Close
-              </span>
-            </div>
-          }
-          placement="top"
-          disabled={false}
-        >
+        <>
           <button
             type="button"
             onClick={closeMetadata}
             className="tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2  tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+            data-tooltip-id="close-metadata"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +57,17 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
               ></path>
             </svg>
           </button>
-        </Tippy>
+          <Tooltip
+            id="close-metadata"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            Close
+          </Tooltip>
+        </>
       </div>
       <div className="tw-space-y-2">
         {metadata.map((item, index) => (

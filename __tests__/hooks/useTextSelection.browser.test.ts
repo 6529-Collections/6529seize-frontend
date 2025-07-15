@@ -10,7 +10,8 @@ import {
   createMockRange,
   createMockTreeWalker,
   testMouseEventHandling,
-  testBrowserAPI
+  testBrowserAPI,
+  createReduxWrapper
 } from '../utils/textSelectionTestUtils';
 
 // Setup common mocks
@@ -196,7 +197,9 @@ describe('useTextSelection Browser Compatibility', () => {
   describe('Cross-browser text node detection', () => {
     it('should handle different text node types across browsers', () => {
       const mocks = createBrowserMock('chrome');
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
 
       // Test with different node types that browsers might return
       const testCases = [
@@ -237,7 +240,9 @@ describe('useTextSelection Browser Compatibility', () => {
 
   describe('Browser-specific getSelection behavior', () => {
     it('should handle different getSelection implementations', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
 
       // Test different getSelection scenarios
       const testCases = [

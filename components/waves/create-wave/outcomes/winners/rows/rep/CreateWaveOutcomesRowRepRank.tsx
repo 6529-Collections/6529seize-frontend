@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
@@ -18,11 +18,24 @@ export default function CreateWaveOutcomesRowRepRank({
           </h3>
         </div>
         <div className="tw-col-span-4">
-          <Tippy content={outcome.category}>
-            <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate">
+          <>
+            <p 
+              className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate"
+              data-tooltip-id={`rep-category-${outcome.category}`}
+            >
               {outcome.category}
             </p>
-          </Tippy>
+            <Tooltip
+              id={`rep-category-${outcome.category}`}
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              {outcome.category}
+            </Tooltip>
+          </>
         </div>
         <div className="tw-col-span-2">
           <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-text-nowrap">

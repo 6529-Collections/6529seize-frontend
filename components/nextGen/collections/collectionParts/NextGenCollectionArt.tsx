@@ -28,7 +28,7 @@ import {
   formatNameForUrl,
 } from "../../nextgen_helpers";
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import {
   faArrowCircleRight,
@@ -261,26 +261,31 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             </a>
           ) : (
             <>
-              <Tippy
-                content={`${showFilters ? "Hide" : "Show"} Filters${
+              <FontAwesomeIcon
+                icon={showFilters ? "filter-circle-xmark" : "filter"}
+                style={{
+                  cursor: "pointer",
+                  height: "22px",
+                  color: selectedTraitValues.length > 0 ? "#00dd00" : "white",
+                }}
+                onClick={() => setShowFilters(!showFilters)}
+                data-tooltip-id={`nextgen-collection-art-filters-${props.collection.id}`}
+              />
+              <Tooltip
+                id={`nextgen-collection-art-filters-${props.collection.id}`}
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}
+               place="bottom"
+                delayShow={250}>
+                {`${showFilters ? "Hide" : "Show"} Filters${
                   selectedTraitValues.length > 0
                     ? ` (${selectedTraitValues.length} selected)`
                     : ""
                 }`}
-                hideOnClick={true}
-                placement="bottom"
-                theme="light"
-                delay={250}>
-                <FontAwesomeIcon
-                  icon={showFilters ? "filter-circle-xmark" : "filter"}
-                  style={{
-                    cursor: "pointer",
-                    height: "22px",
-                    color: selectedTraitValues.length > 0 ? "#00dd00" : "white",
-                  }}
-                  onClick={() => setShowFilters(!showFilters)}
-                />
-              </Tippy>
+              </Tooltip>
               <Dropdown className={styles.rarityDropdown} drop="down-centered">
                 <Dropdown.Toggle>Listing Status: {listedType}</Dropdown.Toggle>
                 <Dropdown.Menu>

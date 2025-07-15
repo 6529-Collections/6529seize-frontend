@@ -6,7 +6,13 @@ jest.mock('../../../../../../../../components/distribution-plan-tool/common/Dist
   <tr data-testid="wrapper">{children}</tr>
 ));
 
-jest.mock('@tippyjs/react', () => (props: any) => <span data-testid="tippy">{props.children}{props.content}</span>);
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid="react-tooltip" data-tooltip-id={id}>
+      {children}
+    </div>
+  ),
+}));
 
 jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableSnapshotTooltip', () => (p: any) => <div data-testid="snapshot-tip">{p.snapshotId}</div>);
 jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableExcludedSnapshotsTooltip', () => (p: any) => <div data-testid="excluded-tip">{p.excludedSnapshots.length}</div>);
@@ -44,6 +50,17 @@ test('shows tooltips when exclude lists present', () => {
       <FinalizeSnapshotsTableRow row={row} phases={phases} onRemoveGroupSnapshot={jest.fn()} />
     </tbody></table>
   );
+  
+  // Check that all tooltip elements are rendered
+  const tooltips = screen.getAllByTestId('react-tooltip');
+  expect(tooltips).toHaveLength(3);
+  
+  // Check tooltip IDs
+  expect(tooltips[0]).toHaveAttribute('data-tooltip-id', 'snapshot-info-g1');
+  expect(tooltips[1]).toHaveAttribute('data-tooltip-id', 'excluded-snapshots-g1');
+  expect(tooltips[2]).toHaveAttribute('data-tooltip-id', 'excluded-components-g1');
+  
+  // Check tooltip content components
   expect(screen.getByTestId('snapshot-tip')).toHaveTextContent('s1');
   expect(screen.getByTestId('excluded-tip')).toHaveTextContent('1');
   expect(screen.getByTestId('components-tip')).toHaveTextContent('1');

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import { faAward } from "@fortawesome/free-solid-svg-icons";
@@ -181,19 +181,15 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
   );
 
   return (
-    <Tippy
-      content={tooltipContent}
-      placement="top"
-      animation="shift-away"
-      visible={isTouch ? isOpen : undefined}
-      onClickOutside={() => setIsOpen(false)}>
+    <>
       <button
         onClick={handleClick}
         className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${
           isMobile ? "tw-gap-4" : "tw-gap-2"
         } tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${
           isTouch ? "tw-cursor-pointer" : ""
-        }`}>
+        }`}
+        data-tooltip-id={`wave-outcomes-${drop.id}`}>
         <span className="tw-text-xs tw-font-medium tw-text-iron-200">
           Outcome:
         </span>
@@ -218,6 +214,22 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           )}
         </div>
       </button>
-    </Tippy>
+      <Tooltip
+        id={`wave-outcomes-${drop.id}`}
+        place="top"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+          zIndex: 10,
+        }}
+        clickable={true}
+        openEvents={isTouch ? { click: true } : { mouseenter: true }}
+        closeEvents={isTouch ? { click: true } : { mouseleave: true }}
+        globalCloseEvents={isTouch ? { clickOutsideAnchor: true } : {}}
+      >
+        {tooltipContent}
+      </Tooltip>
+    </>
   );
 };

@@ -4,7 +4,13 @@ import BrainLeftSidebarWaveClose from '../../../../../components/brain/left-side
 import { useRouter } from 'next/router';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
-jest.mock('@tippyjs/react', () => (props: any) => <div data-testid="tippy">{props.children}</div>);
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
+  ),
+}));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
 
 const mockedUseRouter = useRouter as jest.Mock;
@@ -20,7 +26,7 @@ describe('BrainLeftSidebarWaveClose', () => {
     render(<BrainLeftSidebarWaveClose waveId="1" />);
     expect(screen.getByRole('button', { name: /close wave/i })).toBeInTheDocument();
     expect(screen.getByTestId('icon')).toBeInTheDocument();
-    expect(screen.getByTestId('tippy')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip-wave-close-1')).toBeInTheDocument();
   });
 
   it('navigates to /my-stream on click', async () => {

@@ -3,7 +3,8 @@ import { useTextSelection } from '../../hooks/useTextSelection';
 import {
   setupTextSelectionTestMocks,
   cleanupTextSelectionMocks,
-  cleanupTestContainer
+  cleanupTestContainer,
+  createReduxWrapper
 } from '../utils/textSelectionTestUtils';
 
 // Mock DOM APIs that aren't available in jsdom
@@ -79,7 +80,9 @@ describe('useTextSelection', () => {
 
   describe('initialization', () => {
     it('should initialize with default state', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
 
       expect(result.current.state).toEqual({
         isSelecting: false,
@@ -98,7 +101,9 @@ describe('useTextSelection', () => {
 
     it('should handle null container ref', () => {
       const nullRef = { current: null };
-      const { result } = renderHook(() => useTextSelection(nullRef));
+      const { result } = renderHook(() => useTextSelection(nullRef), {
+        wrapper: createReduxWrapper()
+      });
 
       expect(result.current.state).toEqual({
         isSelecting: false,
@@ -110,7 +115,9 @@ describe('useTextSelection', () => {
 
   describe('clearSelection', () => {
     it('should reset state when clearing selection', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
 
       // First set some state by simulating a selection
       act(() => {
@@ -125,7 +132,9 @@ describe('useTextSelection', () => {
     });
 
     it('should remove highlight spans from DOM', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Add a mock highlight span
       const highlightSpan = document.createElement('span');
@@ -144,7 +153,9 @@ describe('useTextSelection', () => {
 
   describe('mouse event handling', () => {
     it('should handle mouse down event', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       const mouseEvent = new MouseEvent('mousedown', {
         button: 0,
@@ -166,7 +177,9 @@ describe('useTextSelection', () => {
     });
 
     it('should ignore non-left click mouse down', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       const mouseEvent = new MouseEvent('mousedown', {
         button: 1, // Middle click
@@ -182,7 +195,9 @@ describe('useTextSelection', () => {
     });
 
     it('should handle mouse up after mouse down', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Start selection
       const mouseDownEvent = new MouseEvent('mousedown', {
@@ -240,7 +255,9 @@ describe('useTextSelection', () => {
     });
 
     it('should handle browser API availability', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Test when caretPositionFromPoint is available
       mockCaretPositionFromPoint.mockReturnValue({
@@ -253,7 +270,9 @@ describe('useTextSelection', () => {
     });
 
     it('should fall back to caretRangeFromPoint when caretPositionFromPoint unavailable', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Simulate caretPositionFromPoint not available
       delete (document as any).caretPositionFromPoint;
@@ -269,7 +288,9 @@ describe('useTextSelection', () => {
 
   describe('selection state management', () => {
     it('should maintain selection state during mouse move', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Start selection
       const startMouseEvent = new MouseEvent('mousedown', {
@@ -302,7 +323,9 @@ describe('useTextSelection', () => {
     });
 
     it('should ignore mouse move when not selecting', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Try mouse move without starting selection
       act(() => {
@@ -319,7 +342,9 @@ describe('useTextSelection', () => {
 
   describe('clipboard integration', () => {
     it('should handle copy when selection exists', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Mock navigator.clipboard
       const mockWriteText = jest.fn().mockResolvedValue(undefined);
@@ -340,7 +365,9 @@ describe('useTextSelection', () => {
     });
 
     it('should handle copy when no selection exists', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       const mockWriteText = jest.fn();
       Object.defineProperty(navigator, 'clipboard', {
@@ -358,7 +385,9 @@ describe('useTextSelection', () => {
 
   describe('browser selection population', () => {
     it('should populate browser selection when selection exists', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       const mockBrowserSelection = {
         removeAllRanges: jest.fn(),
@@ -379,7 +408,9 @@ describe('useTextSelection', () => {
     });
 
     it('should handle missing window.getSelection', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       (window.getSelection as jest.Mock).mockReturnValue(null);
 
@@ -394,7 +425,9 @@ describe('useTextSelection', () => {
 
   describe('cleanup and memory management', () => {
     it('should cleanup resources on unmount', () => {
-      const { unmount } = renderHook(() => useTextSelection(containerRef));
+      const { unmount } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Should not throw errors on unmount
       expect(() => unmount()).not.toThrow();
@@ -403,7 +436,10 @@ describe('useTextSelection', () => {
     it('should handle cleanup when container ref changes', () => {
       const { rerender } = renderHook(
         ({ containerRef }) => useTextSelection(containerRef),
-        { initialProps: { containerRef } }
+        { 
+          initialProps: { containerRef },
+          wrapper: createReduxWrapper()
+        }
       );
 
       const newContainer = document.createElement('div');
@@ -415,7 +451,9 @@ describe('useTextSelection', () => {
 
   describe('error handling', () => {
     it('should handle DOM API errors gracefully', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Mock createRange to throw an error
       mockCreateRange.mockImplementation(() => {
@@ -445,7 +483,9 @@ describe('useTextSelection', () => {
     });
 
     it('should handle missing DOM methods gracefully', () => {
-      const { result } = renderHook(() => useTextSelection(containerRef));
+      const { result } = renderHook(() => useTextSelection(containerRef), {
+        wrapper: createReduxWrapper()
+      });
       
       // Remove elementFromPoint
       delete (document as any).elementFromPoint;

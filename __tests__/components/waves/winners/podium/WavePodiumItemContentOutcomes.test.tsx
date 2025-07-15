@@ -3,10 +3,18 @@ import { WavePodiumItemContentOutcomes } from "../../../../../components/waves/w
 import { ApiWaveOutcomeCredit } from "../../../../../generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "../../../../../generated/models/ApiWaveOutcomeType";
 
-jest.mock("@tippyjs/react", () => ({ __esModule: true, default: (props: any) => <div>{props.children}{props.content}</div> }));
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
+  ),
+}));
 
 test("renders icons for all outcome types", () => {
   const winner = {
+    place: 1,
+    drop: { id: "test-drop-id" },
     awards: [
       { credit: ApiWaveOutcomeCredit.Cic, amount: 10 },
       { credit: ApiWaveOutcomeCredit.Rep, amount: 5, rep_category: "A" },

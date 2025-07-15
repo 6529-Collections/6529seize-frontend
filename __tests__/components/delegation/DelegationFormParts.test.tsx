@@ -20,7 +20,13 @@ jest.mock('react-bootstrap', () => ({
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid="icon" onClick={p.onClick} {...p}/> }));
 
-jest.mock('@tippyjs/react', () => (props:any) => <div data-testid="tippy" {...props}>{props.children}</div>);
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
+  ),
+}));
 jest.mock('wagmi', () => ({ useEnsName: () => ({ data: null }) }));
 
 describe('Delegation form helpers', () => {
@@ -76,6 +82,6 @@ describe('Delegation form helpers', () => {
       <DelegationFormLabel title="Label" tooltip="info" />
     );
     expect(getByText('Label')).toBeInTheDocument();
-    expect(getByTestId('tippy')).toBeInTheDocument();
+    expect(getByTestId('tooltip-delegation-form-label-label')).toBeInTheDocument();
   });
 });

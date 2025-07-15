@@ -2,7 +2,7 @@
 
 import styles from "./Delegation.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { useState, useEffect } from "react";
 import { Form, Row, Col, Container } from "react-bootstrap";
 import {
@@ -78,17 +78,28 @@ function DelegationAddressInput(
 export function DelegationFormLabel(
   props: Readonly<{ title: string; tooltip: string; span?: number }>
 ) {
+  const tooltipId = `delegation-form-label-${props.title.toLowerCase().replace(/\s+/g, '-')}`;
+  
   return (
     <Form.Label
       column
       sm={props.span ?? 3}
       className="d-flex align-items-center">
       {props.title}
-      <Tippy content={props.tooltip} placement={"top"} theme={"light"}>
-        <FontAwesomeIcon
-          className={styles.infoIcon}
-          icon={faInfoCircle}></FontAwesomeIcon>
-      </Tippy>
+      <FontAwesomeIcon
+        className={styles.infoIcon}
+        icon={faInfoCircle}
+        data-tooltip-id={tooltipId}></FontAwesomeIcon>
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}>
+        {props.tooltip}
+      </Tooltip>
     </Form.Label>
   );
 }
@@ -478,17 +489,27 @@ export function DelegationTokenSelection(
 export function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
+  const tooltipId = `delegation-close-button-${props.title.toLowerCase().replace(/\s+/g, '-')}`;
+  
   return (
-    <Tippy
-      content={`Cancel ${props.title}`}
-      delay={250}
-      placement={"top"}
-      theme={"light"}>
+    <>
       <FontAwesomeIcon
         aria-label={`Cancel ${props.title}`}
         className={styles.closeNewDelegationForm}
         icon={faTimesCircle}
-        onClick={() => props.onHide()}></FontAwesomeIcon>
-    </Tippy>
+        onClick={() => props.onHide()}
+        data-tooltip-id={tooltipId}></FontAwesomeIcon>
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        delayShow={250}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}>
+        {`Cancel ${props.title}`}
+      </Tooltip>
+    </>
   );
 }

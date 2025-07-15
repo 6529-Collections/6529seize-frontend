@@ -5,41 +5,13 @@ import { ApiWave } from '../../../../generated/models/ApiWave';
 import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
 
 // Mock external dependencies
-jest.mock('@tippyjs/react', () => {
-  return function MockTippy({ 
-    children, 
-    content, 
-    visible, 
-    onClickOutside 
-  }: any) {
-    const [isVisible, setIsVisible] = React.useState(false);
-    
-    React.useEffect(() => {
-      if (visible !== undefined) {
-        setIsVisible(visible);
-      }
-    }, [visible]);
-
-    return (
-      <div data-testid="tippy-container">
-        <div 
-          onClick={() => setIsVisible(!isVisible)}
-          onBlur={() => {
-            setIsVisible(false);
-            onClickOutside?.();
-          }}
-        >
-          {children}
-        </div>
-        {isVisible && (
-          <div data-testid="tippy-content">
-            {content}
-          </div>
-        )}
-      </div>
-    );
-  };
-});
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
+  ),
+}));
 
 jest.mock('../../../../hooks/drops/useDropOutcomes', () => ({
   useDropOutcomes: jest.fn(),
@@ -223,10 +195,7 @@ describe('WaveWinnersSmallOutcome', () => {
 
     render(<WaveWinnersSmallOutcome drop={mockDrop} wave={mockWave} />);
 
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
-    expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip-outcome-small-drop-123')).toBeInTheDocument();
     expect(screen.getByText('Outcome Details')).toBeInTheDocument();
     expect(screen.getAllByText('NIC')).toHaveLength(2);
     expect(screen.getByText('1,000')).toBeInTheDocument();
@@ -241,10 +210,7 @@ describe('WaveWinnersSmallOutcome', () => {
 
     render(<WaveWinnersSmallOutcome drop={mockDrop} wave={mockWave} />);
 
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
-    expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip-outcome-small-drop-123')).toBeInTheDocument();
     expect(screen.getAllByText('Rep')).toHaveLength(2);
     expect(screen.getByText('200')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
@@ -260,10 +226,7 @@ describe('WaveWinnersSmallOutcome', () => {
 
     render(<WaveWinnersSmallOutcome drop={mockDrop} wave={mockWave} />);
 
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
-    expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip-outcome-small-drop-123')).toBeInTheDocument();
     expect(screen.getByText('Special Award')).toBeInTheDocument();
     expect(screen.getByText('Community Choice')).toBeInTheDocument();
   });
@@ -284,13 +247,9 @@ describe('WaveWinnersSmallOutcome', () => {
 
     const button = screen.getByRole('button');
     
-    // First click should open tooltip
-    fireEvent.click(button);
-    expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
-
-    // Second click should close tooltip
-    fireEvent.click(button);
-    expect(screen.queryByTestId('tippy-content')).not.toBeInTheDocument();
+    // Button should be rendered (tooltip is always rendered with react-tooltip)
+    expect(button).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip-outcome-small-drop-123')).toBeInTheDocument();
   });
 
   it('stops event propagation on button click', () => {
@@ -324,14 +283,10 @@ describe('WaveWinnersSmallOutcome', () => {
     const button = screen.getByRole('button');
     fireEvent.click(button);
 
-    expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip-outcome-small-drop-123')).toBeInTheDocument();
 
-    // Simulate clicking outside
-    const tippyContainer = screen.getByTestId('tippy-container');
-    const childDiv = tippyContainer.firstChild as HTMLElement;
-    fireEvent.blur(childDiv);
-
-    expect(screen.queryByTestId('tippy-content')).not.toBeInTheDocument();
+    // With react-tooltip, the tooltip is always rendered
+    expect(screen.getByTestId('tooltip-outcome-small-drop-123')).toBeInTheDocument();
   });
 
   it('passes correct props to useDropOutcomes hook', () => {
@@ -363,9 +318,6 @@ describe('WaveWinnersSmallOutcome', () => {
 
     render(<WaveWinnersSmallOutcome drop={mockDrop} wave={mockWave} />);
 
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
     expect(formatNumberWithCommas).toHaveBeenCalledWith(1234567);
     expect(screen.getByText('1,234,567')).toBeInTheDocument();
   });
@@ -377,9 +329,6 @@ describe('WaveWinnersSmallOutcome', () => {
     });
 
     render(<WaveWinnersSmallOutcome drop={mockDrop} wave={mockWave} />);
-
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
 
     // Should show all outcome types in tooltip
     expect(screen.getByText('NIC')).toBeInTheDocument();
@@ -433,7 +382,7 @@ describe('WaveWinnersSmallOutcome', () => {
     fireEvent.click(button);
     
     // On touch devices, clicking should toggle tooltip visibility
-    expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip-outcome-small-drop-123')).toBeInTheDocument();
   });
 
   it('renders unique keys for outcome items', () => {
@@ -453,9 +402,6 @@ describe('WaveWinnersSmallOutcome', () => {
     });
 
     render(<WaveWinnersSmallOutcome drop={mockDrop} wave={mockWave} />);
-
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
 
     // All items should render without key conflicts
     expect(screen.getByText('100')).toBeInTheDocument();

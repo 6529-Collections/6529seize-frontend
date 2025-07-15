@@ -1,7 +1,7 @@
 import React from "react";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import Link from "next/link";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiDropRater } from "../../../generated/models/ApiDropRater";
 import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 import { ApiDropContextProfileContext } from "../../../generated/models/ApiDropContextProfileContext";
@@ -51,15 +51,11 @@ const MemesLeaderboardDropVoteSummary: React.FC<
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
           {topVoters.map((voter) => (
-            <Tippy
-              key={voter.profile.handle}
-              content={`${voter.profile.handle} - ${formatNumberWithCommas(
-                voter.rating
-              )}`}
-            >
+            <React.Fragment key={voter.profile.handle}>
               <Link
                 href={`/${voter.profile.handle}`}
                 onClick={(e) => e.stopPropagation()}
+                data-tooltip-id={`voter-${voter.profile.handle}`}
               >
                 {voter.profile.pfp ? (
                   <img
@@ -71,7 +67,17 @@ const MemesLeaderboardDropVoteSummary: React.FC<
                   <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-bg-iron-800" />
                 )}
               </Link>
-            </Tippy>
+              <Tooltip
+                id={`voter-${voter.profile.handle}`}
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}
+              >
+                {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
+              </Tooltip>
+            </React.Fragment>
           ))}
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">

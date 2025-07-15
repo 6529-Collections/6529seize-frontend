@@ -215,7 +215,7 @@ export function WaveDropReaction({
       <Tooltip
         id={`reaction-${drop.id}-${emojiId}`}
         delayShow={250}
-        place="bottom"
+       place="bottom"
         opacity={1}
         style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}>
         <div className="tw-flex tw-items-center tw-gap-2">

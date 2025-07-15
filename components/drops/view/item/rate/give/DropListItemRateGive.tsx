@@ -6,7 +6,7 @@ import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
 import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
 
 export enum RateChangeType {
@@ -205,19 +205,13 @@ export default function DropListItemRateGive({
     return "tw-text-iron-500";
   };
 
+  const tooltipId = `rate-give-tooltip-${drop.id}`;
+
   return (
-    <Tippy
-      visible={getShowRate()}
-      placement="top"
-      content={
-        <div className="tw-text-center">
-          <span
-            className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}>
-            {getRateText()}
-          </span>
-        </div>
-      }>
-      <div className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
+    <>
+      <div 
+        className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center"
+        data-tooltip-id={getShowRate() ? tooltipId : undefined}>
         <div
           className={`${
             isMobile ? "tw-gap-x-4" : ""
@@ -245,6 +239,23 @@ export default function DropListItemRateGive({
           />
         </div>
       </div>
-    </Tippy>
+      {getShowRate() && (
+        <Tooltip
+          id={tooltipId}
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+          }}>
+          <div className="tw-text-center">
+            <span
+              className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}>
+              {getRateText()}
+            </span>
+          </div>
+        </Tooltip>
+      )}
+    </>
   );
 }

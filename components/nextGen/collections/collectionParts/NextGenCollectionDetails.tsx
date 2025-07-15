@@ -6,7 +6,7 @@ import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
 import { ContentView } from "./NextGenCollection";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { goerli, sepolia } from "viem/chains";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { DistributionLink } from "../NextGen";
 import NextGenTraitSets from "./NextGenTraitSets";
 
@@ -76,19 +76,25 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                   <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
                     <span className="font-color-h">Contract</span>
                     <span>
-                      <Tippy
-                        content={NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}
-                        placement={"right"}
-                        theme={"light"}
-                        delay={500}>
-                        <a
-                          className="font-color text-decoration-none"
-                          href={getEtherscanLink()}
-                          target="_blank"
-                          rel="noreferrer">
-                          {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
-                        </a>
-                      </Tippy>
+                      <a
+                        className="font-color text-decoration-none"
+                        href={getEtherscanLink()}
+                        target="_blank"
+                        rel="noreferrer"
+                        data-tooltip-id={`contract-tooltip-${props.collection.id}`}>
+                        {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
+                      </a>
+                      <Tooltip
+                        id={`contract-tooltip-${props.collection.id}`}
+                        place="right"
+                        delayShow={500}
+                        style={{
+                          backgroundColor: "#1F2937",
+                          color: "white",
+                          padding: "4px 8px",
+                        }}>
+                        {NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}
+                      </Tooltip>
                     </span>
                   </Col>
                 </Row>

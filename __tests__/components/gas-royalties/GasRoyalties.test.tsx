@@ -41,9 +41,13 @@ jest.mock("next/image", () => ({
     <img alt={props.alt ?? ""} {...props} />
   ),
 }));
-jest.mock("@tippyjs/react", () => (props: any) => (
-  <span data-testid="tippy">{props.children}</span>
-));
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
+  ),
+}));
 
 beforeEach(() => {
   (require("next/router").default.push as jest.Mock).mockClear();
@@ -95,7 +99,7 @@ it("renders token image with optional note", () => {
   const link = screen.getByRole("link");
   expect(link).toHaveAttribute("href", "/memes/1");
   expect(screen.getByAltText("Meme1")).toBeInTheDocument();
-  expect(screen.getAllByTestId("tippy")).toHaveLength(2);
+  expect(screen.getAllByTestId(/^tooltip-/)).toHaveLength(2);
 });
 
 describe("useSharedState", () => {

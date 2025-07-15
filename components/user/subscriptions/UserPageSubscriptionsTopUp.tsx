@@ -12,7 +12,7 @@ import {
   SUBSCRIPTIONS_ADDRESS_ENS,
   SUBSCRIPTIONS_CHAIN,
 } from "../../../constants";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import DotLoader from "../../dotLoader/DotLoader";
 import {
   numberOfCardsForCalendarEnd,
@@ -252,15 +252,22 @@ export default function UserPageSubscriptionsTopUp() {
           <h5 className="mb-0">Top Up</h5>
           <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
             Sending to{" "}
-            <Tippy
-              content={
-                <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
-              }>
-              <span>
+            <>
+              <span data-tooltip-id="subscription-address">
                 {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
                 {formatAddress(SUBSCRIPTIONS_ADDRESS)}
               </span>
-            </Tippy>
+              <Tooltip
+                id="subscription-address"
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}
+              >
+                <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
+              </Tooltip>
+            </>
           </span>
         </Col>
       </Row>

@@ -14,7 +14,7 @@ import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { mainnet } from "viem/chains";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../hooks/useIdentity";
@@ -194,11 +194,12 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 <span className="pt-1 pb-1 d-flex flex-column">
                   <span className="font-color-h">Marketplaces</span>
                   <span className="d-flex gap-4">
-                    <Tippy content={"Opensea"} theme={"light"} delay={250}>
+                    <>
                       <a
                         href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
-                        rel="noreferrer">
+                        rel="noreferrer"
+                        data-tooltip-id={`opensea-${props.token_id}`}>
                         <Image
                           className={styles.marketplace}
                           src="/opensea.png"
@@ -207,7 +208,17 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                           height={28}
                         />
                       </a>
-                    </Tippy>
+                      <Tooltip
+                        id={`opensea-${props.token_id}`}
+                        content="Opensea"
+                        delayShow={250}
+                        style={{
+                          backgroundColor: "#1F2937",
+                          color: "white",
+                          padding: "4px 8px",
+                        }}
+                      />
+                    </>
                   </span>
                 </span>
               )}
