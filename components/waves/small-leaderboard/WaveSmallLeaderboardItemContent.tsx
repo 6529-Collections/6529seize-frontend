@@ -70,11 +70,11 @@ export const WaveSmallLeaderboardItemContent: React.FC<
             <Tooltip
               id={`wave-storm-${drop.id}`}
               place="top"
-              positionStrategy="fixed"
               style={{
                 backgroundColor: "#1F2937",
                 color: "white",
                 padding: "4px 8px",
+                zIndex: 10,
               }}
             >
               <span className="tw-text-xs">Storm</span>
@@ -100,11 +100,11 @@ export const WaveSmallLeaderboardItemContent: React.FC<
             <Tooltip
               id={`wave-metadata-${drop.id}`}
               place="top"
-              positionStrategy="fixed"
               style={{
                 backgroundColor: "#1F2937",
                 color: "white",
                 padding: "4px 8px",
+                zIndex: 10,
               }}
             >
               <span className="tw-text-xs">Metadata</span>
@@ -130,11 +130,11 @@ export const WaveSmallLeaderboardItemContent: React.FC<
             <Tooltip
               id={`wave-media-${drop.id}`}
               place="top"
-              positionStrategy="fixed"
               style={{
                 backgroundColor: "#1F2937",
                 color: "white",
                 padding: "4px 8px",
+                zIndex: 10,
               }}
             >
               <span className="tw-text-xs">Media</span>

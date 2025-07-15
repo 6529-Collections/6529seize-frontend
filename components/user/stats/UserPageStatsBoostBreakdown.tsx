@@ -213,6 +213,8 @@ function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
     return <></>;
   }
 
+  const tooltipId = `boost-info-${getRandomObjectId()}`;
+
   return (
     <>
       <FontAwesomeIcon
@@ -220,14 +222,16 @@ function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
         height={16}
         color="lightgrey"
         cursor={"pointer"}
-        data-tooltip-id={`boost-info-${getRandomObjectId()}`}
+        data-tooltip-id={tooltipId}
       />
       <Tooltip
-        id={`boost-info-${getRandomObjectId()}`}
+        id={tooltipId}
+        place="top"
         style={{
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
+          zIndex: 10,
         }}
       >
         {info.length > 1 ? (

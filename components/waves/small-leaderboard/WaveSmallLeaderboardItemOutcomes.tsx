@@ -217,11 +217,11 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
       <Tooltip
         id={`wave-outcomes-${drop.id}`}
         place="top"
-        positionStrategy="fixed"
         style={{
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
+          zIndex: 10,
         }}
         clickable={true}
         openEvents={isTouch ? { click: true } : { mouseenter: true }}
