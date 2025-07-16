@@ -13,20 +13,6 @@ jest.mock('react-bootstrap', () => ({
   Row: (p:any) => <div {...p} />,
   Col: (p:any) => <div {...p} />,
 }));
-jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any) => <svg {...p} /> }));
-jest.mock('@tippyjs/react', () => (props:any) => <div>{props.children}</div>);
-jest.mock('../../../helpers/AllowlistToolHelpers', () => ({ getRandomObjectId: ()=>'id' }));
-jest.mock('../../../helpers/Helpers', () => ({ getTransactionLink: ()=>'link' }));
-
-const writeContract = jest.fn();
-jest.mock('wagmi', () => ({
-  useWriteContract: () => ({ writeContract, isPending: false, data: undefined, error: undefined, reset: jest.fn() }),
-  useWaitForTransactionReceipt: () => ({ isLoading: false }),
-}));
-
-beforeEach(() => {
-  writeContract.mockClear();
-});
 
 describe('DelegationSubmitGroups', () => {
   it('displays errors when validation fails', () => {

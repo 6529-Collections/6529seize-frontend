@@ -16,7 +16,6 @@ jest.mock("@tanstack/react-query", () => ({
   __esModule: true,
   useMutation: jest.fn(),
 }));
-jest.mock("@tippyjs/react", () => ({ __esModule: true, default: (props: any) => <div>{props.children}</div> }));
 
 jest.mock("../../components/distribution-plan-tool/common/CircleLoader", () => ({ __esModule: true,
   CircleLoaderSize: { SMALL: "SMALL" },

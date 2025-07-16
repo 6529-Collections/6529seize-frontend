@@ -7,7 +7,6 @@ jest.mock('react-bootstrap', () => {
   return { Container:(p:any)=><div {...p}/>, Row:(p:any)=><div {...p}/>, Col:(p:any)=><div {...p}/> };
 });
 jest.mock('next/image', () => (props: any) => <img {...props} />);
-jest.mock('@tippyjs/react', () => (props: any) => <span>{props.children}</span>);
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid={p.icon?.iconName || 'icon'} /> }));
 jest.mock('../../../../../helpers/Helpers', () => ({
   areEqualAddresses: jest.fn(() => true),

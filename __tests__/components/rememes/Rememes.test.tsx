@@ -13,34 +13,6 @@ jest.mock("@/components/nft-image/RememeImage", () => () => (
 jest.mock("@/components/pagination/Pagination", () => (props: any) => (
   <div data-testid="pagination" onClick={() => props.setPage(2)} />
 ));
-jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: (props: any) => (
-    <svg data-testid="icon" onClick={props.onClick} />
-  ),
-}));
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img alt={props.alt ?? ""} {...props} />
-  ),
-}));
-jest.mock("@tippyjs/react", () => (props: any) => (
-  <span>{props.children}</span>
-));
-jest.mock("@/components/lfg-slideshow/LFGSlideshow", () => ({
-  LFGButton: () => <div />,
-}));
-jest.mock("@/components/collections-dropdown/CollectionsDropdown", () => ({
-  __esModule: true,
-  default: (props: any) => <div />,
-}));
-
-const routerPush = jest.fn();
-(useRouter as jest.Mock).mockReturnValue({
-  query: {},
-  pathname: "/rememes",
-  push: routerPush,
-});
 
 (fetchUrl as jest.Mock).mockImplementation((url: string) => {
   if (url.includes("memes_lite")) return Promise.resolve({ data: [] });

@@ -9,17 +9,6 @@ jest.mock('../../../../hooks/useCapacitor');
 jest.mock('../../../../hooks/isMobileDevice');
 jest.mock('next/router', () => ({ useRouter: () => ({ asPath: '/' }) }));
 jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img alt="" {...p} /> }));
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <>{children}</> }));
-jest.mock('../../../../hooks/useElectron', () => ({ useElectron: () => false }));
-jest.mock('../../../../components/header/share/HeaderShareMobileApps', () => ({ ShareMobileApp: () => <div>MobileApp</div> }));
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ isAuthenticated: false }) }));
-jest.mock('react-bootstrap', () => {
-  const Modal = ({ show, children }: any) => (show ? <div data-testid="modal">{children}</div> : null);
-  const Button = (p: any) => <button {...p} />;
-  const ModalBody = ({ children }: any) => <div>{children}</div>;
-  (Modal as any).Body = ModalBody;
-  return { Modal, Button };
-});
 jest.mock('qrcode', () => ({ toDataURL: jest.fn(() => Promise.resolve('data:image/png;base64')) }));
 
 const mockUseCapacitor = useCapacitor as jest.MockedFunction<typeof useCapacitor>;

@@ -36,7 +36,6 @@ jest.mock('../../../../components/cookies/CookieConsentContext', () => ({
   }))
 }));
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: (props: any) => <span>{props.children}</span> }));
 
 describe('UserPageSubscriptionsTopUp', () => {
   it('sends transaction on card button click', async () => {

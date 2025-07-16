@@ -5,7 +5,6 @@ import LatestActivityRow, { printRoyalties, printGas } from "../../../components
 import { MANIFOLD } from "../../../constants";
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any) => <img {...p}/> }));
-jest.mock('@tippyjs/react', () => (p:any) => <div data-testid="tippy">{p.children}</div>);
 const iconMock = jest.fn();
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any) => { iconMock(p); return <svg data-testid="icon" />; } }));
 jest.mock('react-bootstrap', () => ({ Container:(p:any)=><div data-testid="container">{p.children}</div>, Row:(p:any)=><div>{p.children}</div>, Col:(p:any)=><div>{p.children}</div> }));

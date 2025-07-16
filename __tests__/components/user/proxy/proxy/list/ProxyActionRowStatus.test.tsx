@@ -4,7 +4,6 @@ import ProxyActionRowStatus from '../../../../../../components/user/proxy/proxy/
 import { ProfileProxyActionStatus, ProfileProxySide } from '../../../../../../entities/IProxy';
 import { ApiProfileMin } from '../../../../../../generated/models/ApiProfileMin';
 
-jest.mock('@tippyjs/react', () => (props: any) => <div data-testid="tippy" {...props}>{props.children}</div>);
 
 describe('ProxyActionRowStatus', () => {
   const profile: ApiProfileMin = { handle: 'bob', pfp: 'img', id: '1' } as any;
