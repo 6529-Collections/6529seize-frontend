@@ -6,15 +6,30 @@ import { useRouter } from "next/navigation";
 import useCapacitor from "@/hooks/useCapacitor";
 import { resolveDeepLink } from "@/helpers/deep-link.helpers";
 
-let coldStartDeepLinkHandled = false;
-
 export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const { isCapacitor } = useCapacitor();
   const router = useRouter();
-  const [ready, setReady] = useState(!isCapacitor);
+
+  const [ready, setReady] = useState(() => {
+    if (!isCapacitor) return true;
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("deepLinkHandled") === "true";
+    }
+    return false;
+  });
 
   useEffect(() => {
     if (!isCapacitor) {
+      setReady(true);
+      return;
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("deepLinkHandled") === "true"
+    ) {
+      console.log("Deep link already handled, skipping.");
+      setReady(true);
       return;
     }
 
@@ -34,15 +49,15 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
 
     const checkColdStart = async () => {
       try {
-        if (!coldStartDeepLinkHandled) {
-          const launchUrlResult = await App.getLaunchUrl();
-          if (launchUrlResult?.url) {
-            console.log("Cold start deep link detected:", launchUrlResult.url);
-            handleDeepLink(launchUrlResult.url);
-          }
-          coldStartDeepLinkHandled = true;
+        const launchUrlResult = await App.getLaunchUrl();
+        if (launchUrlResult?.url) {
+          console.log("Cold start deep link detected:", launchUrlResult.url);
+          handleDeepLink(launchUrlResult.url);
         }
       } finally {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("deepLinkHandled", "true");
+        }
         setReady(true);
       }
     };
@@ -60,7 +75,11 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   }, [isCapacitor, router]);
 
   if (!ready) {
-    return null; // or splash screen
+    return (
+      <div className="tw-flex tw-justify-center tw-items-center tw-h-screen tw-w-screen tw-bg-black tw-text-white tw-text-2xl tw-font-bold">
+        Splash screen…
+      </div>
+    );
   }
 
   return <>{children}</>;

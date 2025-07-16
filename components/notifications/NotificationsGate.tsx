@@ -208,7 +208,7 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
 
   if (!ready) {
     return (
-      <div className="tw-flex tw-justify-center tw-items-center tw-h-screen tw-w-screen tw-bg-white tw-text-2xl tw-font-bold">
+      <div className="tw-flex tw-justify-center tw-items-center tw-h-screen tw-w-screen tw-bg-black tw-text-white tw-text-2xl tw-font-bold">
         Splash screen...
       </div>
     );
