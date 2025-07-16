@@ -22,6 +22,7 @@ import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
+import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
 
 export default function Providers({
   children,
@@ -30,7 +31,7 @@ export default function Providers({
 }) {
   return (
     <QueryClientSetup>
-      <WagmiSetup>
+      <WagmiSetup wagmiConfig={getWagmiConfig()}>
         <CapacitorSetup />
         <IpfsImageSetup />
         <ReactQueryWrapper>
