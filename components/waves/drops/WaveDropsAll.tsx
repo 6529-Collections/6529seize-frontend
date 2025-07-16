@@ -14,7 +14,7 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
-import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { useNotificationsContext } from "../../notifications/NotificationsGate";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import { useVirtualizedWaveDrops } from "../../../hooks/useVirtualizedWaveDrops";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -309,7 +309,10 @@ export default function WaveDropsAll({
         <WaveDropsReverseContainer
           ref={scrollContainerRef}
           isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
-          hasNextPage={!!waveMessages?.hasNextPage && (waveMessages?.drops?.length ?? 0) >= 25}
+          hasNextPage={
+            !!waveMessages?.hasNextPage &&
+            (waveMessages?.drops?.length ?? 0) >= 25
+          }
           onTopIntersection={handleTopIntersection}
           onUserScroll={(direction, isAtBottom) => {
             setIsAtBottom(isAtBottom);

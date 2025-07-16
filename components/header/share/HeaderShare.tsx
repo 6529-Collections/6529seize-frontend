@@ -23,7 +23,7 @@ import { useElectron } from "../../../hooks/useElectron";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import yaml from "js-yaml";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
-import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
+import { DeepLinkScope } from "@/helpers/deep-link.helpers";
 
 const QRCode = require("qrcode");
 

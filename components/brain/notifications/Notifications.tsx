@@ -13,7 +13,7 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
-import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { useNotificationsContext } from "../../notifications/NotificationsGate";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import NotificationsCauseFilter, {
   NotificationFilter,

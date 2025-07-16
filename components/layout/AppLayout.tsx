@@ -9,7 +9,6 @@ import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "../../contexts/HeaderContext";
-import { useDeepLinkNavigation } from "../../hooks/useDeepLinkNavigation";
 import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 import { useSelector } from "react-redux";
 import { selectEditingDropId } from "../../store/editSlice";
@@ -25,7 +24,6 @@ interface Props {
 }
 
 export default function AppLayout({ children }: Props) {
-  useDeepLinkNavigation();
   const { registerRef } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const { activeView } = useViewContext();

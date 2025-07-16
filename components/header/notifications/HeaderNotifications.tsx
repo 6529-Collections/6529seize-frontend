@@ -7,7 +7,7 @@ import { useTitle } from "../../../contexts/TitleContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
-import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { useNotificationsContext } from "../../notifications/NotificationsGate";
 
 export default function HeaderNotifications() {
   const { connectedProfile } = useAuth();

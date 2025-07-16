@@ -28,7 +28,7 @@ import { NextPageProps } from "./hooks/useWavePagination";
 import useEnhancedWavesList, {
   MinimalWave,
 } from "./hooks/useEnhancedWavesList";
-import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { useNotificationsContext } from "@/components/notifications/NotificationsGate";
 
 // Define nested structures for context data
 interface WavesContextData {

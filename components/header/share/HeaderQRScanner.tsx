@@ -10,7 +10,7 @@ import useCapacitor from "../../../hooks/useCapacitor";
 import { useAuth } from "../../auth/Auth";
 import Image from "next/image";
 import { areEqualURLS } from "../../../helpers/Helpers";
-import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
+import { DeepLinkScope } from "@/helpers/deep-link.helpers";
 
 export default function HeaderQRScanner({
   onScanSuccess,

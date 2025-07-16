@@ -1,7 +1,7 @@
 import Auth from "@/components/auth/Auth";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
+import { NotificationsGate } from "@/components/notifications/NotificationsGate";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { IpfsProvider } from "@/components/ipfs/IPFSContext";
 import { EULAConsentProvider } from "@/components/eula/EULAConsentContext";
@@ -22,6 +22,7 @@ import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
+import { DeepLinkGate } from "../deep-links/DeepLinkGate";
 
 export default function Providers({
   children,
@@ -41,30 +42,32 @@ export default function Providers({
                   <SeizeConnectProvider>
                     <Auth>
                       <WaveEligibilityProvider>
-                        <NotificationsProvider>
-                          <CookieConsentProvider>
-                            <EULAConsentProvider>
-                              <AppWebSocketProvider>
-                                <TitleProvider>
-                                  <HeaderProvider>
-                                    <ScrollPositionProvider>
-                                      <ViewProvider>
-                                        <NavigationHistoryProvider>
-                                          <LayoutProvider>
-                                            <MyStreamProvider>
-                                              {children}
-                                            </MyStreamProvider>
-                                          </LayoutProvider>
-                                        </NavigationHistoryProvider>
-                                      </ViewProvider>
-                                    </ScrollPositionProvider>
-                                  </HeaderProvider>
-                                </TitleProvider>
-                                <NewVersionToast />
-                              </AppWebSocketProvider>
-                            </EULAConsentProvider>
-                          </CookieConsentProvider>
-                        </NotificationsProvider>
+                        <DeepLinkGate>
+                          <NotificationsGate>
+                            <CookieConsentProvider>
+                              <EULAConsentProvider>
+                                <AppWebSocketProvider>
+                                  <TitleProvider>
+                                    <HeaderProvider>
+                                      <ScrollPositionProvider>
+                                        <ViewProvider>
+                                          <NavigationHistoryProvider>
+                                            <LayoutProvider>
+                                              <MyStreamProvider>
+                                                {children}
+                                              </MyStreamProvider>
+                                            </LayoutProvider>
+                                          </NavigationHistoryProvider>
+                                        </ViewProvider>
+                                      </ScrollPositionProvider>
+                                    </HeaderProvider>
+                                  </TitleProvider>
+                                  <NewVersionToast />
+                                </AppWebSocketProvider>
+                              </EULAConsentProvider>
+                            </CookieConsentProvider>
+                          </NotificationsGate>
+                        </DeepLinkGate>
                       </WaveEligibilityProvider>
                     </Auth>
                   </SeizeConnectProvider>
