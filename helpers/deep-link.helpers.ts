@@ -3,7 +3,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 
 export interface RouterWrapper {
-  replace: (url: string) => void | Promise<boolean>;
+  replace: (url: string) => void;
 }
 
 export enum DeepLinkScope {
