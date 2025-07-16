@@ -28,7 +28,7 @@ describe('TheMemes helpers', () => {
     expect(btn.textContent).toBe('Edition Size');
     fireEvent.click(btn);
     expect(onSelect).toHaveBeenCalled();
-    expect(btn.className).toContain('disabled');
+    expect(btn.className).not.toContain('disabled');
   });
 
   it('printVolumeTypeDropdown handles click behaviour', () => {

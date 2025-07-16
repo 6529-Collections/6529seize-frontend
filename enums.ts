@@ -39,6 +39,23 @@ export enum MemesSort {
   HIGHEST_OFFER = "Highest Offer",
 }
 
+export const MEMES_EXTENDED_SORT = [
+  "age",
+  "edition_size",
+  "meme",
+  "hodlers",
+  "tdh",
+  "percent_unique",
+  "percent_unique_cleaned",
+  "floor_price",
+  "market_cap",
+  "total_volume_last_24_hours",
+  "total_volume_last_7_days",
+  "total_volume_last_1_month",
+  "total_volume",
+  "highest_offer",
+] as const;
+
 export enum MemeLabSort {
   AGE = "Age",
   EDITION_SIZE = "Edition Size",

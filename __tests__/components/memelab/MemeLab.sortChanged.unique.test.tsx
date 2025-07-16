@@ -23,7 +23,7 @@ describe('sortChanged unique percent ex museum', () => {
       setNfts
     );
     expect(router.replace).toHaveBeenCalledWith(
-      { query: { sort: MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM, sort_dir: SortDirection.DESC } },
+      { query: { sort: 'unique_percent_ex_museum', sort_dir: 'desc' } },
       undefined,
       { shallow: true }
     );

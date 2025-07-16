@@ -73,6 +73,7 @@ describe("TheMemesMintPage", () => {
         title: "Mint | The Memes",
         description: "Collections | 6529.io",
       },
+      other: { version: "" },
       twitter: {
         card: "summary_large_image",
       },
