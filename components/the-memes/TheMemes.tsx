@@ -131,7 +131,6 @@ export default function TheMemesComponent() {
     if (routerSort) {
       const sortLower = routerSort.toLowerCase();
 
-      // Check if this is a volume sort
       if (sortLower.startsWith("volume_")) {
         initialSort = MemesSort.VOLUME;
         const vol = sortLower.replace("volume_", "");
@@ -150,13 +149,6 @@ export default function TheMemesComponent() {
         );
         if (resolvedKey) {
           initialSort = MemesSort[resolvedKey as keyof typeof MemesSort];
-        } else {
-          const resolvedVal = Object.values(MemesSort).find(
-            (v) => v.toLowerCase() === sortLower
-          );
-          if (resolvedVal) {
-            initialSort = resolvedVal as MemesSort;
-          }
         }
       }
     }
@@ -223,10 +215,14 @@ export default function TheMemesComponent() {
 
   useEffect(() => {
     let sortParam: string;
+
     if (sort === MemesSort.VOLUME) {
-      sortParam = `volume_${volumeType.toLowerCase()}`;
+      sortParam = `VOLUME_${volumeType.toUpperCase()}`;
     } else {
-      sortParam = sort.toLowerCase();
+      sortParam =
+        Object.keys(MemesSort).find(
+          (k) => MemesSort[k as keyof typeof MemesSort] === sort
+        ) || sort;
     }
 
     let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
