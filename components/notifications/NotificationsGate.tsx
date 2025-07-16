@@ -29,26 +29,32 @@ const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
 
+let pushLaunchHandled = false;
+
 export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isIos } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
-  const [ready, setReady] = useState(!isCapacitor);
+  const [ready, setReady] = useState(!isCapacitor || pushLaunchHandled);
 
   useEffect(() => {
-    if (!isCapacitor) return;
+    if (!isCapacitor || pushLaunchHandled) return;
+
+    console.log("Running push notification gate on app launch...");
 
     let resolved = false;
 
     const timeout = setTimeout(() => {
       if (!resolved) {
+        console.log("No launch notification detected after timeout.");
+        pushLaunchHandled = true;
         setReady(true);
       }
-    }, 300);
+    }, 1000);
 
-    PushNotifications.addListener(
+    const listenerPromise = PushNotifications.addListener(
       "pushNotificationActionPerformed",
       async (action) => {
         resolved = true;
@@ -62,16 +68,18 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
           connectedProfile
         );
 
+        pushLaunchHandled = true;
         setReady(true);
       }
     );
 
     return () => {
       clearTimeout(timeout);
+      listenerPromise.then((handle) => handle.remove());
     };
   }, [isCapacitor, connectedProfile, router]);
 
-  // Now also run your normal push setup:
+  // Run your normal push setup always:
   useEffect(() => {
     if (!isCapacitor) return;
 
@@ -93,7 +101,7 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
     const stableDeviceId = await getStableDeviceId();
     const deviceInfo = await Device.getInfo();
 
-    await PushNotifications.addListener("registration", async (token) => {
+    PushNotifications.addListener("registration", async (token) => {
       await registerPushNotification(
         stableDeviceId,
         deviceInfo,
@@ -102,26 +110,14 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
       );
     });
 
-    await PushNotifications.addListener("registrationError", (error) => {
+    PushNotifications.addListener("registrationError", (error) => {
       console.error("Push registration error: ", error);
     });
 
-    await PushNotifications.addListener(
+    PushNotifications.addListener(
       "pushNotificationReceived",
       (notification) => {
         console.log("Push notification received: ", notification);
-      }
-    );
-
-    // This listener stays, in case the app is already running:
-    await PushNotifications.addListener(
-      "pushNotificationActionPerformed",
-      async (action) => {
-        await handlePushNotificationAction(
-          router,
-          action.notification,
-          profile
-        );
       }
     );
 
@@ -211,7 +207,11 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
   );
 
   if (!ready) {
-    return null; // or your splash screen
+    return (
+      <div className="tw-flex tw-justify-center tw-items-center tw-h-screen tw-w-screen tw-bg-white tw-text-2xl tw-font-bold">
+        Splash screen...
+      </div>
+    );
   }
 
   return (

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import useCapacitor from "@/hooks/useCapacitor";
 import { resolveDeepLink } from "@/helpers/deep-link.helpers";
 
+let coldStartDeepLinkHandled = false;
+
 export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const { isCapacitor } = useCapacitor();
   const router = useRouter();
@@ -32,10 +34,13 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
 
     const checkColdStart = async () => {
       try {
-        const launchUrlResult = await App.getLaunchUrl();
-        if (launchUrlResult?.url) {
-          console.log("Cold start deep link detected:", launchUrlResult.url);
-          handleDeepLink(launchUrlResult.url);
+        if (!coldStartDeepLinkHandled) {
+          const launchUrlResult = await App.getLaunchUrl();
+          if (launchUrlResult?.url) {
+            console.log("Cold start deep link detected:", launchUrlResult.url);
+            handleDeepLink(launchUrlResult.url);
+          }
+          coldStartDeepLinkHandled = true;
         }
       } finally {
         setReady(true);
