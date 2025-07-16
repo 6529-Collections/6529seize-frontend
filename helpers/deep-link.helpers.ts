@@ -1,19 +1,11 @@
-import { SplashScreen } from "@capacitor/splash-screen";
 import { App as CapacitorApp } from "@capacitor/app";
-import { Capacitor } from "@capacitor/core";
-
-export interface RouterWrapper {
-  replace: (url: string) => void;
-}
 
 export enum DeepLinkScope {
   NAVIGATE = "navigate",
   SHARE_CONNECTION = "share-connection",
 }
 
-export function resolveDeepLink(
-  deepLinkUrl: string
-): { pathname: string; queryParams: Record<string, string | number> } | null {
+export function resolveDeepLink(deepLinkUrl: string): string | null {
   if (!deepLinkUrl) {
     return null;
   }
@@ -48,26 +40,25 @@ export function resolveDeepLink(
         break;
     }
 
-    return {
-      pathname,
-      queryParams,
-    };
+    const params = new URLSearchParams(
+      Object.entries(queryParams).map(([k, v]) => [k, String(v)])
+    );
+    const targetUrl = `${pathname}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+
+    return targetUrl;
   } catch (e) {
     console.error("Failed to resolve deep link:", e);
     return null;
   }
 }
 
-export async function initDeepLink(router: RouterWrapper): Promise<void> {
-  if (!Capacitor.isNativePlatform()) {
-    return;
-  }
-
+export async function initDeepLink(): Promise<string | null> {
   // Guard #1: only initial history entry
   const hist = window.history.state;
   if (hist?.idx > 0) {
-    await SplashScreen.hide();
-    return;
+    return null;
   }
 
   // Guard #2: only once per session
@@ -77,20 +68,9 @@ export async function initDeepLink(router: RouterWrapper): Promise<void> {
     sessionStorage.setItem(key, "1");
 
     if (info?.url) {
-      const resolved = resolveDeepLink(info.url);
-      if (resolved) {
-        const params = new URLSearchParams(
-          Object.entries(resolved.queryParams).map(([k, v]) => [k, String(v)])
-        );
-        const targetUrl = `${resolved.pathname}${
-          params.toString() ? `?${params.toString()}` : ""
-        }`;
-        await Promise.resolve(router.replace(targetUrl));
-      } else {
-        console.warn("initDeepLink: launch URL did not resolve:", info.url);
-      }
+      return resolveDeepLink(info.url);
     }
   }
 
-  await SplashScreen.hide();
+  return null;
 }

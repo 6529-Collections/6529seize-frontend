@@ -4,7 +4,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { useRouter } from "next/navigation";
 import useCapacitor from "@/hooks/useCapacitor";
 import { resolveDeepLink } from "@/helpers/deep-link.helpers";
-import { initDeepLink, RouterWrapper } from "@/helpers/deep-link.helpers";
+import { initDeepLink } from "@/helpers/deep-link.helpers";
 
 export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const { isCapacitor } = useCapacitor();
@@ -19,8 +19,12 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
 
     // Cold-start handling
     async function startup() {
-      await initDeepLink(router);
-      setReady(true);
+      const targetUrl = await initDeepLink();
+      if (targetUrl) {
+        router.replace(targetUrl);
+      } else {
+        setReady(true);
+      }
     }
     startup();
 
@@ -30,13 +34,7 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
       ({ url }) => {
         const resolved = resolveDeepLink(url);
         if (resolved) {
-          const params = new URLSearchParams(
-            Object.entries(resolved.queryParams).map(([k, v]) => [k, String(v)])
-          );
-          const target = `${resolved.pathname}${
-            params.toString() ? `?${params.toString()}` : ""
-          }`;
-          router.replace(target);
+          router.replace(resolved);
         } else {
           console.warn("DeepLinkGate: unknown deep link", url);
         }

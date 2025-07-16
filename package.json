@@ -34,7 +34,6 @@
     "@capacitor/keyboard": "7.0.1",
     "@capacitor/push-notifications": "7.0.1",
     "@capacitor/share": "7.0.1",
-    "@capacitor/splash-screen": "^7.0.1",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
