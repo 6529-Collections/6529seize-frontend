@@ -10,12 +10,6 @@ import { MemeLabSort } from "../../../enums";
 import { SortDirection } from "../../../entities/ISort";
 import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
 
-(global as any).ResizeObserver = class {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-
 jest.mock("../../../components/the-memes/TheMemes", () => ({
   SortButton: (p: any) => (
     <button data-testid="sort" onClick={() => p.select()}>
@@ -29,7 +23,7 @@ jest.mock("../../components/memelab/MemeLab.module.scss", () => ({}));
 
 describe("MemeLab utilities", () => {
   it("getInitialRouterValues parses router", () => {
-    const router: any = { query: { sort_dir: "DESC", sort: "edition-size" } };
+    const router: any = { query: { sort_dir: "DESC", sort: "edition_size" } };
     const { initialSortDir, initialSort } = getInitialRouterValues(router);
     expect(initialSortDir).toBe(SortDirection.DESC);
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);

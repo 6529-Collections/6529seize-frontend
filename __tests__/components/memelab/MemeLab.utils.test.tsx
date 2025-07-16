@@ -10,12 +10,6 @@ import { MemeLabSort } from "../../../enums";
 import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
 import { NextRouter } from "next/router";
 
-(global as any).ResizeObserver = class {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
