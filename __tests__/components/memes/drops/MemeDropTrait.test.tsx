@@ -3,7 +3,6 @@ import MemeDropTrait from '../../../../components/memes/drops/MemeDropTrait';
 
 jest.mock('../../../../helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => `f-${n}` }));
 jest.mock('../../../../components/waves/memes/traits/schema', () => ({ FIELD_TO_LABEL_MAP: { pointsLoki: 'Points' } }));
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <span data-testid="tippy">{children}</span> }));
 jest.mock('../../../../hooks/isMobileDevice', () => () => false);
 
 describe('MemeDropTrait', () => {

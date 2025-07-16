@@ -19,7 +19,9 @@ jest.mock('../../../../../../../../helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: () => 'id123',
 }));
 
-jest.mock('../../../../../../../../components/utils/tooltip/LazyTippy', () => ({ children }: any) => <div data-testid="tippy">{children}</div>);
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children }: any) => <div data-testid="tooltip">{children}</div>,
+}));
 
 describe('DropListItemRateGiveClap', () => {
   it('triggers animation and submit on click when voting positive', async () => {

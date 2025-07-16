@@ -4,9 +4,6 @@ import { WaveSmallLeaderboardItemOutcomes } from '../../../../components/waves/s
 import { ApiWaveOutcomeCredit } from '../../../../generated/models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeType } from '../../../../generated/models/ApiWaveOutcomeType';
 
-jest.mock('@tippyjs/react', () => ({ children, content }: any) => (
-  <div data-testid="tippy">{children}<div data-testid="content">{content}</div></div>
-));
 
 describe('WaveSmallLeaderboardItemOutcomes', () => {
   const drop: any = { rank: 1 };
