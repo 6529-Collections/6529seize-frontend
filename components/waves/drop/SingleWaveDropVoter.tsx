@@ -2,7 +2,7 @@ import React from "react";
 import { ApiWaveVoter } from "../../../generated/models/ApiWaveVoter";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 import {
   isEthereumAddress,
@@ -56,8 +56,26 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
         </Link>
       </div>
       <div className="tw-flex tw-items-center tw-gap-3 tw-whitespace-nowrap">
-        <Tippy
-          content={
+        <>
+          <div 
+            className="tw-flex tw-items-center tw-gap-1"
+            data-tooltip-id={`single-voter-${voter.voter.handle}-${position}`}
+          >
+            {hasPositiveVotes && (
+              <div className={`${dotClasses} tw-bg-green`} />
+            )}
+            {hasNegativeVotes && (
+              <div className={`${dotClasses} tw-bg-red`} />
+            )}
+          </div>
+          <Tooltip
+            id={`single-voter-${voter.voter.handle}-${position}`}
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
             <div className="tw-text-sm tw-space-x-1">
               <div className="tw-text-green">
                 +{formatNumberWithCommas(voter.positive_votes_summed)}
@@ -68,17 +86,8 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
                 </div>
               )}
             </div>
-          }
-        >
-          <div className="tw-flex tw-items-center tw-gap-1">
-            {hasPositiveVotes && (
-              <div className={`${dotClasses} tw-bg-green`} />
-            )}
-            {hasNegativeVotes && (
-              <div className={`${dotClasses} tw-bg-red`} />
-            )}
-          </div>
-        </Tippy>
+          </Tooltip>
+        </>
         <span className="tw-text-xs tw-text-iron-400">
           {formatNumberWithCommas(voter.absolute_votes_summed)} {creditType} total
         </span>

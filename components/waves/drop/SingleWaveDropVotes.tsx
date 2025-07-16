@@ -1,7 +1,7 @@
 import React from "react";
 import { ApiDrop } from "../../../generated/models/ObjectSerializer";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
@@ -48,24 +48,33 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
       <div className="tw-flex tw-items-center tw-gap-x-3">
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
           {firstThreeVoters.map((voter) => (
-            <Tippy
-              key={voter.profile.handle}
-              content={`${voter.profile.handle} - ${formatNumberWithCommas(
-                voter.rating
-              )}`}
-            >
+            <div key={voter.profile.handle}>
               <Link href={`/${voter.profile.handle}`}>
                 {voter.profile.pfp ? (
                   <img
                     className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950"
                     src={voter.profile.pfp}
                     alt="Recent voter"
+                    data-tooltip-id={`wave-voter-${voter.profile.handle}`}
                   />
                 ) : (
-                  <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" />
+                  <div 
+                    className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" 
+                    data-tooltip-id={`wave-voter-${voter.profile.handle}`}
+                  />
                 )}
               </Link>
-            </Tippy>
+              <Tooltip
+                id={`wave-voter-${voter.profile.handle}`}
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}
+              >
+                {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
+              </Tooltip>
+            </div>
           ))}
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">

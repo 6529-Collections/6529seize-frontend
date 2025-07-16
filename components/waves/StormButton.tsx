@@ -1,5 +1,5 @@
 import React from "react";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 
 interface StormButtonProps {
   readonly isStormMode: boolean;
@@ -16,27 +16,17 @@ const StormButton: React.FC<StormButtonProps> = ({
 }) => {
   return (
     <div>
-      <Tippy
-        content={
-          <div className="tw-text-center">
-            <span className="tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out">
-              {isStormMode ? "Add a part" : "Break into storm"}
-            </span>
-          </div>
-        }
-        placement="top"
-        disabled={false}
+      <button
+        onClick={breakIntoStorm}
+        disabled={!canAddPart || submitting}
+        type="button"
+        className={`tw-flex tw-items-center tw-justify-center tw-flex-shrink-0  tw-rounded-full tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 ${
+          canAddPart && !submitting
+            ? "tw-cursor-pointer tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 desktop-hover:hover:tw-bg-primary-300/20 tw-bg-iron-700"
+            : "tw-cursor-default tw-text-iron-600 desktop-hover:hover:tw-text-iron-600 tw-bg-iron-900"
+        }`}
+        data-tooltip-id="storm-button-tooltip"
       >
-        <button
-          onClick={breakIntoStorm}
-          disabled={!canAddPart || submitting}
-          type="button"
-          className={`tw-flex tw-items-center tw-justify-center tw-flex-shrink-0  tw-rounded-full tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 ${
-            canAddPart && !submitting
-              ? "tw-cursor-pointer tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 desktop-hover:hover:tw-bg-primary-300/20 tw-bg-iron-700"
-              : "tw-cursor-default tw-text-iron-600 desktop-hover:hover:tw-text-iron-600 tw-bg-iron-900"
-          }`}
-        >
           <svg
             className={`tw-h-[1.1rem] tw-w-[1.1rem] lg:tw-size-4 tw-flex-shrink-0 ${
               !canAddPart || submitting ? "tw-opacity-50" : ""
@@ -55,7 +45,17 @@ const StormButton: React.FC<StormButtonProps> = ({
             />
           </svg>
         </button>
-      </Tippy>
+      <Tooltip
+        id="storm-button-tooltip"
+        place="top"
+        positionStrategy="fixed"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}>
+        <span className="tw-text-xs">{isStormMode ? "Add a part" : "Break into storm"}</span>
+      </Tooltip>
     </div>
   );
 };

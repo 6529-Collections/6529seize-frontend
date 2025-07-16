@@ -106,7 +106,17 @@ module.exports = {
           '0%, 100%': { transform: 'translateX(0)' },
           '20%, 60%': { transform: 'translateX(-4px)' },
           '40%, 80%': { transform: 'translateX(4px)' }
-        }
+        },
+        'gallery-reveal': {
+          '0%': { 
+            opacity: '0.7',
+            transform: 'translateY(4px) perspective(1000px) rotateX(2deg)'
+          },
+          '100%': { 
+            opacity: '1',
+            transform: 'translateY(0) perspective(1000px) rotateX(0)'
+          }
+        },
       },
       animation: {
         'loading-bar': 'loading-bar 1.5s infinite',
@@ -115,7 +125,8 @@ module.exports = {
         'gradient-x': 'gradient-x 3s ease infinite',
         'spin-slow': 'spin 15s linear infinite',
         'fadeIn': 'fadeIn 0.3s ease-out forwards',
-        'shake': 'shake 0.3s ease-in-out'
+        'shake': 'shake 0.3s ease-in-out',
+        'gallery-reveal': 'gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
       },
       backgroundSize: {
         'gradient-pos': '200% 200%',

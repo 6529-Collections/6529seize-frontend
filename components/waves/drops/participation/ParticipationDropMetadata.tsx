@@ -1,7 +1,7 @@
 "use client";
 
 import { ApiDropMetadata } from "../../../../generated/models/ApiDropMetadata";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import { useState } from "react";
 
@@ -18,15 +18,27 @@ const MetadataItem: React.FC<{ meta: ApiDropMetadata }> = ({ meta }) => {
       <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">
         {meta.data_key}:
       </span>
-      <Tippy
-        disabled={isMobile}
-        content={meta.data_value}
-        placement="top"
-        theme="dark">
-        <span className="tw-text-iron-200 tw-text-xs tw-font-medium tw-line-clamp-2">
+      <>
+        <span 
+          className="tw-text-iron-200 tw-text-xs tw-font-medium tw-line-clamp-2"
+          data-tooltip-id={`metadata-${meta.data_key}`}
+        >
           {meta.data_value}
         </span>
-      </Tippy>
+        {!isMobile && (
+          <Tooltip
+            id={`metadata-${meta.data_key}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            {meta.data_value}
+          </Tooltip>
+        )}
+      </>
     </div>
   );
 };

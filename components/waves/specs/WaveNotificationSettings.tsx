@@ -135,9 +135,8 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
         <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-10 lg:tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden">
           {isAllEnabled ? (
             <OverlayTrigger
-              placement="top"
               overlay={
-                <Tooltip id={`mentions-tooltip-${wave.id}`}>
+                <Tooltip id={`mentions-tooltip-${wave.id}`} placement="top">
                   {getMentionsTooltip()}
                 </Tooltip>
               }>
@@ -175,9 +174,8 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
 
           {disableSelection ? (
             <OverlayTrigger
-              placement="top"
               overlay={
-                <Tooltip id={`all-tooltip-${wave.id}`}>
+                <Tooltip id={`all-tooltip-${wave.id}`} placement="top">
                   {getAllTooltip()}
                 </Tooltip>
               }>
@@ -230,9 +228,8 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
             </button>
           ) : (
             <OverlayTrigger
-              placement="top"
               overlay={
-                <Tooltip id={`all-tooltip-${wave.id}`}>
+                <Tooltip id={`all-tooltip-${wave.id}`} placement="top">
                   {getAllTooltip()}
                 </Tooltip>
               }>

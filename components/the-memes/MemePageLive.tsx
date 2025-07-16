@@ -17,7 +17,7 @@ import { fetchUrl } from "../../services/6529api";
 import RememeImage from "../nft-image/RememeImage";
 import Pagination from "../pagination/Pagination";
 import { RememeSort } from "../rememes/Rememes";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import { NftPageStats } from "../nftAttributes/NftStats";
@@ -359,11 +359,7 @@ export function MemePageLiveSubMenu(props: {
                   </Dropdown.Menu>
                 </Dropdown>
                 {selectedRememeSorting === RememeSort.RANDOM && (
-                  <Tippy
-                    content="Refresh results"
-                    placement="top"
-                    theme="light"
-                    delay={250}>
+                  <>
                     <FontAwesomeIcon
                       icon={faRefresh}
                       className={styles.buttonIcon}
@@ -372,8 +368,21 @@ export function MemePageLiveSubMenu(props: {
                           fetchRememes(props.nft.id);
                         }
                       }}
+                      data-tooltip-id="refresh-rememes"
                     />
-                  </Tippy>
+                    <Tooltip
+                      id="refresh-rememes"
+                      place="top"
+                      delayShow={250}
+                      style={{
+                        backgroundColor: "#f8f9fa",
+                        color: "#212529",
+                        padding: "4px 8px",
+                      }}
+                    >
+                      Refresh results
+                    </Tooltip>
+                  </>
                 )}
               </span>
             )}

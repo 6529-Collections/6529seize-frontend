@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import {
   usePinnedWaves,
   MAX_PINNED_WAVES,
@@ -110,12 +110,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     : `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
 
   return (
-    <Tippy
-      content={tooltipContent}
-      hideOnClick={false}
-      animation="fade"
-      duration={[100, 0]} // Fast fade in, instant fade out
-    >
+    <>
       <button
         onClick={handleClick}
         className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${
@@ -123,7 +118,8 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
             ? "tw-text-iron-300 tw-bg-iron-700/40 desktop-hover:hover:tw-bg-iron-700/60"
             : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 tw-bg-iron-800"
         }`}
-        aria-label={isPinned ? "Unpin wave" : "Pin wave"}>
+        aria-label={isPinned ? "Unpin wave" : "Pin wave"}
+        data-tooltip-id={`wave-pin-${waveId}`}>
         <FontAwesomeIcon
           icon={faThumbtack}
           className={`tw-size-3 tw-flex-shrink-0 ${
@@ -131,7 +127,17 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
           }`}
         />
       </button>
-    </Tippy>
+      <Tooltip
+        id={`wave-pin-${waveId}`}
+        place="top"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}>
+        <span className="tw-text-xs">{tooltipContent}</span>
+      </Tooltip>
+    </>
   );
 };
 

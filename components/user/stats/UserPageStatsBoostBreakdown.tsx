@@ -5,7 +5,7 @@ import {
   TDHBoostBreakdown,
 } from "../../../entities/ITDH";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 export default function UserPageStatsBoostBreakdown({
@@ -213,10 +213,28 @@ function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
     return <></>;
   }
 
+  const tooltipId = `boost-info-${getRandomObjectId()}`;
+
   return (
-    <Tippy
-      content={
-        info.length > 1 ? (
+    <>
+      <FontAwesomeIcon
+        icon={faInfoCircle}
+        height={16}
+        color="lightgrey"
+        cursor={"pointer"}
+        data-tooltip-id={tooltipId}
+      />
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+          zIndex: 10,
+        }}
+      >
+        {info.length > 1 ? (
           <ul
             className="mb-0"
             style={{ paddingLeft: "1rem", textAlign: "left" }}>
@@ -228,14 +246,8 @@ function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
           </ul>
         ) : (
           info[0]
-        )
-      }
-      interactive={true}>
-      <FontAwesomeIcon
-        icon={faInfoCircle}
-        height={16}
-        color="lightgrey"
-        cursor={"pointer"}></FontAwesomeIcon>
-    </Tippy>
+        )}
+      </Tooltip>
+    </>
   );
 }

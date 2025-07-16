@@ -2,7 +2,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 
 interface DropVoteProgressingProps {
   readonly current: number | null | undefined;
@@ -40,16 +40,13 @@ export default function DropVoteProgressing({
   }
 
   return (
-    <Tippy
-      content={`Projected vote count at decision time: ${formatNumberWithCommas(
-        projected
-      )}`}
-    >
+    <>
       <span
         className={`${color} tw-text-xs tw-font-medium tw-ml-0.5 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-flex tw-items-center tw-gap-x-1`}
         style={{
           animationDuration: "2s",
         }}
+        data-tooltip-id={`drop-vote-progress-${current}-${projected}`}
       >
         <FontAwesomeIcon
           icon={faArrowRight}
@@ -57,6 +54,20 @@ export default function DropVoteProgressing({
         />
         <span>{formatNumberWithCommas(projected)}</span>
       </span>
-    </Tippy>
+      <Tooltip
+        id={`drop-vote-progress-${current}-${projected}`}
+        place="top"
+        positionStrategy="fixed"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        <span className="tw-text-xs">
+          Projected vote count at decision time: {formatNumberWithCommas(projected)}
+        </span>
+      </Tooltip>
+    </>
   );
 }

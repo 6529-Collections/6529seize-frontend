@@ -6,8 +6,12 @@ import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { commonApiFetch } from "../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPostWithoutBodyAndResponse,
+} from "../../../services/api/common-api";
 import { useWaveEligibility } from "../WaveEligibilityContext";
+import { debounce } from "lodash";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly registerWave: (waveId: string) => void;
@@ -16,6 +20,7 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
     sinceSerialNo: number,
     signal: AbortSignal
   ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
+  readonly removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
 }
 
 export enum ProcessIncomingDropType {
@@ -35,6 +40,7 @@ export function useWaveRealtimeUpdater({
   registerWave,
   syncNewestMessages,
   removeDrop,
+  removeWaveDeliveredNotifications,
 }: UseWaveRealtimeUpdaterProps): {
   processIncomingDrop: ProcessIncomingDropFn;
   processDropRemoved: (waveId: string, dropId: string) => void;
@@ -219,6 +225,9 @@ export function useWaveRealtimeUpdater({
         // Initiate the background fetch for reconciliation
         initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
+
+      void removeWaveDeliveredNotifications(waveId);
+      markWaveAsReadDebounced(waveId);
     },
     [getData, updateData, registerWave, initiateFetchNewestCycle]
   );
@@ -229,6 +238,12 @@ export function useWaveRealtimeUpdater({
     },
     [removeDrop]
   );
+
+  const markWaveAsReadDebounced = debounce((waveId: string) => {
+    void commonApiPostWithoutBodyAndResponse({
+      endpoint: `notifications/wave/${waveId}/read`,
+    }).catch((error) => console.error("Failed to mark wave as read:", error));
+  }, 2000);
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
@@ -264,12 +279,12 @@ export function useWaveRealtimeUpdater({
         // Mark that tab just became visible, eligibility will be refreshed
         // on the next WebSocket message for any wave
         tabJustBecameVisibleRef.current = true;
-        console.log("[WaveRealtimeUpdater] Tab became visible, will refresh eligibility on next message");
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   // Cleanup: Cancel all ongoing fetches on unmount

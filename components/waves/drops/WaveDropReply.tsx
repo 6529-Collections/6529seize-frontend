@@ -73,7 +73,7 @@ export default function WaveDropReply({
   };
 
   return (
-    <div className="tw-mb-3 tw-relative">
+    <div className="tw-mb-3 tw-relative" data-text-selection-exclude="true">
       <div
         className="tw-absolute tw-top-2.5 tw-left-5 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"
         style={{ height: "calc(100% - 3px)" }}

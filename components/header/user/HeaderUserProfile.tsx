@@ -70,7 +70,7 @@ export default function HeaderUserProfile({
         variant="light"
         id="status-tooltip"
         className="tw-z-[9999] tw-font-normal tw-text-sm"
-        place="bottom"
+       place="bottom"
       />
       <Link
         href={`${userContent.path}`}

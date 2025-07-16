@@ -11,7 +11,7 @@ import {
   ETHEREUM_ICON_TEXT,
   NEXTGEN_MEDIA_BASE_URL,
 } from "../../../../constants";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { Container, Row, Col } from "react-bootstrap";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
@@ -74,43 +74,50 @@ export function NextGenTokenImage(
             e.preventDefault();
             e.stopPropagation();
           }}>
-          <Tippy
-            content={
-              <Container>
-                <Row className="pt-2 pb-2">
-                  <Col>{ownerInfo}</Col>
-                </Row>
-                <Row className="pt-1">
-                  <Col>
-                    Opensea:{" "}
-                    {props.token.opensea_price > 0
-                      ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-                      : "Not Listed"}
-                  </Col>
-                </Row>
-                <Row className="pt-1">
-                  <Col>
-                    Blur:{" "}
-                    {props.token.blur_price > 0
-                      ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
-                      : "Not Listed"}
-                  </Col>
-                </Row>
-                <Row className="pt-1">
-                  <Col>
-                    Magic Eden:{" "}
-                    {props.token.me_price > 0
-                      ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
-                      : "Not Listed"}
-                  </Col>
-                </Row>
-              </Container>
-            }
-            theme={"light"}
-            placement="right"
-            delay={250}>
-            <FontAwesomeIcon height={18} icon={faInfoCircle}></FontAwesomeIcon>
-          </Tippy>
+          <FontAwesomeIcon 
+            height={18} 
+            icon={faInfoCircle}
+            data-tooltip-id={`owner-info-${props.token.id}`}
+          />
+          <Tooltip
+            id={`owner-info-${props.token.id}`}
+            place="right"
+            delayShow={250}
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}>
+            <Container>
+              <Row className="pt-2 pb-2">
+                <Col>{ownerInfo}</Col>
+              </Row>
+              <Row className="pt-1">
+                <Col>
+                  Opensea:{" "}
+                  {props.token.opensea_price > 0
+                    ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
+              </Row>
+              <Row className="pt-1">
+                <Col>
+                  Blur:{" "}
+                  {props.token.blur_price > 0
+                    ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
+              </Row>
+              <Row className="pt-1">
+                <Col>
+                  Magic Eden:{" "}
+                  {props.token.me_price > 0
+                    ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
+              </Row>
+            </Container>
+          </Tooltip>
         </button>
       );
     }

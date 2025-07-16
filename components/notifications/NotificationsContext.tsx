@@ -9,10 +9,7 @@ import { Device, DeviceInfo } from "@capacitor/device";
 import { useRouter } from "next/navigation";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
-import {
-  commonApiPost,
-  commonApiPostWithoutBodyAndResponse,
-} from "../../services/api/common-api";
+import { commonApiPost } from "../../services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 
@@ -94,12 +91,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           action.notification,
           profile
         );
-
-        if (isIos) {
-          await PushNotifications.removeDeliveredNotifications({
-            notifications: [action.notification],
-          });
-        }
       }
     );
 
@@ -113,22 +104,68 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handlePushNotificationAction = async (
+    router: ReturnType<typeof useRouter>,
+    notification: PushNotificationSchema,
+    profile?: ApiIdentity
+  ) => {
+    console.log("Push notification action performed", notification);
+    const notificationData = notification.data;
+    const notificationProfileId = notificationData.profile_id;
+
+    if (
+      profile &&
+      notificationProfileId &&
+      notificationProfileId !== profile.id
+    ) {
+      console.log("Notification profile id does not match connected profile");
+      return;
+    }
+
+    void removeDeliveredNotifications([notification]);
+
+    const redirectUrl = resolveRedirectUrl(notificationData);
+    if (redirectUrl) {
+      console.log("Redirecting to", redirectUrl);
+      router.push(redirectUrl);
+    } else {
+      console.log(
+        "No redirect url found in notification data",
+        notificationData
+      );
+    }
+  };
+
+  const removeDeliveredNotifications = async (
+    notifications: PushNotificationSchema[]
+  ) => {
+    if (isIos) {
+      try {
+        await PushNotifications.removeDeliveredNotifications({ notifications });
+      } catch (error) {
+        console.error("Error removing delivered notifications", error);
+      }
+    }
+  };
+
   const removeWaveDeliveredNotifications = async (waveId: string) => {
-    if (isCapacitor) {
+    if (isIos) {
       const deliveredNotifications =
         await PushNotifications.getDeliveredNotifications();
       const waveNotifications = deliveredNotifications.notifications.filter(
         (notification) => notification.data.wave_id === waveId
       );
-      await PushNotifications.removeDeliveredNotifications({
-        notifications: waveNotifications,
-      });
+      await removeDeliveredNotifications(waveNotifications);
     }
   };
 
   const removeAllDeliveredNotifications = async () => {
-    if (isCapacitor) {
-      await PushNotifications.removeAllDeliveredNotifications();
+    if (isIos) {
+      try {
+        await PushNotifications.removeAllDeliveredNotifications();
+      } catch (error) {
+        console.error("Error removing all delivered notifications", error);
+      }
     }
   };
 
@@ -169,49 +206,7 @@ const registerPushNotification = async (
   }
 };
 
-const handlePushNotificationAction = async (
-  router: ReturnType<typeof useRouter>,
-  notification: PushNotificationSchema,
-  profile?: ApiIdentity
-) => {
-  console.log("Push notification action performed", notification);
-  const notificationData = notification.data;
-  const notificationProfileId = notificationData.profile_id;
-
-  if (
-    profile &&
-    notificationProfileId &&
-    notificationProfileId !== profile.id
-  ) {
-    console.log("Notification profile id does not match connected profile");
-    return;
-  }
-
-  const notificationId = notificationData.notification_id;
-  await commonApiPostWithoutBodyAndResponse({
-    endpoint: `notifications/${notificationId}/read`,
-  })
-    .then(() => {
-      console.log("Notification marked as read", notificationId);
-    })
-    .catch((error) => {
-      console.error(
-        "Error marking notification as read",
-        notificationId,
-        error
-      );
-    })
-    .finally(() => {
-      const redirectUrl = resolveRedirectUrl(notificationData);
-      if (redirectUrl) {
-        console.log("Redirecting to", redirectUrl);
-        router.push(redirectUrl);
-      }
-    });
-};
-
 const resolveRedirectUrl = (notificationData: any) => {
-  
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {
