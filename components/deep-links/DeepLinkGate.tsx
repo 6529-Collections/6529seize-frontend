@@ -6,14 +6,17 @@ import { useRouter } from "next/navigation";
 import useCapacitor from "@/hooks/useCapacitor";
 import { resolveDeepLink } from "@/helpers/deep-link.helpers";
 
+const hasBooted = () => {
+  return sessionStorage.getItem("hasBooted") === "true";
+};
+
 export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const { isCapacitor } = useCapacitor();
   const router = useRouter();
-  const [ready, setReady] = useState(!isCapacitor);
+  const [ready, setReady] = useState(!isCapacitor || hasBooted());
 
   useEffect(() => {
     if (!isCapacitor) {
-      setReady(true);
       return;
     }
 
@@ -31,36 +34,34 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    const checkColdStart = async () => {
-      const alreadyHandled = sessionStorage.getItem("hasBooted");
-      console.log("alreadyHandled", alreadyHandled);
-      if (alreadyHandled === "true") {
-        console.log("Deep link already handled. Skipping.");
-        setReady(true);
-        return;
-      }
-
-      const launchUrlResult = await App.getLaunchUrl();
-      if (launchUrlResult?.url) {
-        console.log("Cold start deep link detected:", launchUrlResult.url);
-        handleDeepLink(launchUrlResult.url);
-      }
-
-      sessionStorage.setItem("hasBooted", "true");
-      setReady(true);
-    };
-
-    checkColdStart();
-
     const listener = App.addListener("appUrlOpen", (data) => {
       console.log("Deep link opened while app running:", data.url);
       handleDeepLink(data.url);
     });
 
+    if (!hasBooted()) {
+      const checkColdStart = async () => {
+        const launchUrlResult = await App.getLaunchUrl();
+
+        sessionStorage.setItem("hasBooted", "true");
+
+        if (launchUrlResult?.url) {
+          console.log("Cold start deep link detected:", launchUrlResult.url);
+          handleDeepLink(launchUrlResult.url);
+        }
+
+        setReady(true);
+      };
+
+      checkColdStart();
+    } else {
+      setReady(true);
+    }
+
     return () => {
       listener.then((handle) => handle.remove());
     };
-  }, [isCapacitor, router]);
+  }, []);
 
   if (!ready) {
     return (
