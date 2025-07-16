@@ -19,7 +19,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import { AuthContext } from "../auth/Auth";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import { MEMELAB_CONTRACT } from "../../constants";
-import { SortButton } from "../the-memes/TheMemes";
+import { SortButton, printVolumeTypeDropdown } from "../the-memes/TheMemes";
 import { MemeLabSort } from "../../enums";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
@@ -27,7 +27,6 @@ import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
-import { printVolumeTypeDropdown } from "../the-memes/TheMemes";
 
 interface Props {
   wallets: string[];
@@ -52,7 +51,9 @@ export function getInitialRouterValues(router: NextRouter) {
 
   const routerSort = router.query.sort;
   if (routerSort) {
-    const routerSortStr = Array.isArray(routerSort) ? routerSort[0] : routerSort;
+    const routerSortStr = Array.isArray(routerSort)
+      ? routerSort[0]
+      : routerSort;
     const resolvedKey = Object.keys(MemeLabSort).find(
       (k) => k.toLowerCase() === routerSortStr.toLowerCase()
     );
@@ -192,9 +193,9 @@ export function sortChanged(
   setLabCollections?: (collections: string[]) => void
 ) {
   const sortKey =
-    Object.keys(MemeLabSort).find(
-      (k) => MemeLabSort[k as keyof typeof MemeLabSort] === sort
-    )?.toLowerCase() ?? "";
+    Object.keys(MemeLabSort)
+      .find((k) => MemeLabSort[k as keyof typeof MemeLabSort] === sort)
+      ?.toLowerCase() ?? "";
   const newQuery: any = {
     sort: sortKey,
     sort_dir: sortDir.toLowerCase(),
