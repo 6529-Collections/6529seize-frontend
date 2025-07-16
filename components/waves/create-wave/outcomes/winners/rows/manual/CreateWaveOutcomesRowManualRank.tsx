@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesRowManualRank({
@@ -17,11 +17,24 @@ export default function CreateWaveOutcomesRowManualRank({
           </h3>
         </div>
         <div className="tw-col-span-8">
-          <Tippy content={outcome.title}>
-            <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate">
+          <>
+            <p 
+              className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate"
+              data-tooltip-id={`manual-title-${outcome.title}`}
+            >
               {outcome.title}
             </p>
-          </Tippy>
+            <Tooltip
+              id={`manual-title-${outcome.title}`}
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              {outcome.title}
+            </Tooltip>
+          </>
         </div>
         <div className="tw-col-span-1 tw-flex tw-justify-end">
           <button

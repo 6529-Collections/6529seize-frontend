@@ -40,7 +40,7 @@ import {
   NULL_ADDRESS,
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import {
   DelegationCenterSection,
   DelegationToast,
@@ -1067,14 +1067,21 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               }>
               {consolidationStatus}
               {pending && (
-                <Tippy
-                  content={`${label} consolidation missing`}
-                  placement={"top"}
-                  theme={"light"}>
+                <>
                   <FontAwesomeIcon
                     className={styles.infoIcon}
-                    icon={faInfoCircle}></FontAwesomeIcon>
-                </Tippy>
+                    icon={faInfoCircle}
+                    data-tooltip-id={`consolidation-missing-${label}`}></FontAwesomeIcon>
+                  <Tooltip
+                    id={`consolidation-missing-${label}`}
+                    style={{
+                      backgroundColor: "#1F2937",
+                      color: "white",
+                      padding: "4px 8px",
+                    }}>
+                    {label} consolidation missing
+                  </Tooltip>
+                </>
               )}
             </span>
           )}
@@ -1152,11 +1159,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 )}
               </span>
               <span className="d-flex align-items-center gap-2">
-                <Tippy content={"Edit"} placement={"top"} theme={"light"}>
+                <>
                   <FontAwesomeIcon
                     icon={faEdit}
                     style={{ cursor: "pointer" }}
                     height={25}
+                    data-tooltip-id={`edit-${del.useCase.use_case}-${w.wallet}`}
                     onClick={() => {
                       setUpdateDelegationParams({
                         wallet: w.wallet,
@@ -1166,8 +1174,17 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       setShowUpdateDelegation(true);
                       window.scrollTo(0, 0);
                     }}></FontAwesomeIcon>
-                </Tippy>
-                <Tippy content={"Revoke"} placement={"top"} theme={"light"}>
+                  <Tooltip
+                    id={`edit-${del.useCase.use_case}-${w.wallet}`}
+                    style={{
+                      backgroundColor: "#1F2937",
+                      color: "white",
+                      padding: "4px 8px",
+                    }}>
+                    Edit
+                  </Tooltip>
+                </>
+                <>
                   <FontAwesomeIcon
                     icon={faXmark}
                     color="white"
@@ -1180,6 +1197,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     }}
                     width={25}
                     height={25}
+                    data-tooltip-id={`revoke-${del.useCase.use_case}-${w.wallet}`}
                     onClick={() => {
                       const title = "Revoking Delegation";
                       let message = "Confirm in your wallet...";
@@ -1199,7 +1217,16 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       }
                       setToast({ title, message });
                     }}></FontAwesomeIcon>
-                </Tippy>
+                  <Tooltip
+                    id={`revoke-${del.useCase.use_case}-${w.wallet}`}
+                    style={{
+                      backgroundColor: "#1F2937",
+                      color: "white",
+                      padding: "4px 8px",
+                    }}>
+                    Revoke
+                  </Tooltip>
+                </>
               </span>
             </span>
           </div>
@@ -1554,16 +1581,21 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <Col>
             <h4>
               Locks{" "}
-              <Tippy
-                content={
-                  "Lock Wallet or Use Case to stop accepting incoming delegations"
-                }
-                placement={"right"}
-                theme={"light"}>
+              <>
                 <FontAwesomeIcon
                   className={styles.infoIcon}
-                  icon={faInfoCircle}></FontAwesomeIcon>
-              </Tippy>
+                  icon={faInfoCircle}
+                  data-tooltip-id="locks-info"></FontAwesomeIcon>
+                <Tooltip
+                  id="locks-info"
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}>
+                  Lock Wallet or Use Case to stop accepting incoming delegations
+                </Tooltip>
+              </>
             </h4>
           </Col>
         </Row>

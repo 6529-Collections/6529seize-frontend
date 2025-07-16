@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiWaveParticipationRequirement } from "../../../../../generated/models/ApiWaveParticipationRequirement";
 
 export default function CreateDropContentMissingMediaWarning({
@@ -17,9 +17,15 @@ export default function CreateDropContentMissingMediaWarning({
     VIDEO: "Please upload a video file",
     IMAGE: "Please upload an image file",
   };
+  
+  const tooltipId = `missing-media-warning-${missingMedia[0].toLowerCase()}`;
+  
   return (
-    <Tippy content={TOOLTIP[missingMedia[0]]}>
-      <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+    <>
+      <div 
+        className="tw-inline-flex tw-items-center tw-gap-x-2"
+        data-tooltip-id={tooltipId}
+      >
         <svg
           className="tw-size-4 tw-flex-shrink-0 tw-text-[#FEDF89]"
           viewBox="0 0 24 24"
@@ -40,6 +46,16 @@ export default function CreateDropContentMissingMediaWarning({
           {LABELS[missingMedia[0]]}
         </span>
       </div>
-    </Tippy>
+      <Tooltip 
+        id={tooltipId}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white", 
+          padding: "4px 8px",
+        }}
+      >
+        {TOOLTIP[missingMedia[0]]}
+      </Tooltip>
+    </>
   );
 }

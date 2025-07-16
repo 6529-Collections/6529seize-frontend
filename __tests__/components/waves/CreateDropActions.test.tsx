@@ -3,6 +3,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateDropActions from '../../../components/waves/CreateDropActions';
 
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 jest.mock('framer-motion', () => ({
   motion: {
     div: React.forwardRef<HTMLDivElement, any>(({ children, ...props }, ref) => (

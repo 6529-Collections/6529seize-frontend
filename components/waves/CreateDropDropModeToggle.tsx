@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import React, { useMemo } from "react";
 import {
   ChatRestriction,
@@ -91,13 +91,14 @@ export const CreateDropDropModeToggle: React.FC<
   }, [isDropMode, isDisabled, canToggle, chatRestriction, submissionRestriction]);
 
   return (
-    <Tippy content={tooltipContent} placement="top">
+    <>
       <div>
         <button
           type="button"
           onClick={canToggle ? () => onDropModeChange(!isDropMode) : undefined}
           disabled={!!isDisabled}
           className={buttonClassName}
+          data-tooltip-id="drop-mode-toggle"
         >
           <svg
             className="tw-size-4 tw-flex-shrink-0"
@@ -121,6 +122,16 @@ export const CreateDropDropModeToggle: React.FC<
           </svg>
         </button>
       </div>
-    </Tippy>
+      <Tooltip
+        id="drop-mode-toggle"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        {tooltipContent}
+      </Tooltip>
+    </>
   );
 };

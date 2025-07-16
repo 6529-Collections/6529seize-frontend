@@ -7,8 +7,7 @@ import {
 import WaveItemDropped from "./WaveItemDropped";
 import WaveItemFollow from "./WaveItemFollow";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
+import { Tooltip } from "react-tooltip";
 
 export default function WaveItem({
   wave,
@@ -129,29 +128,44 @@ export default function WaveItem({
               </svg>
               <span className="tw-font-medium">Chat</span>
             </div>
-            <Tippy content="Followers" className="xl:tw-inline-block tw-hidden">
-              <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50">
-                <svg
-                  className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-                  />
-                </svg>
-                <span className="tw-font-medium">
-                  {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
-                </span>
-                <span className="tw-text-iron-400 xl:tw-hidden">Followers</span>
-              </div>
-            </Tippy>
+            <div
+              className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50 xl:tw-inline-block"
+              data-tooltip-id={`wave-followers-${wave?.id}`}
+            >
+              <svg
+                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+                />
+              </svg>
+              <span className="tw-font-medium">
+                {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
+              </span>
+              <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
+            </div>
+            {wave && (
+              <Tooltip
+                id={`wave-followers-${wave.id}`}
+                place="top"
+                positionStrategy="fixed"
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}
+              >
+                <span className="tw-text-xs">Joined</span>
+              </Tooltip>
+            )}
           </div>
           <div className="tw-flex lg:tw-flex-col min-[1400px]:tw-flex-row tw-justify-between tw-gap-y-4 tw-gap-x-2 tw-mt-4 tw-overflow-x-auto">
             {wave && <WaveItemDropped wave={wave} />}

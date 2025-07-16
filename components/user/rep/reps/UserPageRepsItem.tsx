@@ -7,7 +7,7 @@ import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrap
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import { useRouter } from "next/router";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageRepsItem({
   rep,
@@ -46,15 +46,26 @@ export default function UserPageRepsItem({
             className={`${
               isPositiveRating ? "tw-text-green" : "tw-text-red"
             } tw-whitespace-nowrap tw-font-medium tw-text-sm sm:tw-text-md`}>
-            <Tippy
-              content={`My Rep: ${formatNumberWithCommas(
-                rep.rater_contribution
-              )}`}
-              theme="dark"
-              placement="top"
-              disabled={isTouchScreen ?? !rep.rater_contribution}>
-              <span>{formatNumberWithCommas(rep.rating)}</span>
-            </Tippy>
+            <>
+              <span 
+                data-tooltip-id={`rep-${rep.category}-${rep.rating}`}
+              >
+                {formatNumberWithCommas(rep.rating)}
+              </span>
+              {(!isTouchScreen && !!rep.rater_contribution) ? (
+                <Tooltip
+                  id={`rep-${rep.category}-${rep.rating}`}
+                  place="top"
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}
+                >
+                  My Rep: {formatNumberWithCommas(rep.rater_contribution)}
+                </Tooltip>
+              ) : null}
+            </>
           </span>
 
           <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-sm tw-font-medium tw-text-iron-400">

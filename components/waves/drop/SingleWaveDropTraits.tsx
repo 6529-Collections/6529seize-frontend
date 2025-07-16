@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import { ApiDropMetadata } from "../../../generated/models/ApiDropMetadata";
 import { TraitsData } from "../memes/submission/types/TraitsData";
@@ -32,15 +32,27 @@ const MetadataItem: React.FC<{
       <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-font-normal">
         {label}
       </span>
-      <Tippy
-        disabled={isMobile}
-        content={displayValue}
-        placement="top"
-        theme="dark">
-        <span className="tw-text-iron-50 tw-text-sm tw-font-medium tw-truncate">
+      <>
+        <span 
+          className="tw-text-iron-50 tw-text-sm tw-font-medium tw-truncate"
+          data-tooltip-id={`trait-${label}-${displayValue}`}
+        >
           {displayValue}
         </span>
-      </Tippy>
+        {!isMobile && (
+          <Tooltip
+            id={`trait-${label}-${displayValue}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            {displayValue}
+          </Tooltip>
+        )}
+      </>
     </div>
   );
 };

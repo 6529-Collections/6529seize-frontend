@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useDropOutcomes } from "../../../hooks/drops/useDropOutcomes";
@@ -135,18 +135,15 @@ export const WaveWinnersSmallOutcome: React.FC<
   );
 
   return (
-    <Tippy
-      content={tooltipContent}
-      placement="top"
-      animation="shift-away"
-      visible={isTouch ? isOpen : undefined}
-      onClickOutside={() => setIsOpen(false)}>
+    <>
       <button
         onClick={(e) => {
           e.stopPropagation();
           handleClick(e);
         }}
-        className="tw-border-0 tw-rounded-lg tw-flex tw-items-center tw-gap-2 tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700">
+        className="tw-border-0 tw-rounded-lg tw-flex tw-items-center tw-gap-2 tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+        data-tooltip-id={`outcome-small-${drop.id}`}
+      >
         <span className="tw-text-xs tw-font-normal tw-text-iron-200">
           Outcome:
         </span>
@@ -196,6 +193,18 @@ export const WaveWinnersSmallOutcome: React.FC<
           )}
         </div>
       </button>
-    </Tippy>
+      <Tooltip
+        id={`outcome-small-${drop.id}`}
+        place="top"
+        delayShow={200}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        {tooltipContent}
+      </Tooltip>
+    </>
   );
 };

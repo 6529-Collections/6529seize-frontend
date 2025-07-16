@@ -6,7 +6,7 @@ import { DateIntervalsSelection } from "../../enums";
 import DotLoader from "../dotLoader/DotLoader";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import Image from "next/image";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../services/6529api";
 import { getDateFilters } from "../../helpers/Helpers";
@@ -326,31 +326,46 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
       rel="noreferrer">
       <span className="d-flex justify-content-center aling-items-center gap-3">
         <span>{props.token_id} -</span>
-        <Tippy
-          content={`${props.name}`}
-          delay={0}
-          placement={"auto"}
-          theme={"light"}>
-          <Image
-            loading={"lazy"}
-            width={0}
-            height={0}
-            style={{ width: "auto", height: "40px" }}
-            src={props.thumbnail}
-            alt={props.name}
-            className={styles.nftImage}
-          />
-        </Tippy>
+        <Image
+          loading={"lazy"}
+          width={0}
+          height={0}
+          style={{ width: "auto", height: "40px" }}
+          src={props.thumbnail}
+          alt={props.name}
+          className={styles.nftImage}
+          data-tooltip-id={`token-image-${props.token_id}`}
+        />
         {props.note && (
-          <Tippy content={props.note} placement={"auto"} theme={"light"}>
-            <span>
-              <FontAwesomeIcon
-                className={styles.infoIcon}
-                icon={faInfoCircle}></FontAwesomeIcon>
-            </span>
-          </Tippy>
+          <span>
+            <FontAwesomeIcon
+              className={styles.infoIcon}
+              icon={faInfoCircle}
+              data-tooltip-id={`token-info-${props.token_id}`}
+            />
+          </span>
         )}
       </span>
+      <Tooltip
+        id={`token-image-${props.token_id}`}
+        content={props.name}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      />
+      {props.note && (
+        <Tooltip
+          id={`token-info-${props.token_id}`}
+          content={props.note}
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+          }}
+        />
+      )}
     </a>
   );
 }

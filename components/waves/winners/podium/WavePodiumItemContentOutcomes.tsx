@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import { ApiWaveOutcomeCredit } from "../../../../generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "../../../../generated/models/ApiWaveOutcomeType";
@@ -171,22 +171,16 @@ export const WavePodiumItemContentOutcomes: React.FC<
   );
 
   return (
-    <Tippy
-      content={tooltipContent}
-      placement="left-end"
-      animation="shift-away"
-      visible={isTouch ? isOpen : undefined}
-      onClickOutside={() => setIsOpen(false)}
-      arrow={false}
-      duration={200}
-      className="tw-backdrop-blur-xl">
+    <>
       <button
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           handleClick(e);
         }}
-        className="tw-transition-all tw-duration-200 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-solid tw-border-iron-700/20 hover:tw-bg-iron-800/60 hover:tw-border-iron-700/40 hover:tw-shadow-lg">
+        className="tw-transition-all tw-duration-200 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-solid tw-border-iron-700/20 hover:tw-bg-iron-800/60 hover:tw-border-iron-700/40 hover:tw-shadow-lg"
+        data-tooltip-id={`outcome-${winner.place}-${winner.drop.id}`}
+      >
         <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-hidden md:tw-block">
           Outcome
         </span>
@@ -242,6 +236,18 @@ export const WavePodiumItemContentOutcomes: React.FC<
           )}
         </div>
       </button>
-    </Tippy>
+      <Tooltip
+        id={`outcome-${winner.place}-${winner.drop.id}`}
+        place="left"
+        delayShow={200}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        {tooltipContent}
+      </Tooltip>
+    </>
   );
 };

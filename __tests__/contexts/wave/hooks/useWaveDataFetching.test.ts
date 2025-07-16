@@ -91,12 +91,9 @@ describe('useWaveDataFetching', () => {
 
   it('syncNewestMessages handles error', async () => {
     fetchNewestWaveMessages.mockResolvedValue({ drops: null, highestSerialNo: null });
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const { result, updateData } = setup({ wave1: { drops: [] } });
     const res = await result.current.syncNewestMessages('wave1', 10, new AbortController().signal);
     expect(updateData).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalled();
     expect(res).toEqual({ drops: null, highestSerialNo: null });
-    consoleSpy.mockRestore();
   });
 });

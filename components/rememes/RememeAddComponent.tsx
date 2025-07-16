@@ -13,7 +13,7 @@ import {
 } from "../../helpers/Helpers";
 import { useEnsName } from "wagmi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import Image from "next/image";
 import { postData } from "../../services/6529api";
 import {
@@ -211,11 +211,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
           <Col className="d-flex align-items-center flex-wrap gap-2">
             {references.map((m) => (
               <span className={styles.addMemeReferenceWrapper} key={m.id}>
-                <Tippy
-                  delay={250}
-                  content={"Clear"}
-                  placement={"top"}
-                  theme={"dark"}>
+                <>
                   <span
                     className={`${styles.addMemeReferenceDisplayBtn} ${
                       verifying || verified
@@ -224,10 +220,24 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                     }`}
                     onClick={() =>
                       setReferences((r) => r.filter((s) => s.id != m.id))
-                    }>
+                    }
+                    data-tooltip-id={`clear-reference-${m.id}`}
+                  >
                     x
                   </span>
-                </Tippy>
+                  <Tooltip
+                    id={`clear-reference-${m.id}`}
+                    place="top"
+                    delayShow={250}
+                    style={{
+                      backgroundColor: "#1F2937",
+                      color: "white",
+                      padding: "4px 8px",
+                    }}
+                  >
+                    Clear
+                  </Tooltip>
+                </>
                 <span className={styles.addMemeReferenceDisplay}>
                   #{m.id} - {m.name}
                 </span>

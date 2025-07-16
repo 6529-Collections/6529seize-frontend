@@ -1,5 +1,5 @@
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
 
 enum RoyaltiesType {
@@ -58,31 +58,57 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
       return null;
     case RoyaltiesType.BELOW_THRESHOLD:
       return (
-        <Tippy content={getContent()} theme="dark" placement="top">
-          <div tabIndex={0}
-            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+        <>
+          <button
+            type="button"
+            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+            data-tooltip-id="royalties-below-threshold"
+            aria-label="Royalties information"
           >
             <img
               src="/pepe-smile.png"
               className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
               alt="pepe-smile"
             />
-          </div>
-        </Tippy>
+          </button>
+          <Tooltip
+            id="royalties-below-threshold"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            {getContent()}
+          </Tooltip>
+        </>
       );
     case RoyaltiesType.ABOVE_THRESHOLD:
       return (
-        <Tippy content={getContent()} theme="dark" placement="top">
-          <div tabIndex={0}
-            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+        <>
+          <button
+            type="button"
+            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+            data-tooltip-id="royalties-above-threshold"
+            aria-label="Royalties information"
           >
             <img
               src="/pepe-xglasses.png"
               className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
               alt="pepe-xglasses"
             />
-          </div>
-        </Tippy>
+          </button>
+          <Tooltip
+            id="royalties-above-threshold"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            {getContent()}
+          </Tooltip>
+        </>
       );
     default:
       assertUnreachable(royaltiesType);

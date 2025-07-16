@@ -2,7 +2,7 @@
 
 import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import {
   areEqualAddresses,
@@ -430,14 +430,19 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             <Form.Group as={Row} className="pb-2">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Mint To
-                <Tippy
-                  content={`Address to receive the minted tokens`}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon={faInfoCircle}></FontAwesomeIcon>
-                </Tippy>
+                <FontAwesomeIcon
+                  className={styles.infoIcon}
+                  icon={faInfoCircle}
+                  data-tooltip-id={`mint-to-info-${props.collection.id}`}></FontAwesomeIcon>
+                <Tooltip
+                  id={`mint-to-info-${props.collection.id}`}
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}>
+                  Address to receive the minted tokens
+                </Tooltip>
               </Form.Label>
               <Col sm={12}>
                 <Form.Control
@@ -505,14 +510,19 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               className="pt-2 pb-2 d-flex align-items-center">
               <Form.Label className="d-flex align-items-center">
                 Mint Count
-                <Tippy
-                  content={`How many tokens to mint`}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon={faInfoCircle}></FontAwesomeIcon>
-                </Tippy>
+                <FontAwesomeIcon
+                  className={styles.infoIcon}
+                  icon={faInfoCircle}
+                  data-tooltip-id={`mint-count-info-${props.collection.id}`}></FontAwesomeIcon>
+                <Tooltip
+                  id={`mint-count-info-${props.collection.id}`}
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}>
+                  How many tokens to mint
+                </Tooltip>
               </Form.Label>
               <Col xs={3}>
                 <Form.Select

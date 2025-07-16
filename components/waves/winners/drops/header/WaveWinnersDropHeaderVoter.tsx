@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import {
   getScaledImageUri,
   ImageScale,
@@ -20,23 +20,11 @@ export default function WaveWinnersDropHeaderVoter({
   index,
 }: WaveWinnersDropHeaderVoterProps) {
   return (
-    <Tippy
-      key={voter.profile.id}
-      content={
-        <span className="tw-text-xs tw-font-medium">
-          {voter.profile.handle} • {formatNumberWithCommas(voter.rating)}{" "}
-          {winner.drop.wave.voting_credit_type}
-        </span>
-      }
-      interactive={true}
-      delay={[0, 0]}
-      hideOnClick={false}
-      appendTo={() => document.body}
-      zIndex={1000}
-    >
+    <>
       <div
         className="tw-relative tw-transition-transform hover:tw-scale-110 hover:tw-z-10"
         style={{ zIndex: winner.drop.top_raters.length - index }}
+        data-tooltip-id={`winner-voter-${voter.profile.id}`}
       >
         <Link href={`/${voter.profile.handle}`}>
           {voter.profile.pfp ? (
@@ -50,6 +38,17 @@ export default function WaveWinnersDropHeaderVoter({
           )}
         </Link>
       </div>
-    </Tippy>
+      <Tooltip
+        id={`winner-voter-${voter.profile.id}`}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        {voter.profile.handle} • {formatNumberWithCommas(voter.rating)}{" "}
+        {winner.drop.wave.voting_credit_type}
+      </Tooltip>
+    </>
   );
 }

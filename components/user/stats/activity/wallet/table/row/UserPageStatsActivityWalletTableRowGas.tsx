@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { formatNumberWithCommasOrDash } from "../../../../../../../helpers/Helpers";
 
 export default function UserPageStatsActivityWalletTableRowGas({
@@ -11,28 +11,11 @@ export default function UserPageStatsActivityWalletTableRowGas({
   readonly gasPriceGwei: number;
 }) {
   return (
-    <Tippy
-      theme="dark"
-      placement="top"
-      content={
-        <div className="tw-flex tw-flex-col">
-          <div className="tw-inline-flex tw-justify-between tw-space-x-2">
-            <div> Gas:</div>{" "}
-            <div>{formatNumberWithCommasOrDash(+gas.toFixed(5))}</div>
-          </div>
-          <div className="tw-inline-flex tw-justify-between tw-space-x-2">
-            <div>GWEI:</div> <div> {formatNumberWithCommasOrDash(gasGwei)}</div>
-          </div>
-          <div className="tw-inline-flex tw-justify-between tw-space-x-2">
-            <div>Gas Price:</div>
-            <div>{formatNumberWithCommasOrDash(+gasPriceGwei.toFixed(2))}</div>
-          </div>
-        </div>
-      }
-    >
+    <>
       <div
         aria-label="Gas Information"
         className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+        data-tooltip-id="gas-information"
       >
         <svg
           aria-hidden="true"
@@ -55,6 +38,28 @@ export default function UserPageStatsActivityWalletTableRowGas({
           </g>
         </svg>
       </div>
-    </Tippy>
+      <Tooltip
+        id="gas-information"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        <div className="tw-flex tw-flex-col">
+          <div className="tw-inline-flex tw-justify-between tw-space-x-2">
+            <div> Gas:</div>{" "}
+            <div>{formatNumberWithCommasOrDash(+gas.toFixed(5))}</div>
+          </div>
+          <div className="tw-inline-flex tw-justify-between tw-space-x-2">
+            <div>GWEI:</div> <div> {formatNumberWithCommasOrDash(gasGwei)}</div>
+          </div>
+          <div className="tw-inline-flex tw-justify-between tw-space-x-2">
+            <div>Gas Price:</div>
+            <div>{formatNumberWithCommasOrDash(+gasPriceGwei.toFixed(2))}</div>
+          </div>
+        </div>
+      </Tooltip>
+    </>
   );
 }

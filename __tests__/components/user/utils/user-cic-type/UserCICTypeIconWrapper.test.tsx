@@ -14,14 +14,28 @@ jest.mock('../../../../../components/user/utils/user-cic-type/tooltip/UserCICTyp
 
 jest.mock('@tippyjs/react', () => ({
   __esModule: true,
-  default: ({ children, content }: any) => <div data-testid="tippy">{children}{content}</div>,
+  default: ({ children, content }: any) => (
+    <div data-testid="tippy-wrapper">
+      {children}
+      <div data-testid="tippy-content">{content}</div>
+    </div>
+  ),
 }));
 
 describe('UserCICTypeIconWrapper', () => {
   it('renders icon inside tooltip', () => {
-    const profile = { cic: 0 } as ApiIdentity;
+    const profile = { cic: 0, id: 'test-id' } as ApiIdentity;
     render(<UserCICTypeIconWrapper profile={profile} />);
+    
+    // Check that the icon is rendered
     expect(screen.getByTestId('icon')).toBeInTheDocument();
-    expect(screen.getByTestId('tippy')).toBeInTheDocument();
+    
+    // Check that the tippy wrapper is rendered
+    const tippyWrapper = screen.getByTestId('tippy-wrapper');
+    expect(tippyWrapper).toBeInTheDocument();
+    
+    // Check that the tooltip content is rendered
+    expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltip')).toBeInTheDocument();
   });
 });
