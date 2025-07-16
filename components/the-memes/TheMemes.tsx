@@ -133,15 +133,12 @@ export default function TheMemesComponent() {
 
       if (sortLower.startsWith("volume_")) {
         initialSort = MemesSort.VOLUME;
-        const vol = sortLower.replace("volume_", "");
-        if (
-          Object.values(VolumeType)
-            .map((v) => v.toLowerCase())
-            .includes(vol)
-        ) {
-          initialVolume = Object.values(VolumeType).find(
-            (v) => v.toLowerCase() === vol
-          )!;
+        const volKey = sortLower.replace("volume_", "").toUpperCase();
+        const volMatch = Object.keys(VolumeType).find(
+          (k) => k.toLowerCase() === volKey.toLowerCase()
+        );
+        if (volMatch) {
+          initialVolume = VolumeType[volMatch as keyof typeof VolumeType];
         }
       } else {
         const resolvedKey = Object.keys(MemesSort).find(
@@ -217,12 +214,20 @@ export default function TheMemesComponent() {
     let sortParam: string;
 
     if (sort === MemesSort.VOLUME) {
-      sortParam = `VOLUME_${volumeType.toUpperCase()}`;
+      const volKey = Object.entries(VolumeType).find(
+        ([key, value]) => value === volumeType
+      )?.[0];
+
+      if (volKey) {
+        sortParam = `volume_${volKey.toLowerCase()}`;
+      } else {
+        sortParam = "volume_all_time"; // fallback
+      }
     } else {
-      sortParam =
-        Object.keys(MemesSort).find(
-          (k) => MemesSort[k as keyof typeof MemesSort] === sort
-        ) || sort;
+      const found = Object.entries(MemesSort).find(
+        ([key, value]) => value === sort
+      );
+      sortParam = found ? found[0].toLowerCase() : sort.toLowerCase();
     }
 
     let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
