@@ -34,53 +34,40 @@ export default function CustomTooltip({
   const showTimer = useRef<NodeJS.Timeout | undefined>(undefined);
   const hideTimer = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const calculatePosition = useCallback(() => {
-    if (!childRef.current || !tooltipRef.current) return;
-
-    const childRect = childRef.current.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+  const getOptimalPlacement = useCallback((childRect: DOMRect, tooltipRect: DOMRect) => {
+    if (placement !== "auto") return placement;
     
-    // Mark initial calculation as done
-    setInitialCalculationDone(true);
     const padding = 8;
     const arrowSize = 8;
+    const spaces = {
+      top: childRect.top - padding,
+      bottom: window.innerHeight - childRect.bottom - padding,
+      left: childRect.left - padding,
+      right: window.innerWidth - childRect.right - padding
+    };
     
+    const requiredVerticalSpace = tooltipRect.height + offset + arrowSize;
+    const requiredHorizontalSpace = tooltipRect.width + offset + arrowSize;
+    
+    const placements = [
+      { name: "bottom", space: spaces.bottom, required: requiredVerticalSpace },
+      { name: "top", space: spaces.top, required: requiredVerticalSpace },
+      { name: "right", space: spaces.right, required: requiredHorizontalSpace },
+      { name: "left", space: spaces.left, required: requiredHorizontalSpace }
+    ] as const;
+    
+    const validPlacement = placements.find(p => p.space >= p.required);
+    return validPlacement ? validPlacement.name : "bottom";
+  }, [placement, offset]);
+
+  const calculateInitialPosition = useCallback((childRect: DOMRect, tooltipRect: DOMRect, targetPlacement: string) => {
     let x = 0;
     let y = 0;
-    let finalPlacement = placement === "auto" ? "bottom" : placement;
-
-    // Simplified auto placement logic with priority-based selection
-    if (placement === "auto") {
-      // Calculate available space in all directions
-      const spaces = {
-        top: childRect.top - padding,
-        bottom: window.innerHeight - childRect.bottom - padding,
-        left: childRect.left - padding,
-        right: window.innerWidth - childRect.right - padding
-      };
-      
-      // Required space includes tooltip height, offset, and arrow size
-      const requiredVerticalSpace = tooltipRect.height + offset + arrowSize;
-      const requiredHorizontalSpace = tooltipRect.width + offset + arrowSize;
-      
-      // Priority order: bottom, top, right, left
-      const placements = [
-        { name: "bottom", space: spaces.bottom, required: requiredVerticalSpace },
-        { name: "top", space: spaces.top, required: requiredVerticalSpace },
-        { name: "right", space: spaces.right, required: requiredHorizontalSpace },
-        { name: "left", space: spaces.left, required: requiredHorizontalSpace }
-      ] as const;
-      
-      // Find first placement that fits, or fallback to bottom
-      const validPlacement = placements.find(p => p.space >= p.required);
-      finalPlacement = validPlacement ? validPlacement.name : "bottom";
-    }
-
-    // Calculate initial position based on placement
-    switch (finalPlacement) {
+    
+    switch (targetPlacement) {
       case "top":
         x = childRect.left + (childRect.width - tooltipRect.width) / 2;
-        y = childRect.top - tooltipRect.height - offset - 12; // Extra 12px spacing for top
+        y = childRect.top - tooltipRect.height - offset - 12;
         break;
       case "bottom":
         x = childRect.left + (childRect.width - tooltipRect.width) / 2;
@@ -95,69 +82,71 @@ export default function CustomTooltip({
         y = childRect.top + (childRect.height - tooltipRect.height) / 2;
         break;
     }
+    
+    return { x, y };
+  }, [offset]);
 
-
-    // Keep tooltip within viewport bounds horizontally only
+  const adjustPositionForViewport = useCallback((position: { x: number, y: number }, childRect: DOMRect, tooltipRect: DOMRect, targetPlacement: string) => {
+    const padding = 8;
+    let { x, y } = position;
+    let finalPlacement = targetPlacement;
+    
+    // Keep tooltip within viewport bounds horizontally
     const maxX = window.innerWidth - tooltipRect.width - padding;
     x = Math.max(padding, Math.min(x, maxX));
-
-    // STRICT enforcement: tooltip must NEVER overlap with element
-    if (finalPlacement === "top") {
-      // Force tooltip to be above the element, even if it goes off-screen
-      y = childRect.top - tooltipRect.height - offset - 12; // Extra 12px spacing for top
-      // Only apply viewport constraint if it doesn't cause overlap
-      if (y < padding) {
-        // If tooltip would go off-screen at top, force it to bottom instead
-        finalPlacement = "bottom";
-        y = childRect.bottom + offset;
-      }
-    } else if (finalPlacement === "bottom") {
-      // Force tooltip to be below the element, even if it goes off-screen
+    
+    // Adjust vertical position to prevent overlap
+    if (targetPlacement === "top" && y < padding) {
+      finalPlacement = "bottom";
       y = childRect.bottom + offset;
-      // Only apply viewport constraint if it doesn't cause overlap
-      if (y + tooltipRect.height > window.innerHeight - padding) {
-        // If tooltip would go off-screen at bottom, force it to top instead
-        finalPlacement = "top";
-        y = childRect.top - tooltipRect.height - offset - 12; // Extra 12px spacing for top
-      }
-    } else if (finalPlacement === "left") {
-      x = childRect.left - tooltipRect.width - offset;
-      if (x < padding) {
-        finalPlacement = "right";
-        x = childRect.right + offset;
-      }
-    } else if (finalPlacement === "right") {
+    } else if (targetPlacement === "bottom" && y + tooltipRect.height > window.innerHeight - padding) {
+      finalPlacement = "top";
+      y = childRect.top - tooltipRect.height - offset - 12;
+    } else if (targetPlacement === "left" && x < padding) {
+      finalPlacement = "right";
       x = childRect.right + offset;
-      if (x + tooltipRect.width > window.innerWidth - padding) {
-        finalPlacement = "left";
-        x = childRect.left - tooltipRect.width - offset;
-      }
+    } else if (targetPlacement === "right" && x + tooltipRect.width > window.innerWidth - padding) {
+      finalPlacement = "left";
+      x = childRect.left - tooltipRect.width - offset;
     }
+    
+    return { x, y, finalPlacement };
+  }, [offset]);
 
-    // Calculate arrow position based on the difference between intended and actual position
+  const calculateArrowPosition = useCallback((position: { x: number, y: number }, childRect: DOMRect, tooltipRect: DOMRect, finalPlacement: string) => {
     let arrowX = 0;
     let arrowY = 0;
     
     if (finalPlacement === "top" || finalPlacement === "bottom") {
-      // For top/bottom, arrow should point to the center of the child element
       const childCenterX = childRect.left + childRect.width / 2;
-      const tooltipLeftX = x;
-      arrowX = childCenterX - tooltipLeftX;
-      // Clamp arrow position within tooltip bounds with some margin
+      arrowX = childCenterX - position.x;
       arrowX = Math.max(16, Math.min(arrowX, tooltipRect.width - 16));
     } else if (finalPlacement === "left" || finalPlacement === "right") {
-      // For left/right, arrow should point to the center of the child element
       const childCenterY = childRect.top + childRect.height / 2;
-      const tooltipTopY = y;
-      arrowY = childCenterY - tooltipTopY;
-      // Clamp arrow position within tooltip bounds with some margin
+      arrowY = childCenterY - position.y;
       arrowY = Math.max(16, Math.min(arrowY, tooltipRect.height - 16));
     }
+    
+    return { x: arrowX, y: arrowY };
+  }, []);
 
-    setPosition({ x, y });
-    setArrowPosition({ x: arrowX, y: arrowY });
-    setActualPlacement(finalPlacement); // Use the final placement (may have changed due to constraints)
-  }, [placement, offset]);
+  const calculatePosition = useCallback(() => {
+    if (!childRef.current || !tooltipRef.current) return;
+
+    const childRect = childRef.current.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    
+    setInitialCalculationDone(true);
+    
+    const targetPlacement = getOptimalPlacement(childRect, tooltipRect);
+    const initialPosition = calculateInitialPosition(childRect, tooltipRect, targetPlacement);
+    const adjustedPosition = adjustPositionForViewport(initialPosition, childRect, tooltipRect, targetPlacement);
+    const arrowPos = calculateArrowPosition(adjustedPosition, childRect, tooltipRect, adjustedPosition.finalPlacement);
+
+    setPosition({ x: adjustedPosition.x, y: adjustedPosition.y });
+    setArrowPosition(arrowPos);
+    setActualPlacement(adjustedPosition.finalPlacement as "top" | "bottom" | "left" | "right");
+  }, [getOptimalPlacement, calculateInitialPosition, adjustPositionForViewport, calculateArrowPosition]);
 
   const show = useCallback(() => {
     if (disabled) return;
@@ -220,7 +209,7 @@ export default function CustomTooltip({
         <div
           ref={tooltipRef}
           role="tooltip"
-          className={`${styles.tooltip} ${styles[`tooltip--${actualPlacement}`]}`}
+          className={`${styles.tooltip} ${styles["tooltip--" + actualPlacement]}`}
           style={{
             position: 'fixed',
             left: `${position.x}px`,
@@ -233,7 +222,7 @@ export default function CustomTooltip({
             {content}
           </div>
           <div 
-            className={`${styles.tooltipArrow} ${styles[`tooltipArrow--${actualPlacement}`]}`}
+            className={`${styles.tooltipArrow} ${styles["tooltipArrow--" + actualPlacement]}`}
             style={{
               ...(actualPlacement === "top" || actualPlacement === "bottom") && {
                 left: `${arrowPosition.x}px`,

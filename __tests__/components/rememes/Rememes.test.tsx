@@ -3,7 +3,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Rememes, { RememeSort } from "@/components/rememes/Rememes";
 import { fetchUrl } from "@/services/6529api";
-import { useRouter } from "next/router";
 
 jest.mock("next/router", () => ({ useRouter: jest.fn() }));
 jest.mock("@/services/6529api");
