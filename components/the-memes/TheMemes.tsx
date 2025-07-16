@@ -48,7 +48,10 @@ const MEMES_SORT_TO_API: Record<MemesSort, string> = {
   [MemesSort.HIGHEST_OFFER]: MEMES_EXTENDED_SORT[13],
 };
 
-const API_SORT_TO_MEMES: Record<string, { sort: MemesSort; volume?: VolumeType }> = {
+const API_SORT_TO_MEMES: Record<
+  string,
+  { sort: MemesSort; volume?: VolumeType }
+> = {
   [MEMES_EXTENDED_SORT[0]]: { sort: MemesSort.AGE },
   [MEMES_EXTENDED_SORT[1]]: { sort: MemesSort.EDITION_SIZE },
   [MEMES_EXTENDED_SORT[2]]: { sort: MemesSort.MEME },
@@ -58,10 +61,22 @@ const API_SORT_TO_MEMES: Record<string, { sort: MemesSort; volume?: VolumeType }
   [MEMES_EXTENDED_SORT[6]]: { sort: MemesSort.UNIQUE_PERCENT_EX_MUSEUM },
   [MEMES_EXTENDED_SORT[7]]: { sort: MemesSort.FLOOR_PRICE },
   [MEMES_EXTENDED_SORT[8]]: { sort: MemesSort.MARKET_CAP },
-  [MEMES_EXTENDED_SORT[9]]: { sort: MemesSort.VOLUME, volume: VolumeType.HOURS_24 },
-  [MEMES_EXTENDED_SORT[10]]: { sort: MemesSort.VOLUME, volume: VolumeType.DAYS_7 },
-  [MEMES_EXTENDED_SORT[11]]: { sort: MemesSort.VOLUME, volume: VolumeType.DAYS_30 },
-  [MEMES_EXTENDED_SORT[12]]: { sort: MemesSort.VOLUME, volume: VolumeType.ALL_TIME },
+  [MEMES_EXTENDED_SORT[9]]: {
+    sort: MemesSort.VOLUME,
+    volume: VolumeType.HOURS_24,
+  },
+  [MEMES_EXTENDED_SORT[10]]: {
+    sort: MemesSort.VOLUME,
+    volume: VolumeType.DAYS_7,
+  },
+  [MEMES_EXTENDED_SORT[11]]: {
+    sort: MemesSort.VOLUME,
+    volume: VolumeType.DAYS_30,
+  },
+  [MEMES_EXTENDED_SORT[12]]: {
+    sort: MemesSort.VOLUME,
+    volume: VolumeType.ALL_TIME,
+  },
   [MEMES_EXTENDED_SORT[13]]: { sort: MemesSort.HIGHEST_OFFER },
 };
 
@@ -115,11 +130,19 @@ export default function TheMemesComponent() {
     const routerSort = searchParams?.get("sort");
     if (routerSort) {
       const sortLower = routerSort.toLowerCase();
-      const apiMap = API_SORT_TO_MEMES[sortLower];
-      if (apiMap) {
-        initialSort = apiMap.sort;
-        if (apiMap.volume) {
-          initialVolume = apiMap.volume;
+
+      // Check if this is a volume sort
+      if (sortLower.startsWith("volume_")) {
+        initialSort = MemesSort.VOLUME;
+        const vol = sortLower.replace("volume_", "");
+        if (
+          Object.values(VolumeType)
+            .map((v) => v.toLowerCase())
+            .includes(vol)
+        ) {
+          initialVolume = Object.values(VolumeType).find(
+            (v) => v.toLowerCase() === vol
+          )!;
         }
       } else {
         const resolvedKey = Object.keys(MemesSort).find(
@@ -160,9 +183,7 @@ export default function TheMemesComponent() {
     if (selectedSeason > 0) {
       seasonFilter = `&season=${selectedSeason}`;
     }
-    return `${
-      process.env.API_ENDPOINT
-    }/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
+    return `${process.env.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
   };
 
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
@@ -201,8 +222,14 @@ export default function TheMemesComponent() {
   }, []);
 
   useEffect(() => {
-    const sortKey = getApiSort(sort, volumeType);
-    let queryString = `sort=${sortKey}&sort_dir=${sortDir.toLowerCase()}`;
+    let sortParam: string;
+    if (sort === MemesSort.VOLUME) {
+      sortParam = `volume_${volumeType.toLowerCase()}`;
+    } else {
+      sortParam = sort.toLowerCase();
+    }
+
+    let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
     if (selectedSeason > 0) {
       queryString += `&szn=${selectedSeason}`;
     }
