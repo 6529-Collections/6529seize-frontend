@@ -8,13 +8,15 @@ import "tippy.js/themes/light.css";
 import type { AppProps } from "next/app";
 
 import { NextPage, NextPageContext } from "next";
-import { ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import Providers from "@/components/providers/Providers";
 import { getPageMetadata } from "@/components/providers/metadata";
 import { wrapper } from "@/store/store";
 import { Provider } from "react-redux";
 import BaseLayout from "@/components/layout/BaseLayout";
+import Router from "next/router";
+import { initDeepLink } from "@/helpers/deep-link.helpers";
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement<any>) => ReactNode;
@@ -25,6 +27,8 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
+  const [ready, setReady] = useState(false);
+
   const { store, props } = wrapper.useWrappedStore(rest);
 
   const pageMetadata = rest.pageProps.metadata;
@@ -36,6 +40,18 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     componentMetadata,
     pageMetadata,
   });
+
+  useEffect(() => {
+    async function startup() {
+      await initDeepLink(Router);
+      setReady(true);
+    }
+    startup();
+  }, []);
+
+  if (!ready) {
+    return null;
+  }
 
   return (
     <Provider store={store}>

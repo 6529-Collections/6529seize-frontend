@@ -17,6 +17,11 @@ import { Viewport } from "next";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./error-page";
 import Head from "next/head";
+import { SplashScreen } from "@capacitor/splash-screen";
+import { App as CapacitorApp } from "@capacitor/app";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { initDeepLink } from "@/helpers/deep-link.helpers";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
@@ -32,6 +37,21 @@ export default function RootLayout({
 }: {
   readonly children: React.ReactNode;
 }) {
+  const [ready, setReady] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function startup() {
+      await initDeepLink(router);
+      setReady(true);
+    }
+    startup();
+  }, [router]);
+
+  if (!ready) {
+    return null;
+  }
+
   return (
     <html lang="en">
       <Head>
