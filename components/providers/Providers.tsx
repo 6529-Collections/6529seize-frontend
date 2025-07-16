@@ -23,15 +23,19 @@ import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
+import { initWeb3Modal } from "./web3ModalSetup";
 
 export default function Providers({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
+  const wagmiConfig = getWagmiConfig();
+  initWeb3Modal(wagmiConfig.config);
+
   return (
     <QueryClientSetup>
-      <WagmiSetup wagmiConfig={getWagmiConfig()}>
+      <WagmiSetup wagmiConfig={wagmiConfig}>
         <CapacitorSetup />
         <IpfsImageSetup />
         <ReactQueryWrapper>
