@@ -13,10 +13,11 @@ const hasBooted = () => {
 export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const { isCapacitor } = useCapacitor();
   const router = useRouter();
-  const [ready, setReady] = useState(!isCapacitor || hasBooted());
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!isCapacitor) {
+      setReady(true);
       return;
     }
 
@@ -39,7 +40,10 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
       handleDeepLink(data.url);
     });
 
-    if (!hasBooted()) {
+    if (hasBooted()) {
+      setReady(true);
+    } else {
+      console.log("Not booted, checking for cold start deep link");
       const checkColdStart = async () => {
         const launchUrlResult = await App.getLaunchUrl();
 
@@ -54,8 +58,6 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
       };
 
       checkColdStart();
-    } else {
-      setReady(true);
     }
 
     return () => {
