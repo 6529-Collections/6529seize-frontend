@@ -9,23 +9,10 @@ import { resolveDeepLink } from "@/helpers/deep-link.helpers";
 export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const { isCapacitor } = useCapacitor();
   const router = useRouter();
-
-  const [ready, setReady] = useState(() => {
-    if (!isCapacitor) return true;
-    if (typeof window !== "undefined") {
-      return Boolean(window.__deepLinkHandled);
-    }
-    return false;
-  });
+  const [ready, setReady] = useState(!isCapacitor);
 
   useEffect(() => {
     if (!isCapacitor) {
-      setReady(true);
-      return;
-    }
-
-    if (typeof window !== "undefined" && window.__deepLinkHandled) {
-      console.log("Deep link already handled, skipping.");
       setReady(true);
       return;
     }
@@ -45,18 +32,22 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
     };
 
     const checkColdStart = async () => {
-      try {
-        const launchUrlResult = await App.getLaunchUrl();
-        if (launchUrlResult?.url) {
-          console.log("Cold start deep link detected:", launchUrlResult.url);
-          handleDeepLink(launchUrlResult.url);
-        }
-      } finally {
-        if (typeof window !== "undefined") {
-          window.__deepLinkHandled = true;
-        }
+      const alreadyHandled = sessionStorage.getItem("hasBooted");
+      console.log("alreadyHandled", alreadyHandled);
+      if (alreadyHandled === "true") {
+        console.log("Deep link already handled. Skipping.");
         setReady(true);
+        return;
       }
+
+      const launchUrlResult = await App.getLaunchUrl();
+      if (launchUrlResult?.url) {
+        console.log("Cold start deep link detected:", launchUrlResult.url);
+        handleDeepLink(launchUrlResult.url);
+      }
+
+      sessionStorage.setItem("hasBooted", "true");
+      setReady(true);
     };
 
     checkColdStart();
