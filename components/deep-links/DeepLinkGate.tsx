@@ -13,7 +13,7 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const [ready, setReady] = useState(() => {
     if (!isCapacitor) return true;
     if (typeof window !== "undefined") {
-      return sessionStorage.getItem("deepLinkHandled") === "true";
+      return Boolean(window.__deepLinkHandled);
     }
     return false;
   });
@@ -24,10 +24,7 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    if (
-      typeof window !== "undefined" &&
-      sessionStorage.getItem("deepLinkHandled") === "true"
-    ) {
+    if (typeof window !== "undefined" && window.__deepLinkHandled) {
       console.log("Deep link already handled, skipping.");
       setReady(true);
       return;
@@ -56,7 +53,7 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
         }
       } finally {
         if (typeof window !== "undefined") {
-          sessionStorage.setItem("deepLinkHandled", "true");
+          window.__deepLinkHandled = true;
         }
         setReady(true);
       }

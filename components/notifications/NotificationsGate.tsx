@@ -29,18 +29,32 @@ const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
 
-let pushLaunchHandled = false;
-
 export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isIos } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
-  const [ready, setReady] = useState(!isCapacitor || pushLaunchHandled);
+
+  const [ready, setReady] = useState(() => {
+    if (!isCapacitor) return true;
+    if (typeof window !== "undefined") {
+      return Boolean(window.__pushLaunchHandled);
+    }
+    return false;
+  });
 
   useEffect(() => {
-    if (!isCapacitor || pushLaunchHandled) return;
+    if (!isCapacitor) {
+      setReady(true);
+      return;
+    }
+
+    if (typeof window !== "undefined" && window.__pushLaunchHandled) {
+      console.log("Push notification gate already handled, skipping splash.");
+      setReady(true);
+      return;
+    }
 
     console.log("Running push notification gate on app launch...");
 
@@ -49,7 +63,9 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
     const timeout = setTimeout(() => {
       if (!resolved) {
         console.log("No launch notification detected after timeout.");
-        pushLaunchHandled = true;
+        if (typeof window !== "undefined") {
+          window.__pushLaunchHandled = true;
+        }
         setReady(true);
       }
     }, 1000);
@@ -68,7 +84,9 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
           connectedProfile
         );
 
-        pushLaunchHandled = true;
+        if (typeof window !== "undefined") {
+          window.__pushLaunchHandled = true;
+        }
         setReady(true);
       }
     );
@@ -79,7 +97,6 @@ export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [isCapacitor, connectedProfile, router]);
 
-  // Run your normal push setup always:
   useEffect(() => {
     if (!isCapacitor) return;
 
