@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
-import { Capacitor } from "@capacitor/core";
 import { useRouter } from "next/navigation";
 import useCapacitor from "@/hooks/useCapacitor";
 import { resolveDeepLink } from "@/helpers/deep-link.helpers";
@@ -13,7 +12,7 @@ export const DeepLinkGate = ({ children }: { children: React.ReactNode }) => {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!isCapacitor || !Capacitor.isNativePlatform()) {
+    if (!isCapacitor) {
       setReady(true);
       return;
     }
