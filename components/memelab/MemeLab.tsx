@@ -19,7 +19,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import { AuthContext } from "../auth/Auth";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import { MEMELAB_CONTRACT } from "../../constants";
-import { SortButton } from "../the-memes/TheMemes";
+import { SortButton, printVolumeTypeDropdown } from "../the-memes/TheMemes";
 import { MemeLabSort } from "../../enums";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
@@ -27,7 +27,6 @@ import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
-import { VolumeTypeDropdown } from "../the-memes/MemeShared";
 
 interface Props {
   wallets: string[];
@@ -39,8 +38,11 @@ export function getInitialRouterValues(router: NextRouter) {
 
   const routerSortDir = router.query.sort_dir;
   if (routerSortDir) {
+    const routerSortDirStr = Array.isArray(routerSortDir)
+      ? routerSortDir[0]
+      : routerSortDir;
     const resolvedRouterSortDir = Object.values(SortDirection).find(
-      (sd) => sd === routerSortDir
+      (sd) => sd.toLowerCase() === routerSortDirStr.toLowerCase()
     );
     if (resolvedRouterSortDir) {
       initialSortDir = resolvedRouterSortDir;
@@ -49,11 +51,21 @@ export function getInitialRouterValues(router: NextRouter) {
 
   const routerSort = router.query.sort;
   if (routerSort) {
-    const resolvedRouterSort = Object.values(MemeLabSort).find(
-      (sd) => sd === routerSort
+    const routerSortStr = Array.isArray(routerSort)
+      ? routerSort[0]
+      : routerSort;
+    const resolvedKey = Object.keys(MemeLabSort).find(
+      (k) => k.toLowerCase() === routerSortStr.toLowerCase()
     );
-    if (resolvedRouterSort) {
-      initialSort = resolvedRouterSort;
+    if (resolvedKey) {
+      initialSort = MemeLabSort[resolvedKey as keyof typeof MemeLabSort];
+    } else {
+      const resolvedVal = Object.values(MemeLabSort).find(
+        (v) => v.toLowerCase() === routerSortStr.toLowerCase()
+      );
+      if (resolvedVal) {
+        initialSort = resolvedVal as MemeLabSort;
+      }
     }
   }
 
@@ -87,12 +99,12 @@ export function printSortButtons(
           select={() => setSort(v)}
         />
       ))}
-      <VolumeTypeDropdown
-        isVolumeSort={sort === MemeLabSort.VOLUME}
-        selectedVolumeSort={volumeType}
-        setVolumeType={setVolumeType}
-        setVolumeSort={() => setSort(MemeLabSort.VOLUME)}
-      />
+      {printVolumeTypeDropdown(
+        sort === MemeLabSort.VOLUME,
+        setVolumeType,
+        () => setSort(MemeLabSort.VOLUME),
+        volumeType
+      )}
     </>
   );
 }
@@ -180,9 +192,13 @@ export function sortChanged(
   setLabArtists?: (artists: string[]) => void,
   setLabCollections?: (collections: string[]) => void
 ) {
+  const sortKey =
+    Object.keys(MemeLabSort)
+      .find((k) => MemeLabSort[k as keyof typeof MemeLabSort] === sort)
+      ?.toLowerCase() ?? "";
   const newQuery: any = {
-    sort: sort,
-    sort_dir: sortDir,
+    sort: sortKey,
+    sort_dir: sortDir.toLowerCase(),
   };
   if (collectionName) {
     newQuery.collection = collectionName?.replaceAll(" ", "-");

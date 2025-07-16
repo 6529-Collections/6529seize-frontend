@@ -42,7 +42,7 @@ describe("MemeLab helpers", () => {
         )}
       </div>
     );
-    expect(screen.getByTestId("sort-age")).toBeInTheDocument();
+    expect(screen.getByTestId("sort-Age")).toBeInTheDocument();
     expect(screen.getByTestId("volume-dropdown")).toBeInTheDocument();
   });
 

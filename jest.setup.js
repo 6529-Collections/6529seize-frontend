@@ -63,6 +63,22 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
+// Provide ResizeObserver for components relying on it
+if (typeof global.ResizeObserver === "undefined") {
+  global.ResizeObserver = class {
+    // no-op for test environment
+    observe() {
+      /* noop */
+    }
+    unobserve() {
+      /* noop */
+    }
+    disconnect() {
+      /* noop */
+    }
+  };
+}
+
 // Default API endpoint needed for service tests
 process.env.API_ENDPOINT = process.env.API_ENDPOINT || "https://example.com";
 
