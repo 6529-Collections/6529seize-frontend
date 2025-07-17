@@ -26,7 +26,9 @@ npm run type-check
 
 ## Programmatic Checks
 
-Before completing any coding task, ensure the following commands succeed:
+Before completing any coding task, ensure the following commands succeed. For a
+quicker check when your changes are small, you may run
+`npm run test:cov:changed` to execute tests only for files changed since `main`:
 
 ```bash
 npm run test
@@ -39,6 +41,7 @@ Note: When changing files like readme.md, agents.md or other documentation or in
 - `npm run test`: Executes all Jest tests and checks code coverage. The command will fail if:
   - Any Jest test fails.
   - Any file modified since diverging from the `main` branch (including uncommitted changes) has less than 80% line coverage.
+- `npm run test:cov:changed`: Runs Jest only on files changed since `main`, still enforcing the 80% coverage threshold.
 - `npm run lint`: Ensure code adheres to linting rules.
 - `npm run type-check`: Verify TypeScript type checking passes with `tsc --noEmit -p tsconfig.json`.
 

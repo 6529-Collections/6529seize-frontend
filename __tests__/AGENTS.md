@@ -47,11 +47,14 @@ A suggested 20‑minute cycle:
 
 ## Execution Instructions
 
-Run all tests with:
+Run tests with:
 
 ```bash
-npm run test
+npm run test:cov:changed
 ```
+
+This command runs Jest only on files changed since `main`. Use `npm run test` if
+you need to execute the entire suite.
 
 This command also checks coverage for modified files. Linting and type‑checking should pass as well:
 
