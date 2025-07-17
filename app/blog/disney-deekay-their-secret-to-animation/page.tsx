@@ -957,10 +957,10 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   <a
                                     href="https://deekaykwon.com/#/designer-client-1/"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener"
+                                  >
                                     Designer &amp; Client
-                                  </a>
-                                  ”, spreading infectious joy in “Happy Virus”,
+                                  </a>”, spreading infectious joy in “Happy Virus”,
                                   or the existence of one's angel and devil
                                   sides in “
                                   <a
