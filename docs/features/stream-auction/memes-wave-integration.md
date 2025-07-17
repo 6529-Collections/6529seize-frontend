@@ -12,7 +12,7 @@ Understanding why creators choose to redirect to stream auctions is crucial for 
 
 **Alternative Path**: "I want to try something different" - Users are curious about the auction mechanism as an alternative to traditional leaderboard competition.
 
-**Community Interest**: "There's strong community interest in owning this as a 1/1" - Users recognize that community members specifically want to own their content as a collectible, not just vote for it.
+**Community Interest**: "There's strong community interest in owning this as a 1/1" - Users recognize that community members specifically want to own their content as a unique collectible rather than as part of a broader edition.
 
 **Quality Recognition**: "This content deserves to be preserved as a unique piece" - Users view the auction as a way to honor exceptional content that transcends typical meme lifecycle.
 
