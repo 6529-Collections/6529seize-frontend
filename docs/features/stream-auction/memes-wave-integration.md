@@ -366,17 +366,23 @@ SOON = Upcoming auction being prepared
 
 ### My Stream Integration
 
-**Limited Integration**:
-- Stream auctions are primarily accessed through Collections section
-- My Stream maintains focus on personal social feed and wave activity
-- Minimal auction-specific content in the personal feed
+**Natural Feed Integration**:
+- My Stream shows user's auction activity as part of their personal feed
+- Auction events are treated as normal user activities alongside wave participation
+- Links to auctions in Collections section for full auction management
 
-**Integration Points**:
-- **Redirected Drop Removal**: When user's drops are redirected to stream auction, they are removed from memes wave and no longer appear in My Stream wave content
-- **Personal Milestone Posts**: Major auction events (user won auction, user's auction ended) may appear as feed items
-- **Auction Links**: Links to view auctions in Collections section when relevant to user's activity
-- **Activity Notifications**: Auction notifications (outbid, won) handled through notification system, not My Stream content
-- **Focus**: My Stream remains focused on social wave activity rather than becoming an auction management interface
+**Feed Activity Types**:
+- **Drop Redirected**: "You redirected [Drop Title] to stream auction" with link to auction
+- **Auction Started**: "Your auction for [Drop Title] is now live" with current bid status
+- **Auction Bid Received**: "New bid on your auction [Drop Title]: 1.2 ETH" 
+- **Auction Won**: "You won the auction for [Drop Title] - 2.5 ETH"
+- **Auction Ended**: "Your auction for [Drop Title] ended - final bid: 3.1 ETH"
+
+**User Experience**:
+- Auction activity appears chronologically with other user activities
+- Each auction post links to the auction page in Collections
+- Shows relevant auction context (current bid, time remaining, etc.)
+- Maintains continuity between memes wave participation and auction outcomes
 
 ## Bid Tracking & Status Indicators
 
