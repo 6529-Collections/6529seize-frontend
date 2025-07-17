@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import AuthorPage from "@/pages/author/6529er6529-io";
+import AuthorPage from "@/app/author/6529er6529-io/page";
 import CompanyPortfolio from "@/app/capital/company-portfolio/page";
 import EducationPage from "@/pages/education";
 import FakeRares from "@/pages/museum/6529-fund-szn1/fakerares";
