@@ -8,7 +8,7 @@ export const WAVE_FOLLOWING_WAVES_PARAMS = {
 };
 
 export const WAVE_DROPS_PARAMS = {
-  limit: 25,
+  limit: 50,
 };
 
 export const WAVE_DEFAULT_SUBSCRIPTION_ACTIONS = Object.values(
