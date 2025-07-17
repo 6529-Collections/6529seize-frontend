@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import DelegationMappingToolPage from '../../pages/delegation-mapping-tool';
+import DelegationMappingToolPage from '@/app/delegation-mapping-tool/page';
 import { AuthContext } from '../../components/auth/Auth';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);

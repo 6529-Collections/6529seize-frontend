@@ -1,29 +1,30 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { ShareMobileApp } from "../components/header/share/HeaderShareMobileApps";
-import ClientOnly from "../components/client-only/ClientOnly";
-import { DeepLinkScope } from "../hooks/useDeepLinkNavigation";
+import { useSearchParams } from "next/navigation";
+import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
+import ClientOnly from "@/components/client-only/ClientOnly";
+import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const OpenMobilePage = () => {
-  const router = useRouter();
-  const { path } = router.query;
-
+export default function OpenMobilePage() {
+  const searchParams = useSearchParams();
+  const pathParam = searchParams?.get("path") || "";
   const [decodedPath, setDecodedPath] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!router.isReady || typeof window === "undefined" || !path) {
+    if (typeof window === "undefined" || !pathParam) {
       return;
     }
 
     const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
-
-    const raw = Array.isArray(path) ? path[0] : path;
-    const decoded = decodeURIComponent(raw);
+    const decoded = decodeURIComponent(pathParam);
     const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${decoded}`;
 
     setDecodedPath(decoded);
     window.location.href = deepLink;
-  }, [router.isReady, path]);
+  }, [pathParam]);
 
   const handleBack = () => {
     if (decodedPath) {
@@ -37,8 +38,7 @@ const OpenMobilePage = () => {
     const shareIos = <ShareMobileApp platform="ios" target="_self" />;
     const shareAndroid = <ShareMobileApp platform="android" target="_self" />;
 
-    const userAgent =
-      typeof navigator === "undefined" ? "" : navigator.userAgent;
+    const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent;
     const isIos = /iPad|iPhone|iPod/.test(userAgent);
     const isAndroid = /android/i.test(userAgent);
 
@@ -74,6 +74,8 @@ const OpenMobilePage = () => {
       </div>
     </ClientOnly>
   );
-};
+}
 
-export default OpenMobilePage;
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Open Mobile" });
+}

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import MemeAccountingPage from '../../pages/meme-accounting';
+import MemeAccountingPage, { generateMetadata } from '@/app/meme-accounting/page';
 import { AuthContext } from '../../components/auth/Auth';
 
 jest.mock('../../components/gas-royalties/Royalties', () => () => <div data-testid="royalties" />);
@@ -49,10 +49,9 @@ describe('MemeAccountingPage', () => {
     // Component renders successfully
   });
 
-  it('exposes correct metadata', () => {
-    expect(MemeAccountingPage.metadata).toEqual({
-      title: 'Meme Accounting',
-      description: 'Tools',
-    });
+  it('exposes correct metadata', async () => {
+    process.env.BASE_ENDPOINT = 'https://example.com';
+    const metadata = await generateMetadata();
+    expect(metadata).toMatchObject({ title: 'Meme Accounting', description: 'Tools | 6529.io' });
   });
 });
