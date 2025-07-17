@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import CreateWaveOutcomesRowManualApprove from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualApprove';
 import { CreateWaveOutcomeConfig } from '../../../../../../../../types/waves.types';
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
 
 jest.mock('../../../../../../../../helpers/Helpers', () => ({
   formatLargeNumber: (n: number) => `formatted-${n}`,

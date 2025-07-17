@@ -5,21 +5,6 @@ import { WalletAddress } from '../../../components/address/WalletAddress';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
-
-jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any) => <svg {...p} data-testid="icon" /> }));
-
-jest.mock('react-bootstrap', () => {
-  const Dropdown: any = ({ children }: any) => <div>{children}</div>;
-  Dropdown.displayName = 'Dropdown';
-  Dropdown.Toggle = (p: any) => <button {...p}>{p.children}</button>;
-  Dropdown.Toggle.displayName = 'DropdownToggle';
-  Dropdown.Menu = (p: any) => <div>{p.children}</div>;
-  Dropdown.Menu.displayName = 'DropdownMenu';
-  Dropdown.Item = (p: any) => <button onClick={p.onClick}>{p.children}</button>;
-  Dropdown.Item.displayName = 'DropdownItem';
-  return { Dropdown };
-});
 
 const parseEmojis = jest.fn((s: string) => 'parsed');
 const formatAddress = jest.fn((v: string) => `fmt-${v}`);

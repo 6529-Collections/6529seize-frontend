@@ -10,11 +10,6 @@ jest.mock("../../../../hooks/isMobileDevice", () => ({
   default: jest.fn(() => false),
 }));
 
-jest.mock("@tippyjs/react", () => {
-  return function Tippy({ children, content, disabled }: any) {
-    return disabled ? children : <div title={content}>{children}</div>;
-  };
-});
 
 describe("SingleWaveDropTraits", () => {
   const createMockDrop = (

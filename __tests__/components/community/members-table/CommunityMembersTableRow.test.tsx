@@ -20,7 +20,6 @@ jest.mock('../../../../components/user/utils/level/UserLevel', () => () => <div 
 jest.mock('../../../../components/user/utils/user-cic-type/UserCICTypeIcon', () => () => <div data-testid="icon" />);
 jest.mock('../../../../components/utils/CommonTimeAgo', () => () => <span data-testid="time" />);
 jest.mock('next/link', () => ({ __esModule: true, default: ({ children, href }: any) => <a href={href}>{children}</a> }));
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <>{children}</> }));
 
 const baseMember: CommunityMemberOverview = {
   display: 'Alice',

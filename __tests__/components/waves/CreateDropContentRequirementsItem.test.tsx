@@ -3,7 +3,6 @@ import { render, fireEvent } from '@testing-library/react';
 import CreateDropContentRequirementsItem from '../../../components/waves/CreateDropContentRequirementsItem';
 import { DropRequirementType } from '../../../components/waves/CreateDropContentRequirements';
 
-jest.mock('@tippyjs/react', () => ({ children }: any) => <div>{children}</div>);
 
 describe('CreateDropContentRequirementsItem', () => {
   it('calls onOpenMetadata when requirement type is METADATA', () => {

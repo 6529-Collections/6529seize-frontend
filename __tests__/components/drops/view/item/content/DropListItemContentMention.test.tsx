@@ -2,8 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import DropListItemContentMention from '../../../../../../components/drops/view/item/content/DropListItemContentMention';
 
-jest.mock('../../../../../../components/user/utils/profile/UserProfileTooltip', () => (props: any) => <div data-testid="tooltip">{props.user}</div>);
-jest.mock('../../../../../../components/utils/tooltip/LazyTippy', () => (props: any) => <div data-testid="tippy">{props.children}</div>);
+jest.mock('../../../../../../components/utils/tooltip/UserProfileTooltipWrapper', () => ({ user, children }: any) => <div data-testid="tooltip-wrapper" data-user={user}>{children}</div>);
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
 
 describe('DropListItemContentMention', () => {
@@ -14,6 +13,6 @@ describe('DropListItemContentMention', () => {
     expect(link).toHaveAttribute('href', '/bob');
     expect(link).toHaveTextContent('@bob');
     fireEvent.click(link);
-    expect(container.querySelector('[data-testid="tippy"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeInTheDocument();
   });
 });

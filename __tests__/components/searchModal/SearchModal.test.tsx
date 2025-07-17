@@ -21,13 +21,6 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: (props: any) => <div data-testid="font-awesome-icon" {...props} />
-}));
-
-jest.mock("@tippyjs/react", () => {
-  return (props: any) => <div>{props.children}</div>;
-});
 
 jest.mock("../../../helpers/Helpers", () => ({
   formatAddress: (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`
