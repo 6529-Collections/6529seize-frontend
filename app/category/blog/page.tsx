@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 
 export default function CategoryBlogPage() {
   return (
-  <>
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -627,13 +626,9 @@ export default function CategoryBlogPage() {
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-      <a
-        className="fusion-one-page-text-link fusion-page-load-link"
-        tabIndex={-1}
-        href="#"
-        aria-hidden="true">
-        Page load link
-      </a>
+        <button type="button" className="fusion-one-page-text-link fusion-page-load-link" tabIndex={-1} aria-hidden="true">
+          Page load link
+        </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
@@ -653,14 +648,13 @@ export default function CategoryBlogPage() {
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-        <a href="#" id="toTop" className="fusion-top-top-link">
-          <span id="awb-to-top-label" className="screen-reader-text">
-            Go to Top
-          </span>
-        </a>
+          <button type="button" id="toTop" className="fusion-top-top-link">
+            <span id="awb-to-top-label" className="screen-reader-text">
+              Go to Top
+            </span>
+          </button>
       </section>
     </div>
-  </>
   );
 }
 

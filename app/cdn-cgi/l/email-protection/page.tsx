@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 
 export default function EmailProtectionPage() {
   return (
-  <>
     <div>
       {/*[if lt IE 7]> <html className="no-js ie6 oldie" lang="en-US"> <![endif]*/}
       {/*[if IE 7]>    <html className="no-js ie7 oldie" lang="en-US"> <![endif]*/}
@@ -137,7 +136,6 @@ export default function EmailProtectionPage() {
       </div>
       {/* /#cf-wrapper */}
     </div>
-  </>
   );
 }
 
