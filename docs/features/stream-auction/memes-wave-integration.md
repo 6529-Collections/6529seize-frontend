@@ -90,10 +90,10 @@ POST /api/waves/{waveId}/drops/{dropId}/redirect-to-stream
 // Get stream auction data for redirected drop
 GET /api/waves/{waveId}/drops/{dropId}/stream-auction
 
-// List all stream auctions (active, ended, pending)
+// List all stream auctions (active, collection, upcoming)
 GET /api/stream-auctions
 Query params:
-  - status: active | ended | pending
+  - status: active | collection | upcoming
   - page: number
   - limit: number
   - sort: price | end_time | created_at
@@ -101,7 +101,7 @@ Query params:
 // Get user's active bids
 GET /api/stream-auctions/my-bids
 Query params:
-  - status: active | won | ended
+  - status: active | won | collection
   - page: number
   - limit: number
 ```
@@ -126,8 +126,6 @@ Query params:
 - **Dual-State Badge Behavior**: Shows "Stream Eligible" for all viewers, becomes actionable for drop author with distinct visual treatment
 - **Author Decision Authority**: Only drop author can redirect to auction, others see informational indicator only
 - **Auction parameters (starting price, duration)**: Contract-level configuration (see Decided Requirements section)
-
-**DECIDED**: 
 - **Redirect Confirmation Modal**: Clear, transparent process explanation focusing on what happens next
 - **Modal Content**: Immediate consequences, next steps, timeline, auction parameters, and specific team contact
 - **Philosophy**: Present facts without pressure - users make informed decisions with full transparency
@@ -218,7 +216,7 @@ User clicks "Redirect to Stream" button:
 
 **Navigation**:
 - Main collections page: `/collections/stream-auctions`
-- Categories: Active, Ended, Pending
+- Categories: Active, Upcoming, Collection
 - Filters: Price range, time remaining, creator
 - User section: "My Bids" - shows auctions where user has placed bids
 
@@ -299,20 +297,21 @@ Stream Auctions Page:
 │ │ 👑  │ │     │ │     │           │
 │ └─────┘ └─────┘ └─────┘           │
 │ ─────────────────────────────────── │
-│ Pending (3)                         │
+│ Upcoming (3)                        │
 │ ┌─────┐ ┌─────┐ ┌─────┐           │
 │ │ NFT │ │ NFT │ │ NFT │           │
-│ │PEND │ │PEND │ │PEND │           │
+│ │SOON │ │SOON │ │SOON │           │
 │ │ ⏳  │ │ ⏳  │ │ ⏳  │           │
 │ └─────┘ └─────┘ └─────┘           │
 │ ─────────────────────────────────── │
-│ Ended (24)                          │
+│ Collection (24)                     │
 │ [Show More]                         │
 └─────────────────────────────────────┘
 
 Legend:
 👑 = You're the highest bidder
 ⏳ = Auction setup in progress (team will contact author)
+SOON = Upcoming auction being prepared
 ```
 
 ## Integration with Existing Systems
@@ -386,7 +385,7 @@ Users need clear visibility into their auction participation:
 - List of auctions user has lost (participated in but didn't win)
 - Real-time status updates (highest bidder, won, lost)
 - Quick action buttons (increase bid, claim won auctions)
-- Filtering by status (active, won, ended)
+- Filtering by status (active, won, collection)
 - Sorting by end time, bid amount, auction activity
 
 ### Bid Status Indicators
