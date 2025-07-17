@@ -1,14 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import Restricted from '../../pages/restricted';
+import RestrictedPage from '@/app/restricted/page';
 import { AuthContext } from '../../components/auth/Auth';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { getStagingAuth } from '../../services/auth/auth.utils';
 
 jest.mock('next/image', () => (props: any) => <img {...props} />);
-jest.mock('../../pages/access', () => ({ LoginImage: (p: any) => <img {...p} /> }));
+jest.mock('@/app/access/page', () => ({ LoginImage: (p: any) => <img {...p} /> }));
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 jest.mock('../../services/auth/auth.utils', () => ({ getStagingAuth: jest.fn() }));
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -35,7 +35,7 @@ jest.mock('../../contexts/TitleContext', () => ({
 
 describe('Restricted page', () => {
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({ isReady: true });
+    (useRouter as jest.Mock).mockReturnValue({});
     (getStagingAuth as jest.Mock).mockReturnValue('token');
   });
 
@@ -46,7 +46,7 @@ describe('Restricted page', () => {
     }) as any;
     render(
       <TestProvider>
-        <Restricted />
+        <RestrictedPage />
       </TestProvider>
     );
     await waitFor(() => expect(fetch).toHaveBeenCalled());
@@ -60,7 +60,7 @@ describe('Restricted page', () => {
     }) as any;
     render(
       <TestProvider>
-        <Restricted />
+        <RestrictedPage />
       </TestProvider>
     );
     await waitFor(() => expect(fetch).toHaveBeenCalled());

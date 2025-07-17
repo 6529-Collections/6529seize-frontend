@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import OpenMobilePage from "../../pages/open-mobile";
-import { useRouter } from "next/router";
+import OpenMobilePage from "@/app/open-mobile/page";
+import { useSearchParams } from "next/navigation";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({ useSearchParams: jest.fn() }));
 
-const useRouterMock = useRouter as jest.Mock;
+const useSearchParamsMock = useSearchParams as jest.Mock;
 
 describe("OpenMobilePage", () => {
   beforeEach(() => {
@@ -15,10 +15,7 @@ describe("OpenMobilePage", () => {
       origin: "https://example.com",
     } as any;
     process.env.MOBILE_APP_SCHEME = "app";
-    useRouterMock.mockReturnValue({
-      query: { path: "/foo%20bar" },
-      isReady: true,
-    });
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("path=%2Ffoo%20bar"));
   });
 
   it("deep links and allows going back", async () => {

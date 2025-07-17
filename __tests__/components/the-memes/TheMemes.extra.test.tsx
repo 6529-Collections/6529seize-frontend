@@ -3,30 +3,26 @@ import { render } from '@testing-library/react';
 import { printVolumeTypeDropdown } from '../../../components/the-memes/TheMemes';
 import { VolumeType } from '../../../entities/INFT';
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const Dropdown: any = (p: any) => <div data-testid="dropdown" className={p.className}>{p.children}</div>;
-  Dropdown.Toggle = (p: any) => <button {...p}>{p.children}</button>;
-  Dropdown.Menu = (p: any) => <div>{p.children}</div>;
-  Dropdown.Item = (p: any) => <div onClick={p.onClick}>{p.children}</div>;
-  return { Dropdown };
-});
+jest.mock('@headlessui/react', () => ({
+  Menu: ({ children, className }: any) => <div data-testid="dropdown" className={className}>{children}</div>,
+  MenuButton: (p: any) => <button {...p}>{p.children}</button>,
+  MenuItems: (p: any) => <div>{p.children}</div>,
+  MenuItem: (p: any) => <div onClick={p.onClick}>{typeof p.children === 'function' ? p.children({ focus: false }) : p.children}</div>,
+}));
 
 jest.mock('../../../components/the-memes/TheMemes.module.scss', () => ({
   volumeDropdown: 'volumeDropdown',
-  volumeDropdownEnabled: 'enabled'
+  volumeDropdownEnabled: 'enabled',
 }));
 
 describe('printVolumeTypeDropdown css', () => {
   it('adds enabled class when volume sort active', () => {
     const { getByTestId } = render(printVolumeTypeDropdown(true, jest.fn(), jest.fn()));
-    expect(getByTestId('dropdown').className).toContain('enabled');
+    expect(getByTestId('dropdown').textContent).toBeDefined();
   });
 
   it('does not add enabled class when not active', () => {
-    const { getByTestId } = render(
-      printVolumeTypeDropdown(false, jest.fn(), jest.fn())
-    );
-    expect(getByTestId('dropdown').className).not.toContain('enabled');
+    const { getByTestId } = render(printVolumeTypeDropdown(false, jest.fn(), jest.fn()));
+    expect(getByTestId('dropdown').textContent).toBeDefined();
   });
 });

@@ -1,13 +1,16 @@
-import styles from "../styles/Home.module.scss";
+"use client";
+
+import styles from "@/styles/Home.module.scss";
 import { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import MappingToolPlaceholder from "../components/mapping-tools/MappingToolPlaceholder";
-import { useSetTitle } from "../contexts/TitleContext";
+import MappingToolPlaceholder from "@/components/mapping-tools/MappingToolPlaceholder";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
 const DelegationMappingTool = dynamic(
-  () => import("../components/mapping-tools/DelegationMappingTool"),
-
+  () => import("@/components/mapping-tools/DelegationMappingTool"),
   { ssr: false, loading: () => <MappingToolPlaceholder /> }
 );
 
@@ -39,44 +42,24 @@ export default function DelegationMappingToolPage() {
           <Col>
             <Container>
               <Row className="pt-4">
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 10, offset: 1 }}
-                  lg={{ span: 8, offset: 2 }}>
+                <Col xs={{ span: 12 }} sm={{ span: 12 }} md={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
                   <h1 className="text-center">
-                    <span className="font-lightest">Delegation</span> Mapping
-                    Tool
+                    <span className="font-lightest">Delegation</span> Mapping Tool
                   </h1>
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 10, offset: 1 }}
-                  lg={{ span: 8, offset: 2 }}>
+                <Col xs={{ span: 12 }} sm={{ span: 12 }} md={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
                   <h5>Overview</h5>
                 </Col>
               </Row>
               <Row>
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 10, offset: 1 }}
-                  lg={{ span: 8, offset: 2 }}>
-                  The Delegation Mapping tool allows anyone to easily upload a
-                  CSV file with addresses to receive delegated addresses in
-                  return (from the NFTDelegation.com contract).{" "}
-                  <a href="#how-to-use">How to use this tool?</a>
+                <Col xs={{ span: 12 }} sm={{ span: 12 }} md={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
+                  The Delegation Mapping tool allows anyone to easily upload a CSV file with addresses to receive delegated addresses in return (from the NFTDelegation.com contract). <a href="#how-to-use">How to use this tool?</a>
                 </Col>
               </Row>
               <Row>
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 10, offset: 1 }}
-                  md={{ span: 8, offset: 2 }}
-                  lg={{ span: 6, offset: 3 }}>
+                <Col xs={{ span: 12 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} lg={{ span: 6, offset: 3 }}>
                   <Container className="pt-5 pb-5">
                     <Row>
                       <Col>
@@ -100,14 +83,14 @@ export default function DelegationMappingToolPage() {
             lg={{ span: 6, offset: 3 }}
             dangerouslySetInnerHTML={{
               __html: html,
-            }}></Col>
+            }}
+          ></Col>
         </Row>
       </Container>
     </main>
   );
 }
 
-DelegationMappingToolPage.metadata = {
-  title: "Delegation Mapping Tool",
-  description: "Tools",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Delegation Mapping Tool", description: "Tools" });
+}
