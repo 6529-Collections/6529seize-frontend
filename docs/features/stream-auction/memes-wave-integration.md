@@ -22,10 +22,7 @@ These different motivations affect how users perceive the redirect decision and 
 
 ### Eligibility Criteria
 
-**Voting Threshold**: A submission becomes eligible for stream auction when it:
-- Maintains 100+ votes over 7 days (fallback - see Deferred Decisions)
-- Maintains 3.5+ average vote rating (fallback - see Deferred Decisions)
-- **DEFERRED**: Final thresholds pending data analysis in Phase 2
+**Voting Threshold**: A submission becomes eligible for stream auction when it maintains sufficient voting metrics over a specified time period. The exact vote count, rating average, and time duration will be determined based on analysis of existing memes wave data and user behavior patterns to ensure optimal balance between accessibility and quality.
 
 ### User Flow
 
@@ -34,8 +31,10 @@ These different motivations affect how users perceive the redirect decision and 
 3. **Eligibility**: System tracks voting metrics and flags eligible submissions
 4. **Notification**: User sees they're eligible for stream auction
 5. **Choice**: User decides to redirect to stream auction OR stay in leaderboard
-6. **Auction Setup**: If redirected, submission is minted as 1/1 NFT auction
-7. **Leaderboard Removal**: Original submission is removed from memes wave leaderboard
+6. **Redirect Announcement**: System posts in original memes wave about redirect with auction link
+7. **Auction Setup**: If redirected, submission is minted as 1/1 NFT auction
+8. **Leaderboard Removal**: Original submission is removed from memes wave leaderboard
+9. **Auction Activity Feed**: System generates posts in Stream Auction Activity wave for auction events (start, new bids, end, claim)
 
 ## Technical Architecture
 
@@ -65,11 +64,11 @@ CREATE TABLE stream_auction_redirections (
     wave_id VARCHAR(255) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     redirected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    stream_token_id INTEGER,
-    auction_end_time TIMESTAMP,
-    starting_price DECIMAL(18,8), -- Contract-configured (e.g., 0.1 ETH)
-    auction_duration INTEGER, -- in seconds - Contract-configured (e.g., 86400 = 24 hours)
-    status VARCHAR(50) DEFAULT 'pending' -- pending, minted, auction_active, auction_ended, claimed
+    stream_token_id INTEGER, -- NULL until minted
+    status VARCHAR(50) DEFAULT 'pending', -- pending, minted, auction_active, auction_ended, claimed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(drop_id, wave_id) -- Ensure one redirect per drop
     -- Note: pending auctions visible in main auction list for community transparency
 );
 ```
@@ -206,28 +205,67 @@ User clicks "Redirect to Stream" button:
 
 #### Integration Points
 
-**My Stream Page**:
-- New tab: "Stream Auctions" alongside existing tabs
-- Shows active auctions, recently ended, pending
-- New tab: "My Bids" - shows user's active bids, outbid status, won auctions
+**Collections Section**:
+- Stream auctions are a new collection type within the Collections navigation
+- Accessible via Collections dropdown or direct URL: `/collections/stream-auctions`
+- Fits naturally alongside existing collections (The Memes, Gradient, NextGen, etc.)
+- Uses familiar collections browsing experience with filtering and sorting
 
 **Index Page**:
 - New section: "Live Stream Auctions" (primary discovery mechanism)
 - Carousel of active auctions
-- Link to full stream auction page
+- Link to full stream auction collection page
 
 **Navigation**:
-- Dedicated page: `/stream-auctions` (no top-level navigation initially)
+- Main collections page: `/collections/stream-auctions`
 - Categories: Active, Ended, Pending
 - Filters: Price range, time remaining, creator
 - User section: "My Bids" - shows auctions where user has placed bids
+
+## Stream Auction Activity Wave
+
+### Purpose
+The Stream Auction Activity wave provides a public feed of auction events and activity, allowing community members to follow the auction ecosystem in real-time. This wave exists in the standard Waves section and operates as a system-generated activity feed.
+
+### Wave Characteristics
+- **Wave Type**: System-generated activity feed (no user submissions)
+- **Content**: Automated posts about auction events and milestones
+- **Interaction**: Standard wave chat functionality for community discussion
+- **Visibility**: Public wave that anyone can follow and engage with
+
+### System-Generated Posts
+
+**Redirect Announcement**:
+- Posted in original memes wave when user chooses to redirect
+- Content: Drop preview, redirect notification, link to auction in Collections
+- Purpose: Provides closure to memes wave followers about redirected content
+
+**Auction Activity Posts** (in Stream Auction Activity wave):
+- **Auction Start**: "Auction for [Drop Title] has begun" with starting price, duration, auction link
+- **New Bid**: "New bid of [Amount] ETH on [Drop Title]" with previous bid, current high bid, time remaining, bidder handle (if public)
+- **Auction End**: "Auction for [Drop Title] has ended" with final price, winner, claim instructions
+- **Claim Complete**: "NFT for [Drop Title] has been claimed by [Winner]" with final transaction details
+
+### Post Content Format
+Each auction activity post includes:
+- **Auction Link**: Direct link to auction page in Collections section
+- **Current Status**: Bid amount, time remaining, auction phase
+- **Context**: Drop preview thumbnail, title, original author
+- **Actionable Info**: Relevant buttons/links for viewing auction or placing bids
+- **Community Data**: Bidder handles (if public), participation metrics
+
+### Community Engagement
+- Standard wave chat functionality allows discussion around auction events
+- Users can react to auction milestones and bid activity
+- Creates community space for auction-related conversation separate from personal notifications
+- Provides transparency and social proof for auction ecosystem activity
 
 ## Stream Auction Page Structure
 
 ### Page Hierarchy
 
 ```
-/stream-auctions/
+/collections/stream-auctions/
 ├── index.tsx (main auction listing)
 ├── [tokenId].tsx (individual auction details)
 ├── my-bids.tsx (user's active bids)
@@ -294,23 +332,38 @@ Legend:
 - **useMyBids** - Get user's active bids and bid status
 - **useBidStatus** - Check if user is highest bidder on specific auction
 
+### Stream Auction Activity Wave Integration
+
+**Wave Infrastructure**:
+- **Wave Type**: New system-generated wave type for auction activity feed
+- **Location**: Standard Waves section alongside other wave types
+- **Access**: Public wave available for following and discussion
+
+**System Posting Mechanism**:
+- **Redirect Posts**: Automated posts in original memes wave when redirects occur
+- **Auction Activity Posts**: Automated posts in Stream Auction Activity wave for all auction events
+- **Real-time Updates**: WebSocket integration for live auction event posting
+- **Post Templates**: Standardized formats for different auction event types
+
+**Integration Components**:
+- **StreamAuctionWavePosting** - System service for generating auction activity posts
+- **useWaveAuctionIntegration** - Hook for managing wave-auction data flow
+- **WaveAuctionPost** - Component for displaying auction activity posts in wave feed
+- **AuctionEventProcessor** - Backend service for converting auction events to wave posts
+
 ### My Stream Integration
 
-**New Views**:
-- Stream Auctions tab in desktop tabs
-- My Bids tab in desktop tabs
-- Stream auction cards in mobile view
-- Stream auction notifications
-- Bid status indicators on auction cards
+**Limited Integration**:
+- Stream auctions are primarily accessed through Collections section
+- My Stream maintains focus on personal feed and drops activity
+- Links to user's redirected auctions within drop history
 
 **Integration Points**:
-- Add stream auctions to activity feed
-- Show stream auction status in drop history
+- Show stream auction status in drop history when drops are redirected
 - Notify users when their redirected auction gets bids
 - Notify users when they're outbid (ETH automatically refunded)
-- Show bid history in user's activity (not active bid status since only one active bid exists)
-- Show pending auctions in main auction list for transparency
-- Contextual links from memes wave drops to stream auctions
+- Contextual links from memes wave drops to stream auctions in Collections
+- Activity feed may show major auction events (won, redirected) but detailed auction browsing happens in Collections
 
 ## Bid Tracking & Status Indicators
 
@@ -455,16 +508,15 @@ async function getAuctionState(tokenId: number): Promise<AuctionState>
 **Options Considered**: Centralized vs distributed permission models
 
 ### Discovery & Navigation
-**Status**: DEFERRED  
-**Reason**: Requires user research on navigation patterns and mental models to understand how users perceive the transition from voting to bidding  
-**Timeline**: Phase 2 - after initial implementation and user behavior analysis  
-**Fallback**: Hybrid discovery model with multiple entry points:
-  - Active auctions carousel on index page  
-  - Integration into my-stream for personal tracking
-  - Contextual links from memes wave drops
-  - No dedicated top-level navigation initially
-**Dependencies**: User research, navigation analytics, A/B testing framework  
-**Options Considered**: Standalone top-level section, stream integration, memes integration, hybrid model
+**Status**: DECIDED  
+**Decision**: Collections integration as primary discovery mechanism  
+**Rationale**: Stream auctions are NFT collections, making Collections section the natural home for auction discovery and browsing  
+**Implementation**: 
+  - Primary access through Collections section (`/collections/stream-auctions`)
+  - Active auctions carousel on index page for discovery  
+  - Contextual links from memes wave drops to specific auctions
+  - Uses familiar collections browsing patterns (filtering, sorting, pagination)
+**Benefits**: Leverages existing user mental models for NFT browsing, reduces navigation complexity
 
 ### Performance & Caching Strategy
 **Status**: DEFERRED  
@@ -506,7 +558,7 @@ async function getAuctionState(tokenId: number): Promise<AuctionState>
 ### UI/UX Decisions
 
 7. **Discovery & Navigation**:
-   - **DEFERRED**: See Deferred Decisions section - using hybrid discovery model with multiple entry points as fallback
+   - **DECIDED**: Collections integration as primary discovery mechanism - see Deferred Decisions section for implementation details
 
 8. **Notifications**:
    - **DECIDED**: Integrated auction notification system with dedicated tab and real-time updates
@@ -567,6 +619,11 @@ async function getAuctionState(tokenId: number): Promise<AuctionState>
 
 ### Overview
 The auction notification system integrates with the existing notification architecture to provide real-time updates about auction events. It leverages the current tabbed interface, WebSocket system, and push notification infrastructure.
+
+**Important Distinction**: Personal notifications are separate from the Stream Auction Activity wave:
+- **Personal Notifications**: User-specific alerts (outbid, won auction, your auction got bid) sent directly to individuals
+- **Wave Activity**: Public feed of auction events that anyone can follow and discuss in the Stream Auction Activity wave
+- **Purpose**: Notifications handle urgent personal alerts while wave activity provides community engagement and transparency
 
 ### Notification Types
 
