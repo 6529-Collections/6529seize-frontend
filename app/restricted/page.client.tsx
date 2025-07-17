@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import styles from "@/styles/Home.module.scss";
-import { LoginImage } from "../access/page";
+import { LoginImage } from "../access/page.client";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -23,7 +23,9 @@ export default function RestrictedPage() {
           setImage(response.image);
           if (r.status === 403) {
             const country = response.country;
-            const msg = `Access from your country ${country ? "(" + country + ") " : ""}is restricted`;
+            const msg = `Access from your country ${
+              country ? "(" + country + ") " : ""
+            }is restricted`;
             setMessage(msg);
           } else {
             setMessage("Go to 6529.io");
