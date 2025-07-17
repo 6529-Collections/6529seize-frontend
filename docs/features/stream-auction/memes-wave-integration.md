@@ -368,15 +368,15 @@ SOON = Upcoming auction being prepared
 
 **Limited Integration**:
 - Stream auctions are primarily accessed through Collections section
-- My Stream maintains focus on personal feed and drops activity
-- Links to user's redirected auctions within drop history
+- My Stream maintains focus on personal social feed and wave activity
+- Minimal auction-specific content in the personal feed
 
 **Integration Points**:
-- Show stream auction status in drop history when drops are redirected
-- Notify users when their redirected auction gets bids
-- Notify users when they're outbid (ETH automatically refunded)
-- Contextual links from memes wave drops to stream auctions in Collections
-- Activity feed may show major auction events (won, redirected) but detailed auction browsing happens in Collections
+- **Drop Status Updates**: When user's drops are redirected to stream auction, the drop shows updated status in My Stream
+- **Personal Milestone Posts**: Major auction events (user won auction, user's auction ended) may appear as feed items
+- **Contextual Links**: Links from redirected drops in My Stream to their corresponding auctions in Collections
+- **Activity Notifications**: Auction notifications (outbid, won) handled through notification system, not My Stream content
+- **Focus**: My Stream remains focused on social wave activity rather than becoming an auction management interface
 
 ## Bid Tracking & Status Indicators
 
