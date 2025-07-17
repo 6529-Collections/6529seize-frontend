@@ -23,7 +23,7 @@ export default function RestrictedPage() {
           setImage(response.image);
           if (r.status === 403) {
             const country = response.country;
-            const msg = `Access from your country ${country ? `(${country}) ` : ""}is restricted`;
+            const msg = `Access from your country ${country ? "(" + country + ") " : ""}is restricted`;
             setMessage(msg);
           } else {
             setMessage("Go to 6529.io");

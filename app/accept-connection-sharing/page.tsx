@@ -84,7 +84,7 @@ export function AcceptConnectionSharing(props: Readonly<AcceptConnectionSharingP
               <Col sm={12} md={6}>
                 <h4>Incoming Connection</h4>
                 <p className="pt-3">
-                  Token: {token.substring(0, 8)}...${token.substring(token.length - 7)}
+                  Token: {`${token.substring(0, 8)}...${token.substring(token.length - 7)}`}
                 </p>
                 <p>Address: {address}</p>
               </Col>

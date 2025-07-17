@@ -18,7 +18,6 @@ export default function ConsolidationMappingToolPage() {
   useSetTitle("Consolidation Mapping Tool | Tools");
 
   const [html, setHtml] = useState("");
-  const [htmlError, setHtmlError] = useState(false);
 
   useEffect(() => {
     fetch(
@@ -27,10 +26,7 @@ export default function ConsolidationMappingToolPage() {
       if (response.status === 200) {
         response.text().then((htmlText) => {
           setHtml(htmlText);
-          setHtmlError(false);
         });
-      } else {
-        setHtmlError(true);
       }
     });
   }, []);
