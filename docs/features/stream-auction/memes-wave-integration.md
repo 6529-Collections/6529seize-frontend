@@ -214,22 +214,36 @@ User clicks "Redirect to Stream" button:
 - Carousel of active auctions
 - Link to full stream auction collection page
 
-**Navigation**:
+**Navigation Structure**:
 - Main collections page: `/collections/stream-auctions`
-- Categories: Active, Upcoming, Collection
-- Filters: Price range, time remaining, creator
-- User section: "My Bids" - shows auctions where user has placed bids
+
+**Primary Categories** (mutually exclusive):
+- **Active** - Current auctions accepting bids
+- **Upcoming** - Auctions being prepared for launch
+- **Collection** - Completed auctions (minted NFTs)
+
+**Cross-Category Filters** (apply within any category):
+- Price range (starting price for Active/Upcoming, final price for Collection)
+- Creator/author
+- Time-based filters:
+  - Active: Time remaining
+  - Upcoming: Expected launch timeframe
+  - Collection: Completion date
+
+**User-Specific Views**:
+- "My Bids" - User's auction participation across all categories
+- "My Auctions" - Auctions user created across all categories
 
 ## Stream Auction Activity Wave
 
 ### Purpose
-The Stream Auction Activity wave provides a public feed of auction events and activity, allowing community members to follow the auction ecosystem in real-time. This wave exists in the standard Waves section and operates as a system-generated activity feed.
+The Stream Auction Activity wave provides a public feed of auction events and activity, allowing community members to follow the auction ecosystem in real-time. This is a standard chat wave where the system automatically posts about auction events, and users can discuss around those posts.
 
 ### Wave Characteristics
-- **Wave Type**: System-generated activity feed (no user submissions)
-- **Content**: Automated posts about auction events and milestones
-- **Interaction**: Standard wave chat functionality for community discussion
-- **Visibility**: Public wave that anyone can follow and engage with
+- **Wave Type**: Standard chat wave (ApiWaveType.Chat)
+- **Content**: System-generated posts about auction events with normal chat functionality
+- **Interaction**: Full chat wave functionality - users can reply, quote, and discuss auction posts
+- **Visibility**: Public chat wave that anyone can follow and engage with
 
 ### System-Generated Posts
 
@@ -253,8 +267,8 @@ Each auction activity post includes:
 - **Community Data**: Bidder handles (if public), participation metrics
 
 ### Community Engagement
-- Standard wave chat functionality allows discussion around auction events
-- Users can react to auction milestones and bid activity
+- Standard chat wave functionality allows discussion around auction events
+- Users can reply, quote, and react to auction milestone posts
 - Creates community space for auction-related conversation separate from personal notifications
 - Provides transparency and social proof for auction ecosystem activity
 
@@ -319,10 +333,10 @@ SOON = Upcoming auction being prepared
 ### Memes Wave Integration
 
 **Modified Components**:
-- **WaveDropsAll** - Add eligibility indicator
-- **WaveDropQuote** - Show stream auction status if redirected
-- **WaveDropActions** - Add redirect button for eligible drops
-- **WaveLeaderboard** - Remove redirected drops from display
+- **WaveDropsAll** - Add eligibility indicator badge to drop cards
+- **WaveDropQuote** - Show stream auction status and link if drop has been redirected
+- **WaveDropActions** - Add new action button "Redirect to Stream" for eligible drops (only visible to drop author)
+- **WaveLeaderboard** - Remove redirected drops from leaderboard display and voting competition
 
 **New Hooks**:
 - **useStreamEligibility** - Check if drop is eligible
@@ -334,9 +348,9 @@ SOON = Upcoming auction being prepared
 ### Stream Auction Activity Wave Integration
 
 **Wave Infrastructure**:
-- **Wave Type**: New system-generated wave type for auction activity feed
-- **Location**: Standard Waves section alongside other wave types
-- **Access**: Public wave available for following and discussion
+- **Wave Type**: Standard chat wave (ApiWaveType.Chat) with system-generated posts
+- **Location**: Standard Waves section alongside other chat waves
+- **Access**: Public chat wave available for following and discussion
 
 **System Posting Mechanism**:
 - **Redirect Posts**: Automated posts in original memes wave when redirects occur
@@ -345,10 +359,10 @@ SOON = Upcoming auction being prepared
 - **Post Templates**: Standardized formats for different auction event types
 
 **Integration Components**:
-- **StreamAuctionWavePosting** - System service for generating auction activity posts
+- **StreamAuctionWavePosting** - System service for generating auction activity posts in chat wave
 - **useWaveAuctionIntegration** - Hook for managing wave-auction data flow
-- **WaveAuctionPost** - Component for displaying auction activity posts in wave feed
-- **AuctionEventProcessor** - Backend service for converting auction events to wave posts
+- **WaveAuctionPost** - Component for displaying auction activity posts in chat wave feed
+- **AuctionEventProcessor** - Backend service for converting auction events to chat wave posts
 
 ### My Stream Integration
 
