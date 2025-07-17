@@ -372,9 +372,9 @@ SOON = Upcoming auction being prepared
 - Minimal auction-specific content in the personal feed
 
 **Integration Points**:
-- **Drop Status Updates**: When user's drops are redirected to stream auction, the drop shows updated status in My Stream
+- **Redirected Drop Removal**: When user's drops are redirected to stream auction, they are removed from memes wave and no longer appear in My Stream wave content
 - **Personal Milestone Posts**: Major auction events (user won auction, user's auction ended) may appear as feed items
-- **Contextual Links**: Links from redirected drops in My Stream to their corresponding auctions in Collections
+- **Auction Links**: Links to view auctions in Collections section when relevant to user's activity
 - **Activity Notifications**: Auction notifications (outbid, won) handled through notification system, not My Stream content
 - **Focus**: My Stream remains focused on social wave activity rather than becoming an auction management interface
 
