@@ -53,7 +53,7 @@ export const WaveDropsReverseContainer = forwardRef<
         threshold: 0,
       },
       handleIntersection,
-      !!scrollContainerRef.current && !isFetchingNextPage
+      !!scrollContainerRef.current
     );
 
     const handleScroll = useCallback(() => {
