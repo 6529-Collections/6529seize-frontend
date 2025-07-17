@@ -36,10 +36,6 @@ jest.mock("../../../../../components/dotLoader/DotLoader", () => () => (
   <div data-testid="loader" />
 ));
 
-jest.mock("@tippyjs/react", () => ({
-  __esModule: true,
-  default: ({ children }: any) => <span>{children}</span>,
-}));
 
 jest.mock("../../../../../helpers/AllowlistToolHelpers", () => ({
   getRandomObjectId: () => "id",

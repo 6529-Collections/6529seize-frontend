@@ -1,0 +1,286 @@
+
+.tooltip {
+  position: fixed;
+  z-index: 999999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: tooltipIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  
+  // Transform origin based on placement
+  &--top {
+    transform-origin: center bottom;
+  }
+  
+  &--bottom,
+  &--auto {
+    transform-origin: center top;
+  }
+  
+  &--left {
+    transform-origin: right center;
+  }
+  
+  &--right {
+    transform-origin: left center;
+  }
+}
+
+// Smooth entrance animation with delay for positioning
+@keyframes tooltipIn {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+  }
+  1% {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+}
+
+// Tooltip content - dark theme optimized
+.tooltipContent {
+  position: relative;
+  background: #131316; // Solid dark background for better readability
+  border: 1px solid #333; // Subtle border for definition
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #fff;
+  font-weight: 400;
+  
+  // High quality text rendering
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  
+  // Prevent text selection
+  user-select: none;
+  -webkit-user-select: none;
+  
+  // Links inside tooltips
+  a {
+    color: #4a9eff; // Brighter blue for dark background
+    text-decoration: none;
+    font-weight: 500;
+    
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+}
+
+// Arrow styles - proper triangular arrows using CSS borders
+.tooltipArrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  
+  // Top arrow points down
+  &--top {
+    bottom: -6px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #37373E; // Border color
+    
+    // Inner triangle for the fill
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 1px;
+      left: -5px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid #37373E; // Background color
+    }
+  }
+  
+  // Bottom arrow points up
+  &--bottom {
+    top: -6px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #37373E; // Border color
+    
+    // Inner triangle for the fill
+    &::after {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: -5px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 5px solid #37373E; // Background color
+    }
+  }
+  
+  // Left arrow points right
+  &--left {
+    right: -6px;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 6px solid #37373E; // Border color
+    
+    // Inner triangle for the fill
+    &::after {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: -5px;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 5px solid #37373E; // Background color
+    }
+  }
+  
+  // Right arrow points left
+  &--right {
+    left: -6px;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid #37373E; // Border color
+    
+    // Inner triangle for the fill
+    &::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-right: 5px solid #37373E; // Background color
+    }
+  }
+}
+
+// Responsive adjustments - maintaining Montserrat readability
+@media (max-width: 768px) {
+  .tooltipContent {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .tooltipArrow {
+    // Smaller arrows on mobile
+    &--top {
+      bottom: -5px;
+      border-left-width: 5px;
+      border-right-width: 5px;
+      border-top-width: 5px;
+      
+      &::after {
+        left: -4px;
+        border-left-width: 4px;
+        border-right-width: 4px;
+        border-top-width: 4px;
+      }
+    }
+    
+    &--bottom {
+      top: -5px;
+      border-left-width: 5px;
+      border-right-width: 5px;
+      border-bottom-width: 5px;
+      
+      &::after {
+        left: -4px;
+        border-left-width: 4px;
+        border-right-width: 4px;
+        border-bottom-width: 4px;
+      }
+    }
+    
+    &--left {
+      right: -5px;
+      border-top-width: 5px;
+      border-bottom-width: 5px;
+      border-left-width: 5px;
+      
+      &::after {
+        top: -4px;
+        left: -4px;
+        border-top-width: 4px;
+        border-bottom-width: 4px;
+        border-left-width: 4px;
+      }
+    }
+    
+    &--right {
+      left: -5px;
+      border-top-width: 5px;
+      border-bottom-width: 5px;
+      border-right-width: 5px;
+      
+      &::after {
+        top: -4px;
+        right: -4px;
+        border-top-width: 4px;
+        border-bottom-width: 4px;
+        border-right-width: 4px;
+      }
+    }
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .tooltipContent {
+    background: #000;
+    color: #fff;
+    border-color: #fff;
+    border-width: 2px;
+  }
+  
+  .tooltipArrow {
+    &--top {
+      border-top-color: #fff;
+      &::after {
+        border-top-color: #000;
+      }
+    }
+    
+    &--bottom {
+      border-bottom-color: #fff;
+      &::after {
+        border-bottom-color: #000;
+      }
+    }
+    
+    &--left {
+      border-left-color: #fff;
+      &::after {
+        border-left-color: #000;
+      }
+    }
+    
+    &--right {
+      border-right-color: #fff;
+      &::after {
+        border-right-color: #000;
+      }
+    }
+  }
+}

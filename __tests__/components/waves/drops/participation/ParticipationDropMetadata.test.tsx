@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ParticipationDropMetadata from '../../../../../components/waves/drops/participation/ParticipationDropMetadata';
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <span>{children}</span> }));
 jest.mock('../../../../../hooks/isMobileDevice', () => ({ __esModule: true, default: () => false }));
 
 describe('ParticipationDropMetadata', () => {

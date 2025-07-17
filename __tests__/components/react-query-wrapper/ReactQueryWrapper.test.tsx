@@ -52,11 +52,11 @@ it('sets initial wave drops only when cache empty', () => {
   );
   const feed = { drops: ['d1'] } as any;
   act(() => ctx.setWaveDrops({ waveDrops: feed, waveId: 'w1' }));
-  expect(client.getQueryData([QueryKey.DROPS, { waveId: 'w1', limit: 25, dropId: null }])).toEqual({ pages: [feed], pageParams: [undefined] });
+  expect(client.getQueryData([QueryKey.DROPS, { waveId: 'w1', limit: 50, dropId: null }])).toEqual({ pages: [feed], pageParams: [undefined] });
   // second call should not overwrite
   const other = { drops: ['d2'] } as any;
   act(() => ctx.setWaveDrops({ waveDrops: other, waveId: 'w1' }));
-  expect(client.getQueryData([QueryKey.DROPS, { waveId: 'w1', limit: 25, dropId: null }])).toEqual({ pages: [feed], pageParams: [undefined] });
+  expect(client.getQueryData([QueryKey.DROPS, { waveId: 'w1', limit: 50, dropId: null }])).toEqual({ pages: [feed], pageParams: [undefined] });
 });
 
 it('sets initial waves overview page only once', () => {

@@ -4,7 +4,6 @@ import { WaveLeaderboardDropRaters } from '../../../../components/waves/leaderbo
 import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
 import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
 
-jest.mock('@tippyjs/react', () => (props: any) => <div>{props.children}</div>);
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 jest.mock('../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u, ImageScale: { W_AUTO_H_50: 'AUTO' } }));
 jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <span data-testid="progress" /> }));

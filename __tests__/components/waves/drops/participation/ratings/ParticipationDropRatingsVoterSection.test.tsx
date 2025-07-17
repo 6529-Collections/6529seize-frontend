@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import ParticipationDropRatingsVoterSection from '../../../../../../components/waves/drops/participation/ratings/ParticipationDropRatingsVoterSection';
 
-jest.mock('@tippyjs/react', () => ({ children, content }: any) => <div data-testid="tippy">{children}</div>);
 
 const drop = {
   top_raters: Array.from({ length: 6 }).map((_, i) => ({

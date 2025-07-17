@@ -299,7 +299,7 @@ export default function UserPageIdentityHeaderCICRate({
               htmlFor="nic-rating-input"
               className={`${
                 isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
-              } tw-block tw-text-sm tw-font-normal tw-text-iron-400 tw-break-all`}>
+              } tw-block tw-text-sm tw-font-normal tw-text-iron-300`}>
               Your total NIC Rating of{" "}
               <span className="tw-whitespace-nowrap">{profile.query}:</span>
             </label>
