@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import WaveItem from '../../../../components/waves/list/WaveItem';
 
-jest.mock('@tippyjs/react', () => ({ children }: any) => <div>{children}</div>);
 jest.mock('../../../../components/waves/list/WaveItemDropped', () => () => <div data-testid="dropped" />);
 jest.mock('../../../../components/waves/list/WaveItemFollow', () => () => <div data-testid="follow" />);
 

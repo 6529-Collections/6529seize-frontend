@@ -3,7 +3,6 @@ import React from 'react';
 import MemesLeaderboardDropVoteSummary from '../../../../components/memes/drops/MemesLeaderboardDropVoteSummary';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ children, href }: any) => <a href={href}>{children}</a> }));
-jest.mock('@tippyjs/react', () => (props: any) => <div>{props.children}</div>);
 jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <div data-testid="progress" /> }));
 
 describe('MemesLeaderboardDropVoteSummary', () => {

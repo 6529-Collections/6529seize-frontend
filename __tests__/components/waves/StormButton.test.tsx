@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import StormButton from '../../../components/waves/StormButton';
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <span>{children}</span> }));
 
 describe('StormButton', () => {
   it('calls breakIntoStorm on click', () => {

@@ -1,10 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import BuildPhaseForm from '../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseForm';
-import {
-  DistributionPlanToolContext,
-  DistributionPlanToolStep,
-} from '../../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
 import { BuildPhasesPhase } from '../../../../../../components/distribution-plan-tool/build-phases/BuildPhases';
 
 // Mock sub components to keep test focused
@@ -33,49 +29,17 @@ jest.mock('../../../../../../components/allowlist-tool/common/modals/AllowlistTo
     ) : null,
 }));
 
-jest.mock('@tippyjs/react', () => ({ children }: any) => <>{children}</>);
-
-const defaultContext = {
-  step: DistributionPlanToolStep.CREATE_PLAN,
-  setStep: jest.fn(),
-  fetching: false,
-  distributionPlan: { id: 'id' } as any,
-  runOperations: jest.fn(),
-  setState: jest.fn(),
-  operations: [],
-  fetchOperations: jest.fn(),
-  transferPools: [],
-  setTransferPools: jest.fn(),
-  tokenPools: [],
-  setTokenPools: jest.fn(),
-  customTokenPools: [],
-  setCustomTokenPools: jest.fn(),
-  phases: [],
-  setPhases: jest.fn(),
-  setToasts: jest.fn(),
-};
 
 const phase: BuildPhasesPhase = {
-  id: 'p1',
-  allowlistId: 'id',
-  name: 'Phase 1',
-  description: '',
-  hasRan: false,
-  order: 1,
-  components: [],
+  name: 'Test Phase',
+  description: 'Test Description',
+  buildSpec: [],
+  allowlistSpec: []
 };
 
-function renderComponent(ctx?: Partial<typeof defaultContext>) {
-  return render(
-    <DistributionPlanToolContext.Provider value={{ ...defaultContext, ...ctx }}>
-      <BuildPhaseForm selectedPhase={phase} phases={[phase]} />
-    </DistributionPlanToolContext.Provider>
-  );
-}
-
-beforeEach(() => {
-  modalMock.mockClear();
-});
+const renderComponent = () => {
+  return render(<BuildPhaseForm />);
+};
 
 describe('BuildPhaseForm', () => {
   it('updates form values and opens modal on submit', () => {

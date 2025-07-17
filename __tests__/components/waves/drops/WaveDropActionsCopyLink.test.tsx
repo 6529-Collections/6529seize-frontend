@@ -2,7 +2,6 @@ import { render, fireEvent } from '@testing-library/react';
 import WaveDropActionsCopyLink from '../../../../components/waves/drops/WaveDropActionsCopyLink';
 import '@testing-library/jest-dom';
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <>{children}</> }));
 
 const writeText = jest.fn().mockResolvedValue(undefined);
 Object.assign(navigator, { clipboard: { writeText } });

@@ -11,7 +11,6 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: (p:any) => <div>{p.children}</div> }));
 
 describe('WaveDropActionsReply', () => {
   const baseDrop: any = { id: '1', wave: { authenticated_user_eligible_to_chat: true } };

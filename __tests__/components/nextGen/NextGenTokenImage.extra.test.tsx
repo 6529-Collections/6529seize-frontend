@@ -9,24 +9,6 @@ import {
 
 jest.mock('next/image', () => ({ __esModule: true, default: ({ priority, ...props }: any) => <img {...props} /> }));
 
-jest.mock('@tippyjs/react', () => (props: any) => <div>{props.children}</div>);
-
-jest.mock('../../../helpers/Helpers', () => ({
-  cicToType: jest.fn(() => 'UNKNOWN'),
-  formatAddress: (a: string) => 'fmt-' + a,
-  getRoyaltyImage: () => 'roy.png',
-  ETHEREUM_ICON_TEXT: 'ETH'
-}));
-
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const RB: any = {
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-  };
-  return RB;
-});
 
 jest.mock('../../../hooks/isMobileScreen', () => ({ __esModule: true, default: () => false }));
 jest.mock('../../../components/user/utils/UserCICAndLevel', () => ({ __esModule: true, default: () => <div data-testid='cic' /> }));

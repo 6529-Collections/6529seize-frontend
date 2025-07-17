@@ -70,7 +70,7 @@ export default function UserCICTypeIconTooltip({
   });
 
   return (
-    <div className="tw-p-3">
+    <div className="tw-p-4 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg">
       <UserCICTypeIconTooltipHeaders />
       <div className="tw-mt-4 tw-space-y-0.5">
         <span className="tw-block tw-text-iron-200 tw-font-semibold">

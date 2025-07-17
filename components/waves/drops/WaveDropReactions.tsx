@@ -193,6 +193,7 @@ export function WaveDropReaction({
       <button
         onClick={handleClick}
         data-tooltip-id={`reaction-${drop.id}-${emojiId}`}
+        data-text-selection-exclude="true"
         className={clsx(
           "tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-border tw-border-solid hover:tw-text-iron-100",
           borderStyle,

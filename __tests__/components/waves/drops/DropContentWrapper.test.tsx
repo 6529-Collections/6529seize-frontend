@@ -29,10 +29,10 @@ describe('DropContentWrapper', () => {
     const scrollSpy = jest.spyOn(window, 'scrollBy').mockImplementation();
     render(<DropContentWrapper>content</DropContentWrapper>);
 
-    expect(screen.getByText('Show full drop')).toBeInTheDocument();
+    expect(screen.getByText('Show full post')).toBeInTheDocument();
 
-    await user.click(screen.getByText('Show full drop'));
-    expect(screen.queryByText('Show full drop')).toBeNull();
+    await user.click(screen.getByText('Show full post'));
+    expect(screen.queryByText('Show full post')).toBeNull();
     expect(scrollSpy).toHaveBeenCalled();
     scrollSpy.mockRestore();
   });

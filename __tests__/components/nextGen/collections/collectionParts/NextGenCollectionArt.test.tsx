@@ -40,10 +40,6 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: (p: any) => <svg {...p} />,
 }));
 
-jest.mock('@tippyjs/react', () => ({
-  __esModule: true,
-  default: ({ children }: any) => <span>{children}</span>,
-}));
 
 jest.mock('../../../../../helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: () => 'id',
