@@ -1,13 +1,8 @@
-import React from "react";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
+export default function CasaBatlloPage() {
+  return (
   <>
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -409,6 +404,9 @@ const IndexPage = () => (
       </section>
     </div>
   </>
-);
+  );
+}
 
-export default IndexPage;
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "LIVING ARCHITECTURE - CASA BATLLO - 6529.io" });
+}

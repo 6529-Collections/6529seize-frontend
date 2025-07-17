@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import Teexels from "@/pages/author/teexels/index";
+import Teexels from "@/app/author/teexels/page";
 import Capital from "@/app/capital/page";
 import Feed from "@/pages/feed/index";
 

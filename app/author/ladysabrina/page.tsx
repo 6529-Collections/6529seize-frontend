@@ -1,25 +1,31 @@
-import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import { Metadata } from "next";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
-const IndexPage = () => (
+
+export default function AuthorLadysabrinaPage() {
+  return (
   <>
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta name="robots" content="noindex, follow" />
+      <meta
+        name="robots"
+        content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      />
       {/* This site is optimized with the Yoast SEO plugin v23.9 - https://yoast.com/wordpress/plugins/seo/ */}
-      <title>nft6529, Author at 6529.io</title>
+      <title>Sabrina Khan, Author at 6529.io</title>
+      <link rel="canonical" href="/author/ladysabrina/" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="profile" />
-      <meta property="og:title" content="nft6529, Author at 6529.io" />
+      <meta property="og:title" content="Sabrina Khan, Author at 6529.io" />
+      <meta property="og:url" content="/author/ladysabrina/" />
       <meta property="og:site_name" content="6529.io" />
+      <meta
+        property="og:image"
+        content="https://secure.gravatar.com/avatar/0421ede5378d7fa65c28a4f6dfa0df79?s=500&d=mm&r=g"
+      />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@om100m" />
       {/* / Yoast SEO plugin. */}
@@ -40,21 +46,24 @@ const IndexPage = () => (
       <link
         rel="alternate"
         type="application/rss+xml"
-        title="6529.io » Posts by nft6529 Feed"
-        href="/author/nft6529/feed/"
+        title="6529.io » Posts by Sabrina Khan Feed"
+        href="/author/ladysabrina/feed/"
       />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="profile" />
       <meta property="og:site_name" content="6529.io" />
-      <meta property="og:title" content="nft6529, Author at 6529.io" />
-      <meta property="og:url" />
+      <meta property="og:title" content="Sabrina Khan, Author at 6529.io" />
+      <meta
+        property="og:url"
+        content="/blog/disney-deekay-their-secret-to-animation/"
+      />
       <meta
         property="og:image"
-        content="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-header-logo.png"
+        content="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay.jpeg"
       />
-      <meta property="og:image:width" content={"100"} />
-      <meta property="og:image:height" content={"100"} />
-      <meta property="og:image:type" content="image/png" />
+      <meta property="og:image:width" content={"725"} />
+      <meta property="og:image:height" content={"956"} />
+      <meta property="og:image:type" content="image/jpeg" />
       <link
         rel="stylesheet"
         id="genesis-blocks-style-css-css"
@@ -160,8 +169,7 @@ const IndexPage = () => (
       />
       <link
         rel="stylesheet"
-        id="fusion-dynamic-css-css"
-        href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/5d12cef5f403106fff0a40b2eeddf804.min.css?ver=3.11.11"
+        href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/b18dc723a9e6535a41ea302dff00c1a1.min.css?ver=3.11.11"
         type="text/css"
         media="all"
       />
@@ -170,7 +178,7 @@ const IndexPage = () => (
         rel="alternate"
         title="JSON"
         type="application/json"
-        href="/wp-json/wp/v2/users/1"
+        href="/wp-json/wp/v2/users/7"
       />
       <link
         rel="EditURI"
@@ -245,7 +253,7 @@ const IndexPage = () => (
               <div className="fusion-page-title-row">
                 <div className="fusion-page-title-wrapper">
                   <div className="fusion-page-title-captions">
-                    <h1 className="entry-title">nft6529</h1>
+                    <h1 className="entry-title">ladysabrina</h1>
                     <div className="fusion-page-title-secondary"></div>
                   </div>
                 </div>
@@ -266,8 +274,8 @@ const IndexPage = () => (
                     <img
                       loading="lazy"
                       alt="6529.io"
-                      src="https://secure.gravatar.com/avatar/066318b421b5e881a3a4a561c98427ae?s=82&d=mm&r=g"
-                      srcSet="https://secure.gravatar.com/avatar/066318b421b5e881a3a4a561c98427ae?s=164&d=mm&r=g 2x"
+                      src="https://secure.gravatar.com/avatar/0421ede5378d7fa65c28a4f6dfa0df79?s=82&d=mm&r=g"
+                      srcSet="https://secure.gravatar.com/avatar/0421ede5378d7fa65c28a4f6dfa0df79?s=164&d=mm&r=g 2x"
                       className="avatar avatar-82 photo"
                       height={82}
                       width={82}
@@ -276,11 +284,11 @@ const IndexPage = () => (
                   </div>
                   <div className="fusion-author-info">
                     <h3 className="fusion-author-title vcard">
-                      About <span className="fn">nft6529</span>{" "}
+                      About <span className="fn">Sabrina Khan</span>{" "}
                     </h3>
                     This author has not yet filled in any details.
                     <br />
-                    So far nft6529 has created 0 blog entries.{" "}
+                    So far Sabrina Khan has created 3 blog entries.{" "}
                   </div>
                   <div style={{ clear: "both" }} />
                   <div className="fusion-author-social clearfix">
@@ -292,8 +300,352 @@ const IndexPage = () => (
                   className="fusion-blog-archive fusion-blog-layout-masonry-wrapper fusion-clearfix">
                   <div
                     className="fusion-posts-container fusion-blog-layout-grid fusion-blog-layout-grid-4 isotope fusion-blog-layout-masonry fusion-no-meta-info fusion-blog-pagination fusion-blog-rollover "
-                    data-pages={0}>
+                    data-pages={1}>
                     <article className="fusion-post-grid fusion-post-masonry post fusion-grid-sizer" />
+                    <article
+                      id="post-2423"
+                      className="fusion-post-masonry fusion-post-grid  fusion-element-grid post fusion-clearfix post-2423 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                      <div className="fusion-post-wrapper">
+                        <div
+                          className="fusion-masonry-element-container fusion-image-wrapper"
+                          style={{
+                            backgroundImage:
+                              "url(/wp-content/uploads/2023/02/deekay.jpeg)",
+                            paddingTop: "calc((100% + 38px) * 0.8 - 20px)",
+                          }}
+                          aria-haspopup="true">
+                          <img
+                            loading="lazy"
+                            width={725}
+                            height={956}
+                            src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay.jpeg"
+                            className="attachment-full size-full wp-post-image"
+                            alt="6529.io"
+                            decoding="async"
+                            fetchPriority="high"
+                            srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay-200x264.jpeg 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay-400x527.jpeg 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay-600x791.jpeg 600w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay.jpeg 725w"
+                            sizes="(min-width: 2200px) 100vw, (min-width: 976px) 270px, (min-width: 864px) 360px, (min-width: 752px) 540px, (min-width: 640px) 752px, "
+                          />
+                          <div className="fusion-rollover">
+                            <div className="fusion-rollover-content">
+                              <a
+                                className="fusion-rollover-link"
+                                href="/blog/disney-deekay-their-secret-to-animation/"
+                                target="_blank">
+                                Disney and DeeKay: Their Secret to Animation
+                              </a>
+                              <div className="fusion-rollover-sep" />
+                              <a
+                                className="fusion-rollover-gallery"
+                                href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2023/02/deekay.jpeg"
+                                data-id={2423}
+                                data-rel="iLightbox[gallery]"
+                                data-title="DeeKay Kwon"
+                                data-caption>
+                                Gallery{" "}
+                              </a>
+                              <h4 className="fusion-rollover-title">
+                                <a
+                                  className="fusion-rollover-title-link"
+                                  href="/blog/disney-deekay-their-secret-to-animation/"
+                                  target="_blank">
+                                  Disney and DeeKay: Their Secret to Animation{" "}
+                                </a>
+                              </h4>
+                              <div className="fusion-rollover-categories">
+                                <a href="/category/blog/" rel="tag">
+                                  BLOG
+                                </a>
+                              </div>
+                              <a
+                                className="fusion-link-wrapper"
+                                href="/blog/disney-deekay-their-secret-to-animation/"
+                                target="_blank"
+                                aria-label="Disney and DeeKay: Their Secret to Animation"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="fusion-post-content-wrapper">
+                          <div className="fusion-post-content post-content">
+                            <h2 className="entry-title fusion-post-title">
+                              <a
+                                href="/blog/disney-deekay-their-secret-to-animation/"
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                Disney and DeeKay: Their Secret to Animation
+                              </a>
+                            </h2>
+                            <span className="vcard rich-snippet-hidden">
+                              <span className="fn">
+                                <a
+                                  href="/author/ladysabrina/"
+                                  title="Posts by Sabrina Khan"
+                                  rel="author">
+                                  Sabrina Khan
+                                </a>
+                              </span>
+                            </span>
+                            <span className="updated rich-snippet-hidden">
+                              2023-03-16T15:43:46-04:00
+                            </span>
+                            <div className="fusion-post-content-container">
+                              <p>
+                                {" "}
+                                Disney and DeeKay: Their Secret to Animation by
+                                Sabrina Khan “I just want to make people smile
+                                with my animation and earn enough money [...]
+                              </p>{" "}
+                            </div>
+                          </div>
+                          <span className="entry-title rich-snippet-hidden">
+                            Disney and DeeKay: Their Secret to Animation
+                          </span>
+                          <span className="vcard rich-snippet-hidden">
+                            <span className="fn">
+                              <a
+                                href="/author/ladysabrina/"
+                                title="Posts by Sabrina Khan"
+                                rel="author">
+                                Sabrina Khan
+                              </a>
+                            </span>
+                          </span>
+                          <span className="updated rich-snippet-hidden">
+                            2023-03-16T15:43:46-04:00
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                    <article
+                      id="post-1971"
+                      className="fusion-post-masonry fusion-post-grid  fusion-element-grid post fusion-clearfix post-1971 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                      <div className="fusion-post-wrapper">
+                        <div
+                          className="fusion-masonry-element-container fusion-image-wrapper"
+                          style={{
+                            backgroundImage:
+                              "url(/wp-content/uploads/2022/04/Fidenza-313.png)",
+                            paddingTop: "calc((100% + 38px) * 0.8 - 20px)",
+                          }}
+                          aria-haspopup="true">
+                          <img
+                            loading="lazy"
+                            width={600}
+                            height={720}
+                            src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313.png"
+                            className="attachment-full size-full wp-post-image"
+                            alt="6529.io"
+                            decoding="async"
+                            srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313-200x240.png 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313-400x480.png 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313.png 600w"
+                            sizes="(min-width: 2200px) 100vw, (min-width: 976px) 270px, (min-width: 864px) 360px, (min-width: 752px) 540px, (min-width: 640px) 752px, "
+                          />
+                          <div className="fusion-rollover">
+                            <div className="fusion-rollover-content">
+                              <a
+                                className="fusion-rollover-link"
+                                href="/blog/from-fibonacci-to-fidenza/"
+                                target="_blank">
+                                FROM FIBONACCI TO FIDENZA
+                              </a>
+                              <div className="fusion-rollover-sep" />
+                              <a
+                                className="fusion-rollover-gallery"
+                                href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Fidenza-313.png"
+                                data-id={1971}
+                                data-rel="iLightbox[gallery]"
+                                data-title="Fidenza #313"
+                                data-caption>
+                                Gallery{" "}
+                              </a>
+                              <h4 className="fusion-rollover-title">
+                                <a
+                                  className="fusion-rollover-title-link"
+                                  href="/blog/from-fibonacci-to-fidenza/"
+                                  target="_blank">
+                                  FROM FIBONACCI TO FIDENZA{" "}
+                                </a>
+                              </h4>
+                              <div className="fusion-rollover-categories">
+                                <a href="/category/blog/" rel="tag">
+                                  BLOG
+                                </a>
+                              </div>
+                              <a
+                                className="fusion-link-wrapper"
+                                href="/blog/from-fibonacci-to-fidenza/"
+                                target="_blank"
+                                aria-label="FROM FIBONACCI TO FIDENZA"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="fusion-post-content-wrapper">
+                          <div className="fusion-post-content post-content">
+                            <h2 className="entry-title fusion-post-title">
+                              <a
+                                href="/blog/from-fibonacci-to-fidenza/"
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                FROM FIBONACCI TO FIDENZA
+                              </a>
+                            </h2>
+                            <span className="vcard rich-snippet-hidden">
+                              <span className="fn">
+                                <a
+                                  href="/author/ladysabrina/"
+                                  title="Posts by Sabrina Khan"
+                                  rel="author">
+                                  Sabrina Khan
+                                </a>
+                              </span>
+                            </span>
+                            <span className="updated rich-snippet-hidden">
+                              2022-11-15T13:08:28-05:00
+                            </span>
+                            <div className="fusion-post-content-container">
+                              <p>
+                                {" "}
+                                From Fibonacci to Fidenza by Sabrina Khan There
+                                is an autonomous artist among us, a faceless,
+                                soulless creature, who, at the hands of talented
+                                [...]
+                              </p>{" "}
+                            </div>
+                          </div>
+                          <span className="entry-title rich-snippet-hidden">
+                            FROM FIBONACCI TO FIDENZA
+                          </span>
+                          <span className="vcard rich-snippet-hidden">
+                            <span className="fn">
+                              <a
+                                href="/author/ladysabrina/"
+                                title="Posts by Sabrina Khan"
+                                rel="author">
+                                Sabrina Khan
+                              </a>
+                            </span>
+                          </span>
+                          <span className="updated rich-snippet-hidden">
+                            2022-11-15T13:08:28-05:00
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                    <article
+                      id="post-1825"
+                      className="fusion-post-masonry fusion-post-grid  fusion-element-portrait post fusion-clearfix post-1825 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                      <div className="fusion-post-wrapper">
+                        <div
+                          className="fusion-masonry-element-container fusion-image-wrapper"
+                          style={{
+                            backgroundImage:
+                              "url(/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg)",
+                            paddingTop: "calc((100% + 38px) * 1.6 + 4px)",
+                          }}
+                          aria-haspopup="true">
+                          <img
+                            loading="lazy"
+                            width={1455}
+                            height={2560}
+                            src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg"
+                            className="attachment-full size-full wp-post-image"
+                            alt="summer.jpg"
+                            decoding="async"
+                            srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-200x352.jpg 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-400x704.jpg 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-600x1056.jpg 600w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-800x1408.jpg 800w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-1200x2111.jpg 1200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg 1455w"
+                            sizes="(min-width: 2200px) 100vw, (min-width: 976px) 270px, (min-width: 864px) 360px, (min-width: 752px) 540px, (min-width: 640px) 752px, "
+                          />
+                          <div className="fusion-rollover">
+                            <div className="fusion-rollover-content">
+                              <a
+                                className="fusion-rollover-link"
+                                href="/blog/a-tale-of-two-artists/"
+                                target="_blank">
+                                A Tale of Two Artists – Van Gogh and XCOPY
+                              </a>
+                              <div className="fusion-rollover-sep" />
+                              <a
+                                className="fusion-rollover-gallery"
+                                href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg"
+                                data-id={1825}
+                                data-rel="iLightbox[gallery]"
+                                data-title="summer.jpg"
+                                data-caption="summer.jpg">
+                                Gallery{" "}
+                              </a>
+                              <h4 className="fusion-rollover-title">
+                                <a
+                                  className="fusion-rollover-title-link"
+                                  href="/blog/a-tale-of-two-artists/"
+                                  target="_blank">
+                                  A Tale of Two Artists – Van Gogh and XCOPY{" "}
+                                </a>
+                              </h4>
+                              <div className="fusion-rollover-categories">
+                                <a href="/category/blog/" rel="tag">
+                                  BLOG
+                                </a>
+                              </div>
+                              <a
+                                className="fusion-link-wrapper"
+                                href="/blog/a-tale-of-two-artists/"
+                                target="_blank"
+                                aria-label="A Tale of Two Artists – Van Gogh and XCOPY"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="fusion-post-content-wrapper">
+                          <div className="fusion-post-content post-content">
+                            <h2 className="entry-title fusion-post-title">
+                              <a
+                                href="/blog/a-tale-of-two-artists/"
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                A Tale of Two Artists – Van Gogh and XCOPY
+                              </a>
+                            </h2>
+                            <span className="vcard rich-snippet-hidden">
+                              <span className="fn">
+                                <a
+                                  href="/author/ladysabrina/"
+                                  title="Posts by Sabrina Khan"
+                                  rel="author">
+                                  Sabrina Khan
+                                </a>
+                              </span>
+                            </span>
+                            <span className="updated rich-snippet-hidden">
+                              2022-11-03T13:07:34-04:00
+                            </span>
+                            <div className="fusion-post-content-container">
+                              <p>
+                                {" "}
+                                A Tale of Two Artists: Van Gogh and XCOPY by
+                                Sabrina Khan It is rare to meet someone who does
+                                not know Vincent Van [...]
+                              </p>{" "}
+                            </div>
+                          </div>
+                          <span className="entry-title rich-snippet-hidden">
+                            A Tale of Two Artists – Van Gogh and XCOPY
+                          </span>
+                          <span className="vcard rich-snippet-hidden">
+                            <span className="fn">
+                              <a
+                                href="/author/ladysabrina/"
+                                title="Posts by Sabrina Khan"
+                                rel="author">
+                                Sabrina Khan
+                              </a>
+                            </span>
+                          </span>
+                          <span className="updated rich-snippet-hidden">
+                            2022-11-03T13:07:34-04:00
+                          </span>
+                        </div>
+                      </div>
+                    </article>
                   </div>
                 </div>
               </section>
@@ -341,5 +693,9 @@ const IndexPage = () => (
     </div>
   </>
 );
+}
 
-export default IndexPage;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Sabrina Khan, Author at 6529.io" });
+}

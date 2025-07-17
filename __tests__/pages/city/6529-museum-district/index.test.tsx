@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CityMuseumRedirectPage from '../../../../pages/city/6529-museum-district/index';
+import CityMuseumRedirectPage from '@/app/city/6529-museum-district/page';
 
 // Mock the Header component since it's dynamically imported
 jest.mock('../../../../components/header/Header', () => {

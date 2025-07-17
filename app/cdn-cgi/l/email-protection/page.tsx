@@ -1,13 +1,8 @@
-import React from "react";
-import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const Header = dynamic(() => import("../../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
+export default function EmailProtectionPage() {
+  return (
   <>
     <div>
       {/*[if lt IE 7]> <html className="no-js ie6 oldie" lang="en-US"> <![endif]*/}
@@ -143,6 +138,9 @@ const IndexPage = () => (
       {/* /#cf-wrapper */}
     </div>
   </>
-);
+  );
+}
 
-export default IndexPage;
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Email Protection | Cloudflare" });
+}

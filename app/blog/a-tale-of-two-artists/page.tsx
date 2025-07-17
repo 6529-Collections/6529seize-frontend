@@ -1,13 +1,7 @@
-import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
+import { getAppMetadata } from "@/components/providers/metadata";
+import { Metadata } from "next";
+export default function BlogATaleOfTwoArtistsPage() {
+  return (
   <>
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -233,7 +227,6 @@ So, it is startling to imagine that"
       />
       <link
         rel="stylesheet"
-        id="fusion-dynamic-css-css"
         href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/c38db8bb1e7b256db5f81185ac0dbf47.min.css?ver=3.11.11"
         type="text/css"
         media="all"
@@ -1344,5 +1337,10 @@ So, it is startling to imagine that"
     </div>
   </>
 );
+}
 
-export default IndexPage;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "A Tale of Two Artists - Van Gogh and XCOPY - 6529.io" });
+}
+

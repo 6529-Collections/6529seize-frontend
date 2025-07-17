@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import BlogCategoryPage from '../../pages/category/blog';
+import BlogCategoryPage from '@/app/category/blog/page';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 

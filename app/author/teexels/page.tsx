@@ -1,34 +1,19 @@
-import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
+import { getAppMetadata } from "@/components/providers/metadata";
+import { Metadata } from "next";
+export default function AuthorTeexelsPage() {
+  return (
   <>
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta
-        name="robots"
-        content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
-      />
+      <meta name="robots" content="noindex, follow" />
       {/* This site is optimized with the Yoast SEO plugin v23.9 - https://yoast.com/wordpress/plugins/seo/ */}
-      <title>6529er, Author at 6529.io</title>
-      <link rel="canonical" href="/author/6529er6529-io/" />
+      <title>Teexels, Author at 6529.io</title>
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="profile" />
-      <meta property="og:title" content="6529er, Author at 6529.io" />
-      <meta property="og:url" content="/author/6529er6529-io/" />
+      <meta property="og:title" content="Teexels, Author at 6529.io" />
       <meta property="og:site_name" content="6529.io" />
-      <meta
-        property="og:image"
-        content="https://secure.gravatar.com/avatar/2d848ab145b3e89075107a2cc448075f?s=500&d=mm&r=g"
-      />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@om100m" />
       {/* / Yoast SEO plugin. */}
@@ -49,21 +34,21 @@ const IndexPage = () => (
       <link
         rel="alternate"
         type="application/rss+xml"
-        title="6529.io » Posts by 6529er Feed"
-        href="/author/6529er6529-io/feed/"
+        title="6529.io » Posts by Teexels Feed"
+        href="/author/teexels/feed/"
       />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="profile" />
       <meta property="og:site_name" content="6529.io" />
-      <meta property="og:title" content="6529er, Author at 6529.io" />
-      <meta property="og:url" content="/news/introducing-om/" />
+      <meta property="og:title" content="Teexels, Author at 6529.io" />
+      <meta property="og:url" />
       <meta
         property="og:image"
-        content="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80.jpg"
+        content="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-header-logo.png"
       />
-      <meta property="og:image:width" content={"1920"} />
-      <meta property="og:image:height" content={"1080"} />
-      <meta property="og:image:type" content="image/jpeg" />
+      <meta property="og:image:width" content={"100"} />
+      <meta property="og:image:height" content={"100"} />
+      <meta property="og:image:type" content="image/png" />
       <link
         rel="stylesheet"
         id="genesis-blocks-style-css-css"
@@ -169,7 +154,6 @@ const IndexPage = () => (
       />
       <link
         rel="stylesheet"
-        id="fusion-dynamic-css-css"
         href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/5d12cef5f403106fff0a40b2eeddf804.min.css?ver=3.11.11"
         type="text/css"
         media="all"
@@ -179,7 +163,7 @@ const IndexPage = () => (
         rel="alternate"
         title="JSON"
         type="application/json"
-        href="/wp-json/wp/v2/users/2"
+        href="/wp-json/wp/v2/users/8"
       />
       <link
         rel="EditURI"
@@ -254,14 +238,7 @@ const IndexPage = () => (
               <div className="fusion-page-title-row">
                 <div className="fusion-page-title-wrapper">
                   <div className="fusion-page-title-captions">
-                    <h1 className="entry-title">
-                      <a
-                        href="/cdn-cgi/l/email-protection"
-                        className="__cf_email__"
-                        data-cfemail="4177747378243301777473786f282e">
-                        [email&nbsp;protected]
-                      </a>
-                    </h1>
+                    <h1 className="entry-title">teexels</h1>
                     <div className="fusion-page-title-secondary"></div>
                   </div>
                 </div>
@@ -282,8 +259,8 @@ const IndexPage = () => (
                     <img
                       loading="lazy"
                       alt="6529.io"
-                      src="https://secure.gravatar.com/avatar/2d848ab145b3e89075107a2cc448075f?s=82&d=mm&r=g"
-                      srcSet="https://secure.gravatar.com/avatar/2d848ab145b3e89075107a2cc448075f?s=164&d=mm&r=g 2x"
+                      src="https://secure.gravatar.com/avatar/a9a77cb02576617d19fd99bfe7d753d6?s=82&d=mm&r=g"
+                      srcSet="https://secure.gravatar.com/avatar/a9a77cb02576617d19fd99bfe7d753d6?s=164&d=mm&r=g 2x"
                       className="avatar avatar-82 photo"
                       height={82}
                       width={82}
@@ -292,11 +269,11 @@ const IndexPage = () => (
                   </div>
                   <div className="fusion-author-info">
                     <h3 className="fusion-author-title vcard">
-                      About <span className="fn">6529er</span>{" "}
+                      About <span className="fn">Teexels</span>{" "}
                     </h3>
                     This author has not yet filled in any details.
                     <br />
-                    So far 6529er has created 1 blog entries.{" "}
+                    So far Teexels has created 0 blog entries.{" "}
                   </div>
                   <div style={{ clear: "both" }} />
                   <div className="fusion-author-social clearfix">
@@ -308,115 +285,8 @@ const IndexPage = () => (
                   className="fusion-blog-archive fusion-blog-layout-masonry-wrapper fusion-clearfix">
                   <div
                     className="fusion-posts-container fusion-blog-layout-grid fusion-blog-layout-grid-4 isotope fusion-blog-layout-masonry fusion-no-meta-info fusion-blog-pagination fusion-blog-rollover "
-                    data-pages={1}>
+                    data-pages={0}>
                     <article className="fusion-post-grid fusion-post-masonry post fusion-grid-sizer" />
-                    <article
-                      id="post-1214"
-                      className="fusion-post-masonry fusion-post-grid  fusion-element-landscape post fusion-clearfix post-1214 type-post status-publish format-standard has-post-thumbnail hentry category-news">
-                      <div className="fusion-post-wrapper">
-                        <div
-                          className="fusion-masonry-element-container fusion-image-wrapper"
-                          style={{
-                            backgroundImage:
-                              "url(/wp-content/uploads/2022/04/Artboard-1-80.jpg)",
-                            paddingTop: "calc((100% + 34px) * 0.4 - 20px)",
-                          }}
-                          aria-haspopup="true">
-                          <img
-                            loading="lazy"
-                            width={1920}
-                            height={1080}
-                            src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80.jpg"
-                            className="attachment-full size-full wp-post-image"
-                            alt="6529.io"
-                            decoding="async"
-                            fetchPriority="high"
-                            srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80-200x113.jpg 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80-400x225.jpg 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80-600x338.jpg 600w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80-800x450.jpg 800w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80-1200x675.jpg 1200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80.jpg 1920w"
-                            sizes="(min-width: 2200px) 100vw, (min-width: 752px) 580px, (min-width: 640px) 752px, "
-                          />
-                          <div className="fusion-rollover">
-                            <div className="fusion-rollover-content">
-                              <a
-                                className="fusion-rollover-link"
-                                href="/news/introducing-om/">
-                                INTRODUCING OM
-                              </a>
-                              <div className="fusion-rollover-sep" />
-                              <a
-                                className="fusion-rollover-gallery"
-                                href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80.jpg"
-                                data-id={1214}
-                                data-rel="iLightbox[gallery]"
-                                data-title="Artboard 1-80"
-                                data-caption>
-                                Gallery{" "}
-                              </a>
-                              <h4 className="fusion-rollover-title">
-                                <a
-                                  className="fusion-rollover-title-link"
-                                  href="/news/introducing-om/">
-                                  INTRODUCING OM{" "}
-                                </a>
-                              </h4>
-                              <div className="fusion-rollover-categories">
-                                <a href="/category/news/" rel="tag">
-                                  NEWS
-                                </a>
-                              </div>
-                              <a
-                                className="fusion-link-wrapper"
-                                href="/news/introducing-om/"
-                                aria-label="INTRODUCING OM"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="fusion-post-content-wrapper">
-                          <div className="fusion-post-content post-content">
-                            <h2 className="entry-title fusion-post-title">
-                              <a href="/news/introducing-om/">INTRODUCING OM</a>
-                            </h2>
-                            <span className="vcard rich-snippet-hidden">
-                              <span className="fn">
-                                <a
-                                  href="/author/6529er6529-io/"
-                                  title="Posts by 6529er"
-                                  rel="author">
-                                  6529er
-                                </a>
-                              </span>
-                            </span>
-                            <span className="updated rich-snippet-hidden">
-                              2022-04-14T17:42:14-04:00
-                            </span>
-                            <div className="fusion-post-content-container">
-                              <p>
-                                {" "}
-                                INTRODUCING OM This is the launch date of the
-                                alpha version of the first district of OM.&nbsp;
-                                The goal of OM is to build a fully [...]
-                              </p>{" "}
-                            </div>
-                          </div>
-                          <span className="entry-title rich-snippet-hidden">
-                            INTRODUCING OM
-                          </span>
-                          <span className="vcard rich-snippet-hidden">
-                            <span className="fn">
-                              <a
-                                href="/author/6529er6529-io/"
-                                title="Posts by 6529er"
-                                rel="author">
-                                6529er
-                              </a>
-                            </span>
-                          </span>
-                          <span className="updated rich-snippet-hidden">
-                            2022-04-14T17:42:14-04:00
-                          </span>
-                        </div>
-                      </div>
-                    </article>
                   </div>
                 </div>
               </section>
@@ -465,4 +335,10 @@ const IndexPage = () => (
   </>
 );
 
-export default IndexPage;
+
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Teexels, Author at 6529.io" });
+}
+
