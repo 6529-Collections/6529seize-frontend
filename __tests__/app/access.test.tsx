@@ -1,11 +1,11 @@
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import Access from '../../pages/access';
+import AccessPage from '@/app/access/page';
 import { AuthContext } from '../../components/auth/Auth';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img {...p} /> }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img alt="" {...p} /> }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 // Mock TitleContext
 jest.mock('../../contexts/TitleContext', () => ({
@@ -37,7 +37,7 @@ describe('Access page', () => {
       status: 401,
       json: () => Promise.resolve({ image: 'img.jpg' }),
     }) as any;
-    useRouterMock.mockReturnValue({ isReady: true, push: jest.fn() });
+    useRouterMock.mockReturnValue({ push: jest.fn() });
     // Avoid "alert is not implemented" errors from jsdom
     global.alert = jest.fn();
   });
@@ -45,7 +45,7 @@ describe('Access page', () => {
   it('fetches image and triggers login on enter', async () => {
     const { getByPlaceholderText } = render(
       <TestProvider>
-        <Access />
+        <AccessPage />
       </TestProvider>
     );
     await waitFor(() => expect(fetch).toHaveBeenCalled());
