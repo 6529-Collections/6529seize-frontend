@@ -3,7 +3,6 @@ import UserPageStatsBoostBreakdown from '../../../../components/user/stats/UserP
 import { ConsolidatedTDH } from '../../../../entities/ITDH';
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <span>{children}</span> }));
 
 describe('UserPageStatsBoostBreakdown', () => {
   it('renders nothing when boost breakdown missing', () => {

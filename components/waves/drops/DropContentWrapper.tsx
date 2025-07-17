@@ -84,7 +84,7 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
               onClick={toggleExpand}
               className="tw-bg-iron-700 tw-border-0 tw-text-sm tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-px-3 tw-py-2 tw-rounded-full tw-shadow-md desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-650 tw-transition tw-duration-200 tw-flex tw-items-center tw-space-x-2"
             >
-              Show full drop
+              Show full post
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0"
                 fill="currentColor"

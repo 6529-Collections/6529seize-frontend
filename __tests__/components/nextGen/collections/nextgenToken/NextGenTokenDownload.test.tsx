@@ -32,14 +32,6 @@ jest.mock('react-use-downloader', () => ({
   default: () => mockUseDownloader(),
 }));
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: (props: any) => <svg data-testid={props.icon.iconName} onClick={props.onClick} className={props.class} />,
-}));
-
-jest.mock('@tippyjs/react', () => {
-  const React = require('react');
-  return { __esModule: true, default: ({ children }: any) => <span>{children}</span> };
-});
 
 const token = { id: 7, image_url: 'https://img.com/png/file.png', collection_id: 1 } as any;
 

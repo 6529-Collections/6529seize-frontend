@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { SingleWaveDropVotes } from '../../../../components/waves/drop/SingleWaveDropVotes';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: (props: any) => <div>{props.children}</div> }));
 jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: (props: any) => <div data-testid='progress' data-current={props.current} data-projected={props.projected}/>}));
 
 const useDropInteractionRules = jest.fn();

@@ -7,7 +7,6 @@ jest.mock('wagmi', () => ({
   useEnsAddress: () => ({ data: '0x123' })
 }));
 
-jest.mock('@tippyjs/react', () => (props: any) => <div data-testid="tippy">{props.children}</div>);
 
 jest.mock('react-bootstrap', () => ({ Form: { Control: (p: any) => <input {...p} />, Label:(p:any)=> <label {...p}/>, Group:(p:any)=> <div {...p}/>, Select:(p:any)=> <select {...p}/>, Row:(p:any)=> <div {...p}/>, Col:(p:any)=> <div {...p}/> }, Container:(p:any)=> <div {...p}/> }));
 
