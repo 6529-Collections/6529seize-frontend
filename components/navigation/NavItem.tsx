@@ -10,7 +10,7 @@ import { useAuth } from "../auth/Auth";
 import { useTitle } from "../../contexts/TitleContext";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
 import { useUnreadIndicator } from "../../hooks/useUnreadIndicator";
-import { useNotificationsContext } from "../notifications/NotificationsContext";
+import { useNotificationsContext } from "../notifications/NotificationsGate";
 import { isNavItemActive } from "./isNavItemActive";
 import { useWaveData } from "../../hooks/useWaveData";
 import { useWave } from "../../hooks/useWave";

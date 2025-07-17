@@ -4,7 +4,7 @@ import HeaderUserConnected from "./HeaderUserConnected";
 import HeaderUserConnect from "./HeaderUserConnect";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useEffect } from "react";
-import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { useNotificationsContext } from "../../notifications/NotificationsGate";
 
 export default function HeaderUser() {
   const { address } = useSeizeConnectContext();

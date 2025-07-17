@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -12,6 +18,7 @@ import { useAuth } from "../auth/Auth";
 import { commonApiPost } from "../../services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
+import { resolvePushNotificationRedirectUrl } from "@/helpers/push-notification.helpers";
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
@@ -22,35 +29,84 @@ const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
 
-const redirectConfig = {
-  path: ({ path }: { path: string }) => `/${path}`,
-  profile: ({ handle }: { handle: string }) => `/${handle}`,
-  "the-memes": ({ id }: { id: string }) => `/the-memes/${id}`,
-  "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
-  "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
-  waves: ({ wave_id, drop_id }: { wave_id: string; drop_id: string }) => {
-    let base = `/my-stream?wave=${wave_id}`;
-    return drop_id ? `${base}&serialNo=${drop_id}` : base;
-  },
-};
-
-export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
+export const NotificationsGate: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isIos } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
 
+  const [ready, setReady] = useState(() => {
+    if (!isCapacitor) return true;
+    if (typeof window !== "undefined") {
+      return Boolean(window.__pushLaunchHandled);
+    }
+    return false;
+  });
+
   useEffect(() => {
+    if (!isCapacitor) {
+      setReady(true);
+      return;
+    }
+
+    if (typeof window !== "undefined" && window.__pushLaunchHandled) {
+      console.log("Push notification gate already handled, skipping splash.");
+      setReady(true);
+      return;
+    }
+
+    console.log("Running push notification gate on app launch...");
+
+    let resolved = false;
+
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        console.log("No launch notification detected after timeout.");
+        if (typeof window !== "undefined") {
+          window.__pushLaunchHandled = true;
+        }
+        setReady(true);
+      }
+    }, 1000);
+
+    const listenerPromise = PushNotifications.addListener(
+      "pushNotificationActionPerformed",
+      async (action) => {
+        resolved = true;
+        clearTimeout(timeout);
+
+        console.log("Notification tap action performed:", action);
+
+        await handlePushNotificationAction(
+          router,
+          action.notification,
+          connectedProfile
+        );
+
+        if (typeof window !== "undefined") {
+          window.__pushLaunchHandled = true;
+        }
+        setReady(true);
+      }
+    );
+
+    return () => {
+      clearTimeout(timeout);
+      listenerPromise.then((handle) => handle.remove());
+    };
+  }, [isCapacitor, connectedProfile, router]);
+
+  useEffect(() => {
+    if (!isCapacitor) return;
+
     initializeNotifications(connectedProfile ?? undefined);
-  }, [connectedProfile]);
+  }, [connectedProfile, isCapacitor]);
 
   const initializeNotifications = async (profile?: ApiIdentity) => {
     try {
-      if (isCapacitor) {
-        console.log("Initializing push notifications");
-        await initializePushNotifications(profile);
-      }
+      console.log("Initializing push notifications");
+      await initializePushNotifications(profile);
     } catch (error) {
       console.error("Error initializing notifications", error);
     }
@@ -60,11 +116,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     await PushNotifications.removeAllListeners();
 
     const stableDeviceId = await getStableDeviceId();
-
     const deviceInfo = await Device.getInfo();
 
-    await PushNotifications.addListener("registration", async (token) => {
-      registerPushNotification(
+    PushNotifications.addListener("registration", async (token) => {
+      await registerPushNotification(
         stableDeviceId,
         deviceInfo,
         token.value,
@@ -72,25 +127,14 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       );
     });
 
-    await PushNotifications.addListener("registrationError", (error) => {
+    PushNotifications.addListener("registrationError", (error) => {
       console.error("Push registration error: ", error);
     });
 
-    await PushNotifications.addListener(
+    PushNotifications.addListener(
       "pushNotificationReceived",
       (notification) => {
         console.log("Push notification received: ", notification);
-      }
-    );
-
-    await PushNotifications.addListener(
-      "pushNotificationActionPerformed",
-      async (action) => {
-        await handlePushNotificationAction(
-          router,
-          action.notification,
-          profile
-        );
       }
     );
 
@@ -107,7 +151,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const handlePushNotificationAction = async (
     router: ReturnType<typeof useRouter>,
     notification: PushNotificationSchema,
-    profile?: ApiIdentity
+    profile?: ApiIdentity | null
   ) => {
     console.log("Push notification action performed", notification);
     const notificationData = notification.data;
@@ -124,10 +168,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     void removeDeliveredNotifications([notification]);
 
-    const redirectUrl = resolveRedirectUrl(notificationData);
+    const redirectUrl = resolvePushNotificationRedirectUrl(notificationData);
     if (redirectUrl) {
       console.log("Redirecting to", redirectUrl);
-      router.push(redirectUrl);
+      router.replace(redirectUrl);
     } else {
       console.log(
         "No redirect url found in notification data",
@@ -141,7 +185,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     if (isIos) {
       try {
-        await PushNotifications.removeDeliveredNotifications({ notifications });
+        await PushNotifications.removeDeliveredNotifications({
+          notifications,
+        });
       } catch (error) {
         console.error("Error removing delivered notifications", error);
       }
@@ -177,6 +223,14 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
+  if (!ready) {
+    return (
+      <div className="tw-flex tw-justify-center tw-items-center tw-h-screen tw-w-screen tw-bg-black tw-text-white tw-text-2xl tw-font-bold">
+        Splash screen...
+      </div>
+    );
+  }
+
   return (
     <NotificationsContext.Provider value={value}>
       {children}
@@ -203,32 +257,6 @@ const registerPushNotification = async (
     console.log("Push registration success", response);
   } catch (error) {
     console.error("Push registration error", error);
-  }
-};
-
-const resolveRedirectUrl = (notificationData: any) => {
-  const { redirect, ...params } = notificationData;
-
-  if (!redirect) {
-    console.log(
-      "No redirect type found in notification data",
-      notificationData
-    );
-    return null;
-  }
-
-  const resolveFn = redirectConfig[redirect as keyof typeof redirectConfig];
-
-  if (!resolveFn) {
-    console.error("Unknown redirect type", redirect);
-    return null;
-  }
-
-  try {
-    return resolveFn(params);
-  } catch (error) {
-    console.error("Error resolving redirect URL", error);
-    return null;
   }
 };
 
