@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import GasComponent from "../../../components/gas-royalties/Gas";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { fetchUrl } from "../../../services/6529api";
+import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -56,9 +57,17 @@ beforeEach(() => {
   });
 });
 
+const renderGas = () => {
+  render(
+    <TitleProvider>
+      <GasComponent />
+    </TitleProvider>
+  );
+};
+
 test("shows message when no gas info is returned", async () => {
   (fetchUrl as jest.Mock).mockResolvedValue([]);
-  render(<GasComponent />);
+  renderGas();
   await waitFor(() => {
     expect(screen.getByText(/No gas info found/i)).toBeInTheDocument();
   });
@@ -74,7 +83,7 @@ test("renders gas table when data exists", async () => {
       thumbnail: "img.png",
     },
   ]);
-  render(<GasComponent />);
+  renderGas();
   await waitFor(() => screen.getByTestId("token-image"));
   expect(screen.getByAltText("Meme1")).toBeInTheDocument();
   expect(screen.getByText("Alice")).toBeInTheDocument();

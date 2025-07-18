@@ -22,8 +22,9 @@ export async function generateMetadata({
   const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
     (sd) => sd === focus
   );
-  const title = `Meme Accounting - ${capitalizeEveryWord(
-    resolvedFocus?.replace("-", " ") ?? ""
-  )}`;
+  const focusPart = resolvedFocus?.replace("-", " ");
+  const title = `Meme Accounting${
+    focusPart ? ` - ${capitalizeEveryWord(focusPart)}` : ""
+  }`;
   return getAppMetadata({ title, description: "Tools" });
 }
