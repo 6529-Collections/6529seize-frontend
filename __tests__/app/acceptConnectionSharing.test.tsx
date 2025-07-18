@@ -1,11 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import AcceptConnectionSharing, {
-  getServerSideProps,
-} from "@/pages/accept-connection-sharing";
+import { AcceptConnectionSharing } from "@/app/accept-connection-sharing/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -28,8 +26,9 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
 }));
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -51,6 +50,7 @@ const TestProvider: React.FC<{ children: React.ReactNode }> = ({
 describe("AcceptConnectionSharing page", () => {
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
       seizeDisconnectAndLogout: jest.fn(),
@@ -77,12 +77,4 @@ describe("AcceptConnectionSharing page", () => {
     expect(screen.getByText(/0x123/)).toBeInTheDocument();
   });
 
-  it("getServerSideProps returns props from query", async () => {
-    const result = await getServerSideProps(
-      { query: { token: "t", address: "a", role: "r" } } as any,
-      null as any,
-      null as any
-    );
-    expect(result).toEqual({ props: { token: "t", address: "a", role: "r" } });
-  });
 });

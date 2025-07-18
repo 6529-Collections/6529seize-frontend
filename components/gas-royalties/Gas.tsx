@@ -12,24 +12,24 @@ import {
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import { useRouter } from "next/router";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function GasComponent() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (router.isReady) {
-      const routerFocus = router.query.focus as string;
-      const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
-        (sd) => sd === routerFocus
-      );
-      if (resolvedFocus) {
-        setCollectionFocus(resolvedFocus);
-      } else {
-        setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
-      }
+    const routerFocus = searchParams?.get("focus") as string;
+    const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
+      (sd) => sd === routerFocus
+    );
+    if (resolvedFocus) {
+      setCollectionFocus(resolvedFocus);
+    } else {
+      router.push(`${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`);
     }
-  }, [router.isReady]);
+  }, [searchParams]);
 
   const [gas, setGas] = useState<Gas[]>([]);
   const [sumGas, setSumGas] = useState(0);

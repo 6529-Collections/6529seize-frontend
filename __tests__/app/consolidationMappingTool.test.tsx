@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import ConsolidationMappingToolPage from '../../pages/consolidation-mapping-tool';
+import ConsolidationMappingToolPage from '@/app/consolidation-mapping-tool/page';
 import { AuthContext } from '../../components/auth/Auth';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);

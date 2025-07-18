@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import GasPage from '../../pages/meme-gas';
+import GasPage, { generateMetadata } from '@/app/meme-gas/page';
 import { AuthContext } from '../../components/auth/Auth';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
@@ -35,7 +35,9 @@ describe('GasPage', () => {
     expect(getByTestId('dynamic')).toBeInTheDocument();
   });
 
-  it('exports metadata', () => {
-    expect(GasPage.metadata).toEqual({ title: 'Meme Gas', description: 'Tools' });
+  it('exports metadata', async () => {
+    process.env.BASE_ENDPOINT = 'https://example.com';
+    const metadata = await generateMetadata();
+    expect(metadata).toMatchObject({ title: 'Meme Gas', description: 'Tools | 6529.io' });
   });
 });
