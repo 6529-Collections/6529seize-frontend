@@ -102,3 +102,8 @@ export enum AboutSection {
   NAKAMOTO_THRESHOLD = "nakamoto-threshold",
   COPYRIGHT = "copyright",
 }
+
+export enum GasRoyaltiesCollectionFocus {
+  MEMES = "the-memes",
+  MEMELAB = "meme-lab",
+}

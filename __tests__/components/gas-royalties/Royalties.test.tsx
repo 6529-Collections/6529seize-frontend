@@ -1,9 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import Royalties from "../../../components/gas-royalties/Royalties";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { fetchUrl } from "../../../services/6529api";
+import { TitleProvider } from "@/contexts/TitleContext";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 
 jest.mock("../../../services/6529api", () => ({
   fetchUrl: jest.fn(),
@@ -39,17 +44,31 @@ jest.mock("../../../components/gas-royalties/GasRoyalties", () => ({
   useSharedState: () => mockState,
 }));
 
-const router = { isReady: true, query: {}, push: jest.fn() } as any;
+const router = { push: jest.fn() } as any;
 (useRouter as jest.Mock).mockReturnValue(router);
+(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+(usePathname as jest.Mock).mockReturnValue("/meme-accounting");
 
 beforeEach(() => {
   jest.clearAllMocks();
-  Object.assign(mockState, { royalties: [], fetching: false, collectionFocus: "the-memes" });
+  Object.assign(mockState, {
+    royalties: [],
+    fetching: false,
+    collectionFocus: "the-memes",
+  });
 });
+
+const renderRoyalties = () => {
+  render(
+    <TitleProvider>
+      <Royalties />
+    </TitleProvider>
+  );
+};
 
 it("shows message when no royalties are returned", async () => {
   (fetchUrl as jest.Mock).mockResolvedValue([]);
-  render(<Royalties />);
+  renderRoyalties();
   await waitFor(() => {
     expect(screen.getByText(/No royalties found/i)).toBeInTheDocument();
   });
@@ -68,7 +87,7 @@ it("renders royalties table when data exists", async () => {
       thumbnail: "img.png",
     },
   ]);
-  render(<Royalties />);
+  renderRoyalties();
   await waitFor(() => screen.getByTestId("token-image"));
   expect(screen.getByAltText("Meme1")).toBeInTheDocument();
   expect(screen.getByText("Alice")).toBeInTheDocument();

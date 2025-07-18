@@ -305,9 +305,7 @@ function HeaderQRModal({
             <div className={styles.url}>{url}</div>
             <FontAwesomeIcon
               icon={faCopy}
-              className={`${styles.urlCopy} ${
-                urlCopied ? styles.copied : ""
-              }`}
+              className={`${styles.urlCopy} ${urlCopied ? styles.copied : ""}`}
               data-tooltip-id="copy-url-tooltip"
               onClick={() => {
                 navigator.clipboard.writeText(url);
@@ -334,7 +332,12 @@ function HeaderQRModal({
   }
 
   return (
-    <Modal show={show} onHide={onClose} keyboard centered>
+    <Modal
+      show={show}
+      onHide={onClose}
+      keyboard
+      centered
+      data-testid="header-share-modal">
       <Modal.Body className={styles.modalBody}>
         <ModalMenu
           isShareConnection={!!getRefreshToken()}

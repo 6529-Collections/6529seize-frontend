@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import LadysabrinaPage from '../../pages/author/ladysabrina/index';
-import DisneyDeekayPage from '../../pages/blog/disney-deekay-their-secret-to-animation/index';
+import LadysabrinaPage from '@/app/author/ladysabrina/page';
+import DisneyDeekayPage from '@/app/blog/disney-deekay-their-secret-to-animation/page';
 import EducationCollabPage from '../../pages/education/education-collaboration-form/index';
 import GMRedirectPage from '../../pages/gm-or-die-small-mp4/index';
 import CryptoAdzPage from '../../pages/museum/6529-fund-szn1/cryptoadz/index';

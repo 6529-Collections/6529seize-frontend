@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
 import { render, screen } from "@testing-library/react";
 import About100M from "@/app/about/100m-project/page";
-import FromFibonacciToFidenza from "@/pages/blog/from-fibonacci-to-fidenza";
-import EmailProtection from "@/pages/cdn-cgi/l/email-protection";
+import FromFibonacciToFidenza from "@/app/blog/from-fibonacci-to-fidenza/page";
+import EmailProtection from "@/app/cdn-cgi/l/email-protection/page";
 import EmailSignatures from "@/app/email-signatures/page";
 import MuseumFund from "@/pages/museum/6529-fund-szn1";
 import ConstructionToken from "@/pages/museum/6529-fund-szn1/construction-token";

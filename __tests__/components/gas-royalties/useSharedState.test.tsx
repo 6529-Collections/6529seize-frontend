@@ -1,8 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
-import {
-  useSharedState,
-  GasRoyaltiesCollectionFocus,
-} from "@/components/gas-royalties/GasRoyalties";
+import { useSharedState } from "@/components/gas-royalties/GasRoyalties";
+import { GasRoyaltiesCollectionFocus } from "@/enums";
 
 // Mock getDateFilters to simplify URL generation
 jest.mock("@/helpers/Helpers", () => ({
