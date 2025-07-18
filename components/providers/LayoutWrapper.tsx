@@ -16,7 +16,8 @@ export default function LayoutWrapper({
   const pathname = usePathname();
 
   const isSmall = pathname?.startsWith("/my-stream");
-  const isAccess = pathname?.startsWith("/access");
+  const isAccessOrRestricted =
+    pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
 
   const content = useMemo(() => {
     return isApp ? (
@@ -26,7 +27,7 @@ export default function LayoutWrapper({
     );
   }, [isApp, isSmall, children]);
 
-  if (isAccess) {
+  if (isAccessOrRestricted) {
     return <>{children}</>;
   }
 
