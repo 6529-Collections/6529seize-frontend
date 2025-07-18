@@ -10,7 +10,7 @@ import { Tooltip } from "react-tooltip";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../services/6529api";
 import { getDateFilters } from "../../helpers/Helpers";
-import router from "next/router";
+import { useRouter, usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { ApiArtistNameItem } from "../../generated/models/ApiArtistNameItem";
@@ -31,7 +31,6 @@ interface HeaderProps {
   is_primary: boolean;
   is_custom_blocks: boolean;
   focus: GasRoyaltiesCollectionFocus;
-  setFocus: (focus: GasRoyaltiesCollectionFocus) => void;
   getUrl: () => string;
   setSelectedArtist: (artist: string) => void;
   setIsPrimary: (isPrimary: boolean) => void;
@@ -79,6 +78,8 @@ function getUrlParams(
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [artists, setArtists] = useState<ApiArtistNameItem[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showBlockPicker, setShowBlockPicker] = useState(false);
@@ -86,21 +87,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   const [toDate, setToDate] = useState<Date>();
   const [fromBlock, setFromBlock] = useState<number>();
   const [toBlock, setToBlock] = useState<number>();
-
-  useEffect(() => {
-    if (props.focus) {
-      router.push(
-        {
-          pathname: router.pathname,
-          query: {
-            focus: props.focus,
-          },
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-  }, [props.focus]);
 
   useEffect(() => {
     const path =
@@ -172,12 +158,16 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     ? styles.collectionFocusActive
                     : styles.collectionFocus
                 }`}
-                onClick={() =>
-                  props.setFocus(GasRoyaltiesCollectionFocus.MEMES)
-                }
+                onClick={() => {
+                  router.push(
+                    `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`
+                  );
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    props.setFocus(GasRoyaltiesCollectionFocus.MEMES);
+                    router.push(
+                      `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`
+                    );
                   }
                 }}
                 aria-label="The Memes">
@@ -190,11 +180,15 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     : styles.collectionFocus
                 }`}
                 onClick={() =>
-                  props.setFocus(GasRoyaltiesCollectionFocus.MEMELAB)
+                  router.push(
+                    `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
+                  )
                 }
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    props.setFocus(GasRoyaltiesCollectionFocus.MEMELAB);
+                    router.push(
+                      `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
+                    );
                   }
                 }}
                 aria-label="Meme Lab">
@@ -409,7 +403,6 @@ export function useSharedState() {
       selected_artist: selectedArtist,
       is_primary: isPrimary,
       is_custom_blocks: isCustomBlocks,
-      setFocus: setCollectionFocus,
       setSelectedArtist,
       setIsPrimary,
       setIsCustomBlocks,
