@@ -2,26 +2,26 @@
 
 import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
-import { fetchUrl } from "../../services/6529api";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
+import { fetchUrl } from "@/services/6529api";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
 import { useEffect, useState } from "react";
-import { NFTLite, Rememe } from "../../entities/INFT";
-import { DBResponse } from "../../entities/IDBResponse";
-import { useRouter } from "next/router";
-import RememeImage from "../nft-image/RememeImage";
+import { NFTLite, Rememe } from "@/entities/INFT";
+import { DBResponse } from "@/entities/IDBResponse";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import RememeImage from "@/components/nft-image/RememeImage";
 import Image from "next/image";
-import Pagination from "../pagination/Pagination";
+import Pagination from "@/components/pagination/Pagination";
 import {
   areEqualAddresses,
   formatAddress,
   numberWithCommas,
-} from "../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import DotLoader from "../dotLoader/DotLoader";
-import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
-import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
-import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
+import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import { faPlusCircle, faRefresh } from "@fortawesome/free-solid-svg-icons";
 
 const PAGE_SIZE = 40;
@@ -39,6 +39,8 @@ export enum RememeSort {
 
 export default function Rememes() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [memes, setMemes] = useState<NFTLite[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
@@ -52,8 +54,10 @@ export default function Rememes() {
   const [selectedTokenType, setSelectedTokenType] = useState<TokenType>(
     TokenType.ALL
   );
+
+  const queryMemeId = searchParams?.get("meme_id");
   const [selectedMeme, setSelectedMeme] = useState<number>(
-    router.query.meme_id ? parseInt(router.query.meme_id.toString()) : 0
+    queryMemeId ? parseInt(queryMemeId) : 0
   );
 
   const sorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
@@ -62,12 +66,17 @@ export default function Rememes() {
   );
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
-      (response: DBResponse) => {
-        setMemes(response.data);
-        setMemesLoaded(true);
-      }
-    );
+    try {
+      fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+        (response: DBResponse) => {
+          setMemes(response.data);
+        }
+      );
+    } catch (error) {
+      console.error("Error fetching memes", error);
+    } finally {
+      setMemesLoaded(true);
+    }
   }, []);
 
   function fetchResults(mypage: number) {
@@ -85,32 +94,28 @@ export default function Rememes() {
       sort = "&sort=created_at&sort_direction=desc";
     }
     let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      setTotalResults(response.count);
-      setRememes(response.data);
-      setRememesLoaded(true);
-    });
+    fetchUrl(url)
+      .then((response: DBResponse) => {
+        setTotalResults(response.count);
+        setRememes(response.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching rememes", err);
+      })
+      .finally(() => {
+        setRememesLoaded(true);
+      });
   }
 
   useEffect(() => {
-    const currentId = router.query.meme_id
-      ? parseInt(router.query.meme_id.toString())
+    const currentId = searchParams?.get("meme_id")
+      ? parseInt(searchParams.get("meme_id")!)
       : 0;
     if (!currentId || currentId != selectedMeme) {
-      const currentQuery = { ...router.query };
-      if (selectedMeme) {
-        currentQuery.meme_id = selectedMeme.toString();
-      } else {
-        delete currentQuery.meme_id;
-      }
-      router.push(
-        {
-          pathname: router.pathname,
-          query: currentQuery,
-        },
-        undefined,
-        { shallow: true }
-      );
+      const newPath = `${pathname}${
+        selectedMeme ? `?meme_id=${selectedMeme}` : ""
+      }`;
+      router.push(newPath);
     }
   }, [selectedMeme]);
 
@@ -301,8 +306,7 @@ export default function Rememes() {
                             backgroundColor: "#f8f9fa",
                             color: "#212529",
                             padding: "4px 8px",
-                          }}
-                        >
+                          }}>
                           Refresh results
                         </Tooltip>
                       </>
@@ -332,17 +336,14 @@ export default function Rememes() {
                       drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Meme Reference:{" "}
-                        {router.query.meme_id
-                          ? memes.find(
-                              (m) => m.id.toString() === router.query.meme_id
-                            )
-                            ? `${router.query.meme_id} - ${
+                        {queryMemeId
+                          ? memes.find((m) => m.id.toString() === queryMemeId)
+                            ? `${queryMemeId} - ${
                                 memes.find(
-                                  (m) =>
-                                    m.id.toString() === router.query.meme_id
+                                  (m) => m.id.toString() === queryMemeId
                                 )?.name
                               }`
-                            : `${router.query.meme_id}`
+                            : `${queryMemeId}`
                           : `All`}
                       </Dropdown.Toggle>
                       <Dropdown.Menu>

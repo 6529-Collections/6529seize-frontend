@@ -4,14 +4,37 @@ import userEvent from "@testing-library/user-event";
 import Rememes, { RememeSort } from "@/components/rememes/Rememes";
 import { fetchUrl } from "@/services/6529api";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
-jest.mock("@/services/6529api");
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+  useSearchParams: jest.fn().mockReturnValue({
+    get: jest.fn().mockReturnValue(undefined),
+  }),
+  usePathname: jest.fn().mockReturnValue("/rememes"),
+}));
+jest.mock("@/services/6529api", () => ({
+  fetchUrl: jest.fn(),
+}));
 jest.mock("@/components/nft-image/RememeImage", () => () => (
   <div data-testid="img" />
 ));
 jest.mock("@/components/pagination/Pagination", () => (props: any) => (
   <div data-testid="pagination" onClick={() => props.setPage(2)} />
 ));
+jest.mock("@/components/lfg-slideshow/LFGSlideshow", () => ({
+  LFGButton: () => <div data-testid="lfg-button" />,
+}));
+jest.mock("@/components/collections-dropdown/CollectionsDropdown", () => () => (
+  <div data-testid="collections-dropdown" />
+));
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid="react-tooltip" data-tooltip-id={id}>
+      {children}
+    </div>
+  ),
+}));
 
 (fetchUrl as jest.Mock).mockImplementation((url: string) => {
   if (url.includes("memes_lite")) return Promise.resolve({ data: [] });

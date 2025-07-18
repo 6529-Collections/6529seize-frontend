@@ -1,9 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import GasComponent from "../../../components/gas-royalties/Gas";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { fetchUrl } from "../../../services/6529api";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 
 jest.mock("../../../services/6529api", () => ({
   fetchUrl: jest.fn(),
@@ -40,10 +44,16 @@ jest.mock("../../../components/gas-royalties/GasRoyalties", () => ({
 
 const router = { isReady: true, query: {}, push: jest.fn() } as any;
 (useRouter as jest.Mock).mockReturnValue(router);
+(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+(usePathname as jest.Mock).mockReturnValue("/meme-gas");
 
 beforeEach(() => {
   jest.clearAllMocks();
-  Object.assign(mockState, { gas: [], fetching: false, collectionFocus: "the-memes" });
+  Object.assign(mockState, {
+    gas: [],
+    fetching: false,
+    collectionFocus: "the-memes",
+  });
 });
 
 test("shows message when no gas info is returned", async () => {
