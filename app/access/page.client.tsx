@@ -1,20 +1,24 @@
-import { useEffect, useState } from "react";
-import styles from "../styles/Home.module.scss";
-import Cookies from "js-cookie";
-import { API_AUTH_COOKIE } from "../constants";
-import { useRouter } from "next/router";
-import Image from "next/image";
-import { useSetTitle } from "../contexts/TitleContext";
-import { getStagingAuth } from "../services/auth/auth.utils";
+"use client";
 
-export default function Access() {
+import { useEffect, useState } from "react";
+import styles from "@/styles/Home.module.scss";
+import Cookies from "js-cookie";
+import { API_AUTH_COOKIE } from "@/constants";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { getStagingAuth } from "@/services/auth/auth.utils";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
+
+export default function AccessPage() {
   useSetTitle("Access Page");
   const router = useRouter();
-  const [image, setImage] = useState();
+  const [image, setImage] = useState<string>();
   const [inputDisabled, setInputDisabled] = useState(false);
 
   useEffect(() => {
-    if (!image && router.isReady) {
+    if (!image) {
       const apiAuth = getStagingAuth();
       fetch(`${process.env.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
@@ -22,15 +26,15 @@ export default function Access() {
         r.json().then((response: any) => {
           setImage(response.image);
         });
-        if (r.status != 401) {
+        if (r.status !== 401) {
           router.push("/");
           setInputDisabled(true);
         }
       });
     }
-  }, [router.isReady]);
+  }, [image, router]);
 
-  function doLogin(target: any) {
+  function doLogin(target: HTMLInputElement) {
     target.select();
     const pass = target.value;
     fetch(`${process.env.API_ENDPOINT}/api/`, {
@@ -61,9 +65,9 @@ export default function Access() {
           defaultValue={inputDisabled ? "Go to 6529.io" : ""}
           aria-label="Team access code"
           placeholder={inputDisabled ? "Go to 6529.io" : "Team Login"}
-          onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>): void => {
+          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>): void => {
             if (event.key.toLowerCase() === "enter") {
-              doLogin(event.target);
+              doLogin(event.target as HTMLInputElement);
             }
           }}
         />
@@ -90,6 +94,6 @@ export function LoginImage(props: Readonly<{ image: string; alt: string }>) {
   );
 }
 
-Access.metadata = {
-  title: "Access Page",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Access Page" });
+}

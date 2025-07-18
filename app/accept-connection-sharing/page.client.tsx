@@ -1,16 +1,20 @@
+"use client";
+
 import { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { areEqualAddresses } from "../helpers/Helpers";
-import { setAuthJwt } from "../services/auth/auth.utils";
-import { commonApiPost } from "../services/api/common-api";
-import { Spinner } from "../components/dotLoader/DotLoader";
-import { ApiRedeemRefreshTokenRequest } from "../generated/models/ApiRedeemRefreshTokenRequest";
-import { ApiRedeemRefreshTokenResponse } from "../generated/models/ApiRedeemRefreshTokenResponse";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { setAuthJwt } from "@/services/auth/auth.utils";
+import { commonApiPost } from "@/services/api/common-api";
+import { Spinner } from "@/components/dotLoader/DotLoader";
+import { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemRefreshTokenRequest";
+import { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
 interface AcceptConnectionSharingProps {
   token: string;
@@ -18,16 +22,11 @@ interface AcceptConnectionSharingProps {
   role?: string;
 }
 
-export default function AcceptConnectionSharing(
-  props: Readonly<AcceptConnectionSharingProps>
-) {
+export function AcceptConnectionSharing(props: Readonly<AcceptConnectionSharingProps>) {
   const router = useRouter();
   const { setToast } = useAuth();
-  const {
-    seizeAcceptConnection,
-    seizeDisconnectAndLogout,
-    address: connectedAddress,
-  } = useSeizeConnectContext();
+  const { seizeAcceptConnection, seizeDisconnectAndLogout, address: connectedAddress } =
+    useSeizeConnectContext();
 
   const { token, address, role } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
@@ -51,21 +50,13 @@ export default function AcceptConnectionSharing(
         redeemResponse.token &&
         areEqualAddresses(redeemResponse.address, address)
       ) {
-        setAuthJwt(
-          redeemResponse.address,
-          redeemResponse.token,
-          token,
-          role ?? undefined
-        );
+        setAuthJwt(redeemResponse.address, redeemResponse.token, token, role ?? undefined);
         seizeAcceptConnection(redeemResponse.address);
         router.push("/");
       }
     } catch (error) {
       console.error(error);
-      setToast({
-        message: "Failed to accept connection",
-        type: "error",
-      });
+      setToast({ message: "Failed to accept connection", type: "error" });
       setAcceptingConnection(false);
     }
   };
@@ -93,23 +84,15 @@ export default function AcceptConnectionSharing(
               <Col sm={12} md={6}>
                 <h4>Incoming Connection</h4>
                 <p className="pt-3">
-                  Token: {token.substring(0, 8)}...$
-                  {token.substring(token.length - 7)}
+                  Token: {`${token.substring(0, 8)}...${token.substring(token.length - 7)}`}
                 </p>
                 <p>Address: {address}</p>
               </Col>
-              <Col
-                sm={12}
-                md={6}
-                className="d-flex flex-column align-items-center justify-content-center">
+              <Col sm={12} md={6} className="d-flex flex-column align-items-center justify-content-center">
                 {connectedAddress && !acceptingConnection ? (
                   <>
-                    <p className="text-center">
-                      Existing connection detected, disconnect first!
-                    </p>
-                    <Button
-                      size="lg"
-                      onClick={() => seizeDisconnectAndLogout()}>
+                    <p className="text-center">Existing connection detected, disconnect first!</p>
+                    <Button size="lg" onClick={() => seizeDisconnectAndLogout()}>
                       Disconnect
                     </Button>
                   </>
@@ -120,7 +103,8 @@ export default function AcceptConnectionSharing(
                     onClick={() => {
                       setAcceptingConnection(true);
                       acceptConnection();
-                    }}>
+                    }}
+                  >
                     {acceptingConnection ? (
                       <>
                         PROCESSING <Spinner dimension={18} />
@@ -139,21 +123,14 @@ export default function AcceptConnectionSharing(
   );
 }
 
-export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const { token, address, role } = req.query;
-
-  const props: AcceptConnectionSharingProps = {
-    token,
-    address,
-  };
-  if (role) {
-    props.role = role;
-  }
-  return {
-    props,
-  };
+export default function AcceptConnectionSharingPage() {
+  const searchParams = useSearchParams();
+  const token = searchParams?.get("token") || "";
+  const address = searchParams?.get("address") || "";
+  const role = searchParams?.get("role") || undefined;
+  return <AcceptConnectionSharing token={token} address={address} role={role} />;
 }
 
-AcceptConnectionSharing.metadata = {
-  title: "Accept Connection Sharing",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Accept Connection Sharing" });
+}

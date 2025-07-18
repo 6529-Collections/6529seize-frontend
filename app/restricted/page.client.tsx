@@ -1,19 +1,20 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import styles from "../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
+import { LoginImage } from "../access/page.client";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { getStagingAuth } from "@/services/auth/auth.utils";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-import { useRouter } from "next/router";
-import { LoginImage } from "./access";
-import { useSetTitle } from "../contexts/TitleContext";
-import { getStagingAuth } from "../services/auth/auth.utils";
-
-export default function Access() {
+export default function RestrictedPage() {
   useSetTitle("Restricted");
-  const router = useRouter();
-  const [image, setImage] = useState();
+  const [image, setImage] = useState<string | undefined>();
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!image && router.isReady) {
+    if (!image) {
       const apiAuth = getStagingAuth();
       fetch(`${process.env.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
@@ -23,7 +24,7 @@ export default function Access() {
           if (r.status === 403) {
             const country = response.country;
             const msg = `Access from your country ${
-              country ? `(${country}) ` : ""
+              country ? "(" + country + ") " : ""
             }is restricted`;
             setMessage(msg);
           } else {
@@ -32,23 +33,18 @@ export default function Access() {
         });
       });
     }
-  }, [router.isReady]);
+  }, [image]);
 
   return (
     <main className={styles.login}>
       {image && <LoginImage image={image} alt="access" />}
       <div className={styles.loginPrompt}>
-        <input
-          disabled={true}
-          type="text"
-          className="text-center"
-          value={message}
-        />
+        <input disabled type="text" className="text-center" value={message} />
       </div>
     </main>
   );
 }
 
-Access.metadata = {
-  title: "Restricted",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Restricted" });
+}

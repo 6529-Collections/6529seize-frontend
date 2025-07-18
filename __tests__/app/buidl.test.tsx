@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import Buidl from '../../pages/buidl';
+import Buidl from '@/app/buidl/page';
 import { AuthContext } from '../../components/auth/Auth';
 
 

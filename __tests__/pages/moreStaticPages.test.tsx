@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 import Seize404 from "@/pages/404";
-import DisputeResolution from "@/pages/dispute-resolution";
+import DisputeResolution from "@/app/dispute-resolution/page";
 import GradientsPage from "@/pages/6529-gradient";
 import PlansPage from "@/pages/emma/plans";
 import MemeLabCollectionPage from "@/pages/meme-lab/collection/[collection]";

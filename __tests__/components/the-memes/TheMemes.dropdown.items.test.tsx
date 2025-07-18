@@ -3,14 +3,15 @@ import { render, screen } from '@testing-library/react';
 import { printVolumeTypeDropdown } from '../../../components/the-memes/TheMemes';
 import { VolumeType } from '../../../entities/INFT';
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const Dropdown: any = (p: any) => <div>{p.children}</div>;
-  Dropdown.Toggle = (p: any) => <button>{p.children}</button>;
-  Dropdown.Menu = (p: any) => <div>{p.children}</div>;
-  Dropdown.Item = (p: any) => <div data-testid="item">{p.children}</div>;
-  return { Dropdown };
-});
+jest.mock('@headlessui/react', () => ({
+  Menu: ({ children }: any) => <div>{children}</div>,
+  MenuButton: (p: any) => <button>{p.children}</button>,
+  MenuItems: (p: any) => <div>{p.children}</div>,
+  MenuItem: (p: any) => {
+    const child = typeof p.children === 'function' ? p.children({ focus: false }) : p.children;
+    return React.cloneElement(child, { 'data-testid': 'item' });
+  },
+}));
 
 jest.mock('../../../components/the-memes/TheMemes.module.scss', () => ({}));
 
