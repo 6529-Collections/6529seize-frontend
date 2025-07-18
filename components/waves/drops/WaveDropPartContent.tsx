@@ -25,6 +25,7 @@ interface WaveDropPartContentProps {
   readonly onSave?: (newContent: string) => void;
   readonly onCancel?: () => void;
   readonly drop?: ApiDrop;
+  readonly isCompetitionDrop?: boolean;
 }
 
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
@@ -43,6 +44,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   onSave,
   onCancel,
   drop,
+  isCompetitionDrop = false,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -128,7 +130,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
             />
           </div>
           {!!activePart.media.length && (
-            <WaveDropPartContentMedias activePart={activePart} />
+            <WaveDropPartContentMedias activePart={activePart} isCompetitionDrop={isCompetitionDrop} />
           )}
         </div>
 
