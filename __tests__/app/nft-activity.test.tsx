@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import NFTActivityPage from '../../pages/nft-activity';
+import NFTActivityPage, { generateMetadata } from '@/app/nft-activity/page';
 import { AuthContext } from '../../components/auth/Auth';
 
 
@@ -119,11 +119,10 @@ describe('NFTActivityPage', () => {
     // Title is set via TitleContext hooks
   });
 
-  it('has correct metadata', () => {
-    expect(NFTActivityPage.metadata).toEqual({
-      title: 'NFT Activity',
-      description: 'Network',
-    });
+  it('has correct metadata', async () => {
+    process.env.BASE_ENDPOINT = 'https://example.com';
+    const metadata = await generateMetadata();
+    expect(metadata).toMatchObject({ title: 'NFT Activity', description: 'Network | 6529.io' });
   });
 
   it('renders with main element having correct class', () => {

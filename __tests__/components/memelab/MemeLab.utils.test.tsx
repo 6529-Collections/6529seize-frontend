@@ -104,7 +104,7 @@ describe("MemeLab utilities", () => {
         )}
       </div>
     );
-    await userEvent.click(screen.getByRole("button", { name: "Edition-size" }));
+    await userEvent.click(screen.getByRole("button", { name: "Edition Size" }));
     expect(setSort).toHaveBeenCalled();
   });
 
