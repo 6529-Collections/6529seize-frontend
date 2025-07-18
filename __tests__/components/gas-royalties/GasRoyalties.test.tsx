@@ -7,10 +7,11 @@ import {
   GasRoyaltiesCollectionFocus,
 } from "../../../components/gas-royalties/GasRoyalties";
 import { DateIntervalsSelection } from "../../../enums";
+import { usePathname, useRouter } from "next/navigation";
 
-jest.mock("next/router", () => ({
-  __esModule: true,
-  default: { push: jest.fn(), pathname: "/" },
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
 jest.mock("../../../services/6529api", () => ({
@@ -43,18 +44,20 @@ jest.mock("next/image", () => ({
 }));
 jest.mock("react-tooltip", () => ({
   Tooltip: ({ children, id }: any) => (
-    <div data-testid={`tooltip-${id}`}>
-      {children}
-    </div>
+    <div data-testid={`tooltip-${id}`}>{children}</div>
   ),
 }));
 
 beforeEach(() => {
-  (require("next/router").default.push as jest.Mock).mockClear();
+  (useRouter as jest.Mock).mockClear();
 });
 
 it("renders download widget and triggers focus change", async () => {
-  const setFocus = jest.fn();
+  const pathname = "/meme-gas";
+  const push = jest.fn();
+  (useRouter as jest.Mock).mockReturnValue({ push });
+  (usePathname as jest.Mock).mockReturnValue(pathname);
+
   render(
     <GasRoyaltiesHeader
       title="Gas"
@@ -66,7 +69,6 @@ it("renders download widget and triggers focus change", async () => {
       is_primary={false}
       is_custom_blocks={false}
       focus={GasRoyaltiesCollectionFocus.MEMES}
-      setFocus={setFocus}
       getUrl={() => "https://test.6529.io/file"}
       setSelectedArtist={jest.fn()}
       setIsPrimary={jest.fn()}
@@ -83,7 +85,9 @@ it("renders download widget and triggers focus change", async () => {
   );
   const memeLab = screen.getByText("Meme Lab");
   fireEvent.click(memeLab);
-  expect(setFocus).toHaveBeenCalledWith(GasRoyaltiesCollectionFocus.MEMELAB);
+  expect(push).toHaveBeenCalledWith(
+    `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
+  );
 });
 
 it("renders token image with optional note", () => {
