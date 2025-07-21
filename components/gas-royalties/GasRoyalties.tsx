@@ -2,24 +2,19 @@
 
 import styles from "./GasRoyalties.module.scss";
 import { Row, Col, Dropdown, Container } from "react-bootstrap";
-import { DateIntervalsSelection } from "../../enums";
+import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
 import DotLoader from "../dotLoader/DotLoader";
-import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
+import DownloadUrlWidget from "@/components/downloadUrlWidget/DownloadUrlWidget";
 import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 import { useState, useEffect } from "react";
-import { fetchUrl } from "../../services/6529api";
-import { getDateFilters } from "../../helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { getDateFilters } from "@/helpers/Helpers";
 import { useRouter, usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DatePickerModal from "../datePickerModal/DatePickerModal";
-import { ApiArtistNameItem } from "../../generated/models/ApiArtistNameItem";
+import DatePickerModal from "@/components/datePickerModal/DatePickerModal";
+import { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-
-export enum GasRoyaltiesCollectionFocus {
-  MEMES = "the-memes",
-  MEMELAB = "meme-lab",
-}
 
 interface HeaderProps {
   title: string;

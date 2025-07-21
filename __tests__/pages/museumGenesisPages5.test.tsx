@@ -1,65 +1,71 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import Century from '../../pages/museum/genesis/century';
-import Meridian from '../../pages/museum/genesis/meridian';
-import PublicDomain from '../../pages/museum/6529-public-domain';
-import Archetype from '../../pages/museum/genesis/archetype';
-import FragmentsOfAnInfiniteField from '../../pages/museum/genesis/fragments-of-an-infinite-field';
-import Nimbuds from '../../pages/museum/genesis/nimbuds';
-import NftPhotography from '../../pages/museum/nft-photography';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import Century from "@/app/museum/genesis/century/page";
+import Meridian from "@/app/museum/genesis/meridian/page";
+import PublicDomain from "@/app/museum/6529-public-domain/page";
+import Archetype from "@/app/museum/genesis/archetype/page";
+import FragmentsOfAnInfiniteField from "@/app/museum/genesis/fragments-of-an-infinite-field/page";
+import Nimbuds from "@/app/museum/genesis/nimbuds/page";
+import NftPhotography from "@/app/museum/nft-photography/page";
 
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
+jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
-describe('museum genesis pages', () => {
-  it('renders Century page', () => {
+describe("museum genesis pages", () => {
+  it("renders Century page", () => {
     render(<Century />);
     expect(screen.getAllByText(/CENTURY/i).length).toBeGreaterThan(0);
   });
 
-  it('renders Meridian page', () => {
+  it("renders Meridian page", () => {
     render(<Meridian />);
     expect(screen.getAllByText(/MERIDIAN/i).length).toBeGreaterThan(0);
   });
 
-  it('renders 6529 Public Domain page', () => {
+  it("renders 6529 Public Domain page", () => {
     render(<PublicDomain />);
-    expect(screen.getAllByText(/6529 PUBLIC DOMAIN/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/6529 PUBLIC DOMAIN/i).length).toBeGreaterThan(
+      0
+    );
   });
 
-  it('renders Archetype page', () => {
+  it("renders Archetype page", () => {
     render(<Archetype />);
     expect(screen.getAllByText(/ARCHETYPE/i).length).toBeGreaterThan(0);
   });
 
-  it('renders Fragments of an Infinite Field page', () => {
+  it("renders Fragments of an Infinite Field page", () => {
     render(<FragmentsOfAnInfiniteField />);
-    expect(screen.getAllByText(/FRAGMENTS OF AN INFINITE FIELD/i).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(/FRAGMENTS OF AN INFINITE FIELD/i).length
+    ).toBeGreaterThan(0);
   });
 
-  it('renders Nimbuds page', () => {
+  it("renders Nimbuds page", () => {
     render(<Nimbuds />);
     expect(screen.getAllByText(/NIMBUDS/i).length).toBeGreaterThan(0);
   });
 
-  it('renders NFT Photography page', () => {
+  it("renders NFT Photography page", () => {
     render(<NftPhotography />);
     expect(screen.getAllByText(/NFT PHOTOGRAPHY/i).length).toBeGreaterThan(0);
   });
 
-  it('renders Archetype with artist information', () => {
+  it("renders Archetype with artist information", () => {
     render(<Archetype />);
     expect(screen.getByText(/Kjetil Golid/i)).toBeInTheDocument();
     expect(screen.getByText(/02\/27\/2021/i)).toBeInTheDocument();
   });
 
-  it('renders public domain with visit button', () => {
+  it("renders public domain with visit button", () => {
     render(<PublicDomain />);
-    expect(screen.getByRole('link', { name: /VISIT 6529 PUBLIC DOMAIN/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /VISIT 6529 PUBLIC DOMAIN/i })
+    ).toBeInTheDocument();
   });
 
-  it('renders Archetype with NFT images', () => {
+  it("renders Archetype with NFT images", () => {
     render(<Archetype />);
-    const images = screen.getAllByRole('img');
+    const images = screen.getAllByRole("img");
     expect(images.length).toBeGreaterThan(0);
   });
 });
