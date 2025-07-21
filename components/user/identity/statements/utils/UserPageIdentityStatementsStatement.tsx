@@ -6,7 +6,7 @@ import CopyIcon from "../../../../utils/icons/CopyIcon";
 import SocialStatementIcon from "../../../utils/icons/SocialStatementIcon";
 import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteStatementButton";
 import { useCopyToClipboard } from "react-use";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import OutsideLinkIcon from "../../../../utils/icons/OutsideLinkIcon";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { useRouter } from "next/router";
@@ -48,36 +48,58 @@ export default function UserPageIdentityStatementsStatement({
         <span>{title}</span>
       </div>
       {canOpen && (
-        <Tippy
-          content="Open"
-          theme="dark"
-          placement="top"
-          disabled={isTouchScreen}>
+        <>
           <a
             href={statement.statement_value}
             target="_blank"
             rel="noopener noreferrer"
             className={`${
               isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-            } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}>
+            } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+            data-tooltip-id={`open-statement-${statement.statement_type}`}
+          >
             <OutsideLinkIcon />
           </a>
-        </Tippy>
+          {!isTouchScreen && (
+            <Tooltip
+              id={`open-statement-${statement.statement_type}`}
+              place="top"
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              Open
+            </Tooltip>
+          )}
+        </>
       )}
-      <Tippy
-        content="Copy"
-        theme="dark"
-        placement="top"
-        disabled={isTouchScreen}>
+      <>
         <button
           aria-label="Copy"
           className={`${
             isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
           } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-          onClick={handleCopy}>
+          onClick={handleCopy}
+          data-tooltip-id={`copy-statement-${statement.statement_type}`}
+        >
           <CopyIcon />
         </button>
-      </Tippy>
+        {!isTouchScreen && (
+          <Tooltip
+            id={`copy-statement-${statement.statement_type}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            Copy
+          </Tooltip>
+        )}
+      </>
       {canEdit && (
         <UserPageIdentityDeleteStatementButton
           statement={statement}

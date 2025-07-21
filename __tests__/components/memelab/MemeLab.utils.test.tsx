@@ -75,7 +75,7 @@ const nftMeta: LabExtendedData = {
 describe("MemeLab utilities", () => {
   it("parses router query for initial values", () => {
     const router = {
-      query: { sort: MemeLabSort.HODLERS, sort_dir: "DESC" },
+      query: { sort: 'hodlers', sort_dir: "DESC" },
     } as unknown as NextRouter;
     const { initialSortDir, initialSort } = getInitialRouterValues(router);
     expect(initialSort).toBe(MemeLabSort.HODLERS);
@@ -104,7 +104,7 @@ describe("MemeLab utilities", () => {
         )}
       </div>
     );
-    await userEvent.click(screen.getByRole("button", { name: "Edition-size" }));
+    await userEvent.click(screen.getByRole("button", { name: "Edition Size" }));
     expect(setSort).toHaveBeenCalled();
   });
 

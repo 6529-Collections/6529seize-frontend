@@ -1,5 +1,5 @@
 import React from "react";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { ApiDropRater } from "../../../../generated/models/ApiDropRater";
@@ -54,15 +54,11 @@ export default function MemeDropVoteStats({
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center -tw-space-x-1.5 -tw-mt-0.5">
           {firstThreeVoters.map((voter) => (
-            <Tippy
-              key={voter.profile.handle}
-              content={`${voter.profile.handle} - ${formatNumberWithCommas(
-                voter.rating
-              )}`}
-            >
+            <div key={voter.profile.handle}>
               <Link
                 href={`/${voter.profile.handle}`}
                 onClick={(e) => e.stopPropagation()}
+                data-tooltip-id={`vote-stats-${voter.profile.handle}`}
               >
                 {voter.profile.pfp ? (
                   <img
@@ -74,7 +70,19 @@ export default function MemeDropVoteStats({
                   <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" />
                 )}
               </Link>
-            </Tippy>
+              <Tooltip
+                id={`vote-stats-${voter.profile.handle}`}
+                place="top"
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}>
+                <span className="tw-text-xs">{`${voter.profile.handle} - ${formatNumberWithCommas(
+                  voter.rating
+                )}`}</span>
+              </Tooltip>
+            </div>
           ))}
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">

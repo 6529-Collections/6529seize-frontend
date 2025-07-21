@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface SingleWaveDropContentMetadataProps {
@@ -21,11 +21,27 @@ const MetadataItem: React.FC<{ label: string; value: string }> = ({
       <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">
         {label}:
       </span>
-      <Tippy disabled={isMobile} content={value} placement="top" theme="dark">
-        <span className="tw-text-iron-50 tw-text-xs tw-font-medium tw-truncate">
+      <>
+        <span 
+          className="tw-text-iron-50 tw-text-xs tw-font-medium tw-truncate"
+          data-tooltip-id={`metadata-${label}-${value}`}
+        >
           {value}
         </span>
-      </Tippy>
+        {!isMobile && (
+          <Tooltip
+            id={`metadata-${label}-${value}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
+            {value}
+          </Tooltip>
+        )}
+      </>
     </div>
   );
 };

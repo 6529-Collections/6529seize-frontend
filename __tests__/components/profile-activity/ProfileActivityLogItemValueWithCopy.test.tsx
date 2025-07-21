@@ -5,7 +5,6 @@ import { useCopyToClipboard } from 'react-use';
 import { useRouter } from 'next/router';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
-jest.mock('@tippyjs/react', () => (props: any) => <span>{props.children}</span>);
 jest.mock("react-use", () => ({ useCopyToClipboard: jest.fn() }));
 describe('ProfileActivityLogItemValueWithCopy', () => {
   const copy = jest.fn();

@@ -48,6 +48,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
+          zIndex: 10,
         }}>
         <span className="tw-text-xs">Delete</span>
       </Tooltip>

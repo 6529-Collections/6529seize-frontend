@@ -33,10 +33,12 @@ function DropListItemContentMediaImage({
   src,
   maxRetries = 0,
   onContainerClick,
+  isCompetitionDrop = false,
 }: {
   readonly src: string;
   readonly maxRetries?: number;
   readonly onContainerClick?: () => void;
+  readonly isCompetitionDrop?: boolean;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -256,7 +258,9 @@ function DropListItemContentMediaImage({
     <>
       <div
         ref={ref}
-        className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-mx-[1px]">
+        className={`tw-w-full tw-h-full tw-flex tw-items-center tw-relative tw-mx-[1px] ${
+          isCompetitionDrop ? "tw-justify-center" : ""
+        }`}>
         {!loaded && errorCount <= maxRetries && (
           <div
             className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"

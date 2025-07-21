@@ -54,7 +54,7 @@ export default function UserProfileTooltip({
     : null;
 
   return (
-    <div className="tailwind-scope tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700 tw-rounded-xl tw-p-4 tw-min-w-[280px] tw-max-w-[320px] tw-shadow-xl">
+    <div className="tailwind-scope tw-bg-iron-950 tw-min-w-[280px] tw-max-w-[320px]">
       <div className="tw-flex tw-flex-col tw-gap-y-2">
         <div className="tw-flex tw-justify-start">
           <div className="tw-flex-shrink-0">

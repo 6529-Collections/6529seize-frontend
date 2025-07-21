@@ -4,7 +4,6 @@ import { SingleWaveDropVoter } from '../../../../components/waves/drop/SingleWav
 import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock('@tippyjs/react', () => ({ children }: any) => <div data-testid="tippy">{children}</div>);
 
 describe('SingleWaveDropVoter', () => {
   const baseVoter = {

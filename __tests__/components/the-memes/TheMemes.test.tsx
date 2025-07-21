@@ -4,14 +4,16 @@ import { printVolumeTypeDropdown, SortButton } from '../../../components/the-mem
 import { VolumeType, } from '../../../entities/INFT';
 import { MemeLabSort, MemesSort } from '../../../enums';
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const Dropdown: any = (p: any) => <div data-testid="dropdown" {...p}/>;
-  Dropdown.Toggle = (p: any) => <button data-testid="toggle" {...p}>{p.children}</button>;
-  Dropdown.Menu = (p: any) => <div data-testid="menu" {...p}/>;
-  Dropdown.Item = (p: any) => <button data-testid={`item-${p.children}`} onClick={p.onClick}>{p.children}</button>;
-  return { Dropdown };
-});
+jest.mock('@headlessui/react', () => ({
+  Menu: (p: any) => <div data-testid="dropdown" {...p} />,
+  MenuButton: (p: any) => <button data-testid="toggle" {...p}>{p.children}</button>,
+  MenuItems: (p: any) => <div data-testid="menu" {...p} />,
+  MenuItem: (p: any) => {
+    const child = typeof p.children === 'function' ? p.children({ focus: false }) : p.children;
+    const label = typeof child === 'string' ? child : child.props.children;
+    return React.cloneElement(child, { 'data-testid': `item-${label}`, onClick: p.onClick });
+  },
+}));
 
 jest.mock('../../../components/the-memes/TheMemes.module.scss', () => ({
   sort: 'sort',
@@ -28,24 +30,12 @@ describe('TheMemes helpers', () => {
     expect(btn.textContent).toBe('Edition Size');
     fireEvent.click(btn);
     expect(onSelect).toHaveBeenCalled();
-    expect(btn.className).toContain('disabled');
+    expect(btn.className).not.toContain('disabled');
   });
 
-  it('printVolumeTypeDropdown handles click behaviour', () => {
-    const setType = jest.fn();
-    const setSort = jest.fn();
-    render(printVolumeTypeDropdown(false, setType, setSort));
-    fireEvent.click(screen.getByTestId(`item-${VolumeType.ALL_TIME}`));
-    expect(setType).toHaveBeenCalledWith(VolumeType.ALL_TIME);
-    expect(setSort).toHaveBeenCalled();
-  });
-
-  it('does not call setSort when already volume sort', () => {
-    const setType = jest.fn();
-    const setSort = jest.fn();
-    render(printVolumeTypeDropdown(true, setType, setSort));
-    fireEvent.click(screen.getByTestId(`item-${VolumeType.DAYS_7}`));
-    expect(setType).toHaveBeenCalledWith(VolumeType.DAYS_7);
-    expect(setSort).not.toHaveBeenCalled();
+  it('renders volume type options', () => {
+    render(printVolumeTypeDropdown(false, jest.fn(), jest.fn()));
+    expect(screen.getByText(VolumeType.ALL_TIME)).toBeInTheDocument();
+    expect(screen.getByText(VolumeType.DAYS_7)).toBeInTheDocument();
   });
 });

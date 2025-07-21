@@ -27,9 +27,12 @@ jest.mock('../../../../components/address/Address', () => (props: any) => <div d
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: (props: any) => <svg data-testid={props.icon.iconName} />,
 }));
-jest.mock('@tippyjs/react', () => ({
-  __esModule: true,
-  default: ({ children }: any) => <span data-testid="tippy">{children}</span>,
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
+  ),
 }));
 
 // Mock hooks
@@ -231,7 +234,7 @@ describe('NextGenTokenOnChain', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Marketplaces')).toBeInTheDocument();
-      expect(screen.getByTestId('tippy')).toBeInTheDocument();
+      expect(screen.getByTestId(/^tooltip-/)).toBeInTheDocument();
     });
   });
 

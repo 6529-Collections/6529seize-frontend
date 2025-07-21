@@ -2,7 +2,7 @@ import React from "react";
 import { ApiWaveVoter } from "../../../../generated/models/ApiWaveVoter";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 
@@ -43,8 +43,26 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
         </Link>
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-ml-6">
-        <Tippy
-          content={
+        <>
+          <div 
+            className="tw-flex tw-items-center tw-gap-1"
+            data-tooltip-id={`voter-votes-${voter.voter.handle}-${position}`}
+          >
+            {hasPositiveVotes && (
+              <div className="tw-w-1.5 tw-h-1.5 tw-rounded-sm tw-bg-green" />
+            )}
+            {hasNegativeVotes && (
+              <div className="tw-w-1.5 tw-h-1.5 tw-rounded-sm tw-bg-red" />
+            )}
+          </div>
+          <Tooltip
+            id={`voter-votes-${voter.voter.handle}-${position}`}
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
+            }}
+          >
             <div className="tw-text-sm tw-space-x-1">
               <div className="tw-text-green">
                 +{formatNumberWithCommas(voter.positive_votes_summed)}
@@ -55,17 +73,8 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
                 </div>
               )}
             </div>
-          }
-        >
-          <div className="tw-flex tw-items-center tw-gap-1">
-            {hasPositiveVotes && (
-              <div className="tw-w-1.5 tw-h-1.5 tw-rounded-sm tw-bg-green" />
-            )}
-            {hasNegativeVotes && (
-              <div className="tw-w-1.5 tw-h-1.5 tw-rounded-sm tw-bg-red" />
-            )}
-          </div>
-        </Tippy>
+          </Tooltip>
+        </>
         <span className="tw-text-xs tw-text-iron-400 tw-whitespace-nowrap">
           {formatNumberWithCommas(voter.absolute_votes_summed)} {creditType}{" "}
           total

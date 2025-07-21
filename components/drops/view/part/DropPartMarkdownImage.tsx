@@ -37,19 +37,12 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const { isCapacitor } = useCapacitor();
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
-    if (imgRef.current) {
-      setNaturalSize({
-        width: imgRef.current.naturalWidth,
-        height: imgRef.current.naturalHeight,
-      });
-    }
   }, []);
 
   const handleImageClick = useCallback(
@@ -208,17 +201,9 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
 
   return (
     <>
-      <div className="tw-relative tw-w-full sm:tw-max-w-lg tw-mt-2 tw-flex">
-        {isLoading && (
-          <div
-            className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
-            style={{
-              paddingBottom: `${Math.min(
-                (1 / (naturalSize.width / naturalSize.height)) * 100,
-                70
-              )}%`,
-              maxHeight: "70vh",
-            }}></div>
+      <div className="tw-flex tw-mt-2">
+        {isLoading && ( 
+          <div className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl tw-h-80"></div>
         )}
         <img
           ref={imgRef}
@@ -226,12 +211,9 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
           alt={alt}
           onLoad={handleImageLoad}
           onClick={handleImageClick}
-          className={`tw-object-center tw-object-contain tw-max-w-full tw-h-auto tw-max-h-[70vh] ${
+          className={`tw-object-center tw-object-contain tw-max-w-full tw-h-80 tw-cursor-pointer ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
-          } tw-cursor-pointer`}
-          style={{
-            width: naturalSize.width > 0 ? `${naturalSize.width}px` : "100%",
-          }}
+          }`}
           {...props}
         />
       </div>

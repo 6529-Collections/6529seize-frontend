@@ -5,7 +5,7 @@ import styles from "./Clap.module.scss";
 import mojs from "@mojs/core";
 import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
 import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
-import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
+import { Tooltip } from "react-tooltip";
 import { DropVoteState } from "../../../../../../../hooks/drops/types";
 import { VOTE_STATE_ERRORS } from "../DropListItemRateGiveSubmit";
 
@@ -222,16 +222,15 @@ export default function DropListItemRateGiveClap({
   }, [rate]);
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
+  const tooltipId = `clap-tooltip-${randomID}`;
+  
   return (
-    <LazyTippy
-      placement="top"
-      interactive={false}
-      disabled={canVote}
-      content={<div>{VOTE_STATE_ERRORS[voteState]}</div>}>
+    <>
       <div className="tailwind-scope">
         <button
           disabled={!rate || !canVote}
           id={`clap-${randomID}`}
+          data-tooltip-id={!canVote ? tooltipId : undefined}
           aria-label="Clap for drop"
           className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-current tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
           onClick={(e) => {
@@ -259,6 +258,21 @@ export default function DropListItemRateGiveClap({
           </span>
         </button>
       </div>
-    </LazyTippy>
+      
+      {!canVote && (
+        <Tooltip
+          id={tooltipId}
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+            fontSize: "12px",
+            borderRadius: "4px",
+          }}>
+          {VOTE_STATE_ERRORS[voteState]}
+        </Tooltip>
+      )}
+    </>
   );
 }

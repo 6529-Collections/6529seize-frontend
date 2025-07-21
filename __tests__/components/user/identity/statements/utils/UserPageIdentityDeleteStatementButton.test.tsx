@@ -15,9 +15,12 @@ jest.mock("../../../../../../components/user/identity/statements/utils/UserPageI
   ),
 }));
 
-jest.mock("@tippyjs/react", () => ({
-  __esModule: true,
-  default: (props: any) => <div data-testid="tippy" data-disabled={props.disabled}>{props.children}</div>,
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid="react-tooltip" data-tooltip-id={id}>
+      {children}
+    </div>
+  ),
 }));
 
 const statement = { id: "1" } as any;

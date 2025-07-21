@@ -4,7 +4,6 @@ import MemeDropVoteStats from '../../../../../components/memes/drops/meme-partic
 import { ApiDropRater } from '../../../../generated/models/ApiDropRater';
 
 jest.mock('next/link', () => ({__esModule:true, default: ({href,children}:any) => <a href={href}>{children}</a>}));
-jest.mock('@tippyjs/react', () => (props:any) => <span>{props.children}</span>);
 
 const voters: ApiDropRater[] = [
   { profile: { handle: 'bob', pfp: 'img' } as any, rating: 3 } as ApiDropRater

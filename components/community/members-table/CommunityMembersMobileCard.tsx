@@ -7,7 +7,7 @@ import {
   cicToType,
 } from "../../../helpers/Helpers";
 import UserLevel from "../../user/utils/level/UserLevel";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import UserCICTypeIcon from "../../user/utils/user-cic-type/UserCICTypeIcon";
 import {
   isEthereumAddress,
@@ -103,15 +103,23 @@ export default function CommunityMembersMobileCard({
               <span className="tw-font-semibold tw-text-iron-50 tw-text-xxs">
                 {formatNumberWithCommasOrDash(member.cic)}
               </span>
-              <Tippy
-                placement="top"
-                interactive={false}
-                content={CIC_TO_TEXT[cicToType(member.cic)]}
+              <span 
+                className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+                data-tooltip-id={`cic-tooltip-${member.detail_view_key}`}
               >
-                <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
-                  <UserCICTypeIcon cic={member.cic} />
-                </span>
-              </Tippy>
+                <UserCICTypeIcon cic={member.cic} />
+              </span>
+              <Tooltip 
+                id={`cic-tooltip-${member.detail_view_key}`}
+                place="top"
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white", 
+                  padding: "4px 8px",
+                }}
+              >
+                {CIC_TO_TEXT[cicToType(member.cic)]}
+              </Tooltip>
             </div>
           </div>
         </div>

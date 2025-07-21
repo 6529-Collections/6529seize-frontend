@@ -19,7 +19,6 @@ jest.mock('../../../../components/drops/view/item/options/delete/DropsListItemDe
   )
 }));
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
 
 describe('WaveDropActionsOptions', () => {
   it('opens and closes delete modal', () => {

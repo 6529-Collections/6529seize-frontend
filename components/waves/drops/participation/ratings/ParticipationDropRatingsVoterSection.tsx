@@ -1,4 +1,5 @@
-import Tippy from "@tippyjs/react";
+import React from "react";
+import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import {
@@ -24,24 +25,11 @@ export default function ParticipationDropRatingsVoterSection({
       {hasRaters && (
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
           {drop.top_raters.slice(0, 5).map((rater, index) => (
-            <Tippy
-              key={rater.profile.id}
-              content={
-                <span className="tw-text-sm tw-font-medium">
-                  {rater.profile.handle} •{" "}
-                  {formatNumberWithCommas(rater.rating)}{" "}
-                  {drop.wave.voting_credit_type}
-                </span>
-              }
-              interactive={true}
-              delay={[0, 0]}
-              hideOnClick={false}
-              appendTo={() => document.body}
-              zIndex={1000}
-            >
+            <div key={rater.profile.id}>
               <div
                 className="tw-relative tw-transition-transform hover:tw-scale-110 hover:tw-z-10"
                 style={{ zIndex: drop.top_raters.length - index }}
+                data-tooltip-id={`participation-rater-${rater.profile.id}`}
               >
                 {rater.profile.pfp && (
                   <Link href={`/${rater.profile.handle}`}>
@@ -56,7 +44,19 @@ export default function ParticipationDropRatingsVoterSection({
                   </Link>
                 )}
               </div>
-            </Tippy>
+              <Tooltip
+                id={`participation-rater-${rater.profile.id}`}
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}
+              >
+                {rater.profile.handle} •{" "}
+                {formatNumberWithCommas(rater.rating)}{" "}
+                {drop.wave.voting_credit_type}
+              </Tooltip>
+            </div>
           ))}
           {drop.raters_count > 5 && (
             <div

@@ -3,7 +3,7 @@ import {
   ProfileProxySide,
 } from "../../../../../entities/IProxy";
 import { ApiProfileMin } from "../../../../../generated/models/ApiProfileMin";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 
 const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
   [ProfileProxyActionStatus.ACTIVE]:
@@ -43,8 +43,11 @@ export default function ProxyActionRowStatus({
   readonly side: ProfileProxySide;
 }) {
   return (
-    <Tippy content={statusOwnerProfile.handle}>
-      <div className="tw-inline-flex tw-space-x-2 lg:tw-min-w-[6.6rem]">
+    <>
+      <div 
+        className="tw-inline-flex tw-space-x-2 lg:tw-min-w-[6.6rem]"
+        data-tooltip-id={`proxy-status-${statusOwnerProfile.id}`}
+      >
         {statusOwnerProfile.pfp ? (
           <img
             src={statusOwnerProfile.pfp}
@@ -60,6 +63,16 @@ export default function ProxyActionRowStatus({
           {STATUS_LABELS[side][status]}
         </div>
       </div>
-    </Tippy>
+      <Tooltip
+        id={`proxy-status-${statusOwnerProfile.id}`}
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white",
+          padding: "4px 8px",
+        }}
+      >
+        {statusOwnerProfile.handle}
+      </Tooltip>
+    </>
   );
 }

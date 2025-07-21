@@ -1,6 +1,6 @@
 "use client";
 
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
 import StormButton from "./StormButton";
@@ -79,17 +79,15 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   ease: "easeInOut",
                 }}
                 className="tw-flex tw-items-center tw-gap-x-2 tw-overflow-hidden">
-                <Tippy
-                  content={<span className="tw-text-xs">Add metadata</span>}
-                  disabled={isMobile}
-                  trigger="mouseenter">
+                <>
                   <button
                     onClick={onAddMetadataClick}
                     className={`tw-flex-shrink-0 ${
                       isRequiredMetadataMissing
                         ? "tw-text-[#FEDF89]"
                         : "tw-text-iron-400"
-                    } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/80 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}>
+                    } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/80 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
+                    data-tooltip-id="add-metadata-tooltip">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -105,24 +103,35 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       />
                     </svg>
                   </button>
-                </Tippy>
+                  {!isMobile && (
+                    <Tooltip
+                      id="add-metadata-tooltip"
+                      place="top"
+                      positionStrategy="fixed"
+                      style={{
+                        backgroundColor: "#1F2937",
+                        color: "white",
+                        padding: "4px 8px",
+                      }}>
+                      <span className="tw-text-xs">Add metadata</span>
+                    </Tooltip>
+                  )}
+                </>
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2, delay: 0.1 }}
                   className="tw-flex tw-items-center tw-gap-x-2">
-                  <Tippy
-                    content={<span className="tw-text-xs">Upload a file</span>}
-                    disabled={isMobile}
-                    trigger="mouseenter">
+                  <>
                     <label
                       aria-label="Upload a file"
                       className={`tw-flex-shrink-0 ${
                         isRequiredMediaMissing
                           ? "tw-text-[#FEDF89]"
                           : "tw-text-iron-400"
-                      } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}>
+                      } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
+                      data-tooltip-id="upload-file-tooltip">
                       <input
                         type="file"
                         className="tw-hidden"
@@ -145,16 +154,28 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         />
                       </svg>
                     </label>
-                  </Tippy>
+                    {!isMobile && (
+                      <Tooltip
+                        id="upload-file-tooltip"
+                        place="top"
+                        positionStrategy="fixed"
+                        style={{
+                          backgroundColor: "#1F2937",
+                          color: "white",
+                          padding: "4px 8px",
+                          zIndex: 9999,
+                        }}>
+                        <span className="tw-text-xs">Upload a file</span>
+                      </Tooltip>
+                    )}
+                  </>
                   {gifPickerEnabled && (
-                    <Tippy
-                      content={<span className="tw-text-xs">Add GIF</span>}
-                      disabled={isMobile}
-                      trigger="mouseenter">
+                    <>
                       <button
                         onClick={() => setShowGifPicker(true)}
                         aria-label="Add GIF"
-                        className={`tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}>
+                        className={`tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
+                        data-tooltip-id="add-gif-tooltip">
                         <svg
                           className="tw-flex-shrink-0 tw-size-5"
                           viewBox="0 0 24 24"
@@ -182,7 +203,21 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           </g>
                         </svg>
                       </button>
-                    </Tippy>
+                      {!isMobile && (
+                        <Tooltip
+                          id="add-gif-tooltip"
+                          place="top"
+                          positionStrategy="fixed"
+                          style={{
+                            backgroundColor: "#1F2937",
+                            color: "white",
+                            padding: "4px 8px",
+                            zIndex: 9999,
+                          }}>
+                          <span className="tw-text-xs">Add GIF</span>
+                        </Tooltip>
+                      )}
+                    </>
                   )}
                   <StormButton
                     isStormMode={isStormMode}

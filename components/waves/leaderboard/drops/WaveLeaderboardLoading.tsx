@@ -26,7 +26,7 @@ export const WaveLeaderboardLoading: React.FC = () => {
             ></path>
           </svg>
         </div>
-        <div className="tw-text-iron-400">Loading drops...</div>
+        <div className="tw-text-iron-500 tw-text-sm">Loading drops...</div>
       </div>
     </div>
   );

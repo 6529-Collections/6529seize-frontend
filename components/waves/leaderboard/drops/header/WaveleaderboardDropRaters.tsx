@@ -1,7 +1,7 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import {
   getScaledImageUri,
@@ -63,24 +63,12 @@ export const WaveLeaderboardDropRaters: React.FC<
       <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap">
         <div className="tw-flex -tw-space-x-1.5 tw-items-center">
           {drop.top_raters.map((voter, index) => (
-            <Tippy
-              key={voter.profile.id}
-              content={
-                <span className="tw-text-sm tw-font-medium">
-                  {voter.profile.handle} •{" "}
-                  {formatNumberWithCommas(voter.rating)}{" "}
-                  {drop.wave.voting_credit_type}
-                </span>
-              }
-              interactive={true}
-              delay={[0, 0]}
-              hideOnClick={false}
-              appendTo={() => document.body}
-              zIndex={1000}
-            >
+            <>
               <div
+                key={voter.profile.id}
                 className="tw-relative tw-transition-transform hover:tw-scale-110 hover:tw-z-10"
                 style={{ zIndex: drop.top_raters.length - index }}
+                data-tooltip-id={`voter-${drop.id}-${voter.profile.id}`}
               >
                 <Link href={`/${voter.profile.handle}`}>
                   {voter.profile.pfp ? (
@@ -97,7 +85,23 @@ export const WaveLeaderboardDropRaters: React.FC<
                   )}
                 </Link>
               </div>
-            </Tippy>
+              <Tooltip
+                id={`voter-${drop.id}-${voter.profile.id}`}
+                delayShow={0}
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                  zIndex: 1000,
+                }}
+              >
+                <span className="tw-text-sm tw-font-medium">
+                  {voter.profile.handle} •{" "}
+                  {formatNumberWithCommas(voter.rating)}{" "}
+                  {drop.wave.voting_credit_type}
+                </span>
+              </Tooltip>
+            </>
           ))}
         </div>
         <span className="tw-text-sm tw-text-iron-400">

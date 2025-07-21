@@ -12,15 +12,17 @@ import {
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 
 export default function RoyaltiesComponent() {
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [royalties, setRoyalties] = useState<Royalty[]>([]);
   const [sumVolume, setSumVolume] = useState(0);
@@ -48,18 +50,16 @@ export default function RoyaltiesComponent() {
   } = useSharedState();
 
   useEffect(() => {
-    if (router.isReady) {
-      const routerFocus = router.query.focus as string;
-      const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
-        (sd) => sd === routerFocus
-      );
-      if (resolvedFocus) {
-        setCollectionFocus(resolvedFocus);
-      } else {
-        setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
-      }
+    const routerFocus = searchParams?.get("focus") as string;
+    const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
+      (sd) => sd === routerFocus
+    );
+    if (resolvedFocus) {
+      setCollectionFocus(resolvedFocus);
+    } else {
+      router.push(`${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`);
     }
-  }, [router.isReady]);
+  }, [searchParams]);
 
   function getUrlWithParams() {
     return getUrl("royalties");
@@ -166,14 +166,21 @@ export default function RoyaltiesComponent() {
                       <div className="d-flex align-items-center justify-content-center gap-2">
                         {isPrimary ? "Primary Proceeds" : "Royalties"}
                         {isPrimary && (
-                          <Tippy
-                            content="Total Minter payments less the Manifold fee"
-                            placement={"auto"}
-                            theme={"light"}>
+                          <>
                             <FontAwesomeIcon
                               className={styles.infoIcon}
-                              icon={faInfoCircle}></FontAwesomeIcon>
-                          </Tippy>
+                              icon={faInfoCircle}
+                              data-tooltip-id="primary-proceeds-tooltip"></FontAwesomeIcon>
+                            <Tooltip
+                              id="primary-proceeds-tooltip"
+                              style={{
+                                backgroundColor: "#1F2937",
+                                color: "white",
+                                padding: "4px 8px",
+                              }}>
+                              Total Minter payments less the Manifold fee
+                            </Tooltip>
+                          </>
                         )}
                       </div>
                     </th>
@@ -183,14 +190,21 @@ export default function RoyaltiesComponent() {
                     <th className="text-center">
                       <div className="d-flex align-items-center justify-content-center gap-2">
                         Artist Split{" "}
-                        <Tippy
-                          content={getTippyArtistsContent()}
-                          placement={"auto"}
-                          theme={"light"}>
+                        <>
                           <FontAwesomeIcon
                             className={styles.infoIcon}
-                            icon={faInfoCircle}></FontAwesomeIcon>
-                        </Tippy>
+                            icon={faInfoCircle}
+                            data-tooltip-id="artist-split-tooltip"></FontAwesomeIcon>
+                          <Tooltip
+                            id="artist-split-tooltip"
+                            style={{
+                              backgroundColor: "#1F2937",
+                              color: "white",
+                              padding: "4px 8px",
+                            }}>
+                            {getTippyArtistsContent()}
+                          </Tooltip>
+                        </>
                       </div>
                     </th>
                   </tr>

@@ -4,7 +4,7 @@ import { useCopyToClipboard } from "react-use";
 import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
 import { truncateTextMiddle } from "../../../../helpers/AllowlistToolHelpers";
 import { use, useEffect, useState } from "react";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { CreateSnapshotSnapshot } from "../CreateSnapshots";
 import { DistributionPlanTokenPoolDownloadStatus } from "../../../allowlist-tool/allowlist-tool.types";
 import CreateSnapshotTableRowDownload from "./CreateSnapshotTableRowDownload";
@@ -172,21 +172,31 @@ export default function CreateSnapshotTableRow({
         <div className="tw-h-full tw-flex tw-items-center">
           <span>{tokenIdsTruncated}</span>
           <div className="tw-pl-2 -tw-mt-0.5">
-            <Tippy content={tokenIdsTooltip} placement="top" theme="dark">
-              <svg
-                className="tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Tippy>
+            <svg
+              data-tooltip-id={`token-ids-tooltip-${snapshot.id}`}
+              className="tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <Tooltip
+              id={`token-ids-tooltip-${snapshot.id}`}
+              place="top"
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              {tokenIdsTooltip}
+            </Tooltip>
           </div>
         </div>
       </td>

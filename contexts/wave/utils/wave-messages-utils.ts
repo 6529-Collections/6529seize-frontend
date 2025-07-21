@@ -90,9 +90,9 @@ export async function fetchAroundSerialNoWaveMessages(
       params,
       signal,
       retryOptions: {
-        maxRetries: 3,
-        initialDelayMs: 1000,
-        backoffFactor: 2,
+        maxRetries: 2,
+        initialDelayMs: 300,
+        backoffFactor: 1.5,
         jitter: 0.1,
       },
     });

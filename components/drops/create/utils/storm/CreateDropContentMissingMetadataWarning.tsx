@@ -1,4 +1,4 @@
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { ApiWaveRequiredMetadata } from "../../../../../generated/models/ApiWaveRequiredMetadata";
 
 export default function CreateDropContentMissingMetadataWarning({
@@ -11,19 +11,11 @@ export default function CreateDropContentMissingMetadataWarning({
     NUMBER: "number",
   };
   return (
-    <Tippy
-      content={
-        <ul>
-          {missingMetadata.map((metadata, i) => (
-            <li key={`missing-metadata-tooltip-${i}`}>
-              &quot;{metadata.name}&quot; is required (type:{" "}
-              {TYPE_LABELS[metadata.type]})
-            </li>
-          ))}
-        </ul>
-      }
-    >
-      <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+    <>
+      <div 
+        className="tw-inline-flex tw-items-center tw-gap-x-2"
+        data-tooltip-id="missing-metadata-warning"
+      >
         <svg
           className="tw-size-4 tw-flex-shrink-0 tw-text-[#FEDF89]"
           viewBox="0 0 24 24"
@@ -42,6 +34,23 @@ export default function CreateDropContentMissingMetadataWarning({
 
         <span className="tw-text-xs tw-text-[#FEDF89]">Metadata is required</span>
       </div>
-    </Tippy>
+      <Tooltip 
+        id="missing-metadata-warning"
+        style={{
+          backgroundColor: "#1F2937",
+          color: "white", 
+          padding: "4px 8px",
+        }}
+      >
+        <ul>
+          {missingMetadata.map((metadata, i) => (
+            <li key={`missing-metadata-tooltip-${i}`}>
+              &quot;{metadata.name}&quot; is required (type:{" "}
+              {TYPE_LABELS[metadata.type]})
+            </li>
+          ))}
+        </ul>
+      </Tooltip>
+    </>
   );
 }

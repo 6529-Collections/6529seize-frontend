@@ -19,7 +19,7 @@ import Pagination from "../../../pagination/Pagination";
 import DotLoader from "../../../dotLoader/DotLoader";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import {
   formatNameForUrl,
   normalizeNextgenTokenID,
@@ -449,18 +449,21 @@ function TraitSetAccordion(
                   <Owner set={set} />
                 </span>
                 {props.values.length > 0 && missingValues.length === 0 && (
-                  <Tippy
-                    theme="light"
-                    delay={250}
-                    content={
-                      <>
-                        Complete <b>{props.trait}</b> trait set!
-                      </>
-                    }>
+                  <>
                     <FontAwesomeIcon
                       style={{ height: "1.5em", color: "#00aa00" }}
-                      icon={faCheckCircle}></FontAwesomeIcon>
-                  </Tippy>
+                      icon={faCheckCircle}
+                      data-tooltip-id={`complete-trait-${props.collection.id}-${props.trait}-${set.owner}`}></FontAwesomeIcon>
+                    <Tooltip
+                      id={`complete-trait-${props.collection.id}-${props.trait}-${set.owner}`}
+                      style={{
+                        backgroundColor: "#1F2937",
+                        color: "white",
+                        padding: "4px 8px",
+                      }}>
+                      Complete <b>{props.trait}</b> trait set!
+                    </Tooltip>
+                  </>
                 )}
               </Col>
             </Row>
@@ -497,12 +500,7 @@ function TraitSetAccordion(
                           href={`/nextgen/token/${t}`}
                           target="_blank"
                           rel="noreferrer">
-                          <Tippy
-                            theme="light"
-                            delay={250}
-                            content={`${props.collection.name} #${
-                              normalizeNextgenTokenID(t).token_id
-                            }`}>
+                          <>
                             <Image
                               priority
                               loading="eager"
@@ -516,6 +514,7 @@ function TraitSetAccordion(
                               }}
                               src={getNextGenIconUrl(t)}
                               alt={`#${t.toString()}`}
+                              data-tooltip-id={`token-${t}`}
                               onError={({ currentTarget }) => {
                                 if (
                                   currentTarget.src === getNextGenIconUrl(t)
@@ -524,7 +523,16 @@ function TraitSetAccordion(
                                 }
                               }}
                             />
-                          </Tippy>
+                            <Tooltip
+                              id={`token-${t}`}
+                              style={{
+                                backgroundColor: "#1F2937",
+                                color: "white",
+                                padding: "4px 8px",
+                              }}>
+                              {props.collection.name} #{normalizeNextgenTokenID(t).token_id}
+                            </Tooltip>
+                          </>
                         </a>
                       ))}
                     </span>

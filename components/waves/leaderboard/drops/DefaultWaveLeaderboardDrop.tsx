@@ -81,7 +81,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 
           <div className="tw-space-y-2">
             <div className="tw-ml-[3.35rem]">
-              <WaveLeaderboardDropContent drop={drop} />
+              <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
             </div>
           </div>
           <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.25rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">

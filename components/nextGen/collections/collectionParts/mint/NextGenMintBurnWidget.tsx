@@ -2,7 +2,7 @@
 
 import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
 import {
   areEqualAddresses,
@@ -301,14 +301,20 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
             <Form.Group as={Row} className="pt-1 pb-1">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Mint To
-                <Tippy
-                  content={`In burns to mint, the token is minted to the address that burns the token.`}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon={faInfoCircle}></FontAwesomeIcon>
-                </Tippy>
+                <FontAwesomeIcon
+                  className={styles.infoIcon}
+                  icon={faInfoCircle}
+                  data-tooltip-id={`mint-to-info-${props.collection.id}`}></FontAwesomeIcon>
+                <Tooltip
+                  id={`mint-to-info-${props.collection.id}`}
+                  content="In burns to mint, the token is minted to the address that burns the token."
+                  place="top"
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}
+                />
               </Form.Label>
               <Col sm={12}>{mintForAddress}</Col>
             </Form.Group>

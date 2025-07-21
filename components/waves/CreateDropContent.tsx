@@ -41,7 +41,6 @@ import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
-import "tippy.js/dist/tippy.css";
 import { ApiDropType } from "../../generated/models/ApiDropType";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import {

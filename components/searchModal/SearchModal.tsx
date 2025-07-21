@@ -4,7 +4,7 @@ import styles from "./SearchModal.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Modal, InputGroup, Form, Button } from "react-bootstrap";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { formatAddress } from "../../helpers/Helpers";
 import {
   faSearch,
@@ -71,18 +71,28 @@ function SearchModal(props: Readonly<Props>) {
         </InputGroup>
         {props.searchWallets.map((w) => (
           <div key={w} className="pt-1 pb-1">
-            <Tippy
-              delay={250}
-              content={"Clear"}
-              placement={"top"}
-              theme={"dark"}>
+            <>
               <FontAwesomeIcon
                 onClick={() => {
                   props.removeSearchWallet(w);
                 }}
                 className={styles.removeWalletBtn}
-                icon={faSquareXmark}></FontAwesomeIcon>
-            </Tippy>
+                icon={faSquareXmark}
+                data-tooltip-id={`remove-wallet-${w}`}
+              />
+              <Tooltip
+                id={`remove-wallet-${w}`}
+                place="top"
+                delayShow={250}
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                }}
+              >
+                Clear
+              </Tooltip>
+            </>
             {"  "}
             {w}
           </div>
@@ -121,35 +131,55 @@ export function SearchWalletsDisplay(
       {searchWallets.length > 0 &&
         searchWallets.map((sw) => (
           <span className={styles.searchWalletDisplayWrapper} key={sw}>
-            <Tippy
-              delay={250}
-              content={"Clear"}
-              placement={"top"}
-              theme={"light"}>
+            <>
               <button
                 className={`btn-link ${styles.searchWalletDisplayBtn}`}
                 onClick={() =>
                   setSearchWallets(searchWallets.filter((s) => s != sw))
-                }>
+                }
+                data-tooltip-id={`clear-wallet-display-${sw}`}
+              >
                 x
               </button>
-            </Tippy>
+              <Tooltip
+                id={`clear-wallet-display-${sw}`}
+                place="top"
+                delayShow={250}
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  color: "#212529",
+                  padding: "4px 8px",
+                }}
+              >
+                Clear
+              </Tooltip>
+            </>
             <span className={styles.searchWalletDisplay}>
               {sw.endsWith(".eth") ? sw : formatAddress(sw)}
             </span>
           </span>
         ))}
       {searchWallets.length > 0 && (
-        <Tippy
-          delay={250}
-          content={"Clear All"}
-          placement={"top"}
-          theme={"light"}>
+        <>
           <FontAwesomeIcon
             onClick={() => setSearchWallets([])}
             className={styles.clearSearchBtnIcon}
-            icon={faTimesCircle}></FontAwesomeIcon>
-        </Tippy>
+            icon={faTimesCircle}
+            data-tooltip-id="clear-all-display"
+          />
+          <Tooltip
+            id="clear-all-display"
+            place="top"
+            delayShow={250}
+            style={{
+              backgroundColor: "#f8f9fa",
+              color: "#212529",
+              padding: "4px 8px",
+            }}
+          >
+            Clear All
+          </Tooltip>
+        </>
       )}
       <button
         onClick={() => setShowSearchModal(true)}

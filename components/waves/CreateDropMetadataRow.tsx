@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CreateDropMetadataType } from "./CreateDropContent";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 
 interface CreateDropMetadataRowProps {
   readonly metadata: CreateDropMetadataType;
@@ -126,7 +126,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
           />
         </div>
       </div>
-      <Tippy content={metadata.required ? "Required field" : "Remove"}>
+      <>
         <div>
           <button
             type="button"
@@ -137,7 +137,9 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
               disabled || metadata.required
                 ? "tw-text-iron-600 tw-cursor-not-allowed"
                 : "tw-text-iron-400 hover:tw-text-error"
-            }`}>
+            }`}
+            data-tooltip-id={`metadata-action-${index}`}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -152,7 +154,17 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
             </svg>
           </button>
         </div>
-      </Tippy>
+        <Tooltip
+          id={`metadata-action-${index}`}
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+          }}
+        >
+          {metadata.required ? "Required field" : "Remove"}
+        </Tooltip>
+      </>
     </div>
   );
 };

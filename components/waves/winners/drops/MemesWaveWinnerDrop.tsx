@@ -12,7 +12,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { cicToType, formatNumberWithCommas } from "../../../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MemeDropTraits from "../../../memes/drops/MemeDropTraits";
@@ -158,6 +158,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}
+                isCompetitionDrop={true}
               />
             </div>
           )}
@@ -179,16 +180,13 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-flex tw-items-center -tw-space-x-1.5">
                 {topVoters.map((voter) => (
-                  <Tippy
-                    key={voter.profile.handle}
-                    content={`${
-                      voter.profile.handle
-                    } - ${formatNumberWithCommas(voter.rating)}`}
-                  >
+                  <>
                     <Link
+                      key={voter.profile.handle}
                       href={`/${voter.profile.handle}`}
                       onClick={(e) => e.stopPropagation()}
                       className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
+                      data-tooltip-id={`voter-${voter.profile.handle}-${voter.rating}`}
                     >
                       {voter.profile.pfp ? (
                         <img
@@ -200,7 +198,17 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-object-contain tw-bg-iron-800" />
                       )}
                     </Link>
-                  </Tippy>
+                    <Tooltip
+                      id={`voter-${voter.profile.handle}-${voter.rating}`}
+                      style={{
+                        backgroundColor: "#1F2937",
+                        color: "white",
+                        padding: "4px 8px",
+                      }}
+                    >
+                      {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
+                    </Tooltip>
+                  </>
                 ))}
               </div>
               <div className="tw-flex tw-items-baseline tw-gap-x-1">

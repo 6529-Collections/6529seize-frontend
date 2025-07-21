@@ -2,7 +2,21 @@ import { render, screen } from '@testing-library/react';
 import DropVoteProgressing from '../../../../../components/drops/view/utils/DropVoteProgressing';
 import React from 'react';
 
-jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children }) => <div data-testid="tippy">{children}</div> }));
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
+// Mock react-tooltip
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid={`tooltip-${id}`} role="tooltip">
+      {children}
+    </div>
+  ),
+}));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
 jest.mock('../../../../../helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => String(n) }));
 

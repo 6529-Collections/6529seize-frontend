@@ -17,6 +17,7 @@ interface WaveDropContentProps {
   readonly isSaving?: boolean;
   readonly onSave?: (newContent: string) => void;
   readonly onCancel?: () => void;
+  readonly isCompetitionDrop?: boolean;
 }
 
 const WaveDropContent: React.FC<WaveDropContentProps> = ({
@@ -32,6 +33,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   isSaving = false,
   onSave,
   onCancel,
+  isCompetitionDrop = false,
 }) => {
   return (
     <DropContentWrapper parentContainerRef={parentContainerRef}>
@@ -47,6 +49,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
         isSaving={isSaving}
         onSave={onSave}
         onCancel={onCancel}
+        isCompetitionDrop={isCompetitionDrop}
       />
     </DropContentWrapper>
   );

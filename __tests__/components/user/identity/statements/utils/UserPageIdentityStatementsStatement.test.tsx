@@ -12,9 +12,12 @@ jest.mock(
   })
 );
 
-jest.mock("@tippyjs/react", () => ({
-  __esModule: true,
-  default: ({ children }: any) => <div>{children}</div>,
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({ children, id }: any) => (
+    <div data-testid="react-tooltip" data-tooltip-id={id}>
+      {children}
+    </div>
+  ),
 }));
 
 const mockCopyToClipboard = jest.fn();

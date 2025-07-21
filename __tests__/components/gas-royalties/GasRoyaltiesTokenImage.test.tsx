@@ -3,9 +3,12 @@ import { GasRoyaltiesTokenImage } from '../../../components/gas-royalties/GasRoy
 
 // Mock next/image to render a regular img element
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
-jest.mock('@tippyjs/react', () => ({
-  __esModule: true,
-  default: (props: any) => <span>{props.children}{props.content}</span>,
+jest.mock('react-tooltip', () => ({
+  Tooltip: ({ children, id, content }: any) => (
+    <div data-testid={`tooltip-${id}`}>
+      {content || children}
+    </div>
+  ),
 }));
 
 describe('GasRoyaltiesTokenImage', () => {
@@ -35,6 +38,8 @@ describe('GasRoyaltiesTokenImage', () => {
         note="Important"
       />
     );
-    expect(container.textContent).toContain('Important');
+    // Check that the tooltip with note is rendered
+    expect(container.querySelector('[data-testid="tooltip-token-info-2"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="tooltip-token-info-2"]').textContent).toContain('Important');
   });
 });
