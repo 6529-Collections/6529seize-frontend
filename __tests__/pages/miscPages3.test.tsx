@@ -3,7 +3,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import AuthorPage from "@/app/author/6529er6529-io/page";
 import CompanyPortfolio from "@/app/capital/company-portfolio/page";
-import EducationPage from "@/pages/education";
+import EducationPage from "@/app/education/page";
 import FakeRares from "@/pages/museum/6529-fund-szn1/fakerares";
 import Gazers from "@/pages/museum/6529-fund-szn1/gazers";
 import RarePepe from "@/pages/museum/6529-fund-szn1/rarepepe";
