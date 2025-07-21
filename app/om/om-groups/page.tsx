@@ -1,11 +1,6 @@
 import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
 const IndexPage = () => (
   <>
@@ -437,3 +432,8 @@ Representative groups:
 );
 
 export default IndexPage;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "OM Groups" });
+}
+

@@ -1,9 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import Page from '../../../../pages/om/discord';
-
-jest.mock('next/dynamic', () => () => () => <div data-testid="header" />);
-jest.mock('../../../../components/header/HeaderPlaceholder', () => () => <div data-testid="placeholder" />);
+import Page from '@/app/om/discord/page';
 
 const renderPage = () => render(<Page />);
 

@@ -1,9 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Page from '../../../../pages/om/6529-museum-district';
+import Page from '@/app/om/6529-museum-district/page';
 
-jest.mock('../../../../components/header/Header', () => () => <div data-testid="header">Header</div>);
-jest.mock('../../../../components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
 
 describe('6529 Museum District Page', () => {
   const renderComponent = () => render(<Page />);

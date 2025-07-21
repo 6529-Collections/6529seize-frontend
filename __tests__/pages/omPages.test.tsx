@@ -1,8 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import OmGroups from '../../pages/om/om-groups';
+import OmGroups from '@/app/om/om-groups/page';
 
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
 describe('OM pages render', () => {
   it('renders OM Groups page', () => {
