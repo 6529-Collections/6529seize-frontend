@@ -1,11 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import MfersPage from '../../pages/museum/6529-fund-szn1/mfers';
-import ACMuseumPage from '../../pages/museum/ac-museum';
-import AlgorhythmsPage from '../../pages/museum/genesis/algorhythms';
-import EntretiemposPage from '../../pages/museum/genesis/entretiempos';
-import IgnitionPage from '../../pages/museum/genesis/ignition';
-import WatercolorDreamsPage from '../../pages/museum/genesis/watercolor-dreams';
+import MfersPage from "../../pages/app/museum/6529-fund-szn1/mfers/page";
+import ACMuseumPage from "../../pages/app/museum/ac-museum/page";
+import AlgorhythmsPage from "../../pages/app/museum/genesis/algorhythms/page";
+import EntretiemposPage from "../../pages/app/museum/genesis/entretiempos/page";
+import IgnitionPage from "../../pages/app/museum/genesis/ignition/page";
+import WatercolorDreamsPage from "../../pages/app/museum/genesis/watercolor-dreams/page";
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 jest.mock('../../components/header/Header', () => () => <div data-testid="header" />);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Page from '../../../../../pages/museum/genesis/labios';
+import Page from "../../../../../pages/app/museum/genesis/labios/page";
 
 jest.mock('../../../../../components/header/Header', () => () => <div data-testid="header">Header</div>);
 jest.mock('../../../../../components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);

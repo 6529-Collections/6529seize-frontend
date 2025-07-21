@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import ElevatedDeconstructions from "@/pages/museum/genesis/elevated-deconstructions";
-import Ringers from "@/pages/museum/genesis/ringers";
-import Screens from "@/pages/museum/genesis/screens";
-import Skulptuur from "@/pages/museum/genesis/skulptuur";
-import Synapses from "@/pages/museum/genesis/synapses";
-import BlocksOfArt from "@/pages/museum/genesis/the-blocks-of-art";
-import Vortex from "@/pages/museum/genesis/vortex";
+import ElevatedDeconstructions from "@/pages/app/museum/genesis/elevated-deconstructions/page";
+import Ringers from "@/pages/app/museum/genesis/ringers/page";
+import Screens from "@/pages/app/museum/genesis/screens/page";
+import Skulptuur from "@/pages/app/museum/genesis/skulptuur/page";
+import Synapses from "@/pages/app/museum/genesis/synapses/page";
+import BlocksOfArt from "@/pages/app/museum/genesis/the-blocks-of-art/page";
+import Vortex from "@/pages/app/museum/genesis/vortex/page";
 import OMRedirect from "@/app/om/OM/page";
 import { AuthContext } from "@/components/auth/Auth";
 

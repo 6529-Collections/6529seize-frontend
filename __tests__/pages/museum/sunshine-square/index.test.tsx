@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import Page from '../../../../pages/museum/sunshine-square';
+import Page from "../../../../pages/app/museum/sunshine-square/page";
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 jest.mock('../../../../components/header/Header', () => () => <div data-testid="header" />);

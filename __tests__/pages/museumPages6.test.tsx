@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import Inspirals from '../../pages/museum/genesis/inspirals';
-import Unigrids from '../../pages/museum/genesis/unigrids';
+import Inspirals from "../../pages/app/museum/genesis/inspirals/page";
+import Unigrids from "../../pages/app/museum/genesis/unigrids/page";
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 

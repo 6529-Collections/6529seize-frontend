@@ -957,10 +957,10 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                   <a
                                     href="https://deekaykwon.com/#/designer-client-1/"
                                     target="_blank"
-                                    rel="noopener"
-                                  >
+                                    rel="noopener">
                                     Designer &amp; Client
-                                  </a>”, spreading infectious joy in “Happy Virus”,
+                                  </a>
+                                  ”, spreading infectious joy in “Happy Virus”,
                                   or the existence of one's angel and devil
                                   sides in “
                                   <a
@@ -1117,9 +1117,13 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-        <button type="button" className="fusion-one-page-text-link fusion-page-load-link" tabIndex={-1} aria-hidden="true">
-          Page load link
-        </button>
+      <button
+        type="button"
+        className="fusion-one-page-text-link fusion-page-load-link"
+        tabIndex={-1}
+        aria-hidden="true">
+        Page load link
+      </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
@@ -1139,18 +1143,18 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-          <button type="button" id="toTop" className="fusion-top-top-link">
-            <span id="awb-to-top-label" className="screen-reader-text">
-              Go to Top
-            </span>
-          </button>
+        <button type="button" id="toTop" className="fusion-top-top-link">
+          <span id="awb-to-top-label" className="screen-reader-text">
+            Go to Top
+          </span>
+        </button>
       </section>
     </div>
-);
+  );
 }
-
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Disney and DeeKay: Their Secret to Animation - 6529.io" });
+  return getAppMetadata({
+    title: "Disney and DeeKay: Their Secret to Animation",
+  });
 }
-
