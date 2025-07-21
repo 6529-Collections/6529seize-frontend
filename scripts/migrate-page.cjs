@@ -45,6 +45,7 @@ function migrateIndexFile(indexFile) {
   }
 
   // Remove unused imports
+  // eslint-disable-next-line security/detect-unsafe-regex
   content = content
     .replace(/^import\s+React\s+from\s+["']react["'];?\n?/gm, "")
     .replace(/^import\s+HeaderPlaceholder.*\n?/gm, "")
@@ -52,12 +53,14 @@ function migrateIndexFile(indexFile) {
     .replace(/^const\s+Header\s+=\s+dynamic\(\(\)\s+=>.*?\n^\s*}\);\n?/gms, "");
 
   // Remove top-level fragment if it's the only wrapper
+  // eslint-disable-next-line security/detect-unsafe-regex
   content = content.replace(
     /(\(\s*)<>\s*\n?([\s\S]*?)\n?\s*<\/>\s*(\);)/,
     "$1$2$3"
   );
 
   // Replace default export if needed
+  // eslint-disable-next-line security/detect-unsafe-regex
   content = content.replace(
     /export\s+default\s+.*?;/,
     "export default IndexPage;"
