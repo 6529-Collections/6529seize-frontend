@@ -6,10 +6,6 @@ import { useCoreContractWrite } from "@/components/nextGen/nextgen_helpers";
 
 // Mock dependencies
 jest.mock("@/components/nextGen/nextgen_helpers");
-
-const {
-  useCoreContractWrite,
-} = require("@/components/nextGen/nextgen_helpers");
 jest.mock("@/components/nextGen/NextGenContractWriteStatus", () => {
   return function MockNextGenContractWriteStatus({
     isLoading,
