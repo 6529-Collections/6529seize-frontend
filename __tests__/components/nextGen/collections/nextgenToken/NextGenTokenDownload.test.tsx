@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NextGenTokenDownload, {
@@ -8,7 +7,6 @@ import NextGenTokenDownload, {
 
 // Mock react-bootstrap components
 jest.mock("react-bootstrap", () => {
-  const React = require("react");
   const Dropdown: any = (p: any) => <div {...p} />;
   Dropdown.Item = (p: any) => <button {...p} />;
   const RB: any = {

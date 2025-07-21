@@ -66,17 +66,16 @@ export default function Rememes() {
   );
 
   useEffect(() => {
-    try {
-      fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
-        (response: DBResponse) => {
-          setMemes(response.data);
-        }
-      );
-    } catch (error) {
-      console.error("Error fetching memes", error);
-    } finally {
-      setMemesLoaded(true);
-    }
+    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`)
+      .then((response: DBResponse) => {
+        setMemes(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching memes", error);
+      })
+      .finally(() => {
+        setMemesLoaded(true);
+      });
   }, []);
 
   function fetchResults(mypage: number) {
