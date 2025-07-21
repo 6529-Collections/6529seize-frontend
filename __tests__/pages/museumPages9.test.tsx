@@ -1,15 +1,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import Fam2021Page from '../../pages/museum/6529-fam-2021';
-import ChromieSquigglePage from '../../pages/museum/6529-fund-szn1/chromie-squiggle';
-import ConflictingMetaphysicsPage from '../../pages/museum/6529-fund-szn1/conflicting-metaphysics';
-import FundSzn2Page from '../../pages/museum/6529-fund-szn2';
-import BitDigitalPage from '../../pages/museum/genesis/27-bit-digital';
-import AlgobotsPage from '../../pages/museum/genesis/algobots';
-import AsemicaPage from '../../pages/museum/genesis/asemica';
-import ChimeraPage from '../../pages/museum/genesis/chimera';
-import CosmicReefPage from '../../pages/museum/genesis/cosmic-reef';
-import GenesisDcaPage from '../../pages/museum/genesis/genesis-dca';
+import Fam2021Page from "../../app/museum/6529-fam-2021/page";
+import ChromieSquigglePage from "../../app/museum/6529-fund-szn1/chromie-squiggle/page";
+import ConflictingMetaphysicsPage from "../../app/museum/6529-fund-szn1/conflicting-metaphysics/page";
+import FundSzn2Page from "../../app/museum/6529-fund-szn2/page";
+import BitDigitalPage from "../../app/museum/genesis/27-bit-digital/page";
+import AlgobotsPage from "../../app/museum/genesis/algobots/page";
+import AsemicaPage from "../../app/museum/genesis/asemica/page";
+import ChimeraPage from "../../app/museum/genesis/chimera/page";
+import CosmicReefPage from "../../app/museum/genesis/cosmic-reef/page";
+import GenesisDcaPage from "../../app/museum/genesis/genesis-dca/page";
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 jest.mock('../../components/header/Header', () => () => <div data-testid="header" />);

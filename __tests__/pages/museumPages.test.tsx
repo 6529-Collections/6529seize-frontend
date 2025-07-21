@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import CryptoAdPunks from '../../pages/museum/6529-fund-szn1/cryptoad-punks';
-import CryptoPunks from '../../pages/museum/6529-fund-szn1/cryptopunks';
-import QueensKings from '../../pages/museum/6529-fund-szn1/queens-kings';
-import AckBar from '../../pages/museum/ack-bar';
-import EarlyNftArt from '../../pages/museum/early-nft-art';
-import Autology from '../../pages/museum/genesis/autology';
-import Cryptoblots from '../../pages/museum/genesis/cryptoblots';
-import Dreams from '../../pages/museum/genesis/dreams';
-import DynamicSlices from '../../pages/museum/genesis/dynamic-slices';
-import Edifice from '../../pages/museum/genesis/edifice';
+import CryptoAdPunks from "../../app/museum/6529-fund-szn1/cryptoad-punks/page";
+import CryptoPunks from "../../app/museum/6529-fund-szn1/cryptopunks/page";
+import QueensKings from "../../app/museum/6529-fund-szn1/queens-kings/page";
+import AckBar from "../../app/museum/ack-bar/page";
+import EarlyNftArt from "../../app/museum/early-nft-art/page";
+import Autology from "../../app/museum/genesis/autology/page";
+import Cryptoblots from "../../app/museum/genesis/cryptoblots/page";
+import Dreams from "../../app/museum/genesis/dreams/page";
+import DynamicSlices from "../../app/museum/genesis/dynamic-slices/page";
+import Edifice from "../../app/museum/genesis/edifice/page";
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 

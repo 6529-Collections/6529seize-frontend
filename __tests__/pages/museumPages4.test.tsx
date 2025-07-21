@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import AnIncomparableLove from '../../pages/museum/6529-fund-szn1/an-incomparable-love';
-import BoredApeYachtClub from '../../pages/museum/6529-fund-szn1/bored-ape-yacht-club';
-import IntensifyModeling from '../../pages/museum/6529-fund-szn1/intensify-modeling';
-import PrimaryColorsOfNeuralBricolage from '../../pages/museum/6529-fund-szn1/primary-colors-of-neural-bricolage';
-import Videodrome from '../../pages/museum/6529-fund-szn1/videodrome';
-import XCopy from '../../pages/museum/6529-fund-szn1/xcopy';
-import BatsoupyumMuseum1 from '../../pages/museum/batsoupyum-museum-1';
-import Autoglyphs from '../../pages/museum/genesis/autoglyphs';
-import ConstructionToken from '../../pages/museum/genesis/construction-token';
+import AnIncomparableLove from "../../app/museum/6529-fund-szn1/an-incomparable-love/page";
+import BoredApeYachtClub from "../../app/museum/6529-fund-szn1/bored-ape-yacht-club/page";
+import IntensifyModeling from "../../app/museum/6529-fund-szn1/intensify-modeling/page";
+import PrimaryColorsOfNeuralBricolage from "../../app/museum/6529-fund-szn1/primary-colors-of-neural-bricolage/page";
+import Videodrome from "../../app/museum/6529-fund-szn1/videodrome/page";
+import XCopy from "../../app/museum/6529-fund-szn1/xcopy/page";
+import BatsoupyumMuseum1 from "../../app/museum/batsoupyum-museum-1/page";
+import Autoglyphs from "../../app/museum/genesis/autoglyphs/page";
+import ConstructionToken from "../../app/museum/genesis/construction-token/page";
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 

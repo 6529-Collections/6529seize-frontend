@@ -6,10 +6,10 @@ import { getServerSideProps as getStatsProps } from "@/pages/[user]/stats";
 import OpenMetaverse from "@/app/about/open-metaverse/page";
 import Tweetstorms from "@/app/education/tweetstorms/page";
 import MemeLab from "@/pages/meme-lab";
-import FamPage from "@/pages/museum/6529-fam";
-import BalladOfGhosts from "@/pages/museum/6529-fund-szn1/ballad-of-ghosts";
-import DeadRingers from "@/pages/museum/6529-fund-szn1/dead-ringers";
-import GenesisPage from "@/pages/museum/6529-fund-szn1/genesis";
+import FamPage from "@/app/museum/6529-fam/page";
+import BalladOfGhosts from "@/app/museum/6529-fund-szn1/ballad-of-ghosts/page";
+import DeadRingers from "@/app/museum/6529-fund-szn1/dead-ringers/page";
+import GenesisPage from "@/app/museum/6529-fund-szn1/genesis/page";
 import { AuthContext } from "@/components/auth/Auth";
 
 // Mock TitleContext

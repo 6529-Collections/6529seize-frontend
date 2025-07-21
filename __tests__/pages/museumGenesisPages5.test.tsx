@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import Century from '../../pages/museum/genesis/century';
-import Meridian from '../../pages/museum/genesis/meridian';
-import PublicDomain from '../../pages/museum/6529-public-domain';
-import Archetype from '../../pages/museum/genesis/archetype';
-import FragmentsOfAnInfiniteField from '../../pages/museum/genesis/fragments-of-an-infinite-field';
-import Nimbuds from '../../pages/museum/genesis/nimbuds';
-import NftPhotography from '../../pages/museum/nft-photography';
+import Century from "../../app/museum/genesis/century/page";
+import Meridian from "../../app/museum/genesis/meridian/page";
+import PublicDomain from "../../app/museum/6529-public-domain/page";
+import Archetype from "../../app/museum/genesis/archetype/page";
+import FragmentsOfAnInfiniteField from "../../app/museum/genesis/fragments-of-an-infinite-field/page";
+import Nimbuds from "../../app/museum/genesis/nimbuds/page";
+import NftPhotography from "../../app/museum/nft-photography/page";
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 

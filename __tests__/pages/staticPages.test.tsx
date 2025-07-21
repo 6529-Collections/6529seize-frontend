@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import AboutRules from "@/app/about/rules/page";
 import CasaBatllo from "@/app/casabatllo/page";
-import Museum from "@/pages/museum";
+import Museum from "@/app/museum/page";
 import ElementColumns from "@/app/element_category/columns/page";
 import MemeLabDistribution from "@/pages/meme-lab/[id]/distribution";
 import AuthorNft6529 from "@/app/author/nft6529/page";

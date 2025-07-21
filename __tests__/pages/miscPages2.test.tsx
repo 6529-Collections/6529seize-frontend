@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import WillowShield from "@/pages/museum/genesis/willow-shield";
+import WillowShield from "@/app/museum/genesis/willow-shield/page";
 import NextGenDistributionPlan from "@/pages/nextgen/collection/[collection]/distribution-plan";
 import JoinOm from "@/app/om/join-om/page";
 import PartnershipRequest from "@/app/om/partnership-request/page";
 import ConsolidatedMetrics from "@/pages/open-data/consolidated-network-metrics";
 import MemeSubscriptions from "@/pages/open-data/meme-subscriptions";
 import AddRememes from "@/pages/rememes/add";
-import SlideInitiatives from "@/pages/slide-page/6529-initiatives";
+import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
 import AppWallets from "@/pages/tools/app-wallets";
 import { AuthContext } from "@/components/auth/Auth";
 

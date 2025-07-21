@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import ArcheologyOfTheFuture from '../../pages/museum/6529-fund-szn1/archeology-of-the-future';
-import PhotoB from '../../pages/museum/6529-photo-b';
-import GeneralAssembly from '../../pages/museum/general-assembly';
-import Hyperhash from '../../pages/museum/genesis/hyperhash';
-import SecretSurprise from '../../pages/museum/genesis/secret-surprise';
-import SozetLounge from '../../pages/museum/sozet-lounge';
-import TheInstitutions from '../../pages/museum/the-institutions';
+import ArcheologyOfTheFuture from "../../app/museum/6529-fund-szn1/archeology-of-the-future/page";
+import PhotoB from "../../app/museum/6529-photo-b/page";
+import GeneralAssembly from "../../app/museum/general-assembly/page";
+import Hyperhash from "../../app/museum/genesis/hyperhash/page";
+import SecretSurprise from "../../app/museum/genesis/secret-surprise/page";
+import SozetLounge from "../../app/museum/sozet-lounge/page";
+import TheInstitutions from "../../app/museum/the-institutions/page";
 import IntroducingOM from '../../pages/news/introducing-om';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
