@@ -6,11 +6,13 @@ import DropListItemContentMedia from "../../drops/view/item/content/media/DropLi
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
   readonly disableMediaInteraction?: boolean;
+  readonly isCompetitionDrop?: boolean;
 }
 
 const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   activePart,
   disableMediaInteraction = false,
+  isCompetitionDrop = false,
 }) => {
   if (!activePart.media.length) {
     return null;
@@ -23,7 +25,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       {activePart.media.map((media, i) => (
         <div
           key={`part-${i}-media-${media.url}`}
-          className="tw-flex tw-justify-center tw-h-64"
+          className="tw-flex tw-h-80"
         >
           {disableMediaInteraction ? (
             <MediaDisplay
@@ -35,6 +37,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
             <DropListItemContentMedia
               media_mime_type={media.mime_type}
               media_url={media.url}
+              isCompetitionDrop={isCompetitionDrop}
             />
           )}
         </div>
