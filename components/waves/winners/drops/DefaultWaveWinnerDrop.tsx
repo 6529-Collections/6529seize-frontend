@@ -75,7 +75,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
             <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
               <WaveWinnersDropHeader winner={winner} showVotingInfo={false} />
-              <WaveWinnersDropContent winner={winner} />
+              <WaveWinnersDropContent winner={winner} isCompetitionDrop={true} />
             </div>
           </div>
 

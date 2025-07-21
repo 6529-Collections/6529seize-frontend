@@ -8,10 +8,12 @@ import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveWinnersDropContentProps {
   readonly winner: ApiWaveDecisionWinner;
+  readonly isCompetitionDrop?: boolean;
 }
 
 export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
   winner,
+  isCompetitionDrop = false,
 }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState(0);
@@ -38,6 +40,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
       onLongPress={() => {}}
       onQuoteClick={() => {}}
       setLongPressTriggered={() => {}}
+      isCompetitionDrop={isCompetitionDrop}
     />
   );
 };
