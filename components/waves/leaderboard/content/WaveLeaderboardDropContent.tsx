@@ -9,11 +9,12 @@ import WaveDropReactions from "../../drops/WaveDropReactions";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
+  readonly isCompetitionDrop?: boolean;
 }
 
 export const WaveLeaderboardDropContent: React.FC<
   WaveLeaderboardDropContentProps
-> = ({ drop }) => {
+> = ({ drop, isCompetitionDrop = false }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
@@ -35,6 +36,7 @@ export const WaveLeaderboardDropContent: React.FC<
         onLongPress={() => {}}
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
+        isCompetitionDrop={isCompetitionDrop}
       />
       {!!drop.metadata.length && (
         <div className="tw-mt-2">

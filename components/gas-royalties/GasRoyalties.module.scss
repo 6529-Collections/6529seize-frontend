@@ -85,7 +85,7 @@
 }
 
 .collectionFocusActive {
-  color: variables.$font-color;
+  color: variables.$font-color !important;
   transform: scale(1.02);
 }
 

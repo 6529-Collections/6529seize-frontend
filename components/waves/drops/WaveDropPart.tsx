@@ -17,6 +17,7 @@ interface WaveDropPartProps {
   readonly isSaving?: boolean;
   readonly onSave?: (newContent: string) => void;
   readonly onCancel?: () => void;
+  readonly isCompetitionDrop?: boolean;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds
@@ -35,6 +36,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     isSaving = false,
     onSave,
     onCancel,
+    isCompetitionDrop = false,
   }) => {
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
@@ -126,6 +128,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
             isSaving={isSaving}
             onSave={onSave}
             onCancel={onCancel}
+            isCompetitionDrop={isCompetitionDrop}
           />
         </div>
       </div>

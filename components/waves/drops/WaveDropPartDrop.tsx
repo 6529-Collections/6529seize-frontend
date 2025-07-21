@@ -17,6 +17,7 @@ interface WaveDropPartDropProps {
   isSaving?: boolean;
   onSave?: (newContent: string) => void;
   onCancel?: () => void;
+  isCompetitionDrop?: boolean;
 }
 
 const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
@@ -32,6 +33,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   isSaving = false,
   onSave,
   onCancel,
+  isCompetitionDrop = false,
 }) => {
   return (
     <div className="tw-flex tw-gap-x-3 tw-h-full tw-relative">
@@ -54,6 +56,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             onSave={onSave}
             onCancel={onCancel}
             drop={drop}
+            isCompetitionDrop={isCompetitionDrop}
           />
         </div>
       </div>

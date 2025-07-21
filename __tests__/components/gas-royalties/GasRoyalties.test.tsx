@@ -4,9 +4,8 @@ import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
   useSharedState,
-  GasRoyaltiesCollectionFocus,
-} from "../../../components/gas-royalties/GasRoyalties";
-import { DateIntervalsSelection } from "../../../enums";
+} from "@/components/gas-royalties/GasRoyalties";
+import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
 import { usePathname, useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({

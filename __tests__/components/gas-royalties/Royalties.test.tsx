@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import Royalties from "../../../components/gas-royalties/Royalties";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { fetchUrl } from "../../../services/6529api";
+import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -57,9 +58,17 @@ beforeEach(() => {
   });
 });
 
+const renderRoyalties = () => {
+  render(
+    <TitleProvider>
+      <Royalties />
+    </TitleProvider>
+  );
+};
+
 it("shows message when no royalties are returned", async () => {
   (fetchUrl as jest.Mock).mockResolvedValue([]);
-  render(<Royalties />);
+  renderRoyalties();
   await waitFor(() => {
     expect(screen.getByText(/No royalties found/i)).toBeInTheDocument();
   });
@@ -78,7 +87,7 @@ it("renders royalties table when data exists", async () => {
       thumbnail: "img.png",
     },
   ]);
-  render(<Royalties />);
+  renderRoyalties();
   await waitFor(() => screen.getByTestId("token-image"));
   expect(screen.getByAltText("Meme1")).toBeInTheDocument();
   expect(screen.getByText("Alice")).toBeInTheDocument();

@@ -94,6 +94,7 @@ export default function OngoingParticipationDrop({
             onQuoteClick={onQuoteClick}
             setLongPressTriggered={setLongPressTriggered}
             parentContainerRef={parentContainerRef}
+            isCompetitionDrop={true}
           />
         </div>
       </div>
