@@ -1,11 +1,6 @@
 import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
 const IndexPage = () => (
   <>
@@ -18,16 +13,20 @@ const IndexPage = () => (
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
       />
       {/* This site is optimized with the Yoast SEO plugin v23.9 - https://yoast.com/wordpress/plugins/seo/ */}
-      <title>DISCORD - 6529.io</title>
-      <link rel="canonical" href="/om/discord/" />
+      <title>OM INSTRUCTION MANUAL - 6529.io</title>
+      <link rel="canonical" href="/om/instruction-manual/" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
-      <meta property="og:title" content="DISCORD - 6529.io" />
-      <meta property="og:url" content="/om/discord/" />
+      <meta property="og:title" content="OM INSTRUCTION MANUAL - 6529.io" />
+      <meta property="og:url" content="/om/instruction-manual/" />
       <meta property="og:site_name" content="6529.io" />
       <meta
         property="article:modified_time"
-        content="2022-04-22T14:02:55+00:00"
+        content="2022-04-17T08:31:10+00:00"
+      />
+      <meta
+        property="og:image"
+        content="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image5.png"
       />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@om100m" />
@@ -50,28 +49,44 @@ const IndexPage = () => (
       />
       <meta
         name="description"
-        content="JOIN OUR DISCORD CHANNEL 
-
-Are you interested in staying up to date on the latest with OM?
-
-Join OM Discord!"
+        content="QUICK GUIDE TO NAVIGATING OM 
+EXPLORE OM IN PEACE
+Enter in Single Player Mode
+EXPLORE OM WITH OTHERS
+Enter in Multi Player Mode
+MOVE AROUND
+Use Arrow Keys or WASD keys (if you are a gamer)
+LOOK AROUND AND CHOOSE DIRECTION OF MOVEMENT
+Mouse or Trackpad
+JUMP
+Space bar
+ENTER A SPACE (ROOM)
+Walk close to an entrance until the instructions show up, then press “E”,"
       />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
       <meta property="og:site_name" content="6529.io" />
-      <meta property="og:title" content="DISCORD - 6529.io" />
+      <meta property="og:title" content="OM INSTRUCTION MANUAL - 6529.io" />
       <meta
         property="og:description"
-        content="JOIN OUR DISCORD CHANNEL 
-
-Are you interested in staying up to date on the latest with OM?
-
-Join OM Discord!"
+        content="QUICK GUIDE TO NAVIGATING OM 
+EXPLORE OM IN PEACE
+Enter in Single Player Mode
+EXPLORE OM WITH OTHERS
+Enter in Multi Player Mode
+MOVE AROUND
+Use Arrow Keys or WASD keys (if you are a gamer)
+LOOK AROUND AND CHOOSE DIRECTION OF MOVEMENT
+Mouse or Trackpad
+JUMP
+Space bar
+ENTER A SPACE (ROOM)
+Walk close to an entrance until the instructions show up, then press “E”,"
       />
-      <meta property="og:url" content="/om/discord/" />
+      <meta property="og:url" content="/om/instruction-manual/" />
       <meta
         property="article:modified_time"
-        content="2022-04-22T14:02:55-05:00"
+        content="2022-04-17T08:31:10-05:00"
       />
       <meta
         property="og:image"
@@ -195,7 +210,7 @@ Join OM Discord!"
         rel="alternate"
         title="JSON"
         type="application/json"
-        href="/wp-json/wp/v2/pages/757"
+        href="/wp-json/wp/v2/pages/839"
       />
       <link
         rel="EditURI"
@@ -203,18 +218,18 @@ Join OM Discord!"
         title="RSD"
         href="/xmlrpc.php?rsd"
       />
-      <link rel="shortlink" href="/?p=757" />
+      <link rel="shortlink" href="/?p=839" />
       <link
         rel="alternate"
         title="oEmbed (JSON)"
         type="application/json+oembed"
-        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fom%2Fdiscord%2F"
+        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fom%2Finstruction-manual%2F"
       />
       <link
         rel="alternate"
         title="oEmbed (XML)"
         type="text/xml+oembed"
-        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fom%2Fdiscord%2F#038;format=xml"
+        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fom%2Finstruction-manual%2F#038;format=xml"
       />
       <link
         rel="preload"
@@ -283,7 +298,7 @@ Join OM Discord!"
               <div className="fusion-page-title-row">
                 <div className="fusion-page-title-wrapper">
                   <div className="fusion-page-title-captions">
-                    <h1 className="entry-title">DISCORD</h1>
+                    <h1 className="entry-title">6529 NFT FUND</h1>
                     <div className="fusion-page-title-secondary"></div>
                   </div>
                 </div>
@@ -297,10 +312,10 @@ Join OM Discord!"
             <div className="fusion-row" style={{ maxWidth: "100%" }}>
               <section id="content" className="full-width">
                 <div
-                  id="post-757"
-                  className="post-757 page type-page status-publish hentry">
+                  id="post-839"
+                  className="post-839 page type-page status-publish hentry">
                   <span className="entry-title rich-snippet-hidden">
-                    DISCORD
+                    OM INSTRUCTION MANUAL
                   </span>
                   <span className="vcard rich-snippet-hidden">
                     <span className="fn">
@@ -313,7 +328,7 @@ Join OM Discord!"
                     </span>
                   </span>
                   <span className="updated rich-snippet-hidden">
-                    2022-04-22T10:02:55-04:00
+                    2022-04-17T04:31:10-04:00
                   </span>{" "}
                   <div className="post-content">
                     <div
@@ -333,62 +348,210 @@ Join OM Discord!"
                           marginRight: "calc(-4% / 2 )",
                         }}>
                         <div
-                          className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_4 1_4 fusion-flex-column"
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"
                           style={{
                             backgroundSize: "cover",
-                            width: "25%",
+                            width: "100%",
                             marginTop: 0,
-                            paddingRight: "7.68%",
+                            paddingRight: "1.92%",
                             marginBottom: 20,
-                            paddingLeft: "7.68%",
-                          }}>
-                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column" />
-                        </div>
-                        <div
-                          className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_2 1_2 fusion-flex-column"
-                          style={{
-                            backgroundSize: "cover",
-                            width: "50%",
-                            marginTop: 0,
-                            paddingRight: "3.84%",
-                            marginBottom: 20,
-                            paddingLeft: "3.84%",
+                            paddingLeft: "1.92%",
                           }}>
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                             <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
                               <h1
                                 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
                                 style={{ margin: 0, lineHeight: "0.8" }}>
-                                JOIN OUR DISCORD CHANNEL
+                                QUICK GUIDE TO NAVIGATING OM
                               </h1>
                             </div>
                             <div className="fusion-text fusion-text-1">
+                              <h3>EXPLORE OM IN PEACE</h3>
+                              <p>Enter in Single Player Mode</p>
+                              <h3>EXPLORE OM WITH OTHERS</h3>
+                              <p>Enter in Multi Player Mode</p>
+                              <h3>MOVE AROUND</h3>
                               <p>
-                                Are you interested in staying up to date on the
-                                latest with OM?
+                                Use Arrow Keys or WASD keys (if you are a gamer)
+                              </p>
+                              <h3>
+                                LOOK AROUND AND CHOOSE DIRECTION OF MOVEMENT
+                              </h3>
+                              <p>Mouse or Trackpad</p>
+                              <h3>JUMP</h3>
+                              <p>Space bar</p>
+                              <h3>ENTER A SPACE (ROOM)</h3>
+                              <p>
+                                Walk close to an entrance until the instructions
+                                show up, then press “E”, wait for portal to load
+                                and walk through it
+                              </p>
+                              <h3>EXIT A SPACE (BACK TO THE MAIN SQUARE)</h3>
+                              <p>
+                                Press “F”, wait for the portal to load and walk
+                                through it
+                              </p>
+                              <h3>SWITCH FROM FIRST / THIRD PERSON VIEW</h3>
+                              <p>Press “C”</p>
+                              <h3>CHAT (IN MULTIPLAYER MODE)</h3>
+                              <p>Press “Enter” and chat</p>
+                              <h3>CHANGE YOUR AVATAR</h3>
+                              <p>
+                                Connect your wallet to OnCyber and select an NFT
+                              </p>
+                              <h3>IMPROVE YOUR GRAPHIC PERFORMANCE (LAPTOP)</h3>
+                              <p>
+                                Switch your browser to use your dedicated GPU,
+                                not your integrated GPU (if you have a dedicated
+                                GPU).&nbsp; It will make a big difference in
+                                performance, though will use more battery power
+                                if you are unplugged.
+                              </p>
+                              <h4>
+                                <span style={{ textDecoration: "underline" }}>
+                                  DETAILED INSTRUCTIONS ON SWITCHING TO YOUR
+                                  DEDICATED GPU
+                                </span>
+                              </h4>
+                              <p>
+                                Some computers aren't set up to use dedicated
+                                GPU.
                               </p>
                               <p>
-                                <a
-                                  href="https://discord.gg/join-om"
-                                  target="_blank"
-                                  rel="noopener">
-                                  Join OM Discord!
-                                </a>
+                                You may be able to adjust your GPU usage for a
+                                better experience on oncyber:
+                              </p>
+                              <p>
+                                Below are changes for those who use NVIDA GPUs
+                                and those who use AMD GPUs.
+                              </p>
+                              <p>
+                                M
+                                <strong>
+                                  ake the changes to use your dedicated GPU:
+                                </strong>
+                              </p>
+                              <p>A) For Nvidia GPU</p>
+                              <p>
+                                1. Open the “Nvidia Control Panel” — right click
+                                on empty space on desktop and choose “Nvidia
+                                Control Panel” from menu
+                              </p>
+                              <p>
+                                <img
+                                  loading="lazy"
+                                  fetchPriority="high"
+                                  decoding="async"
+                                  className="size-full wp-image-1229 alignnone"
+                                  src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image5.png"
+                                  alt="6529.io"
+                                  width={580}
+                                  height={216}
+                                  srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image5-200x74.png 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image5-300x112.png 300w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image5-400x149.png 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image5.png 580w"
+                                  sizes="(max-width: 580px) 100vw, 580px"
+                                />
+                              </p>
+                              <p>
+                                2. Navigate to 3D Settings &gt; Manage 3D
+                                Settings
+                              </p>
+                              <p>
+                                <img
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="size-full wp-image-1230 alignnone"
+                                  src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image4.png"
+                                  alt="6529.io"
+                                  width={570}
+                                  height={360}
+                                  srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image4-200x126.png 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image4-300x189.png 300w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image4-320x202.png 320w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image4-400x253.png 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image4.png 570w"
+                                  sizes="(max-width: 570px) 100vw, 570px"
+                                />
+                              </p>
+                              <p>
+                                3. Open the tab “Program Settings” and choose
+                                your browser from the dropdown menu
+                              </p>
+                              <p>
+                                <img
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="size-full wp-image-1231 alignnone"
+                                  src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image3.png"
+                                  alt="6529.io"
+                                  width={696}
+                                  height={530}
+                                  srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image3-200x152.png 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image3-300x228.png 300w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image3-400x305.png 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image3-600x457.png 600w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image3.png 696w"
+                                  sizes="(max-width: 696px) 100vw, 696px"
+                                />
+                              </p>
+                              <p>4. Select your browser from the programs</p>
+                              <p>
+                                <img
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="size-full wp-image-1232 alignnone"
+                                  src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2.png"
+                                  alt="6529.io"
+                                  width={1014}
+                                  height={752}
+                                  srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2-200x148.png 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2-300x222.png 300w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2-400x297.png 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2-600x445.png 600w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2-768x570.png 768w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2-800x593.png 800w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image2.png 1014w"
+                                  sizes="(max-width: 1014px) 100vw, 1014px"
+                                />
+                              </p>
+                              <p>
+                                5. Scroll down, select GPUs and adjust from
+                                global setting to use NVIDIA
+                              </p>
+                              <p>
+                                <img
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="size-full wp-image-1233 alignnone"
+                                  src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image1.png"
+                                  alt="6529.io"
+                                  width={434}
+                                  height={495}
+                                  srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image1-200x228.png 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image1-263x300.png 263w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image1-400x456.png 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/image1.png 434w"
+                                  sizes="(max-width: 434px) 100vw, 434px"
+                                />
+                              </p>
+                              <p>B) For AMD GPU</p>
+                              <ol>
+                                <li>
+                                  Open “Radeon Settings” — right click on empty
+                                  space on desktop and choose “Radeon Settings”
+                                  from menu
+                                </li>
+                                <li>
+                                  Navigate to Preference&gt;Additional
+                                  Settings&gt; Power&gt;Switchable Graphics
+                                  Application Settings
+                                </li>
+                                <li>
+                                  Select the browser from the list of
+                                  applications. If not on the list, Add
+                                  Application and select the .exe-file from the
+                                  browser director.
+                                </li>
+                                <li>
+                                  In the column Graphics Settings, assign the
+                                  “High Performance” profile to the browser
+                                </li>
+                                <li>Apply changes</li>
+                              </ol>
+                              <p>
+                                Regardless of your GPU brand, in the latest
+                                version of Windows 10 you can set per-app GPU
+                                preferences under&nbsp;
+                                <strong>Display Settings</strong>
+                                &nbsp;&gt;&nbsp;
+                                <strong>Graphics Settings</strong>. You can open
+                                Display Settings by right-clicking on the
+                                Desktop.
                               </p>
                             </div>
                           </div>
-                        </div>
-                        <div
-                          className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_4 1_4 fusion-flex-column"
-                          style={{
-                            backgroundSize: "cover",
-                            width: "25%",
-                            marginTop: 0,
-                            paddingRight: "7.68%",
-                            marginBottom: 20,
-                            paddingLeft: "7.68%",
-                          }}>
-                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column" />
                         </div>
                       </div>
                     </div>
@@ -441,3 +604,8 @@ Join OM Discord!"
 );
 
 export default IndexPage;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "OM Instruction Manual" });
+}
+

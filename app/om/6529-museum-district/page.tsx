@@ -1,11 +1,7 @@
 import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const IndexPage = () => (
   <>
@@ -188,7 +184,6 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
       />
       <link
         rel="stylesheet"
-        id="fusion-dynamic-css-css"
         href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/131abea3e11386a1d10efb44f4033532.min.css?ver=3.11.11"
         type="text/css"
         media="all"
@@ -1836,3 +1831,9 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
 );
 
 export default IndexPage;
+
+
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "6529 Museum District" });
+}

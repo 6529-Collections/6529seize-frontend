@@ -1,10 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import Page from '../../../pages/om';
-
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
-jest.mock('../../../components/header/Header', () => () => <div data-testid="header" />);
-jest.mock('../../../components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder" />);
+import Page from '@/app/om/page';
 
 describe('OM Index Page', () => {
   const renderPage = () => render(<Page />);

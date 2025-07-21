@@ -7,7 +7,7 @@ import Skulptuur from "@/pages/museum/genesis/skulptuur";
 import Synapses from "@/pages/museum/genesis/synapses";
 import BlocksOfArt from "@/pages/museum/genesis/the-blocks-of-art";
 import Vortex from "@/pages/museum/genesis/vortex";
-import OMRedirect from "@/pages/om/OM";
+import OMRedirect from "@/app/om/OM/page";
 import { AuthContext } from "@/components/auth/Auth";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
