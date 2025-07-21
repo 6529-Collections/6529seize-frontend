@@ -1,13 +1,11 @@
-# Mobile Notification Strategy
+# Auction Notifications on Mobile
 
-This document outlines the notification system for stream auctions on mobile devices, focusing on timely alerts and actionable responses.
+Here's how we keep you updated about auctions through push notifications.
 
-## Notification Types
+## Types of Notifications
 
-### 1. Eligibility Achieved
-**Trigger**: Drop reaches voting threshold  
-**Recipients**: Drop creator only  
-**Priority**: Medium
+### Your Meme is Eligible
+When your meme gets enough votes:
 
 ```
 ┌─────────────────────────────────────┐
@@ -18,12 +16,10 @@ This document outlines the notification system for stream auctions on mobile dev
 └─────────────────────────────────────┘
 ```
 
-**Deep Link Action**: Opens drop with redirect modal
+Tapping takes you straight to the redirect options.
 
-### 2. Outbid Alert
-**Trigger**: User's bid is exceeded  
-**Recipients**: Previous highest bidder  
-**Priority**: High
+### Someone Outbid You
+When you're no longer the highest bidder:
 
 ```
 ┌─────────────────────────────────────┐
@@ -35,16 +31,10 @@ This document outlines the notification system for stream auctions on mobile dev
 └─────────────────────────────────────┘
 ```
 
-**Features**:
-- Shows bid differential
-- Time remaining crucial
-- Quick bid action
-- Single notification per outbid
+Shows the new bid, your last bid, and time left. Quick bid button lets you jump right back in.
 
-### 3. Auction Ending Soon
-**Trigger**: 1 hour before end  
-**Recipients**: Current highest bidder  
-**Priority**: High
+### Auction Ending Soon
+One hour before an auction ends (if you're winning):
 
 ```
 ┌─────────────────────────────────────┐
@@ -56,28 +46,20 @@ This document outlines the notification system for stream auctions on mobile dev
 └─────────────────────────────────────┘
 ```
 
-**Timing**: Exactly 1 hour before end
-
-### 4. Auction Won
-**Trigger**: Auction ends with user as winner  
-**Recipients**: Winning bidder  
-**Priority**: High
+### You Won!
+When the auction ends and you're the winner:
 
 ```
 ┌─────────────────────────────────────┐
 │ 🏆 You Won the Auction!            │
 │ "Meme Title" - 3.2 ETH            │
 │                                    │
-│ [Claim NFT] [View Details]         │
+│ [View Details]                     │
 └─────────────────────────────────────┘
 ```
 
-**Persistent**: Stays until claimed
-
-### 5. New Bid on Your Auction
-**Trigger**: Someone bids on creator's auction  
-**Recipients**: Auction creator  
-**Priority**: Medium
+### New Bid on Your Auction
+If you created the auction, you'll know when people bid:
 
 ```
 ┌─────────────────────────────────────┐
@@ -89,33 +71,31 @@ This document outlines the notification system for stream auctions on mobile dev
 └─────────────────────────────────────┘
 ```
 
-### 6. Creator Started Auction
-**Trigger**: Followed creator's auction goes live  
-**Recipients**: Creator's followers  
-**Priority**: Low
+### Creator You Follow Started an Auction
+When creators you follow start auctions:
 
 ```
 ┌─────────────────────────────────────┐
 │ 🎨 @creator started an auction     │
-│ "Meme Title" - Starting at 0.1 ETH │
+│ "Meme Title"                       │
 │                                    │
 │ [View Auction] [Dismiss]           │
 └─────────────────────────────────────┘
 ```
 
-## Notification Behavior
+## How Notifications Work
 
-### Outbid Policy
-**Single Notification Rule**:
-1. User places bid → becomes highest bidder
-2. Someone outbids them → user gets ONE notification
-3. No further notifications until user bids again
-4. Prevents notification spam
+### The One-Notification Rule
+Here's the important bit about outbid notifications:
+1. You place a bid and become the highest bidder
+2. Someone outbids you - you get ONE notification
+3. If more people keep bidding, you won't get more notifications
+4. You only get notified again after you place a new bid
 
-**Rationale**: Users who don't respond to outbid are "out of the game"
+This prevents your phone from buzzing constantly if you're not actively participating.
 
-### Grouping Strategy
-When multiple notifications arrive:
+### When You Get Multiple Updates
+If several things happen at once, we group them:
 ```
 ┌─────────────────────────────────────┐
 │ 📬 3 Stream Auction Updates        │
@@ -127,118 +107,33 @@ When multiple notifications arrive:
 ```
 
 ### Quiet Hours
-- Respect system DND settings
-- Critical only during quiet hours
-- Batch non-critical for morning
-- User preference override
+We respect your Do Not Disturb settings. During quiet hours, only critical notifications (like winning an auction) come through. Everything else waits until morning.
 
-## Deep Linking
+## Tapping Notifications
 
-### Link Structure
-```
-app://auctions/{auctionId}?action={action}
+Each notification takes you exactly where you need to go:
+- **Bid buttons** → Opens the auction with bid amounts ready
+- **View buttons** → Shows the full auction details
+- **Notification itself** → Takes you to the relevant auction
 
-Examples:
-app://auctions/123?action=bid
-app://auctions/123?action=view
-app://auctions/123?action=claim
-```
 
-### Action Handling
-- `bid`: Opens with bid interface expanded
-- `view`: Standard auction view
-- `claim`: Direct to claim flow
-- Invalid auction: Graceful fallback
+## When You're in the App
 
-## Push Notification Payload
-
-### iOS (APNS)
-```json
-{
-  "aps": {
-    "alert": {
-      "title": "🔴 Outbid on Auction",
-      "body": "New bid: 1.8 ETH (yours: 1.5 ETH)",
-      "action": "Bid Again"
-    },
-    "sound": "default",
-    "badge": 1,
-    "category": "AUCTION_OUTBID"
-  },
-  "data": {
-    "auctionId": "123",
-    "currentBid": "1.8",
-    "yourBid": "1.5",
-    "timeLeft": 7920
-  }
-}
-```
-
-### Android (FCM)
-```json
-{
-  "notification": {
-    "title": "🔴 Outbid on Auction",
-    "body": "New bid: 1.8 ETH (yours: 1.5 ETH)",
-    "icon": "notification_icon",
-    "color": "#FF5733"
-  },
-  "data": {
-    "type": "AUCTION_OUTBID",
-    "auctionId": "123",
-    "currentBid": "1.8",
-    "yourBid": "1.5",
-    "timeLeft": 7920,
-    "clickAction": "AUCTION_BID"
-  },
-  "priority": "high"
-}
-```
-
-## In-App Notification Display
-
-### Banner Style
+If you're already using the app when something happens:
 ```
 ┌─────────────────────────────────────┐
 │ 🔴 Outbid!  New: 1.8 ETH  [Bid]  X │
 └─────────────────────────────────────┘
 ```
 
-- Appears at top
-- Auto-dismiss after 5s
-- Tappable for action
-- Swipe to dismiss
+This banner appears at the top, disappears after 5 seconds, or you can tap it to act immediately.
 
-### Notification Center
-In-app notification list:
-- Chronological order
-- Unread indicators
-- Swipe actions
-- Bulk management
+There's also a notification center in the app where you can see all your auction updates in one place.
 
-## Performance Considerations
 
-### Battery Impact
-- Use high priority sparingly
-- Batch low-priority updates
-- Respect power saving modes
-- Efficient payload size
+## Controlling Your Notifications
 
-### Network Efficiency
-- Delta updates only
-- Compress payloads
-- Use notification extensions
-- Cache notification data
-
-### Delivery Optimization
-- Regional delivery times
-- Retry failed deliveries
-- Track delivery rates
-- Handle token refreshes
-
-## User Preferences
-
-### Granular Controls
+You can turn different types on or off:
 ```
 ┌─────────────────────────────────────┐
 │ Auction Notifications              │
@@ -255,25 +150,11 @@ In-app notification list:
 └─────────────────────────────────────┘
 ```
 
-### Quick Mute Options
-- Mute specific auction
-- Snooze all for 1 hour
-- Disable until tomorrow
-- Weekend-only mode
+Quick options if things get too noisy:
+- Mute a specific auction
+- Snooze everything for an hour
+- Turn off until tomorrow
 
-## Analytics & Monitoring
-
-### Key Metrics
-- Delivery success rate
-- Open rate by type
-- Action rate (bid from notif)
-- Opt-out rate
-
-### User Behavior
-- Response time to outbid
-- Notification to bid conversion  
-- Preference patterns
-- Engagement by time of day
 
 ---
 

@@ -1,10 +1,10 @@
 # Memes Wave to Stream Auction Integration
 
 ## Quick Summary
-This feature allows successful memes wave submissions to be converted into 1/1 NFT auctions, providing creators a path to monetize popular content while maintaining the integrity of the memes wave ecosystem.
+Popular memes can become 1/1 NFT auctions. When your meme gets enough community votes, you can turn it into an auction instead of competing on the regular leaderboard.
 
 ## What This Does
-When a meme receives strong community support through voting, the creator gains the option to redirect it from the standard leaderboard competition to a unique NFT auction. This creates a monetization opportunity for exceptional content that resonates with the community.
+Instead of just competing for leaderboard spots, creators get a new choice when their memes perform well. You can redirect your popular meme to become a unique NFT that people can bid on.
 
 ## Navigation Guide
 
@@ -15,16 +15,24 @@ When a meme receives strong community support through voting, the creator gains 
 
 ### 👤 For Product & Design Teams
 - [User Motivations](01-concept/motivations.md) - Why users want this feature
-- [Desktop Experience](03-user-experience/desktop/) - Web interface design
-- [Mobile Experience](03-user-experience/mobile/) - Native app considerations
+- Desktop Experience:
+  - [Memes Wave Changes](03-user-experience/desktop/memes-wave-changes.md) - Eligibility badges & redirect flow
+  - [Auction Discovery](03-user-experience/desktop/auction-discovery.md) - Finding and browsing auctions
+  - [Bidding Interface](03-user-experience/desktop/bidding-interface.md) - Placing bids & auction details
+- Mobile Experience:
+  - [Overview](03-user-experience/mobile/overview.md) - Mobile-specific considerations
+  - [Quick Bidding](03-user-experience/mobile/quick-bidding.md) - One-tap bid experience
+  - [Notifications](03-user-experience/mobile/notifications.md) - Push alerts & updates
 - [Activity Wave](03-user-experience/activity-wave.md) - Public auction feed
 
 ### 💻 For Developers
 - [Architecture Overview](04-technical/architecture.md) - System design
 - [API Reference](04-technical/api/endpoints.md) - All endpoints documented
 - [Database Schema](04-technical/database/schema.md) - Table structures
-- [Smart Contracts](04-technical/smart-contracts/) - Blockchain integration
-- [Components](04-technical/components/) - Frontend structure
+- Smart Contracts:
+  - [Integration Guide](04-technical/smart-contracts/integration.md) - How to integrate with contracts
+  - [Detailed Reference](04-technical/smart-contracts/detailed-reference.md) - Complete contract specifications
+- [Component Structure](04-technical/components/structure.md) - Frontend components
 
 ### 🔧 For Integration Teams
 - [Memes Wave Changes](05-integration/memes-wave.md) - Required modifications
@@ -49,13 +57,18 @@ When a meme receives strong community support through voting, the creator gains 
 - [API Endpoints](04-technical/api/endpoints.md)
 - [Database Schema](04-technical/database/schema.md)
 - [Component Structure](04-technical/components/structure.md)
+- [Smart Contract Integration](04-technical/smart-contracts/integration.md)
+- [Contract Detailed Reference](04-technical/smart-contracts/detailed-reference.md)
 - [Webhook Events](04-technical/api/webhooks.md)
 
 ### User Experience
-- [Eligibility Badge Design](03-user-experience/desktop/memes-wave-changes.md#eligibility-badge)
-- [Redirect Flow](03-user-experience/desktop/memes-wave-changes.md#redirect-flow)
-- [Mobile Bidding](03-user-experience/mobile/quick-bidding.md)
-- [Notification Types](03-user-experience/mobile/notifications.md)
+- [Desktop Memes Wave Changes](03-user-experience/desktop/memes-wave-changes.md)
+- [Desktop Auction Discovery](03-user-experience/desktop/auction-discovery.md)
+- [Desktop Bidding Interface](03-user-experience/desktop/bidding-interface.md)
+- [Mobile Overview](03-user-experience/mobile/overview.md)
+- [Mobile Quick Bidding](03-user-experience/mobile/quick-bidding.md)
+- [Mobile Notifications](03-user-experience/mobile/notifications.md)
+- [Activity Wave](03-user-experience/activity-wave.md)
 
 ## Status Tracking
 

@@ -1,130 +1,110 @@
-# User Journey: Meme to Auction
+# From Meme to Auction
 
-This document walks through the complete user journey from posting a meme to completing an auction sale.
+Here's exactly what happens when you turn a meme into an auction.
 
-## Journey Overview
+## The Flow
 
 ```
-Post Meme → Receive Votes → Become Eligible → Redirect Decision → Auction Active → Final Sale
+Post Meme → Get Votes → See Eligible Badge → Choose to Redirect → Auction Goes Live → Someone Wins
 ```
 
-## Detailed Steps
+## Step by Step
 
-### 1. Initial Submission
-**User**: Creator  
-**Action**: Posts a meme to the wave  
-**Experience**: Standard meme submission process, no changes
+### 1. You Post a Meme
+Just like always. Nothing different. Upload your meme to the wave and wait for votes.
 
-### 2. Community Voting Phase
-**Users**: Community members  
-**Action**: Vote on the meme (1-5 rating)  
-**What's Happening**: System tracks voting metrics in background
+### 2. People Vote
+Community members use their TDH to vote for your meme. The system quietly tracks how you're doing.
 
-### 3. Eligibility Achievement
-**Trigger**: Meme reaches voting threshold  
-**Visual Change**: "Stream Eligible" badge appears on the meme card  
-**Notification**: Creator receives alert about eligibility
+### 3. You Hit the Threshold
+Once you get enough votes, boom - a "Stream Eligible" badge appears on your meme. You'll get a notification too.
 
 ```
 ┌─────────────────────────────────────┐
 │ [Meme Content]           [🎯 Stream]│
 │                         [Eligible] │
 │                                     │
-│ Votes: 150 | Avg: 4.2              │
+│ Votes: 150 | Voters: 42            │
 └─────────────────────────────────────┘
 ```
 
-### 4. Redirect Decision Point
-**User**: Creator only  
-**Options**: 
-- Continue in leaderboard competition
-- Redirect to stream auction
+### 4. Decision Time
+Now you choose. Keep competing for the leaderboard or turn it into an auction?
 
-**Key Information Shown**:
-- What happens to votes (refunded)
-- Auction parameters (price, duration)
-- This decision is permanent
+The system shows you:
+- Everyone who voted gets their TDH back
+- Your auction details (starting price, duration)
+- Once you redirect, you can't undo it
 
-### 5. Redirect Confirmation
-**User**: Creator  
-**Action**: Confirms redirect decision  
-**System Actions**:
-- Immediately removes meme from leaderboard
-- Refunds all voter TDH
-- Creates pending auction entry
-- Posts announcement in original wave
+### 5. You Pull the Trigger
+Hit confirm and things happen fast:
+- Your meme disappears from the leaderboard
+- Everyone who voted gets their TDH back instantly
+- The system announces your redirect in the wave
+- Your auction enters the queue
 
-### 6. Manual Verification
-**Timeline**: 1-3 business days  
-**Process**: Team member contacts creator via DM  
-**Purpose**: Verify content and finalize auction setup
+### 6. Quick Check
+Within 1-3 days, someone from the team DMs you to verify everything's good with your content and set up the auction details.
 
-### 7. Auction Goes Live
-**Visible To**: Everyone  
-**Where**: Collections > Stream Auctions  
-**Initial State**:
-- Starting price: 0.1 ETH (set by contract)
-- Duration: 24 hours (set by contract)
-- Open for bidding
+### 7. Your Auction Goes Live
+Now everyone can see it in Collections > Stream Auctions.
+- Starts at the configured price
+- Runs for the set duration
+- Anyone can bid
 
-### 8. Bidding Activity
-**Users**: Any collector  
-**Actions**:
-- Place bids (must exceed current by minimum increment)
-- Monitor auction status
-- Receive notifications when outbid
+### 8. The Bidding War
+Collectors find your auction and start bidding. Each bid has to beat the previous one by at least 5%.
 
-**Creator Experience**:
-- Sees bid notifications
-- Can interact with bidders
-- Watches price potentially increase
+You watch the action:
+- Get notified for each new bid
+- Can interact with bidders in the Stream Auction Activity wave
+- See your meme's value climb (hopefully)
 
-### 9. Auction Conclusion
-**Duration**: 24 hours after start  
-**Winner**: Highest bidder  
-**Notifications**:
-- Winner notified to claim
-- Creator notified of final price
+Bidders get alerts when someone outbids them.
 
-### 10. NFT Claim
-**User**: Auction winner  
-**Action**: Claims NFT through auction interface  
-**Result**: 1/1 NFT transferred to winner's wallet
+### 9. Time's Up
+When the auction duration ends, highest bidder wins. Both you and the winner get notified about the final sale price.
 
-## Alternative Paths
+### 10. Claiming the NFT
+The winner goes to the auction page and claims their 1/1 NFT. It transfers straight to their wallet. You get paid. Everyone's happy.
 
-### Path A: Choose Not to Redirect
-If creator doesn't redirect when eligible:
-- Meme stays in leaderboard competition
-- Eligible badge remains visible
-- Can still redirect later (no deadline)
+## What If You Don't Redirect?
 
-### Path B: Don't Reach Eligibility
-If meme doesn't hit thresholds:
-- Continues in normal wave lifecycle
-- May still win leaderboard through other metrics
-- No auction option available
+### You Keep the Badge
+If you're eligible but don't redirect:
+- Your meme stays in the leaderboard race
+- The badge stays visible
+- You can redirect anytime later - no rush
 
-## Key Decision Points
+### Never Hit the Threshold?
+If you don't get enough votes:
+- Your meme lives its normal life in the wave
+- Might still win the leaderboard other ways
+- But no auction option for you
 
-### For Creators
-1. **When Eligible**: Redirect now or wait?
-2. **Why Redirect**: Monetization vs. leaderboard glory?
-3. **Timing**: Best time to capture value?
+## The Big Decisions
 
-### For Collectors
-1. **Discovery**: How to find auctions?
-2. **Bidding**: How much to bid?
-3. **Competition**: Monitor other bidders?
+### Creators Think About:
+- Should I redirect now or wait?
+- Is this the right time to maximize value?
+- Will my meme do better as a 1/1 or competing for the top spot?
 
-## User Mental Models
+### Collectors Think About:
+- Where do I find these auctions?
+- How much should I bid?
+- Who else is bidding against me?
 
-Different users approach this feature differently:
+## Different Types of Players
 
-- **"The Monetizer"**: Sees eligibility, immediately redirects for profit
-- **"The Competitor"**: Stays in leaderboard unless clearly not winning  
-- **"The Artist"**: Redirects quality pieces worthy of 1/1 status
-- **"The Strategist"**: Times redirect based on community interest
+We see four main approaches:
+
+**The Monetizer**: Sees that eligible badge, redirects immediately. Cash is king.
+
+**The Competitor**: Only redirects if they're clearly not winning the leaderboard. Glory first, money second.
+
+**The Artist**: Carefully picks which pieces deserve to be 1/1s. Quality over quantity.
+
+**The Strategist**: Watches community reactions, times their redirect perfectly for maximum value.
 
 ---
 

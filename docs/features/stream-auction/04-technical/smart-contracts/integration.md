@@ -1,8 +1,28 @@
 # Smart Contract Integration
 
-This document details the integration with Stream smart contracts for auction functionality.
+This document provides comprehensive technical documentation for integrating with the 6529 Stream Auction smart contracts, including detailed function specifications, event handling, and security considerations.
 
-## Contract Overview
+## Contract Architecture
+
+The auction system consists of four main contracts working together:
+
+```
+StreamDrops (Entry Point)
+    ↓
+StreamMinter (Token Creation)
+    ↓
+StreamCore (ERC721 Implementation)
+    ↓
+StreamAuctions (Auction Logic)
+```
+
+### Contract Relationships
+
+- **StreamDrops**: Creates drops (auctions/sales) via `mintDrop()` - only accessible by `tdhSigner`
+- **StreamMinter**: Handles token minting and auction initialization via `mintAndAuction()`
+- **StreamCore**: ERC721 contract that manages NFT collections and tokens
+- **StreamAuctions**: Manages bidding, time extensions, and auction claims
+- **StreamAdmins**: Permission management for all administrative functions
 
 ### Contract Addresses
 ```typescript
@@ -25,23 +45,82 @@ const TESTNET_CONTRACTS = {
 };
 ```
 
+## Contract Interfaces
+
+### StreamAuctions Contract
+
+#### Events
+
+```solidity
+event Participate(address indexed _add, uint256 indexed tokenid, uint256 indexed bid)
+```
+- **Purpose**: Emitted when a bid is placed
+- **Parameters**: `_add` (bidder), `tokenid`, `bid` (amount)
+- **Filter Usage**: All parameters indexed for efficient filtering
+
+```solidity
+event ClaimAuction(uint256 indexed tokenid, uint256 indexed bid)
+```
+- **Purpose**: Emitted when auction is successfully claimed
+- **Note**: NOT emitted for no-bid auctions
+
+#### Core Functions
+
+```solidity
+function participateToAuction(uint256 _tokenid) public payable
+```
+- **Purpose**: Place a bid on an active auction
+- **Requirements**: 
+  - Auction must be active
+  - Bid ≥ starting price (first) or current + 5%
+- **Effects**: 
+  - Refunds previous bidder automatically
+  - Extends auction by 5 min if bid in final 5 min
+- **Gas**: ~200,000 recommended
+
+```solidity
+function claimAuction(uint256 _tokenid) public nonReentrant
+```
+- **Purpose**: Finalize auction and distribute funds/NFT
+- **Requirements**: 
+  - Auction ended
+  - Not already claimed
+- **Fund Distribution**: 
+  - 50% to poster
+  - 25% to platform
+  - 25% to curators
+- **Gas**: ~300,000 recommended
+
+### StreamDrops Contract
+
+```solidity
+function mintDrop(address _poster, string memory _tokenData, uint256 _collectionID, uint256 _opt, uint256 _price, uint256 _endDate) public payable authorized
+```
+- **Access**: Only `tdhSigner` address
+- **Parameters**:
+  - `_poster`: Receives 50% of proceeds
+  - `_tokenData`: Token metadata
+  - `_collectionID`: Target collection
+  - `_opt`: 1 = Fixed price, 2 = Auction
+  - `_price`: Starting price (wei)
+  - `_endDate`: Min 10 minutes from now
+
+### StreamMinter Contract
+
+```solidity
+function mintAndAuction(address _recipient, string memory _tokenData, uint256 _saltfun_o, uint256 _collectionID, uint _auctionEndTime) public streamDropRequired returns (uint256)
+```
+- **Access**: Only callable by StreamDrops
+- **Requirements**: 
+  - Collection phases must be set
+  - `_auctionEndTime >= block.timestamp + 600`
+- **Returns**: Token ID of minted token
+
 ## Key Functions
 
 ### Auction Creation (Backend Only)
 
 ```typescript
-// Function: createStreamAuction
-// Called by: Backend with tdhSigner
-// Purpose: Mint NFT and start auction
-
-interface CreateAuctionParams {
-  poster: string;           // Creator address
-  tokenData: string;        // IPFS hash of metadata
-  collectionId: number;     // Stream collection ID
-  startingPrice: string;    // In wei (e.g., "100000000000000000" for 0.1 ETH)
-  duration: number;         // In seconds (e.g., 86400 for 24 hours)
-}
-
 async function createStreamAuction(params: CreateAuctionParams): Promise<number> {
   const contract = new ethers.Contract(
     STREAM_CONTRACTS.STREAM_DROPS,
@@ -49,28 +128,39 @@ async function createStreamAuction(params: CreateAuctionParams): Promise<number>
     tdhSigner
   );
   
+  // Validate end time (minimum 10 minutes)
+  const minEndTime = Math.floor(Date.now() / 1000) + 600;
+  const endTime = Math.floor(Date.now() / 1000) + params.duration;
+  if (endTime < minEndTime) {
+    throw new Error('Auction must run for at least 10 minutes');
+  }
+  
+  // Check collection phases are active
+  const minter = new ethers.Contract(STREAM_CONTRACTS.STREAM_MINTER, STREAM_MINTER_ABI, provider);
+  const [startTime, endTimePhase] = await minter.retrieveCollectionPhases(params.collectionId);
+  const currentTime = Math.floor(Date.now() / 1000);
+  
+  if (currentTime < startTime || currentTime > endTimePhase) {
+    throw new Error('Collection not in active minting phase');
+  }
+  
   const tx = await contract.mintDrop(
     params.poster,
     params.tokenData,
     params.collectionId,
-    params.startingPrice,
-    params.duration
+    2, // _opt = 2 for auction
+    ethers.utils.parseEther(params.startingPrice),
+    endTime
   );
   
   const receipt = await tx.wait();
-  const tokenId = extractTokenIdFromReceipt(receipt);
-  
-  return tokenId;
+  return extractTokenIdFromReceipt(receipt);
 }
 ```
 
 ### Bidding Functions (Frontend)
 
 ```typescript
-// Function: placeBid
-// Called by: Frontend with user's wallet
-// Purpose: Submit bid on active auction
-
 async function placeBid(tokenId: number, bidAmount: string): Promise<void> {
   const contract = new ethers.Contract(
     STREAM_CONTRACTS.STREAM_AUCTIONS,
@@ -78,16 +168,27 @@ async function placeBid(tokenId: number, bidAmount: string): Promise<void> {
     userSigner
   );
   
-  // Validate bid amount meets minimum
-  const currentBid = await contract.getCurrentBid(tokenId);
-  const minIncrement = currentBid.mul(110).div(100); // 10% increase
+  // Get current auction state
+  const currentBid = await contract.auctionHighestBid(tokenId);
+  const incPercent = await contract.incPercent(); // Default: 5%
   
-  if (ethers.BigNumber.from(bidAmount).lt(minIncrement)) {
-    throw new Error("Bid too low");
+  let minimumBid;
+  if (currentBid.eq(0)) {
+    // First bid - use starting price
+    const drops = new ethers.Contract(STREAM_CONTRACTS.STREAM_DROPS, STREAM_DROPS_ABI, provider);
+    minimumBid = await drops.retrieveAuctionPrice(tokenId);
+  } else {
+    // Calculate minimum with increment percentage
+    const increment = currentBid.mul(incPercent).div(100);
+    minimumBid = currentBid.add(increment);
   }
   
-  // Submit bid with ETH value
-  const tx = await contract.placeBid(tokenId, {
+  if (ethers.BigNumber.from(bidAmount).lt(minimumBid)) {
+    throw new Error(`Bid must be at least ${ethers.utils.formatEther(minimumBid)} ETH`);
+  }
+  
+  // Submit bid - contract handles refunds automatically
+  const tx = await contract.participateToAuction(tokenId, {
     value: bidAmount,
     gasLimit: 200000
   });
@@ -99,10 +200,6 @@ async function placeBid(tokenId: number, bidAmount: string): Promise<void> {
 ### Claim Functions
 
 ```typescript
-// Function: claimAuction
-// Called by: Frontend with winner's wallet
-// Purpose: Claim won NFT after auction ends
-
 async function claimAuction(tokenId: number): Promise<void> {
   const contract = new ethers.Contract(
     STREAM_CONTRACTS.STREAM_AUCTIONS,
@@ -110,18 +207,22 @@ async function claimAuction(tokenId: number): Promise<void> {
     userSigner
   );
   
-  // Verify auction ended and user won
-  const auctionState = await contract.getAuctionState(tokenId);
-  if (!auctionState.ended) {
-    throw new Error("Auction still active");
+  // Check if auction can be claimed
+  const minter = new ethers.Contract(STREAM_CONTRACTS.STREAM_MINTER, STREAM_MINTER_ABI, provider);
+  const endTime = await minter.getAuctionEndTime(tokenId);
+  const currentTime = Math.floor(Date.now() / 1000);
+  const isClaimed = await contract.auctionClaim(tokenId);
+  
+  if (currentTime <= endTime) {
+    throw new Error('Auction has not ended yet');
   }
-  if (auctionState.highestBidder !== userAddress) {
-    throw new Error("Not the winner");
+  if (isClaimed) {
+    throw new Error('Auction already claimed');
   }
   
-  // Claim the NFT
+  // Anyone can claim - NFT goes to highest bidder or execution address if no bids
   const tx = await contract.claimAuction(tokenId, {
-    gasLimit: 150000
+    gasLimit: 300000
   });
   
   await tx.wait();
@@ -131,106 +232,79 @@ async function claimAuction(tokenId: number): Promise<void> {
 ### Read Functions
 
 ```typescript
-// Function: getAuctionState
-// Called by: Frontend/Backend
-// Purpose: Get current auction status
-
-interface AuctionState {
-  active: boolean;
-  ended: boolean;
-  startTime: number;
-  endTime: number;
-  startingPrice: string;
-  currentBid: string;
-  highestBidder: string;
-  bidCount: number;
-  claimed: boolean;
-}
-
 async function getAuctionState(tokenId: number): Promise<AuctionState> {
-  const contract = new ethers.Contract(
-    STREAM_CONTRACTS.STREAM_AUCTIONS,
-    STREAM_AUCTIONS_ABI,
-    provider
-  );
+  const auctions = new ethers.Contract(STREAM_CONTRACTS.STREAM_AUCTIONS, STREAM_AUCTIONS_ABI, provider);
+  const minter = new ethers.Contract(STREAM_CONTRACTS.STREAM_MINTER, STREAM_MINTER_ABI, provider);
+  const drops = new ethers.Contract(STREAM_CONTRACTS.STREAM_DROPS, STREAM_DROPS_ABI, provider);
   
-  const state = await contract.auctions(tokenId);
+  const [
+    isActive,
+    endTime,
+    currentBid,
+    currentBidder,
+    startingPrice,
+    poster,
+    isClaimed
+  ] = await Promise.all([
+    minter.getAuctionStatus(tokenId),
+    minter.getAuctionEndTime(tokenId),
+    auctions.auctionHighestBid(tokenId),
+    auctions.auctionHighestBidder(tokenId),
+    drops.retrieveAuctionPrice(tokenId),
+    drops.retrieveAuctionPoster(tokenId),
+    auctions.auctionClaim(tokenId)
+  ]);
   
   return {
-    active: state.active,
-    ended: Date.now() / 1000 > state.endTime,
-    startTime: state.startTime.toNumber(),
-    endTime: state.endTime.toNumber(),
-    startingPrice: state.startingPrice.toString(),
-    currentBid: state.currentBid.toString(),
-    highestBidder: state.highestBidder,
-    bidCount: state.bidCount.toNumber(),
-    claimed: state.claimed
+    active: isActive,
+    ended: Math.floor(Date.now() / 1000) > endTime.toNumber(),
+    endTime: endTime.toNumber(),
+    startingPrice: startingPrice.toString(),
+    currentBid: currentBid.toString(),
+    highestBidder: currentBidder,
+    poster,
+    claimed: isClaimed
   };
 }
 ```
 
 ## Event Monitoring
 
-### Event Definitions
-```typescript
-// Auction Created
-event AuctionCreated(
-  uint256 indexed tokenId,
-  address indexed creator,
-  uint256 startingPrice,
-  uint256 endTime
-);
-
-// Bid Placed
-event BidPlaced(
-  uint256 indexed tokenId,
-  address indexed bidder,
-  uint256 amount,
-  uint256 timestamp
-);
-
-// Auction Ended
-event AuctionEnded(
-  uint256 indexed tokenId,
-  address indexed winner,
-  uint256 finalPrice
-);
-
-// NFT Claimed
-event AuctionClaimed(
-  uint256 indexed tokenId,
-  address indexed winner
-);
+### Actual Contract Events
+```solidity
+// From StreamAuctions.sol
+event Participate(address indexed _add, uint256 indexed tokenid, uint256 indexed bid);
+event ClaimAuction(uint256 indexed tokenid, uint256 indexed bid);
+event Withdraw(address indexed _add, bool status, uint256 indexed funds);
 ```
 
 ### Event Listener Setup
 ```typescript
-// Listen for auction events
 function setupAuctionEventListeners() {
-  const contract = new ethers.Contract(
+  const auctions = new ethers.Contract(
     STREAM_CONTRACTS.STREAM_AUCTIONS,
     STREAM_AUCTIONS_ABI,
     provider
   );
   
-  // New bid events
-  contract.on("BidPlaced", async (tokenId, bidder, amount, timestamp) => {
-    await updateAuctionCache(tokenId, {
-      currentBid: amount.toString(),
+  // Listen for new bids
+  const participateFilter = auctions.filters.Participate(null, null, null);
+  auctions.on(participateFilter, async (bidder, tokenId, bid, event) => {
+    await updateAuctionCache(tokenId.toNumber(), {
+      currentBid: bid.toString(),
       currentBidder: bidder,
-      lastBidTime: timestamp
+      blockNumber: event.blockNumber
     });
     
-    await sendOutbidNotifications(tokenId, bidder, amount);
-    await postToActivityWave("bid", tokenId, bidder, amount);
+    await sendOutbidNotifications(tokenId.toNumber(), bidder, bid);
+    await postToActivityWave("bid", tokenId.toNumber(), bidder, bid);
   });
   
-  // Auction ended events
-  contract.on("AuctionEnded", async (tokenId, winner, finalPrice) => {
-    await markAuctionEnded(tokenId, winner, finalPrice);
-    await sendWinnerNotification(tokenId, winner);
-    await postToActivityWave("ended", tokenId, winner, finalPrice);
+  // Listen for claims (note: only emitted if auction had bids)
+  const claimFilter = auctions.filters.ClaimAuction(null, null);
+  auctions.on(claimFilter, async (tokenId, winningBid, event) => {
+    await markAuctionCompleted(tokenId.toNumber(), winningBid);
+    await postToActivityWave("claimed", tokenId.toNumber(), winningBid);
   });
 }
 ```
@@ -258,15 +332,39 @@ const GAS_ESTIMATES = {
 ### Common Errors
 ```typescript
 const CONTRACT_ERRORS = {
-  "Auction not active": "This auction has ended or hasn't started",
-  "Bid too low": "Your bid must be at least 10% higher than current",
-  "Insufficient funds": "Your wallet doesn't have enough ETH",
-  "Not authorized": "Only the auction creator can perform this action",
-  "Already claimed": "This NFT has already been claimed"
+  // StreamAuctions errors
+  "Ended": "Auction has ended",
+  "Equal or Higher than starting bid": "First bid must meet starting price",
+  "% more than highest bid": "Bid must be higher than current bid plus increment",
+  "ETH failed": "Fund transfer failed - check recipient",
+  "err": "Cannot claim - auction not ended or already claimed",
+  
+  // StreamDrops errors
+  "Drop Executed": "This drop already exists",
+  "price": "Incorrect payment amount",
+  "Not found": "Invalid option - use 1 for fixed price or 2 for auction",
+  "Not Allowed": "Only authorized signer can create drops",
+  
+  // StreamMinter errors
+  "Not started": "Collection minting hasn't started",
+  "Ended": "Collection minting period ended",
+  "No supply": "Collection is sold out",
+  "Add data": "Collection data must be set first",
+  
+  // Admin errors
+  "Not allowed": "Insufficient permissions",
+  "Contract is not Minter": "Invalid minter contract",
+  "Contract is not Admin": "Invalid admin contract"
 };
 
 function translateContractError(error: any): string {
   const message = error.reason || error.message || "";
+  
+  // Check for specific patterns
+  if (message.includes("% more than highest bid")) {
+    return "Your bid must be higher than the current bid plus the minimum increment";
+  }
+  
   return CONTRACT_ERRORS[message] || "Transaction failed. Please try again.";
 }
 ```
@@ -324,14 +422,110 @@ async function verifyBidSignature(
 ```
 
 ### Admin Functions
-Only callable by authorized admin addresses:
-- Update auction parameters
-- Pause/unpause auctions
-- Emergency withdrawal
-- Collection management
+
+#### Update Auction Parameters
+```typescript
+async function updateAuctionParameters(bidIncrement: number, extensionTime: number, adminSigner: Signer) {
+  const auctions = new ethers.Contract(STREAM_CONTRACTS.STREAM_AUCTIONS, STREAM_AUCTIONS_ABI, adminSigner);
+  
+  // Update bid increment percentage (default: 5)
+  await auctions.updatePercentAndExtensionTime(1, bidIncrement);
+  
+  // Update extension time in seconds (default: 300)
+  await auctions.updatePercentAndExtensionTime(0, extensionTime);
+}
+```
+
+#### Set Collection Phases (Required before auctions)
+```typescript
+async function setCollectionPhases(collectionId: number, startTime: number, endTime: number, adminSigner: Signer) {
+  const minter = new ethers.Contract(STREAM_CONTRACTS.STREAM_MINTER, STREAM_MINTER_ABI, adminSigner);
+  
+  // Collection data must be added first
+  await minter.setCollectionPhases(collectionId, startTime, endTime);
+}
+```
+
+#### Emergency Functions
+```typescript
+// Emergency withdrawal (all contracts have this)
+async function emergencyWithdraw(contractAddress: string, adminSigner: Signer) {
+  const contract = new ethers.Contract(contractAddress, ['function emergencyWithdraw()'], adminSigner);
+  await contract.emergencyWithdraw();
+}
+```
+
+### Access Control
+
+```solidity
+// Modifiers used in contracts
+modifier FunctionAdminRequired(bytes4 _selector) // Admin functions
+modifier authorized() // TDH signer only (drops creation)
+modifier streamDropRequired() // Only StreamDrops can call mint functions
+```
+
+## Fund Distribution
+
+When an auction is claimed with bids:
+- **50%** to poster (creator)
+- **25%** to platform address
+- **25%** to curators pool address
+
+No-bid auctions: NFT transfers to execution address, no funds distributed.
+
+## Critical Requirements
+
+1. **Collection Phases**: Must call `setCollectionPhases()` before creating auctions
+2. **Minimum Duration**: All auctions must run for at least 600 seconds (10 minutes)
+3. **Automatic Refunds**: Previous bidder automatically refunded when outbid
+4. **Time Extension**: Bids in final 5 minutes extend auction by 5 minutes
+5. **Anyone Can Claim**: After auction ends, anyone can trigger claim (not just winner)
+
+## Complete Integration Example
+
+```typescript
+class StreamAuctionService {
+  private contracts: { [key: string]: ethers.Contract };
+  
+  constructor(provider: ethers.Provider, signer?: ethers.Signer) {
+    this.contracts = {
+      auctions: new ethers.Contract(STREAM_CONTRACTS.STREAM_AUCTIONS, STREAM_AUCTIONS_ABI, signer || provider),
+      minter: new ethers.Contract(STREAM_CONTRACTS.STREAM_MINTER, STREAM_MINTER_ABI, provider),
+      drops: new ethers.Contract(STREAM_CONTRACTS.STREAM_DROPS, STREAM_DROPS_ABI, provider)
+    };
+  }
+  
+  async getMinimumBid(tokenId: number): Promise<BigNumber> {
+    const currentBid = await this.contracts.auctions.auctionHighestBid(tokenId);
+    const incPercent = await this.contracts.auctions.incPercent();
+    
+    if (currentBid.eq(0)) {
+      return await this.contracts.drops.retrieveAuctionPrice(tokenId);
+    }
+    
+    const increment = currentBid.mul(incPercent).div(100);
+    return currentBid.add(increment);
+  }
+  
+  async placeBid(tokenId: number, amount: BigNumber): Promise<TransactionReceipt> {
+    const minBid = await this.getMinimumBid(tokenId);
+    if (amount.lt(minBid)) {
+      throw new Error(`Minimum bid is ${ethers.utils.formatEther(minBid)} ETH`);
+    }
+    
+    const tx = await this.contracts.auctions.participateToAuction(tokenId, {
+      value: amount,
+      gasLimit: 200000
+    });
+    
+    return await tx.wait();
+  }
+}
+```
 
 ---
 
 [Back to API →](../api/endpoints.md)  
 [See components →](../components/structure.md)  
 [Integration guide →](../../05-integration/)
+[Detailed contract reference →](./detailed-reference.md)

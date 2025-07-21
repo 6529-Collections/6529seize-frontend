@@ -1,10 +1,10 @@
-# Bidding Interface Design
+# How to Place Bids
 
-This document details the user interface for placing bids on stream auctions.
+Here's what the bidding interface looks like and how it works.
 
-## Bidding Component
+## What You See
 
-### Default State (Not Bidding)
+### When You're Not Bidding Yet
 ```
 ┌─────────────────────────────────────┐
 │ Current Bid: 1.2 ETH               │
@@ -18,7 +18,7 @@ This document details the user interface for placing bids on stream auctions.
 └─────────────────────────────────────┘
 ```
 
-### Expanded Bidding State
+### When You Click "Place Bid"
 ```
 ┌─────────────────────────────────────┐
 │ Current Bid: 1.2 ETH               │
@@ -44,35 +44,25 @@ This document details the user interface for placing bids on stream auctions.
 └─────────────────────────────────────┘
 ```
 
-## Bidding Flow
+## How It Works
 
-### 1. Initial Click
-User clicks "Place Bid" button:
-- Component expands to show options
-- Quick bid buttons calculate increments
-- Custom input field appears
-- Wallet connection check
+### Step 1: Click to Start
+When you click "Place Bid", the interface expands to show your options. We check your wallet connection at the same time.
 
-### 2. Amount Selection
+### Step 2: Pick Your Amount
 
-#### Quick Bid Buttons
-Dynamic calculations based on current bid:
-- **Button 1**: Minimum increment (10%)
-- **Button 2**: Moderate increase (25%)
-- **Button 3**: Aggressive bid (50-100%)
+#### Quick Options
+We give you three quick bid buttons that make sense:
+- First button: The minimum you can bid (10% more than current)
+- Second button: A solid increase (25% more)
+- Third button: A strong bid to really compete (50-100% more)
 
-Amounts round to clean numbers:
-- 1.2 → 1.32, 1.5, 2.0
-- 5.5 → 6.1, 6.9, 8.3
-- 10 → 11, 12.5, 15
+We round to nice clean numbers. So if the current bid is 1.2 ETH, you'll see options like 1.32, 1.5, and 2.0 instead of weird decimals.
 
-#### Custom Input
-- Validates minimum increment
-- Shows USD equivalent
-- Real-time validation
-- Clear error messages
+#### Or Enter Your Own
+Type any amount you want (as long as it's at least 10% higher). You'll see the USD value update as you type, and we'll tell you right away if your bid is too low.
 
-### 3. Confirmation Step
+### Step 3: Double-Check Before Bidding
 ```
 ┌─────────────────────────────────────┐
 │ Confirm Your Bid                   │
@@ -90,15 +80,12 @@ Amounts round to clean numbers:
 └─────────────────────────────────────┘
 ```
 
-### 4. Wallet Interaction
-- Clear signing request
-- Gas estimate shown
-- Processing state
-- Success/error handling
+### Step 4: Sign with Your Wallet
+Your wallet pops up with the transaction to sign. You'll see the gas cost estimate. After you sign, we show a spinner while it processes, then either a success message or an error if something went wrong.
 
-## Bid Status Indicators
+## Your Bid Status
 
-### You're Winning
+### When You're Winning
 ```
 ┌─────────────────────────────────────┐
 │ 👑 You're the highest bidder!      │
@@ -109,7 +96,7 @@ Amounts round to clean numbers:
 └─────────────────────────────────────┘
 ```
 
-### You've Been Outbid
+### When Someone Outbids You
 ```
 ┌─────────────────────────────────────┐
 │ 🔴 You've been outbid              │
@@ -120,7 +107,7 @@ Amounts round to clean numbers:
 └─────────────────────────────────────┘
 ```
 
-### No Active Bid
+### When You Haven't Bid Yet
 ```
 ┌─────────────────────────────────────┐
 │ Current Bid: 2.8 ETH               │
@@ -130,30 +117,30 @@ Amounts round to clean numbers:
 └─────────────────────────────────────┘
 ```
 
-## Real-time Updates
+## Live Updates
 
-### WebSocket Integration
-- Current bid updates instantly
-- Time remaining syncs across users
-- Bid notifications appear inline
-- Status changes immediate
+Everything updates in real-time:
+- Current bid changes instantly when someone bids
+- Timer counts down for everyone at the same time
+- You see notifications right in the interface
+- Your status updates immediately
 
-### Update Animations
-- Price changes highlight briefly
-- New bid flash notification
-- Countdown urgent at <5 min
-- Status transitions smooth
+When things change:
+- The price flashes briefly so you notice
+- New bids get a quick highlight
+- Timer turns red when under 5 minutes
+- Everything animates smoothly
 
-## Error States
+## When Things Go Wrong
 
-### Insufficient Balance
+### Not Enough ETH
 ```
 ┌─────────────────────────────────────┐
 │ ❌ Insufficient Balance             │
 │ You have: 0.8 ETH                  │
 │ Bid requires: 1.32 ETH             │
 │                                    │
-│ [Add Funds]  [Lower Bid]           │
+│ Add ETH to your wallet to bid      │
 └─────────────────────────────────────┘
 ```
 
@@ -179,10 +166,9 @@ Amounts round to clean numbers:
 └─────────────────────────────────────┘
 ```
 
-## Bidding Guidelines Display
+## Help for New Bidders
 
-### First-Time Bidder
-Show educational tooltip:
+If it's your first time, we show a quick explanation:
 ```
 ┌─────────────────────────────────────┐
 │ 💡 How Bidding Works               │
@@ -192,45 +178,34 @@ Show educational tooltip:
 │ • You can only have one active     │
 │   bid per auction                  │
 │ • Outbid? Auto-refund in same tx   │
-│ • Winners must claim NFT after     │
 │                                    │
 │ [Got it]                           │
 └─────────────────────────────────────┘
 ```
 
-## Mobile Considerations
+## Works on Your Phone
 
-### Touch-Optimized Layout
-- Larger tap targets (min 44px)
-- Quick bid buttons prominent
-- Number input with number pad
-- Simplified confirmation flow
+On mobile, everything's optimized for touch:
+- Big buttons you can actually tap
+- Quick bid options right up front
+- Number pad pops up for custom amounts
+- Simpler confirmation process
 
-### Responsive Behavior
-- Stack elements vertically
-- Full-width buttons
-- Collapsible information
-- Swipe gestures for quick bids
+The layout adjusts too:
+- Everything stacks vertically
+- Buttons stretch full width
+- Less important info collapses
+- Maybe swipe for quick bid amounts
 
-## Accessibility
+## Making It Accessible
 
-### Keyboard Navigation
-- Tab through all options
-- Enter to confirm
-- Escape to cancel
-- Arrow keys for quick amounts
+We make sure everyone can bid:
 
-### Screen Reader Support
-- Clear action labels
-- Status announcements
-- Error descriptions
-- Time remaining updates
+**Keyboard users**: Tab through everything, Enter to confirm, Escape to cancel, arrow keys for amounts.
 
-### Visual Accessibility
-- High contrast mode
-- Clear focus indicators
-- Error states not just color
-- Important info not just icons
+**Screen readers**: Everything's labeled clearly. Status changes get announced. Errors are fully described. Time updates are readable.
+
+**Visual needs**: High contrast mode available. You can see what's focused. Errors aren't just red - they have icons and text. Important stuff isn't just shown with icons.
 
 ---
 

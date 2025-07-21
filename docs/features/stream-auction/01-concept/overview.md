@@ -1,47 +1,45 @@
 # Stream Auction Feature Overview
 
-## The Problem We're Solving
+## The Problem
 
-Currently, when someone creates a meme that resonates strongly with the community, they have limited options:
-- Win the leaderboard and get their meme minted as an open edition
-- Lose the leaderboard competition and get nothing
+Right now, if you create a meme that people love, you've got two outcomes:
+- Win the leaderboard → your meme becomes an open edition
+- Don't win → you get nothing
 
-There's no middle path for creators whose content is exceptional but might not win the overall competition. This leaves value on the table for both creators and collectors who want to own unique pieces.
+That's it. Even if your meme is amazing and gets tons of votes, if someone else wins that round, you're out of luck. Meanwhile, collectors who'd pay good money for your work as a 1/1 can't get it.
 
-## Our Solution
+## The Solution
 
-We're introducing a "redirect to auction" feature that allows creators to convert their successful memes into 1/1 NFT auctions. This provides:
+If your meme gets enough community support, you can redirect it to become a 1/1 auction instead of competing on the leaderboard. 
 
-- **For Creators**: A monetization path for popular content
-- **For Collectors**: Access to unique pieces from their favorite creators
-- **For the Ecosystem**: More diverse participation models
+This changes everything. Creators can monetize popular work even if they don't win. Collectors can bid on unique pieces they actually want. The whole ecosystem gets more interesting.
 
-## How It Works in Simple Terms
+## How It Works
 
-1. **Create & Share**: Post a meme to the wave as normal
-2. **Community Votes**: The meme gains traction through voting
-3. **Eligibility**: Once it hits certain thresholds, it becomes "stream eligible"
-4. **Creator Choice**: The creator can choose to redirect to an auction
-5. **Auction Process**: The meme becomes a 1/1 NFT that collectors can bid on
-6. **Final Sale**: Highest bidder wins, creator gets paid
+1. Post your meme to the wave like always
+2. People vote for it because they like it
+3. Once you hit the vote threshold, you see a "Stream Eligible" badge
+4. You decide: keep competing for the leaderboard or redirect to auction?
+5. If you redirect, your meme becomes a 1/1 NFT auction
+6. Collectors bid, highest bidder wins, you get paid
 
 ## Key Principles
 
-### Creator Empowerment
-The decision to redirect is entirely in the creator's hands. We show them when they're eligible but never force the choice.
+### Your Choice, Always
+Nobody forces you to redirect. We just show you when you're eligible. You decide what's best for your work.
 
-### Transparency
-All redirected memes are announced in the original wave, and auctions are visible to the entire community.
+### Everything's Public
+When someone redirects, it gets announced in the wave. All auctions are visible. No hidden deals.
 
-### Finality
-Once a creator chooses to redirect, the decision is permanent. This encourages thoughtful decision-making.
+### No Take-backs
+Once you redirect, that's it. Can't change your mind. This keeps things clean and makes people think before they act.
 
-### Fairness
-Voters who supported the meme get their voting tokens refunded when a redirect happens, just like when a meme wins the leaderboard.
+### Voters Get Refunded
+If you redirect, everyone who voted for you gets their voting TDH back. Same as if you'd won the leaderboard. Nobody loses out.
 
-## What Makes This Special
+## Why This Works
 
-Unlike traditional NFT platforms where everything is for sale, this system requires community validation first. Only memes that resonate with voters can become auctions, creating a quality filter powered by the community itself.
+Most NFT platforms let anyone list anything. Here, you need real community support first. If people don't vote for your meme, you can't auction it. The community decides what's worth collecting, not just the creator.
 
 ---
 

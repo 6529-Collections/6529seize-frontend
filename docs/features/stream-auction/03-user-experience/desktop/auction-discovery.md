@@ -1,27 +1,26 @@
-# Auction Discovery & Browsing
+# Finding Stream Auctions
 
-This document covers how users find and browse stream auctions throughout the platform.
+Here's how people discover and browse auctions across the platform.
 
-## Primary Access Point
+## Where to Look
 
-### Collections Section Integration
-**URL**: `/collections/stream-auctions`  
-**Navigation**: Collections dropdown → Stream Auctions
-
-Stream auctions appear as a new collection type alongside:
+The main spot is in Collections. You'll see Stream Auctions right there with the other collections:
 - The Memes
 - Gradient
 - NextGen
-- **Stream Auctions** (NEW)
+- **Stream Auctions** (that's us!)
 
-## Main Auction Listing Page
+Just go to `/collections/stream-auctions` or pick it from the Collections dropdown.
 
-### Page Layout
+## The Main Page
+
+Here's what you see when you land on the auctions page:
+
 ```
 ┌─────────────────────────────────────────┐
 │ Stream Auctions                         │
 │ ─────────────────────────────────────── │
-│ [Active] [Upcoming] [Collection] [My Bids]│
+│ [Active (12)] [Upcoming (3)] [Completed] [My Bids (2)]│
 │                                         │
 │ Filters: [Price Range] [Ending Soon] [↓]│
 │ ─────────────────────────────────────── │
@@ -38,42 +37,26 @@ Stream auctions appear as a new collection type alongside:
 └─────────────────────────────────────────┘
 ```
 
-### Category Tabs
+## The Different Tabs
 
-#### Active Auctions
-- Currently accepting bids
-- Sorted by ending soonest by default
-- Shows current bid and time remaining
-- Indicators for user's bid status
+**Active** - What's live right now. Shows current bid and time left. Little icons tell you if you're winning (👑) or if it's ending soon (⚡).
 
-#### Upcoming Auctions  
-- In pending/preparation state
-- Shows "Coming Soon" messaging
-- Creator contact in progress
-- Builds anticipation
+**Upcoming** - Auctions being set up. Shows "Coming Soon" while the team works with creators.
 
-#### Collection
-- Completed auctions
-- Shows final sale price
-- Winner information (if public)
-- Historical record
+**Completed** - Past auctions. See what sold for how much.
 
-#### My Bids
-- User's active participations
-- Quick access to auctions they're involved in
-- Status indicators (winning/outbid)
-- One-click rebid actions
+**My Bids** - Just the ones you're in. Quick way to check if you're still winning or need to bid again.
 
-## Auction Card Design
+## What Each Auction Shows
 
-### Standard Auction Card
+Here's a typical auction card:
 ```
 ┌─────────────────────┐
 │ [Meme Image/Preview]│
 │                     │
 │ Current Bid: 1.2 ETH│
 │ Time Left: 2h 15m   │
-│ Bidders: 7          │
+│ Bidders: 7 [→]      │
 │                     │
 │ by @creator         │
 │ ─────────────────── │
@@ -81,49 +64,45 @@ Stream auctions appear as a new collection type alongside:
 └─────────────────────┘
 ```
 
-### Card Elements
-- **Image**: Full meme preview
-- **Current Bid**: Live-updated
-- **Time Remaining**: Countdown timer
-- **Bid Count**: Social proof
-- **Creator**: Link to profile
-- **Status Icons**:
-  - 👑 You're winning
-  - ⚡ Ending soon (<1hr)
-  - 🔥 Hot (many bids)
+Each card shows:
+- The meme itself
+- Current bid (updates live)
+- Time counting down
+- How many people have bid (click [→] for bid history)
+- Who created it
 
-## Filtering & Sorting
+Icons mean things:
+- 👑 = You're winning this one
+- ⚡ = Ending in less than an hour
+- 🔥 = Lots of bidding action
 
-### Filter Options
-- **Price Range**: Min/max current bid
-- **Time Remaining**: Ending within X hours
-- **Creator**: Specific creators
-- **Status**: Has bids / No bids
-- **Category**: From specific waves
+## Finding What You Want
 
-### Sort Options  
-- Ending Soon (default for active)
-- Price: Low to High
-- Price: High to Low
-- Recently Added
-- Most Bids
+### Filters
+- Price range (set min/max)
+- Time left (ending soon)
+- Specific creators
+- Has bids or not
 
-## Search Integration
+### Sorting
+Default is ending soonest first, but you can also sort by:
+- Price (low to high or high to low)
+- Newest additions
+- Most popular (bid count)
 
-### Search Functionality
-- Search by creator name
-- Search by meme text content
-- Search by auction ID
-- Filters maintain during search
+## Search
 
-### Search Results Display
-- Highlights matching terms
-- Shows category (active/upcoming/ended)
-- Direct link to auction page
+You can search for:
+- Creator names
+- Text in the meme
+- Auction IDs
 
-## Individual Auction Page
+Your filters stay active while searching, and results show which category each auction is in (active, upcoming, or completed).
 
-### Page Structure
+## When You Click on an Auction
+
+Here's what the auction page looks like:
+
 ```
 ┌─────────────────────────────────────────┐
 │ ← Back to Auctions                      │
@@ -148,58 +127,48 @@ Stream auctions appear as a new collection type alongside:
 │ Stats                                   │
 │ ─────────────────────────────────────── │
 │ Original Votes: 187                     │
-│ Average Rating: 4.3                     │
-│ Wave: Memes Wave #42                    │
+│ Voters: 43                              │
 └─────────────────────────────────────────┘
 ```
 
-### Key Sections
-1. **Hero Section**: Large meme display
-2. **Auction Status**: Current bid, time, quick bid
-3. **Bid History**: Recent bids (limited)
-4. **User Status**: Your participation
-5. **Metadata**: Original wave context
-6. **Action Area**: Bidding interface
+Main parts:
+- Big meme image on the left
+- Current bid and time counting down
+- Recent bids (you can see who's competing)
+- Your status (are you winning or losing?)
+- Original context from when it was in the wave
+- Big bid button ready to go
 
-## Discovery Features
+## Where Else You'll See Auctions
 
-### Homepage Integration
-**Location**: Index page  
-**Section**: "Live Stream Auctions"
-**Format**: Horizontal carousel
+### On the Homepage
+Right on the main page, you'll see a "Live Stream Auctions" section with a carousel showing 6-8 auctions. We prioritize ones ending soon so you don't miss out. There's a "View All" link to see everything.
 
-Shows 6-8 active auctions with:
-- Ending soon priority
-- Mix of price ranges
-- "View All" link
-
-### Related Auctions
-On individual auction pages:
+### When Viewing an Auction
+At the bottom of each auction page, we show related ones:
 - More from this creator
-- Similar price range
-- Ending at similar times
-- From same wave
+- Others in the same price range
+- Auctions ending around the same time
 
-### Activity Feed Integration
-Stream Auction Activity wave shows:
+### In the Activity Feed
+The Stream Auction Activity wave is where all the action happens:
 - New auctions going live
-- Significant bid activity
-- Auctions ending soon
-- Final results
+- Big bids happening
+- "Ending in 10 minutes!" alerts
+- Final sale prices
 
-## Mobile Responsive Design
+This is also where bidders and creators can chat about the auctions.
 
-### Grid Adjustments
-- 4 columns → 2 columns (tablet)
-- 2 columns → 1 column (mobile)
-- Card info condensed
-- Touch-friendly tap targets
+## Works Great on Your Phone
 
-### Simplified Filters
-- Collapsible filter panel
-- Most-used filters visible
-- Others in dropdown
-- Applied filters shown as chips
+The grid adjusts automatically:
+- Desktop: 4 auctions across
+- Tablet: 2 across
+- Phone: Single column
+
+On mobile, filters collapse into a panel you can expand. The most important ones (price, ending soon) stay visible. Everything else tucks away but is easy to get to.
+
+All the buttons are big enough for thumbs, and the important info (current bid, time left) is right up front.
 
 ---
 

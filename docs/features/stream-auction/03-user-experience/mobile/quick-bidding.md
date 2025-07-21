@@ -1,10 +1,10 @@
-# Mobile Quick Bidding Interface
+# Quick Bidding on Mobile
 
-This document details the touch-optimized bidding interface designed for rapid mobile interactions.
+Here's how the bidding interface works on phones - optimized for speed.
 
-## Quick Bid Interface Design
+## The Bidding Button
 
-### Collapsed State
+### Before You Tap
 ```
 ┌─────────────────────────────────────┐
 │ Current Bid: 1.2 ETH               │
@@ -16,7 +16,7 @@ This document details the touch-optimized bidding interface designed for rapid m
 └─────────────────────────────────────┘
 ```
 
-### Expanded Bidding State
+### After You Tap
 ```
 ┌─────────────────────────────────────┐
 │ Current Bid: 1.2 ETH               │
@@ -45,39 +45,20 @@ This document details the touch-optimized bidding interface designed for rapid m
 └─────────────────────────────────────┘
 ```
 
-## Dynamic Bid Increments
+## Smart Bid Amounts
 
-### Increment Calculation Logic
-```typescript
-// Mobile-optimized rounding for clean amounts
-const calculateMobileIncrements = (currentBid: number) => {
-  const base = currentBid * 0.1; // 10% minimum
-  
-  return {
-    min: roundToNiceNumber(currentBid * 1.1),
-    moderate: roundToNiceNumber(currentBid * 1.25),
-    aggressive: roundToNiceNumber(currentBid * 1.5)
-  };
-};
+We calculate three bid options for you:
+- **Minimum**: Just enough to outbid (10% more)
+- **Moderate**: A solid increase (25% more)
+- **Strong**: Make a statement (50% more)
 
-const roundToNiceNumber = (value: number) => {
-  if (value < 1) return Math.ceil(value * 20) / 20; // 0.05
-  if (value < 10) return Math.ceil(value * 10) / 10; // 0.1
-  if (value < 100) return Math.ceil(value * 2) / 2; // 0.5
-  return Math.ceil(value); // 1.0
-};
-```
+The amounts round to nice clean numbers. So instead of 1.32847 ETH, you see 1.35 ETH.
 
-### Button Design Principles
-- Large touch targets (60px height)
-- Clear value + context label
-- Visual hierarchy (min bid subtle)
-- Haptic feedback on tap
-- Loading state during processing
+Each button is big enough to tap easily, shows the amount clearly, and tells you what kind of bid it is.
 
-## Custom Amount Input
+## Entering Your Own Amount
 
-### Number Pad Interface
+### Custom Number Pad
 ```
 ┌─────────────────────────────────────┐
 │ Enter Bid Amount                    │
@@ -105,34 +86,27 @@ const roundToNiceNumber = (value: number) => {
 └─────────────────────────────────────┘
 ```
 
-### Input Features
-- Custom number pad (not system keyboard)
-- Real-time validation
-- USD conversion display
-- Minimum bid enforcement
-- Decimal precision limits
+What makes this number pad special:
+- Built just for bidding (not your regular keyboard)
+- Shows USD value as you type
+- Won't let you bid too low
+- Handles decimals sensibly
 
-## Confirmation Flow
+## Quick Confirmation
 
-### Biometric Confirmation
+When you're ready to bid:
 ```
 ┌─────────────────────────────────────┐
 │ Confirm Bid: 1.5 ETH              │
 │                                    │
-│     ┌─────────────────┐            │
-│     │   [Face ID]     │            │
-│     │   Authenticate  │            │
-│     │   to Bid        │            │
-│     └─────────────────┘            │
-│                                    │
 │ Current highest: 1.2 ETH           │
 │ Your increase: +25%                │
 │                                    │
-│ [Cancel]                           │
+│ [Cancel]    [Confirm Bid]          │
 └─────────────────────────────────────┘
 ```
 
-### Processing State
+While your bid processes:
 ```
 ┌─────────────────────────────────────┐
 │      Placing Your Bid...           │
@@ -141,16 +115,13 @@ const roundToNiceNumber = (value: number) => {
 │         │ [Spinner] │              │
 │         └───────────┘              │
 │                                    │
-│    Confirming with wallet...       │
-│                                    │
-│    [Cancel Transaction]            │
+│    Processing transaction...       │
 └─────────────────────────────────────┘
 ```
 
-## Notification-Triggered Bidding
+## Bidding from Notifications
 
-### Outbid Notification Action
-When user taps an outbid notification:
+When someone outbids you and you tap the notification:
 
 ```
 ┌─────────────────────────────────────┐
@@ -172,31 +143,23 @@ When user taps an outbid notification:
 └─────────────────────────────────────┘
 ```
 
-### One-Tap Rebid
-- Pre-calculated amounts based on new price
-- Single tap to bid
-- Biometric auth if enabled
-- Return to previous app
+The beauty of this:
+- Amounts already calculated based on the new price
+- One tap places your bid
+- Takes you right back to what you were doing
 
-## Gesture Interactions
+## Quick Gestures
 
-### Swipe to Bid
-Experimental feature for power users:
-- Swipe up from bottom to reveal bid options
-- Swipe right on amount to confirm
-- Haptic feedback on selection
-- Cancel with swipe down
+### Press and Hold
+Press and hold the current bid to see:
+- Recent bid history
+- How many people are bidding
+- When the last bid happened
+- Option to share the auction
 
-### Long Press Options
-Long press on current bid shows:
-- Bid history (last 5)
-- Number of unique bidders
-- Time since last bid
-- Share auction link
+## When Things Go Wrong
 
-## Error Handling
-
-### Connection Issues
+### Bad Connection
 ```
 ┌─────────────────────────────────────┐
 │ ⚠️ Connection Issue                 │
@@ -210,51 +173,30 @@ Long press on current bid shows:
 └─────────────────────────────────────┘
 ```
 
-### Bid Failed States
-- Clear error messaging
-- Actionable recovery options
-- Current auction state shown
-- One-tap retry with new amount
+### If Your Bid Fails
+We'll tell you exactly what went wrong and how to fix it. You'll see the current auction status and can retry with a new amount in one tap.
 
-## Performance Optimizations
+## Keeping It Fast
 
-### Instant Feedback
-- Optimistic UI updates
-- Haptic response immediate
-- Visual feedback <100ms
-- Background processing
+### Instant Response
+Everything feels instant - the interface updates right away while we process your bid in the background.
 
-### Offline Queuing
-- Store bid intent locally
-- Retry when connected
-- Clear queue status
-- Expiry handling
+### Easy on Your Battery
+We're smart about power usage:
+- Fewer animations when battery is low
+- Efficient network usage
+- Smart retry timing
 
-### Battery Efficiency
-- Reduce animations on low battery
-- Batch network requests
-- Efficient WebSocket usage
-- Smart retry backoff
+## Works for Everyone
 
-## Accessibility Features
+### Screen Readers
+Everything's properly labeled and announced. Bid amounts, status changes, and available actions are all clear.
 
-### VoiceOver Support
-- Clear button labels
-- Bid amount announcements
-- Status change alerts
-- Gesture hints
+### Large Text Support
+If you use larger text sizes, the whole interface scales properly. Buttons stay tappable and important info stays visible.
 
-### Dynamic Type
-- Buttons scale with text size
-- Layout adapts to preference
-- Minimum tap targets maintained
-- Critical info always visible
-
-### Reduce Motion
-- Simplified transitions
-- No automatic animations
-- Clear state changes
-- Focus on functionality
+### Reduced Motion
+If you prefer less movement, we turn off animations but keep everything functional and clear.
 
 ---
 

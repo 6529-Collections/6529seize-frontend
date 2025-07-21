@@ -1,200 +1,110 @@
-# Decisions & Requirements Tracking
+# Stream Auction Decisions
 
-This document consolidates all decisions about the stream auction feature, organized by status.
+Here's what we've decided, what we're putting off, and what we still need to figure out.
 
-## Decision Status System
+## How We Track Things
 
-- **✅ DECIDED**: Finalized and ready for implementation
-- **🔄 DEFERRED**: Postponed with clear rationale and fallback approach  
-- **❓ OPEN**: Still needs stakeholder input
+- **✅ DECIDED**: Done deal, ready to build
+- **🔄 DEFERRED**: Pushing to later with a good reason
+- **❓ OPEN**: Still need answers
 
 ---
 
 ## ✅ DECIDED
 
-### Auction Parameter Control
-**Decision**: Contract-level configuration  
-**Details**: Starting price and duration are set at the smart contract level by contract admins  
-**Rationale**: Ensures consistency across all auctions and eliminates user decision complexity  
-**Implementation**: 
-- Starting price: 0.1 ETH (configured in contract)
-- Duration: 24 hours (configured in contract)
-- No user input required during redirect
-- Contract admins can update for future auctions
+### Auction Parameters - Set by Contract
+We're controlling starting price and duration at the contract level. Admins set it, creators don't worry about it.
 
-### Redirect Permanence
-**Decision**: No cancellation after redirect  
-**Details**: Once a user confirms redirect, the decision is final and irreversible  
-**Rationale**: 
-- Simplifies system implementation
-- Encourages thoughtful decision-making
-- Eliminates complex vote restoration logic
-**User Impact**: Clear warning in confirmation modal
+Why? Keeps things consistent and simple. No one has to decide "what price should I start at?"
 
-### Eligibility Persistence
-**Decision**: Once eligible, always eligible  
-**Details**: Achieving eligibility is permanent - it never expires or gets lost  
-**Rationale**: 
-- Rewards achievement
-- Reduces user anxiety
-- Simplifies tracking logic
+The plan:
+- Starting price and duration configured in contract
+- No user input needed
+- Admins can change it later if needed
 
-### Collection Management
-**Decision**: Dedicated collection within Stream for memes wave auctions  
-**Details**: Create "Memes Wave Auctions" collection within Stream architecture  
-**Rationale**: 
-- Preserves memes identity
-- Maintains stream integration
-- Creates focused collecting experience
-**Dependencies**: Smart contract team to create new collection
+### No Take-backs on Redirects
+Once you redirect, that's it. No undo button, no changing your mind.
 
-### Discovery & Navigation  
-**Decision**: Collections integration as primary discovery mechanism  
-**Details**: 
-- Primary access through Collections section (`/collections/stream-auctions`)
-- Active auctions carousel on index page
-- Contextual links from memes drops
-**Rationale**: Leverages existing user mental models for NFT browsing
+This makes the system way simpler and forces people to think before they click. We'll show a big warning before they confirm.
 
-### Error Handling Strategy
-**Decision**: Manual intervention with pending state  
-**Process**: 
-1. Immediate leaderboard removal
-2. Auction enters pending state  
-3. Team member contacts creator via DM
-4. Manual verification and setup (1-3 days)
-**Rationale**: Balances automation with quality control
+### Eligibility is Dynamic
+You need to maintain X votes over Y period to stay eligible. If votes drop below the threshold, you lose the badge until you get back above it.
 
-### Data Consistency
-**Decision**: Immediate atomic redirect operation  
-**Details**: 
-- Drop immediately removed from leaderboard
-- Votes refunded to all voters
-- No intermediate states
-**Technical**: Single database transaction ensures consistency
+It's not a one-time achievement - you have to keep the momentum going.
 
-### Notification Integration
-**Decision**: Dedicated notification types for all auction events  
-**Implementation**: New `ApiNotificationCause` enum values for:
-- Eligibility achieved
-- Bid received
-- Outbid alerts  
-- Auction ending
-- Auction won
-- New auctions from followed creators
+### Where These Live
+We're creating a dedicated "Memes Wave Auctions" collection inside Stream.
 
-### Mobile Experience
-**Decision**: Native touch-optimized experience  
-**Key Features**:
-- Dynamic bid increment buttons
-- Single-tap rebidding from notifications
-- Streamlined wallet connection handling
-**Rationale**: Mobile users need speed for competitive bidding
+This way memes keep their identity but still work with all the Stream infrastructure. Collectors know exactly where to find them.
+
+### How People Find Auctions
+Main path is through Collections - that's where people already look for NFTs.
+
+You'll find them at:
+- Collections section (`/collections/stream-auctions`)
+- Carousel on the homepage
+- Links from the original memes
+
+### When Things Go Wrong
+We're using manual checks to catch problems.
+
+Here's the flow:
+1. Meme leaves the leaderboard right away
+2. Goes into pending while we check it
+3. Someone from the team DMs the creator
+4. We verify and set up manually (1-3 days)
+
+Not fully automated, but keeps quality high.
+
+### Everything Happens at Once
+When you redirect, it all happens instantly:
+- Meme disappears from leaderboard
+- Everyone gets their TDH back
+- No weird in-between states
+
+One database transaction handles it all. Clean.
+
+### Notifications for Everything
+We're adding specific notification types for each auction event:
+- You're eligible!
+- Someone bid on your auction
+- You got outbid
+- Auction ending soon
+- You won!
+- Creator you follow started an auction
+
+### Mobile Gets Special Treatment
+Building a proper touch experience for phones:
+- Quick bid buttons (+5%, +10%, +25%)
+- One-tap rebidding from notifications
+- Smooth wallet connections
+
+Because fumbling with your phone while someone outbids you sucks.
 
 ---
 
 ## 🔄 DEFERRED
 
-### Voting Thresholds
-**Status**: DEFERRED  
-**Reason**: Requires analysis of existing memes wave data and user behavior patterns  
-**Timeline**: Phase 2 - after initial implementation and data collection  
-**Fallback**: 100 votes over 7 days with 3.5+ average rating  
-**Dependencies**: 
-- Historical voting data analysis
-- A/B testing framework
-**Next Steps**: 
-1. Analyze voting patterns
-2. Define test groups
-3. Implement measurement
+### How Many Votes to Be Eligible?
+Pushing this decision to Phase 2. We need to analyze real voting data first.
 
-### Eligibility Timing  
-**Status**: DEFERRED  
-**Reason**: Timing parameters depend on voting threshold decisions  
-**Timeline**: Phase 2 - concurrent with voting threshold analysis  
-**Fallback**: 
-- Eligibility checks start 24 hours after submission
-- No deadline to decide on redirect
-**Dependencies**: Voting threshold decisions, user research
+For now, we're thinking something like X votes from Y voters, but need to see the patterns.
 
-### Permission Management
-**Status**: DEFERRED  
-**Reason**: Requires security review and operational procedures  
-**Timeline**: Phase 1 - must be resolved before backend implementation  
-**Fallback**: 
-- Use existing tdhSigner from Stream
-- Maintain current admin structure
-- Manual contract upgrades via multisig
-**Dependencies**: Security audit, operational runbook
+To figure this out:
+1. Look at historical voting data
+2. See what works
 
-### Performance & Caching
-**Status**: DEFERRED  
-**Reason**: Need production load patterns to optimize  
-**Timeline**: Phase 3 - after production deployment  
-**Fallback**: 
-- Static metadata: 1-hour cache
-- Dynamic state: 1-minute cache  
-- WebSocket for real-time updates
-**Dependencies**: Load testing, monitoring setup
 
----
+### Who Can Do What?
+Need security review before deciding permissions.
 
-## ❓ OPEN QUESTIONS
+Plan for now:
+- Use Stream's existing tdhSigner setup
+- Keep current admin structure
+- Manual upgrades through multisig
 
-### Business Questions
+Must figure this out before Phase 1 backend work.
 
-1. **Auction Reserve Prices**
-   - Should we allow reserve prices?
-   - If yes, who sets them?
-   - Impact on auction dynamics?
-
-2. **Creator Royalties**
-   - Royalty percentage for secondary sales?
-   - How to enforce on-chain?
-   - Split with platform?
-
-3. **Promotion Tools**
-   - Can creators promote their auctions?
-   - Integration with social platforms?
-   - Featured auction slots?
-
-### Technical Questions
-
-4. **Webhook Requirements**
-   - Which external systems need webhooks?
-   - Real-time vs batch updates?
-   - Retry strategies?
-
-5. **Analytics Tracking**
-   - What metrics to track?
-   - Privacy considerations?
-   - Dashboard requirements?
-
-### UX Questions  
-
-6. **Auction Extensions**
-   - Last-minute bid extensions?
-   - How long to extend?
-   - User expectations?
-
-7. **Failed Auction Handling**
-   - What if no bids received?
-   - Return to memes wave?
-   - Try again options?
-
----
-
-## Decision Log
-
-### Recent Updates
-- **2024-01-15**: Decided on contract-level auction parameters
-- **2024-01-14**: Confirmed no redirect cancellation
-- **2024-01-13**: Deferred voting thresholds pending analysis
-
-### Upcoming Decisions Needed
-1. Reserve price policy (by Phase 1)
-2. Webhook architecture (by Phase 2)  
-3. Analytics requirements (by Phase 2)
 
 ---
 

@@ -1,62 +1,46 @@
-# Memes Wave UI Changes
+# What Changes in the Memes Wave
 
-This document details all UI modifications needed in the memes wave to support stream auction redirects.
+Here's how we modify the memes wave to support auction redirects.
 
-## Eligibility Badge
+## The Eligibility Badge
 
-### Design Specifications
-**Position**: Top right corner of drop card  
-**Style**: Rounded badge with icon and text  
-**Colors**: 
-- Background: Stream brand color with opacity
-- Text: High contrast for readability
-- Icon: 🎯 target emoji or custom stream icon
+When a meme hits the threshold, we show a badge in the top right corner. Think rounded corners, maybe a 🎯 icon, using Stream's brand colors but with some transparency so it doesn't overpower the meme itself.
 
-### Badge States
+## How It Looks
 
-#### For All Viewers (Non-Interactive)
+### For Everyone Else
+If you're just browsing and see an eligible meme:
 ```
 ┌─────────────────────────────────────┐
 │ [Drop Content]           [🎯 Stream]│
 │                         [Eligible] │
 │                                     │
 │ [Vote] [Share] [More]               │
-│ Votes: 150 | Avg: 4.2               │
+│ Votes: 150 | Voters: 42             │
 └─────────────────────────────────────┘
 ```
 
-**Behavior**:
-- Shows when drop meets eligibility criteria
-- Not clickable for non-authors
-- Subtle animation on first appearance
-- Tooltip on hover: "This meme is eligible for stream auction"
+The badge just sits there - you can't click it. Maybe it fades in with a nice animation when it first appears. Hover over it and you get a tooltip explaining what it means.
 
-#### For Drop Author (Interactive)
+### For the Creator
+If it's your meme, the badge becomes interactive:
 ```
 ┌─────────────────────────────────────┐
 │ [Drop Content]         [🎯 Stream]  │
 │                       [Eligible]   │
 │                       [→ Redirect] │
 │ [Vote] [Share] [More]               │
-│ Votes: 150 | Avg: 4.2               │
+│ Votes: 150 | Voters: 42             │
 └─────────────────────────────────────┘
 ```
 
-**Behavior**:
-- Clickable with hover state
-- Distinct visual treatment (border, glow)
-- Shows "Redirect" action on hover/tap
-- Opens redirect modal on click
+Now it's clickable. Maybe it glows a bit or has a border. When you hover, it shows "Redirect" so you know what'll happen. Click it and you get the redirect modal.
 
-### Implementation Considerations
-- Must not interfere with voting UI
-- Responsive sizing for mobile
-- Accessible contrast ratios
-- Smooth appearance animation
+Keep in mind - this needs to work on phones too, and shouldn't mess with the voting buttons.
 
-## Redirect Modal
+## The Redirect Modal
 
-### Modal Structure
+When they click, here's what they see:
 ```
 ┌─────────────────────────────────────────┐
 │ Redirect to Stream Auction              │
@@ -66,94 +50,61 @@ This document details all UI modifications needed in the memes wave to support s
 │                                         │
 │ What happens when you redirect:         │
 │                                         │
-│ ✓ Removed from leaderboard competition │
-│ ✓ All votes refunded to supporters     │
-│ ✓ Becomes exclusive 1/1 NFT auction    │
-│ ✓ 24-hour auction at 0.1 ETH start     │
+│ ✓ Leaves the leaderboard race          │
+│ ✓ Everyone gets their TDH back         │
+│ ✓ Becomes a 1/1 NFT auction            │
+│ ✓ Auction starts at set price          │
 │                                         │
-│ ⚠️ This decision is permanent          │
+│ ⚠️ This can't be undone                │
 │                                         │
-│ Next steps:                             │
-│ 1. You'll be contacted via DM          │
-│ 2. Auction setup takes 1-3 days        │
-│ 3. We'll notify you when it's live     │
+│ What's next:                            │
+│ 1. Someone from the team DMs you       │
+│ 2. We set things up (1-3 days)         │
+│ 3. Your auction goes live              │
 │                                         │
 │ [Cancel]          [Redirect to Auction] │
 └─────────────────────────────────────────┘
 ```
 
-### Content Sections
+The modal needs to be super clear about:
+- What happens right now (leaves leaderboard, refunds happen)
+- What they're getting (1/1 auction with whatever parameters)
+- That big warning that you can't undo this
+- Exactly what happens next (team contact, timeline)
 
-#### Immediate Consequences
-Clear bullet points about what happens right away:
-- Leaderboard removal
-- Vote refunds
-- Status change
+Make the warning impossible to miss. The "Redirect to Auction" button should stand out as the primary action.
 
-#### Auction Information  
-Key parameters displayed:
-- Starting price (from contract)
-- Duration (from contract)
-- Format (1/1 NFT)
+## After They Redirect
 
-#### Process Transparency
-Timeline and next steps:
-- Manual verification requirement
-- Expected timeline
-- Who will contact them
-
-#### Permanent Decision Warning
-Clear, unmissable warning that this cannot be undone
-
-### Visual Design
-- Clean, uncluttered layout
-- Clear visual hierarchy
-- Warning styling for permanent decision
-- Primary CTA stands out
-
-## Drop Card After Redirect
-
-### Redirected State Display
+Once someone redirects, the card changes:
 ```
 ┌─────────────────────────────────────┐
 │ [Drop Content]        [🔄 Redirected]│
 │                       [to Auction]  │
 │                                     │
 │ [View Auction →]                    │
-│ Original votes: 150 | Avg: 4.2      │
+│ Original votes: 150 from 42 voters  │
 └─────────────────────────────────────┘
 ```
 
-**Changes**:
-- Eligibility badge replaced with redirect status
-- Voting UI removed/disabled
-- Link to auction added
-- Historical vote data preserved
-- Subtle visual treatment (opacity, border)
+What changes:
+- Badge now says "Redirected to Auction"
+- Can't vote anymore (buttons gone)
+- Link to the auction appears
+- Still shows the votes it got (for context)
+- Maybe slightly faded or different border
 
-### Behaviors
-- No voting allowed
-- Comments/discussion still enabled
-- Share functionality updated to include auction link
-- Shows in wave history but not leaderboard
+People can still comment and share, but voting is done. It stays in the wave history but disappears from the leaderboard.
 
-## Leaderboard Handling
+## The Leaderboard
 
-### Removal Process
-- Immediate removal upon redirect
-- No ghost/placeholder entry
-- Other entries move up naturally
-- No indication in leaderboard of redirected items
+When someone redirects, their meme just vanishes from the leaderboard. No placeholder, no "this was redirected" message - it's just gone. Other memes move up to fill the space.
 
-### Vote Refund Messaging
-When votes are refunded:
-- Voters receive notification
-- Refund amount clearly stated
-- Link to auction for interested collectors
+Everyone who voted gets a notification about their TDH refund, with a link to check out the auction if they want to bid.
 
-## Wave Announcement Post
+## Announcement in the Wave
 
-### Automated Post Format
+The system posts an update when someone redirects:
 ```
 ┌─────────────────────────────────────┐
 │ 🎯 Stream Auction Redirect          │
@@ -163,45 +114,38 @@ When votes are refunded:
 │ "@creator redirected their meme     │
 │ to a 1/1 stream auction!"           │
 │                                     │
-│ Original votes: 150 supporters      │
+│ Original support: 150 votes         │
 │                                     │
 │ [View Auction →] [Follow Updates →] │
 └─────────────────────────────────────┘
 ```
 
-**Purpose**:
-- Notify wave participants
-- Provide closure on redirected content
-- Drive traffic to auction
-- Maintain transparency
+This lets everyone know what happened and where to find the auction.
 
-## Progress Indicators
+## Progress Toward Eligibility (Maybe?)
 
-### Pre-Eligibility (Optional Enhancement)
-Show progress toward eligibility:
+We could show creators how close they are:
 ```
 [Current: 75 votes | Need: 100 votes]
 [████████░░] 75% to Stream eligibility
 ```
 
-**Considerations**:
-- Only show to drop author
-- Don't create pressure/gamification
-- Simple, non-intrusive design
+But only if we're careful - show it just to the creator, keep it subtle, don't make it feel like a game they have to win.
 
-## Mobile Responsive Design
+## Filtering for Eligible Memes
 
-### Touch Targets
-- Minimum 44x44px tap areas
-- Adequate spacing between actions
-- Badge remains visible but smaller
-- Modal adapts to viewport
+Add a filter option to the wave so people can see just the eligible ones:
+```
+[All Memes] [Eligible Only] [My Memes]
+```
 
-### Simplified Mobile Modal
-- Shorter content blocks
-- Larger buttons
-- Key info prioritized
-- Scrollable if needed
+This helps collectors find potential auctions and creators see what's working. When "Eligible Only" is active, only show memes with that Stream badge.
+
+## Making It Work on Phones
+
+The badge needs to be tappable (at least 44x44px) but not so big it covers the meme. Space things out so fat fingers don't hit the wrong button.
+
+The modal should adapt - maybe shorter text, bigger buttons, and let people scroll if they need to. The important stuff (what happens, can't undo) needs to be visible without scrolling.
 
 ---
 

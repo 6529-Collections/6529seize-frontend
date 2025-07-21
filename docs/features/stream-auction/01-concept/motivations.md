@@ -1,146 +1,97 @@
-# User Motivations & Mental Models
+# Why Creators Redirect
 
-Understanding why creators choose to redirect to stream auctions is crucial for designing effective UI and messaging. Through analysis, several distinct mental models emerge.
+We see different types of creators making this choice for different reasons. Here's what drives them.
 
-## Primary Motivations
+## The Main Types
 
-### 1. Personal Monetization
-**Mental Model**: "I want to monetize this successful meme"  
-**User Type**: Pragmatic creators focused on earning from their content  
-**Key Needs**:
-- Clear visibility of potential earnings
-- Understanding of auction mechanics
-- Confidence in the process
+### The Money Makers
+These creators see that eligible badge and think "finally, I can get paid for this one."
 
-**Design Implications**:
-- Emphasize the monetization opportunity in eligibility messaging
-- Show auction parameters clearly (starting price, typical sale ranges)
-- Provide examples of successful past auctions
+They want to know:
+- How much could I make?
+- How does the auction actually work?
+- Is this legit?
 
-### 2. Alternative Path
-**Mental Model**: "I want to try something different"  
-**User Type**: Experimenters and innovators  
-**Key Needs**:
-- Understanding how auctions differ from leaderboard
-- Clarity on what makes auctions special
-- Assurance they can succeed in this format
+So we show them auction details upfront and maybe some examples of what others have earned.
 
-**Design Implications**:
-- Highlight the uniqueness of 1/1 ownership
-- Explain the collector audience difference
-- Show auction as equally valid to leaderboard wins
+### The Experimenters
+These folks just want to try the new thing. They're bored with the regular leaderboard grind.
 
-### 3. Community Interest
-**Mental Model**: "There's strong community interest in owning this as a 1/1"  
-**User Type**: Community-focused creators  
-**Key Needs**:
-- Signals of collector interest
-- Understanding their audience
-- Confidence in demand
+They're thinking:
+- What makes this different?
+- Who's buying these?
+- Is this as good as winning the leaderboard?
 
-**Design Implications**:
-- Show voting metrics as proof of interest
-- Enable pre-redirect community signals
-- Highlight engaged voters who might become bidders
+We need to explain that 1/1s hit different than open editions, and that's perfectly valid.
 
-### 4. Quality Recognition
-**Mental Model**: "This content deserves to be preserved as a unique piece"  
-**User Type**: Artistic creators valuing their work  
-**Key Needs**:
-- Recognition of content quality
-- Prestige of 1/1 status
-- Long-term value preservation
+### The Community Players
+These creators redirect because they can feel the community wants it. They see those votes and know people would pay for a 1/1.
 
-**Design Implications**:
-- Frame 1/1 as premium/exclusive
-- Emphasize permanence and collectibility
-- Show auction as curation mechanism
+They care about:
+- Will my supporters actually bid?
+- Who's interested in owning this?
+- Is there real demand?
 
-## Secondary Considerations
+The vote count itself is their signal - lots of votes means lots of potential bidders.
 
-### Timing Strategies
+### The Artists
+These creators look at their meme and think "this one's special." They want it to be a 1/1 because it deserves that status.
 
-**Early Redirectors**: Jump at eligibility immediately
-- Want first-mover advantage
-- Confident in auction success
-- Less attached to leaderboard competition
+What matters to them:
+- Is this prestigious?
+- Will it be valued long-term?
+- Does 1/1 mean something here?
 
-**Late Redirectors**: Wait to see leaderboard position
-- Hedge their bets
-- Want maximum information
-- Redirect only if not winning
+They see the auction as recognition that their work is art, not just another meme.
 
-**Strategic Redirectors**: Time based on external factors
-- Consider market conditions
-- Wait for optimal audience attention
-- Coordinate with other activities
+## When They Pull the Trigger
 
-### Risk Perceptions
+### The Quick Clickers
+See the badge, click redirect. Done. They know what they want and don't overthink it.
 
-**Low Risk Perception**:
-- See guaranteed monetization opportunity
-- Trust the auction process
-- Confident in their content value
+### The Wait-and-See Crowd
+These folks watch the leaderboard first. If they realize they're not going to win, then they redirect. It's their backup plan.
 
-**High Risk Perception**:
-- Worry about auction failure
-- Prefer known leaderboard system
-- Need more education/examples
+### The Strategists
+They time everything. Maybe they wait for the weekend when more collectors are online. Or they coordinate with other drops. They're playing 4D chess.
 
-## Addressing Different Motivations
+## How They See Risk
 
-### In Eligibility Messaging
+Some creators see this as free money - "I already got the votes, now I can get paid too." They're all in.
 
-For **Monetizers**: "Your meme is eligible for auction - potential to earn ETH"
+Others worry - "What if nobody bids? What if I could've won the leaderboard?" They need more convincing, more examples of successful auctions.
 
-For **Experimenters**: "Try something new - convert to exclusive 1/1 NFT"
+## What This Means for Messaging
 
-For **Community-Focused**: "Strong community support - they want to collect this"
+When that eligibility badge shows up, we can't use one-size-fits-all messaging.
 
-For **Quality-Focused**: "Exceptional content - preserve as unique artwork"
+For money makers: Focus on the ETH opportunity
+For experimenters: Highlight what makes this different  
+For community players: Show those vote numbers
+For artists: Talk about 1/1 prestige
 
-### In Confirmation Flows
+In the confirmation flow, we need to:
+- Show the votes they earned (validation!)
+- Be super clear about what happens next
+- Make it obvious this is permanent
+- Let them know we've got their back through the process
 
-**Build Confidence** by showing:
-- Voting metrics as validation
-- Clear auction parameters
-- Simple next steps
-- Reversal isn't possible (encourages commitment)
+## The Golden Rules
 
-**Reduce Anxiety** by:
-- Explaining the manual verification process
-- Showing timeline clearly
-- Providing specific contact information
-- Emphasizing team support
+1. Never push anyone to redirect - it's just an option
+2. Be totally upfront about what happens
+3. Getting eligible is an achievement worth celebrating
+4. Whatever they choose is the right choice
 
-## Design Principles
+## What They Actually Ask
 
-1. **No Pressure**: Present opportunity, not obligation
-2. **Full Transparency**: Show all consequences upfront
-3. **Celebrate Achievement**: Eligibility is an accomplishment
-4. **Support Decision**: Whatever they choose is valid
+**Money Makers**: "How much?" "When do I get paid?" "Any fees?"
 
-## Common Questions by Motivation Type
+**Experimenters**: "What's different about this?" "Who buys these?"
 
-### Monetizers Ask:
-- "How much can I earn?"
-- "When do I get paid?"
-- "What are the fees?"
+**Community Players**: "Will my voters bid?" "How do I let them know?"
 
-### Experimenters Ask:
-- "How is this different?"
-- "Who buys these?"
-- "Can I do both?"
-
-### Community-Focused Ask:
-- "Will my supporters bid?"
-- "How do I promote this?"
-- "Can voters become buyers?"
-
-### Quality-Focused Ask:
-- "Is this prestigious?"
-- "How is value determined?"
-- "What happens long-term?"
+**Artists**: "Is this respected?" "Will it hold value?"
 
 ---
 
