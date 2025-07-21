@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// NOSONAR
+/* eslint-disable security/detect-unsafe-regex */
 
 const fs = require("fs");
 const path = require("path");
