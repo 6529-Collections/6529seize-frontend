@@ -1,14 +1,9 @@
 import React from "react";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
-  <>
+export default function PodcastsPage() {
+  return (
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -18,21 +13,21 @@ const IndexPage = () => (
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
       />
       {/* This site is optimized with the Yoast SEO plugin v23.9 - https://yoast.com/wordpress/plugins/seo/ */}
-      <title>EDUCATION - 6529.io</title>
-      <link rel="canonical" href="/education/" />
+      <title>PODCASTS</title>
+      <link rel="canonical" href="/education/podcasts/" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
-      <meta property="og:title" content="EDUCATION - 6529.io" />
-      <meta property="og:url" content="/education/" />
+      <meta property="og:title" content="PODCASTS" />
+      <meta property="og:url" content="/education/podcasts/" />
       <meta property="og:site_name" content="6529.io" />
       <meta
         property="article:modified_time"
-        content="2022-04-12T16:21:06+00:00"
+        content="2022-06-15T11:51:53+00:00"
       />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@om100m" />
       <meta name="twitter:label1" content="Est. reading time" />
-      <meta name="twitter:data1" content="5 minutes" />
+      <meta name="twitter:data1" content="24 minutes" />
       {/* / Yoast SEO plugin. */}
       <link rel="dns-prefetch" href="//stats.wp.com" />
       <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
@@ -50,30 +45,44 @@ const IndexPage = () => (
       />
       <meta
         name="description"
-        content="EDUCATION IS THE MOST IMPORTANT INITIATIVE AT 6529 AND THE ONE THAT HAS TAKEN MOST OF MY TIME 
-WHY EDUCATION
+        content="THE PSEUDONYMOUS PHILOSOPHER: PUNK 6529'S VISION FOR OUR DECENTRALIZED FUTURE 
 
-We will have an open metaverse, if we choose to have one.
+Punk6529 joins Consensus 2022 in Austin, Texas.
 
-Societies are made up of people – citizens, business leaders, public servants. We all choose how we spend our time and resources, how we live"
+Moderator:
+Michael Casey
+CoinDesk Chief Content Officer 
+
+12 Jun 2022 | Coindesk       
+
+THE WORLD ACCORDING TO PUNK 6529 
+
+This is without question the Real Vision"
       />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
       <meta property="og:site_name" content="6529.io" />
-      <meta property="og:title" content="EDUCATION - 6529.io" />
+      <meta property="og:title" content="PODCASTS" />
       <meta
         property="og:description"
-        content="EDUCATION IS THE MOST IMPORTANT INITIATIVE AT 6529 AND THE ONE THAT HAS TAKEN MOST OF MY TIME 
-WHY EDUCATION
+        content="THE PSEUDONYMOUS PHILOSOPHER: PUNK 6529'S VISION FOR OUR DECENTRALIZED FUTURE 
 
-We will have an open metaverse, if we choose to have one.
+Punk6529 joins Consensus 2022 in Austin, Texas.
 
-Societies are made up of people – citizens, business leaders, public servants. We all choose how we spend our time and resources, how we live"
+Moderator:
+Michael Casey
+CoinDesk Chief Content Officer 
+
+12 Jun 2022 | Coindesk       
+
+THE WORLD ACCORDING TO PUNK 6529 
+
+This is without question the Real Vision"
       />
-      <meta property="og:url" content="/education/" />
+      <meta property="og:url" content="/education/podcasts/" />
       <meta
         property="article:modified_time"
-        content="2022-04-12T16:21:06-05:00"
+        content="2022-06-15T11:51:53-05:00"
       />
       <meta
         property="og:image"
@@ -197,7 +206,7 @@ Societies are made up of people – citizens, business leaders, public servants.
         rel="alternate"
         title="JSON"
         type="application/json"
-        href="/wp-json/wp/v2/pages/33"
+        href="/wp-json/wp/v2/pages/218"
       />
       <link
         rel="EditURI"
@@ -205,18 +214,18 @@ Societies are made up of people – citizens, business leaders, public servants.
         title="RSD"
         href="/xmlrpc.php?rsd"
       />
-      <link rel="shortlink" href="/?p=33" />
+      <link rel="shortlink" href="/?p=218" />
       <link
         rel="alternate"
         title="oEmbed (JSON)"
         type="application/json+oembed"
-        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2F"
+        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2Fpodcasts%2F"
       />
       <link
         rel="alternate"
         title="oEmbed (XML)"
         type="text/xml+oembed"
-        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2F#038;format=xml"
+        href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Feducation%2Fpodcasts%2F#038;format=xml"
       />
       <link
         rel="preload"
@@ -285,7 +294,7 @@ Societies are made up of people – citizens, business leaders, public servants.
               <div className="fusion-page-title-row">
                 <div className="fusion-page-title-wrapper">
                   <div className="fusion-page-title-captions">
-                    <h1 className="entry-title">EDUCATION</h1>
+                    <h1 className="entry-title">PODCASTS</h1>
                     <div className="fusion-page-title-secondary"></div>
                   </div>
                 </div>
@@ -294,15 +303,15 @@ Societies are made up of people – citizens, business leaders, public servants.
           </section>
           <main
             id="main"
-            className="clearfix "
+            className="clearfix width-100"
             style={{ minHeight: "100vh", padding: 30 }}>
-            <div className="fusion-row">
-              <section id="content" style={{ width: "100%" }}>
+            <div className="fusion-row" style={{ maxWidth: "100%" }}>
+              <section id="content" className="full-width">
                 <div
-                  id="post-33"
-                  className="post-33 page type-page status-publish hentry">
+                  id="post-218"
+                  className="post-218 page type-page status-publish hentry">
                   <span className="entry-title rich-snippet-hidden">
-                    EDUCATION
+                    PODCASTS
                   </span>
                   <span className="vcard rich-snippet-hidden">
                     <span className="fn">
@@ -315,8 +324,8 @@ Societies are made up of people – citizens, business leaders, public servants.
                     </span>
                   </span>
                   <span className="updated rich-snippet-hidden">
-                    2022-04-12T12:21:06-04:00
-                  </span>
+                    2022-06-15T07:51:53-04:00
+                  </span>{" "}
                   <div className="post-content">
                     <div
                       className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"
@@ -328,15 +337,377 @@ Societies are made up of people – citizens, business leaders, public servants.
                         flexWrap: "wrap",
                       }}>
                       <div
-                        className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap"
+                        className="fusion-builder-row fusion-row fusion-flex-align-items-stretch fusion-flex-content-wrap"
                         style={{
                           maxWidth: 1248,
                           marginLeft: "calc(-4% / 2 )",
                           marginRight: "calc(-4% / 2 )",
                         }}>
                         <div
-                          className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_3 1_3 fusion-flex-column fusion-column-inner-bg-wrapper"
                           style={{
+                            width: "33.3333333333%",
+                            marginTop: 0,
+                            paddingRight: "5.76%",
+                            marginBottom: 0,
+                            paddingLeft: "5.76%",
+                          }}>
+                          <span className="fusion-column-inner-bg hover-type-none">
+                            <a
+                              className="fusion-column-anchor"
+                              href="https://www.coindesk.com/tv/special-coverage/pseudonymous-philosopher-livestream/"
+                              rel="noopener noreferrer"
+                              target="_blank">
+                              <span className="fusion-column-inner-bg-image" />
+                            </a>
+                          </span>
+                          <div
+                            className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column fusion-empty-column-bg-image fusion-column-has-bg-image"
+                            data-bg-url="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/06/Punk-6529-Consensus-800x451.jpg">
+                            <img
+                              loading="lazy"
+                              decoding="async"
+                              className="fusion-empty-dims-img-placeholder fusion-no-large-visibility fusion-no-medium-visibility"
+                              src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27800%27%20height%3D%27451%27%20viewBox%3D%270%200%20800%20451%27%3E%3Crect%20width%3D%27800%27%20height%3D%27451%27%20fill-opacity%3D%220%22%2F%3E%3C%2Fsvg%3E"
+                              alt="6529.io"
+                            />
+                          </div>
+                        </div>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_2_3 2_3 fusion-flex-column"
+                          style={{
+                            backgroundSize: "cover",
+                            width: "66.6666666667%",
+                            marginTop: 0,
+                            paddingRight: "2.88%",
+                            marginBottom: 20,
+                            paddingLeft: "2.88%",
+                          }}>
+                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                            <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
+                              <h1
+                                className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
+                                style={{ margin: 0, lineHeight: "0.9" }}>
+                                <a
+                                  href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
+                                  target="_blank"
+                                  rel="noopener">
+                                  THE PSEUDONYMOUS PHILOSOPHER: PUNK 6529'S
+                                  VISION FOR OUR DECENTRALIZED FUTURE
+                                </a>
+                              </h1>
+                            </div>
+                            <div className="fusion-text fusion-text-1">
+                              <p>
+                                Punk6529 joins Consensus 2022 in Austin, Texas.
+                              </p>
+                              <p>
+                                Moderator:
+                                <br />
+                                Michael Casey
+                                <br />
+                                CoinDesk Chief Content Officer
+                              </p>
+                            </div>
+                            <div className="fusion-text fusion-text-2">
+                              <p>
+                                12 Jun 2022 |{" "}
+                                <a
+                                  href="https://www.coindesk.com/tv/special-coverage/pseudonymous-philosopher-livestream/"
+                                  target="_blank"
+                                  rel="noopener">
+                                  Coindesk
+                                </a>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_1 1_1 fusion-flex-column"
+                          style={{
+                            paddingBottom: 10,
+                            backgroundSize: "cover",
+                            width: "100%",
+                            marginTop: 40,
+                            paddingRight: "1.92%",
+                            marginBottom: 20,
+                            paddingLeft: "1.92%",
+                          }}>
+                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                            <div
+                              className="fusion-separator fusion-full-width-sep"
+                              style={{
+                                alignSelf: "center",
+                                marginLeft: "auto",
+                                marginRight: "auto",
+                                width: "100%",
+                              }}>
+                              <div
+                                className="fusion-separator-border sep-single sep-solid"
+                                style={{
+                                  borderColor: "#e2e2e2",
+                                  borderTopWidth: 1,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"
+                      style={{
+                        borderTopLeftRadius: 0,
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        flexWrap: "wrap",
+                      }}>
+                      <div
+                        className="fusion-builder-row fusion-row fusion-flex-align-items-stretch fusion-flex-content-wrap"
+                        style={{
+                          maxWidth: 1248,
+                          marginLeft: "calc(-4% / 2 )",
+                          marginRight: "calc(-4% / 2 )",
+                        }}>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_3 1_3 fusion-flex-column fusion-column-inner-bg-wrapper"
+                          style={{
+                            width: "33.3333333333%",
+                            marginTop: 0,
+                            paddingRight: "5.76%",
+                            marginBottom: 0,
+                            paddingLeft: "5.76%",
+                          }}>
+                          <span className="fusion-column-inner-bg hover-type-none">
+                            <a
+                              className="fusion-column-anchor"
+                              href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
+                              rel="noopener noreferrer"
+                              target="_blank">
+                              <span className="fusion-column-inner-bg-image" />
+                            </a>
+                          </span>
+                          <div
+                            className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column fusion-empty-column-bg-image fusion-column-has-bg-image"
+                            data-bg-url="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Raoul-Pal-6529-600x337.jpg">
+                            <img
+                              loading="lazy"
+                              decoding="async"
+                              className="fusion-empty-dims-img-placeholder fusion-no-large-visibility fusion-no-medium-visibility"
+                              src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27600%27%20height%3D%27337%27%20viewBox%3D%270%200%20600%20337%27%3E%3Crect%20width%3D%27600%27%20height%3D%27337%27%20fill-opacity%3D%220%22%2F%3E%3C%2Fsvg%3E"
+                              alt="6529.io"
+                            />
+                          </div>
+                        </div>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_2_3 2_3 fusion-flex-column"
+                          style={{
+                            backgroundSize: "cover",
+                            width: "66.6666666667%",
+                            marginTop: 0,
+                            paddingRight: "2.88%",
+                            marginBottom: 20,
+                            paddingLeft: "2.88%",
+                          }}>
+                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                            <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-one">
+                              <h1
+                                className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
+                                style={{ margin: 0, lineHeight: "0.9" }}>
+                                <a
+                                  href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
+                                  target="_blank"
+                                  rel="noopener">
+                                  THE WORLD ACCORDING TO PUNK 6529
+                                </a>
+                              </h1>
+                            </div>
+                            <div className="fusion-text fusion-text-3">
+                              <p>
+                                This is without question the Real Vision
+                                interview of the year, and it'll go down in
+                                history as an all-time RV classic. I kid you
+                                not! My conversation with Punk 6529, a leading
+                                thinker and investor in the NFT space, is
+                                enjoyable, immersive, informative, fascinating,
+                                and extremely important. It will blow your hair
+                                off and make your brain melt. I'm going to have
+                                to rewatch it a few times to take it all in. I
+                                suggest you settle in with a big glass of Rioja
+                                or a nice cup of tea and tune into the mind of
+                                this very unique punk. Recorded on March 31,
+                                2022.
+                              </p>
+                              <p>
+                                Requires free email registration (not payment)
+                              </p>
+                            </div>
+                            <div className="fusion-text fusion-text-4">
+                              <p>
+                                8 Apr 2022 |{" "}
+                                <a
+                                  href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5?utm_campaign=Standard&utm_medium=email&_hsmi=209440565&_hsenc=p2ANqtz--g9VR4uR4r_gYXUHzs_nQ_HtjcBwauwvn9JpB0mcMcjnP7pTKcphSHpClkDikSztXMi6N7_1n11iVTODrpvFNuVz26qg&utm_source=202248_alert_weekly_members_crypto_1_Standard"
+                                  target="_blank"
+                                  rel="noopener">
+                                  RealVision.com
+                                </a>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-5 fusion_builder_column_1_1 1_1 fusion-flex-column"
+                          style={{
+                            paddingBottom: 10,
+                            backgroundSize: "cover",
+                            width: "100%",
+                            marginTop: 40,
+                            paddingRight: "1.92%",
+                            marginBottom: 20,
+                            paddingLeft: "1.92%",
+                          }}>
+                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                            <div
+                              className="fusion-separator fusion-full-width-sep"
+                              style={{
+                                alignSelf: "center",
+                                marginLeft: "auto",
+                                marginRight: "auto",
+                                width: "100%",
+                              }}>
+                              <div
+                                className="fusion-separator-border sep-single sep-solid"
+                                style={{
+                                  borderColor: "#e2e2e2",
+                                  borderTopWidth: 1,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"
+                      style={{
+                        borderTopLeftRadius: 0,
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        flexWrap: "wrap",
+                      }}>
+                      <div
+                        className="fusion-builder-row fusion-row fusion-flex-align-items-stretch fusion-flex-content-wrap"
+                        style={{
+                          maxWidth: 1248,
+                          marginLeft: "calc(-4% / 2 )",
+                          marginRight: "calc(-4% / 2 )",
+                        }}>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_3 1_3 fusion-flex-column"
+                          style={{
+                            backgroundSize: "cover",
+                            width: "33.3333333333%",
+                            marginTop: 0,
+                            paddingRight: "5.76%",
+                            marginBottom: 0,
+                            paddingLeft: "5.76%",
+                          }}>
+                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                            <div className="fusion-video fusion-youtube">
+                              <div className="video-shortcode">
+                                <div
+                                  className="fluid-width-video-wrapper"
+                                  style={{ paddingTop: "60%" }}>
+                                  <iframe
+                                    title="YouTube video player 1"
+                                    src="https://www.youtube.com/embed/i2jfWIMiWO0?wmode=transparent&autoplay=0&rel=0"
+                                    width={600}
+                                    height={360}
+                                    allowFullScreen
+                                    allow="autoplay; fullscreen"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-7 fusion_builder_column_2_3 2_3 fusion-flex-column"
+                          style={{
+                            backgroundSize: "cover",
+                            width: "66.6666666667%",
+                            marginTop: 0,
+                            paddingRight: "2.88%",
+                            marginBottom: 20,
+                            paddingLeft: "2.88%",
+                          }}>
+                          <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                            <div className="fusion-title title fusion-title-3 fusion-sep-none fusion-title-text fusion-title-size-one">
+                              <h1
+                                className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
+                                style={{ margin: 0, lineHeight: "0.9" }}>
+                                <a
+                                  href="https://unchainedpodcast.com/punk6529-on-the-significance-of-bored-ape-yacht-club-and-cryptopunks/"
+                                  target="_blank"
+                                  rel="noopener">
+                                  PUNK6529 ON THE SIGNIFICANCE OF BORED APE
+                                  YACHT CLUB AND CRYPTOPUNKS
+                                </a>
+                              </h1>
+                            </div>
+                            <div className="fusion-text fusion-text-5">
+                              <p>
+                                In his first podcast appearance ever, Punk6529,
+                                known for writing massive threads on Crypto
+                                Twitter, discusses the cultural and historical
+                                significance of Bored Ape Yacht Club creator
+                                Yuga Labs purchasing the intellectual property
+                                rights to CryptoPunks and Meebits from Larva
+                                Labs.
+                              </p>
+                            </div>
+                            <div
+                              className="fusion-audio fusion-audio-1"
+                              style={{ backgroundColor: "#1d242d" }}>
+                              {/*[if lt IE 9]><![endif]*/}
+                              <audio
+                                className="wp-audio-shortcode"
+                                id="audio-218-1"
+                                preload="none"
+                                style={{ width: "100%" }}
+                                controls={true}>
+                                <source
+                                  type="audio/mpeg"
+                                  src="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Unchained_-_Ep.331_-_Punk6529_on_the_Significance_of_Bored_Ape_Yacht_Club_and_CryptoPunks.mp3?_=1"
+                                />
+                                <a href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Unchained_-_Ep.331_-_Punk6529_on_the_Significance_of_Bored_Ape_Yacht_Club_and_CryptoPunks.mp3">
+                                  /wp-content/uploads/2022/04/Unchained_-_Ep.331_-_Punk6529_on_the_Significance_of_Bored_Ape_Yacht_Club_and_CryptoPunks.mp3
+                                </a>
+                              </audio>
+                            </div>
+                            <div className="fusion-text fusion-text-6">
+                              <p>
+                                18 Mar 2022 |{" "}
+                                <a
+                                  href="https://unchainedpodcast.com/punk6529-on-the-significance-of-bored-ape-yacht-club-and-cryptopunks/"
+                                  target="_blank"
+                                  rel="noopener">
+                                  UnchainedPodcast.com
+                                </a>{" "}
+                                |{" "}
+                                <a href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Unchained_-_Ep.331_-_Punk6529_on_the_Significance_of_Bored_Ape_Yacht_Club_and_CryptoPunks.mp3">
+                                  Download mp3
+                                </a>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="fusion-layout-column fusion_builder_column fusion-builder-column-8 fusion_builder_column_1_1 1_1 fusion-flex-column fusion-no-small-visibility fusion-no-large-visibility"
+                          style={{
+                            paddingBottom: 10,
                             backgroundSize: "cover",
                             width: "100%",
                             marginTop: 0,
@@ -345,85 +716,21 @@ Societies are made up of people – citizens, business leaders, public servants.
                             paddingLeft: "1.92%",
                           }}>
                           <div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                            <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
-                              <h1
-                                className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
-                                style={{ margin: 0, lineHeight: "0.8" }}>
-                                EDUCATION IS THE MOST IMPORTANT INITIATIVE AT
-                                6529 AND THE ONE THAT HAS TAKEN MOST OF MY TIME
-                              </h1>
-                            </div>
-                            <div className="fusion-text fusion-text-1">
-                              <h3>
-                                WHY EDUCATION
-                                <strong>
-                                  <br />
-                                </strong>
-                              </h3>
-                              <p>
-                                We will have an open metaverse, if we choose to
-                                have one.
-                              </p>
-                              <p>
-                                Societies are made up of people – citizens,
-                                business leaders, public servants. We all choose
-                                how we spend our time and resources, how we live
-                                our lives, who we vote for.
-                              </p>
-                              <p>
-                                I believe that most people once they are aware
-                                about their choices, will prefer an open
-                                metaverse based on interoperable standards to a
-                                closed corporate metaverse.
-                              </p>
-                              <p>
-                                So the goal of 6529 Education is to share
-                                knowledge so that everyone can make an informed
-                                decision on how to live their lives and on what
-                                type of society they would like to live in.
-                              </p>
-                              <h3>WHAT IS THE PLAN IN EDUCATION?</h3>
-                              <p>
-                                The 6529{" "}
-                                <a href="/education/tweetstorms/">
-                                  <span style={{ textDecoration: "underline" }}>
-                                    Tweetstorms
-                                  </span>
-                                </a>{" "}
-                                and{" "}
-                                <a href="/education/podcasts/">
-                                  <span style={{ textDecoration: "underline" }}>
-                                    Podcasts
-                                  </span>
-                                </a>{" "}
-                                are the start and will continue.
-                              </p>
-                              <p>
-                                In the next couple of months, we will do
-                                Something Else too.
-                              </p>
-                              <p>
-                                We are working on some ideas to scale education
-                                further and faster in multiple directions. Stay
-                                tuned.
-                              </p>
-                              <h3>PARTNER WITH 6529 IN EDUCATION</h3>
-                              <p>
-                                If you are involved in education, research,
-                                advocacy or policy in the cryptocurrency,
-                                digital rights, NFTs, Web3, metaverse, or
-                                related space, please get in touch{" "}
-                                <a href="/education/education-collaboration-form/">
-                                  <u>here</u>
-                                </a>
-                                .
-                              </p>
-                              <p>
-                                We absolutely want to help education spread
-                                across different communities, different
-                                geographies and are open to ideas on how to do
-                                so.
-                              </p>
+                            <div
+                              className="fusion-separator fusion-full-width-sep"
+                              style={{
+                                alignSelf: "center",
+                                marginLeft: "auto",
+                                marginRight: "auto",
+                                width: "100%",
+                              }}>
+                              <div
+                                className="fusion-separator-border sep-single sep-solid"
+                                style={{
+                                  borderColor: "#e2e2e2",
+                                  borderTopWidth: 1,
+                                }}
+                              />
                             </div>
                           </div>
                         </div>
@@ -474,7 +781,9 @@ Societies are made up of people – citizens, business leaders, public servants.
         </a>
       </section>
     </div>
-  </>
-);
+  );
+}
 
-export default IndexPage;
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "PODCASTS" });
+}

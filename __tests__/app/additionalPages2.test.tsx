@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import Teexels from "@/app/author/teexels/page";
 import Capital from "@/app/capital/page";
-import Feed from "@/pages/feed/index";
+import Feed from "@/app/feed/page";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 

@@ -51,7 +51,7 @@ describe("static content pages render meta tags and headings", () => {
     },
     {
       Component: EducationPage,
-      title: "EDUCATION - 6529.io",
+      title: "EDUCATION",
       canonical: "/education/",
       heading: /EDUCATION/i,
     },

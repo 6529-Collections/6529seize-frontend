@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import LadysabrinaPage from '@/app/author/ladysabrina/page';
 import DisneyDeekayPage from '@/app/blog/disney-deekay-their-secret-to-animation/page';
-import EducationCollabPage from '../../pages/education/education-collaboration-form/index';
-import GMRedirectPage from '../../pages/gm-or-die-small-mp4/index';
+import EducationCollabPage from '@/app/education/education-collaboration-form/page';
+import GMRedirectPage from '@/app/gm-or-die-small-mp4/page';
 import CryptoAdzPage from '../../pages/museum/6529-fund-szn1/cryptoadz/index';
 import EntretiemposPage from '../../pages/museum/6529-fund-szn1/entretiempos/index';
 import JiometoryPage from '../../pages/museum/6529-fund-szn1/jiometory-no-compute/index';
@@ -33,7 +33,7 @@ describe('static SEO pages render correctly', () => {
 
   it('education collaboration form page renders', () => {
     render(<EducationCollabPage />);
-    expect(getTitle()).toBe('EDUCATION COLLABORATION FORM - 6529.io');
+    expect(getTitle()).toBe('EDUCATION COLLABORATION FORM');
     expect(getCanonical()).toBe('/education/education-collaboration-form/');
     expect(screen.getAllByText(/EDUCATION COLLABORATION FORM/i).length).toBeGreaterThan(0);
   });
