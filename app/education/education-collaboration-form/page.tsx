@@ -1,14 +1,9 @@
 import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
-  <>
+export default function EducationCollaborationFormPage() {
+  return (
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -18,13 +13,13 @@ const IndexPage = () => (
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
       />
       {/* This site is optimized with the Yoast SEO plugin v23.9 - https://yoast.com/wordpress/plugins/seo/ */}
-      <title>EDUCATION COLLABORATION FORM - 6529.io</title>
+      <title>EDUCATION COLLABORATION FORM</title>
       <link rel="canonical" href="/education/education-collaboration-form/" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
       <meta
         property="og:title"
-        content="EDUCATION COLLABORATION FORM - 6529.io"
+        content="EDUCATION COLLABORATION FORM"
       />
       <meta
         property="og:url"
@@ -61,7 +56,7 @@ EDUCATION COLLABORATION FORM"
       <meta property="og:site_name" content="6529.io" />
       <meta
         property="og:title"
-        content="EDUCATION COLLABORATION FORM - 6529.io"
+        content="EDUCATION COLLABORATION FORM"
       />
       <meta
         property="og:description"
@@ -730,7 +725,9 @@ EDUCATION COLLABORATION FORM"
         </a>
       </section>
     </div>
-  </>
-);
+  );
+}
 
-export default IndexPage;
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "EDUCATION COLLABORATION FORM" });
+}

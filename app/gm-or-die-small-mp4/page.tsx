@@ -1,14 +1,9 @@
 import React from "react";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
-  <>
+export default function GMRedirectPage() {
+  return (
     <div>
       <title>Redirecting...</title>
       <meta
@@ -22,7 +17,9 @@ const IndexPage = () => (
         </a>
       </p>
     </div>
-  </>
-);
+  );
+}
 
-export default IndexPage;
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Redirecting..." });
+}

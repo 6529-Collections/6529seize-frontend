@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import PodcastsPage from '../../../../pages/education/podcasts/index';
+import PodcastsPage from '@/app/education/podcasts/page';
 
 // Mock the Header component since it's dynamically imported
 jest.mock('../../../../components/header/Header', () => {
@@ -25,7 +25,7 @@ describe('PodcastsPage', () => {
     renderComponent();
     
     const titleElement = document.querySelector('title');
-    expect(titleElement?.textContent).toBe('PODCASTS - 6529.io');
+    expect(titleElement?.textContent).toBe('PODCASTS');
   });
 
   it('includes correct meta tags for SEO', () => {
@@ -51,10 +51,10 @@ describe('PodcastsPage', () => {
     
     const metaTags = document.querySelectorAll('meta');
     
-    const ogTitle = Array.from(metaTags).find(meta => 
+    const ogTitle = Array.from(metaTags).find(meta =>
       meta.getAttribute('property') === 'og:title'
     );
-    expect(ogTitle?.getAttribute('content')).toBe('PODCASTS - 6529.io');
+    expect(ogTitle?.getAttribute('content')).toBe('PODCASTS');
     
     const ogType = Array.from(metaTags).find(meta => 
       meta.getAttribute('property') === 'og:type'

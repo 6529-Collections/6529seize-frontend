@@ -1,14 +1,9 @@
 import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
-const IndexPage = () => (
-  <>
+export default function TweetstormsPage() {
+  return (
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -18,11 +13,11 @@ const IndexPage = () => (
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
       />
       {/* This site is optimized with the Yoast SEO plugin v23.9 - https://yoast.com/wordpress/plugins/seo/ */}
-      <title>TWEETSTORMS - 6529.io</title>
+      <title>TWEETSTORMS</title>
       <link rel="canonical" href="/education/tweetstorms/" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
-      <meta property="og:title" content="TWEETSTORMS - 6529.io" />
+      <meta property="og:title" content="TWEETSTORMS" />
       <meta property="og:url" content="/education/tweetstorms/" />
       <meta property="og:site_name" content="6529.io" />
       <meta
@@ -60,7 +55,7 @@ Current Pinned Tweet:"
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
       <meta property="og:site_name" content="6529.io" />
-      <meta property="og:title" content="TWEETSTORMS - 6529.io" />
+      <meta property="og:title" content="TWEETSTORMS" />
       <meta
         property="og:description"
         content="Punk6529 is well-known for his wide ranging (and long!) tweetstorms on decentralization and how, specifically, NFTs can form the underlying architecture of an open metaverse.
@@ -978,7 +973,9 @@ Current Pinned Tweet:"
         </a>
       </section>
     </div>
-  </>
-);
+  );
+}
 
-export default IndexPage;
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "TWEETSTORMS" });
+}
