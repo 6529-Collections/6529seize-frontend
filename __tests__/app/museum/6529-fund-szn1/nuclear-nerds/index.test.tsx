@@ -1,49 +1,61 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import NuclearNerdsPage from '../../../../../pages/museum/6529-fund-szn1/nuclear-nerds/index';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import NuclearNerdsPage from "@/app/museum/6529-fund-szn1/nuclear-nerds/page";
 
-jest.mock('../../../../../components/header/Header', () => () => <div data-testid="header">Header</div>);
-jest.mock('../../../../../components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
+jest.mock("../../../../../components/header/Header", () => () => (
+  <div data-testid="header">Header</div>
+));
+jest.mock("../../../../../components/header/HeaderPlaceholder", () => () => (
+  <div data-testid="header-placeholder">Header Placeholder</div>
+));
 
-describe('NuclearNerdsPage', () => {
+describe("NuclearNerdsPage", () => {
   const renderComponent = () => render(<NuclearNerdsPage />);
 
-  it('renders the page title', () => {
+  it("renders the page title", () => {
     renderComponent();
-    const title = document.querySelector('title');
-    expect(title?.textContent).toBe('NUCLEAR NERDS OF THE ACCIDENTAL APOCALYPSE - 6529.io');
+    const title = document.querySelector("title");
+    expect(title?.textContent).toBe(
+      "NUCLEAR NERDS OF THE ACCIDENTAL APOCALYPSE - 6529.io"
+    );
   });
 
-  it('includes canonical link', () => {
+  it("includes canonical link", () => {
     renderComponent();
     const canonical = document.querySelector('link[rel="canonical"]');
     expect(canonical).toBeInTheDocument();
-    expect(canonical?.getAttribute('href')).toBe('/museum/6529-fund-szn1/nuclear-nerds/');
+    expect(canonical?.getAttribute("href")).toBe(
+      "/museum/6529-fund-szn1/nuclear-nerds/"
+    );
   });
 
-  it('includes robots meta tag', () => {
+  it("includes robots meta tag", () => {
     renderComponent();
     const robots = document.querySelector('meta[name="robots"]');
-    expect(robots?.getAttribute('content')).toBe('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+    expect(robots?.getAttribute("content")).toBe(
+      "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    );
   });
 
-  it('includes Open Graph title', () => {
+  it("includes Open Graph title", () => {
     renderComponent();
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    expect(ogTitle?.getAttribute('content')).toBe('NUCLEAR NERDS OF THE ACCIDENTAL APOCALYPSE - 6529.io');
+    expect(ogTitle?.getAttribute("content")).toBe(
+      "NUCLEAR NERDS OF THE ACCIDENTAL APOCALYPSE - 6529.io"
+    );
   });
 
-  it('has skip to content link', () => {
+  it("has skip to content link", () => {
     renderComponent();
-    const skip = screen.getByText('Skip to content');
+    const skip = screen.getByText("Skip to content");
     expect(skip).toBeInTheDocument();
-    expect(skip).toHaveAttribute('href', '#content');
+    expect(skip).toHaveAttribute("href", "#content");
   });
 
-  it('has go to top link', () => {
+  it("has go to top link", () => {
     renderComponent();
-    const link = document.querySelector('#toTop');
+    const link = document.querySelector("#toTop");
     expect(link).toBeInTheDocument();
-    expect(link).toHaveClass('fusion-top-top-link');
+    expect(link).toHaveClass("fusion-top-top-link");
   });
 });
