@@ -19,11 +19,9 @@ export const TextSelectionOverlay: React.FC<TextSelectionOverlayProps> = ({
 
     // Handle mousedown in capture phase to intercept before browser's word selection
     const handleMouseDownCapture = (e: MouseEvent) => {
-      // For right click with active selection
+      // For right click with active selection - just populate browser selection
+      // Don't prevent default to allow context menu to appear
       if (e.button === 2 && state.selection?.text) {
-        e.preventDefault();
-        e.stopPropagation();
-        // Ensure browser selection is populated before context menu
         handlers.populateBrowserSelection();
       }
     };
@@ -51,10 +49,8 @@ export const TextSelectionOverlay: React.FC<TextSelectionOverlayProps> = ({
     const handleContextMenu = (e: MouseEvent) => {
       // When right-clicking with custom selection
       if (state.selection?.text) {
-        // Prevent any default context menu behavior that might interfere
-        e.stopPropagation();
-        
-        // Always ensure browser selection is populated for context menu
+        // Don't prevent default or stop propagation - let context menu work normally
+        // Just ensure browser selection is populated for context menu
         handlers.populateBrowserSelection();
       }
     };

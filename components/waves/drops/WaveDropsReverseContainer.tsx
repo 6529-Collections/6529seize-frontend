@@ -2,7 +2,8 @@
 
 import React, { forwardRef, useRef, useEffect, useCallback } from "react";
 import { useIntersectionObserver } from "../../../hooks/scroll/useIntersectionObserver";
-import TextSelectionOverlay from "./TextSelectionOverlay";
+// Temporarily commented out for native selection testing
+// import TextSelectionOverlay from "./TextSelectionOverlay";
 
 
 interface WaveDropsReverseContainerProps {
@@ -88,13 +89,14 @@ export const WaveDropsReverseContainer = forwardRef<
     React.useImperativeHandle(ref, () => scrollContainerRef.current!);
 
   return (
-    <TextSelectionOverlay containerRef={scrollContainerRef}>
+    // Temporarily disabled TextSelectionOverlay to test native selection
+    // <TextSelectionOverlay containerRef={scrollContainerRef}>
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="tw-pb-6 tw-bg-iron-950 tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 drops-custom-selection"
+        className="tw-pb-6 tw-bg-iron-950 tw-flex tw-flex-col tw-rotate-180 tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
       >
-        <div className="tw-flex tw-flex-col-reverse">
+        <div className="tw-flex tw-flex-col [&>*]:tw-rotate-180">
           {children}
           {hasNextPage && (
             <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
@@ -104,7 +106,7 @@ export const WaveDropsReverseContainer = forwardRef<
         </div>
         <div ref={topSentinelRef} style={{ height: "1px" }} />
       </div>
-    </TextSelectionOverlay>
+    // </TextSelectionOverlay>
   );
 });
 
