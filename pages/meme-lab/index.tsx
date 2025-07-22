@@ -1,4 +1,4 @@
-import styles from "../../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 import { useSetTitle } from "../../contexts/TitleContext";
 import dynamic from "next/dynamic";
 import { useAuth } from "../../components/auth/Auth";

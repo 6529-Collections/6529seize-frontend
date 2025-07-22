@@ -1,4 +1,4 @@
-import styles from "../../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import CommunityStatsComponent from "@/components/communityStats/CommunityStats";
 import { getAppMetadata } from "@/components/providers/metadata";
