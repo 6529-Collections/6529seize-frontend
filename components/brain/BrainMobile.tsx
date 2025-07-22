@@ -111,13 +111,10 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const hasWave = Boolean(router.query.wave);
 
-  // Sync route to mobile view with navigation awareness
   useEffect(() => {
     if (router.pathname === "/my-stream/notifications") {
       setActiveView(BrainView.NOTIFICATIONS);
     } else if (router.pathname === "/my-stream" && !router.query.wave) {
-      // When navigating directly to /my-stream (like from bottom nav Stream icon),
-      // reset to DEFAULT view to show the main stream content
       setActiveView(BrainView.DEFAULT);
     }
   }, [router.pathname, router.query.wave]);
@@ -125,8 +122,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   // Handle tab visibility and reset on wave changes
   useEffect(() => {
     if (!hasWave) {
-      // Only reset wave-specific views when no wave is active
-      // Let route-based navigation (like notifications page) handle global views
       if (
         activeView !== BrainView.DEFAULT &&
         activeView !== BrainView.WAVES &&
@@ -157,8 +152,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       setActiveView(BrainView.DEFAULT);
     }
 
-    // Only reset global views when actually in a wave context and there's a conflict
-    // Don't reset during normal navigation between notifications/messages/waves and stream
     if (hasWave && router.query.wave) {
       if (
         activeView === BrainView.NOTIFICATIONS ||
