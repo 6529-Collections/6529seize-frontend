@@ -1,11 +1,11 @@
 jest.mock("next/font/google", () => ({ Poppins: () => () => null }));
-jest.mock("../../../components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper", () => ({ __esModule: true, default: (p: any) => <>{p.children}</> }));
+jest.mock("@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper", () => ({ __esModule: true, default: (p: any) => <>{p.children}</> }));
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import BlockPickerTimeWindowSelect from "../../../components/block-picker/BlockPickerTimeWindowSelect";
-import { BlockPickerTimeWindow } from "../../../pages/meme-blocks";
+import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
+import { BlockPickerTimeWindow } from "@/app/meme-blocks/page.client";
 
-jest.mock("../../../components/block-picker/BlockPickerTimeWindowSelectList", () => (props: any) => (
+jest.mock("@/components/block-picker/BlockPickerTimeWindowSelectList", () => (props: any) => (
   <button data-testid="option" onClick={() => props.setTimeWindow(BlockPickerTimeWindow.ONE_MINUTE)} />
 ));
 
