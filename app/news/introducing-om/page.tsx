@@ -1,15 +1,7 @@
-import React from "react";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import dynamic from "next/dynamic";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
-
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 const IndexPage = () => (
-  <>
-    <div>
+  <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -498,8 +490,10 @@ const IndexPage = () => (
           </span>
         </a>
       </section>
-    </div>
-  </>
-);
+    </div>);
 
 export default IndexPage;
+
+export async function generateMetadata() {
+  return getAppMetadata({ title: "INTRODUCING OM - 6529.io" });
+}
