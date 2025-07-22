@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { getDateDisplay } from "../../helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 interface Prenode {
   ip: string;
@@ -32,6 +33,8 @@ interface Prenode {
 const PAGE_SIZE = 20;
 
 export default function PrenodesStatus() {
+  useSetTitle("Prenodes | Network");
+
   const account = useSeizeConnectContext();
 
   const [page, setPage] = useState<number>(1);

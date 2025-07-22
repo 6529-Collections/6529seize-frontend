@@ -1,8 +1,8 @@
-import { useSetTitle } from "../../contexts/TitleContext";
-import ProgressChart from "../../components/levels/ProgressChart";
-import TableOfLevels from "../../components/levels/TableOfLevels";
+import ProgressChart from "@/components/levels/ProgressChart";
+import TableOfLevels from "@/components/levels/TableOfLevels";
+import { useSetTitle } from "@/contexts/TitleContext";
 
-export default function Levels() {
+export default function LevelsClient() {
   useSetTitle("Levels | Network");
 
   return (
@@ -40,8 +40,3 @@ export default function Levels() {
     </div>
   );
 }
-
-Levels.metadata = {
-  title: "Levels",
-  description: "Network",
-};

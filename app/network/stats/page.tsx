@@ -1,16 +1,9 @@
 import styles from "../../styles/Home.module.scss";
-import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
-import { useSetTitle } from "../../contexts/TitleContext";
+import CommunityStatsComponent from "@/components/communityStats/CommunityStats";
+import { getAppMetadata } from "@/components/providers/metadata";
 
-const CommunityStatsComponent = dynamic(
-  () => import("../../components/communityStats/CommunityStats"),
-  { ssr: false }
-);
-
-export default function CommunityStats() {
-  useSetTitle("Stats | Network");
-
+export default function CommunityStatsPage() {
   return (
     <main className={`${styles.main} ${styles.tdhMain}`}>
       <Container fluid>
@@ -30,7 +23,9 @@ export default function CommunityStats() {
   );
 }
 
-CommunityStats.metadata = {
-  title: "Stats",
-  description: "Network",
+export const generateMetadata = async () => {
+  return getAppMetadata({
+    title: "Stats",
+    description: "Network",
+  });
 };
