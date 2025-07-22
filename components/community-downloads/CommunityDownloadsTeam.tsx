@@ -1,3 +1,4 @@
+import { useSetTitle } from "@/contexts/TitleContext";
 import {
   formatDate,
   DownloadsLayout,
@@ -10,6 +11,8 @@ interface TeamDownload {
 }
 
 export default function CommunityDownloadsTeam() {
+  useSetTitle("Team | Open Data");
+
   const downloads: TeamDownload[] = [
     {
       created_at: "2023-05-10 11:44:03",

@@ -1,6 +1,8 @@
+import { useSetTitle } from "@/contexts/TitleContext";
 import CommunityDownloadsComponent from "./CommunityDownloadsComponent";
 
 export default function CommunityDownloadsRememes() {
+  useSetTitle("Rememes | Open Data");
   return (
     <CommunityDownloadsComponent
       title="Rememes"

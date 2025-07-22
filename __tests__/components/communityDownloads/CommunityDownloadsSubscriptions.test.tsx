@@ -1,18 +1,16 @@
 import { render, screen, act } from "@testing-library/react";
-import CommunityDownloadsSubscriptions from "../../../components/community-downloads/CommunityDownloadsSubscriptions";
-import { MEMES_CONTRACT } from "../../../constants";
+import CommunityDownloadsSubscriptions from "@/components/community-downloads/CommunityDownloadsSubscriptions";
+import { MEMES_CONTRACT } from "@/constants";
+import { TitleProvider } from "@/contexts/TitleContext";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-const { useRouter } = require("next/router");
-const { commonApiFetch } = require("../../../services/api/common-api");
+const { commonApiFetch } = require("@/services/api/common-api");
 
 describe("CommunityDownloadsSubscriptions", () => {
   beforeEach(() => {
-    useRouter.mockReturnValue({ isReady: true });
     jest.clearAllMocks();
   });
 
@@ -29,7 +27,11 @@ describe("CommunityDownloadsSubscriptions", () => {
       ],
     });
     await act(async () => {
-      render(<CommunityDownloadsSubscriptions />);
+      render(
+        <TitleProvider>
+          <CommunityDownloadsSubscriptions />
+        </TitleProvider>
+      );
     });
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: `subscriptions/uploads?contract=${MEMES_CONTRACT}&page_size=25&page=1`,
@@ -44,7 +46,11 @@ describe("CommunityDownloadsSubscriptions", () => {
   it("shows placeholder when no downloads", async () => {
     commonApiFetch.mockResolvedValue({ count: 0, data: [] });
     await act(async () => {
-      render(<CommunityDownloadsSubscriptions />);
+      render(
+        <TitleProvider>
+          <CommunityDownloadsSubscriptions />
+        </TitleProvider>
+      );
     });
     expect(screen.getByText("Nothing here yet")).toBeInTheDocument();
   });

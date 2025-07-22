@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
 import { fetchUrl } from "@/services/6529api";
 
-jest.mock("next/router", () => ({ useRouter: () => ({ isReady: true }) }));
 jest.mock("@/services/6529api");
 
 jest.mock("@/components/pagination/Pagination", () => ({

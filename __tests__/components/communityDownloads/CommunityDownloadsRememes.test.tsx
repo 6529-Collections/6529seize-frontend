@@ -1,10 +1,9 @@
 import { render } from "@testing-library/react";
-import CommunityDownloadsRememes from "../../../components/community-downloads/CommunityDownloadsRememes";
-import CommunityDownloadsComponent from "../../../components/community-downloads/CommunityDownloadsComponent";
+import CommunityDownloadsRememes from "@/components/community-downloads/CommunityDownloadsRememes";
+import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
+import { TitleProvider } from "@/contexts/TitleContext";
 
-jest.mock(
-  "../../../components/community-downloads/CommunityDownloadsComponent"
-);
+jest.mock("@/components/community-downloads/CommunityDownloadsComponent");
 
 const mockComponent = CommunityDownloadsComponent as jest.MockedFunction<
   typeof CommunityDownloadsComponent
@@ -21,11 +20,20 @@ describe("CommunityDownloadsRememes", () => {
   });
 
   it("renders CommunityDownloadsComponent with rememe data", () => {
-    render(<CommunityDownloadsRememes />);
-    expect(mockComponent).toHaveBeenCalledTimes(1);
-    expect(mockComponent.mock.calls[0][0]).toEqual({
-      title: "Rememes",
-      url: "https://test.6529.io.test/api/rememes_uploads",
-    });
+    render(
+      <TitleProvider>
+        <CommunityDownloadsRememes />
+      </TitleProvider>
+    );
+
+    const calls = mockComponent.mock.calls;
+
+    const match = calls.find(
+      ([props]) =>
+        props.title === "Rememes" &&
+        props.url === "https://test.6529.io.test/api/rememes_uploads"
+    );
+
+    expect(match).toBeTruthy();
   });
 });
