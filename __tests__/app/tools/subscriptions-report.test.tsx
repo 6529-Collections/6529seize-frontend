@@ -1,16 +1,16 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
-import { AuthContext } from "../../../components/auth/Auth";
-import { CookieConsentProvider } from "../../../components/cookies/CookieConsentContext";
+import { AuthContext } from "@/components/auth/Auth";
+import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 
-jest.mock("../../../helpers/meme_calendar.helpers", () => ({
+jest.mock("@/helpers/meme_calendar.helpers", () => ({
   getMintingDates: jest.fn(() => []),
   isMintingToday: jest.fn(() => false),
   numberOfCardsForSeasonEnd: jest.fn(() => ({ count: 2, szn: 1 })),
 }));
 
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn((opts) => {
     if (opts && opts.endpoint === "subscriptions/redeemed-memes-counts") {
       return Promise.resolve({
@@ -24,20 +24,13 @@ jest.mock("../../../services/api/common-api", () => ({
   }),
 }));
 
-jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn().mockReturnValue({
-    title: "Subscriptions Report",
-    description: "Tools",
-  }),
-}));
-
-const { commonApiFetch } = require("../../../services/api/common-api");
+const { commonApiFetch } = require("@/services/api/common-api");
 const {
   numberOfCardsForSeasonEnd,
-} = require("../../../helpers/meme_calendar.helpers");
+} = require("@/helpers/meme_calendar.helpers");
 
 // Mock TitleContext
-jest.mock("../../../contexts/TitleContext", () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
     title: "Test Title",
     setTitle: jest.fn(),
@@ -84,9 +77,9 @@ describe("Subscriptions report page", () => {
   });
 
   it("exposes metadata", async () => {
-    await expect(generateMetadata()).resolves.toEqual({
-      title: "Subscriptions Report",
-      description: "Tools",
-    });
+    process.env.BASE_ENDPOINT = "https://base.test";
+    const metadata = await generateMetadata();
+    expect(metadata.title).toEqual("Subscriptions Report");
+    expect(metadata.description).toEqual("Tools | 6529.io");
   });
 });

@@ -39,5 +39,6 @@ export async function generateMetadata({
   const address = params["app-wallet-address"];
   return getAppMetadata({
     title: `${formatAddress(address)} | App Wallets`,
+    description: "Tools",
   });
 }

@@ -28,7 +28,11 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 describe("App Wallet page", () => {
   it("exposes metadata", async () => {
-    const meta = await generateMetadata({ params: { "app-wallet-address": "0xdef" } });
-    expect(meta).toEqual({ title: "fmt-0xdef | App Wallets" });
+    process.env.BASE_ENDPOINT = "https://base.test";
+    const meta = await generateMetadata({
+      params: { "app-wallet-address": "0xdef" },
+    });
+    expect(meta.title).toEqual("fmt-0xdef | App Wallets");
+    expect(meta.description).toEqual("Tools | 6529.io");
   });
 });

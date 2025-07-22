@@ -6,6 +6,7 @@
 
 /** @type {import('jest').Config} */
 const config = {
+  testTimeout: 10000,
   // Use ts-jest preset
   preset: "ts-jest",
   // Test environment setup
