@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 import Seize404 from "@/pages/404";
 import DisputeResolution from "@/app/dispute-resolution/page";
-import GradientsPage from "@/pages/6529-gradient";
+import GradientsPage from "@/app/6529-gradient/page";
 import PlansPage from "@/pages/emma/plans";
 import MemeLabCollectionPage from "@/pages/meme-lab/collection/[collection]";
 import { AuthContext } from "@/components/auth/Auth";
@@ -83,7 +83,7 @@ describe("additional static pages", () => {
         <GradientsPage />
       </TestProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(screen.getByTestId("gradient")).toBeInTheDocument();
   });
 
   it("renders EMMA plans page", () => {

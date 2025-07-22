@@ -34,7 +34,7 @@ interface NftWithOwner extends NFT {
   owner_display: string;
 }
 
-export default function GradientPage({ id }: { readonly id: string }) {
+export default function GradientPageComponent({ id }: { readonly id: string }) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useContext(AuthContext);

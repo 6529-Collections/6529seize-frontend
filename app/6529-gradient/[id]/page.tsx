@@ -20,10 +20,8 @@ export default async function GradientPage({
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ focus: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
 

@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import GradientPage from "@/components/6529Gradient/GradientPage";
+import GradientPageComponent from "@/components/6529Gradient/GradientPage";
 import { useRouter } from "next/navigation";
 import { fetchUrl } from "@/services/6529api";
 import { AuthContext } from "@/components/auth/Auth";
@@ -68,7 +68,7 @@ function renderPage(wallet: string = "0x1") {
       <AuthContext.Provider
         value={{ connectedProfile: { wallets: [{ wallet }] } } as any}>
         <CookieConsentProvider>
-          <GradientPage id="1" />
+          <GradientPageComponent id="1" />
         </CookieConsentProvider>
       </AuthContext.Provider>
     </TitleProvider>
