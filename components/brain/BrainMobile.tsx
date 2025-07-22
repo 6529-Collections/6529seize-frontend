@@ -111,12 +111,13 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const hasWave = Boolean(router.query.wave);
 
-  // Simple fix: sync notifications route to mobile view
   useEffect(() => {
     if (router.pathname === "/my-stream/notifications") {
       setActiveView(BrainView.NOTIFICATIONS);
+    } else if (router.pathname === "/my-stream" && !router.query.wave) {
+      setActiveView(BrainView.DEFAULT);
     }
-  }, [router.pathname]);
+  }, [router.pathname, router.query.wave]);
 
   // Handle tab visibility and reset on wave changes
   useEffect(() => {
@@ -151,14 +152,16 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       setActiveView(BrainView.DEFAULT);
     }
 
-    if (
-      activeView === BrainView.NOTIFICATIONS ||
-      activeView === BrainView.MESSAGES ||
-      activeView === BrainView.WAVES
-    ) {
-      setActiveView(BrainView.DEFAULT);
+    if (hasWave && router.query.wave) {
+      if (
+        activeView === BrainView.NOTIFICATIONS ||
+        activeView === BrainView.MESSAGES ||
+        activeView === BrainView.WAVES
+      ) {
+        setActiveView(BrainView.DEFAULT);
+      }
     }
-  }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave]);
+  }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave, router.query.wave]);
 
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.ABOUT]: (
