@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useCallback, useMemo } from "react";
 import { debounce } from "lodash";
 import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";

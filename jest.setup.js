@@ -94,3 +94,12 @@ global.ResizeObserver = class ResizeObserver {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   disconnect() {} // Intentionally empty - no actual observation needed in tests
 };
+
+if (typeof global.fetch === "undefined") {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve([]),
+    })
+  );
+}

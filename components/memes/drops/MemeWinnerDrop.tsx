@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useCallback } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";

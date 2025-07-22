@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useCallback, useMemo } from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
 import { TraitsData } from "../types/TraitsData";

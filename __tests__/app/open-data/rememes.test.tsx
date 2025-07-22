@@ -1,15 +1,13 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import RememesDownloads from '../../../pages/open-data/rememes';
-import { AuthContext } from '../../../components/auth/Auth';
-
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
-
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import RememesDownloads, {
+  generateMetadata,
+} from "@/app/open-data/rememes/page";
 
 // Mock TitleContext
-jest.mock('../../../contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -23,15 +21,23 @@ jest.mock('../../../contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('Open Data rememes page', () => {
-  it('renders component and sets title', () => {
-    render(
-      <RememesDownloads />
-    );
-    expect(screen.getByTestId('dynamic')).toBeInTheDocument();
+jest.mock("@/components/providers/metadata", () => ({
+  getAppMetadata: jest.fn().mockReturnValue({
+    title: "Rememes",
+    description: "Open Data",
+  }),
+}));
+
+describe("Open Data rememes page", () => {
+  it("renders metrics component and sets title", () => {
+    render(<RememesDownloads />);
+    expect(screen.getByText("Rememes")).toBeInTheDocument();
   });
 
-  it('exposes metadata', () => {
-    expect(RememesDownloads.metadata).toEqual({ title: 'Rememes', description: 'Open Data' });
+  it("exposes metadata", async () => {
+    await expect(generateMetadata()).resolves.toEqual({
+      title: "Rememes",
+      description: "Open Data",
+    });
   });
 });

@@ -1,3 +1,5 @@
+"use client"
+
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 interface SelectModeContextType {

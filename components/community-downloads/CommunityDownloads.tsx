@@ -1,3 +1,5 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./CommunityDownloads.module.scss";
 import useCapacitor from "@/hooks/useCapacitor";

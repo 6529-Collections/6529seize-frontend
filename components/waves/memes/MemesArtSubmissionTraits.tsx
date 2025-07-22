@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useCallback } from "react";
 import { TraitsData } from "./submission/types/TraitsData";
 import { Section, TraitField } from "./traits";

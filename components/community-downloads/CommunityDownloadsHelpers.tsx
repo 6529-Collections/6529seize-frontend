@@ -1,3 +1,5 @@
+"use client";
+
 import { Fragment, ReactNode } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";

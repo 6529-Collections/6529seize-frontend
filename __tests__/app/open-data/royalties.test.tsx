@@ -1,14 +1,13 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import RoyaltiesDownloads from '../../../pages/open-data/royalties';
-import { AuthContext } from '../../../components/auth/Auth';
-
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import RoyaltiesDownloads, {
+  generateMetadata,
+} from "@/app/open-data/royalties/page";
 
 // Mock TitleContext
-jest.mock('../../../contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -22,16 +21,23 @@ jest.mock('../../../contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('Open Data royalties page', () => {
-  it('renders royalties component and sets title', () => {
-    render(
-      <RoyaltiesDownloads />
-    );
-    expect(screen.getByTestId('dynamic')).toBeInTheDocument();
-    // Component renders successfully
+jest.mock("@/components/providers/metadata", () => ({
+  getAppMetadata: jest.fn().mockReturnValue({
+    title: "Royalties",
+    description: "Open Data",
+  }),
+}));
+
+describe("Open Data royalties page", () => {
+  it("renders royalties component and sets title", () => {
+    render(<RoyaltiesDownloads />);
+    expect(screen.getByText("Royalties")).toBeInTheDocument();
   });
 
-  it('exposes metadata', () => {
-    expect(RoyaltiesDownloads.metadata).toEqual({ title: 'Royalties', description: 'Open Data' });
+  it("exposes metadata", async () => {
+    await expect(generateMetadata()).resolves.toEqual({
+      title: "Royalties",
+      description: "Open Data",
+    });
   });
 });

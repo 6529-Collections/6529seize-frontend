@@ -1,3 +1,5 @@
+"use client"
+
 import { useCallback } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { useWaveLoadingState } from "./useWaveLoadingState";

@@ -1,15 +1,12 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import Downloads from '../../../pages/open-data/index';
-import { AuthContext } from '../../../components/auth/Auth';
-
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
-
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import Downloads, { generateMetadata } from "@/app/open-data/page";
+import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 
 // Mock TitleContext
-jest.mock('../../../contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -23,16 +20,24 @@ jest.mock('../../../contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('Open Data page', () => {
-  it('renders downloads component and sets title', () => {
+jest.mock("@/components/providers/metadata", () => ({
+  getAppMetadata: jest.fn().mockReturnValue({
+    title: "Open Data",
+  }),
+}));
+
+describe("Open Data page", () => {
+  it("renders downloads component and sets title", () => {
     render(
-      <Downloads />
+      <CookieConsentProvider>
+        <Downloads />
+      </CookieConsentProvider>
     );
-    expect(screen.getByTestId('dynamic')).toBeInTheDocument();
-    // Component renders successfully
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Open Data");
   });
 
-  it('exposes metadata', () => {
-    expect(Downloads.metadata).toEqual({ title: 'Open Data' });
+  it("exposes metadata", async () => {
+    await expect(generateMetadata()).resolves.toEqual({ title: "Open Data" });
   });
 });

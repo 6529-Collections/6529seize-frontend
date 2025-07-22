@@ -1,3 +1,5 @@
+"use client"
+
 import { Tooltip } from "react-tooltip";
 import React, { useMemo } from "react";
 import {
