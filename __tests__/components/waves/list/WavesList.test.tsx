@@ -4,10 +4,12 @@ import WavesList from "../../../../components/waves/list/WavesList";
 import { AuthContext } from "../../../../components/auth/Auth";
 import { ProfileConnectedStatus } from "../../../../entities/IProfile";
 import { ApiWavesOverviewType } from "../../../../generated/models/ApiWavesOverviewType";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
+  usePathname: () => "/waves",
+  useSearchParams: () => ({ get: () => null, toString: () => "" }),
 }));
 
 jest.mock("../../../../components/waves/list/header/WavesListHeader", () => (props: any) => (
@@ -35,11 +37,8 @@ jest.mock("../../../../components/waves/list/WavesListSearchResults", () => (pro
   <div data-testid="search-results">{props.identity ?? ""}</div>
 ));
 
-const push = jest.fn((url: any, _as?: any, _opts?: any) => {
-  router.pathname = url.pathname;
-  router.query = url.query;
-});
-const router = { pathname: "/waves", query: {}, push } as any;
+const push = jest.fn();
+const router = { push } as any;
 (useRouter as jest.Mock).mockReturnValue(router);
 
 const baseAuth = {
@@ -74,18 +73,10 @@ it("updates router and shows search results when identity changes", async () => 
   expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
   await user.click(screen.getByTestId("set-id"));
   expect(screen.getByTestId("search-results")).toHaveTextContent("bob");
-  expect(push).toHaveBeenLastCalledWith(
-    { pathname: "/waves", query: { identity: "bob" } },
-    undefined,
-    { shallow: true }
-  );
+  expect(push).toHaveBeenLastCalledWith("/waves?identity=bob");
   await user.click(screen.getByTestId("clear-id"));
   expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
-  expect(push).toHaveBeenLastCalledWith(
-    { pathname: "/waves", query: {} },
-    undefined,
-    { shallow: true }
-  );
+  expect(push).toHaveBeenLastCalledWith("/waves");
 });
 
 it("toggles show all state", async () => {

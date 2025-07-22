@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateDirectMessage from '../../../../components/waves/create-dm/CreateDirectMessage';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../../components/auth/Auth';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 jest.mock('../../../../components/auth/Auth', () => ({
   useAuth: jest.fn(),
 }));

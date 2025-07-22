@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { WaveLeaderboardDropContent } from '../../../../../components/waves/leaderboard/content/WaveLeaderboardDropContent';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 jest.mock('../../../../../components/waves/drops/WaveDropContent', () => ({
   __esModule: true,
   default: ({ onDropContentClick, drop }: any) => (

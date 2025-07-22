@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveDropActionsOpen from '../../../../components/waves/drops/WaveDropActionsOpen';
 import { ApiDropType } from '../../../../generated/models/ApiDropType';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -11,7 +11,7 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 afterEach(() => jest.clearAllMocks());
 

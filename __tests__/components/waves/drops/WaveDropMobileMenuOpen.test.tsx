@@ -2,9 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WaveDropMobileMenuOpen from '../../../../components/waves/drops/WaveDropMobileMenuOpen';
 import { ApiDropType } from '../../../../generated/models/ApiDropType';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ pathname:'/p', query:{ q:'1' }, push });

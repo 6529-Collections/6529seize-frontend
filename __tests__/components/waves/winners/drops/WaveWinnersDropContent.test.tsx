@@ -4,7 +4,7 @@ import React from 'react';
 import { WaveWinnersDropContent } from '../../../../../components/waves/winners/drops/WaveWinnersDropContent';
 
 const push = jest.fn();
-jest.mock('next/router', () => ({ useRouter: () => ({ push }) }));
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
 const WaveDropContentMock = jest.fn((props: any) => (
   <button data-testid="content" onClick={() => props.onDropContentClick(props.drop)} />

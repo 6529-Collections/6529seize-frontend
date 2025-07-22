@@ -6,7 +6,7 @@ import { DropInteractionParams, DropLocation } from "../Drop";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";

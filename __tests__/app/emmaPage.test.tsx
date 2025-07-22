@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DistributionPlanTool from '../../pages/emma/index';
+import DistributionPlanTool from '../../app/emma/page';
 
 jest.mock('next/dynamic', () => () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
 jest.mock('../../components/distribution-plan-tool/connect/distributipn-plan-tool-connect', () => () => <div data-testid="connect" />);
