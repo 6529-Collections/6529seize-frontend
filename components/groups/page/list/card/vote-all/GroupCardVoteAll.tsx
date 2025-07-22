@@ -11,7 +11,7 @@ import {
 import { CreditDirection } from "../GroupCard";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../../helpers/Types";
-import { CommunityMembersQuery } from "../../../../../../pages/network/index";
+import { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "../../../../../../entities/ISort";
 import {
   commonApiFetch,

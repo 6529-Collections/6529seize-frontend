@@ -10,7 +10,7 @@ import {
   commonApiPost,
 } from "../../../../../services/api/common-api";
 import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
-import { CommunityMembersQuery } from "../../../../../pages/network/index";
+import { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "../../../../../entities/ISort";
 import { Page } from "../../../../../helpers/Types";
 import { CommunityMemberOverview } from "../../../../../entities/IProfile";
@@ -87,7 +87,7 @@ export default function GroupCreateTest({
       setMutating(false);
       return;
     }
-    setParams((prev) => ({
+    setParams((prev: CommunityMembersQuery) => ({
       ...prev,
       group_id: undefined,
     }));
@@ -99,7 +99,7 @@ export default function GroupCreateTest({
       group: groupConfig.group,
     });
     if (response) {
-      setParams((prev) => ({
+      setParams((prev: CommunityMembersQuery) => ({
         ...prev,
         group_id: response.id,
       }));

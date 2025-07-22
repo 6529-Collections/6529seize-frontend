@@ -1,5 +1,5 @@
 import React from "react";
-import { getServerSideProps } from "@/pages/tools/app-wallets/[app-wallet-address]";
+import { generateMetadata } from "@/app/tools/app-wallets/[app-wallet-address]/page";
 
 jest.mock("next/dynamic", () => () => (p: any) => (
   <div data-testid="wallet" {...p} />
@@ -27,14 +27,12 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("App Wallet page", () => {
-  it("getServerSideProps returns metadata", async () => {
-    const ctx = { query: { "app-wallet-address": "0xdef" } } as any;
-    const res = await getServerSideProps(ctx, null as any, "/p");
-    expect(res).toEqual({
-      props: {
-        address: "0xdef",
-        metadata: { title: "fmt-0xdef | App Wallets" },
-      },
+  it("exposes metadata", async () => {
+    process.env.BASE_ENDPOINT = "https://base.test";
+    const meta = await generateMetadata({
+      params: { "app-wallet-address": "0xdef" },
     });
+    expect(meta.title).toEqual("fmt-0xdef | App Wallets");
+    expect(meta.description).toEqual("Tools | 6529.io");
   });
 });
