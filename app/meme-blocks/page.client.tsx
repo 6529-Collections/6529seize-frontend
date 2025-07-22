@@ -1,13 +1,14 @@
-import { Poppins } from "next/font/google";
-import { useEffect, useState } from "react";
-import PrimaryButton from "../../components/utils/button/PrimaryButton";
+"use client";
 
-import BlockPickerTimeWindowSelect from "../../components/block-picker/BlockPickerTimeWindowSelect";
-import BlockPickerDateSelect from "../../components/block-picker/BlockPickerDateSelect";
-import BlockPickerBlockNumberIncludes from "../../components/block-picker/BlockPickerBlockNumberIncludes";
-import { distributionPlanApiPost } from "../../services/distribution-plan-api";
-import BlockPickerResult from "../../components/block-picker/result/BlockPickerResult";
-import { useTitle } from "../../contexts/TitleContext";
+import { useEffect, useState } from "react";
+import { Poppins } from "next/font/google";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
+import BlockPickerDateSelect from "@/components/block-picker/BlockPickerDateSelect";
+import BlockPickerBlockNumberIncludes from "@/components/block-picker/BlockPickerBlockNumberIncludes";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
+import BlockPickerResult from "@/components/block-picker/result/BlockPickerResult";
+import { useTitle } from "@/contexts/TitleContext";
 import { useAuth } from "@/components/auth/Auth";
 
 export interface PredictBlockNumbersResponseApiModel {
@@ -15,13 +16,6 @@ export interface PredictBlockNumbersResponseApiModel {
   readonly count: number;
   readonly blockNumbers: number[];
 }
-
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export enum BlockPickerTimeWindow {
   NONE = "NONE",
@@ -53,7 +47,14 @@ const BlockPickerTimeWindowToMilliseconds = {
   [BlockPickerTimeWindow.TWO_DAYS]: 172800000,
 };
 
-export default function BlockPicker() {
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+});
+
+export default function BlockPickerClient() {
   const { setTitle } = useTitle();
   const { setToast } = useAuth();
 
@@ -142,7 +143,6 @@ export default function BlockPicker() {
               setTime={setTime}
             />
           </div>
-
           <div className="tw-w-1/2">
             <div className="tw-flex tw-w-full tw-gap-x-4">
               <BlockPickerTimeWindowSelect
@@ -167,7 +167,6 @@ export default function BlockPicker() {
             </div>
           </div>
         </div>
-
         {!loading && !!predictedBlock && (
           <BlockPickerResult
             blocknumber={predictedBlock.blockNumber}
@@ -179,8 +178,3 @@ export default function BlockPicker() {
     </div>
   );
 }
-
-BlockPicker.metadata = {
-  title: "Meme Blocks",
-  description: "Tools",
-};

@@ -10,6 +10,7 @@ export default function GradientsPage() {
     </main>
   );
 }
+
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "6529 Gradient",

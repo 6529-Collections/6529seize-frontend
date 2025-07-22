@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import BlockPicker from "@/pages/meme-blocks";
+import BlockPicker from "@/app/meme-blocks/page";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 
 jest.mock("next/font/google", () => ({
