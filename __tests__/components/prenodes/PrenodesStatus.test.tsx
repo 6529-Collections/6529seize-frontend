@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import PrenodesStatus from "@/components/prenodes/PrenodesStatus";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { useAuth } from "@/components/auth/Auth";
 
-jest.mock("@/components/auth/SeizeConnectContext");
+jest.mock("@/components/auth/Auth");
 
-const mockUseContext = useSeizeConnectContext as jest.Mock;
+const mockUseContext = useAuth as jest.Mock;
 
 describe("PrenodesStatus", () => {
   beforeEach(() => {
@@ -28,7 +28,9 @@ describe("PrenodesStatus", () => {
     (fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve({ data: [prenode], count: 1 }),
     });
-    mockUseContext.mockReturnValue({ address: "0xabc" });
+    mockUseContext.mockReturnValue({
+      connectedProfile: { primary_wallet: "0xabc" },
+    });
 
     render(
       <TitleProvider>
