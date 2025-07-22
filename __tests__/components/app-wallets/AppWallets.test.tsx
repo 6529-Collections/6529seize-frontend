@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppWallets from '../../../components/app-wallets/AppWallets';
 import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 jest.mock('../../../components/app-wallets/AppWalletsContext');
 jest.mock('../../../components/app-wallets/AppWalletCard', () => (props: any) => <div data-testid="card">{props.wallet.address}</div>);

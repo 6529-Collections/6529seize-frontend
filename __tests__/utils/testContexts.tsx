@@ -38,7 +38,7 @@ export const createMockAuthContext = (
   setTitle: jest.fn(),
   title: '',
   ...overrides,
-});
+} as unknown as AuthContextType);
 
 export const renderWithAuth = (
   component: React.ReactElement,

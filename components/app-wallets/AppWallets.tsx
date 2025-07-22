@@ -7,7 +7,7 @@ import { CreateAppWalletModal } from "./AppWalletModal";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 

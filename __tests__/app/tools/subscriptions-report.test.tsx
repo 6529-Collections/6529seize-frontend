@@ -1,6 +1,6 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
-import Page from "../../../pages/tools/subscriptions-report";
+import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "../../../components/auth/Auth";
 import { CookieConsentProvider } from "../../../components/cookies/CookieConsentContext";
 
@@ -21,6 +21,13 @@ jest.mock("../../../services/api/common-api", () => ({
       });
     }
     return Promise.resolve([]);
+  }),
+}));
+
+jest.mock("@/components/providers/metadata", () => ({
+  getAppMetadata: jest.fn().mockReturnValue({
+    title: "Subscriptions Report",
+    description: "Tools",
   }),
 }));
 
@@ -76,8 +83,8 @@ describe("Subscriptions report page", () => {
     });
   });
 
-  it("exposes metadata", () => {
-    expect(Page.metadata).toEqual({
+  it("exposes metadata", async () => {
+    await expect(generateMetadata()).resolves.toEqual({
       title: "Subscriptions Report",
       description: "Tools",
     });

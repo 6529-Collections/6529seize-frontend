@@ -1,4 +1,4 @@
-import { BlockPickerTimeWindow } from "../../pages/meme-blocks";
+import { BlockPickerTimeWindow } from "@/app/meme-blocks/page.client";
 
 export default function BlockPickerTimeWindowSelectList({
   options,

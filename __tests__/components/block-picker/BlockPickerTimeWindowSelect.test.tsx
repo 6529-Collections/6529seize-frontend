@@ -3,7 +3,7 @@ jest.mock("../../../components/allowlist-tool/common/animation/AllowlistToolAnim
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BlockPickerTimeWindowSelect from "../../../components/block-picker/BlockPickerTimeWindowSelect";
-import { BlockPickerTimeWindow } from "../../../pages/meme-blocks";
+import { BlockPickerTimeWindow } from "@/app/meme-blocks/page.client";
 
 jest.mock("../../../components/block-picker/BlockPickerTimeWindowSelectList", () => (props: any) => (
   <button data-testid="option" onClick={() => props.setTimeWindow(BlockPickerTimeWindow.ONE_MINUTE)} />

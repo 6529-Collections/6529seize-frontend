@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import Page from '../../../../pages/tools/app-wallets/import-wallet';
+import Page, { generateMetadata } from '@/app/tools/app-wallets/import-wallet/page';
 import { AuthContext } from '../../../../components/auth/Auth';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="import" />);
@@ -39,7 +39,10 @@ describe('Import App Wallet Page', () => {
     expect(document.querySelector('[data-testid="import"]')).toBeInTheDocument();
   });
 
-  it('exports metadata', () => {
-    expect(Page.metadata).toEqual({ title: 'App Wallets | Import', description: 'Tools' });
+  it('exposes metadata', async () => {
+    await expect(generateMetadata()).resolves.toEqual({
+      title: 'App Wallets | Import',
+      description: 'Tools',
+    });
   });
 });
