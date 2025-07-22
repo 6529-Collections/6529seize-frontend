@@ -204,6 +204,7 @@ const DefaultWinnerDrop = ({
                 parentContainerRef={parentContainerRef}
                 onLongPress={handleLongPress}
                 setLongPressTriggered={setLongPressTriggered}
+                isCompetitionDrop={true}
               />
             </div>
           </div>
