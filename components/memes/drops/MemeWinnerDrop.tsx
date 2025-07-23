@@ -88,6 +88,7 @@ export default function MemeWinnerDrop({
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
+                    isCompetitionDrop={true}
                   />
                 </div>
               )}

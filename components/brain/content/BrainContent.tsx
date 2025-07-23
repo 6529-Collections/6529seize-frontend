@@ -46,6 +46,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   // Only render the pinned waves on mobile (S breakpoint)
   const shouldShowPinnedWaves = breakpoint === "S";
 
+
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       <div
@@ -54,14 +55,18 @@ const BrainContent: React.FC<BrainContentProps> = ({
         {shouldShowPinnedWaves && <BrainContentPinnedWaves />}
       </div>
       <div className="tw-flex-1 tw-overflow-hidden">
-        <div className="tw-h-full">{children}</div>
+        <div className="tw-h-full">
+          {children}
+        </div>
       </div>
-      <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
-        <BrainContentInput
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-        />
-      </div>
+      {activeDrop && (
+        <div className="tw-sticky tw-bottom-1 tw-z-[60] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+          <BrainContentInput
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+          />
+        </div>
+      )}
     </div>
   );
 };

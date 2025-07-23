@@ -57,6 +57,10 @@ export default function DropItemChat({
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}
+                isCompetitionDrop={
+                  drop.drop_type === ApiDropType.Participatory ||
+                  drop.drop_type === ApiDropType.Winner
+                }
               />
             </div>
           )}

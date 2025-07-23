@@ -157,6 +157,7 @@ export default function EndedParticipationDrop({
               onQuoteClick={onQuoteClick}
               setLongPressTriggered={setLongPressTriggered}
               parentContainerRef={parentContainerRef}
+              isCompetitionDrop={true}
             />
           </div>
         </div>

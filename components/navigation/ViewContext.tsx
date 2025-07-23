@@ -62,7 +62,12 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const handleNavClick = useCallback(
     async (item: NavItem) => {
       if (item.kind === "route") {
-        router.push(item.href);
+        // For Stream navigation, ensure clean route without query params
+        if (item.name === "Stream" && item.href === "/my-stream") {
+          router.push("/my-stream");
+        } else {
+          router.push(item.href);
+        }
       } else if (item.viewKey === "waves" && lastVisitedWave) {
         router.push(`/my-stream?wave=${lastVisitedWave}`);
       } else if (item.viewKey === "waves") {
