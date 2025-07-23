@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 
-export default function WaveRedirect({ params }: { params: { wave: string } }) {
-  redirect(`/my-stream?wave=${params.wave}`);
+export default async function WaveRedirect({
+  params,
+}: {
+  readonly params: Promise<{ wave: string }>;
+}) {
+  const { wave } = await params;
+  redirect(`/my-stream?wave=${wave}`);
 }

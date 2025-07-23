@@ -8,9 +8,9 @@ import type { Metadata } from "next";
 export default async function ReMeme({
   params,
 }: {
-  readonly params: { contract: string; id: string };
+  readonly params: Promise<{ contract: string; id: string }>;
 }) {
-  const { contract, id } = params;
+  const { contract, id } = await params;
 
   return (
     <main className={styles.main}>
@@ -22,9 +22,9 @@ export default async function ReMeme({
 export async function generateMetadata({
   params,
 }: {
-  readonly params: { contract: string; id: string };
+  readonly params: Promise<{ contract: string; id: string }>;
 }): Promise<Metadata> {
-  const { contract, id } = params;
+  const { contract, id } = await params;
   let name = `${formatAddress(contract)} #${id}`;
   let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
   const response = await fetchUrl(
