@@ -7,7 +7,7 @@ import Hyperhash from "@/app/museum/genesis/hyperhash/page";
 import SecretSurprise from "@/app/museum/genesis/secret-surprise/page";
 import SozetLounge from "@/app/museum/sozet-lounge/page";
 import TheInstitutions from "@/app/museum/the-institutions/page";
-import IntroducingOM from '@/app/news/introducing-om/page";
+import IntroducingOM from "@/app/news/introducing-om/page";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
