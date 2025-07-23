@@ -73,6 +73,7 @@ export default function WaveDropsAll({
 
   const [isScrolling, setIsScrolling] = useState(false);
   const [userHasManuallyScrolled, setUserHasManuallyScrolled] = useState(false);
+  const [containerVisible, setContainerVisible] = useState(false);
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
@@ -151,6 +152,13 @@ export default function WaveDropsAll({
     connectedProfile?.handle ?? null
   );
 
+  // Auto-scroll to bottom when new messages arrive and user is at bottom
+  useEffect(() => {
+    if (isAtBottom && !userHasManuallyScrolled && waveMessages?.drops.length && init && containerVisible) {
+      scrollToVisualBottom();
+    }
+  }, [waveMessages?.drops.length, isAtBottom, userHasManuallyScrolled, scrollToVisualBottom, init, containerVisible]);
+
   // // Effect to update the ref whenever waveMessages changes
   useEffect(() => {
     latestWaveMessagesRef.current = waveMessages;
@@ -165,30 +173,21 @@ export default function WaveDropsAll({
     }
   }, [waveMessages]);
 
-  // Effect for initial load and handling own temporary drops
+  // Effect for initial load
   useEffect(() => {
     const currentMessages = latestWaveMessagesRef.current;
-    if (currentMessages && currentMessages.drops.length > 0) {
-      if (!init) setInit(true);
-
-      const lastDrop = currentMessages.drops[0];
-      if (lastDrop.id.startsWith("temp-")) {
-        if (isAtBottom && !userHasManuallyScrolled) {
-          setTimeout(() => {
-            scrollToVisualBottom();
-          }, 100);
-        } else if (!userHasManuallyScrolled) {
-          setSerialNo(lastDrop.serial_no);
-        }
-      }
+    if (currentMessages && currentMessages.drops.length > 0 && !init) {
+      setInit(true);
+      // Use requestAnimationFrame to ensure DOM is ready, then scroll instantly
+      requestAnimationFrame(() => {
+        scrollToVisualBottom("instant");
+        // Show container after positioning
+        requestAnimationFrame(() => {
+          setContainerVisible(true);
+        });
+      });
     }
-  }, [
-    waveMessages,
-    isAtBottom,
-    userHasManuallyScrolled,
-    scrollToVisualBottom,
-    init,
-  ]); // Keep dependencies, logic uses ref
+  }, [waveMessages, scrollToVisualBottom, init]); // Keep dependencies, logic uses ref
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -301,6 +300,10 @@ export default function WaveDropsAll({
     }
 
     if (waveMessages?.drops.length === 0) {
+      // Set container visible immediately for empty state
+      if (!containerVisible) {
+        setContainerVisible(true);
+      }
       return <WaveDropsEmptyPlaceholder dropId={dropId} />;
     }
 
@@ -313,14 +316,14 @@ export default function WaveDropsAll({
           onTopIntersection={handleTopIntersection}
           onUserScroll={(direction, isAtBottom) => {
             setIsAtBottom(isAtBottom);
-            if (direction === "up") {
+            if (direction === "down") {
               setUserHasManuallyScrolled(true);
             }
           }}>
           <DropsList
             scrollContainerRef={scrollContainerRef}
             onReplyClick={setSerialNo}
-            drops={waveMessages?.drops ?? []}
+            drops={[...(waveMessages?.drops ?? [])].reverse()}
             showWaveInfo={false}
             onReply={onReply}
             onQuote={onQuote}
@@ -338,7 +341,7 @@ export default function WaveDropsAll({
         <WaveDropsScrollBottomButton
           isAtBottom={isAtBottom}
           scrollToBottom={() => {
-            scrollToVisualBottom();
+            scrollToVisualBottom("smooth");
             setUserHasManuallyScrolled(false); // Reset manual scroll flag when user clicks to bottom
           }}
         />
@@ -372,7 +375,7 @@ export default function WaveDropsAll({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-border-x tw-border-t tw-border-b-0">
+    <div className={`tw-flex tw-flex-col tw-h-full tw-justify-start tw-relative tw-overflow-y-auto tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-border-x tw-border-t tw-border-b-0 ${containerVisible ? 'tw-opacity-100' : 'tw-opacity-0'} tw-transition-opacity tw-duration-200`}>
       {renderContent()}
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>

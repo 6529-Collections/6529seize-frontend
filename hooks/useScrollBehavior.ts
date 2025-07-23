@@ -8,12 +8,13 @@ export const useScrollBehavior = () => {
   const [isAtTop, setIsAtTop] = useState(false);
 
   // scrollToVisualBottom scrolls to the newest messages (visually at the bottom)
-  const scrollToVisualBottom = useCallback(() => {
+  const scrollToVisualBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
     if (scrollContainerRef.current) {
-      // For a flex-col-reverse container, new messages (bottom) are at scrollTop = 0
-      scrollContainerRef.current.scrollTo({
-        top: 0,
-        behavior: "smooth",
+      // For a normal container, new messages (bottom) are at max scrollTop
+      const container = scrollContainerRef.current;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: behavior,
       });
     }
   }, [scrollContainerRef]);
@@ -21,15 +22,9 @@ export const useScrollBehavior = () => {
   // scrollToVisualTop scrolls to the oldest messages (visually at the top)
   const scrollToVisualTop = useCallback(() => {
     if (scrollContainerRef.current) {
-      // For a flex-col-reverse container, old messages (top) need max scrollTop
-      const container = scrollContainerRef.current;
-
-      // Calculate maximum scroll position
-      const maxScrollPosition = container.scrollHeight - container.clientHeight;
-
-      // Set scroll position directly
-      container.scrollTo({
-        top: -maxScrollPosition,
+      // For a normal container, old messages (top) are at scrollTop = 0
+      scrollContainerRef.current.scrollTo({
+        top: 0,
         behavior: "smooth",
       });
     }
@@ -40,13 +35,9 @@ export const useScrollBehavior = () => {
     if (container) {
       const { scrollTop, scrollHeight, clientHeight } = container;
 
-      // In a flex-reversed container:
-      const newIsAtBottom = scrollTop < 5; // Visual bottom is at scrollTop near 0
-
-      // For flex-col-reverse, we may need to check large negative values
-      // Visual top is at the most negative scrollTop value
-      const maxNegativeScroll = -(scrollHeight - clientHeight);
-      const newIsAtTop = Math.abs(scrollTop - maxNegativeScroll) < 5;
+      // In a normal container:
+      const newIsAtBottom = scrollTop + clientHeight >= scrollHeight - 5; // Visual bottom is at max scrollTop
+      const newIsAtTop = scrollTop < 5; // Visual top is at scrollTop near 0
 
       setIsAtBottom(newIsAtBottom);
       setIsAtTop(newIsAtTop);
