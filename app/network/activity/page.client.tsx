@@ -3,26 +3,11 @@
 import { useContext } from "react";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSetTitle } from "@/contexts/TitleContext";
-import ProfileActivityLogs, {
-  ActivityLogParams,
-} from "@/components/profile-activity/ProfileActivityLogs";
+import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import { CountlessPage } from "@/helpers/Types";
 import { ProfileActivityLog } from "@/entities/IProfile";
-import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
-import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
 import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
-
-export const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
-  page: 1,
-  pageSize: 50,
-  logTypes: getProfileLogTypes({
-    logTypes: [],
-  }),
-  matter: null,
-  targetType: FilterTargetType.ALL,
-  handleOrWallet: null,
-  groupId: null,
-};
+import { INITIAL_ACTIVITY_LOGS_PARAMS } from "@/helpers/profile-logs.helpers";
 
 export default function CommunityActivityPageClient({
   logsPage,
