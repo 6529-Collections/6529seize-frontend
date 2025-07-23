@@ -1,27 +1,36 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import WavesList from "../../../../components/waves/list/WavesList";
-import { AuthContext } from "../../../../components/auth/Auth";
-import { ProfileConnectedStatus } from "../../../../entities/IProfile";
-import { ApiWavesOverviewType } from "../../../../generated/models/ApiWavesOverviewType";
+import WavesList from "@/components/waves/list/WavesList";
+import { AuthContext } from "@/components/auth/Auth";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: () => "/waves",
-  useSearchParams: () => ({ get: () => null, toString: () => "" }),
+  useSearchParams: () => new URLSearchParams("identity=bob"),
 }));
 
-jest.mock("../../../../components/waves/list/header/WavesListHeader", () => (props: any) => (
-  <div>
-    <button onClick={() => props.setIdentity("bob")} data-testid="set-id" />
-    <button onClick={() => props.setIdentity(null)} data-testid="clear-id" />
-  </div>
-));
+jest.mock(
+  "@/components/waves/list/header/WavesListHeader",
+  () => (props: any) =>
+    (
+      <div>
+        <button onClick={() => props.setIdentity("bob")} data-testid="set-id" />
+        <button
+          onClick={() => props.setIdentity(null)}
+          data-testid="clear-id"
+        />
+      </div>
+    )
+);
 
-jest.mock("../../../../components/waves/list/WavesListWrapper", () => (props: any) => (
+jest.mock("@/components/waves/list/WavesListWrapper", () => (props: any) => (
   <div data-testid={`wrapper-${props.overviewType}`}>
-    <span data-testid={`showall-${props.overviewType}`}>{String(props.showAllType)}</span>
+    <span data-testid={`showall-${props.overviewType}`}>
+      {String(props.showAllType)}
+    </span>
     <button
       onClick={() =>
         props.setShowAllType(
@@ -33,9 +42,11 @@ jest.mock("../../../../components/waves/list/WavesListWrapper", () => (props: an
   </div>
 ));
 
-jest.mock("../../../../components/waves/list/WavesListSearchResults", () => (props: any) => (
-  <div data-testid="search-results">{props.identity ?? ""}</div>
-));
+jest.mock(
+  "@/components/waves/list/WavesListSearchResults",
+  () => (props: any) =>
+    <div data-testid="search-results">{props.identity ?? ""}</div>
+);
 
 const push = jest.fn();
 const router = { push } as any;
@@ -71,9 +82,13 @@ it("updates router and shows search results when identity changes", async () => 
   const user = userEvent.setup();
   setup();
   expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
+
   await user.click(screen.getByTestId("set-id"));
-  expect(screen.getByTestId("search-results")).toHaveTextContent("bob");
+
+  const result = await screen.findByTestId("search-results");
+  expect(result).toHaveTextContent("bob");
   expect(push).toHaveBeenLastCalledWith("/waves?identity=bob");
+
   await user.click(screen.getByTestId("clear-id"));
   expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
   expect(push).toHaveBeenLastCalledWith("/waves");
