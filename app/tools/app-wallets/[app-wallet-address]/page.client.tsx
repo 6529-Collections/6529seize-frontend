@@ -34,9 +34,9 @@ export default function AppWalletPage(props: { readonly address: string }) {
 export async function generateMetadata({
   params,
 }: {
-  params: { "app-wallet-address": string };
+  readonly params: Promise<{ "app-wallet-address": string }>;
 }): Promise<Metadata> {
-  const address = params["app-wallet-address"];
+  const { "app-wallet-address": address } = await params;
   return getAppMetadata({
     title: `${formatAddress(address)} | App Wallets`,
     description: "Tools",

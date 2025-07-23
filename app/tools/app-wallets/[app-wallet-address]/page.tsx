@@ -1,7 +1,11 @@
-import AppWalletPageClient, { generateMetadata } from './page.client';
+import AppWalletPageClient, { generateMetadata } from "./page.client";
 
-export default function AppWalletPage({ params }: { params: { "app-wallet-address": string } }) {
-  const address = params["app-wallet-address"];
+export default async function AppWalletPage({
+  params,
+}: {
+  readonly params: Promise<{ "app-wallet-address": string }>;
+}) {
+  const { "app-wallet-address": address } = await params;
   return <AppWalletPageClient address={address} />;
 }
 
