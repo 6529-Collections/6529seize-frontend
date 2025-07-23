@@ -4,8 +4,8 @@ import {
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
   RateMatter,
-} from "../../../../entities/IProfile";
-import { useRouter } from "next/router";
+} from "@/entities/IProfile";
+import { useRouter, useSearchParams } from "next/navigation";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { UserPageTabType } from "../../../user/layout/UserPageTabs";
@@ -46,6 +46,7 @@ export default function ProfileActivityLogRate({
     ProfileActivityLogRatingEditContentChangeReason.LOST_TDH;
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const getRatingType = (): ProfileActivityLogRateType =>
     log.contents.new_rating < log.contents.old_rating
@@ -75,7 +76,7 @@ export default function ProfileActivityLogRate({
   const handleOrWallet = log.target_profile_handle ?? "";
 
   const isCurrentUser =
-    (router.query.user as string)?.toLowerCase() ===
+    (searchParams?.get("user") as string)?.toLowerCase() ===
     handleOrWallet.toLowerCase();
 
   const tabTarget =

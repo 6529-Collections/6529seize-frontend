@@ -115,7 +115,12 @@ export default function PrenodesStatus() {
     }
 
     return (
-      <Col xs={12} sm={12} md={6} className="pt-2 pb-2">
+      <Col
+        xs={12}
+        sm={12}
+        md={6}
+        className="pt-2 pb-2"
+        key={`${prenode.ip}-${prenode.domain}`}>
         <a
           href={href}
           target="_blank"

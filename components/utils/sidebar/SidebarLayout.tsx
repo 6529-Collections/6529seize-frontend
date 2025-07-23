@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import GroupsSidebarToggle from "../../groups/sidebar/GroupsSidebarToggle";
 import GroupsSidebar from "../../groups/sidebar/GroupsSidebar";
 import { createBreakpoint } from "react-use";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectActiveGroupId,
@@ -22,6 +22,7 @@ export default function SidebarLayout({
   const useBreakpoint = createBreakpoint({ XXL: 2048, MD: 768, S: 0 });
   const breakpoint = useBreakpoint();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const activeGroupId = useSelector(selectActiveGroupId);
   const dispatch = useDispatch();
@@ -56,14 +57,14 @@ export default function SidebarLayout({
   );
 
   useEffect(() => {
-    if (router.isReady && !init) {
-      const { group } = router.query as { group: string | undefined };
+    if (!init) {
+      const group = searchParams?.get("group");
       if (group && group !== activeGroupId) {
         dispatch(setActiveGroupId(group));
       }
       setInit(true);
     }
-  }, [router.isReady]);
+  }, []);
 
   const elementIsVisibleInViewportPx = (el: HTMLElement | null) => {
     if (!el) {
