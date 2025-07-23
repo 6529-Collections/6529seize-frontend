@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Rememes, { RememeSort } from "@/components/rememes/Rememes";
 import { fetchUrl } from "@/services/6529api";
+import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -61,7 +62,11 @@ describe("Rememes component", () => {
   });
 
   it("fetches rememes and changes sorting", async () => {
-    render(<Rememes />);
+    render(
+      <TitleProvider>
+        <Rememes />
+      </TitleProvider>
+    );
     await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
     expect(fetchUrl).toHaveBeenCalledWith(
       "https://test.6529.io/api/rememes?page_size=40&page=1"

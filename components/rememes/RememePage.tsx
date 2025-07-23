@@ -3,7 +3,6 @@
 import styles from "./Rememes.module.scss";
 
 import { useEffect, useState } from "react";
-import { useSetTitle } from "../../contexts/TitleContext";
 import Image from "next/image";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -32,11 +31,11 @@ import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
+import { useTitle } from "@/contexts/TitleContext";
 
 interface Props {
   contract: string;
   id: string;
-  name: string;
 }
 
 enum Tabs {
@@ -128,7 +127,7 @@ export function printMemeReferences(
 }
 
 export default function RememePage(props: Readonly<Props>) {
-  useSetTitle(`${props.name} | ReMemes | 6529.io`);
+  const { setTitle } = useTitle();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const [rememe, setRememe] = useState<Rememe>();
@@ -136,7 +135,6 @@ export default function RememePage(props: Readonly<Props>) {
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);
 
   const [memes, setMemes] = useState<NFT[]>([]);
-  const [memesLoaded, setMemesLoaded] = useState(false);
 
   useEffect(() => {
     if (props.contract && props.id) {
@@ -145,6 +143,10 @@ export default function RememePage(props: Readonly<Props>) {
       ).then((response: DBResponse) => {
         if (response.data.length === 1) {
           setRememe(response.data[0]);
+          if (response.data[0].metadata?.name) {
+            const title = `${response.data[0].metadata.name} | ReMemes | 6529.io`;
+            setTitle(title);
+          }
         }
       });
     }
@@ -160,7 +162,6 @@ export default function RememePage(props: Readonly<Props>) {
         )}`
       ).then((responseNfts: NFT[]) => {
         setMemes(responseNfts.sort((a, b) => a.id - b.id));
-        setMemesLoaded(true);
       });
     }
   }, [rememe]);

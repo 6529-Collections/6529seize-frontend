@@ -1,14 +1,12 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import ReMemes from '@/app/rememes/page';
-import { generateMetadata } from '@/app/rememes/page';
-import { AuthContext } from '@/components/auth/Auth';
-
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import ReMemes, { generateMetadata } from "@/app/rememes/page";
+import { AuthContext } from "@/components/auth/Auth";
 
 // Mock TitleContext
-jest.mock('@/contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -22,8 +20,16 @@ jest.mock('@/contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('ReMemes page', () => {
-  it('renders component', () => {
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/rememes",
+}));
+
+describe("ReMemes page", () => {
+  it("renders component", () => {
     render(
       <AuthContext.Provider value={{} as any}>
         <ReMemes />
@@ -32,11 +38,11 @@ describe('ReMemes page', () => {
     expect(screen.getByText(/Add ReMeme/)).toBeInTheDocument();
   });
 
-  it('exposes metadata', async () => {
-    process.env.BASE_ENDPOINT = 'https://test.com';
+  it("exposes metadata", async () => {
+    process.env.BASE_ENDPOINT = "https://test.com";
     const meta = await generateMetadata();
-    expect(meta.title).toBe('ReMemes');
-    expect(meta.description).toContain('Collections');
+    expect(meta.title).toBe("ReMemes");
+    expect(meta.description).toContain("Collections");
     const images = Array.isArray(meta.openGraph?.images)
       ? meta.openGraph?.images
       : [meta.openGraph?.images];

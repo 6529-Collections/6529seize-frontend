@@ -1,13 +1,21 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import ReMeme from "@/app/rememes/[contract]/[id]/page";
-import { generateMetadata } from "@/app/rememes/[contract]/[id]/page";
+import ReMeme, { generateMetadata } from "@/app/rememes/[contract]/[id]/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { fetchUrl } from "@/services/6529api";
 import { formatAddress } from "@/helpers/Helpers";
 
 jest.mock("@/services/6529api");
 jest.mock("@/helpers/Helpers");
+
+jest.mock("@/components/rememes/RememePage", () => {
+  return {
+    __esModule: true,
+    default: () => (
+      <div data-testid="rememe-page-component">RememePageComponent</div>
+    ),
+  };
+});
 
 const mockSetTitle = jest.fn();
 
@@ -41,25 +49,25 @@ describe("ReMeme page", () => {
     jest.clearAllMocks();
   });
 
-  it("renders RememePageComponent with correct props", () => {
-    const pageProps = {
-      contract: "0x123abc",
-      id: "456",
-      name: "Test ReMeme",
-      image: "test-image.png",
-    };
+  it("renders RememePageComponent with correct props", async () => {
+    const props = { contract: "0x123abc", id: "456" };
 
-    render(
-      <TestProvider>
-        <ReMeme
-          name={pageProps.name}
-          contract={pageProps.contract}
-          id={pageProps.id}
-        />
-      </TestProvider>
-    );
+    (fetchUrl as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          metadata: { name: "Test ReMeme" },
+          image: "test-image.png",
+        },
+      ],
+    });
 
-    expect(screen.getByRole("main")).toBeInTheDocument();
+    const resolved = await ReMeme({ params: props });
+
+    render(<TestProvider>{resolved}</TestProvider>);
+
+    expect(
+      await screen.findByTestId("rememe-page-component")
+    ).toBeInTheDocument();
   });
 
   it("sets page title on mount", () => {
@@ -72,11 +80,7 @@ describe("ReMeme page", () => {
 
     render(
       <TestProvider>
-        <ReMeme
-          name={pageProps.name}
-          contract={pageProps.contract}
-          id={pageProps.id}
-        />
+        <ReMeme params={{ contract: pageProps.contract, id: pageProps.id }} />
       </TestProvider>
     );
 

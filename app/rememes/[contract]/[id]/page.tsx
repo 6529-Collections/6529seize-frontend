@@ -1,3 +1,4 @@
+import styles from "@/styles/Home.module.css";
 import RememePage from "@/components/rememes/RememePage";
 import { fetchUrl } from "@/services/6529api";
 import { formatAddress } from "@/helpers/Helpers";
@@ -7,32 +8,21 @@ import type { Metadata } from "next";
 export default async function ReMeme({
   params,
 }: {
-  params: { contract: string; id: string };
+  readonly params: { contract: string; id: string };
 }) {
   const { contract, id } = params;
 
-  let name = `${formatAddress(contract)} #${id}`;
-  let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
-  const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
+  return (
+    <main className={styles.main}>
+      <RememePage contract={contract} id={id} />
+    </main>
   );
-
-  if (response?.data?.length > 0) {
-    if (response.data[0].metadata?.name) {
-      name = response.data[0].metadata.name;
-    }
-    if (response.data[0].image) {
-      image = response.data[0].image;
-    }
-  }
-
-  return <RememePage name={name} contract={contract} id={id} />;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: { contract: string; id: string };
+  readonly params: { contract: string; id: string };
 }): Promise<Metadata> {
   const { contract, id } = params;
   let name = `${formatAddress(contract)} #${id}`;
@@ -54,6 +44,6 @@ export async function generateMetadata({
     title: name,
     ogImage: image ?? `${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`,
     description: `ReMemes`,
-    twitterCard: "summary_large_image",
+    twitterCard: "summary",
   });
 }

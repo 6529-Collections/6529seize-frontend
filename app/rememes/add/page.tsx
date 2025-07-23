@@ -1,9 +1,14 @@
+import styles from "@/styles/Home.module.css";
 import RememeAddPage from "@/components/rememes/RememeAddPage";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 
 export default function ReMemesAddPage() {
-  return <RememeAddPage />;
+  return (
+    <main className={styles.main}>
+      <RememeAddPage />
+    </main>
+  );
 }
 
 export async function generateMetadata(): Promise<Metadata> {
