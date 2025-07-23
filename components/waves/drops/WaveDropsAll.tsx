@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
@@ -152,12 +152,25 @@ export default function WaveDropsAll({
     connectedProfile?.handle ?? null
   );
 
+  // Memoize reversed drops array to avoid creating new array on every render
+  const reversedDrops = useMemo(() => 
+    [...(waveMessages?.drops ?? [])].reverse(), 
+    [waveMessages?.drops]
+  );
+
   // Auto-scroll to bottom when new messages arrive and user is at bottom
   useEffect(() => {
     if (isAtBottom && !userHasManuallyScrolled && waveMessages?.drops.length && init && containerVisible) {
       scrollToVisualBottom();
     }
   }, [waveMessages?.drops.length, isAtBottom, userHasManuallyScrolled, scrollToVisualBottom, init, containerVisible]);
+
+  // Set container visible immediately for empty state
+  useEffect(() => {
+    if (waveMessages?.drops.length === 0 && !containerVisible) {
+      setContainerVisible(true);
+    }
+  }, [waveMessages?.drops.length, containerVisible]);
 
   // // Effect to update the ref whenever waveMessages changes
   useEffect(() => {
@@ -300,10 +313,6 @@ export default function WaveDropsAll({
     }
 
     if (waveMessages?.drops.length === 0) {
-      // Set container visible immediately for empty state
-      if (!containerVisible) {
-        setContainerVisible(true);
-      }
       return <WaveDropsEmptyPlaceholder dropId={dropId} />;
     }
 
@@ -323,7 +332,7 @@ export default function WaveDropsAll({
           <DropsList
             scrollContainerRef={scrollContainerRef}
             onReplyClick={setSerialNo}
-            drops={[...(waveMessages?.drops ?? [])].reverse()}
+            drops={reversedDrops}
             showWaveInfo={false}
             onReply={onReply}
             onQuote={onQuote}

@@ -51,7 +51,7 @@ export const WaveDropsReverseContainer = forwardRef<
       topSentinelRef,
       {
         root: scrollContainerRef.current,
-        rootMargin: "100px 0px 0px 0px",
+        rootMargin: "50px 0px 0px 0px",
         threshold: 0,
       },
       handleIntersection,
