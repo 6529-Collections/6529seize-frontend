@@ -51,7 +51,7 @@ export const WaveDropsReverseContainer = forwardRef<
       topSentinelRef,
       {
         root: scrollContainerRef.current,
-        rootMargin: "1px 0px 0px 0px",
+        rootMargin: "50px 0px 0px 0px",
         threshold: 0,
       },
       handleIntersection,
@@ -67,7 +67,7 @@ export const WaveDropsReverseContainer = forwardRef<
         if (!container) return;
         const { scrollTop, scrollHeight, clientHeight } = container;
         // In a normal container, we're at the bottom when scrollTop + clientHeight is near scrollHeight
-        const currentIsAtBottom = scrollTop + clientHeight >= scrollHeight - 5;
+        const currentIsAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
         isAtBottom.current = currentIsAtBottom;
         // In a normal container, scrolling "down" means the scrollTop is increasing
         // and scrolling "up" means the scrollTop is decreasing
@@ -94,6 +94,7 @@ export const WaveDropsReverseContainer = forwardRef<
       ref={scrollContainerRef}
       onScroll={handleScroll}
       className="tw-pb-6 tw-bg-iron-950 tw-flex tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
+      style={{ scrollBehavior: 'auto', overflowAnchor: 'none' }}
     >
       <div ref={topSentinelRef} style={{ height: "1px" }} />
       <div className="tw-flex tw-flex-col">

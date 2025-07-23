@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useMemo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
@@ -67,7 +67,7 @@ export default function WaveDropsAll({
 
   const { scrollContainerRef, scrollToVisualBottom } = useScrollBehavior();
 
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isAtBottom, setIsAtBottom] = useState(false);
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
 
@@ -75,6 +75,7 @@ export default function WaveDropsAll({
   const [userHasManuallyScrolled, setUserHasManuallyScrolled] = useState(false);
   const [containerVisible, setContainerVisible] = useState(false);
   const [lastLoadTime, setLastLoadTime] = useState(0);
+  
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
@@ -159,12 +160,46 @@ export default function WaveDropsAll({
     [waveMessages?.drops]
   );
 
-  // Auto-scroll to bottom when new messages arrive and user is at bottom
-  useEffect(() => {
-    if (isAtBottom && !userHasManuallyScrolled && waveMessages?.drops.length && init && containerVisible) {
-      scrollToVisualBottom();
+  // Precise bottom positioning function
+  const maintainBottomPosition = useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    
+    const container = scrollContainerRef.current;
+    const targetScrollTop = container.scrollHeight - container.clientHeight;
+    
+    // Direct assignment - no scroll API calls
+    container.scrollTop = targetScrollTop;
+  }, []);
+
+  // On mount, jump to bottom before paint and set bottom state
+  useLayoutEffect(() => {
+    if (scrollContainerRef.current && init && containerVisible) {
+      maintainBottomPosition();
+      // Set isAtBottom to true after scrolling to bottom
+      setTimeout(() => setIsAtBottom(true), 100);
     }
-  }, [waveMessages?.drops.length, isAtBottom, userHasManuallyScrolled, scrollToVisualBottom, init, containerVisible]);
+  }, [init, containerVisible, maintainBottomPosition]);
+
+  // Auto-scroll to bottom when new messages arrive and user is at bottom
+  // Lock scroll position when user is not at bottom
+  useLayoutEffect(() => {
+    if (!waveMessages?.drops.length || !init || !containerVisible || !scrollContainerRef.current) return;
+    
+    const container = scrollContainerRef.current;
+    
+    if (isAtBottom && !userHasManuallyScrolled) {
+      // User is at bottom, maintain bottom position with precise calculation
+      maintainBottomPosition();
+    } else if (!isAtBottom) {
+      // User is not at bottom, lock their current scroll position
+      const wasScrollTop = container.scrollTop;
+      const wasScrollHeight = container.scrollHeight;
+      const newScrollHeight = container.scrollHeight;
+      const heightDiff = newScrollHeight - wasScrollHeight;
+      // Direct assignment for position lock
+      container.scrollTop = wasScrollTop + heightDiff;
+    }
+  }, [waveMessages?.drops.length, isAtBottom, userHasManuallyScrolled, init, containerVisible, maintainBottomPosition]);
 
   // Set container visible immediately for empty state
   useEffect(() => {
@@ -187,21 +222,17 @@ export default function WaveDropsAll({
     }
   }, [waveMessages]);
 
-  // Effect for initial load
+  // Effect for initial load - simplified to only use bottom anchor
   useEffect(() => {
     const currentMessages = latestWaveMessagesRef.current;
     if (currentMessages && currentMessages.drops.length > 0 && !init) {
       setInit(true);
-      // Use requestAnimationFrame to ensure DOM is ready, then scroll instantly
+      // Show container immediately, bottom anchor will handle scrolling
       requestAnimationFrame(() => {
-        scrollToVisualBottom("instant");
-        // Show container after positioning
-        requestAnimationFrame(() => {
-          setContainerVisible(true);
-        });
+        setContainerVisible(true);
       });
     }
-  }, [waveMessages, scrollToVisualBottom, init]); // Keep dependencies, logic uses ref
+  }, [waveMessages, init]); // Removed scrollToVisualBottom dependency
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -352,7 +383,8 @@ export default function WaveDropsAll({
             if (direction === "down") {
               setUserHasManuallyScrolled(true);
             }
-          }}>
+          }}
+>
           <DropsList
             scrollContainerRef={scrollContainerRef}
             onReplyClick={setSerialNo}
@@ -374,7 +406,16 @@ export default function WaveDropsAll({
         <WaveDropsScrollBottomButton
           isAtBottom={isAtBottom}
           scrollToBottom={() => {
-            scrollToVisualBottom("smooth");
+            if (scrollContainerRef.current) {
+              const container = scrollContainerRef.current;
+              const targetScrollTop = container.scrollHeight - container.clientHeight;
+              container.scrollTo({
+                top: targetScrollTop,
+                behavior: 'smooth'
+              });
+              // Update isAtBottom state after scrolling
+              setTimeout(() => setIsAtBottom(true), 300);
+            }
             setUserHasManuallyScrolled(false); // Reset manual scroll flag when user clicks to bottom
           }}
         />
