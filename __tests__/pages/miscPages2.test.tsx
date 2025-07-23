@@ -6,11 +6,14 @@ import JoinOm from "@/app/om/join-om/page";
 import PartnershipRequest from "@/app/om/partnership-request/page";
 import ConsolidatedMetrics from "@/app/open-data/consolidated-network-metrics/page";
 import MemeSubscriptions from "@/app/open-data/meme-subscriptions/page";
-import AddRememes from "@/pages/rememes/add";
+import AddRememes from "@/app/rememes/add/page";
 import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
 import AppWallets from "@/app/tools/app-wallets/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { NextGenCollection } from "@/entities/INextgen";
+import { WagmiProvider, createConfig, http } from "wagmi";
+import { mainnet } from "viem/chains";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("next/navigation", () => ({
@@ -40,6 +43,23 @@ jest.mock("@/contexts/TitleContext", () => ({
   useSetWaveData: jest.fn(),
   useSetStreamHasNewItems: jest.fn(),
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: "0x123",
+    isConnected: true,
+    seizeConnect: jest.fn(),
+    seizeConnectOpen: false,
+  }),
+}));
+
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: () => ({
+    seizeSettings: {
+      rememes_submission_tdh_threshold: 6942,
+    },
+  }),
 }));
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -97,12 +117,28 @@ describe("misc pages render", () => {
   });
 
   it("renders add rememes page", () => {
-    render(
-      <TestProvider>
-        <AddRememes />
-      </TestProvider>
+    const queryClient = new QueryClient();
+    const mockConfig = createConfig({
+      chains: [mainnet],
+      transports: {
+        [mainnet.id]: http(),
+      },
+    });
+
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WagmiProvider config={mockConfig}>
+        <TestProvider>{children}</TestProvider>
+      </WagmiProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TestProvider>
+          <AddRememes />
+        </TestProvider>
+      </QueryClientProvider>,
+      { wrapper: Wrapper }
+    );
+    expect(screen.getByText(/add ReMemes/i)).toBeInTheDocument();
   });
 
   it("renders slide initiatives redirect page", () => {

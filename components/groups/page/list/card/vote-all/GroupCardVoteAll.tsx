@@ -1,30 +1,27 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import { CommunityMemberOverview } from "../../../../../../entities/IProfile";
-import { ApiGroupFull } from "../../../../../../generated/models/ApiGroupFull";
-import { AuthContext } from "../../../../../auth/Auth";
+import { CommunityMemberOverview } from "@/entities/IProfile";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { AuthContext } from "@/components/auth/Auth";
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../../../../react-query-wrapper/ReactQueryWrapper";
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CreditDirection } from "../GroupCard";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { Page } from "../../../../../../helpers/Types";
+import { Page } from "@/helpers/Types";
 import { CommunityMembersQuery } from "@/app/network/page";
-import { SortDirection } from "../../../../../../entities/ISort";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../../../../services/api/common-api";
+import { SortDirection } from "@/entities/ISort";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 import GroupCardActionWrapper from "../GroupCardActionWrapper";
-import { ApiRateMatter } from "../../../../../../generated/models/ApiRateMatter";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
 import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
-import { CommunityMembersSortOption } from "../../../../../../enums";
-import { ApiBulkRateRequest } from "../../../../../../generated/models/ApiBulkRateRequest";
-import { ApiBulkRateResponse } from "../../../../../../generated/models/ApiBulkRateResponse";
+import { CommunityMembersSortOption } from "@/enums";
+import { ApiBulkRateRequest } from "@/generated/models/ApiBulkRateRequest";
+import { ApiBulkRateResponse } from "@/generated/models/ApiBulkRateResponse";
 
 export default function GroupCardVoteAll({
   matter,

@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { NFTLite, Rememe } from "@/entities/INFT";
 import { DBResponse } from "@/entities/IDBResponse";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSetTitle } from "@/contexts/TitleContext";
 import RememeImage from "@/components/nft-image/RememeImage";
 import Image from "next/image";
 import Pagination from "@/components/pagination/Pagination";
@@ -38,6 +39,7 @@ export enum RememeSort {
 }
 
 export default function Rememes() {
+  useSetTitle("ReMemes | Collections");
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();

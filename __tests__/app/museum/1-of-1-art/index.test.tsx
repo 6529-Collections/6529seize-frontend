@@ -1,16 +1,16 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import Museum1of1ArtPage from '@/app/museum/1-of-1-art/page";
+import Museum1of1ArtPage from "@/app/museum/1-of-1-art/page";
 
 // Mock the Header component since it's dynamically imported
-jest.mock("../../../../components/header/Header", () => {
+jest.mock("@/components/header/Header", () => {
   return function MockHeader() {
     return <div data-testid="header">Header</div>;
   };
 });
 
 // Mock HeaderPlaceholder
-jest.mock("../../../../components/header/HeaderPlaceholder", () => {
+jest.mock("@/components/header/HeaderPlaceholder", () => {
   return function MockHeaderPlaceholder() {
     return <div data-testid="header-placeholder">Header Placeholder</div>;
   };

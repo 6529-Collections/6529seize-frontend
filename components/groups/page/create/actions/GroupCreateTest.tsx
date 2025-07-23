@@ -1,21 +1,18 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiCreateGroup } from "../../../../../generated/models/ApiCreateGroup";
-import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
-import { AuthContext } from "../../../../auth/Auth";
+import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { AuthContext } from "@/components/auth/Auth";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../../../services/api/common-api";
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { CommunityMembersQuery } from "@/app/network/page";
-import { SortDirection } from "../../../../../entities/ISort";
-import { Page } from "../../../../../helpers/Types";
-import { CommunityMemberOverview } from "../../../../../entities/IProfile";
-import { CommunityMembersSortOption } from "../../../../../enums";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { SortDirection } from "@/entities/ISort";
+import { Page } from "@/helpers/Types";
+import { CommunityMemberOverview } from "@/entities/IProfile";
+import { CommunityMembersSortOption } from "@/enums";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreateTest({
   groupConfig,
