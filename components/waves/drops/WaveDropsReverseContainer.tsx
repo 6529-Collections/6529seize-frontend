@@ -66,8 +66,8 @@ export const WaveDropsReverseContainer = forwardRef<
         const container = scrollContainerRef.current;
         if (!container) return;
         const { scrollTop, scrollHeight, clientHeight } = container;
-        // In a normal container, we're at the bottom when scrollTop + clientHeight is near scrollHeight
-        const currentIsAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+        // In a normal container, we're at the bottom when scrollTop + clientHeight equals scrollHeight
+        const currentIsAtBottom = scrollTop + clientHeight >= scrollHeight;
         isAtBottom.current = currentIsAtBottom;
         // In a normal container, scrolling "down" means the scrollTop is increasing
         // and scrolling "up" means the scrollTop is decreasing

@@ -75,50 +75,77 @@ export default function WaveDropsAll({
   const [userHasManuallyScrolled, setUserHasManuallyScrolled] = useState(false);
   const [containerVisible, setContainerVisible] = useState(false);
   const [lastLoadTime, setLastLoadTime] = useState(0);
+  const [isScrollingToReply, setIsScrollingToReply] = useState(false);
   
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
       // Check if the target ref exists and is associated with the targetSerial
       if (targetDropRef.current && scrollContainerRef.current) {
-        targetDropRef.current.scrollIntoView({
-          behavior: behavior,
-          block: "center",
-        });
+        const container = scrollContainerRef.current;
+        const targetElement = targetDropRef.current;
+        
+        // Set flag to prevent bottom maintenance interference
+        setIsScrollingToReply(true);
+        // Reset manual scroll flag when programmatically scrolling to reply
+        setUserHasManuallyScrolled(false);
+        
+        // Get the target element's position relative to the container
+        const targetRect = targetElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        
+        // Calculate the scroll position to center the element
+        const targetTop = targetElement.offsetTop;
+        const targetHeight = targetElement.offsetHeight;
+        const containerHeight = container.clientHeight;
+        
+        // Center the element in the viewport
+        const scrollTo = targetTop - (containerHeight / 2) + (targetHeight / 2);
+        
+        if (behavior === 'smooth') {
+          container.scrollTo({
+            top: scrollTo,
+            behavior: 'smooth'
+          });
+        } else {
+          container.scrollTop = scrollTo;
+        }
 
-        // Check twice after small delays if element is still in viewport
-        // This protects against layout shifts that might move the element
+        // Check after delay if element is centered
         setTimeout(() => {
           const rect = targetDropRef.current?.getBoundingClientRect();
-          const isInViewport =
-            rect && rect.top >= 0 && rect.bottom <= window.innerHeight;
-
-          if (!isInViewport && targetDropRef.current) {
-            targetDropRef.current.scrollIntoView({
-              behavior: behavior,
-              block: "center",
-            });
-
-            // Second check after another small delay
-            setTimeout(() => {
-              const rect = targetDropRef.current?.getBoundingClientRect();
-              const isInViewport =
-                rect && rect.top >= 0 && rect.bottom <= window.innerHeight;
-
-              if (!isInViewport && targetDropRef.current) {
-                targetDropRef.current.scrollIntoView({
-                  behavior: behavior,
-                  block: "center",
-                });
-              }
-            }, 300);
+          const containerRect = scrollContainerRef.current?.getBoundingClientRect();
+          
+          if (rect && containerRect) {
+            const elementCenter = rect.top + rect.height / 2;
+            const containerCenter = containerRect.top + containerRect.height / 2;
+            const diff = Math.abs(elementCenter - containerCenter);
+            
+            // If not reasonably centered, try again
+            if (diff > 100 && targetDropRef.current && scrollContainerRef.current) {
+              const targetTop = targetDropRef.current.offsetTop;
+              const targetHeight = targetDropRef.current.offsetHeight;
+              const containerHeight = scrollContainerRef.current.clientHeight;
+              const scrollTo = targetTop - (containerHeight / 2) + (targetHeight / 2);
+              
+              scrollContainerRef.current.scrollTo({
+                top: scrollTo,
+                behavior: behavior
+              });
+            }
           }
-        }, 150);
+        }, behavior === 'smooth' ? 600 : 150);
+        
+        // Reset scrolling flag after scroll completes
+        setTimeout(() => {
+          setIsScrollingToReply(false);
+        }, behavior === 'smooth' ? 700 : 200);
+        
         return true;
       }
       return false;
     },
-    [] // No state dependencies needed here
+    [setUserHasManuallyScrolled]
   );
 
   const smoothScrollWithRetries = useCallback(
@@ -175,8 +202,8 @@ export default function WaveDropsAll({
   useLayoutEffect(() => {
     if (scrollContainerRef.current && init && containerVisible) {
       maintainBottomPosition();
-      // Set isAtBottom to true after scrolling to bottom
-      setTimeout(() => setIsAtBottom(true), 100);
+      // Set isAtBottom to true immediately after scrolling to bottom
+      setIsAtBottom(true);
     }
   }, [init, containerVisible, maintainBottomPosition]);
 
@@ -184,6 +211,9 @@ export default function WaveDropsAll({
   // Lock scroll position when user is not at bottom
   useLayoutEffect(() => {
     if (!waveMessages?.drops.length || !init || !containerVisible || !scrollContainerRef.current) return;
+    
+    // Skip bottom maintenance when scrolling to reply to prevent interference
+    if (isScrollingToReply) return;
     
     const container = scrollContainerRef.current;
     
@@ -199,7 +229,7 @@ export default function WaveDropsAll({
       // Direct assignment for position lock
       container.scrollTop = wasScrollTop + heightDiff;
     }
-  }, [waveMessages?.drops.length, isAtBottom, userHasManuallyScrolled, init, containerVisible, maintainBottomPosition]);
+  }, [waveMessages?.drops.length, isAtBottom, userHasManuallyScrolled, init, containerVisible, maintainBottomPosition, isScrollingToReply]);
 
   // Set container visible immediately for empty state
   useEffect(() => {
@@ -233,6 +263,15 @@ export default function WaveDropsAll({
       });
     }
   }, [waveMessages, init]); // Removed scrollToVisualBottom dependency
+
+  // Reset scroll state when switching waves (don't reset isAtBottom - let initialization handle it)
+  useEffect(() => {
+    setUserHasManuallyScrolled(false);
+    setInit(false);
+    setContainerVisible(false);
+    setIsScrollingToReply(false);
+  }, [waveId]);
+
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -409,14 +448,16 @@ export default function WaveDropsAll({
             if (scrollContainerRef.current) {
               const container = scrollContainerRef.current;
               const targetScrollTop = container.scrollHeight - container.clientHeight;
+              
+              // Set states immediately before scrolling
+              setUserHasManuallyScrolled(false);
+              setIsAtBottom(true);
+              
               container.scrollTo({
                 top: targetScrollTop,
                 behavior: 'smooth'
               });
-              // Update isAtBottom state after scrolling
-              setTimeout(() => setIsAtBottom(true), 300);
             }
-            setUserHasManuallyScrolled(false); // Reset manual scroll flag when user clicks to bottom
           }}
         />
 
