@@ -4,7 +4,7 @@ import React from "react";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { Tooltip } from "react-tooltip";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface WaveDropActionsOpenProps {
   readonly drop: ExtendedDrop;
@@ -12,19 +12,14 @@ interface WaveDropActionsOpenProps {
 
 const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams()!;
   const canBeOpened = drop.drop_type !== ApiDropType.Chat;
 
   const onDropClick = (drop: ExtendedDrop) => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("drop", drop.id);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   if (!canBeOpened) {

@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./LatestActivity.module.scss";
-import homeStyles from "../../styles/Home.module.scss";
+import homeStyles from "@/styles/Home.module.scss";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";

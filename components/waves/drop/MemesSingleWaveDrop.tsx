@@ -8,7 +8,7 @@ import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useDrop } from "../../../hooks/useDrop";
 import { useWaveData } from "../../../hooks/useWaveData";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
-import { useRouter } from "next/router";
+import { useRouter, usePathname } from "next/navigation";
 
 interface MemesSingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -20,17 +20,12 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   onClose,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { drop } = useDrop({ dropId: initialDrop.id });
   const { data: wave } = useWaveData({
     waveId: drop?.wave.id ?? null,
     onWaveNotFound: () => {
-      router.push(
-        { pathname: router.pathname, query: { wave: null } },
-        undefined,
-        {
-          shallow: true,
-        }
-      );
+      router.push(pathname);
     },
   });
   const [activeTab, setActiveTab] = useState<SingleWaveDropTab>(

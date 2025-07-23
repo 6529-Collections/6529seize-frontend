@@ -8,7 +8,7 @@ import ConsolidatedMetrics from "@/app/open-data/consolidated-network-metrics/pa
 import MemeSubscriptions from "@/app/open-data/meme-subscriptions/page";
 import AddRememes from "@/app/rememes/add/page";
 import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
-import AppWallets from "@/pages/tools/app-wallets";
+import AppWallets from "@/app/tools/app-wallets/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { NextGenCollection } from "@/entities/INextgen";
 import { WagmiProvider, createConfig, http } from "wagmi";

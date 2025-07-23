@@ -1,4 +1,4 @@
-import styles from "../../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 import { getAppMetadata } from "@/components/providers/metadata";
 import CommunityMetricsClient from "./page.client";
 

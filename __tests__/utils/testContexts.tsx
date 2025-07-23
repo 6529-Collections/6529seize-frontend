@@ -36,7 +36,7 @@ export const createMockAuthContext = (
   setToast: jest.fn(),
   setActiveProfileProxy: jest.fn(async () => {}),
   ...overrides,
-});
+} as unknown as AuthContextType);
 
 export const renderWithAuth = (
   component: React.ReactElement,

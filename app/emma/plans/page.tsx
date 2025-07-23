@@ -1,6 +1,8 @@
-import DistributionPlanToolWrapper from "../../../components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
-import DistributionPlanToolPlans from "../../../components/distribution-plan-tool/plans/DistributionPlanToolPlans";
-import DistributionPlanToolCreatePlan from "../../../components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan";
+import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
+import DistributionPlanToolPlans from "@/components/distribution-plan-tool/plans/DistributionPlanToolPlans";
+import DistributionPlanToolCreatePlan from "@/components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan";
+import { getAppMetadata } from "@/components/providers/metadata";
+import type { Metadata } from "next";
 
 export default function DistributionPlanToolPlansPage() {
   return (
@@ -13,9 +15,7 @@ export default function DistributionPlanToolPlansPage() {
                 <div className="tw-flex tw-flex-col">
                   <h1 className="tw-text-white">EMMA</h1>
                   <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
-                    The Seize distribution plan tool allows you to build a
-                    distribution plan for your mint that includes airdrops,
-                    allowlists and public minting in one or more phases.
+                    The Seize distribution plan tool allows you to build a distribution plan for your mint that includes airdrops, allowlists and public minting in one or more phases.
                   </p>
                 </div>
               </div>
@@ -31,7 +31,6 @@ export default function DistributionPlanToolPlansPage() {
   );
 }
 
-DistributionPlanToolPlansPage.metadata = {
-  title: "EMMA | Plans",
-  description: "Tools",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "EMMA | Plans", description: "Tools" });
+}
