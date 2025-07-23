@@ -1,6 +1,7 @@
 import { LeaderboardFocus } from "@/components/leaderboard/Leaderboard";
 import CommunityNerdPageClient from "./page.client";
 import { Metadata } from "next";
+import { getAppMetadata } from "@/components/providers/metadata";
 
 export async function generateMetadata({
   params,
@@ -13,10 +14,10 @@ export async function generateMetadata({
       ? LeaderboardFocus.INTERACTIONS
       : LeaderboardFocus.TDH;
 
-  return {
+  return getAppMetadata({
     title: `Network Nerd - ${focus}`,
     description: "Network",
-  };
+  });
 }
 
 export default function CommunityNerdPage({
