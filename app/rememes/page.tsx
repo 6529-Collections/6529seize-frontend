@@ -1,4 +1,4 @@
-import styles from "@/styles/Home.module.css";
+import styles from "@/styles/Home.module.scss";
 import Rememes from "@/components/rememes/Rememes";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
