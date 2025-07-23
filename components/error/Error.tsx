@@ -11,7 +11,7 @@ export default function ErrorComponent() {
   }, []);
 
   return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-justify-start tw-pt-[100px]">
+    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen">
       <Image
         width="0"
         height="0"

@@ -1,8 +1,8 @@
 import {
   ProfileActivityLog,
   ProfileActivityLogType,
-} from "../../../entities/IProfile";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+} from "@/entities/IProfile";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";

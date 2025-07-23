@@ -10,6 +10,7 @@ import { CountlessPage } from "@/helpers/Types";
 import { ProfileActivityLog } from "@/entities/IProfile";
 import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
 import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
+import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
 
 export const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
@@ -39,12 +40,14 @@ export default function CommunityActivityPageClient({
   });
 
   return (
-    <ProfileActivityLogs
-      initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-      withFilters={true}>
-      <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
-        <span className="font-lightest">Network</span> Activity
-      </h1>
-    </ProfileActivityLogs>
+    <SidebarLayout>
+      <ProfileActivityLogs
+        initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
+        withFilters={true}>
+        <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
+          <span className="font-lightest">Network</span> Activity
+        </h1>
+      </ProfileActivityLogs>
+    </SidebarLayout>
   );
 }
