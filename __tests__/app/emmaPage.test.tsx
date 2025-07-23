@@ -1,18 +1,27 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import DistributionPlanTool, { generateMetadata } from "@/app/emma/page";
+import { TitleProvider } from "@/contexts/TitleContext";
 
-jest.mock("next/dynamic", () => () => ({ children }: any) => (
-  <div data-testid="wrapper">{children}</div>
-));
 jest.mock(
-  "@/components/distribution-plan-tool/connect/distributipn-plan-tool-connect",
+  "@/components/distribution-plan-tool/connect/distribution-plan-tool-connect",
   () => () => <div data-testid="connect" />
+);
+jest.mock(
+  "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper",
+  () => ({
+    __esModule: true,
+    default: ({ children }: any) => <div data-testid="wrapper">{children}</div>,
+  })
 );
 
 describe("EMMA page", () => {
   it("renders wrapper and connect components", () => {
-    render(<DistributionPlanTool />);
+    render(
+      <TitleProvider>
+        <DistributionPlanTool />
+      </TitleProvider>
+    );
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("connect")).toBeInTheDocument();
     expect(screen.getByText(/Meet EMMA/i)).toBeInTheDocument();

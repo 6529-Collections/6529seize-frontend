@@ -1,4 +1,4 @@
-import DistributionPlanToolConnect from "@/components/distribution-plan-tool/connect/distributipn-plan-tool-connect";
+import DistributionPlanToolConnect from "@/components/distribution-plan-tool/connect/distribution-plan-tool-connect";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";

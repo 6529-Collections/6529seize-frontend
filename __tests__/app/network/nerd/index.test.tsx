@@ -82,7 +82,7 @@ describe("ClientCommunityNerdPage", () => {
 describe("generateMetadata", () => {
   it("returns Interactions metadata", async () => {
     const metadata = await generateMetadata({
-      params: { focus: ["interactions"] },
+      params: Promise.resolve({ focus: "interactions" }),
     });
     expect(metadata).toEqual({
       title: "Network Nerd - Interactions",
@@ -91,7 +91,9 @@ describe("generateMetadata", () => {
   });
 
   it("returns default TDH metadata", async () => {
-    const metadata = await generateMetadata({ params: {} });
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ focus: undefined }),
+    });
     expect(metadata).toEqual({
       title: "Network Nerd - Cards Collected",
       description: "Network",

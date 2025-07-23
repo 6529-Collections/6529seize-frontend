@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 jest.mock("next/navigation", () => ({ redirect: jest.fn() }));
 
 describe("Wave redirect page", () => {
-  it("calls next/navigation redirect with wave param", () => {
-    WaveRedirect({ params: { wave: "test-wave-123" } } as any);
+  it("calls next/navigation redirect with wave param", async () => {
+    await WaveRedirect({ params: { wave: "test-wave-123" } } as any);
     expect(redirect).toHaveBeenCalledWith("/my-stream?wave=test-wave-123");
   });
 });

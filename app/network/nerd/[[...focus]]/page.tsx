@@ -14,7 +14,7 @@ export async function generateMetadata({
       : LeaderboardFocus.TDH;
 
   return {
-    title: `Network Nerd - ${focus}`,
+    title: `Network Nerd - ${focusParam}`,
     description: "Network",
   };
 }

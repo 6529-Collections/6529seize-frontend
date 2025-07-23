@@ -20,7 +20,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   onClose,
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const { drop } = useDrop({ dropId: initialDrop.id });
   const { data: wave } = useWaveData({
     waveId: drop?.wave.id ?? null,
