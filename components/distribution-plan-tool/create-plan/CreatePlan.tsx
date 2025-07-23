@@ -20,7 +20,7 @@ export default function CreatePlan() {
 
   const { setState } = useContext(DistributionPlanToolContext);
   useEffect(() => {
-    const id = searchParams.get("id");
+    const id = searchParams?.get("id");
     if (!id) {
       router.push("/emma");
       return;
