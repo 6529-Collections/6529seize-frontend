@@ -74,6 +74,7 @@ export default function WaveDropsAll({
   const [isScrolling, setIsScrolling] = useState(false);
   const [userHasManuallyScrolled, setUserHasManuallyScrolled] = useState(false);
   const [containerVisible, setContainerVisible] = useState(false);
+  const [lastLoadTime, setLastLoadTime] = useState(0);
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
@@ -265,11 +266,21 @@ export default function WaveDropsAll({
   ]);
 
   const handleTopIntersection = useCallback(async () => {
+    const now = Date.now();
+    // Add a 500ms cooldown to prevent rapid re-fetching
+    if (now - lastLoadTime < 500) return;
+    
     if (
       waveMessages?.hasNextPage &&
       !waveMessages?.isLoading &&
       !waveMessages?.isLoadingNextPage
     ) {
+      setLastLoadTime(now);
+      
+      // Store current scroll height before loading
+      const container = scrollContainerRef.current;
+      const prevScrollHeight = container?.scrollHeight || 0;
+      
       await fetchNextPage(
         {
           waveId,
@@ -277,12 +288,25 @@ export default function WaveDropsAll({
         },
         dropId
       );
+      
+      // Restore scroll position after new content loads
+      if (container) {
+        requestAnimationFrame(() => {
+          const newScrollHeight = container.scrollHeight;
+          const scrollDiff = newScrollHeight - prevScrollHeight;
+          container.scrollTop += scrollDiff;
+        });
+      }
     }
   }, [
     waveMessages?.hasNextPage,
     waveMessages?.isLoading,
     waveMessages?.isLoadingNextPage,
     fetchNextPage,
+    lastLoadTime,
+    scrollContainerRef,
+    waveId,
+    dropId,
   ]);
 
   const onQuoteClick = useCallback(
