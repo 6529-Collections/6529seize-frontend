@@ -1,18 +1,27 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import ProfileActivityLogRate from '../../../../../components/profile-activity/list/items/ProfileActivityLogRate';
-import { RateMatter, ProfileActivityLogRatingEdit, ProfileActivityLogRatingEditContentChangeReason } from '../../../../../entities/IProfile';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import ProfileActivityLogRate from "@/components/profile-activity/list/items/ProfileActivityLogRate";
+import {
+  RateMatter,
+  ProfileActivityLogRatingEdit,
+  ProfileActivityLogRatingEditContentChangeReason,
+} from "@/entities/IProfile";
 
-jest.mock('next/router', () => ({
-  useRouter: () => ({
-    query: {},
-    push: jest.fn(),
-    asPath: '/',
-  }),
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/",
 }));
-jest.mock('../../../../../components/profile-activity/list/items/utils/ProfileActivityLogItemAction', () => (p:any) => <span>{p.action}</span>);
-jest.mock('../../../../../components/user/utils/CommonProfileLink', () => (p:any) => <span>{p.handleOrWallet}</span>);
-jest.mock('../../../../../components/common/SystemAdjustmentPill', () => ({ SystemAdjustmentPill: () => <span>System Adjustment</span> }));
+jest.mock(
+  "@/components/profile-activity/list/items/utils/ProfileActivityLogItemAction",
+  () => (p: any) => <span>{p.action}</span>
+);
+jest.mock("@/components/user/utils/CommonProfileLink", () => (p: any) => (
+  <span>{p.handleOrWallet}</span>
+));
+jest.mock("@/components/common/SystemAdjustmentPill", () => ({
+  SystemAdjustmentPill: () => <span>System Adjustment</span>,
+}));
 
 const baseLog: ProfileActivityLogRatingEdit = {
   type: 0 as any,
@@ -21,24 +30,32 @@ const baseLog: ProfileActivityLogRatingEdit = {
     change_reason: ProfileActivityLogRatingEditContentChangeReason.LOST_TDH,
     new_rating: 10,
     old_rating: 5,
-    rating_category: 'cat',
+    rating_category: "cat",
     rating_matter: RateMatter.REP,
   },
-  target_profile_handle: 'bob',
+  target_profile_handle: "bob",
   proxy_handle: null,
 } as any;
 
-describe('ProfileActivityLogRate', () => {
-  it('renders added text and values', () => {
-    const log = { ...baseLog, contents: { ...baseLog.contents, change_reason: undefined, new_rating: 8, old_rating: 5 } } as any;
+describe("ProfileActivityLogRate", () => {
+  it("renders added text and values", () => {
+    const log = {
+      ...baseLog,
+      contents: {
+        ...baseLog.contents,
+        change_reason: undefined,
+        new_rating: 8,
+        old_rating: 5,
+      },
+    } as any;
     render(<ProfileActivityLogRate log={log} user={null} />);
-    expect(screen.getByText('added')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByText('(total 8)')).toBeInTheDocument();
+    expect(screen.getByText("added")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText("(total 8)")).toBeInTheDocument();
   });
 
-  it('shows system adjustment pill', () => {
+  it("shows system adjustment pill", () => {
     render(<ProfileActivityLogRate log={baseLog} user={null} />);
-    expect(screen.getByText('System Adjustment')).toBeInTheDocument();
+    expect(screen.getByText("System Adjustment")).toBeInTheDocument();
   });
 });

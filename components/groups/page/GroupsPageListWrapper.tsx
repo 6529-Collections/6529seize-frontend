@@ -2,10 +2,10 @@
 
 import { useContext, useEffect, useState } from "react";
 import GroupsList from "./list/GroupsList";
-import { AuthContext } from "../../auth/Auth";
-import { useRouter } from "next/router";
+import { AuthContext } from "@/components/auth/Auth";
+import { useRouter } from "next/navigation";
 import { usePathname, useSearchParams } from "next/navigation";
-import { GroupsRequestParams } from "../../../entities/IGroup";
+import { GroupsRequestParams } from "@/entities/IGroup";
 
 const IDENTITY_SEARCH_PARAM = "identity";
 const GROUP_NAME_SEARCH_PARAM = "group";
@@ -79,9 +79,7 @@ export default function GroupsPageListWrapper({
             name: GROUP_NAME_SEARCH_PARAM,
             value,
           },
-        ]),
-      undefined,
-      { shallow: true }
+        ])
     );
   };
 
@@ -94,9 +92,7 @@ export default function GroupsPageListWrapper({
             name: IDENTITY_SEARCH_PARAM,
             value,
           },
-        ]),
-      undefined,
-      { shallow: true }
+        ])
     );
   };
 

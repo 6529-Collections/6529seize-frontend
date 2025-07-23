@@ -1,3 +1,5 @@
+// "use client";
+
 import ProgressChart from "@/components/levels/ProgressChart";
 import TableOfLevels from "@/components/levels/TableOfLevels";
 import { useSetTitle } from "@/contexts/TitleContext";

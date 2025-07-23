@@ -1,13 +1,13 @@
 "use client";
 
 import { useContext, useEffect, useState, type JSX } from "react";
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
-import { getRandomColorWithSeed } from "../../../../../helpers/Helpers";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import GroupCardView from "./GroupCardView";
-import { AuthContext } from "../../../../auth/Auth";
-import { useRouter } from "next/router";
+import { AuthContext } from "@/components/auth/Auth";
+import { useRouter } from "next/navigation";
 import GroupCardVoteAll from "./vote-all/GroupCardVoteAll";
-import { ApiRateMatter } from "../../../../../generated/models/ApiRateMatter";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 
 export enum GroupCardState {
   IDLE = "IDLE",
