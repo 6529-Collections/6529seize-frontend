@@ -1,3 +1,5 @@
+"use client"
+
 import React, { memo, useCallback } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../generated/models/ApiWave";

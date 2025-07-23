@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import CreateWave from '../../../../components/waves/create-wave/CreateWave';
 import { AuthContext } from '../../../../components/auth/Auth';
 import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
@@ -8,7 +8,7 @@ import { CreateWaveStep } from '../../../../types/waves.types';
 import { ApiIdentity } from '../../../../generated/models/ApiIdentity';
 
 // Mock all dependencies
-jest.mock('next/router', () => ({
+jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
 

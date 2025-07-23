@@ -1,3 +1,5 @@
+"use client"
+
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectEditingDropId } from '../store/editSlice';

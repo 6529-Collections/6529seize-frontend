@@ -23,7 +23,10 @@ jest.mock('../../../../components/waves/drop/SingleWaveDropChat', () => ({
 
 jest.mock('../../../../hooks/useDrop', () => ({ useDrop: () => ({ drop: { id: '1', wave: { id: 'w1' } } }) }));
 jest.mock('../../../../hooks/useWaveData', () => ({ useWaveData: () => ({ data: { id: 'w1' } }) }));
-jest.mock('next/router', () => ({ useRouter: () => ({ push: jest.fn(), pathname: '/p' }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => '/p',
+}));
 
 describe('DefaultSingleWaveDrop', () => {
   it('renders info panel and chat toggle', async () => {

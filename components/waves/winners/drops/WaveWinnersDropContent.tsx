@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import WaveDropContent from "../../drops/WaveDropContent";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveWinnersDropContentProps {
@@ -19,11 +19,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
   const [activePartIndex, setActivePartIndex] = useState(0);
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    router.push(
-      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`,
-      undefined,
-      { shallow: true }
-    );
+    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`);
   };
 
   return (

@@ -1,8 +1,10 @@
+"use client";
+
 import { Fragment, ReactNode } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import styles from "./CommunityDownloads.module.scss";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export function formatDate(dateString: string): string {
   const isYYYYMMDDFormat = (str: string): boolean => /^\d{8}$/.test(str);

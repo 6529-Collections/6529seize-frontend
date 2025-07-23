@@ -2,9 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DistributionPlanToolCreatePlan from '../../../../components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 jest.mock(
   '../../../../components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper',

@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useMemo } from "react";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
 import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";

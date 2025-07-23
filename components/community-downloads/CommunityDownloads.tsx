@@ -1,11 +1,16 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./CommunityDownloads.module.scss";
-import useCapacitor from "../../hooks/useCapacitor";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 export default function CommunityDownloads() {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
+  useSetTitle("Open Data");
+
   return (
     <Container fluid>
       <Row>

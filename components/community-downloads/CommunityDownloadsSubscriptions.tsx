@@ -1,16 +1,16 @@
 "use client";
 
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import Pagination from "../pagination/Pagination";
-import { commonApiFetch } from "../../services/api/common-api";
-import { MEMES_CONTRACT } from "../../constants";
+import Pagination from "@/components/pagination/Pagination";
+import { commonApiFetch } from "@/services/api/common-api";
+import { MEMES_CONTRACT } from "@/constants";
 
 import {
   formatDate,
   DownloadsLayout,
   DownloadsTable,
 } from "./CommunityDownloadsHelpers";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 const PAGE_SIZE = 25;
 
@@ -22,7 +22,7 @@ interface SubscriptionDownload {
 }
 
 export default function CommunityDownloadsSubscriptions() {
-  const router = useRouter();
+  useSetTitle("Meme Subscriptions | Open Data");
 
   const [downloads, setDownloads] = useState<SubscriptionDownload[]>();
   const [totalResults, setTotalResults] = useState(0);
@@ -39,7 +39,7 @@ export default function CommunityDownloadsSubscriptions() {
 
   useEffect(() => {
     fetchResults(page);
-  }, [page, router.query]);
+  }, [page]);
 
   return (
     <DownloadsLayout title="Meme Subscriptions">

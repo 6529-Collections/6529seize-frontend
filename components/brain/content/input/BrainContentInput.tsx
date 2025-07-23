@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useMemo } from "react";
 import { useWaveData } from "../../../../hooks/useWaveData";
 import useCapacitor from "../../../../hooks/useCapacitor";

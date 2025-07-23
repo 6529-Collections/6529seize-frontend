@@ -1,3 +1,5 @@
+"use client"
+
 import FeedWrapper from "../feed/FeedWrapper";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";

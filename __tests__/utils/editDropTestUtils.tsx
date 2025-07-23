@@ -37,8 +37,8 @@ export const commonMocks = {
 export const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({
   id: 'drop-123',
   serial_no: 1,
-  author: { handle: 'testuser' },
-  wave: { id: 'wave-123' },
+  author: { handle: 'testuser' } as any,
+  wave: { id: 'wave-123' } as any,
   created_at: Date.now() - 60000, // 1 minute ago (within edit window)
   updated_at: null,
   title: null,
@@ -46,9 +46,9 @@ export const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({
     part_id: 1, 
     content: 'Original content', 
     media: [], 
-    quoted_drop: null, 
-    replies_count: 0, 
-    quotes_count: 0 
+    quoted_drop: null,
+    replies_count: 0,
+    quotes_count: 0
   }],
   parts_count: 1,
   referenced_nfts: [],
@@ -75,7 +75,7 @@ export const createMockRequest = (overrides: Partial<ApiUpdateDropRequest> = {})
   content: 'Updated content',
   mentioned_users: [],
   ...overrides
-});
+} as any);
 
 // Common test setup utilities
 export const createTestQueryClient = () => new QueryClient({

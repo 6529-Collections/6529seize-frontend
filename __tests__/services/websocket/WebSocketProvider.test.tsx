@@ -39,7 +39,7 @@ describe('WebSocketProvider', () => {
     );
     const { result } = renderHook(() => React.useContext(WebSocketContext)!, { wrapper });
     act(() => { result.current.connect('t'); });
-    const ws = (global.WebSocket as jest.Mock).mock.results[0].value as MockWebSocket;
+    const ws = (global.WebSocket as unknown as jest.Mock).mock.results[0].value as MockWebSocket;
     act(() => { ws.triggerOpen(); });
     expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
 
@@ -65,11 +65,11 @@ describe('WebSocketProvider', () => {
     );
     const { result } = renderHook(() => React.useContext(WebSocketContext)!, { wrapper });
     act(() => { result.current.connect('abc'); });
-    const ws = (global.WebSocket as jest.Mock).mock.results[0].value as any;
+    const ws = (global.WebSocket as unknown as jest.Mock).mock.results[0].value as any;
     act(() => { ws.triggerOpen(); });
     act(() => { ws.onclose({ code: 1006 }); });
     act(() => { jest.advanceTimersByTime(2000); });
-    expect((global.WebSocket as jest.Mock).mock.calls[1][0]).toBe('ws://test?token=abc');
+    expect((global.WebSocket as unknown as jest.Mock).mock.calls[1][0]).toBe('ws://test?token=abc');
     jest.useRealTimers();
   });
 });

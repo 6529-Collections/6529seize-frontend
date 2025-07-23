@@ -6,10 +6,10 @@ import { AuthContext } from '../../../../../../components/auth/Auth';
 jest.mock("../../../../../../services/api/common-api", () => ({ commonApiDelete: jest.fn() }));
 import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 jest.mock('@tanstack/react-query');
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 const useMutationMock = useMutation as jest.Mock;
 const useRouterMock = useRouter as jest.Mock;

@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import styles from "./CustomTooltip.module.scss";

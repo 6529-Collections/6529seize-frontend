@@ -1,3 +1,5 @@
+"use client"
+
 import { memo, useCallback } from 'react';
 import { TimeUnit, MIN_MINUTES } from '../types';
 import TimeUnitSelector from './TimeUnitSelector';

@@ -1,3 +1,5 @@
+"use client"
+
 import { useCallback, useMemo } from "react";
 import useWavesList from "../../../hooks/useWavesList";
 import useNewDropCounter, {

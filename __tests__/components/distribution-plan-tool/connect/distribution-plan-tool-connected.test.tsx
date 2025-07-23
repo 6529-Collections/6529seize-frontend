@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event';
 import DistributionPlanToolConnected from '../../../../components/distribution-plan-tool/connect/distribution-plan-tool-connected';
 import { renderWithAuth } from '../../../utils/testContexts';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
-const { useRouter } = require('next/router');
+const { useRouter } = require('next/navigation');
 
 describe('DistributionPlanToolConnected', () => {
   beforeEach(() => {

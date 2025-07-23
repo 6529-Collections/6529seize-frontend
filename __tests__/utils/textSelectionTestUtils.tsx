@@ -211,8 +211,8 @@ export const createMockRange = (overrides: Partial<Range> = {}): Partial<Range> 
       top: 0,
       bottom: 20,
       width: 100,
-      height: 20
-    })),
+      height: 20,
+    } as any)),
     collapsed: false,
     toString: jest.fn(() => 'sample text'),
     ...overrides

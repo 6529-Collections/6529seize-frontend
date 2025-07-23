@@ -19,7 +19,10 @@ jest.mock('../../../../components/waves/drop/MemesSingleWaveDropInfoPanel', () =
 
 jest.mock('../../../../hooks/useDrop', () => ({ useDrop: () => ({ drop: { id: 'd1', wave: { id: 'w1' } } }) }));
 jest.mock('../../../../hooks/useWaveData', () => ({ useWaveData: () => ({ data: { id: 'w1' } }) }));
-jest.mock('next/router', () => ({ useRouter: () => ({ push: jest.fn(), pathname: '/p' }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => '/p',
+}));
 
 describe('MemesSingleWaveDrop', () => {
   it('renders info panel and toggles chat', () => {

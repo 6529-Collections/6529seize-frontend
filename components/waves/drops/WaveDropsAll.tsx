@@ -9,7 +9,7 @@ import { useScrollBehavior } from "../../../hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";

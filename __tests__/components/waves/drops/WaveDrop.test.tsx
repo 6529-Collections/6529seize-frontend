@@ -17,12 +17,10 @@ jest.mock('../../../../components/waves/drops/WaveDropMobileMenu', () => () => <
 
 jest.mock('../../../../hooks/isMobileDevice');
 
-jest.mock('next/router', () => ({
-  useRouter: jest.fn(() => ({
-    query: {},
-    push: jest.fn(),
-    pathname: '/',
-  })),
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  usePathname: () => '/',
+  useSearchParams: () => ({ get: () => null, toString: () => '' }),
 }));
 
 jest.mock('../../../../hooks/drops/useDropUpdateMutation', () => ({

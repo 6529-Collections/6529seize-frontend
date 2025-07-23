@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDropContent from "../../drops/WaveDropContent";
 import WaveDropMetadata from "../../drops/WaveDropMetadata";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import WaveDropReactions from "../../drops/WaveDropReactions";
 
 interface WaveLeaderboardDropContentProps {
@@ -19,11 +19,7 @@ export const WaveLeaderboardDropContent: React.FC<
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    router.push(
-      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`,
-      undefined,
-      { shallow: true }
-    );
+    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`);
   };
 
   return (

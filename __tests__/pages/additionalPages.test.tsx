@@ -1,15 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import ConsolidationUseCases from "@/pages/consolidation-use-cases";
+import ConsolidationMappingTool from "@/app/consolidation-mapping-tool/page";
 import { getServerSideProps as getGroupsProps } from "@/pages/[user]/groups";
 import { getServerSideProps as getStatsProps } from "@/pages/[user]/stats";
 import OpenMetaverse from "@/app/about/open-metaverse/page";
-import Tweetstorms from "@/pages/education/tweetstorms";
+import Tweetstorms from "@/app/education/tweetstorms/page";
 import MemeLab from "@/pages/meme-lab";
-import FamPage from "@/pages/museum/6529-fam";
-import BalladOfGhosts from "@/pages/museum/6529-fund-szn1/ballad-of-ghosts";
-import DeadRingers from "@/pages/museum/6529-fund-szn1/dead-ringers";
-import GenesisPage from "@/pages/museum/6529-fund-szn1/genesis";
+import FamPage from "@/app/museum/6529-fam/page";
+import BalladOfGhosts from "@/app/museum/6529-fund-szn1/ballad-of-ghosts/page";
+import DeadRingers from "@/app/museum/6529-fund-szn1/dead-ringers/page";
+import GenesisPage from "@/app/museum/6529-fund-szn1/genesis/page";
 import { AuthContext } from "@/components/auth/Auth";
 
 // Mock TitleContext
@@ -88,13 +88,13 @@ beforeEach(() => {
 });
 
 describe("additional static pages render", () => {
-  it("renders Consolidation Use Cases page", () => {
+  it("renders Consolidation Mapping Tool page", () => {
     render(
       <TestProvider>
-        <ConsolidationUseCases />
+        <ConsolidationMappingTool />
       </TestProvider>
     );
-    expect(screen.getByText(/Consolidation/i)).toBeInTheDocument();
+    expect(screen.getByText(/Consolidation Mapping Tool/i)).toBeInTheDocument();
   });
 
   it("getServerSideProps for groups returns props", async () => {

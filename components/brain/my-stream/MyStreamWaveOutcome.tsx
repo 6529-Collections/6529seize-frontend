@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { WaveOutcome } from "../../waves/outcome/WaveOutcome";

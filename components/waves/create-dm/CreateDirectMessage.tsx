@@ -9,7 +9,7 @@ import { useAuth } from "../../auth/Auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { createDirectMessageWave } from "../../../helpers/waves/waves.helpers";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
@@ -71,9 +71,7 @@ export default function CreateDirectMessage({
           .map((i) => i.primary_wallet ?? i.wallet)
           .filter((i) => i !== null),
       });
-      router.push(`/my-stream?view=messages&wave=${wave.id}`, undefined, {
-        shallow: true,
-      });
+      router.push(`/my-stream?view=messages&wave=${wave.id}`);
     } catch (error) {
       console.error(error);
       setToast({

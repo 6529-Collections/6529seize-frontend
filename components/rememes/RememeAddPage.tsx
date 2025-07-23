@@ -16,6 +16,7 @@ import { useAuth } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useSeizeSettings } from "../../contexts/SeizeSettingsContext";
+import { useSetTitle } from "../../contexts/TitleContext";
 import {
   faCheckCircle,
   faTimesCircle,
@@ -27,6 +28,7 @@ interface CheckList {
 }
 
 export default function RememeAddPage() {
+  useSetTitle("Add ReMemes | Collections");
   const { connectedProfile } = useAuth();
   const { address, isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();

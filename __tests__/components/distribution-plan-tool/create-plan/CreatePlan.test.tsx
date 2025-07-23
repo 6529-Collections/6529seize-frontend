@@ -3,9 +3,12 @@ import { render, waitFor } from '@testing-library/react';
 import CreatePlan from '../../../../components/distribution-plan-tool/create-plan/CreatePlan';
 import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
 import { distributionPlanApiFetch } from '../../../../services/distribution-plan-api';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 jest.mock('../../../../services/distribution-plan-api');
 
 jest.mock('../../../../components/distribution-plan-tool/common/StepHeader', () => ({
@@ -20,6 +23,7 @@ jest.mock('../../../../components/allowlist-tool/common/AllowlistToolLoader', ()
 
 const mockedFetch = distributionPlanApiFetch as jest.Mock;
 const mockedUseRouter = useRouter as jest.Mock;
+const mockedSearchParams = useSearchParams as jest.Mock;
 
 describe('CreatePlan', () => {
   beforeEach(() => {
@@ -28,8 +32,9 @@ describe('CreatePlan', () => {
 
   function renderWithContext() {
     const setState = jest.fn();
-    const router = { query: { id: '1' }, push: jest.fn() };
+    const router = { push: jest.fn() };
     mockedUseRouter.mockReturnValue(router);
+    mockedSearchParams.mockReturnValue({ get: () => '1' });
     return {
       setState,
       push: router.push,
