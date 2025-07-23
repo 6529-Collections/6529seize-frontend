@@ -7,17 +7,10 @@ import CommunityActivityPageClient, {
 } from "./page.client";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { convertActivityLogParams } from "@/helpers/activity-logs.helper";
+import { getAppMetadata } from "@/components/providers/metadata";
+import { notFound } from "next/navigation";
 
-export const metadata = {
-  title: "Activity",
-  description: "Network",
-};
-
-export default async function CommunityActivityPage({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
+export default async function CommunityActivityPage() {
   try {
     const headers = await getAppCommonHeaders();
     const logsPage: CountlessPage<ProfileActivityLog> =
@@ -35,9 +28,14 @@ export default async function CommunityActivityPage({
         <CommunityActivityPageClient logsPage={logsPage} />
       </SidebarLayout>
     );
-  } catch (e) {
-    console.log("i am an error", e);
-    // Handle redirect manually
-    return <div>Not found</div>; // or redirect using a notFound() call if appropriate
+  } catch {
+    return notFound();
   }
 }
+
+export const generateMetadata = async () => {
+  return getAppMetadata({
+    title: "Activity",
+    description: "Network",
+  });
+};
