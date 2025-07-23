@@ -6,7 +6,7 @@ import JoinOm from "@/app/om/join-om/page";
 import PartnershipRequest from "@/app/om/partnership-request/page";
 import ConsolidatedMetrics from "@/app/open-data/consolidated-network-metrics/page";
 import MemeSubscriptions from "@/app/open-data/meme-subscriptions/page";
-import AddRememes from "@/pages/rememes/add";
+import AddRememes from "@/app/rememes/add/page";
 import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
 import AppWallets from "@/pages/tools/app-wallets";
 import { AuthContext } from "@/components/auth/Auth";
@@ -102,7 +102,7 @@ describe("misc pages render", () => {
         <AddRememes />
       </TestProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(screen.getByText(/Add Rememe/i)).toBeInTheDocument();
   });
 
   it("renders slide initiatives redirect page", () => {

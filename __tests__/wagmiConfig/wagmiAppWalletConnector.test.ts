@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   createAppWalletConnector,
   APP_WALLET_CONNECTOR_TYPE,

@@ -3,6 +3,7 @@
 import styles from "./Rememes.module.scss";
 
 import { useEffect, useState } from "react";
+import { useSetTitle } from "../../contexts/TitleContext";
 import Image from "next/image";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -35,6 +36,7 @@ import { useCookieConsent } from "../cookies/CookieConsentContext";
 interface Props {
   contract: string;
   id: string;
+  name: string;
 }
 
 enum Tabs {
@@ -126,6 +128,7 @@ export function printMemeReferences(
 }
 
 export default function RememePage(props: Readonly<Props>) {
+  useSetTitle(`${props.name} | ReMemes | 6529.io`);
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const [rememe, setRememe] = useState<Rememe>();

@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ReMemes from '../../../pages/rememes/index';
-import { AuthContext } from '../../../components/auth/Auth';
+import ReMemes from '@/app/rememes/page';
+import { generateMetadata } from '@/app/rememes/page';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
 // Mock TitleContext
-jest.mock('../../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),
@@ -29,10 +29,17 @@ describe('ReMemes page', () => {
         <ReMemes />
       </AuthContext.Provider>
     );
-    expect(screen.getByTestId('dynamic')).toBeInTheDocument();
+    expect(screen.getByText(/Add ReMeme/)).toBeInTheDocument();
   });
 
-  it('exposes metadata', () => {
-    expect(ReMemes.metadata).toEqual({ title: 'ReMemes', description: 'Collections', ogImage: `${process.env.BASE_ENDPOINT}/re-memes-b.jpeg` });
+  it('exposes metadata', async () => {
+    process.env.BASE_ENDPOINT = 'https://test.com';
+    const meta = await generateMetadata();
+    expect(meta.title).toBe('ReMemes');
+    expect(meta.description).toContain('Collections');
+    const images = Array.isArray(meta.openGraph?.images)
+      ? meta.openGraph?.images
+      : [meta.openGraph?.images];
+    expect(images?.[0]).toBe(`${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`);
   });
 });

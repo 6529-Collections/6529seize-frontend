@@ -1,24 +1,14 @@
 import { render } from "@testing-library/react";
-import ReMeme, {
-  getServerSideProps,
-} from "../../../../pages/rememes/[contract]/[id]";
-import { AuthContext } from "../../../../components/auth/Auth";
-import { fetchUrl } from "../../../../services/6529api";
+import ReMeme from '@/app/rememes/[contract]/[id]/page';
+import { generateMetadata } from '@/app/rememes/[contract]/[id]/page';
+import { AuthContext } from '@/components/auth/Auth';
+import { fetchUrl } from '@/services/6529api';
 
 // Mock dependencies
-jest.mock("../../../../services/6529api");
-jest.mock("next/dynamic", () => {
-  return () => {
-    const DynamicComponent = () => (
-      <div data-testid="rememe-page-component">RememePageComponent</div>
-    );
-    DynamicComponent.displayName = "RememePageComponent";
-    return DynamicComponent;
-  };
-});
+jest.mock('@/services/6529api');
 
 // Mock MyStreamContext if needed
-jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({}),
   MyStreamProvider: ({ children }: any) => children,
 }));
@@ -26,7 +16,7 @@ jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
 const mockFetchUrl = fetchUrl as jest.MockedFunction<typeof fetchUrl>;
 
 // Mock TitleContext
-jest.mock("../../../../contexts/TitleContext", () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: "Test Title",
     setTitle: jest.fn(),
@@ -83,14 +73,14 @@ describe("ReMeme Page", () => {
       expect(container.querySelector("main")).toHaveClass("main");
     });
 
-    it("renders RememePageComponent with correct props", () => {
-      const { getByTestId } = render(
+    it("renders Rememe content", () => {
+      const { container } = render(
         <AuthContext.Provider value={mockAuthContext}>
           <ReMeme {...defaultProps} />
         </AuthContext.Provider>
       );
 
-      expect(getByTestId("rememe-page-component")).toBeInTheDocument();
+      expect(container.querySelector("main")).toBeInTheDocument();
     });
 
     it("sets page title on mount", () => {
@@ -104,45 +94,31 @@ describe("ReMeme Page", () => {
     });
   });
 
-  describe("getServerSideProps", () => {
-    const mockReq = {
-      query: {
-        contract: "0x123",
-        id: "456",
-      },
-    };
+  describe("generateMetadata", () => {
+    const params = { contract: "0x123", id: "456" };
 
     beforeEach(() => {
       process.env.API_ENDPOINT = "https://api.test.com";
       process.env.BASE_ENDPOINT = "https://test.com";
     });
 
-    it("returns props with formatted address when API returns no data", async () => {
+    it("returns metadata with formatted address when API returns no data", async () => {
       mockFetchUrl.mockResolvedValue({ data: [] });
 
-      const result = await getServerSideProps(mockReq, {}, {});
+      const result = await generateMetadata({ params });
 
       expect(mockFetchUrl).toHaveBeenCalledWith(
         "https://api.test.com/api/rememes?contract=0x123&id=456"
       );
 
-      expect(result).toEqual({
-        props: {
-          contract: "0x123",
-          id: "456",
-          name: "0x123 #456",
-          image: "https://test.com/6529io.png",
-          metadata: {
-            title: "0x123 #456",
-            ogImage: "https://test.com/6529io.png",
-            description: "ReMemes",
-            twitterCard: "summary_large_image",
-          },
-        },
-      });
+      expect(result.title).toBe("0x123 #456");
+      const images = Array.isArray(result.openGraph?.images)
+        ? result.openGraph?.images
+        : [result.openGraph?.images];
+      expect(images?.[0]).toBe("https://test.com/6529io.png");
     });
 
-    it("returns props with API data when available", async () => {
+    it("returns metadata with API data when available", async () => {
       mockFetchUrl.mockResolvedValue({
         data: [
           {
@@ -152,22 +128,13 @@ describe("ReMeme Page", () => {
         ],
       });
 
-      const result = await getServerSideProps(mockReq, {}, {});
+      const result = await generateMetadata({ params });
 
-      expect(result).toEqual({
-        props: {
-          contract: "0x123",
-          id: "456",
-          name: "Custom ReMeme Name",
-          image: "https://custom-image.jpg",
-          metadata: {
-            title: "Custom ReMeme Name",
-            ogImage: "https://custom-image.jpg",
-            description: "ReMemes",
-            twitterCard: "summary_large_image",
-          },
-        },
-      });
+      expect(result.title).toBe("Custom ReMeme Name");
+      const images = Array.isArray(result.openGraph?.images)
+        ? result.openGraph?.images
+        : [result.openGraph?.images];
+      expect(images?.[0]).toBe("https://custom-image.jpg");
     });
 
     it("handles API data without metadata name", async () => {
@@ -179,10 +146,13 @@ describe("ReMeme Page", () => {
         ],
       });
 
-      const result = await getServerSideProps(mockReq, {}, {});
+      const result = await generateMetadata({ params });
 
-      expect(result.props.name).toBe("0x123 #456");
-      expect(result.props.image).toBe("https://custom-image.jpg");
+      expect(result.title).toBe("0x123 #456");
+      const images = Array.isArray(result.openGraph?.images)
+        ? result.openGraph?.images
+        : [result.openGraph?.images];
+      expect(images?.[0]).toBe("https://custom-image.jpg");
     });
 
     it("handles API data without image", async () => {
@@ -194,10 +164,13 @@ describe("ReMeme Page", () => {
         ],
       });
 
-      const result = await getServerSideProps(mockReq, {}, {});
+      const result = await generateMetadata({ params });
 
-      expect(result.props.name).toBe("Custom Name");
-      expect(result.props.image).toBe("https://test.com/6529io.png");
+      expect(result.title).toBe("Custom Name");
+      const images2 = Array.isArray(result.openGraph?.images)
+        ? result.openGraph?.images
+        : [result.openGraph?.images];
+      expect(images2?.[0]).toBe("https://test.com/6529io.png");
     });
 
     it("uses fallback image in og metadata when image is null", async () => {
@@ -210,18 +183,24 @@ describe("ReMeme Page", () => {
         ],
       });
 
-      const result = await getServerSideProps(mockReq, {}, {});
+      const result = await generateMetadata({ params });
 
-      expect(result.props.metadata.ogImage).toBe("https://test.com/6529io.png");
+      const images3 = Array.isArray(result.openGraph?.images)
+        ? result.openGraph?.images
+        : [result.openGraph?.images];
+      expect(images3?.[0]).toBe("https://test.com/6529io.png");
     });
 
     it("handles API fetch failure gracefully", async () => {
       mockFetchUrl.mockResolvedValue(null);
 
-      const result = await getServerSideProps(mockReq, {}, {});
+      const result = await generateMetadata({ params });
 
-      expect(result.props.name).toBe("0x123 #456");
-      expect(result.props.image).toBe("https://test.com/6529io.png");
+      expect(result.title).toBe("0x123 #456");
+      const images4 = Array.isArray(result.openGraph?.images)
+        ? result.openGraph?.images
+        : [result.openGraph?.images];
+      expect(images4?.[0]).toBe("https://test.com/6529io.png");
     });
   });
 });

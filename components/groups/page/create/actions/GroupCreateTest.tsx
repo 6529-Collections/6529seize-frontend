@@ -10,7 +10,7 @@ import {
   commonApiPost,
 } from "../../../../../services/api/common-api";
 import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
-import { CommunityMembersQuery } from "../../../../../pages/network/index";
+import { CommunityMembersQuery } from "../../../../../app/network/page";
 import { SortDirection } from "../../../../../entities/ISort";
 import { Page } from "../../../../../helpers/Types";
 import { CommunityMemberOverview } from "../../../../../entities/IProfile";

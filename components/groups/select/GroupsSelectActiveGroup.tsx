@@ -5,7 +5,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import GroupItem from "./item/GroupItem";
 import { CommunityMemberOverview } from "../../../entities/IProfile";
 import { Page } from "../../../helpers/Types";
-import { CommunityMembersQuery } from "../../../pages/network/index";
+import { CommunityMembersQuery } from "../../../app/network/page";
 import { SortDirection } from "../../../entities/ISort";
 import { useEffect, useState } from "react";
 import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
