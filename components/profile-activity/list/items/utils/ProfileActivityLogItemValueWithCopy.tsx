@@ -1,10 +1,9 @@
 "use client";
 
 import { Tooltip } from "react-tooltip";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
-import CopyIcon from "../../../../utils/icons/CopyIcon";
+import CopyIcon from "@/components/utils/icons/CopyIcon";
 
 export default function ProfileActivityLogItemValueWithCopy({
   title,
@@ -13,11 +12,10 @@ export default function ProfileActivityLogItemValueWithCopy({
   readonly title: string;
   readonly value: string;
 }) {
-  const router = useRouter();
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, [router.isReady]);
+  }, []);
 
   const [_, copyToClipboard] = useCopyToClipboard();
 
@@ -39,8 +37,7 @@ export default function ProfileActivityLogItemValueWithCopy({
           className={`${
             isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
           } tw-mx-1 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-          data-tooltip-id={`copy-activity-${value}`}
-        >
+          data-tooltip-id={`copy-activity-${value}`}>
           <CopyIcon />
         </button>
         {!isTouchScreen && (
@@ -51,8 +48,7 @@ export default function ProfileActivityLogItemValueWithCopy({
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Copy
           </Tooltip>
         )}

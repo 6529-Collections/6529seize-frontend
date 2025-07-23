@@ -30,7 +30,7 @@ import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
 import Cookies from "js-cookie";
 import { Time } from "@/helpers/time";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
-import { convertActivityLogParams } from "@/helpers/activity-logs.helper";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 export enum QueryKey {
   PROFILE = "PROFILE",

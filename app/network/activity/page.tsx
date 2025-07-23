@@ -1,12 +1,12 @@
 import { getUserProfileActivityLogs } from "@/helpers/server.helpers";
 import { CountlessPage } from "@/helpers/Types";
 import { ProfileActivityLog } from "@/entities/IProfile";
-import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
-import CommunityActivityPageClient, {
-  INITIAL_ACTIVITY_LOGS_PARAMS,
-} from "./page.client";
+import CommunityActivityPageClient from "./page.client";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import { convertActivityLogParams } from "@/helpers/activity-logs.helper";
+import {
+  convertActivityLogParams,
+  INITIAL_ACTIVITY_LOGS_PARAMS,
+} from "@/helpers/profile-logs.helpers";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { notFound } from "next/navigation";
 
@@ -21,13 +21,7 @@ export default async function CommunityActivityPage() {
           disableActiveGroup: true,
         }),
       });
-
-    // Put ReactQueryWrapper inside client component
-    return (
-      <SidebarLayout>
-        <CommunityActivityPageClient logsPage={logsPage} />
-      </SidebarLayout>
-    );
+    return <CommunityActivityPageClient logsPage={logsPage} />;
   } catch {
     return notFound();
   }

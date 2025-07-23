@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/router";
-import { ProfileActivityLogProxyActionStateChanged } from "../../../../entities/IProfile";
-import { PROFILE_PROXY_ACTION_LABELS } from "../../../../entities/IProxy";
-import { AcceptActionRequestActionEnum } from "../../../../generated/models/AcceptActionRequest";
+import { useSearchParams } from "next/navigation";
+import { ProfileActivityLogProxyActionStateChanged } from "@/entities/IProfile";
+import { PROFILE_PROXY_ACTION_LABELS } from "@/entities/IProxy";
+import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import { UserPageTabType } from "../../../user/layout/UserPageTabs";
-import CommonProfileLink from "../../../user/utils/CommonProfileLink";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 
 const ACTION: Record<AcceptActionRequestActionEnum, string> = {
   [AcceptActionRequestActionEnum.Accept]: "accepted",
@@ -20,11 +20,11 @@ export default function ProfileActivityLogProxyActionState({
 }: {
   readonly log: ProfileActivityLogProxyActionStateChanged;
 }) {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const handleOrWallet = log.target_profile_handle ?? "";
 
   const isCurrentUser =
-    (router.query.user as string)?.toLowerCase() ===
+    (searchParams?.get("user") as string)?.toLowerCase() ===
     handleOrWallet.toLowerCase();
 
   const tabTarget = UserPageTabType.PROXY;

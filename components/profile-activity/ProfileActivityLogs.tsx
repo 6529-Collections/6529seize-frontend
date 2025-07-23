@@ -20,7 +20,7 @@ import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "../../store/groupSlice";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { convertActivityLogParams } from "@/helpers/activity-logs.helper";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 export interface ActivityLogParams {
   readonly page: number;
