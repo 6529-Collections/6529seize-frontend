@@ -56,7 +56,11 @@ export default function WavesList({
     } else {
       newQuery.set("identity", newIdentity);
     }
-    router.push(`${pathname}?${newQuery.toString()}`);
+    router.push(
+      newQuery.toString()
+        ? `${pathname}?${newQuery.toString()}`
+        : pathname ?? ""
+    );
   };
 
   const getShowSearchResults = () => !!identity || !!waveName;

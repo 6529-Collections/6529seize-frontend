@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WavesList from "@/components/waves/list/WavesList";
 import { AuthContext } from "@/components/auth/Auth";
@@ -6,11 +6,18 @@ import { ProfileConnectedStatus } from "@/entities/IProfile";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { useRouter } from "next/navigation";
 
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  usePathname: () => "/waves",
-  useSearchParams: () => new URLSearchParams("identity=bob"),
-}));
+let currentParams = new URLSearchParams();
+
+jest.mock("next/navigation", () => {
+  return {
+    useRouter: jest.fn(),
+    usePathname: () => "/waves",
+    useSearchParams: () => ({
+      get: (key: string) => currentParams.get(key),
+      toString: () => currentParams.toString(),
+    }),
+  };
+});
 
 jest.mock(
   "@/components/waves/list/header/WavesListHeader",
@@ -48,7 +55,11 @@ jest.mock(
     <div data-testid="search-results">{props.identity ?? ""}</div>
 );
 
-const push = jest.fn();
+const push = jest.fn((url: string) => {
+  const query = url.split("?")[1];
+  currentParams = new URLSearchParams(query || "");
+});
+
 const router = { push } as any;
 (useRouter as jest.Mock).mockReturnValue(router);
 
@@ -81,16 +92,25 @@ function setup() {
 it("updates router and shows search results when identity changes", async () => {
   const user = userEvent.setup();
   setup();
+
+  // Initially, identity is null
   expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
 
+  // Simulate setting identity to "bob"
   await user.click(screen.getByTestId("set-id"));
 
+  // Component should update and show "bob"
   const result = await screen.findByTestId("search-results");
   expect(result).toHaveTextContent("bob");
   expect(push).toHaveBeenLastCalledWith("/waves?identity=bob");
 
+  // Simulate clearing identity
   await user.click(screen.getByTestId("clear-id"));
-  expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
+
+  // Component should remove search results
+  await waitFor(() =>
+    expect(screen.queryByTestId("search-results")).not.toBeInTheDocument()
+  );
   expect(push).toHaveBeenLastCalledWith("/waves");
 });
 
