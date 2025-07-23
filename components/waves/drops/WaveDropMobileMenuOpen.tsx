@@ -3,7 +3,7 @@
 import React from "react";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface WaveDropMobileMenuOpenProps {
   readonly drop: ExtendedDrop;
@@ -15,6 +15,8 @@ const WaveDropMobileMenuOpen: React.FC<WaveDropMobileMenuOpenProps> = ({
   onOpenChange,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams()!;
   const canBeOpened = drop.drop_type !== ApiDropType.Chat;
 
   if (!canBeOpened) {
@@ -22,16 +24,9 @@ const WaveDropMobileMenuOpen: React.FC<WaveDropMobileMenuOpenProps> = ({
   }
 
   const onDropClick = () => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("drop", drop.id);
+    router.push(`${pathname}?${params.toString()}`);
     onOpenChange();
   };
 

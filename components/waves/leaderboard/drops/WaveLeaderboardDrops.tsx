@@ -10,7 +10,7 @@ import {
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { WaveLeaderboardEmptyState } from "./WaveLeaderboardEmptyState";
 import { WaveLeaderboardLoading } from "./WaveLeaderboardLoading";
 import { WaveLeaderboardLoadingBar } from "./WaveLeaderboardLoadingBar";
@@ -27,6 +27,8 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   onCreateDrop,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams()!;
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
@@ -42,16 +44,9 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   });
 
   const onDropClick = (drop: ExtendedDrop) => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("drop", drop.id);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   if (isFetching && drops.length === 0) {

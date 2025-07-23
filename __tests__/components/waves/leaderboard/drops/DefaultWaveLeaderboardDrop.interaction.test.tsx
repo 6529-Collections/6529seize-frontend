@@ -3,13 +3,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DefaultWaveLeaderboardDrop } from '../../../../../components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop';
 
-jest.mock('next/router', () => ({
-  useRouter: jest.fn(() => ({
-    push: jest.fn(),
-    pathname: '/',
-    query: {},
-    asPath: '/',
-  })),
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  usePathname: () => '/',
+  useSearchParams: () => ({ toString: () => '', get: () => null }),
 }));
 jest.mock('../../../../../hooks/drops/useDropInteractionRules', () => ({
   useDropInteractionRules: jest.fn(),

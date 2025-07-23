@@ -21,7 +21,11 @@ jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardDrop
 jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardEmptyState', () => ({ WaveLeaderboardEmptyState: (props: any) => <div data-testid="empty" onClick={props.onCreateDrop} /> }));
 jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardLoading', () => ({ WaveLeaderboardLoading: () => <div data-testid="loading" /> }));
 jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardLoadingBar', () => ({ WaveLeaderboardLoadingBar: () => <div data-testid="bar" /> }));
-jest.mock('next/router', () => ({ useRouter: () => ({ pathname: '/p', query: {}, push: jest.fn() }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => '/p',
+  useSearchParams: () => ({ toString: () => '', get: () => null }),
+}));
 
 const wave = { id: 'w1' } as ApiWave;
 

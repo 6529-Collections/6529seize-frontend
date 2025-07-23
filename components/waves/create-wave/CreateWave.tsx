@@ -19,7 +19,7 @@ import { getCreateNewWaveBody } from "../../../helpers/waves/create-wave.helpers
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { ApiCreateWaveDropRequest } from "../../../generated/models/ApiCreateWaveDropRequest";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { generateDropPart } from "./services/waveMediaService";
 import { getAdminGroupId } from "./services/waveGroupService";
 import { useAddWaveMutation } from "./services/waveApiService";
