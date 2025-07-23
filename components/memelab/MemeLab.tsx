@@ -12,7 +12,7 @@ import {
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
-import { NextRouter, useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { fetchAllPages } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import DotLoader from "../dotLoader/DotLoader";
@@ -32,28 +32,25 @@ interface Props {
   wallets: string[];
 }
 
-export function getInitialRouterValues(router: NextRouter) {
+export function getInitialRouterValues(
+  searchParams: URLSearchParams | null
+) {
   let initialSortDir = SortDirection.ASC;
   let initialSort = MemeLabSort.AGE;
 
-  const routerSortDir = router.query.sort_dir;
+  const routerSortDir = searchParams?.get("sort_dir");
   if (routerSortDir) {
-    const routerSortDirStr = Array.isArray(routerSortDir)
-      ? routerSortDir[0]
-      : routerSortDir;
     const resolvedRouterSortDir = Object.values(SortDirection).find(
-      (sd) => sd.toLowerCase() === routerSortDirStr.toLowerCase()
+      (sd) => sd.toLowerCase() === routerSortDir.toLowerCase()
     );
     if (resolvedRouterSortDir) {
       initialSortDir = resolvedRouterSortDir;
     }
   }
 
-  const routerSort = router.query.sort;
+  const routerSort = searchParams?.get("sort");
   if (routerSort) {
-    const routerSortStr = Array.isArray(routerSort)
-      ? routerSort[0]
-      : routerSort;
+    const routerSortStr = routerSort;
     const resolvedKey = Object.keys(MemeLabSort).find(
       (k) => k.toLowerCase() === routerSortStr.toLowerCase()
     );
@@ -179,7 +176,7 @@ export function printNftContent(
 }
 
 export function sortChanged(
-  router: NextRouter,
+  router: ReturnType<typeof useRouter>,
   sort: MemeLabSort,
   sortDir: SortDirection,
   volumeType: VolumeType,
@@ -204,13 +201,8 @@ export function sortChanged(
     newQuery.collection = collectionName?.replaceAll(" ", "-");
   }
 
-  router.replace(
-    {
-      query: newQuery,
-    },
-    undefined,
-    { shallow: true }
-  );
+  const queryString = new URLSearchParams(newQuery).toString();
+  router.replace(`?${queryString}`);
 
   if (sort === MemeLabSort.AGE) {
     if (sortDir === SortDirection.ASC) {
@@ -447,15 +439,14 @@ export function sortChanged(
 
 export default function MemeLabComponent(props: Readonly<Props>) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
 
   useEffect(() => {
-    if (router.isReady) {
-      const { initialSortDir, initialSort } = getInitialRouterValues(router);
-      setSort(initialSort);
-      setSortDir(initialSortDir);
-    }
-  }, [router.isReady]);
+    const { initialSortDir, initialSort } = getInitialRouterValues(searchParams);
+    setSort(initialSort);
+    setSortDir(initialSortDir);
+  }, [searchParams]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
