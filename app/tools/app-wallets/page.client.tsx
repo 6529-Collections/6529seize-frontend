@@ -1,17 +1,10 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import dynamic from "next/dynamic";
-import { useSetTitle } from "@/contexts/TitleContext";
+import AppWalletsComponent from "@/components/app-wallets/AppWallets";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { useSetTitle } from "@/contexts/TitleContext";
+import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
-
-const AppWalletsComponent = dynamic(
-  () => import("@/components/app-wallets/AppWallets"),
-  {
-    ssr: false,
-  }
-);
 
 export default function AppWallets() {
   useSetTitle("App Wallets | Tools");
