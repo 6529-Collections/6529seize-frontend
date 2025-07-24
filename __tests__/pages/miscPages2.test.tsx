@@ -1,7 +1,4 @@
-import { render, screen } from "@testing-library/react";
-import React, { useMemo } from "react";
 import WillowShield from "@/app/museum/genesis/willow-shield/page";
-import NextGenDistributionPlan from "@/pages/nextgen/collection/[collection]/distribution-plan";
 import JoinOm from "@/app/om/join-om/page";
 import PartnershipRequest from "@/app/om/partnership-request/page";
 import ConsolidatedMetrics from "@/app/open-data/consolidated-network-metrics/page";
@@ -9,11 +6,15 @@ import MemeSubscriptions from "@/app/open-data/meme-subscriptions/page";
 import AddRememes from "@/app/rememes/add/page";
 import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
 import AppWallets from "@/app/tools/app-wallets/page";
+import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import { AuthContext } from "@/components/auth/Auth";
 import { NextGenCollection } from "@/entities/INextgen";
-import { WagmiProvider, createConfig, http } from "wagmi";
-import { mainnet } from "viem/chains";
+import NextGenDistributionPlan from "@/pages/nextgen/collection/[collection]/distribution-plan";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+import React, { useMemo } from "react";
+import { mainnet } from "viem/chains";
+import { WagmiProvider, createConfig, http } from "wagmi";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("next/navigation", () => ({
@@ -149,9 +150,11 @@ describe("misc pages render", () => {
   it("renders app wallets page", () => {
     render(
       <TestProvider>
-        <AppWallets />
+        <AppWalletsProvider>
+          <AppWallets />
+        </AppWalletsProvider>
       </TestProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(screen.getByText(/App Wallets/i)).toBeInTheDocument();
   });
 });

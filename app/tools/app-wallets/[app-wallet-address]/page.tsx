@@ -1,4 +1,7 @@
-import AppWalletPageClient, { generateMetadata } from "./page.client";
+import { getAppMetadata } from "@/components/providers/metadata";
+import { formatAddress } from "@/helpers/Helpers";
+import { Metadata } from "next";
+import AppWalletPageClient from "./page.client";
 
 export default async function AppWalletPage({
   params,
@@ -9,4 +12,14 @@ export default async function AppWalletPage({
   return <AppWalletPageClient address={address} />;
 }
 
-export { generateMetadata };
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ "app-wallet-address": string }>;
+}): Promise<Metadata> {
+  const { "app-wallet-address": address } = await params;
+  return getAppMetadata({
+    title: `${formatAddress(address)} | App Wallets`,
+    description: "Tools",
+  });
+}

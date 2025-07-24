@@ -1,10 +1,8 @@
 "use client";
 
 import DelegationMappingTool from "@/components/mapping-tools/DelegationMappingTool";
-import { getAppMetadata } from "@/components/providers/metadata";
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
-import type { Metadata } from "next";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
@@ -98,11 +96,4 @@ export default function DelegationMappingToolPage() {
       </Container>
     </main>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "Delegation Mapping Tool",
-    description: "Tools",
-  });
 }

@@ -1,10 +1,8 @@
 "use client";
 
 import LatestActivity from "@/components/latest-activity/LatestActivity";
-import { getAppMetadata } from "@/components/providers/metadata";
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
-import type { Metadata } from "next";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function NFTActivityPage() {
@@ -21,8 +19,4 @@ export default function NFTActivityPage() {
       </Container>
     </main>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "NFT Activity", description: "Network" });
 }
