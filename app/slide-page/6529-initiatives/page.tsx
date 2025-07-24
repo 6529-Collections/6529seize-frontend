@@ -1,5 +1,4 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
 const IndexPage = () => (
   <div>
       <title>Redirecting...</title>

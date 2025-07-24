@@ -1,8 +1,7 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import UserPageRepModifyModal from "../../components/user/rep/modify-rep/UserPageRepModifyModal";
 import { renderWithAuth } from "../utils/testContexts";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
-import * as reactQuery from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query", () => {
   const actual = jest.requireActual("@tanstack/react-query");

@@ -1,9 +1,9 @@
+import GradientsComponent from "@/components/6529Gradient/6529Gradient";
+import { TitleProvider } from "@/contexts/TitleContext";
+import { fetchAllPages } from "@/services/6529api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GradientsComponent from "@/components/6529Gradient/6529Gradient";
 import { useRouter, useSearchParams } from "next/navigation";
-import { fetchAllPages } from "@/services/6529api";
-import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -34,13 +34,7 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 
 const routerReplace = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ replace: routerReplace });
-(useSearchParams as jest.Mock).mockReturnValue({
-  get: (key: string) => {
-    if (key === "sort") return null;
-    if (key === "sort_dir") return null;
-    return null;
-  },
-});
+(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
 const nftData = [
   {

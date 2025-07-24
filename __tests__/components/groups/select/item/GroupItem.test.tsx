@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GroupItem from '../../../../../components/groups/select/item/GroupItem';
 import { getScaledImageUri } from '../../../../../helpers/image.helpers';
-import { getTimeAgo } from '../../../../../helpers/Helpers';
 
 jest.mock('../../../../../helpers/image.helpers', () => ({
   getScaledImageUri: jest.fn(() => 'scaled.jpg'),

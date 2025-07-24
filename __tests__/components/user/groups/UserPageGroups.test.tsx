@@ -1,7 +1,6 @@
 import { render, act } from '@testing-library/react';
 import UserPageGroups from '../../../../components/user/groups/UserPageGroups';
 import { AuthContext } from '../../../../components/auth/Auth';
-import { useRouter } from 'next/router';
 
 let routerPush = jest.fn();
 let capturedProps: any = null;

@@ -1,6 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import ImageComponent from '../../../../../../components/drops/create/lexical/nodes/ImageComponent';
-import CircleLoader, { CircleLoaderSize } from '../../../../../../components/distribution-plan-tool/common/CircleLoader';
 
 jest.mock('../../../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,

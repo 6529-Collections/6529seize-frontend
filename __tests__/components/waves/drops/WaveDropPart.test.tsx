@@ -2,7 +2,6 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveDropPart from '../../../../components/waves/drops/WaveDropPart';
 import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
-import { ApiDrop } from '../../../../generated/models/ApiDrop';
 
 // Mock the WaveDropPartDrop component
 jest.mock('../../../../components/waves/drops/WaveDropPartDrop', () => {

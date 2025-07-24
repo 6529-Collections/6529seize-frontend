@@ -1,6 +1,6 @@
 import { getUserProfileActivityLogs } from "@/helpers/server.helpers";
-import { convertActivityLogParams } from "@/helpers/profile-logs.helper";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 // Mocks
 jest.mock("@/helpers/server.helpers");

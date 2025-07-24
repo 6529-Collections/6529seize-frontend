@@ -1,8 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { WaveWinners } from '../../../../components/waves/winners/WaveWinners';
 import { useWaveDecisions } from '../../../../hooks/waves/useWaveDecisions';
-import { useLayout } from '../../../../components/brain/my-stream/layout/LayoutContext';
 import { useWave } from '../../../../hooks/useWave';
 
 jest.mock('../../../../hooks/waves/useWaveDecisions');

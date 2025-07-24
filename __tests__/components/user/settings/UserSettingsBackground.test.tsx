@@ -1,5 +1,4 @@
 import { render, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import UserSettingsBackground from '../../../../components/user/settings/UserSettingsBackground';
 
 describe('UserSettingsBackground', () => {

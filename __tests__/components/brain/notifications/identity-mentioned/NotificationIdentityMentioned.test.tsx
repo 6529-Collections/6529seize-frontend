@@ -15,7 +15,6 @@ const mockUseRouter = jest.fn(() => ({ push: jest.fn() }));
 jest.mock('next/router', () => ({ useRouter: mockUseRouter }));
 
 import NotificationIdentityMentioned from '../../../../../components/brain/notifications/identity-mentioned/NotificationIdentityMentioned';
-import { useRouter } from 'next/router';
 
 const notification = {
   id: 1,

@@ -20,7 +20,6 @@ import GroupCardDeleteModal from '../../../../../../../../components/groups/page
 import { AuthContext } from '../../../../../../../../components/auth/Auth';
 import { ReactQueryWrapperContext } from '../../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
-import { useDispatch, useSelector } from 'react-redux';
 
 jest.mock('@tanstack/react-query');
 jest.mock('react-redux', () => ({ useDispatch: jest.fn(() => jest.fn()), useSelector: jest.fn(() => null) }));

@@ -1,7 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { TimelineToggleHeader } from "../../../../../components/waves/leaderboard/time/TimelineToggleHeader";
-import { calculateTimeLeft } from "../../../../../helpers/waves/time.utils";
 import { SeizeSettingsProvider } from "../../../../../contexts/SeizeSettingsContext";
 
 jest.mock("../../../../../helpers/waves/time.utils", () => ({

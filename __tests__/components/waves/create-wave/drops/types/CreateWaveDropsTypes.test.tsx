@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDropsTypes, { ExtendedWaveParticipationRequirement } from '../../../../../../components/waves/create-wave/drops/types/CreateWaveDropsTypes';
+import CreateWaveDropsTypes from '../../../../../../components/waves/create-wave/drops/types/CreateWaveDropsTypes';
 import { ApiWaveParticipationRequirement } from '../../../../../../generated/models/ApiWaveParticipationRequirement';
 
 describe('CreateWaveDropsTypes', () => {

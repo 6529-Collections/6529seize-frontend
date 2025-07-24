@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import ArcheologyOfTheFuture from "@/app/museum/6529-fund-szn1/archeology-of-the-future/page";
 import PhotoB from "@/app/museum/6529-photo-b/page";

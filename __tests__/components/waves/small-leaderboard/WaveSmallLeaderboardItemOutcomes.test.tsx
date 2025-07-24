@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { WaveSmallLeaderboardItemOutcomes } from '../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes';
 import { ApiWaveOutcomeCredit } from '../../../../generated/models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeType } from '../../../../generated/models/ApiWaveOutcomeType';

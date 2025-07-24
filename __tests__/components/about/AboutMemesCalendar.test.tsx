@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 import AboutMemesCalendar from '../../../components/about/AboutMemesCalendar';
-import { Time } from '../../../helpers/time';
 
 jest.mock('react-bootstrap', () => ({
   Container: (p:any) => <div>{p.children}</div>,

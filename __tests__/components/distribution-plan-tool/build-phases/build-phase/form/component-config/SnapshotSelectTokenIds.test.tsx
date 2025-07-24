@@ -9,7 +9,6 @@ jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/b
 ));
 
 import SnapshotSelectTokenIds from '../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotSelectTokenIds';
-import { PhaseConfigStep } from '../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
 
 describe('SnapshotSelectTokenIds', () => {
   it('calls onSelectTokenIds on next', async () => {

@@ -3,7 +3,7 @@ import { render, act } from '@testing-library/react';
 import ProfileRatersTableWrapper, { ProfileRatersParamsOrderBy, ProfileRatersTableType } from '../../../../../../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper';
 import { RateMatter } from '../../../../../../entities/IProfile';
 import { useRouter } from 'next/router';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn(), keepPreviousData: 'keepPreviousData' }));

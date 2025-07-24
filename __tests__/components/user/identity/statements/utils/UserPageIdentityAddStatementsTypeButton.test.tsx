@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserPageIdentityAddStatementsTypeButton from '../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton';
 import { STATEMENT_TYPE } from '../../../../../../helpers/Types';

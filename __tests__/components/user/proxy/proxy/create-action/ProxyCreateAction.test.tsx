@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import ProxyCreateAction from '../../../../../../components/user/proxy/proxy/create-action/ProxyCreateAction';
 import { AuthContext } from '../../../../../../components/auth/Auth';
 import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
-import { ApiProfileProxyActionType } from '../../../../../../generated/models/ApiProfileProxyActionType';
 import { useMutation } from '@tanstack/react-query';
 
 // Mock fetch

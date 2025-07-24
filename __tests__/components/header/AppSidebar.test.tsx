@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import AppSidebar from '../../../components/header/AppSidebar';
-import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
 
 let headerProps: any = null;
 let menuProps: any = null;

@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import HeaderUserProxyDropdown from '../../../../../components/header/user/proxy/HeaderUserProxyDropdown';
 import { AuthContext } from '../../../../../components/auth/Auth';
-import { useSeizeConnectContext } from '../../../../../components/auth/SeizeConnectContext';
 
 jest.mock('../../../../../components/header/user/proxy/HeaderUserProxyDropdownItem', () => () => <div data-testid="item" />);
 jest.mock('../../../../../components/header/user/proxy/HeaderUserProxyDropdownChains', () => () => <div data-testid="chains" />);

@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import NotificationWaveCreated from '../../../../components/brain/notifications/wave-created/NotificationWaveCreated';
-import { useQuery } from '@tanstack/react-query';
 
 const queryMock = jest.fn();
 jest.mock('@tanstack/react-query', () => ({ useQuery: (...args:any[]) => queryMock(...args) }));

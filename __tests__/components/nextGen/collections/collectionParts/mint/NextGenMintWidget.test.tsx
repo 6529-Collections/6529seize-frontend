@@ -1,5 +1,4 @@
 import { render } from '@testing-library/react';
-import React from 'react';
 import { getJsonData } from '../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintWidget';
 
 describe('getJsonData', () => {

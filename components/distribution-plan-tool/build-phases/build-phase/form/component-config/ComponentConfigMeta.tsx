@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 
 interface ComponentConfigMetaPropsTag {
   readonly id: string;

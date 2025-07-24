@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppWallet from '../../../components/app-wallets/AppWallet';
 import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';

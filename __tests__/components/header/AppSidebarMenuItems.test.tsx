@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppSidebarMenuItems, { MenuItem } from '../../../components/header/AppSidebarMenuItems';
-import { useSeizeConnectContext } from '../../../components/auth/SeizeConnectContext';
-import { useIdentity } from '../../../hooks/useIdentity';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
 jest.mock('../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));

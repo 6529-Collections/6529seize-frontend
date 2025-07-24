@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import ManifoldMintingWidget from '../../../components/manifoldMinting/ManifoldMintingWidget';
 import { ManifoldClaimStatus, ManifoldPhase } from '../../../hooks/useManifoldClaim';
-import { useSeizeConnectContext } from '../../../components/auth/SeizeConnectContext';
 import {
   useReadContract,
   useReadContracts,

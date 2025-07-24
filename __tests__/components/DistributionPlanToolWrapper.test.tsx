@@ -1,9 +1,8 @@
-import { render, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import DistributionPlanToolWrapper from '../../components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper';
 import { AuthContext } from '../../components/auth/Auth';
 import { useSeizeConnectContext } from '../../components/auth/SeizeConnectContext';
 import { useRouter } from 'next/router';
-import { Poppins } from 'next/font/google';
 
 jest.mock('next/font/google', () => ({ Poppins: () => ({ className: 'poppins' }) }));
 jest.mock('../../components/auth/SeizeConnectContext');

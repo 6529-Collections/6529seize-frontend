@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import UserPageTabs, { UserPageTabType } from '../../../../components/user/layout/UserPageTabs';
 import { AuthContext } from '../../../../components/auth/Auth';
 import { useRouter } from 'next/router';
-import useCapacitor from '../../../../hooks/useCapacitor';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 const useCapacitorMock = jest.fn();

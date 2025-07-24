@@ -7,7 +7,6 @@ import {
 } from "../DistributionPlanToolContext";
 import {
   AllowlistOperationCode,
-  AllowlistToolResponse,
   DistributionPlanTokenPoolDownload,
   DistributionPlanTokenPoolDownloadStatus,
 } from "../../allowlist-tool/allowlist-tool.types";

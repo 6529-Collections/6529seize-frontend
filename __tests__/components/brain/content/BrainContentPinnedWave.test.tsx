@@ -51,7 +51,6 @@ jest.mock('../../../../components/waves/WavePicture', () => ({
 
 import BrainContentPinnedWave from '../../../../components/brain/content/BrainContentPinnedWave';
 import useIsMobileDevice from '../../../../hooks/isMobileDevice';
-import { useWaveData } from '../../../../hooks/useWaveData';
 
 describe('BrainContentPinnedWave', () => {
   const onMouseEnter = jest.fn();

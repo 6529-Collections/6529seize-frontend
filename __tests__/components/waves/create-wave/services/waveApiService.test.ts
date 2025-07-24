@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAddWaveMutation } from '../../../../../components/waves/create-wave/services/waveApiService';
 import { commonApiPost } from '../../../../../services/api/common-api';
-import { useMutation } from '@tanstack/react-query';
 
 jest.mock('../../../../../services/api/common-api');
 

@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import CreateWaveOutcomesRowCICRank from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCICRank';
 
 const outcome = { winnersConfig: { totalAmount: 1500, winners: [] } } as any;

@@ -1,19 +1,12 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import AppWalletComponent from "@/components/app-wallets/AppWallet";
+import { getAppMetadata } from "@/components/providers/metadata";
 import { useTitle } from "@/contexts/TitleContext";
 import { formatAddress } from "@/helpers/Helpers";
-import { getAppMetadata } from "@/components/providers/metadata";
+import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
-
-const AppWalletComponent = dynamic(
-  () => import("@/components/app-wallets/AppWallet"),
-  {
-    ssr: false,
-  }
-);
+import { useEffect } from "react";
 
 export default function AppWalletPage(props: { readonly address: string }) {
   const { setTitle } = useTitle();

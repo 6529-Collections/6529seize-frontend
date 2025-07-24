@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import WaveHeader, { WaveHeaderPinnedSide } from '../../../../components/waves/header/WaveHeader';
 import { ApiWaveType } from '../../../../generated/models/ApiWaveType';

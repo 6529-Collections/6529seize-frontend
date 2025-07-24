@@ -24,7 +24,6 @@ jest.mock("uuid", () => ({ v4: () => "uuid" }));
 jest.mock("wagmi", () => ({ useSignMessage: jest.fn() }));
 
 import { useSeizeConnectContext } from "../../../../components/auth/SeizeConnectContext";
-import { postData } from "../../../../services/6529api";
 import {
   useGlobalAdmin,
   useFunctionAdmin,

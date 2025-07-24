@@ -6,7 +6,6 @@ import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchC
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
-  AllowlistToolResponse,
   DistributionPlanSearchContractMetadataResult,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "../../../../constants";

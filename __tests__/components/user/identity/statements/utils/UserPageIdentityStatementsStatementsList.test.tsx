@@ -3,7 +3,6 @@ import React from 'react';
 import UserPageIdentityStatementsStatementsList from '../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList';
 import { AuthContext } from '../../../../../../components/auth/Auth';
 import { useSeizeConnectContext } from '../../../../../../components/auth/SeizeConnectContext';
-import { amIUser } from '../../../../../../helpers/Helpers';
 
 jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 jest.mock('../../../../../../helpers/Helpers', () => ({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import MyStreamWaveMyVote from '../../../../../components/brain/my-stream/votes/MyStreamWaveMyVote';
 
 jest.mock('../../../../../components/drops/view/item/content/media/DropListItemContentMedia', () => ({

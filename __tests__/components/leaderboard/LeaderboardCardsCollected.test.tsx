@@ -1,7 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import LeaderboardCardsCollectedComponent from '../../../components/leaderboard/LeaderboardCardsCollected';
-import { SortDirection } from '../../../entities/ISort';
-import { LeaderboardCardsCollectedSort } from '../../../components/leaderboard/leaderboard_helpers';
 import { Content, Collector } from '../../../components/leaderboard/Leaderboard';
 
 jest.mock('../../../components/leaderboard/leaderboard_helpers', () => {

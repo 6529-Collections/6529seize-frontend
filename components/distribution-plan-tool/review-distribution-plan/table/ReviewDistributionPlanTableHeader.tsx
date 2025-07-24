@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import AllowlistToolJsonIcon from "../../../allowlist-tool/icons/AllowlistToolJsonIcon";
 import DistributionPlanTableHeaderWrapper from "../../common/DistributionPlanTableHeaderWrapper";
 import {
   FetchResultsType,
@@ -11,10 +10,8 @@ import {
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
   AllowlistResult,
-  AllowlistToolResponse,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import AllowlistToolCsvIcon from "../../../allowlist-tool/icons/AllowlistToolCsvIcon";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";

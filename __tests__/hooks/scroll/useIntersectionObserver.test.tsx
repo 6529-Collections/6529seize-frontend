@@ -1,5 +1,4 @@
 import { renderHook } from '@testing-library/react';
-import React from 'react';
 import { useIntersectionObserver } from '../../../hooks/scroll/useIntersectionObserver';
 
 let observeTarget: Element | null = null;

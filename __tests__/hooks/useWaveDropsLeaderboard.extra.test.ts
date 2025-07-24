@@ -1,7 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useWaveDropsLeaderboard, WaveDropsLeaderboardSort } from '../../hooks/useWaveDropsLeaderboard';
 import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useDebounce } from 'react-use';
 
 jest.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: jest.fn(),

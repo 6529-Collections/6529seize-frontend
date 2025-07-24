@@ -42,11 +42,10 @@ jest.mock('../../../../../../../helpers/AllowlistToolHelpers', () => ({
 }));
 
 import React from 'react';
-import { render, renderHook, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import NewHashtagsPlugin, {
   HashtagsTypeaheadOption,
   getPossibleQueryMatch,
-  useHashtagLookupService,
 } from '../../../../../../../components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
 
 test('renders without crashing', () => {

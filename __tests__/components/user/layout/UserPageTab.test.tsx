@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import UserPageTab from '../../../../components/user/layout/UserPageTab';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { UserPageTabType } from '../../../../components/user/layout/UserPageTabs';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
