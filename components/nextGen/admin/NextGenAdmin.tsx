@@ -14,7 +14,7 @@ import {
   useCollectionArtist,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
-import { FunctionSelectors, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
+import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenAdminSetData from "./NextGenAdminSetData";
 import NextGenAdminSetCosts from "./NextGenAdminSetCosts";
 import NextGenAdminSetPhases from "./NextGenAdminSetPhases";

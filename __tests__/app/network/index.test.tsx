@@ -1,8 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { useSelector } from "react-redux";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useQuery } from "@tanstack/react-query";
 import { generateMetadata } from "@/app/network/page";
 import CommunityMembers from "@/components/community/CommunityMembers";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";

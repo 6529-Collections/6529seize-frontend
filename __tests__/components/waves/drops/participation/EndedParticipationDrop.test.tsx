@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import EndedParticipationDrop from '../../../../../components/waves/drops/participation/EndedParticipationDrop';
-import { useRouter } from 'next/navigation';
-import useIsMobileDevice from '../../../../../hooks/isMobileDevice';
 
 jest.mock('next/navigation', () => ({ useRouter: jest.fn(() => ({ push: jest.fn() })) }));
 jest.mock('../../../../../hooks/isMobileDevice', () => jest.fn(() => true));

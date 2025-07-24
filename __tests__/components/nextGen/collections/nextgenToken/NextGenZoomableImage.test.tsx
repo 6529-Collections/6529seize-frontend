@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import NextGenZoomableImage, { MIN_ZOOM_SCALE } from '../../../../../components/nextGen/collections/nextgenToken/NextGenZoomableImage';
-import { get8KUrl, get16KUrl } from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage';
 import useIsMobileDevice from '../../../../../hooks/isMobileDevice';
 import useIsMobileScreen from '../../../../../hooks/isMobileScreen';
 

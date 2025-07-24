@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import PrivilegedDropCreator, { DropMode } from '../../../components/waves/PrivilegedDropCreator';
 import { useDropPrivileges } from '../../../hooks/useDropPriviledges';
-import { useAuth } from '../../components/auth/Auth';
 
 jest.mock('../../../hooks/useDropPriviledges');
 jest.mock('../../../components/auth/Auth', () => ({ useAuth: () => ({}) }));

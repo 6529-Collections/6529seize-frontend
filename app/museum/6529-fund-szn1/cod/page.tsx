@@ -1,5 +1,4 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
 const IndexPage = () => (
   <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />

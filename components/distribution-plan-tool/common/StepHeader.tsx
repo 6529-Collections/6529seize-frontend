@@ -2,7 +2,6 @@
 
 import { useContext, useState } from "react";
 import {
-  AllowlistOperation,
   AllowlistOperationCode,
 } from "../../allowlist-tool/allowlist-tool.types";
 import {

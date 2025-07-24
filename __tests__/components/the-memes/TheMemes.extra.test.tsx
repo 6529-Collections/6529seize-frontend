@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { printVolumeTypeDropdown } from '../../../components/the-memes/TheMemes';
-import { VolumeType } from '../../../entities/INFT';
 
 jest.mock('@headlessui/react', () => ({
   Menu: ({ children, className }: any) => <div data-testid="dropdown" className={className}>{children}</div>,

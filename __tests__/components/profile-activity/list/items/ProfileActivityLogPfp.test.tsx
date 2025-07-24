@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img {...p} /> }));
 import ProfileActivityLogPfp from '../../../../../components/profile-activity/list/items/ProfileActivityLogPfp';
 import { ProfileActivityLogType, ProfileActivityLogPfpEdit } from '../../../../../entities/IProfile';

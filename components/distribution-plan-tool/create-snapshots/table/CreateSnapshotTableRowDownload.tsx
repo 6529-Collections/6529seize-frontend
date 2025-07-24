@@ -4,7 +4,6 @@ import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { FetchResultsType } from "../../review-distribution-plan/table/ReviewDistributionPlanTable";
 import {
-  AllowlistToolResponse,
   DistributionPlanSnapshotToken,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";

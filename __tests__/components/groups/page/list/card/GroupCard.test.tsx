@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, act } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import GroupCard, {
   GroupCardState,
 } from "../../../../../../components/groups/page/list/card/GroupCard";

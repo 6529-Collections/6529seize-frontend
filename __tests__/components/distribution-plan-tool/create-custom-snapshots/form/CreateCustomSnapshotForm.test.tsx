@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateCustomSnapshotForm from '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm';
 import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';

@@ -2,7 +2,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import NextGenAdminUploadAL from '../../../../components/nextGen/admin/NextGenAdminUploadAL';
 import { useSignMessage } from 'wagmi';
-import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
 
 jest.mock('wagmi', () => ({ useSignMessage: jest.fn() }));
 jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));

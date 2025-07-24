@@ -6,7 +6,6 @@ import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
-  AllowlistToolResponse,
 } from "../../allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiPost } from "../../../services/distribution-plan-api";
 

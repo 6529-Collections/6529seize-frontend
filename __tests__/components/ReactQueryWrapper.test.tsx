@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import ReactQueryWrapper, { ReactQueryWrapperContext, QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_FOLLOWING_WAVES_PARAMS, WAVE_DROPS_PARAMS } from "../../components/react-query-wrapper/utils/query-utils";
 

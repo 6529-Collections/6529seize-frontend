@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useSelector } from 'react-redux';
 import GroupsSidebarAppToggle from '../../../../components/groups/sidebar/GroupsSidebarAppToggle';
 
 jest.mock('react-redux', () => ({ useSelector: jest.fn() }));

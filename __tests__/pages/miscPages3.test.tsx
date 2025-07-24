@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import AuthorPage from "@/app/author/6529er6529-io/page";
 import CompanyPortfolio from "@/app/capital/company-portfolio/page";
 import EducationPage from "@/app/education/page";

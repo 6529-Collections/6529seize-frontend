@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { WaveWinnersSmall } from '../../../../components/waves/winners/WaveWinnersSmall';
 import { useWaveDecisions } from '../../../../hooks/waves/useWaveDecisions';

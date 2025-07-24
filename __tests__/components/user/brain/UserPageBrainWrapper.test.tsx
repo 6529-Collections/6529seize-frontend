@@ -2,7 +2,6 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import UserPageBrainWrapper from '../../../../components/user/brain/UserPageBrainWrapper';
 import { useRouter } from 'next/router';
-import { AuthContext } from '../../../../components/auth/Auth';
 import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
 import { useIdentity } from '../../../../hooks/useIdentity';
 

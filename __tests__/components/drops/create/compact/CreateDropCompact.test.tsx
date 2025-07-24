@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateDropCompact from "../../../../../components/drops/create/compact/CreateDropCompact";
-import { CreateDropType, CreateDropViewType } from "../../../../../components/drops/create/types";
+import { CreateDropType } from "../../../../../components/drops/create/types";
 
 jest.mock("../../../../../components/drops/create/utils/CreateDropContent", () => ({
   __esModule: true,

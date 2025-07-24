@@ -1,6 +1,5 @@
 import { render } from "@testing-library/react";
 import HashtagsPlugin from "../../components/drops/create/lexical/plugins/hashtags/HashtagsPlugin";
-import { forwardRef } from "react";
 
 jest.mock("@lexical/react/LexicalComposerContext", () => ({ useLexicalComposerContext: () => [{}] }));
 

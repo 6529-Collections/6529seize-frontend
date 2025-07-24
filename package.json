@@ -23,7 +23,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:watch": "nodemon --watch tests --watch src --ext ts,tsx,js,jsx --exec \"npx playwright test\"",
     "knip": "knip --fix --allow-remove-files",
-    "type-check": "tsc --noEmit -p tsconfig.json"
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "lint:fix": "npx eslint . --ext .ts,.tsx,.js,.jsx --fix"
   },
   "dependencies": {
     "@capacitor/app": "7.0.1",
@@ -126,6 +127,7 @@
     "dotenv": "^16.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "15.3.2",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "glob": "^11.0.3",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",

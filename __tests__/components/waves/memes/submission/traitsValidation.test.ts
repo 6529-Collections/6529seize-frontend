@@ -1,5 +1,4 @@
 import { validateTraitsData } from '../../../../../components/waves/memes/submission/validation/traitsValidation';
-import { FieldType } from '../../../../../components/waves/memes/traits/schema';
 
 jest.mock('../../../../../components/waves/memes/traits/schema', () => {
   const actual = jest.requireActual('../../../../../components/waves/memes/traits/schema');

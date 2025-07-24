@@ -4,7 +4,6 @@ import AppWalletImport from '../../../components/app-wallets/AppWalletImport';
 import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
 import { useAuth } from '../../../components/auth/Auth';
 import { ethers } from 'ethers';
-import { useRouter } from 'next/navigation';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props:any) => <img {...props} /> }));
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }:any) => <a href={href}>{children}</a> }));

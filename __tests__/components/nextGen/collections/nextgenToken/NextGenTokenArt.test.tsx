@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenTokenArt from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenArt';
-import { get16KUrl } from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage';
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');

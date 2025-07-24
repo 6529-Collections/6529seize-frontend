@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenAdminSetPhases from '../../../../components/nextGen/admin/NextGenAdminSetPhases';
-import { NULL_MERKLE } from '../../../../constants';
 
 jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ collection_id, onChange }: any) => (

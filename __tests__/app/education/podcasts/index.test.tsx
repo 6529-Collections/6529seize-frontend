@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import PodcastsPage from '@/app/education/podcasts/page';
 
 // Mock the Header component since it's dynamically imported
