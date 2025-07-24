@@ -1,10 +1,8 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import { useSetTitle } from "@/contexts/TitleContext";
 import SubscriptionsReportComponent from "@/components/subscriptions-report/SubscriptionsReport";
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+import { useSetTitle } from "@/contexts/TitleContext";
+import styles from "@/styles/Home.module.scss";
 
 export default function SubscriptionsReport() {
   useSetTitle("Subscriptions Report | Tools");
@@ -14,8 +12,4 @@ export default function SubscriptionsReport() {
       <SubscriptionsReportComponent />
     </main>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Subscriptions Report", description: "Tools" });
 }

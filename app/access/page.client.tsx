@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "@/styles/Home.module.scss";
-import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "@/constants";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+import styles from "@/styles/Home.module.scss";
+import Cookies from "js-cookie";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function AccessPage() {
   useSetTitle("Access Page");
@@ -92,8 +90,4 @@ export function LoginImage(props: Readonly<{ image: string; alt: string }>) {
       alt={props.alt}
     />
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Access Page" });
 }

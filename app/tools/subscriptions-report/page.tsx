@@ -1,7 +1,14 @@
-import SubscriptionsReportClient, { generateMetadata } from './page.client';
+import { getAppMetadata } from "@/components/providers/metadata";
+import { Metadata } from "next";
+import SubscriptionsReportClient from "./page.client";
 
 export default function SubscriptionsReportPage() {
   return <SubscriptionsReportClient />;
 }
 
-export { generateMetadata };
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({
+    title: "Subscriptions Report",
+    description: "Tools",
+  });
+}

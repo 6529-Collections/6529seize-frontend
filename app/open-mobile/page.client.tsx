@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
 import ClientOnly from "@/components/client-only/ClientOnly";
+import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function OpenMobilePage() {
   const searchParams = useSearchParams();
@@ -38,7 +36,8 @@ export default function OpenMobilePage() {
     const shareIos = <ShareMobileApp platform="ios" target="_self" />;
     const shareAndroid = <ShareMobileApp platform="android" target="_self" />;
 
-    const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent;
+    const userAgent =
+      typeof navigator === "undefined" ? "" : navigator.userAgent;
     const isIos = /iPad|iPhone|iPod/.test(userAgent);
     const isAndroid = /android/i.test(userAgent);
 
@@ -74,8 +73,4 @@ export default function OpenMobilePage() {
       </div>
     </ClientOnly>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Open Mobile" });
 }

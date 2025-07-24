@@ -1,10 +1,8 @@
 "use client";
 
 import ConsolidationMappingTool from "@/components/mapping-tools/ConsolidationMappingTool";
-import { getAppMetadata } from "@/components/providers/metadata";
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
-import type { Metadata } from "next";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
@@ -98,11 +96,4 @@ export default function ConsolidationMappingToolPage() {
       </Container>
     </main>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "Consolidation Mapping Tool",
-    description: "Tools",
-  });
 }

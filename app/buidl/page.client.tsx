@@ -1,11 +1,9 @@
 "use client";
 
+import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
 import Image from "next/image";
-import { Container, Row, Col } from "react-bootstrap";
-import { useSetTitle } from "@/contexts/TitleContext";
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function BuidlPage() {
   useSetTitle("BUIDL");
@@ -15,14 +13,20 @@ export default function BuidlPage() {
       <Container fluid className={`${styles.pageNotFound} text-center`}>
         <Row>
           <Col>
-            <Image src="/SummerGlasses.svg" width={100} height={100} alt="SummerGlasses" />
+            <Image
+              src="/SummerGlasses.svg"
+              width={100}
+              height={100}
+              alt="SummerGlasses"
+            />
           </Col>
         </Row>
         <Row>
           <Col>
             <h4>
               <p>
-                We are going to BUIDL together to spread the word about a decentralized metaverse.
+                We are going to BUIDL together to spread the word about a
+                decentralized metaverse.
               </p>
               <p>Tools to help in this goal are coming soon.</p>
             </h4>
@@ -31,8 +35,4 @@ export default function BuidlPage() {
       </Container>
     </main>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "BUIDL" });
 }
