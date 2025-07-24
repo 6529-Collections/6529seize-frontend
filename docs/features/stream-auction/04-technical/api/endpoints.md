@@ -2,25 +2,28 @@
 
 This document details all API endpoints for the stream auction feature.
 
+## Authentication
+
+Most endpoints require authentication via JWT token:
+- Include token in `Authorization: Bearer <token>` header
+- Public endpoints are marked with 🌐
+- Authenticated endpoints are marked with 🔒
+
 ## Eligibility Endpoints
 
-### Check Drop Eligibility
+### Check Drop Eligibility 🌐
 ```http
-GET /api/waves/{waveId}/drops/{dropId}/stream-eligibility
+GET /api/drops/{dropId}/stream-eligibility
 ```
 
 **Response:**
 ```json
 {
   "eligible": true,
+  "already_redirected": false,
   "eligibility_achieved_at": "2024-01-15T10:30:00Z",
   "votes_count": 150,
-  "average_rating": 4.2,
-  "thresholds": {
-    "min_votes": 100,
-    "min_rating": 3.5,
-    "time_period_days": 7
-  }
+  "voters_count": 42
 }
 ```
 
@@ -35,8 +38,8 @@ GET /api/users/{userId}/eligible-stream-drops
 ```
 
 **Query Parameters:**
-- `page` (optional): Page number, default 1
-- `limit` (optional): Items per page, default 20
+- `page` (optional): Page number, default 1  
+- `page_size` (optional): Items per page (1-100), default 20
 
 **Response:**
 ```json
@@ -48,23 +51,23 @@ GET /api/users/{userId}/eligible-stream-drops
       "title": "Meme Title",
       "eligibility_achieved_at": "2024-01-15T10:30:00Z",
       "votes_count": 150,
-      "average_rating": 4.2,
+      "voters_count": 42,
       "already_redirected": false
     }
   ],
   "pagination": {
     "page": 1,
-    "limit": 20,
-    "total": 45
+    "page_size": 20,
+    "total_results": 45
   }
 }
 ```
 
 ## Redirect Endpoints
 
-### Redirect Drop to Stream Auction
+### Redirect Drop to Stream Auction 🔒
 ```http
-POST /api/waves/{waveId}/drops/{dropId}/redirect-to-stream
+POST /api/drops/{dropId}/stream-redirect
 ```
 
 **Request Body:**
@@ -82,20 +85,20 @@ POST /api/waves/{waveId}/drops/{dropId}/redirect-to-stream
   "status": "pending",
   "message": "Drop successfully redirected. You will be contacted via DM within 1-3 business days.",
   "removed_from_leaderboard": true,
-  "votes_refunded": 150,
+  "tdh_refunded": true,
   "activity_post_id": "abc123"
 }
 ```
 
 **Status Codes:**
-- `200` - Success
+- `201` - Success
 - `403` - Not authorized (not drop owner)
 - `400` - Drop not eligible or already redirected
 - `409` - Drop already in redirect process
 
-### Get Redirect Status
+### Get Redirect Status 🌐
 ```http
-GET /api/waves/{waveId}/drops/{dropId}/redirect-status
+GET /api/drops/{dropId}/stream-redirect-status
 ```
 
 **Response:**
@@ -118,13 +121,13 @@ GET /api/stream-auctions
 ```
 
 **Query Parameters:**
-- `status`: `active` | `upcoming` | `ended` | `all`
-- `sort`: `ending_soon` | `price_low` | `price_high` | `newest`
-- `page`: Page number
-- `limit`: Items per page
-- `creator`: Filter by creator ID
-- `min_price`: Minimum current bid
-- `max_price`: Maximum current bid
+- `status` (optional): `active` | `upcoming` | `ended` | `all`
+- `sort` (optional): `ending_soon` | `price_low` | `price_high` | `newest`
+- `page` (optional): Page number, default 1
+- `page_size` (optional): Items per page (1-100), default 20
+- `creator` (optional): Filter by creator ID
+- `min_price` (optional): Minimum current bid
+- `max_price` (optional): Maximum current bid
 
 **Response:**
 ```json
@@ -147,8 +150,8 @@ GET /api/stream-auctions
   ],
   "pagination": {
     "page": 1,
-    "limit": 20,
-    "total": 156
+    "page_size": 20,
+    "total_results": 156
   }
 }
 ```
@@ -180,10 +183,8 @@ GET /api/stream-auctions/{tokenId}
   "ends_at": "2024-01-16T10:00:00Z",
   "is_active": true,
   "original_metrics": {
-    "votes": 150,
-    "average_rating": 4.2,
-    "wave_id": "456",
-    "wave_name": "Memes Wave #42"
+    "votes_count": 150,
+    "voters_count": 42
   },
   "recent_bids": [
     {
@@ -208,37 +209,7 @@ GET /api/stream-auctions/{tokenId}
 
 ## Bidding Endpoints
 
-### Place Bid
-```http
-POST /api/stream-auctions/{tokenId}/bid
-```
-
-**Request Body:**
-```json
-{
-  "amount": "2.75",
-  "signature": "0x..." // Wallet signature
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "transaction_hash": "0x...",
-  "new_highest_bid": "2.75",
-  "previous_bid_refunded": true,
-  "outbid_user_notified": true
-}
-```
-
-**Status Codes:**
-- `200` - Success
-- `400` - Invalid bid amount or auction ended
-- `403` - Signature validation failed
-- `409` - Bid too low or auction not active
-
-### Get Bid Requirements
+### Get Bid Requirements 🌐
 ```http
 GET /api/stream-auctions/{tokenId}/bid-requirements
 ```
@@ -251,10 +222,36 @@ GET /api/stream-auctions/{tokenId}/bid-requirements
   "minimum_increment": "0.25",
   "increment_percentage": 10,
   "suggested_bids": ["2.75", "3.0", "3.5"],
-  "user_balance": "5.2",
-  "can_afford_minimum": true
+  "user_balance": "5.2"
 }
 ```
+
+### Get Contract Info 🌐
+```http
+GET /api/stream-auctions/contract-info
+```
+
+**Response:**
+```json
+{
+  "auction_contract": "0x...",
+  "supported_networks": [1],
+  "abi_fragment": {
+    "placeBid": {
+      "inputs": [{"name": "tokenId", "type": "uint256"}],
+      "name": "placeBid",
+      "payable": true,
+      "type": "function"
+    }
+  }
+}
+```
+
+**Note**: Actual bidding happens directly on-chain:
+1. Frontend gets bid requirements from API
+2. User approves transaction in wallet
+3. Frontend calls smart contract's `placeBid()` function
+4. Backend observes blockchain events and updates cache
 
 ## User Dashboard Endpoints
 
@@ -264,9 +261,9 @@ GET /api/stream-auctions/my-bids
 ```
 
 **Query Parameters:**
-- `status`: `active` | `won` | `lost` | `all`
-- `page`: Page number
-- `limit`: Items per page
+- `status` (optional): `active` | `won` | `lost` | `all`
+- `page` (optional): Page number, default 1
+- `page_size` (optional): Items per page (1-100), default 20
 
 **Response:**
 ```json
@@ -363,7 +360,12 @@ POST /api/notifications/auctions/mark-read
 
 ### Connection
 ```javascript
-ws://api.example.com/auctions/live
+wss://{API_HOST}/ws/auctions
+```
+
+**Authentication**: Include JWT token as query parameter:
+```
+wss://{API_HOST}/ws/auctions?token={JWT_TOKEN}
 ```
 
 ### Event Types
