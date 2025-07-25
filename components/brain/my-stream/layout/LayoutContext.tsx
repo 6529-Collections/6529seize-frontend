@@ -357,7 +357,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
     let capSpace = 0;
     if (isAndroid) {
-      capSpace = 85;
+      capSpace = 128;
     } else if (isIos || isCapacitor) {
       capSpace = 20;
     }

@@ -20,6 +20,7 @@ import { useWave } from "../../../hooks/useWave";
 import { useSelector } from "react-redux";
 import { selectEditingDropId } from "../../../store/editSlice";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import { useAndroidKeyboard } from "../../../hooks/useAndroidKeyboard";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
@@ -34,6 +35,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
+  const { keyboardHeight, isVisible, isAndroid } = useAndroidKeyboard();
 
   // Handle URL parameters
   useEffect(() => {
@@ -61,6 +63,22 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
 
     return `${baseStyles} ${heightClass}`;
   }, []);
+
+  // Android keyboard adjustment style
+  const containerStyle = useMemo<React.CSSProperties>(() => {
+    const baseStyle = waveViewStyle || {};
+    
+    // Simple Android keyboard transform - now without conflicts
+    if (isAndroid && isVisible && keyboardHeight > 0) {
+      return {
+        ...baseStyle,
+        transform: `translateY(-${keyboardHeight * 0.6}px)`,
+        transition: 'transform 0.3s ease-out',
+      };
+    }
+    
+    return baseStyle;
+  }, [waveViewStyle, isAndroid, isVisible, keyboardHeight]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
@@ -100,7 +118,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     <div
       ref={containerRef}
       className={`${containerClassName}`}
-      style={waveViewStyle}>
+      style={containerStyle}
+    >
       <WaveDropsAll
         key={wave.id}
         waveId={wave.id}
