@@ -1,8 +1,8 @@
 "use client";
 
+import { useSetTitle } from "@/contexts/TitleContext";
 import { Poppins } from "next/font/google";
 import "react-toastify/dist/ReactToastify.css";
-import { useSetTitle } from "../../../contexts/TitleContext";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
