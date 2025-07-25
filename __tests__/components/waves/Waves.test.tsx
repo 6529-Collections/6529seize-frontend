@@ -1,26 +1,25 @@
+import { AuthContext } from "@/components/auth/Auth";
+import Waves from "@/components/waves/Waves";
+import { TitleProvider } from "@/contexts/TitleContext";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AuthContext } from "../../../components/auth/Auth";
-import Waves from "../../../components/waves/Waves";
-import { ProfileConnectedStatus } from "../../../entities/IProfile";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
+  useRouter: jest.fn(),
+  usePathname: () => "/waves",
 }));
 
-// Simplified dynamic loader returning stub components
-jest.mock("next/dynamic", () => (importFn: any) => {
-  const fnStr = importFn.toString();
-  if (fnStr.includes("create-wave/CreateWave")) {
-    return () => <div data-testid="create-wave">CreateWave</div>;
-  }
-  if (fnStr.includes("create-dm/CreateDirectMessage")) {
-    return () => <div data-testid="create-dm">CreateDM</div>;
-  }
-  return () => null;
+jest.mock("@/components/waves/create-wave/CreateWave", () => {
+  return () => <div data-testid="create-wave">CreateWave</div>;
 });
 
-jest.mock("../../../components/waves/list/WavesList", () => {
+jest.mock("@/components/waves/create-dm/CreateDirectMessage", () => {
+  return () => <div data-testid="create-dm">CreateDM</div>;
+});
+
+jest.mock("@/components/waves/list/WavesList", () => {
   return function MockWavesList(props: any) {
     return (
       <div>
@@ -53,7 +52,9 @@ function renderWaves(params: Map<string, string | null>) {
   });
   return render(
     <AuthContext.Provider value={baseAuth as any}>
-      <Waves />
+      <TitleProvider>
+        <Waves />
+      </TitleProvider>
     </AuthContext.Provider>
   );
 }
