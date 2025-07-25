@@ -58,7 +58,7 @@ export function useAndroidKeyboard() {
             document.documentElement.style.setProperty('--android-keyboard-height', `${fallbackHeight}px`);
           }
         }
-      }, 300);
+      }, 0); // Change from }, 50); to }, 0);
     };
 
     const handleFocusOut = (e: FocusEvent) => {

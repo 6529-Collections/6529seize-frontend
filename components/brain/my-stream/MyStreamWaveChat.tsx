@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import {
   ActiveDropAction,
   ActiveDropState,
@@ -36,6 +36,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const { keyboardHeight, isVisible, isAndroid } = useAndroidKeyboard();
+  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+
+  // On-screen debug state for Android testing
+  const [debugLog, setDebugLog] = useState<string[]>([]);
+  const addDebugLog = useCallback((message: string) => {
+    setDebugLog(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`]);
+  }, []);
 
   // Handle URL parameters
   useEffect(() => {
@@ -64,23 +71,27 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     return `${baseStyles} ${heightClass}`;
   }, []);
 
-  // Android keyboard adjustment style
+  // Android keyboard adjustment style  
   const containerStyle = useMemo<React.CSSProperties>(() => {
     const baseStyle = waveViewStyle || {};
     
-    // Simple Android keyboard transform - now without conflicts
+    // Only transform when keyboard is actually visible
     if (isAndroid && isVisible && keyboardHeight > 0) {
+      const adjustedTransform = Math.max(0, keyboardHeight - 128);
+      
       return {
         ...baseStyle,
-        transform: `translateY(-${keyboardHeight * 0.6}px)`,
-        transition: 'transform 0.3s ease-out',
+        transform: `translateY(-${adjustedTransform}px)`,
+        transition: 'transform 0.15s ease-out', // Much faster, mobile-optimized
       };
     }
     
-    return baseStyle;
+    return {
+      ...baseStyle,
+      transition: 'transform 0.15s ease-out', // Fast reset too
+    };
   }, [waveViewStyle, isAndroid, isVisible, keyboardHeight]);
 
-  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
 
   const onReply = (drop: ApiDrop, partId: number) => {
@@ -118,8 +129,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     <div
       ref={containerRef}
       className={`${containerClassName}`}
-      style={containerStyle}
-    >
+      style={containerStyle}>
+      
       <WaveDropsAll
         key={wave.id}
         waveId={wave.id}
@@ -143,8 +154,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
           </CreateDropWaveWrapper>
         </div>
       )}
-      {/* Floating submission button */}
       {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
+      
+      {/* Simple debug panel - add this right before closing </div> */}
+      <div className="tw-fixed tw-bottom-4 tw-left-4 tw-bg-red-600 tw-text-white tw-p-2 tw-text-xs tw-rounded tw-z-[9999]">
+        K: {keyboardHeight}px | V: {isVisible ? 'Y' : 'N'}
+      </div>
     </div>
   );
 };
