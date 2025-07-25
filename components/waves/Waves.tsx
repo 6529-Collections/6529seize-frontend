@@ -1,10 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
-import WavesList from "./list/WavesList";
-import { AuthContext } from "../auth/Auth";
+import { useSetTitle } from "@/contexts/TitleContext";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
+import { useContext, useEffect, useState, type JSX } from "react";
+import { AuthContext } from "../auth/Auth";
+import WavesList from "./list/WavesList";
 
 enum WavesViewMode {
   CREATE = "CREATE",
@@ -27,6 +28,7 @@ const NEW_WAVE_SEARCH_PARAM = "new";
 const NEW_DIRECT_MESSAGE_SEARCH_PARAM = "new-dm";
 
 export default function Waves() {
+  useSetTitle("Waves | Brain");
   const searchParams = useSearchParams();
   const { connectedProfile, requestAuth, activeProfileProxy, showWaves } =
     useContext(AuthContext);
