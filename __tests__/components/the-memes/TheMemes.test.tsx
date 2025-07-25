@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { printVolumeTypeDropdown, SortButton } from '../../../components/the-memes/TheMemes';
 import { VolumeType, } from '../../../entities/INFT';
-import { MemeLabSort, MemesSort } from '../../../enums';
+import { MemesSort } from '../../../enums';
 
 jest.mock('@headlessui/react', () => ({
   Menu: (p: any) => <div data-testid="dropdown" {...p} />,

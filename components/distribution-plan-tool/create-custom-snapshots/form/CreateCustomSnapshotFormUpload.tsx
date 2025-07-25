@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import AllowlistToolAnimationHeightOpacity from "../../../allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity";
 import AllowlistToolAnimationWrapper from "../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import {

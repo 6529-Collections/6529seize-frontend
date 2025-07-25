@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { AuthContext } from "../../auth/Auth";
 import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
 import WavesListWrapper from "./WavesListWrapper";
@@ -18,6 +18,8 @@ export default function WavesList({
   readonly onCreateNewDirectMessage: () => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams()!;
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [showAllType, setShowAllType] = useState<ApiWavesOverviewType | null>(
     null
@@ -42,25 +44,22 @@ export default function WavesList({
   );
 
   const [identity, setIdentity] = useState<string | null>(
-    (router.query.identity as string) || null
+    searchParams.get("identity") || null
   );
   const [waveName, setWaveName] = useState<string | null>(null);
 
   const updateIdentity = (newIdentity: string | null) => {
     setIdentity(newIdentity);
-    const newQuery = { ...router.query };
+    const newQuery = new URLSearchParams(searchParams.toString());
     if (!newIdentity || newIdentity.trim() === "") {
-      delete newQuery.identity;
+      newQuery.delete("identity");
     } else {
-      newQuery.identity = newIdentity;
+      newQuery.set("identity", newIdentity);
     }
     router.push(
-      {
-        pathname: router.pathname,
-        query: newQuery,
-      },
-      undefined,
-      { shallow: true }
+      newQuery.toString()
+        ? `${pathname}?${newQuery.toString()}`
+        : pathname ?? ""
     );
   };
 
@@ -71,8 +70,8 @@ export default function WavesList({
 
   useEffect(() => {
     setShowSearchResults(getShowSearchResults());
-    setIdentity((router.query.identity as string) || null);
-  }, [router.query.identity, waveName]);
+    setIdentity(searchParams.get("identity") || null);
+  }, [searchParams.toString(), waveName]);
 
   return (
     <div className="tailwind-scope">

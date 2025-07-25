@@ -1,6 +1,6 @@
 #!/bin/bash
 
-grep -rl 'useEffect\|useState\|useRouter\|useRef\|useReducer\|useContext' components helpers contexts hooks \
+grep -rl 'useEffect\|useState\|useRouter\|useRef\|useReducer\|useContext\|useMemo\|useCallback\|useSetTitle' components helpers contexts hooks \
   | grep -E '\.tsx?$' \
   | while read -r file; do
     if ! grep -q '^["'\'']use client["'\'']' "$file"; then

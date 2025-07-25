@@ -2,10 +2,10 @@
 
 import { useContext, useEffect, useState, type JSX } from "react";
 import GroupCreate from "./create/GroupCreate";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 enum GroupsViewMode {
   CREATE = "CREATE",
@@ -15,6 +15,8 @@ enum GroupsViewMode {
 const GROUP_EDIT_SEARCH_PARAM = "edit";
 
 export default function Groups() {
+  useSetTitle("Groups | Network");
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -31,9 +33,7 @@ export default function Groups() {
       const { success } = await requestAuth();
       if (!success) return;
     } else if (pathname) {
-      router.replace(pathname, undefined, {
-        shallow: true,
-      });
+      router.replace(pathname);
     }
 
     setViewMode(mode);

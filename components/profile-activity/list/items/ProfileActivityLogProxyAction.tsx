@@ -1,22 +1,22 @@
 "use client";
 
-import { useRouter } from "next/router";
-import { ProfileActivityLogProxyActionCreated } from "../../../../entities/IProfile";
-import { PROFILE_PROXY_ACTION_LABELS } from "../../../../entities/IProxy";
-import CommonProfileLink from "../../../user/utils/CommonProfileLink";
+import { useSearchParams } from "next/navigation";
+import { ProfileActivityLogProxyActionCreated } from "@/entities/IProfile";
+import { PROFILE_PROXY_ACTION_LABELS } from "@/entities/IProxy";
+import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import { UserPageTabType } from "../../../user/layout/UserPageTabs";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 
 export default function ProfileActivityLogProxyAction({
   log,
 }: {
   readonly log: ProfileActivityLogProxyActionCreated;
 }) {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const handleOrWallet = log.target_profile_handle ?? "";
 
   const isCurrentUser =
-    (router.query.user as string)?.toLowerCase() ===
+    (searchParams?.get("user") as string)?.toLowerCase() ===
     handleOrWallet.toLowerCase();
 
   const tabTarget = UserPageTabType.PROXY;

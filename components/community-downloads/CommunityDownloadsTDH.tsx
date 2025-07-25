@@ -1,3 +1,6 @@
+"use client";
+
+import { useSetTitle } from "@/contexts/TitleContext";
 import CommunityDownloadsComponent from "./CommunityDownloadsComponent";
 
 export enum VIEW {
@@ -10,9 +13,14 @@ interface Props {
 }
 
 export default function CommunityDownloadsTDH(props: Readonly<Props>) {
+  let title = "Network Metrics";
+  if (props.view === VIEW.CONSOLIDATION) {
+    title = `Consolidated ${title}`;
+  }
+  useSetTitle(`${title} | Open Data`);
+
   const url = `${process.env.API_ENDPOINT}/api/${
     props.view === VIEW.WALLET ? "uploads" : "consolidated_uploads"
   }`;
-  const title = props.view === VIEW.CONSOLIDATION ? `Consolidated ` : ``;
-  return <CommunityDownloadsComponent title={`${title} Network`} url={url} />;
+  return <CommunityDownloadsComponent title={title} url={url} />;
 }

@@ -5,8 +5,6 @@ import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import {
   AllowlistOperationCode,
-  AllowlistToolResponse,
-  AllowlistOperation,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
 import { distributionPlanApiPost } from "../../../../services/distribution-plan-api";

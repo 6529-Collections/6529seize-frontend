@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MemesArtSubmissionTraits from '../../../../components/waves/memes/MemesArtSubmissionTraits';
-import { useAuth } from '../../../../components/auth/Auth';
 
 jest.mock('../../../../components/waves/memes/traits/Section', () => ({ Section: ({ children, title }: any) => <div><div>{title}</div>{children}</div> }));
 jest.mock('../../../../components/waves/memes/traits/TraitField', () => ({ TraitField: ({ definition, updateText }: any) => (

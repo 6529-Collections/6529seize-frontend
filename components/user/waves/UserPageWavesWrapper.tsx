@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../../auth/Auth";
 import UserPageWaves from "./UserPageWaves";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";

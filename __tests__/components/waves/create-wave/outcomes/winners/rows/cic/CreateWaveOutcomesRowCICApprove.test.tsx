@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import CreateWaveOutcomesRowCICApprove from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCICApprove';
 
 const outcome = { credit: 1000, maxWinners: 2 } as any;

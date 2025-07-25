@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import CreateDropFullMobile from '../../../../../../components/drops/create/full/mobile/CreateDropFullMobile';
-import { CreateDropType, CreateDropViewType } from '../../../../../../components/drops/create/types';
+import { CreateDropType } from '../../../../../../components/drops/create/types';
 
 jest.mock('../../../../../../components/drops/create/full/mobile/CreateDropFullMobileWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
 jest.mock('../../../../../../components/drops/create/utils/CreateDropContent', () => React.forwardRef(() => <div data-testid="content" />));

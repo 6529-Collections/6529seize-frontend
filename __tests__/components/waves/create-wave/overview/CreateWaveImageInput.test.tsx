@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AuthContext } from '../../../../../components/auth/Auth';
 import CreateWaveImageInput from '../../../../../components/waves/create-wave/overview/CreateWaveImageInput';
 import { createMockAuthContext } from '../../../../utils/testContexts';

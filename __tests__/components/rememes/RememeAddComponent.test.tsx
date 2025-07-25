@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RememeAddComponent, { ProcessedRememe } from '../../../components/rememes/RememeAddComponent';
+import RememeAddComponent from '../../../components/rememes/RememeAddComponent';
 import { NFT } from '../../../entities/INFT';
 import * as api from '../../../services/6529api';
 

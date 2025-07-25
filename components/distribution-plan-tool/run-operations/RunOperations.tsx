@@ -5,7 +5,6 @@ import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 import {
   AllowlistDescription,
   AllowlistRunStatus,
-  AllowlistToolResponse,
 } from "../../allowlist-tool/allowlist-tool.types";
 import { useInterval } from "react-use";
 import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";

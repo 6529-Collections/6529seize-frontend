@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "@/styles/Home.module.scss";
-import { LoginImage } from "../access/page.client";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+import styles from "@/styles/Home.module.scss";
+import { useEffect, useState } from "react";
+import { LoginImage } from "../access/page.client";
 
 export default function RestrictedPage() {
   useSetTitle("Restricted");
@@ -43,8 +41,4 @@ export default function RestrictedPage() {
       </div>
     </main>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Restricted" });
 }

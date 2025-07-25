@@ -1,4 +1,4 @@
-import styles from "../../../../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { useShallowRedirect } from "./[[...view]]";

@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GroupsSelectActiveGroup from '../../../../components/groups/select/GroupsSelectActiveGroup';
-import { useQuery } from '@tanstack/react-query';
-import { useDispatch } from 'react-redux';
 import { QueryKey } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('@tanstack/react-query', () => ({

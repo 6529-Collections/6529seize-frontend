@@ -11,15 +11,20 @@ import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types"
 import AllowlistToolLoader, {
   AllowlistToolLoaderSize,
 } from "../../allowlist-tool/common/AllowlistToolLoader";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
 
 export default function CreatePlan() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { setState } = useContext(DistributionPlanToolContext);
   useEffect(() => {
-    const { id } = router.query;
+    const id = searchParams?.get("id");
+    if (!id) {
+      router.push("/emma");
+      return;
+    }
     const fetchAllowlist = async () => {
       const data = await distributionPlanApiFetch<AllowlistDescription>(
         `/allowlists/${id}`

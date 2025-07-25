@@ -4,7 +4,6 @@ import UserPageWaves from '../../../../components/user/waves/UserPageWaves';
 import { AuthContext } from '../../../../components/auth/Auth';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
-import { useDebounce } from 'react-use';
 import { createMockAuthContext } from '../../../utils/testContexts';
 import { ApiIdentity } from '../../../../generated/models/ApiIdentity';
 import { ApiWave } from '../../../../generated/models/ApiWave';

@@ -1,15 +1,9 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
-import dynamic from "next/dynamic";
+import LatestActivity from "@/components/latest-activity/LatestActivity";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
-
-const LatestActivity = dynamic(() => import("@/components/latest-activity/LatestActivity"), {
-  ssr: false,
-});
+import styles from "@/styles/Home.module.scss";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function NFTActivityPage() {
   useSetTitle("NFT Activity | Network");
@@ -25,8 +19,4 @@ export default function NFTActivityPage() {
       </Container>
     </main>
   );
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "NFT Activity", description: "Network" });
 }

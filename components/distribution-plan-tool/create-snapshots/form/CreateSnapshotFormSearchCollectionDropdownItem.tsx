@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AllowlistToolResponse,
   DistributionPlanSearchContractMetadataResult,
 } from "../../../allowlist-tool/allowlist-tool.types";
 import Image from "next/image";

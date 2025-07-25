@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useWebSocketMessage, useWebSocketMessages, useWebsocketStatus } from '../../services/websocket/useWebSocketMessage';
 import { WebSocketStatus } from '../../services/websocket/WebSocketTypes';
 
@@ -54,7 +54,7 @@ describe('useWebSocketMessages', () => {
 
   it('subscribes to all messages and cleans up', () => {
     const { unmount } = renderHook(() =>
-      useWebSocketMessages({ A: jest.fn(), B: jest.fn() })
+      useWebSocketMessages({ A: jest.fn(), B: jest.fn() } as any)
     );
     expect(useWebSocket().subscribe).toHaveBeenCalledTimes(2);
     unmount();

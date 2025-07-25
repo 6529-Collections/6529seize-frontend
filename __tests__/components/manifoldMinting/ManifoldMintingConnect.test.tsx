@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ManifoldMintingConnect from '../../../components/manifoldMinting/ManifoldMintingConnect';
 import { AuthContext } from '../../../components/auth/Auth';
-import { useSeizeConnectContext } from '../../../components/auth/SeizeConnectContext';
 import { CookieConsentProvider } from '../../../components/cookies/CookieConsentContext';
 
 jest.mock('../../../components/header/user/HeaderUserConnect', () => () => <div data-testid="header-connect" />);

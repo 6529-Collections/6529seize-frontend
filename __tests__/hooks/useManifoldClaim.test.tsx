@@ -1,11 +1,11 @@
 import { renderHook, waitFor } from "@testing-library/react";
+import { useReadContract } from "wagmi";
+import { NULL_MERKLE } from "../../constants";
 import {
-  useManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
+  useManifoldClaim,
 } from "../../hooks/useManifoldClaim";
-import { NULL_MERKLE } from "../../constants";
-import { useReadContract } from "wagmi";
 
 jest.mock("wagmi", () => ({ useReadContract: jest.fn() }));
 
@@ -22,13 +22,13 @@ afterEach(() => {
 test("builds claim from contract data", async () => {
   mockRead.mockReturnValue({
     data: [
-      3n,
+      BigInt(3),
       {
-        total: 1n,
-        totalMax: 2n,
-        cost: 0n,
-        startDate: 100n,
-        endDate: 200n,
+        total: BigInt(1),
+        totalMax: BigInt(2),
+        cost: BigInt(0),
+        startDate: BigInt(100),
+        endDate: BigInt(200),
         merkleRoot: NULL_MERKLE,
       },
     ],

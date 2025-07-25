@@ -4,8 +4,6 @@ import styles from "./MappingTool.module.scss";
 import { Form, Row, Col, Button, Container } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
 import {
-  ALL_USE_CASE,
-  ALL_USE_CASES,
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";

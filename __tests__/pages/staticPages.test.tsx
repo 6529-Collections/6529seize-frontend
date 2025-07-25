@@ -1,15 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import AboutRules from "@/app/about/rules/page";
-import CasaBatllo from "@/pages/casabatllo";
-import Museum from "@/pages/museum";
-import ElementColumns from "@/pages/element_category/columns";
+import CasaBatllo from "@/app/casabatllo/page";
+import Museum from "@/app/museum/page";
+import ElementColumns from "@/app/element_category/columns/page";
 import MemeLabDistribution from "@/pages/meme-lab/[id]/distribution";
-import AuthorNft6529 from "@/pages/author/nft6529";
-import BlogArtists from "@/pages/blog/a-tale-of-two-artists";
+import AuthorNft6529 from "@/app/author/nft6529/page";
+import BlogArtists from "@/app/blog/a-tale-of-two-artists/page";
 import CapitalFund from "@/app/capital/fund/page";
-import ElementSections from "@/pages/element_category/sections";
-import EmmaPlan from "@/pages/emma/plans/[id]";
+import ElementSections from "@/app/element_category/sections/page";
+import EmmaPlan from "@/app/emma/plans/[id]/page";
 
 jest.mock("next/font/google", () => ({
   Poppins: () => ({ className: "poppins" }),
@@ -26,12 +26,12 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
     isAuthenticated: false,
   }),
 }));
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
-    query: { id: "1" },
   }),
+  useSearchParams: () => ({ get: () => "1" }),
 }));
 jest.mock("react-use", () => ({ useInterval: jest.fn() }));
 

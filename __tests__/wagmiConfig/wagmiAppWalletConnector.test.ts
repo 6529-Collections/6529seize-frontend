@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   createAppWalletConnector,
   APP_WALLET_CONNECTOR_TYPE,
@@ -82,7 +83,7 @@ describe("wagmiAppWalletConnector", () => {
 
     mockGetChains.mockReturnValue(mockChains);
     mockCreateConnector.mockImplementation((factory) =>
-      factory({ emitter: mockEmitter })
+      (factory as any)({ emitter: mockEmitter } as any) as any
     );
     mockFallback.mockReturnValue({} as any);
     mockHttp.mockReturnValue({} as any);
@@ -98,7 +99,7 @@ describe("wagmiAppWalletConnector", () => {
 
   describe("createAppWalletConnector", () => {
     it("creates connector with correct properties", () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -114,7 +115,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("sets password successfully with valid credentials", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -143,7 +144,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("fails password validation with invalid credentials", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -157,7 +158,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("handles decryption errors gracefully", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -171,7 +172,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("connects successfully with valid password", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -195,7 +196,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("uses default chain ID when none provided", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -212,7 +213,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("throws error when no val  id account found after decryption", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -231,7 +232,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("disconnects properly", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -243,7 +244,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("gets accounts after connection", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -262,7 +263,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("returns empty accounts when no decrypted key", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -272,15 +273,15 @@ describe("wagmiAppWalletConnector", () => {
       try {
         await connector.getAccounts();
         fail("Should have thrown an error");
-      } catch (error) {
-        expect(error.message).toBe(
+      } catch (err: any) {
+        expect(err.message).toBe(
           "No decrypted key found. Call connect() first."
         );
       }
     });
 
     it("gets current chain ID", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -291,7 +292,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("checks authorization status", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -312,7 +313,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("switches chain successfully", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -333,7 +334,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("throws error when switching to unknown chain", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -345,7 +346,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("handles ensureHexPrefix correctly", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -362,7 +363,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("preserves hex prefix when already present", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -379,7 +380,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("handles event listeners correctly", () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal
@@ -408,7 +409,7 @@ describe("wagmiAppWalletConnector", () => {
     });
 
     it("gets provider and client", async () => {
-      const connector = createAppWalletConnector(
+      const connector: any = createAppWalletConnector(
         mockChains,
         { appWallet: mockAppWallet },
         mockRequestPasswordModal

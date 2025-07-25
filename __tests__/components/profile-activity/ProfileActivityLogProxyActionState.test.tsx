@@ -1,39 +1,46 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import ProfileActivityLogProxyActionState from '../../../components/profile-activity/list/items/ProfileActivityLogProxyActionState';
-import { ApiProfileProxyActionType } from '../../../generated/models/ApiProfileProxyActionType';
-import { AcceptActionRequestActionEnum } from '../../../generated/models/AcceptActionRequest';
-import { ProfileActivityLogType } from '../../../entities/IProfile';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import ProfileActivityLogProxyActionState from "@/components/profile-activity/list/items/ProfileActivityLogProxyActionState";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
+import { ProfileActivityLogType } from "@/entities/IProfile";
 
-jest.mock('../../../components/user/utils/CommonProfileLink', () => ({ __esModule: true, default: jest.fn(() => <div data-testid="link" />) }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock("@/components/user/utils/CommonProfileLink", () => ({
+  __esModule: true,
+  default: jest.fn(() => <div data-testid="link" />),
+}));
+jest.mock("next/navigation", () => ({ useSearchParams: jest.fn() }));
 
-const { default: CommonProfileLink } = require('../../../components/user/utils/CommonProfileLink');
-const { useRouter } = require('next/router');
+const {
+  default: CommonProfileLink,
+} = require("@/components/user/utils/CommonProfileLink");
+const { useSearchParams } = require("next/navigation");
 
-describe('ProfileActivityLogProxyActionState', () => {
+describe("ProfileActivityLogProxyActionState", () => {
   beforeEach(() => {
     (CommonProfileLink as jest.Mock).mockClear();
   });
 
-  it('renders labels and uses CommonProfileLink', () => {
-    (useRouter as jest.Mock).mockReturnValue({ query: { user: 'Alice' } });
+  it("renders labels and uses CommonProfileLink", () => {
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams({ user: "Alice" })
+    );
     const log: any = {
       type: ProfileActivityLogType.PROXY_ACTION_STATE_CHANGED,
-      target_profile_handle: 'Alice',
+      target_profile_handle: "Alice",
       contents: {
-        action_id: '1',
-        proxy_id: 'p',
+        action_id: "1",
+        proxy_id: "p",
         type: ApiProfileProxyActionType.CreateWave,
         state_change_type: AcceptActionRequestActionEnum.Accept,
       },
     };
     render(<ProfileActivityLogProxyActionState log={log} />);
-    expect(screen.getByText('proxy')).toBeInTheDocument();
-    expect(screen.getByText('accepted')).toBeInTheDocument();
-    expect(screen.getByTestId('link')).toBeInTheDocument();
+    expect(screen.getByText("proxy")).toBeInTheDocument();
+    expect(screen.getByText("accepted")).toBeInTheDocument();
+    expect(screen.getByTestId("link")).toBeInTheDocument();
     expect((CommonProfileLink as jest.Mock).mock.calls[0][0]).toMatchObject({
-      handleOrWallet: 'Alice',
+      handleOrWallet: "Alice",
       isCurrentUser: true,
     });
   });

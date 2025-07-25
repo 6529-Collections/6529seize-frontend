@@ -1,3 +1,5 @@
+"use client"
+
 import { useMemo } from "react";
 import { ApiWave } from "../generated/models/ApiWave";
 import { Time } from "../helpers/time";

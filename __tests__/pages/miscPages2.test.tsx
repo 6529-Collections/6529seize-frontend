@@ -1,15 +1,20 @@
+import WillowShield from "@/app/museum/genesis/willow-shield/page";
+import JoinOm from "@/app/om/join-om/page";
+import PartnershipRequest from "@/app/om/partnership-request/page";
+import ConsolidatedMetrics from "@/app/open-data/consolidated-network-metrics/page";
+import MemeSubscriptions from "@/app/open-data/meme-subscriptions/page";
+import AddRememes from "@/app/rememes/add/page";
+import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
+import AppWallets from "@/app/tools/app-wallets/page";
+import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
+import { AuthContext } from "@/components/auth/Auth";
+import { NextGenCollection } from "@/entities/INextgen";
+import NextGenDistributionPlan from "@/pages/nextgen/collection/[collection]/distribution-plan";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import WillowShield from "@/pages/museum/genesis/willow-shield";
-import NextGenDistributionPlan from "@/pages/nextgen/collection/[collection]/distribution-plan";
-import JoinOm from "@/pages/om/join-om";
-import PartnershipRequest from "@/pages/om/partnership-request";
-import ConsolidatedMetrics from "@/pages/open-data/consolidated-network-metrics";
-import MemeSubscriptions from "@/pages/open-data/meme-subscriptions";
-import AddRememes from "@/pages/rememes/add";
-import SlideInitiatives from "@/pages/slide-page/6529-initiatives";
-import AppWallets from "@/pages/tools/app-wallets";
-import { AuthContext } from "@/components/auth/Auth";
+import { mainnet } from "viem/chains";
+import { WagmiProvider, createConfig, http } from "wagmi";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("next/navigation", () => ({
@@ -41,10 +46,27 @@ jest.mock("@/contexts/TitleContext", () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: "0x123",
+    isConnected: true,
+    seizeConnect: jest.fn(),
+    seizeConnectOpen: false,
+  }),
+}));
+
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: () => ({
+    seizeSettings: {
+      rememes_submission_tdh_threshold: 6942,
+    },
+  }),
+}));
+
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const value = useMemo(() => ({ setTitle: jest.fn() }), []);
+  const value = useMemo(() => ({ setTitle: jest.fn() } as any), []);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
@@ -55,7 +77,11 @@ describe("misc pages render", () => {
   });
 
   it("renders NextGen distribution plan page", () => {
-    render(<NextGenDistributionPlan collection={{ name: "name" }} />);
+    render(
+      <NextGenDistributionPlan
+        collection={{ name: "name" } as NextGenCollection}
+      />
+    );
     expect(screen.getByTestId("dynamic")).toBeInTheDocument();
   });
 
@@ -77,7 +103,9 @@ describe("misc pages render", () => {
         <ConsolidatedMetrics />
       </TestProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Consolidated Network Metrics/i)
+    ).toBeInTheDocument();
   });
 
   it("renders meme subscriptions page", () => {
@@ -86,16 +114,32 @@ describe("misc pages render", () => {
         <MemeSubscriptions />
       </TestProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(screen.getByText(/Meme Subscriptions/i)).toBeInTheDocument();
   });
 
   it("renders add rememes page", () => {
-    render(
-      <TestProvider>
-        <AddRememes />
-      </TestProvider>
+    const queryClient = new QueryClient();
+    const mockConfig = createConfig({
+      chains: [mainnet],
+      transports: {
+        [mainnet.id]: http(),
+      },
+    });
+
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WagmiProvider config={mockConfig}>
+        <TestProvider>{children}</TestProvider>
+      </WagmiProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TestProvider>
+          <AddRememes />
+        </TestProvider>
+      </QueryClientProvider>,
+      { wrapper: Wrapper }
+    );
+    expect(screen.getByText(/add ReMemes/i)).toBeInTheDocument();
   });
 
   it("renders slide initiatives redirect page", () => {
@@ -106,9 +150,11 @@ describe("misc pages render", () => {
   it("renders app wallets page", () => {
     render(
       <TestProvider>
-        <AppWallets />
+        <AppWalletsProvider>
+          <AppWallets />
+        </AppWalletsProvider>
       </TestProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(screen.getByText(/App Wallets/i)).toBeInTheDocument();
   });
 });

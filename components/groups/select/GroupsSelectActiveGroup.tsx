@@ -1,18 +1,18 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import GroupItem from "./item/GroupItem";
-import { CommunityMemberOverview } from "../../../entities/IProfile";
-import { Page } from "../../../helpers/Types";
-import { CommunityMembersQuery } from "../../../pages/network/index";
-import { SortDirection } from "../../../entities/ISort";
+import { CommunityMemberOverview } from "@/entities/IProfile";
+import { Page } from "@/helpers/Types";
+import { CommunityMembersQuery } from "@/app/network/page";
+import { SortDirection } from "@/entities/ISort";
 import { useEffect, useState } from "react";
-import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useDispatch } from "react-redux";
-import { setActiveGroupId } from "../../../store/groupSlice";
-import { CommunityMembersSortOption } from "../../../enums";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { setActiveGroupId } from "@/store/groupSlice";
+import { CommunityMembersSortOption } from "@/enums";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupsSelectActiveGroup({
   activeGroupId,

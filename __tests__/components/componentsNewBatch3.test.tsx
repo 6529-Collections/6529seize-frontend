@@ -1,4 +1,3 @@
-import React from 'react';
 
 describe('Complex Components Import Tests', () => {
   describe('Component Import Tests', () => {

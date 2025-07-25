@@ -1,3 +1,5 @@
+"use client"
+
 import { useCallback } from "react";
 import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
 import { useMyStream } from "../contexts/wave/MyStreamContext";

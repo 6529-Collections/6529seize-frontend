@@ -3,7 +3,6 @@ import UserPageRateWrapper from '../../../../../components/user/utils/rate/UserP
 import { RateMatter } from '../../../../../entities/IProfile';
 import { AuthContext } from '../../../../../components/auth/Auth';
 import { useSeizeConnectContext } from '../../../../../components/auth/SeizeConnectContext';
-import CommonInfoBox from '../../../../../components/utils/CommonInfoBox';
 import React from 'react';
 
 jest.mock('../../../../../components/auth/SeizeConnectContext');

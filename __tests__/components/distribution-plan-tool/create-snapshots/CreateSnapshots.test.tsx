@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import CreateSnapshots from '../../../../components/distribution-plan-tool/create-snapshots/CreateSnapshots';
 import { DistributionPlanToolContext, DistributionPlanToolStep } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode, DistributionPlanTokenPoolDownloadStatus } from '../../../../components/allowlist-tool/allowlist-tool.types';
+import { AllowlistOperationCode } from '../../../../components/allowlist-tool/allowlist-tool.types';
 
 // eslint-disable-next-line react/display-name
 jest.mock('../../../../components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTable', () => ({ snapshots }: any) => <div data-testid="table">{snapshots.length}</div>);

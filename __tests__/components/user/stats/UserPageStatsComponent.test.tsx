@@ -1,4 +1,3 @@
-import React from 'react';
 
 jest.mock('next/router', () => ({
   useRouter: () => ({

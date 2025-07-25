@@ -1,4 +1,4 @@
-import styles from "../../../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { MEMELAB_CONTRACT } from "../../../constants";

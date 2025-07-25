@@ -1,4 +1,4 @@
-import { Col, Container, Row, Table } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import Image from "next/image";
 import { AboutSection } from "@/enums";
 import Link from "next/link";

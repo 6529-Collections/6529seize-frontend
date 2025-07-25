@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import { AcceptConnectionSharing } from "@/app/accept-connection-sharing/page";
+import { AcceptConnectionSharing } from "@/app/accept-connection-sharing/page.client";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -76,5 +76,4 @@ describe("AcceptConnectionSharing page", () => {
     expect(screen.getByText(/Incoming Connection/)).toBeInTheDocument();
     expect(screen.getByText(/0x123/)).toBeInTheDocument();
   });
-
 });
