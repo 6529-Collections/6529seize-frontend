@@ -1,10 +1,11 @@
 "use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
-import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState, type JSX } from "react";
 import { AuthContext } from "../auth/Auth";
+import CreateDirectMessage from "./create-dm/CreateDirectMessage";
+import CreateWave from "./create-wave/CreateWave";
 import WavesList from "./list/WavesList";
 
 enum WavesViewMode {
@@ -12,17 +13,6 @@ enum WavesViewMode {
   CREATE_DM = "CREATE_DM",
   VIEW = "VIEW",
 }
-
-const CreateWave = dynamic(() => import("./create-wave/CreateWave"), {
-  ssr: false,
-});
-
-const CreateDirectMessage = dynamic(
-  () => import("./create-dm/CreateDirectMessage"),
-  {
-    ssr: false,
-  }
-);
 
 const NEW_WAVE_SEARCH_PARAM = "new";
 const NEW_DIRECT_MESSAGE_SEARCH_PARAM = "new-dm";
