@@ -8,7 +8,7 @@ import ScreensPage from "@/app/museum/6529-fund-szn1/screens/page";
 import TwinFlames from "@/app/museum/6529-fund-szn1/twin-flames/page";
 import PhotoA from "@/app/museum/6529-photo-a/page";
 import Batsoupyum from "@/app/museum/batsoupyum-museum-2/page";
-import MemeLabId from "../../pages/meme-lab/[id]";
+import MemeLabId from "../../app/meme-lab/[id]/page";
 import BharatKrymo from "@/app/museum/bharat-krymo-museum-1/page";
 import GenerativeArt from "@/app/museum/generative-art/page";
 import SevenTwenty from "@/app/museum/genesis/720-minutes/page";
@@ -63,8 +63,12 @@ describe("additional museum and memelab pages render", () => {
     expect(screen.getAllByText(/BATSOUP/i).length).toBeGreaterThan(0);
   });
 
-  it("renders Meme Lab page", () => {
-    render(<MemeLabId />);
+  it("renders Meme Lab page", async () => {
+    const element = await MemeLabId({
+      params: Promise.resolve({ id: "1" }),
+      searchParams: Promise.resolve({ focus: "live" }),
+    } as any);
+    render(element);
     expect(screen.getByTestId("dynamic")).toBeInTheDocument();
   });
 

@@ -1,11 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import LabCollection from '../../../components/memelab/MemeLabCollection';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchAllPages } from '../../../services/6529api';
 import { AuthContext } from '../../../components/auth/Auth';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+const useSearch = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: () => useSearch(),
+}));
 jest.mock('../../../services/6529api', () => ({ fetchAllPages: jest.fn() }));
 
 jest.mock('../../../components/nft-image/NFTImage', () => (props: any) => <div data-testid={`nft-${props.nft.id}`}>{props.nft.name}</div>);
@@ -16,7 +20,8 @@ const routerReplace = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (useRouter as jest.Mock).mockReturnValue({ isReady: true, query: { collection: 'cool-collection' }, replace: routerReplace });
+  (useRouter as jest.Mock).mockReturnValue({ replace: routerReplace });
+  useSearch.mockReturnValue(new URLSearchParams('collection=cool-collection'));
   process.env.API_ENDPOINT = 'https://api.test';
 });
 

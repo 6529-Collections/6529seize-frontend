@@ -4,7 +4,7 @@ import AboutRules from "@/app/about/rules/page";
 import CasaBatllo from "@/app/casabatllo/page";
 import Museum from "@/app/museum/page";
 import ElementColumns from "@/app/element_category/columns/page";
-import MemeLabDistribution from "@/pages/meme-lab/[id]/distribution";
+import MemeLabDistribution from "@/app/meme-lab/[id]/distribution/page";
 import AuthorNft6529 from "@/app/author/nft6529/page";
 import BlogArtists from "@/app/blog/a-tale-of-two-artists/page";
 import CapitalFund from "@/app/capital/fund/page";

@@ -5,7 +5,7 @@ import { getServerSideProps as getGroupsProps } from "@/pages/[user]/groups";
 import { getServerSideProps as getStatsProps } from "@/pages/[user]/stats";
 import OpenMetaverse from "@/app/about/open-metaverse/page";
 import Tweetstorms from "@/app/education/tweetstorms/page";
-import MemeLab from "@/pages/meme-lab";
+import MemeLab from "@/app/meme-lab/page";
 import FamPage from "@/app/museum/6529-fam/page";
 import BalladOfGhosts from "@/app/museum/6529-fund-szn1/ballad-of-ghosts/page";
 import DeadRingers from "@/app/museum/6529-fund-szn1/dead-ringers/page";
