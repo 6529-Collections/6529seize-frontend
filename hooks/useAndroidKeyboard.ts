@@ -44,21 +44,19 @@ export function useAndroidKeyboard() {
     };
 
     const handleFocusIn = (e: FocusEvent) => {
-      // If Capacitor listeners haven't been added or aren't working, use fallback
-      timer = window.setTimeout(() => {
-        detectKeyboard();
-        
-        // Fallback: If detection still shows 0 and this is an input element, assume keyboard is open
+      // Immediate synchronous detection for first-time responsiveness
+      detectKeyboard();
+      
+      // Immediate fallback for input elements if no height detected
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true')) {
         if (keyboardHeight === 0) {
-          const target = e.target as HTMLElement;
-          if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true')) {
-            const fallbackHeight = Math.floor(window.innerHeight * 0.35); // 35% of screen height
-            setKeyboardHeight(fallbackHeight);
-            setIsVisible(true);
-            document.documentElement.style.setProperty('--android-keyboard-height', `${fallbackHeight}px`);
-          }
+          const fallbackHeight = Math.floor(window.innerHeight * 0.35);
+          setKeyboardHeight(fallbackHeight);
+          setIsVisible(true);
+          document.documentElement.style.setProperty('--android-keyboard-height', `${fallbackHeight}px`);
         }
-      }, 0); // Change from }, 50); to }, 0);
+      }
     };
 
     const handleFocusOut = (e: FocusEvent) => {

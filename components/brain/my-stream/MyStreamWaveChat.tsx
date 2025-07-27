@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   ActiveDropAction,
   ActiveDropState,
@@ -37,12 +37,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const { isApp } = useDeviceInfo();
   const { keyboardHeight, isVisible, isAndroid } = useAndroidKeyboard();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-
-  // On-screen debug state for Android testing
-  const [debugLog, setDebugLog] = useState<string[]>([]);
-  const addDebugLog = useCallback((message: string) => {
-    setDebugLog(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`]);
-  }, []);
 
   // Handle URL parameters
   useEffect(() => {
@@ -82,15 +76,15 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       return {
         ...baseStyle,
         transform: `translateY(-${adjustedTransform}px)`,
-        transition: 'transform 0.15s ease-out', // Much faster, mobile-optimized
+        transition: 'transform 0.25s ease-out',
       };
     }
     
     return {
       ...baseStyle,
-      transition: 'transform 0.15s ease-out', // Fast reset too
+      transition: 'transform 0.25s ease-out',
     };
-  }, [waveViewStyle, isAndroid, isVisible, keyboardHeight]);
+  }, [waveViewStyle, isAndroid, isVisible, keyboardHeight, activeDrop]);
 
   useEffect(() => setActiveDrop(null), [wave]);
 
@@ -155,11 +149,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
         </div>
       )}
       {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
-      
-      {/* Simple debug panel - add this right before closing </div> */}
-      <div className="tw-fixed tw-bottom-4 tw-left-4 tw-bg-red-600 tw-text-white tw-p-2 tw-text-xs tw-rounded tw-z-[9999]">
-        K: {keyboardHeight}px | V: {isVisible ? 'Y' : 'N'}
-      </div>
     </div>
   );
 };
