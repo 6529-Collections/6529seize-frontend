@@ -35,7 +35,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
-  const { keyboardHeight, isVisible, isAndroid } = useAndroidKeyboard();
+  const { getContainerStyle } = useAndroidKeyboard();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
 
   // Handle URL parameters
@@ -65,26 +65,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     return `${baseStyles} ${heightClass}`;
   }, []);
 
-  // Android keyboard adjustment style  
+  // Android keyboard adjustment style using centralized hook
   const containerStyle = useMemo<React.CSSProperties>(() => {
-    const baseStyle = waveViewStyle || {};
-    
-    // Only transform when keyboard is actually visible
-    if (isAndroid && isVisible && keyboardHeight > 0) {
-      const adjustedTransform = Math.max(0, keyboardHeight - 128);
-      
-      return {
-        ...baseStyle,
-        transform: `translateY(-${adjustedTransform}px)`,
-        transition: 'transform 0.25s ease-out',
-      };
-    }
-    
-    return {
-      ...baseStyle,
-      transition: 'transform 0.25s ease-out',
-    };
-  }, [waveViewStyle, isAndroid, isVisible, keyboardHeight, activeDrop]);
+    return getContainerStyle(waveViewStyle || {});
+  }, [waveViewStyle, getContainerStyle]);
 
   useEffect(() => setActiveDrop(null), [wave]);
 

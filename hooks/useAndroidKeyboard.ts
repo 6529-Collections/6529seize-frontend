@@ -153,5 +153,22 @@ export function useAndroidKeyboard() {
     };
   }, [isAndroid]);
 
-  return { keyboardHeight, isVisible, isAndroid };
+  // Centralized container style for keyboard adjustments
+  const getContainerStyle = (baseStyle: React.CSSProperties = {}): React.CSSProperties => {
+    if (isAndroid && isVisible && keyboardHeight > 0) {
+      const adjustedTransform = Math.max(0, keyboardHeight - 128);
+      return {
+        ...baseStyle,
+        transform: `translateY(-${adjustedTransform}px)`,
+        transition: 'transform 0.25s ease-out',
+      };
+    }
+    
+    return {
+      ...baseStyle,
+      transition: 'transform 0.25s ease-out',
+    };
+  };
+
+  return { keyboardHeight, isVisible, isAndroid, getContainerStyle };
 } 
