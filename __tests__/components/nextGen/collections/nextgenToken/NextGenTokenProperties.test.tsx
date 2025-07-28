@@ -4,6 +4,18 @@ import { render, screen, fireEvent } from '@testing-library/react';
 const { displayScore, NextgenRarityToggle, NextgenTokenTraits } = require('../../../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties');
 
 describe('displayScore', () => {
+  beforeEach(() => {
+    // Mock toLocaleString to ensure English locale for consistent decimal formatting
+    const originalToLocaleString = Number.prototype.toLocaleString;
+    jest.spyOn(Number.prototype, 'toLocaleString').mockImplementation(function(this: number, locales?: string | string[], options?: Intl.NumberFormatOptions) {
+      return originalToLocaleString.call(this, 'en-US', options);
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('formats numbers based on size', () => {
     expect(displayScore(0.02)).toBe('0.020');
     expect(displayScore(0.0005)).toBe('5.000e-4');

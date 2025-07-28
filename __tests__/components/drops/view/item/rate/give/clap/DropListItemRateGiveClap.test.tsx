@@ -19,6 +19,38 @@ jest.mock('../../../../../../../../helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: () => 'id123',
 }));
 
+jest.mock('../../../../../../../../helpers/Helpers', () => ({
+  formatLargeNumber: jest.fn((num) => {
+    const absNum = Math.abs(num);
+    if (absNum < 1000) {
+      return absNum.toLocaleString('en-US');
+    } else if (absNum < 10000) {
+      const value = absNum / 1000;
+      if (value % 1 === 0) {
+        return `${value.toLocaleString('en-US')}K`;
+      } else {
+        return `${value.toLocaleString('en-US', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })}K`;
+      }
+    } else if (absNum < 1000000) {
+      const value = absNum / 1000;
+      return `${value.toLocaleString('en-US')}K`;
+    } else {
+      const value = absNum / 1000000;
+      if (value % 1 === 0) {
+        return `${value.toLocaleString('en-US')}M`;
+      } else {
+        return `${value.toLocaleString('en-US', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })}M`;
+      }
+    }
+  }),
+}));
+
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children }: any) => <div data-testid="tooltip">{children}</div>,
 }));

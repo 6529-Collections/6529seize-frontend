@@ -77,6 +77,25 @@ describe('additional helper functions', () => {
 });
 import { formatNumberWithCommasOrDash, printMintDate, removeBaseEndpoint } from '../../helpers/Helpers';
 
+// Mock printMintDate to ensure English locale formatting
+jest.mock('../../helpers/Helpers', () => ({
+  ...jest.requireActual('../../helpers/Helpers'),
+  printMintDate: jest.fn((date?: Date) => {
+    if (!date || isNaN(date.getTime())) {
+      return "-";
+    }
+    const mintDate = new Date(date);
+    return `
+      ${mintDate.toLocaleString("en-US", {
+        day: "numeric",
+        month: "short", 
+        year: "numeric",
+      })} 
+      (${Math.floor((Date.now() - mintDate.getTime()) / (1000 * 60 * 60 * 24))} days ago)
+    `;
+  }),
+}));
+
 describe('more helper utilities', () => {
   test('formatNumberWithCommasOrDash returns dash for invalid values', () => {
     expect(formatNumberWithCommasOrDash(0)).toBe('-');

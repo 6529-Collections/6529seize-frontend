@@ -23,7 +23,7 @@ jest.mock('../../../../helpers/Helpers', () => ({
     if (cic >= 30) return 'UNKNOWN';
     return 'INACCURATE';
   },
-  formatNumberWithCommas: (num: number) => num.toLocaleString(),
+  formatNumberWithCommas: (num: number) => num.toLocaleString('en-US'),
 }));
 
 jest.mock('../../../../helpers/AllowlistToolHelpers', () => ({
