@@ -112,9 +112,8 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders && pinnedWaves.length > 0 && (
           <>
             <SectionHeader label="Pinned" icon={faThumbtack} />
-            <div 
+            <section 
               className="tw-flex tw-flex-col tw-mb-3"
-              role="region"
               aria-label="Pinned waves">
               {pinnedWaves
                 .filter((wave): wave is MinimalWave => {
@@ -133,19 +132,18 @@ const UnifiedWavesListWaves = forwardRef<
                     />
                   </div>
                 ))}
-            </div>
+            </section>
           </>
         )}
         
         {/* Conditionally show regular waves or maintain structure */}
         {regularWaves.length > 0 ? (
-          <div
+          <section
             ref={listContainerRef}
             style={{ 
               height: virtual.totalHeight, 
               position: "relative" 
             } satisfies React.CSSProperties}
-            role="region"
             aria-label="Regular waves list">
             {virtual.virtualItems.map((v: VirtualItem) => {
               if (v.index === regularWaves.length) {
@@ -185,7 +183,7 @@ const UnifiedWavesListWaves = forwardRef<
                 </div>
               );
             })}
-          </div>
+          </section>
         ) : (
           <div 
             ref={listContainerRef} 
