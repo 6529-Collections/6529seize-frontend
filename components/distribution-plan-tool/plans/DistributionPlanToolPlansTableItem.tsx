@@ -1,8 +1,7 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";
-import { get } from "http";
 import { useState } from "react";
 import AllowlistToolLoader from "../../allowlist-tool/common/AllowlistToolLoader";
 import { distributionPlanApiDelete } from "../../../services/distribution-plan-api";

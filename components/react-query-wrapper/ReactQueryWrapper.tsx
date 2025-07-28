@@ -7,32 +7,30 @@ import {
   ProfileActivityLog,
   RateMatter,
   RatingWithProfileInfoAndLevel,
-} from "../../entities/IProfile";
-import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
-import { CountlessPage, Page } from "../../helpers/Types";
-import {
-  ActivityLogParams,
-  convertActivityLogParams,
-} from "../profile-activity/ProfileActivityLogs";
+} from "@/entities/IProfile";
+import { UserPageRepPropsRepRates } from "@/pages/[user]/rep";
+import { CountlessPage, Page } from "@/helpers/Types";
+import { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { ApiDrop } from "../../generated/models/ApiDrop";
-import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
-import { wait } from "../../helpers/Helpers";
-import { TypedFeedItem } from "../../types/feed.types";
-import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
-import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { wait } from "@/helpers/Helpers";
+import { TypedFeedItem } from "@/types/feed.types";
+import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import { addDropToDrops } from "./utils/addDropsToDrops";
-import { ApiWave } from "../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "./utils/query-utils";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
-import { useQueryKeyListener } from "../../hooks/useQueryKeyListener";
+import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
 import Cookies from "js-cookie";
-import { Time } from "../../helpers/time";
-import { ApiIdentity } from "../../generated/models/ObjectSerializer";
+import { Time } from "@/helpers/time";
+import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 export enum QueryKey {
   PROFILE = "PROFILE",

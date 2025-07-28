@@ -1,11 +1,12 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import NextGenTokenDownload, { NextGenTokenDownloadDropdownItem, Resolution } from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenDownload';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import NextGenTokenDownload, {
+  NextGenTokenDownloadDropdownItem,
+  Resolution,
+} from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenDownload";
 
 // Mock react-bootstrap components
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
+jest.mock("react-bootstrap", () => {
   const Dropdown: any = (p: any) => <div {...p} />;
   Dropdown.Item = (p: any) => <button {...p} />;
   const RB: any = {
@@ -18,66 +19,103 @@ jest.mock('react-bootstrap', () => {
 });
 
 // Mock external components
-jest.mock('../../../../../components/dotLoader/DotLoader', () => ({
+jest.mock("../../../../../components/dotLoader/DotLoader", () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
   Spinner: () => <div data-testid="spinner" />,
 }));
 
 const mockDownload = jest.fn();
-const mockUseDownloader = jest.fn(() => ({ download: mockDownload, isInProgress: false }));
+const mockUseDownloader = jest.fn(() => ({
+  download: mockDownload,
+  isInProgress: false,
+}));
 
-jest.mock('react-use-downloader', () => ({
+jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: () => mockUseDownloader(),
 }));
 
-
-const token = { id: 7, image_url: 'https://img.com/png/file.png', collection_id: 1 } as any;
+const token = {
+  id: 7,
+  image_url: "https://img.com/png/file.png",
+  collection_id: 1,
+} as any;
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-it('downloads image when dropdown item clicked and image exists', async () => {
-  global.fetch = jest.fn().mockResolvedValue({ ok: true, headers: { get: () => '1500000' } });
-  render(<NextGenTokenDownloadDropdownItem token={token} resolution={Resolution['1K']} />);
+it("downloads image when dropdown item clicked and image exists", async () => {
+  global.fetch = jest
+    .fn()
+    .mockResolvedValue({ ok: true, headers: { get: () => "1500000" } });
+  render(
+    <NextGenTokenDownloadDropdownItem
+      token={token}
+      resolution={Resolution["1K"]}
+    />
+  );
 
-  const button = await screen.findByRole('button');
+  const button = await screen.findByRole("button");
   await waitFor(() => expect(button).not.toBeDisabled());
-  expect(button).toHaveTextContent('1K (1.5 MB)');
+  expect(button).toHaveTextContent("1K (1.5 MB)");
 
   await userEvent.click(button);
-  expect(mockDownload).toHaveBeenCalledWith('https://img.com/png1k/file.png', '7_1K.png');
+  expect(mockDownload).toHaveBeenCalledWith(
+    "https://img.com/png1k/file.png",
+    "7_1K.png"
+  );
 });
 
-it('shows coming soon and disables when image missing', async () => {
+it("shows coming soon and disables when image missing", async () => {
   global.fetch = jest.fn().mockResolvedValue({ ok: false });
-  render(<NextGenTokenDownloadDropdownItem token={token} resolution={Resolution['1K']} />);
+  render(
+    <NextGenTokenDownloadDropdownItem
+      token={token}
+      resolution={Resolution["1K"]}
+    />
+  );
 
-  const button = await screen.findByRole('button');
+  const button = await screen.findByRole("button");
   expect(button).toBeDisabled();
-  expect(button).toHaveTextContent('1K Coming Soon');
+  expect(button).toHaveTextContent("1K Coming Soon");
   await userEvent.click(button);
   expect(mockDownload).not.toHaveBeenCalled();
 });
 
-it('opens link and downloads via button in main component', async () => {
-  global.fetch = jest.fn().mockResolvedValue({ ok: true, headers: { get: () => '2000000' } });
+it("opens link and downloads via button in main component", async () => {
+  global.fetch = jest
+    .fn()
+    .mockResolvedValue({ ok: true, headers: { get: () => "2000000" } });
   const open = jest.fn();
   const origOpen = window.open;
   // @ts-ignore
   window.open = open;
 
-  render(<NextGenTokenDownload token={token} resolution={Resolution['4K']} />);
+  const { container } = render(
+    <NextGenTokenDownload token={token} resolution={Resolution["4K"]} />
+  );
 
-  await waitFor(() => expect(screen.queryByTestId('loader')).not.toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.queryByTestId("loader")).not.toBeInTheDocument()
+  );
 
-  await userEvent.click(screen.getByTestId('arrow-up-right-from-square'));
-  expect(open).toHaveBeenCalledWith('https://img.com/png4k/file.png', '_blank');
+  const icon = container.querySelector(
+    `[data-tooltip-id="external-link-${token.id}-${Resolution["4K"]}"]`
+  );
 
-  await userEvent.click(screen.getByTestId('download'));
-  expect(mockDownload).toHaveBeenCalledWith('https://img.com/png4k/file.png', '7_4K.png');
+  await userEvent.click(icon!);
+  expect(open).toHaveBeenCalledWith("https://img.com/png4k/file.png", "_blank");
+
+  const download = container.querySelector(
+    `[data-tooltip-id="download-${token.id}-${Resolution["4K"]}"]`
+  );
+  await userEvent.click(download!);
+  expect(mockDownload).toHaveBeenCalledWith(
+    "https://img.com/png4k/file.png",
+    "7_4K.png"
+  );
 
   window.open = origOpen;
 });

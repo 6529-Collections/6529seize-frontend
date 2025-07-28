@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
-import { GlobalTDHHistory } from "../../entities/ITDH";
+import { DBResponse } from "@/entities/IDBResponse";
+import { fetchUrl } from "@/services/6529api";
+import { GlobalTDHHistory } from "@/entities/ITDH";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -17,6 +17,7 @@ import {
   BarElement,
 } from "chart.js";
 import { numberWithCommas } from "../../helpers/Helpers";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 ChartJS.register(
   CategoryScale,
@@ -57,9 +58,10 @@ const GRAPH_OPTIONS = {
 };
 
 export default function CommunityStats() {
-  const [page, setPage] = useState(1);
+  useSetTitle("Stats | Network");
 
-  const [pageSize, setPageSize] = useState(10);
+  const page = 1;
+  const pageSize = 10;
 
   const [tdhHistory, setTdhHistory] = useState<GlobalTDHHistory[]>([]);
   const [latestHistory, setLatestHistory] = useState<GlobalTDHHistory>();

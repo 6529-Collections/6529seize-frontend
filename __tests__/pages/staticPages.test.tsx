@@ -1,15 +1,15 @@
+import AboutRules from "@/app/about/rules/page";
+import AuthorNft6529 from "@/app/author/nft6529/page";
+import BlogArtists from "@/app/blog/a-tale-of-two-artists/page";
+import CapitalFund from "@/app/capital/fund/page";
+import CasaBatllo from "@/app/casabatllo/page";
+import ElementColumns from "@/app/element_category/columns/page";
+import ElementSections from "@/app/element_category/sections/page";
+import EmmaPlan from "@/app/emma/plans/[id]/page";
+import Museum from "@/app/museum/page";
+import MemeLabDistribution from "@/pages/meme-lab/[id]/distribution";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import AboutRules from "@/app/about/rules/page";
-import CasaBatllo from "@/pages/casabatllo";
-import Museum from "@/pages/museum";
-import ElementColumns from "@/pages/element_category/columns";
-import MemeLabDistribution from "@/pages/meme-lab/[id]/distribution";
-import AuthorNft6529 from "@/pages/author/nft6529";
-import BlogArtists from "@/pages/blog/a-tale-of-two-artists";
-import CapitalFund from "@/app/capital/fund/page";
-import ElementSections from "@/pages/element_category/sections";
-import EmmaPlan from "@/pages/emma/plans/[id]";
 
 jest.mock("next/font/google", () => ({
   Poppins: () => ({ className: "poppins" }),
@@ -26,12 +26,12 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
     isAuthenticated: false,
   }),
 }));
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
-    query: { id: "1" },
   }),
+  useSearchParams: () => ({ get: () => "1" }),
 }));
 jest.mock("react-use", () => ({ useInterval: jest.fn() }));
 
@@ -105,8 +105,13 @@ describe("static pages render", () => {
     expect(screen.getByText(/redirected/i)).toBeInTheDocument();
   });
 
-  it("emma plan page renders", () => {
-    render(<EmmaPlan />);
+  it("emma plan page renders", async () => {
+    // Await the server component to get the JSX
+    const jsx = await EmmaPlan({ params: Promise.resolve({ id: "1" }) });
+
+    // Now render the resolved JSX
+    render(jsx);
+
     expect(screen.getByTestId("sidebar")).toBeInTheDocument();
   });
 });

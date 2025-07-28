@@ -1,15 +1,15 @@
 // @ts-nocheck
 import React from "react";
-import { render, screen } from "@testing-library/react";
-import AuthorPage from "@/pages/author/6529er6529-io";
+import { render } from "@testing-library/react";
+import AuthorPage from "@/app/author/6529er6529-io/page";
 import CompanyPortfolio from "@/app/capital/company-portfolio/page";
-import EducationPage from "@/pages/education";
-import FakeRares from "@/pages/museum/6529-fund-szn1/fakerares";
-import Gazers from "@/pages/museum/6529-fund-szn1/gazers";
-import RarePepe from "@/pages/museum/6529-fund-szn1/rarepepe";
-import WildChild from "@/pages/museum/6529-fund-szn1/wild-child-2022";
-import Bonafidehan from "@/pages/museum/bonafidehan-museum";
-import AerialView from "@/pages/museum/genesis/aerial-view";
+import EducationPage from "@/app/education/page";
+import FakeRares from "@/app/museum/6529-fund-szn1/fakerares/page";
+import Gazers from "@/app/museum/6529-fund-szn1/gazers/page";
+import RarePepe from "@/app/museum/6529-fund-szn1/rarepepe/page";
+import WildChild from "@/app/museum/6529-fund-szn1/wild-child-2022/page";
+import Bonafidehan from "@/app/museum/bonafidehan-museum/page";
+import AerialView from "@/app/museum/genesis/aerial-view/page";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("@/components/header/Header", () => () => (
@@ -51,7 +51,7 @@ describe("static content pages render meta tags and headings", () => {
     },
     {
       Component: EducationPage,
-      title: "EDUCATION - 6529.io",
+      title: "EDUCATION",
       canonical: "/education/",
       heading: /EDUCATION/i,
     },

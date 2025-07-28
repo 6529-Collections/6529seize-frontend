@@ -2,7 +2,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import BrainLeftSidebar from '../../../../components/brain/left-sidebar/BrainLeftSidebar';
 import { MyStreamWaveTab } from '../../../../types/waves.types';
-import { useRouter } from 'next/router';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('../../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));

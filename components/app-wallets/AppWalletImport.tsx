@@ -3,7 +3,7 @@
 import styles from "./AppWallet.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRef, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   faCheckCircle,

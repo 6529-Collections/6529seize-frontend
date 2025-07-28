@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "../../store/groupSlice";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -41,51 +42,6 @@ export interface ActivityLogParamsConverted {
   target?: string;
   group_id?: string;
 }
-
-export const convertActivityLogParams = ({
-  params,
-  disableActiveGroup,
-}: {
-  readonly params: ActivityLogParams;
-  readonly disableActiveGroup: boolean;
-}): ActivityLogParamsConverted => {
-  const converted: ActivityLogParamsConverted = {
-    page: `${params.page}`,
-    page_size: `${params.pageSize}`,
-    log_type: params.logTypes.length
-      ? [...params.logTypes].sort((a, b) => a.localeCompare(b)).join(",")
-      : "",
-  };
-
-  if (params.matter) {
-    converted.rating_matter = params.matter;
-  }
-  if (params.groupId && !params.handleOrWallet && !disableActiveGroup) {
-    converted.group_id = params.groupId;
-  }
-
-  if (!params.handleOrWallet) {
-    return converted;
-  }
-
-  if (params.targetType === FilterTargetType.ALL) {
-    converted.include_incoming = "true";
-    converted.profile = params.handleOrWallet;
-    return converted;
-  }
-
-  if (params.targetType === FilterTargetType.INCOMING) {
-    converted.target = params.handleOrWallet;
-    return converted;
-  }
-
-  if (params.targetType === FilterTargetType.OUTGOING) {
-    converted.profile = params.handleOrWallet;
-    return converted;
-  }
-
-  return converted;
-};
 
 export default function ProfileActivityLogs({
   initialParams,

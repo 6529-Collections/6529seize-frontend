@@ -1,16 +1,16 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppWallet from '../../../components/app-wallets/AppWallet';
 import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
 import { useAuth } from '../../../components/auth/Auth';
 import { useSeizeConnectContext } from '../../../components/auth/SeizeConnectContext';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useBalance, useChainId } from 'wagmi';
 import { sepolia } from 'viem/chains';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any)=> <img {...p}/> }));
 jest.mock('next/link', () => ({ __esModule: true, default: ({href, children}:any)=> <a href={href}>{children}</a> }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 jest.mock('../../../components/app-wallets/AppWalletsContext');
 jest.mock('../../../components/auth/Auth');
 jest.mock('../../../components/auth/SeizeConnectContext');

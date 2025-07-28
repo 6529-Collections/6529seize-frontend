@@ -1,22 +1,26 @@
 "use client";
 
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
+import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
+import AllowlistToolAnimationOpacity from "../allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
+import AllowlistToolAnimationWrapper from "../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import BuildPhases from "./build-phases/BuildPhases";
+import CreateCustomSnapshots from "./create-custom-snapshots/CreateCustomSnapshots";
+import CreatePhases from "./create-phases/CreatePhases";
+import CreatePlan from "./create-plan/CreatePlan";
+import CreateSnapshots from "./create-snapshots/CreateSnapshots";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "./DistributionPlanToolContext";
-import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
-import CreatePlan from "./create-plan/CreatePlan";
-import CreateSnapshots from "./create-snapshots/CreateSnapshots";
-import CreatePhases from "./create-phases/CreatePhases";
-import BuildPhases from "./build-phases/BuildPhases";
-import CreateCustomSnapshots from "./create-custom-snapshots/CreateCustomSnapshots";
-import ReviewDistributionPlan from "./review-distribution-plan/ReviewDistributionPlan";
-import AllowlistToolAnimationWrapper from "../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import AllowlistToolAnimationOpacity from "../allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
 import MapDelegations from "./map-delegations/MapDelegations";
+import ReviewDistributionPlan from "./review-distribution-plan/ReviewDistributionPlan";
 
-export default function DistributionPlanToolPage() {
+export default function DistributionPlanToolPage({
+  id,
+}: {
+  readonly id: string;
+}) {
   const { step } = useContext(DistributionPlanToolContext);
   return (
     <AllowlistToolAnimationWrapper mode="wait" initial={true}>
@@ -25,7 +29,7 @@ export default function DistributionPlanToolPage() {
           case DistributionPlanToolStep.CREATE_PLAN:
             return (
               <AllowlistToolAnimationOpacity key="CreatePlan">
-                <CreatePlan />
+                <CreatePlan id={id} />
               </AllowlistToolAnimationOpacity>
             );
           case DistributionPlanToolStep.CREATE_SNAPSHOTS:

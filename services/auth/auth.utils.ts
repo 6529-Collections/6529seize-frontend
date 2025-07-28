@@ -73,7 +73,7 @@ export const setAuthJwt = (
   }
 };
 
-export const getStagingAuth = () => {
+export const getStagingAuth = (): string | null => {
   return Cookies.get(API_AUTH_COOKIE) ?? process.env.STAGING_API_KEY ?? null;
 };
 

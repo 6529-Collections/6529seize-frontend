@@ -1,25 +1,43 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import WavesList from "../../../../components/waves/list/WavesList";
-import { AuthContext } from "../../../../components/auth/Auth";
-import { ProfileConnectedStatus } from "../../../../entities/IProfile";
-import { ApiWavesOverviewType } from "../../../../generated/models/ApiWavesOverviewType";
-import { useRouter } from "next/router";
+import WavesList from "@/components/waves/list/WavesList";
+import { AuthContext } from "@/components/auth/Auth";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { useRouter } from "next/navigation";
 
-jest.mock("next/router", () => ({
-  useRouter: jest.fn(),
-}));
+let currentParams = new URLSearchParams();
 
-jest.mock("../../../../components/waves/list/header/WavesListHeader", () => (props: any) => (
-  <div>
-    <button onClick={() => props.setIdentity("bob")} data-testid="set-id" />
-    <button onClick={() => props.setIdentity(null)} data-testid="clear-id" />
-  </div>
-));
+jest.mock("next/navigation", () => {
+  return {
+    useRouter: jest.fn(),
+    usePathname: () => "/waves",
+    useSearchParams: () => ({
+      get: (key: string) => currentParams.get(key),
+      toString: () => currentParams.toString(),
+    }),
+  };
+});
 
-jest.mock("../../../../components/waves/list/WavesListWrapper", () => (props: any) => (
+jest.mock(
+  "@/components/waves/list/header/WavesListHeader",
+  () => (props: any) =>
+    (
+      <div>
+        <button onClick={() => props.setIdentity("bob")} data-testid="set-id" />
+        <button
+          onClick={() => props.setIdentity(null)}
+          data-testid="clear-id"
+        />
+      </div>
+    )
+);
+
+jest.mock("@/components/waves/list/WavesListWrapper", () => (props: any) => (
   <div data-testid={`wrapper-${props.overviewType}`}>
-    <span data-testid={`showall-${props.overviewType}`}>{String(props.showAllType)}</span>
+    <span data-testid={`showall-${props.overviewType}`}>
+      {String(props.showAllType)}
+    </span>
     <button
       onClick={() =>
         props.setShowAllType(
@@ -31,15 +49,18 @@ jest.mock("../../../../components/waves/list/WavesListWrapper", () => (props: an
   </div>
 ));
 
-jest.mock("../../../../components/waves/list/WavesListSearchResults", () => (props: any) => (
-  <div data-testid="search-results">{props.identity ?? ""}</div>
-));
+jest.mock(
+  "@/components/waves/list/WavesListSearchResults",
+  () => (props: any) =>
+    <div data-testid="search-results">{props.identity ?? ""}</div>
+);
 
-const push = jest.fn((url: any, _as?: any, _opts?: any) => {
-  router.pathname = url.pathname;
-  router.query = url.query;
+const push = jest.fn((url: string) => {
+  const query = url.split("?")[1];
+  currentParams = new URLSearchParams(query || "");
 });
-const router = { pathname: "/waves", query: {}, push } as any;
+
+const router = { push } as any;
 (useRouter as jest.Mock).mockReturnValue(router);
 
 const baseAuth = {
@@ -71,21 +92,26 @@ function setup() {
 it("updates router and shows search results when identity changes", async () => {
   const user = userEvent.setup();
   setup();
+
+  // Initially, identity is null
   expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
+
+  // Simulate setting identity to "bob"
   await user.click(screen.getByTestId("set-id"));
-  expect(screen.getByTestId("search-results")).toHaveTextContent("bob");
-  expect(push).toHaveBeenLastCalledWith(
-    { pathname: "/waves", query: { identity: "bob" } },
-    undefined,
-    { shallow: true }
-  );
+
+  // Component should update and show "bob"
+  const result = await screen.findByTestId("search-results");
+  expect(result).toHaveTextContent("bob");
+  expect(push).toHaveBeenLastCalledWith("/waves?identity=bob");
+
+  // Simulate clearing identity
   await user.click(screen.getByTestId("clear-id"));
-  expect(screen.queryByTestId("search-results")).not.toBeInTheDocument();
-  expect(push).toHaveBeenLastCalledWith(
-    { pathname: "/waves", query: {} },
-    undefined,
-    { shallow: true }
+
+  // Component should remove search results
+  await waitFor(() =>
+    expect(screen.queryByTestId("search-results")).not.toBeInTheDocument()
   );
+  expect(push).toHaveBeenLastCalledWith("/waves");
 });
 
 it("toggles show all state", async () => {

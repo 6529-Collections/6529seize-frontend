@@ -24,7 +24,9 @@ jest.mock('../../../../components/waves/drops/WaveDropsScrollBottomButton', () =
 jest.mock('../../../../components/waves/drops/WaveDropsEmptyPlaceholder', () => ({ __esModule: true, default: () => <div data-testid="empty" /> }));
 jest.mock('../../../../components/waves/drops/WaveDropsScrollingOverlay', () => ({ __esModule: true, default: () => <div data-testid="overlay" /> }));
 push = jest.fn();
-jest.mock('next/router', () => ({ useRouter: () => ({ push }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push }),
+}));
 jest.mock('../../../../hooks/useScrollBehavior', () => ({ useScrollBehavior: () => ({ scrollContainerRef: { current: null }, scrollToVisualBottom: jest.fn() }) }));
 let typingMsg: string | null = null;
 jest.mock('../../../../hooks/useWaveIsTyping', () => ({

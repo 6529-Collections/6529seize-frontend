@@ -1,23 +1,23 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CommunityMemberOverview } from "../../entities/IProfile";
-import { Page } from "../../helpers/Types";
-import { CommunityMembersQuery } from "../../pages/network/index";
+import { CommunityMemberOverview } from "@/entities/IProfile";
+import { Page } from "@/helpers/Types";
+import { CommunityMembersQuery } from "@/app/network/page";
 import { useEffect, useState } from "react";
-import { commonApiFetch } from "../../services/api/common-api";
-import { SortDirection } from "../../entities/ISort";
+import { commonApiFetch } from "@/services/api/common-api";
+import { SortDirection } from "@/entities/ISort";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useDebounce } from "react-use";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 
 import { useSelector } from "react-redux";
-import { selectActiveGroupId } from "../../store/groupSlice";
-import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
-import { CommunityMembersSortOption } from "../../enums";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { selectActiveGroupId } from "@/store/groupSlice";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import { CommunityMembersSortOption } from "@/enums";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -32,6 +32,8 @@ const SEARCH_PARAMS_FIELDS = {
 } as const;
 
 export default function CommunityMembers() {
+  useSetTitle("Network");
+
   const defaultSortBy = CommunityMembersSortOption.LEVEL;
   const defaultSortDirection = SortDirection.DESC;
   const defaultPageSize = 50;
@@ -154,16 +156,14 @@ export default function CommunityMembers() {
     placeholderData: keepPreviousData,
   });
 
-  const updateFields = async (
+  const updateFields = (
     updateItems: QueryUpdateInput[],
     lowerCase: boolean = true
-  ): Promise<void> => {
+  ): void => {
     const queryString = createQueryString(updateItems, lowerCase);
     const path = queryString ? pathname + "?" + queryString : pathname;
     if (path) {
-      await router.replace(path, undefined, {
-        shallow: true,
-      });
+      router.replace(path);
     }
   };
 

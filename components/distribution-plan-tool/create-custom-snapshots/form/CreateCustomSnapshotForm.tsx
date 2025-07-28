@@ -5,7 +5,6 @@ import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
-  AllowlistToolResponse,
   CustomTokenPoolParamsToken,
   ResolvedEns,
 } from "../../../allowlist-tool/allowlist-tool.types";
@@ -14,7 +13,6 @@ import {
   isEthereumAddress,
 } from "../../../../helpers/AllowlistToolHelpers";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
-import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 import { distributionPlanApiPost } from "../../../../services/distribution-plan-api";
 import AllowlistToolCommonModalWrapper, {

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useQuery } from '@tanstack/react-query';
 import { AuthContext } from '../../../../components/auth/Auth';
 import UserPageSubscriptionsUpcoming from '../../../../components/user/subscriptions/UserPageSubscriptionsUpcoming';

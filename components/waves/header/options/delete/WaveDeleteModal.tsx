@@ -7,7 +7,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiDelete } from "../../../../../services/api/common-api";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function WaveDeleteModal({

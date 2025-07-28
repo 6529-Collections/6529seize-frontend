@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import LeaderboardInteractionsComponent from '../../../components/leaderboard/LeaderboardInteractions';
 import { Content, Collector } from '../../../components/leaderboard/Leaderboard';
-import { LeaderboardInteractionsSort } from '../../../components/leaderboard/leaderboard_helpers';
 
 jest.mock('../../../components/leaderboard/leaderboard_helpers', () => {
   const original = jest.requireActual('../../../components/leaderboard/leaderboard_helpers');

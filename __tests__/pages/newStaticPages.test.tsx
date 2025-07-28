@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
 import { render, screen } from "@testing-library/react";
 import About100M from "@/app/about/100m-project/page";
-import FromFibonacciToFidenza from "@/pages/blog/from-fibonacci-to-fidenza";
-import EmailProtection from "@/pages/cdn-cgi/l/email-protection";
+import FromFibonacciToFidenza from "@/app/blog/from-fibonacci-to-fidenza/page";
+import EmailProtection from "@/app/cdn-cgi/l/email-protection/page";
 import EmailSignatures from "@/app/email-signatures/page";
-import MuseumFund from "@/pages/museum/6529-fund-szn1";
-import ConstructionToken from "@/pages/museum/6529-fund-szn1/construction-token";
-import ImageWithArrow from "@/pages/museum/6529-fund-szn1/image-with-arrow";
+import MuseumFund from "@/app/museum/6529-fund-szn1/page";
+import ConstructionToken from "@/app/museum/6529-fund-szn1/construction-token/page";
+import ImageWithArrow from "@/app/museum/6529-fund-szn1/image-with-arrow/page";
 import { AuthContext } from "@/components/auth/Auth";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);

@@ -15,7 +15,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { getDateDisplay } from "../../helpers/Helpers";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { useAuth } from "../auth/Auth";
 
 interface Prenode {
   ip: string;
@@ -32,7 +33,9 @@ interface Prenode {
 const PAGE_SIZE = 20;
 
 export default function PrenodesStatus() {
-  const account = useSeizeConnectContext();
+  useSetTitle("Prenodes | Network");
+
+  const { connectedProfile } = useAuth();
 
   const [page, setPage] = useState<number>(1);
 
@@ -84,8 +87,8 @@ export default function PrenodesStatus() {
 
   function printPrenode(prenode: Prenode) {
     let href = `https://${prenode.domain ?? prenode.ip}/oracle`;
-    if (account.address) {
-      href += `/address/${account.address}`;
+    if (connectedProfile?.primary_wallet) {
+      href += `/address/${connectedProfile.primary_wallet}`;
     } else {
       href += "/tdh/total";
     }
@@ -112,7 +115,12 @@ export default function PrenodesStatus() {
     }
 
     return (
-      <Col xs={12} sm={12} md={6} className="pt-2 pb-2">
+      <Col
+        xs={12}
+        sm={12}
+        md={6}
+        className="pt-2 pb-2"
+        key={`${prenode.ip}-${prenode.domain}`}>
         <a
           href={href}
           target="_blank"

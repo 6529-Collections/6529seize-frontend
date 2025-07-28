@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveDropPartContent from '../../../../components/waves/drops/WaveDropPartContent';
-import { ApiDropPart } from '../../../../generated/models/ApiDropPart';
 
 jest.mock('../../../../components/waves/drops/WaveDropPartContentMarkdown', () => (props: any) => (
   <div data-testid="markdown">{props.part.content}</div>

@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { fetchUrl } from "../../services/6529api";
-import Pagination from "../pagination/Pagination";
-import { ApiUploadsPage } from "../../generated/models/ApiUploadsPage";
-import { ApiUploadItem } from "../../generated/models/ApiUploadItem";
+import { fetchUrl } from "@/services/6529api";
+import Pagination from "@/components/pagination/Pagination";
+import { ApiUploadsPage } from "@/generated/models/ApiUploadsPage";
+import { ApiUploadItem } from "@/generated/models/ApiUploadItem";
 
 import {
   formatDate,
@@ -21,8 +20,6 @@ interface Props {
 }
 
 export default function CommunityDownloadsComponent(props: Readonly<Props>) {
-  const router = useRouter();
-
   const [downloads, setDownloads] = useState<ApiUploadItem[]>();
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
@@ -37,7 +34,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
 
   useEffect(() => {
     fetchResults(page);
-  }, [page, router.query]);
+  }, [page]);
 
   return (
     <DownloadsLayout title={props.title}>

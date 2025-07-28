@@ -2,7 +2,6 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import VirtualScrollWrapper from '../../../../components/waves/drops/VirtualScrollWrapper';
 import { DropSize } from '../../../../helpers/waves/drop.helpers';
-import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
 jest.useFakeTimers();
 

@@ -3,9 +3,7 @@ import { useRouter } from 'next/router';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import UserPageCollected from '../../../../components/user/collected/UserPageCollected';
-import { CollectedCollectionType, CollectionSeized, CollectionSort } from '../../../../entities/IProfile';
-import { SortDirection } from '../../../../entities/ISort';
-import { MEMES_SEASON } from '../../../../enums';
+import { CollectedCollectionType } from '../../../../entities/IProfile';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('next/navigation', () => ({

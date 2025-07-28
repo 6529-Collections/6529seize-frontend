@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GroupItemWrapper from '../../../../../components/groups/select/item/GroupItemWrapper';
-import { getRandomColorWithSeed } from '../../../../../helpers/Helpers';
 
 jest.mock('../../../../../helpers/Helpers', () => ({
   getRandomColorWithSeed: jest.fn(() => '#123456'),

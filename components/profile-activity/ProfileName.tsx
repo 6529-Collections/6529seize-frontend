@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/router";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { createPossessionStr } from "@/helpers/Helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { createPossessionStr } from "../../helpers/Helpers";
-import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
-import { useIdentity } from "../../hooks/useIdentity";
 export enum ProfileNameType {
   POSSESSION = "POSSESSION",
   DEFAULT = "DEFAULT",
@@ -16,8 +16,8 @@ export default function ProfileName({
 }: {
   readonly type: ProfileNameType;
 }) {
-  const router = useRouter();
-  const handleOrWallet = (router.query.user as string).toLowerCase();
+  const searchParams = useSearchParams();
+  const handleOrWallet = searchParams?.get("user")?.toLowerCase();
 
   const { profile } = useIdentity({
     handleOrWallet: handleOrWallet,

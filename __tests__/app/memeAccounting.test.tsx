@@ -1,20 +1,23 @@
 // @ts-nocheck
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import MemeAccountingPage, { generateMetadata } from '@/app/meme-accounting/page';
-import { AuthContext } from '../../components/auth/Auth';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import MemeAccountingPage, {
+  generateMetadata,
+} from "@/app/meme-accounting/page";
+import { AuthContext } from "@/components/auth/Auth";
 
-jest.mock('../../components/gas-royalties/Royalties', () => () => <div data-testid="royalties" />);
+jest.mock("@/components/gas-royalties/Royalties", () => () => (
+  <div data-testid="royalties" />
+));
 
-jest.mock('../../styles/Home.module.scss', () => ({
-  main: 'main-class',
+jest.mock("@/styles/Home.module.scss", () => ({
+  main: "main-class",
 }));
 
-
 // Mock TitleContext
-jest.mock('../../contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -28,7 +31,7 @@ jest.mock('../../contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('MemeAccountingPage', () => {
+describe("MemeAccountingPage", () => {
   const setTitle = jest.fn();
 
   const renderPage = () =>
@@ -38,20 +41,25 @@ describe('MemeAccountingPage', () => {
       </AuthContext.Provider>
     );
 
-  it('renders royalties component inside main', async () => {
+  it("renders royalties component inside main", async () => {
     const { container } = renderPage();
-    expect(container.querySelector('main')).toHaveClass('main-class');
-    expect(await screen.findByTestId('royalties')).toBeInTheDocument();
+    expect(container.querySelector("main")).toHaveClass("main-class");
+    expect(await screen.findByTestId("royalties")).toBeInTheDocument();
   });
 
-  it('page renders successfully', () => {
+  it("page renders successfully", () => {
     renderPage();
     // Component renders successfully
   });
 
-  it('exposes correct metadata', async () => {
-    process.env.BASE_ENDPOINT = 'https://example.com';
-    const metadata = await generateMetadata();
-    expect(metadata).toMatchObject({ title: 'Meme Accounting', description: 'Tools | 6529.io' });
+  it("exposes correct metadata", async () => {
+    process.env.BASE_ENDPOINT = "https://example.com";
+    const metadata = await generateMetadata({
+      searchParams: { focus: "the-memes" },
+    });
+    expect(metadata).toMatchObject({
+      title: "Meme Accounting - The Memes",
+      description: "Tools | 6529.io",
+    });
   });
 });

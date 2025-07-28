@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import AllowlistToolAnimationWrapper from "../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import BlockPickerTimeWindowSelectList from "./BlockPickerTimeWindowSelectList";
-import { BlockPickerTimeWindow } from "../../pages/meme-blocks";
+import { BlockPickerTimeWindow } from "@/app/meme-blocks/page.client";
 
 export default function BlockPickerTimeWindowSelect({
   timeWindow,

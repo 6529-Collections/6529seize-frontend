@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import ElevatedDeconstructions from "@/pages/museum/genesis/elevated-deconstructions";
-import Ringers from "@/pages/museum/genesis/ringers";
-import Screens from "@/pages/museum/genesis/screens";
-import Skulptuur from "@/pages/museum/genesis/skulptuur";
-import Synapses from "@/pages/museum/genesis/synapses";
-import BlocksOfArt from "@/pages/museum/genesis/the-blocks-of-art";
-import Vortex from "@/pages/museum/genesis/vortex";
-import OMRedirect from "@/pages/om/OM";
+import ElevatedDeconstructions from "@/app/museum/genesis/elevated-deconstructions/page";
+import Ringers from "@/app/museum/genesis/ringers/page";
+import Screens from "@/app/museum/genesis/screens/page";
+import Skulptuur from "@/app/museum/genesis/skulptuur/page";
+import Synapses from "@/app/museum/genesis/synapses/page";
+import BlocksOfArt from "@/app/museum/genesis/the-blocks-of-art/page";
+import Vortex from "@/app/museum/genesis/vortex/page";
+import OMRedirect from "@/app/om/OM/page";
 import { AuthContext } from "@/components/auth/Auth";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);

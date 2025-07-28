@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import DropsList from '../../../../components/drops/view/DropsList';
 import { DropSize } from '../../../../helpers/waves/drop.helpers';
-import { DropLocation } from '../../../../components/waves/drops/Drop';
 
 let dropProps: any[] = [];
 let lightProps: any[] = [];

@@ -6,20 +6,24 @@ import {
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 
-import StepHeader from "../common/StepHeader";
-import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";
+import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolLoader, {
   AllowlistToolLoaderSize,
-} from "../../allowlist-tool/common/AllowlistToolLoader";
-import { useRouter } from "next/router";
-import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
+} from "@/components/allowlist-tool/common/AllowlistToolLoader";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useRouter } from "next/navigation";
+import StepHeader from "../common/StepHeader";
 
-export default function CreatePlan() {
+export default function CreatePlan({ id }: { readonly id: string }) {
   const router = useRouter();
 
   const { setState } = useContext(DistributionPlanToolContext);
   useEffect(() => {
-    const { id } = router.query;
+    if (!id) {
+      alert("No id found");
+      router.push("/emma");
+      return;
+    }
     const fetchAllowlist = async () => {
       const data = await distributionPlanApiFetch<AllowlistDescription>(
         `/allowlists/${id}`
