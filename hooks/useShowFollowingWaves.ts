@@ -22,7 +22,7 @@ export function useShowFollowingWaves(): [boolean, (value: boolean) => void] {
       return storedValue === "true";
     } catch (error) {
       // In case of localStorage errors (private browsing etc.)
-      console.error("Error accessing localStorage:", error);
+      console.warn("Error accessing localStorage:", error);
       return false;
     }
   };
@@ -48,39 +48,50 @@ export function useShowFollowingWaves(): [boolean, (value: boolean) => void] {
         })
       );
     } catch (error) {
-      console.error("Error saving to localStorage:", error);
+      console.warn("Error saving to localStorage:", error);
+    }
+  }, []);
+
+  // Memoized event handlers to prevent memory leaks
+  const handleStorageChange = useCallback((event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) {
+      setStateValue(event.newValue === "true");
+    }
+  }, []);
+
+  const handleCustomEvent = useCallback((event: Event) => {
+    try {
+      if ('detail' in event && event.detail && typeof event.detail === 'object' && 
+          'value' in event.detail && typeof event.detail.value === 'boolean') {
+        const customEvent = event as CustomEvent<{ value: boolean }>;
+        setStateValue(customEvent.detail.value);
+      }
+    } catch (error) {
+      console.warn("Error handling following waves custom event:", error);
     }
   }, []);
 
   // Listen for changes from other components
   useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY) {
-        setStateValue(event.newValue === "true");
-      }
-    };
 
-    // Listen for the custom event from other hook instances
-    const handleCustomEvent = (event: CustomEvent<{ value: boolean }>) => {
-      setStateValue(event.detail.value);
-    };
-
-    // Add event listeners
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener(
-      "following-waves-change",
-      handleCustomEvent as EventListener
-    );
+    // Add event listeners with error handling
+    try {
+      window.addEventListener("storage", handleStorageChange);
+      window.addEventListener("following-waves-change", handleCustomEvent);
+    } catch (error) {
+      console.warn("Error adding event listeners:", error);
+    }
 
     // Clean up
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener(
-        "following-waves-change",
-        handleCustomEvent as EventListener
-      );
+      try {
+        window.removeEventListener("storage", handleStorageChange);
+        window.removeEventListener("following-waves-change", handleCustomEvent);
+      } catch (error) {
+        console.warn("Error removing event listeners:", error);
+      }
     };
-  }, []);
+  }, [handleStorageChange, handleCustomEvent]);
 
   return [stateValue, setShowFollowingWaves];
 }
