@@ -114,31 +114,27 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     };
 
     // Determine container class based on art-focused mode and highlighting state
-    const containerClass = `${
-      artFocused
-        ? `group ${
-            !hasTouchScreen
-              ? "tw-transition-all tw-duration-300 tw-ease-out"
-              : ""
-          }`
-        : ""
-    } tw-relative tw-rounded-lg`;
+    const transitionClasses = !hasTouchScreen ? "tw-transition-all tw-duration-300 tw-ease-out" : "";
+    const groupClasses = artFocused ? `group ${transitionClasses}` : "";
+    const containerClass = `${groupClasses} tw-relative tw-rounded-lg`;
 
     // Apply image effects with animation when highlighting - ONLY on desktop
     const highlightAnimation =
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
+    const baseImageClasses = "tw-aspect-square tw-border tw-border-iron-800 tw-relative tw-cursor-pointer touch-none";
+    
+    const artFocusedHoverClasses = !hasTouchScreen 
+      ? `desktop-hover:hover:tw-border-iron-700 tw-transform tw-duration-300 tw-ease-out tw-ring-0 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-600 ${highlightAnimation}`
+      : "";
+    
+    const defaultHoverClasses = !hasTouchScreen
+      ? `desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out ${highlightAnimation}`
+      : "";
+
     const imageContainerClass = artFocused
-      ? `tw-ml-0.5 tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer touch-none ${
-          !hasTouchScreen
-            ? `desktop-hover:hover:tw-border-iron-700 tw-transform tw-duration-300 tw-ease-out tw-ring-0 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-600 ${highlightAnimation}`
-            : ""
-        }`
-      : `tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer touch-none ${
-          !hasTouchScreen
-            ? `desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out ${highlightAnimation}`
-            : ""
-        }`;
+      ? `tw-ml-0.5 ${baseImageClasses} tw-bg-iron-900 ${artFocusedHoverClasses}`
+      : `${baseImageClasses} tw-bg-iron-800 ${defaultHoverClasses}`;
 
     return (
       <div className={containerClass}>
