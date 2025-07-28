@@ -81,10 +81,11 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 
           <div className="tw-mt-4">
             {artworkMedia && (
-              <div className="tw-flex tw-justify-center tw-h-96">
+              <div className="tw-h-96">
                 <DropListItemContentMedia
                   media_mime_type={artworkMedia.mime_type}
                   media_url={artworkMedia.url}
+                  isCompetitionDrop={true}
                 />
               </div>
             )}

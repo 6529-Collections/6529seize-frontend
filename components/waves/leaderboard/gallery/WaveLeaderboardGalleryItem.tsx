@@ -15,6 +15,7 @@ import { VotingModal, MobileVotingModal } from "../../../../components/voting";
 import VotingModalButton from "../../../../components/voting/VotingModalButton";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
 
@@ -31,20 +32,26 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
+    const { hasTouchScreen } = useDeviceInfo(); // Detect touch devices
     const { canShowVote } = useDropInteractionRules(drop);
 
-    // Trigger card highlight animation when sort changes
+    // Animation state and useEffect - ONLY for desktop (non-touch) devices
     const [isFirstRender, setIsFirstRender] = useState(true);
     const [previousSort, setPreviousSort] = useState(activeSort);
 
     useEffect(() => {
+      // Skip all animations on touch devices for performance
+      if (hasTouchScreen) {
+        return;
+      }
+
       let timer: NodeJS.Timeout | null = null;
-      
+
       // Skip animation on first render unless animationKey is set
       if (isFirstRender) {
         setIsFirstRender(false);
         setPreviousSort(activeSort);
-        
+
         // Animate on mount if animationKey is set (indicating a sort change)
         if (animationKey > 0) {
           setIsHighlighting(true);
@@ -66,7 +73,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           clearTimeout(timer);
         }
       };
-    }, [activeSort, animationKey, isFirstRender, previousSort]);
+    }, [activeSort, animationKey, isFirstRender, previousSort, hasTouchScreen]);
 
     // Consider the user has voted even if the rating is 0
     const hasUserVoted = drop.context_profile_context?.rating !== undefined;
@@ -108,15 +115,30 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
 
     // Determine container class based on art-focused mode and highlighting state
     const containerClass = `${
-      artFocused ? "group tw-transition-all tw-duration-300 tw-ease-out" : ""
+      artFocused
+        ? `group ${
+            !hasTouchScreen
+              ? "tw-transition-all tw-duration-300 tw-ease-out"
+              : ""
+          }`
+        : ""
     } tw-relative tw-rounded-lg`;
 
-    // Apply image effects with animation when highlighting
-    const highlightAnimation = isHighlighting ? "tw-animate-gallery-reveal" : "";
-    
+    // Apply image effects with animation when highlighting - ONLY on desktop
+    const highlightAnimation =
+      isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
+
     const imageContainerClass = artFocused
-      ? `tw-ml-0.5 tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer desktop-hover:hover:tw-border-iron-700 tw-transform tw-duration-300 tw-ease-out touch-none tw-ring-0 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-600 ${highlightAnimation}`
-      : `tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out touch-none ${highlightAnimation}`;
+      ? `tw-ml-0.5 tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer touch-none ${
+          !hasTouchScreen
+            ? `desktop-hover:hover:tw-border-iron-700 tw-transform tw-duration-300 tw-ease-out tw-ring-0 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-600 ${highlightAnimation}`
+            : ""
+        }`
+      : `tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-relative tw-cursor-pointer touch-none ${
+          !hasTouchScreen
+            ? `desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out ${highlightAnimation}`
+            : ""
+        }`;
 
     return (
       <div className={containerClass}>
@@ -174,7 +196,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             </div>
           </div>
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
-            {/* Pass variant prop based on art-focused mode */}
             <WaveLeaderboardGalleryItemVotes
               drop={drop}
               variant={artFocused ? "subtle" : "default"}
@@ -202,7 +223,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             </div>
           </div>
 
-          {/* Bottom row: User's vote and vote button */}
           <div className="tw-flex tw-items-center tw-justify-between">
             <div>
               {hasUserVoted && (
@@ -253,8 +273,10 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
   },
   (prevProps, nextProps) => {
     // Force re-render when activeSort or animationKey changes
-    if (prevProps.activeSort !== nextProps.activeSort ||
-        prevProps.animationKey !== nextProps.animationKey) {
+    if (
+      prevProps.activeSort !== nextProps.activeSort ||
+      prevProps.animationKey !== nextProps.animationKey
+    ) {
       return false;
     }
 
