@@ -2,6 +2,7 @@ import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import UnifiedWavesList from '../../../../../components/brain/left-sidebar/waves/UnifiedWavesList';
 import useDeviceInfo from '../../../../../hooks/useDeviceInfo';
+import { createMockMinimalWave } from '../../../../utils/mockFactories';
 
 jest.mock('../../../../../hooks/useDeviceInfo');
 jest.mock('../../../../../components/brain/left-sidebar/waves/UnifiedWavesListLoader', () => ({
@@ -47,6 +48,7 @@ describe('UnifiedWavesList', () => {
         activeWaveId={null}
         fetchNextPage={jest.fn()}
         hasNextPage={false}
+        isFetching={false}
         isFetchingNextPage={false}
         onHover={jest.fn()}
         scrollContainerRef={React.createRef()}
@@ -69,10 +71,11 @@ describe('UnifiedWavesList', () => {
 
     render(
       <UnifiedWavesList
-        waves={[{ id: '1', isPinned: false }] as any}
+        waves={[createMockMinimalWave({ id: '1', isPinned: false })]}
         activeWaveId={null}
         fetchNextPage={fetchNextPage}
         hasNextPage={true}
+        isFetching={false}
         isFetchingNextPage={false}
         onHover={jest.fn()}
         scrollContainerRef={React.createRef()}

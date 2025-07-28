@@ -10,6 +10,31 @@ import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 
+// Interface for virtualization items (matches useVirtualizedWaves)
+interface VirtualItem {
+  index: number;
+  start: number;
+  size: number;
+}
+
+// Type guard to ensure wave object is valid
+function isValidWave(wave: unknown): wave is MinimalWave {
+  return (
+    wave !== null &&
+    wave !== undefined &&
+    typeof wave === "object" &&
+    typeof (wave as MinimalWave).id === "string" &&
+    (wave as MinimalWave).id.length > 0
+  );
+}
+
+// Height for empty waves placeholder to maintain consistent layout (matches UnifiedWavesListEmpty)
+const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
+
+// Virtualization constants
+const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
+const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
+
 interface UnifiedWavesListWavesProps {
   readonly waves: MinimalWave[];
   readonly onHover: (waveId: string) => void;
@@ -20,8 +45,8 @@ interface UnifiedWavesListWavesProps {
 }
 
 export interface UnifiedWavesListWavesHandle {
-  containerRef: React.RefObject<HTMLDivElement>;
-  sentinelRef: React.RefObject<HTMLDivElement>;
+  readonly containerRef: React.RefObject<HTMLDivElement | null>;
+  readonly sentinelRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const UnifiedWavesListWaves = forwardRef<
@@ -42,110 +67,130 @@ const UnifiedWavesListWaves = forwardRef<
 
     // Split waves into pinned and regular waves (no separate active section)
     const { pinnedWaves, regularWaves } = useMemo(() => {
-      const pinned: MinimalWave[] = [];
-      const regular: MinimalWave[] = [];
-
-      waves.forEach((wave) => {
-        if (wave.isPinned) {
-          // Add pinned waves to the pinned section
-          pinned.push(wave);
-        } else {
-          // All unpinned waves go to the regular section
-          regular.push(wave);
-        }
-      });
+      const pinned = waves.filter(wave => wave.isPinned);
+      const regular = waves.filter(wave => !wave.isPinned);
 
       // No special sorting for active waves - keep them in their original position
       return {
         pinnedWaves: pinned,
         regularWaves: regular,
-      };
+      } as const;
     }, [waves]);
 
-    const virtual = useVirtualizedWaves(
+    const virtual = useVirtualizedWaves<MinimalWave>(
       regularWaves,
       "unified-waves-regular",
       scrollContainerRef,
       listContainerRef,
-      62,
-      5
+      WAVE_ROW_HEIGHT,
+      VIRTUALIZATION_OVERSCAN
     );
 
     useImperativeHandle(ref, () => ({
-      containerRef: virtual.containerRef as React.RefObject<HTMLDivElement>,
-      sentinelRef: virtual.sentinelRef as React.RefObject<HTMLDivElement>,
+      containerRef: virtual.containerRef,
+      sentinelRef: virtual.sentinelRef,
     }));
 
-    if (!waves.length) {
-      return null;
-    }
 
-    const joinedToggle =
+    const joinedToggle = useMemo(() => 
       !hideToggle && isConnectedIdentity ? (
         <CommonSwitch label="Joined" isOn={following} setIsOn={setFollowing} />
-      ) : null;
+      ) : null,
+      // setFollowing is referentially stable (useCallback with empty deps)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [hideToggle, isConnectedIdentity, following]
+    );
 
     return (
       <div className="tw-flex tw-flex-col">
+        {/* Always show "All Waves" header with toggle when not hidden */}
+        {!hideHeaders && (
+          <SectionHeader label="All Waves" rightContent={joinedToggle} />
+        )}
+        
+        {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedWaves.length > 0 && (
           <>
             <SectionHeader label="Pinned" icon={faThumbtack} />
-            <div className="tw-flex tw-flex-col tw-mb-3">
-              {pinnedWaves.map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin}
-                  />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-        {regularWaves.length > 0 && (
-          <>
-            {!hideHeaders && (
-              <SectionHeader label="All Waves" rightContent={joinedToggle} />
-            )}
-            <div
-              ref={listContainerRef}
-              style={{ height: virtual.totalHeight, position: "relative" }}>
-              {virtual.virtualItems.map((v) => {
-                if (v.index === regularWaves.length) {
-                  return (
-                    <div
-                      key="sentinel"
-                      ref={virtual.sentinelRef}
-                      style={{
-                        position: "absolute",
-                        top: v.start,
-                        height: v.size,
-                        width: "100%",
-                      }}
-                    />
-                  );
-                }
-                const wave = regularWaves[v.index];
-                return (
-                  <div
-                    key={wave.id}
-                    style={{
-                      position: "absolute",
-                      top: v.start,
-                      height: v.size,
-                      width: "100%",
-                    }}>
+            <div 
+              className="tw-flex tw-flex-col tw-mb-3"
+              role="region"
+              aria-label="Pinned waves">
+              {pinnedWaves
+                .filter((wave): wave is MinimalWave => {
+                  if (!isValidWave(wave)) {
+                    console.error("Invalid pinned wave object", wave);
+                    return false;
+                  }
+                  return true;
+                })
+                .map((wave) => (
+                  <div key={wave.id}>
                     <BrainLeftSidebarWave
                       wave={wave}
                       onHover={onHover}
                       showPin={!hidePin}
                     />
                   </div>
-                );
-              })}
+                ))}
             </div>
           </>
+        )}
+        
+        {/* Conditionally show regular waves or maintain structure */}
+        {regularWaves.length > 0 ? (
+          <div
+            ref={listContainerRef}
+            style={{ 
+              height: virtual.totalHeight, 
+              position: "relative" 
+            } satisfies React.CSSProperties}
+            role="region"
+            aria-label="Regular waves list">
+            {virtual.virtualItems.map((v: VirtualItem) => {
+              if (v.index === regularWaves.length) {
+                return (
+                  <div
+                    key="sentinel"
+                    ref={virtual.sentinelRef}
+                    style={{
+                      position: "absolute",
+                      top: v.start,
+                      height: v.size,
+                      width: "100%",
+                    } satisfies React.CSSProperties}
+                  />
+                );
+              }
+              const wave = regularWaves[v.index];
+              if (!isValidWave(wave)) {
+                console.error("Invalid wave object at index", v.index, wave);
+                return null;
+              }
+              // TypeScript now knows wave is definitely MinimalWave
+              return (
+                <div
+                  key={wave.id}
+                  style={{
+                    position: "absolute",
+                    top: v.start,
+                    height: v.size,
+                    width: "100%",
+                  } satisfies React.CSSProperties}>
+                  <BrainLeftSidebarWave
+                    wave={wave}
+                    onHover={onHover}
+                    showPin={!hidePin}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div 
+            ref={listContainerRef} 
+            style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT } satisfies React.CSSProperties} 
+          />
         )}
       </div>
     );
