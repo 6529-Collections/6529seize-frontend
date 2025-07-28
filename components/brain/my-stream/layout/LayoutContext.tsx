@@ -147,7 +147,7 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor, isAndroid, isIos } = useCapacitor();
+  const { isCapacitor, isAndroid, isIos, keyboardVisible } = useCapacitor();
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
@@ -359,12 +359,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (isAndroid) {
       capSpace = 128;
     } else if (isIos || isCapacitor) {
-      capSpace = 20;
+      // iOS: 54 when keyboard closed, 20 when keyboard open (wave chat)
+      capSpace = keyboardVisible ? 20 : 54;
     }
 
     const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
     return calculateHeightStyle("wave", adjustedSpaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+      }, [spaces, isAndroid, isIos, isCapacitor, keyboardVisible]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
