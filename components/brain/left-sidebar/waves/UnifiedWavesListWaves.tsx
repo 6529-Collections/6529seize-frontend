@@ -6,7 +6,10 @@ import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import JoinedToggle from "./JoinedToggle";
-import { useVirtualizedWaves, VirtualItem } from "../../../../hooks/useVirtualizedWaves";
+import {
+  useVirtualizedWaves,
+  VirtualItem,
+} from "../../../../hooks/useVirtualizedWaves";
 
 // VirtualItem interface is now imported from useVirtualizedWaves
 
@@ -15,7 +18,7 @@ function isValidWave(wave: unknown): wave is MinimalWave {
   if (wave === null || wave === undefined || typeof wave !== "object") {
     return false;
   }
-  
+
   const w = wave as MinimalWave;
   // Check only essential properties for performance
   return (
@@ -29,16 +32,15 @@ function isValidWave(wave: unknown): wave is MinimalWave {
 // Comprehensive validation for debugging purposes only
 function validateWaveDetailed(wave: unknown): wave is MinimalWave {
   if (!isValidWave(wave)) return false;
-  
-  const w = wave as MinimalWave;
   return (
-    typeof w.type === "string" &&
-    w.newDropsCount !== null &&
-    typeof w.newDropsCount === "object" &&
-    typeof w.newDropsCount.count === "number" &&
-    (w.newDropsCount.latestDropTimestamp === null || typeof w.newDropsCount.latestDropTimestamp === "number") &&
-    Array.isArray(w.contributors) &&
-    (w.picture === null || typeof w.picture === "string")
+    typeof wave.type === "string" &&
+    wave.newDropsCount !== null &&
+    typeof wave.newDropsCount === "object" &&
+    typeof wave.newDropsCount.count === "number" &&
+    (wave.newDropsCount.latestDropTimestamp === null ||
+      typeof wave.newDropsCount.latestDropTimestamp === "number") &&
+    Array.isArray(wave.contributors) &&
+    (wave.picture === null || typeof wave.picture === "string")
   );
 }
 
@@ -51,16 +53,16 @@ const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render o
 
 // Common styles for positioned elements
 const listContainerStyle = {
-  position: "relative"
+  position: "relative",
 } as const satisfies React.CSSProperties;
 
 const absolutePositionedStyle = {
   position: "absolute",
-  width: "100%"
+  width: "100%",
 } as const satisfies React.CSSProperties;
 
 const emptyPlaceholderStyle = {
-  minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT
+  minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT,
 } as const satisfies React.CSSProperties;
 
 /**
@@ -104,8 +106,8 @@ const UnifiedWavesListWaves = forwardRef<
 
     // Split waves into pinned and regular waves (no separate active section)
     const { pinnedWaves, regularWaves } = useMemo(() => {
-      const pinned = waves.filter(wave => wave.isPinned);
-      const regular = waves.filter(wave => !wave.isPinned);
+      const pinned = waves.filter((wave) => wave.isPinned);
+      const regular = waves.filter((wave) => !wave.isPinned);
 
       // No special sorting for active waves - keep them in their original position
       return {
@@ -128,28 +130,33 @@ const UnifiedWavesListWaves = forwardRef<
       sentinelRef: virtual.sentinelRef,
     }));
 
-
-
     return (
       <div className="tw-flex tw-flex-col">
         {/* Always show "All Waves" header with toggle when not hidden */}
         {!hideHeaders && (
-          <SectionHeader label="All Waves" rightContent={hideToggle ? undefined : <JoinedToggle />} />
+          <SectionHeader
+            label="All Waves"
+            rightContent={hideToggle ? undefined : <JoinedToggle />}
+          />
         )}
-        
+
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedWaves.length > 0 && (
           <>
             <SectionHeader label="Pinned" icon={faThumbtack} />
-            <section 
+            <section
               className="tw-flex tw-flex-col tw-mb-3"
-              aria-label="Pinned waves">
+              aria-label="Pinned waves"
+            >
               {pinnedWaves
                 .filter((wave): wave is MinimalWave => {
                   if (!isValidWave(wave)) {
                     console.warn("Invalid pinned wave object", wave);
                     if (!validateWaveDetailed(wave)) {
-                      console.warn("Pinned wave failed detailed validation:", wave);
+                      console.warn(
+                        "Pinned wave failed detailed validation:",
+                        wave
+                      );
                     }
                     return false;
                   }
@@ -167,16 +174,17 @@ const UnifiedWavesListWaves = forwardRef<
             </section>
           </>
         )}
-        
+
         {/* Conditionally show regular waves or maintain structure */}
         {regularWaves.length > 0 ? (
           <section
             ref={listContainerRef}
-            style={{ 
-              height: virtual.totalHeight, 
-              ...listContainerStyle
+            style={{
+              height: virtual.totalHeight,
+              ...listContainerStyle,
             }}
-            aria-label="Regular waves list">
+            aria-label="Regular waves list"
+          >
             {virtual.virtualItems.map((v: VirtualItem) => {
               if (v.index === regularWaves.length) {
                 return (
@@ -207,7 +215,8 @@ const UnifiedWavesListWaves = forwardRef<
                     ...absolutePositionedStyle,
                     top: v.start,
                     height: v.size,
-                  }}>
+                  }}
+                >
                   <BrainLeftSidebarWave
                     wave={wave}
                     onHover={onHover}
@@ -218,10 +227,7 @@ const UnifiedWavesListWaves = forwardRef<
             })}
           </section>
         ) : (
-          <div 
-            ref={listContainerRef} 
-            style={emptyPlaceholderStyle} 
-          />
+          <div ref={listContainerRef} style={emptyPlaceholderStyle} />
         )}
       </div>
     );
