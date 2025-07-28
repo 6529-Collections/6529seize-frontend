@@ -11,7 +11,6 @@ export function useAndroidKeyboard() {
   useEffect(() => {
     if (!isAndroid) return;
     let initialHeight = window.innerHeight;
-    let timer: number;
     let capacitorListenersAdded = false;
 
     const detectKeyboard = () => {
@@ -27,8 +26,6 @@ export function useAndroidKeyboard() {
       else {
         height = initialHeight - currentHeight;
       }
-
-
 
       // Only consider it a keyboard if height difference is significant
       if (height > 50) {
@@ -47,25 +44,21 @@ export function useAndroidKeyboard() {
       // Immediate synchronous detection for first-time responsiveness
       detectKeyboard();
       
-      // Immediate fallback for input elements if no height detected
+      // Immediate fallback for input elements - apply transform right away
       const target = e.target as HTMLElement;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true')) {
-        if (keyboardHeight === 0) {
-          const fallbackHeight = Math.floor(window.innerHeight * 0.35);
-          setKeyboardHeight(fallbackHeight);
-          setIsVisible(true);
-          document.documentElement.style.setProperty('--android-keyboard-height', `${fallbackHeight}px`);
-        }
+        const fallbackHeight = Math.floor(window.innerHeight * 0.35);
+        setKeyboardHeight(fallbackHeight);
+        setIsVisible(true);
+        document.documentElement.style.setProperty('--android-keyboard-height', `${fallbackHeight}px`);
       }
     };
 
     const handleFocusOut = (e: FocusEvent) => {
-      clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        setKeyboardHeight(0);
-        setIsVisible(false);
-        document.documentElement.style.setProperty('--android-keyboard-height', '0px');
-      }, 100);
+      // Immediately clear keyboard state when focus leaves input
+      setKeyboardHeight(0);
+      setIsVisible(false);
+      document.documentElement.style.setProperty('--android-keyboard-height', '0px');
     };
 
     const handleResize = () => {
@@ -144,7 +137,6 @@ export function useAndroidKeyboard() {
       window.removeEventListener('orientationchange', detectKeyboard);
       document.removeEventListener('focusin', handleFocusIn);
       document.removeEventListener('focusout', handleFocusOut);
-      clearTimeout(timer);
       
       // Clean up Capacitor listeners
       if (capacitorCleanup) {

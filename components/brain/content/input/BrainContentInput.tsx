@@ -38,7 +38,7 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
         onAllDropsAdded={onCancelReplyQuote}
-        onDropAddedToQueue={() => {}}
+        onDropAddedToQueue={onCancelReplyQuote}
         key={wave.id}
         dropId={null}
         fixedDropMode={DropMode.BOTH}

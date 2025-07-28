@@ -18,7 +18,7 @@ const NotificationsContainer: React.FC = () => {
     <BrainContent
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
-      keyboardAdjustment={128}>
+      keyboardAdjustment={40}>
       <Notifications 
         activeDrop={activeDrop}
         setActiveDrop={setActiveDrop}
