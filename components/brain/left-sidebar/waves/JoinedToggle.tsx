@@ -22,6 +22,16 @@ const JoinedToggle = (): React.JSX.Element | null => {
   const followingHookResult = useShowFollowingWaves();
   const authResult = useAuth();
 
+  // Extract data before any early returns
+  const [following, setFollowing] = followingHookResult || [false, () => {}];
+  const { connectedProfile, activeProfileProxy } = authResult || {};
+
+  // Check authentication state using pure helper function - hook must be called before any returns
+  const connectedHandle = connectedProfile?.handle;
+  const isConnectedIdentity = useMemo(() => {
+    return checkConnectedIdentity(connectedHandle, activeProfileProxy);
+  }, [connectedHandle, activeProfileProxy]);
+
   // Safe extraction with fallbacks - return early if hooks failed
   if (!followingHookResult) {
     console.warn('[JoinedToggle] useShowFollowingWaves hook failed - component will not render', {
@@ -31,15 +41,6 @@ const JoinedToggle = (): React.JSX.Element | null => {
     });
     return null;
   }
-  
-  const [following, setFollowing] = followingHookResult;
-  const { connectedProfile, activeProfileProxy } = authResult || {};
-
-  // Check authentication state using pure helper function
-  const connectedHandle = connectedProfile?.handle;
-  const isConnectedIdentity = useMemo(() => {
-    return checkConnectedIdentity(connectedHandle, activeProfileProxy);
-  }, [connectedHandle, activeProfileProxy]);
 
   // Early return for non-authenticated users
   if (!isConnectedIdentity) {
