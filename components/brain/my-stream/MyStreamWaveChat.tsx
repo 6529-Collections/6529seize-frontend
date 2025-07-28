@@ -67,7 +67,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
 
   // Android keyboard adjustment style using centralized hook
   const containerStyle = useMemo<React.CSSProperties>(() => {
-    return getContainerStyle(waveViewStyle || {});
+    return getContainerStyle(waveViewStyle || {}, 128);
   }, [waveViewStyle, getContainerStyle]);
 
   useEffect(() => setActiveDrop(null), [wave]);

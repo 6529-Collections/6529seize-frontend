@@ -10,7 +10,6 @@ import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
@@ -19,15 +18,17 @@ import NotificationsCauseFilter, {
   NotificationFilter,
 } from "./NotificationsCauseFilter";
 import SpinnerLoader from "../../common/SpinnerLoader";
-import { useAndroidKeyboard } from "../../../hooks/useAndroidKeyboard";
 
-export default function Notifications() {
+interface NotificationsProps {
+  readonly activeDrop: ActiveDropState | null;
+  readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
+}
+
+export default function Notifications({ activeDrop, setActiveDrop }: NotificationsProps) {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
-  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { notificationsViewStyle } = useLayout();
-  const { getContainerStyle } = useAndroidKeyboard();
 
   const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
     null
@@ -120,10 +121,6 @@ export default function Notifications() {
     onBottomIntersection(true);
   };
 
-  const onCancelReplyQuote = () => {
-    setActiveDrop(null);
-  };
-
   const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
   const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
 
@@ -152,19 +149,13 @@ export default function Notifications() {
   return (
     <div
       className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
-      style={getContainerStyle(notificationsViewStyle)}>
+      style={notificationsViewStyle}>
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         <NotificationsCauseFilter
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
         />
         {mainContent}
-        <div className="tw-sticky tw-bottom-0 tw-z-[60] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
-          <BrainContentInput
-            activeDrop={activeDrop}
-            onCancelReplyQuote={onCancelReplyQuote}
-          />
-        </div>
       </div>
     </div>
   );

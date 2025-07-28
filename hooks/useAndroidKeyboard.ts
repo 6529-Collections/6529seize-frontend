@@ -154,19 +154,19 @@ export function useAndroidKeyboard() {
   }, [isAndroid]);
 
   // Centralized container style for keyboard adjustments
-  const getContainerStyle = (baseStyle: React.CSSProperties = {}): React.CSSProperties => {
+  const getContainerStyle = (baseStyle: React.CSSProperties = {}, adjustment: number = 40): React.CSSProperties => {
     if (isAndroid && isVisible && keyboardHeight > 0) {
-      const adjustedTransform = Math.max(0, keyboardHeight - 128);
+      const adjustedTransform = Math.max(0, keyboardHeight - adjustment);
       return {
         ...baseStyle,
         transform: `translateY(-${adjustedTransform}px)`,
-        transition: 'transform 0.25s ease-out',
+        transition: 'transform 0.15s ease-out',
       };
     }
     
     return {
       ...baseStyle,
-      transition: 'transform 0.25s ease-out',
+      transition: 'transform 0.15s ease-out',
     };
   };
 
