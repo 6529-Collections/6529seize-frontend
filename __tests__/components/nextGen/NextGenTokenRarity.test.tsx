@@ -80,6 +80,18 @@ function renderComp() {
 }
 
 describe('NextgenTokenRarity', () => {
+  beforeEach(() => {
+    // Mock toLocaleString to ensure English locale for consistent decimal formatting
+    const originalToLocaleString = Number.prototype.toLocaleString;
+    jest.spyOn(Number.prototype, 'toLocaleString').mockImplementation(function(this: number, locales?: string | string[], options?: Intl.NumberFormatOptions) {
+      return originalToLocaleString.call(this, 'en-US', options);
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('shows token count and initial score', () => {
     renderComp();
     expect(screen.getByText('Token Count: 100')).toBeInTheDocument();

@@ -18,7 +18,7 @@ jest.mock('../../../../hooks/drops/useDropOutcomes', () => ({
 }));
 
 jest.mock('../../../../helpers/Helpers', () => ({
-  formatNumberWithCommas: jest.fn((num) => num.toLocaleString()),
+  formatNumberWithCommas: jest.fn((num) => num.toLocaleString('en-US')),
 }));
 
 import { useDropOutcomes } from '../../../../hooks/drops/useDropOutcomes';
@@ -305,7 +305,7 @@ describe('WaveWinnersSmallOutcome', () => {
 
   it('formats numbers correctly in tooltip', () => {
     const formatNumberWithCommas = require('../../../../helpers/Helpers').formatNumberWithCommas;
-    formatNumberWithCommas.mockImplementation((num: number) => num.toLocaleString());
+    formatNumberWithCommas.mockImplementation((num: number) => num.toLocaleString('en-US'));
 
     mockedUseDropOutcomes.mockReturnValue({
       outcomes: {

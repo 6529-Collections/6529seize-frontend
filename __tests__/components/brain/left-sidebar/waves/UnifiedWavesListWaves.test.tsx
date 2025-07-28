@@ -4,6 +4,7 @@ import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from '../../../../
 import { useShowFollowingWaves } from '../../../../../hooks/useShowFollowingWaves';
 import { useAuth } from '../../../../../components/auth/Auth';
 import { useVirtualizedWaves } from '../../../../../hooks/useVirtualizedWaves';
+import { createMockMinimalWave } from '../../../../utils/mockFactories';
 
 jest.mock('../../../../../components/utils/switch/CommonSwitch', () => (props: any) => <div data-testid="switch">{props.label}-{String(props.isOn)}</div>);
 jest.mock('../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWave', () => (props: any) => <div data-testid={`wave-${props.wave.id}`} data-pin={String(props.showPin)} />);
@@ -22,9 +23,9 @@ const container = document.createElement('div');
 const sentinel = document.createElement('div');
 
 const baseWaves = [
-  { id: 'p1', isPinned: true },
-  { id: 'r1', isPinned: false }
-] as any;
+  createMockMinimalWave({ id: 'p1', isPinned: true }),
+  createMockMinimalWave({ id: 'r1', isPinned: false })
+];
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -41,11 +42,13 @@ beforeEach(() => {
   });
 });
 
-it('returns null when no waves', () => {
+it('renders structure even when no waves', () => {
   const { container } = render(
     <UnifiedWavesListWaves waves={[]} onHover={jest.fn()} scrollContainerRef={scrollRef} />
   );
-  expect(container.firstChild).toBeNull();
+  expect(container.firstChild).not.toBeNull();
+  expect(screen.getByTestId('header-All Waves')).toBeInTheDocument();
+  expect(screen.getByTestId('switch')).toBeInTheDocument();
 });
 
 it('renders pinned and regular waves with headers and switch', () => {
