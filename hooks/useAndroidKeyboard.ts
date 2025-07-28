@@ -1,166 +1,199 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Keyboard } from '@capacitor/keyboard';
 
-export function useAndroidKeyboard() {
+// Debounce utility (simple implementation to avoid lodash dependency)
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+interface AndroidKeyboardHookReturn {
+  keyboardHeight: number;
+  isVisible: boolean;
+  isAndroid: boolean;
+  getContainerStyle: (baseStyle?: React.CSSProperties, adjustment?: number) => React.CSSProperties;
+}
+
+export function useAndroidKeyboard(debounceMs: number = 50): AndroidKeyboardHookReturn {
+  // SSR safety check
+  if (typeof window === 'undefined') {
+    return {
+      keyboardHeight: 0,
+      isVisible: false,
+      isAndroid: false,
+      getContainerStyle: (baseStyle: React.CSSProperties = {}) => ({
+        ...baseStyle,
+        transition: 'transform 0.1s ease-out',
+      }),
+    };
+  }
+
   const isAndroid = Capacitor.getPlatform() === 'android';
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Use ref for initialHeight so it can be recalculated on orientation changes
+  const initialHeightRef = useRef(window.innerHeight);
 
+  // Recalculate initial height (for orientation changes)
+  const resetInitialHeight = useCallback(() => {
+    initialHeightRef.current = window.innerHeight;
+  }, []);
 
-  useEffect(() => {
-    if (!isAndroid) return;
-    let initialHeight = window.innerHeight;
-    let capacitorListenersAdded = false;
+  const detectKeyboard = useCallback(() => {
+    const currentHeight = window.innerHeight;
+    const initialHeight = initialHeightRef.current;
+    let height = 0;
+    
+    // Method 1: VisualViewport API (most reliable)
+    if (window.visualViewport) {
+      height = initialHeight - window.visualViewport.height;
+    } 
+    // Method 2: Window resize fallback
+    else {
+      height = initialHeight - currentHeight;
+    }
 
-    const detectKeyboard = () => {
-      const currentHeight = window.innerHeight;
-      const vvHeight = window.visualViewport?.height || currentHeight;
-      let height = 0;
-      
-      // Method 1: VisualViewport API (most reliable)
-      if (window.visualViewport) {
-        height = initialHeight - window.visualViewport.height;
-      } 
-      // Method 2: Window resize fallback
-      else {
-        height = initialHeight - currentHeight;
-      }
+    // Only consider it a keyboard if height difference is significant
+    if (height > 50) {
+      setKeyboardHeight(height);
+      setIsVisible(true);
+      document.documentElement.style.setProperty('--android-keyboard-height', `${height}px`);
+    } else {
+      setKeyboardHeight(0);
+      setIsVisible(false);
+      document.documentElement.style.setProperty('--android-keyboard-height', '0px');
+    }
+  }, []);
 
-      // Only consider it a keyboard if height difference is significant
-      if (height > 50) {
-        setKeyboardHeight(height);
-        setIsVisible(true);
-      } else {
-        setKeyboardHeight(0);
-        setIsVisible(false);
-      }
+  // Debounced version to prevent flooding React with state updates
+  const debouncedDetectKeyboard = useRef(debounce(detectKeyboard, debounceMs)).current;
 
-      // Set CSS custom property for use in styles
-      document.documentElement.style.setProperty('--android-keyboard-height', `${Math.max(0, height)}px`);
-    };
+  const handleOrientationChange = useCallback(() => {
+    resetInitialHeight();
+    // Use immediate detection for orientation changes (not debounced)
+    detectKeyboard();
+  }, [resetInitialHeight, detectKeyboard]);
 
-    const handleFocusIn = (e: FocusEvent) => {
-      // Immediate synchronous detection for first-time responsiveness
-      detectKeyboard();
-      
-      // Immediate fallback for input elements - apply transform right away
-      const target = e.target as HTMLElement;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true')) {
+  // Simplified focus handlers - remove double state setting
+  const handleFocusIn = useCallback((e: FocusEvent) => {
+    const target = e.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true')) {
+      // Only use fallback if plugin isn't available
+      if (!Capacitor.isPluginAvailable('Keyboard')) {
         const fallbackHeight = Math.floor(window.innerHeight * 0.35);
         setKeyboardHeight(fallbackHeight);
         setIsVisible(true);
         document.documentElement.style.setProperty('--android-keyboard-height', `${fallbackHeight}px`);
       }
-    };
+    }
+  }, []);
 
-    const handleFocusOut = (e: FocusEvent) => {
-      // Immediately clear keyboard state when focus leaves input
-      setKeyboardHeight(0);
-      setIsVisible(false);
-      document.documentElement.style.setProperty('--android-keyboard-height', '0px');
-    };
+  const handleFocusOut = useCallback(() => {
+    // Immediately clear keyboard state when focus leaves input
+    setKeyboardHeight(0);
+    setIsVisible(false);
+    document.documentElement.style.setProperty('--android-keyboard-height', '0px');
+  }, []);
 
-    const handleResize = () => {
-      detectKeyboard();
-    };
+  const handleResize = useCallback(() => {
+    debouncedDetectKeyboard();
+  }, [debouncedDetectKeyboard]);
 
-    const handleVisualViewportResize = () => {
-      detectKeyboard();
-    };
+  const handleVisualViewportResize = useCallback(() => {
+    debouncedDetectKeyboard();
+  }, [debouncedDetectKeyboard]);
 
-    // Method 1: Try Capacitor Keyboard plugin (most reliable for Capacitor apps)
+  useEffect(() => {
+    if (!isAndroid) return;
+
+    let keyboardShowCleanup: (() => void) | undefined;
+    let keyboardHideCleanup: (() => void) | undefined;
+
+    // Setup Capacitor keyboard listeners (if available)
     const setupCapacitorKeyboard = async () => {
-      try {
-        console.log('[Android Keyboard] Setting up Capacitor Keyboard plugin');
-        
-        // Check if Keyboard plugin is available
-        if (Capacitor.isPluginAvailable('Keyboard')) {
-          console.log('[Android Keyboard] Capacitor Keyboard plugin available');
-          
+      if (Capacitor.isPluginAvailable('Keyboard')) {
+        try {
           const keyboardWillShowListener = await Keyboard.addListener('keyboardWillShow', (info) => {
-            console.log('[Android Keyboard] Capacitor keyboardWillShow:', info);
-            const height = info.keyboardHeight || 300; // fallback height
+            const height = info.keyboardHeight || 300;
             setKeyboardHeight(height);
             setIsVisible(true);
             document.documentElement.style.setProperty('--android-keyboard-height', `${height}px`);
           });
 
           const keyboardWillHideListener = await Keyboard.addListener('keyboardWillHide', () => {
-            console.log('[Android Keyboard] Capacitor keyboardWillHide');
             setKeyboardHeight(0);
             setIsVisible(false);
             document.documentElement.style.setProperty('--android-keyboard-height', '0px');
           });
 
-          capacitorListenersAdded = true;
-          console.log('[Android Keyboard] Capacitor listeners added successfully');
-          
-          return () => {
-            keyboardWillShowListener.remove();
-            keyboardWillHideListener.remove();
-          };
-        } else {
-          console.log('[Android Keyboard] Capacitor Keyboard plugin NOT available');
-          return null;
+          keyboardShowCleanup = () => keyboardWillShowListener.remove();
+          keyboardHideCleanup = () => keyboardWillHideListener.remove();
+        } catch (error) {
+          console.error('[Android Keyboard] Error setting up Capacitor Keyboard:', error);
         }
-      } catch (error) {
-        console.log('[Android Keyboard] Error setting up Capacitor Keyboard:', error);
-        return null;
       }
     };
 
-    // Add event listeners
+    // Add event listeners with proper cleanup references
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleVisualViewportResize);
     }
     
     window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', detectKeyboard);
+    window.addEventListener('orientationchange', handleOrientationChange);
     document.addEventListener('focusin', handleFocusIn);
     document.addEventListener('focusout', handleFocusOut);
 
     // Setup Capacitor keyboard listeners
-    let capacitorCleanup: (() => void) | null = null;
-    setupCapacitorKeyboard().then((cleanup) => {
-      capacitorCleanup = cleanup;
-    });
+    setupCapacitorKeyboard();
 
-    // Run initial detection
+    // Initial measurement
+    resetInitialHeight();
     detectKeyboard();
 
     return () => {
+      // Cleanup Capacitor listeners
+      keyboardShowCleanup?.();
+      keyboardHideCleanup?.();
+      
+      // Cleanup DOM listeners (using same function references)
       if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', handleVisualViewportResize);
       }
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', detectKeyboard);
+      window.removeEventListener('orientationchange', handleOrientationChange);
       document.removeEventListener('focusin', handleFocusIn);
       document.removeEventListener('focusout', handleFocusOut);
-      
-      // Clean up Capacitor listeners
-      if (capacitorCleanup) {
-        capacitorCleanup();
-      }
     };
-  }, [isAndroid]);
+  }, [isAndroid, handleVisualViewportResize, handleResize, handleOrientationChange, handleFocusIn, handleFocusOut, resetInitialHeight, detectKeyboard]);
 
   // Centralized container style for keyboard adjustments
-  const getContainerStyle = (baseStyle: React.CSSProperties = {}, adjustment: number = 40): React.CSSProperties => {
+  const getContainerStyle = useCallback((
+    baseStyle: React.CSSProperties = {},
+    adjustment: number = 40
+  ): React.CSSProperties => {
     if (isAndroid && isVisible && keyboardHeight > 0) {
       const adjustedTransform = Math.max(0, keyboardHeight - adjustment);
       return {
         ...baseStyle,
         transform: `translateY(-${adjustedTransform}px)`,
-        transition: 'transform 0.15s ease-out',
+        transition: 'transform 0.1s ease-out',
       };
     }
     
     return {
       ...baseStyle,
-      transition: 'transform 0.15s ease-out',
+      transition: 'transform 0.1s ease-out',
     };
-  };
+  }, [isAndroid, isVisible, keyboardHeight]);
 
   return { keyboardHeight, isVisible, isAndroid, getContainerStyle };
 } 
