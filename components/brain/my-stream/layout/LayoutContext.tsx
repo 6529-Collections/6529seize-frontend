@@ -359,7 +359,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (isAndroid) {
       capSpace = 128;
     } else if (isIos || isCapacitor) {
-      // iOS: 54 when keyboard closed, 20 when keyboard open (wave chat)
+      // iOS: Wave chat view only - remove extra spacing when keyboard is visible
+      // All other views keep the standard 54px spacing
       capSpace = keyboardVisible ? 20 : 54;
     }
 
