@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
 import MyStreamLayout from "../../components/brain/my-stream/layout/MyStreamLayout";
-import Notifications from "../../components/brain/notifications/Notifications";
+import Notifications from "../../components/brain/notifications/NotificationsContainer";
 import {
   dehydrate,
   DehydratedState,

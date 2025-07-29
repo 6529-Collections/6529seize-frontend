@@ -228,8 +228,10 @@ export default function CreateDrop({
     (dropRequest: DropMutationBody) => {
       addToQueue(dropRequest);
       onDropAddedToQueue();
+      // Explicitly blur any focused input to close keyboard
+      (document.activeElement as HTMLElement)?.blur();
     },
-    [addToQueue, onCancelReplyQuote]
+    [addToQueue, onDropAddedToQueue]
   );
 
   const createDropContentProps = useMemo(

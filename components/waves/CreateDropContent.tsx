@@ -738,6 +738,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         );
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
+      (document.activeElement as HTMLElement)?.blur();
+      if (isApp) {
+        import("@capacitor/core").then(({ Capacitor }) => {
+          if (Capacitor.getPlatform() === "android") {
+            import("@capacitor/keyboard").then(({ Keyboard }) => {
+              Keyboard.hide().catch(() => {});
+            });
+          }
+        });
+      }
       setFiles([]);
       refreshState();
       submitDrop({

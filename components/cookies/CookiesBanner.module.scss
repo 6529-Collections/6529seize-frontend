@@ -10,6 +10,11 @@
   color: variables.$very-dark-grey;
 }
 
+.bannerMobile {
+  bottom: 5rem;
+  margin-bottom: max(5px, env(safe-area-inset-bottom));
+}
+
 .accept {
   border: none;
   padding: 5px 10px;

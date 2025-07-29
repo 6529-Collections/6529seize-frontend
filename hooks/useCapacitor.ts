@@ -72,25 +72,28 @@ const useCapacitor = () => {
     let keyboardHideListener: PluginListenerHandle | undefined;
 
     const addKeyboardListeners = async () => {
-      try {
-        // Show the keyboard accessory bar (Done button)
-        await Keyboard.setAccessoryBarVisible({ isVisible: true });
-        
-        keyboardShowListener = await Keyboard.addListener(
-          "keyboardWillShow",
-          () => {
-            setKeyboardVisible(true);
-          }
-        );
+      // Only add keyboard listeners for iOS (let useAndroidKeyboard handle Android)
+      if (isIos) {
+        try {
+          // Show the keyboard accessory bar (Done button)
+          await Keyboard.setAccessoryBarVisible({ isVisible: true });
+          
+          keyboardShowListener = await Keyboard.addListener(
+            "keyboardWillShow",
+            () => {
+              setKeyboardVisible(true);
+            }
+          );
 
-        keyboardHideListener = await Keyboard.addListener(
-          "keyboardWillHide",
-          () => {
-            setKeyboardVisible(false);
-          }
-        );
-      } catch (error) {
-        console.error("Keyboard plugin error:", error);
+          keyboardHideListener = await Keyboard.addListener(
+            "keyboardWillHide",
+            () => {
+              setKeyboardVisible(false);
+            }
+          );
+        } catch (error) {
+          console.error("Keyboard plugin error:", error);
+        }
       }
     };
 

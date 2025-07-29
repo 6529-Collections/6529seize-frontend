@@ -12,6 +12,11 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* Android keyboard height adjustments */
+  :root {
+    --android-keyboard-height: 0px;
+  }
 }
 
 // add the code bellow
@@ -34,6 +39,17 @@
       -moz-user-select: none;
       -ms-user-select: none;
     }
+  }
+
+  /* Android keyboard adjustments */
+  .android-keyboard-adjust {
+    padding-bottom: var(--android-keyboard-height);
+    transition: padding-bottom 0.3s ease-out;
+  }
+
+  .android-keyboard-transform {
+    transform: translateY(calc(-1 * var(--android-keyboard-height)));
+    transition: transform 0.3s ease-out;
   }
 
   /* Custom selection mode for drops area */

@@ -46,7 +46,7 @@ export default function AppLayout({ children }: Props) {
   );
 
   return (
-    <div>
+    <div className="tw-pb-[env(safe-area-inset-bottom,0px)]">
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />
       </div>

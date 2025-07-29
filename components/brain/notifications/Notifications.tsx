@@ -10,7 +10,6 @@ import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
@@ -20,10 +19,14 @@ import NotificationsCauseFilter, {
 } from "./NotificationsCauseFilter";
 import SpinnerLoader from "../../common/SpinnerLoader";
 
-export default function Notifications() {
+interface NotificationsProps {
+  readonly activeDrop: ActiveDropState | null;
+  readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
+}
+
+export default function Notifications({ activeDrop, setActiveDrop }: NotificationsProps) {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
-  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { notificationsViewStyle } = useLayout();
 
@@ -118,10 +121,6 @@ export default function Notifications() {
     onBottomIntersection(true);
   };
 
-  const onCancelReplyQuote = () => {
-    setActiveDrop(null);
-  };
-
   const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
   const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
 
@@ -157,12 +156,6 @@ export default function Notifications() {
           setActiveFilter={setActiveFilter}
         />
         {mainContent}
-        <div className="tw-sticky tw-bottom-0 tw-z-[60] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
-          <BrainContentInput
-            activeDrop={activeDrop}
-            onCancelReplyQuote={onCancelReplyQuote}
-          />
-        </div>
       </div>
     </div>
   );

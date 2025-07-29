@@ -18,11 +18,12 @@ export default function CookiesBanner() {
 
   return (
     <div
-      className={`${
-        styles.banner
+      className={`${styles.banner} ${
+        isMobile ? styles.bannerMobile : ""
       } d-flex align-items-center justify-content-between gap-2 ${
         isMobile ? `flex-column` : ""
-      }`}>
+      }`}
+    >
       <span className="d-flex align-items-center gap-2">
         <Image
           src="/intern.png"
