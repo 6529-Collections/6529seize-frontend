@@ -351,7 +351,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
 
-  // Per-view styles with inline padding logic
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
 
@@ -359,14 +358,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (isAndroid) {
       capSpace = 128;
     } else if (isIos || isCapacitor) {
-      // iOS: Wave chat view only - remove extra spacing when keyboard is visible
-      // All other views keep the standard 54px spacing
-      capSpace = keyboardVisible ? 20 : 54;
+      capSpace = 20;
     }
 
     const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
     return calculateHeightStyle("wave", adjustedSpaces, capSpace);
-      }, [spaces, isAndroid, isIos, isCapacitor, keyboardVisible]);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
