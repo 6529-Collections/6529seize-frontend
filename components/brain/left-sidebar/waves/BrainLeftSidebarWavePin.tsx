@@ -97,10 +97,12 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     }
   };
 
-  // Apply same hover behavior to both pin and unpin states
+  // Apply visibility logic: always show pinned waves on desktop, hide unpinned until hover
   const opacityClass = isTouchDevice
     ? "tw-opacity-100" // Always visible on touch devices
-    : "tw-opacity-0 group-hover:tw-opacity-100"; // Hidden by default, visible on hover
+    : isPinned 
+    ? "tw-opacity-100" // Always visible for pinned waves on desktop
+    : "tw-opacity-0 group-hover:tw-opacity-100"; // Hidden by default, visible on hover for unpinned waves
 
   // Ensure tooltip is updated immediately by always checking the current state
   const tooltipContent = isPinned
@@ -115,7 +117,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
         onClick={handleClick}
         className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${
           isPinned
-            ? "tw-text-iron-300 tw-bg-iron-700/40 desktop-hover:hover:tw-bg-iron-700/60"
+            ? "tw-text-iron-300 tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/60"
             : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 tw-bg-iron-800"
         }`}
         aria-label={isPinned ? "Unpin wave" : "Pin wave"}

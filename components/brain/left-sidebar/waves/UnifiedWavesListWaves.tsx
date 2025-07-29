@@ -143,11 +143,7 @@ const UnifiedWavesListWaves = forwardRef<
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedWaves.length > 0 && (
           <>
-            <SectionHeader label="Pinned" icon={faThumbtack} />
-            <section
-              className="tw-flex tw-flex-col tw-mb-3"
-              aria-label="Pinned waves"
-            >
+            <section className="tw-flex tw-flex-col" aria-label="Pinned waves">
               {pinnedWaves
                 .filter((wave): wave is MinimalWave => {
                   if (!isValidWave(wave)) {
@@ -173,6 +169,11 @@ const UnifiedWavesListWaves = forwardRef<
                 ))}
             </section>
           </>
+        )}
+
+        {/* Add divider between pinned and regular waves */}
+        {!hideHeaders && pinnedWaves.length > 0 && regularWaves.length > 0 && (
+          <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
         )}
 
         {/* Conditionally show regular waves or maintain structure */}
