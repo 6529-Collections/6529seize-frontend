@@ -4,7 +4,6 @@ import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
-import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import JoinedToggle from "./JoinedToggle";
 import {
   useVirtualizedWaves,
@@ -142,8 +141,7 @@ const UnifiedWavesListWaves = forwardRef<
 
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedWaves.length > 0 && (
-          <>
-            <section className="tw-flex tw-flex-col" aria-label="Pinned waves">
+          <section className="tw-flex tw-flex-col" aria-label="Pinned waves">
               {pinnedWaves
                 .filter((wave): wave is MinimalWave => {
                   if (!isValidWave(wave)) {
@@ -168,7 +166,6 @@ const UnifiedWavesListWaves = forwardRef<
                   </div>
                 ))}
             </section>
-          </>
         )}
 
         {/* Add divider between pinned and regular waves */}

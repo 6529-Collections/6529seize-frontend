@@ -98,36 +98,43 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
 
   // Apply visibility logic: always show pinned waves on desktop, hide unpinned until hover
-  const opacityClass = isTouchDevice
-    ? "tw-opacity-100" // Always visible on touch devices
-    : isPinned
-    ? "tw-opacity-100" // Always visible for pinned waves on desktop
-    : "tw-opacity-0 group-hover:tw-opacity-100"; // Hidden by default, visible on hover for unpinned waves
+  const getOpacityClass = () => {
+    if (isTouchDevice) return "tw-opacity-100";
+    if (isPinned) return "tw-opacity-100";
+    return "tw-opacity-0 group-hover:tw-opacity-100";
+  };
+  const opacityClass = getOpacityClass();
 
   // Ensure tooltip is updated immediately by always checking the current state
-  const tooltipContent = isPinned
-    ? "Unpin"
-    : canPinWave()
-    ? "Pin"
-    : `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+  const getTooltipContent = () => {
+    if (isPinned) return "Unpin";
+    if (canPinWave()) return "Pin";
+    return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+  };
+  const tooltipContent = getTooltipContent();
+
+  const getButtonStyles = () => {
+    if (isPinned) {
+      return "tw-text-iron-200 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-text-iron-100";
+    }
+    return "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700";
+  };
+
+  const getAriaLabel = () => {
+    return isPinned ? "Unpin wave" : "Pin wave";
+  };
 
   return (
     <>
       <button
         onClick={handleClick}
-        className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${
-          isPinned
-            ? "tw-text-iron-200 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-text-iron-100"
-            : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700"
-        }`}
-        aria-label={isPinned ? "Unpin wave" : "Pin wave"}
+        className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()}`}
+        aria-label={getAriaLabel()}
         data-tooltip-id={`wave-pin-${waveId}`}
       >
         <FontAwesomeIcon
           icon={faThumbtack}
-          className={`tw-size-3 tw-flex-shrink-0 ${
-            isPinned ? "tw-rotate-[-45deg]" : ""
-          }`}
+          className={`tw-size-3 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
         />
       </button>
       <Tooltip
