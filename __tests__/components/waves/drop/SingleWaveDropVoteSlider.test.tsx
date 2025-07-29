@@ -26,7 +26,7 @@ jest.mock('framer-motion', () => ({
 
 // Mock formatNumberWithCommas
 jest.mock('../../../../helpers/Helpers', () => ({
-  formatNumberWithCommas: (num: number) => num.toLocaleString(),
+  formatNumberWithCommas: (num: number) => num.toLocaleString('en-US'),
 }));
 
 describe('SingleWaveDropVoteSlider', () => {

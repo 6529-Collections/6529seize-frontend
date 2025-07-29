@@ -1,6 +1,18 @@
 import { Time } from '../../helpers/time';
 
 describe('Time utilities', () => {
+  beforeEach(() => {
+    // Mock toLocaleString to ensure English locale for consistent formatting
+    const originalToLocaleString = Date.prototype.toLocaleString;
+    jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function(this: Date, locales?: string | string[], options?: Intl.DateTimeFormatOptions) {
+      return originalToLocaleString.call(this, 'en-US', options);
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('toMonthAndDayString formats correctly', () => {
     const t = Time.fromString('2024-01-02T00:00:00Z');
     expect(t.toMonthAndDayString()).toBe('Tuesday, January 2nd');

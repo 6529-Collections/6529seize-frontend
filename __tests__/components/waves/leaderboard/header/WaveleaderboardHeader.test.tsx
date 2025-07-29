@@ -10,6 +10,10 @@ jest.mock('../../../../../hooks/useWave', () => ({ useWave: () => ({ isMemesWave
 
 jest.mock('../../../../../components/utils/button/PrimaryButton', () => (props:any) => <button data-testid="create" onClick={props.onClicked}>{props.children}</button>);
 
+jest.mock('react-use', () => ({
+  createBreakpoint: jest.fn(() => () => 'MD')
+}));
+
 const wave = { id:'w' } as any;
 
 it('renders controls and handles actions', async () => {

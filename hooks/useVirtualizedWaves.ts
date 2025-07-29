@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useScrollPositionContext } from "../contexts/ScrollPositionContext";
 
-interface VirtualItem {
+export interface VirtualItem {
   index: number;
   start: number;
   size: number;
