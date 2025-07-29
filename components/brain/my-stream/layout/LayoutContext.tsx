@@ -147,7 +147,7 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor, isAndroid, isIos, keyboardVisible } = useCapacitor();
+  const { isCapacitor, isAndroid, isIos } = useCapacitor();
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
