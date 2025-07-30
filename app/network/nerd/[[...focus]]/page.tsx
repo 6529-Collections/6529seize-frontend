@@ -1,11 +1,9 @@
 
+import { LeaderboardFocus } from "@/enums";
 import CommunityNerdPageClient from "./page.client";
 import { Metadata } from "next";
 
-enum LeaderboardFocus {
-  TDH = "Cards Collected",
-  INTERACTIONS = "Interactions",
-}
+
 
 export async function generateMetadata({
   params,

@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Leaderboard, { LeaderboardFocus } from '../../../components/leaderboard/Leaderboard';
+import Leaderboard from '../../../components/leaderboard/Leaderboard';
+import { LeaderboardFocus } from '@/enums';
 
 const fetchUrl = jest.fn();
 const commonApiFetch = jest.fn();
