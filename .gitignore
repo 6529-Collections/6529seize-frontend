@@ -83,5 +83,4 @@ jest-failed-tests.txt
 jest-results.json
 
 # Claude folder
-.claude/
 claude.md
