@@ -9,12 +9,13 @@ import React, {
   useState,
 } from "react";
 import { useAccount, useConnections, useDisconnect } from "wagmi";
-import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
+// import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import {
   migrateCookiesToLocalStorage,
   getWalletAddress,
   removeAuthJwt,
 } from "../../services/auth/auth.utils";
+import { useAppKit, useAppKitState } from "@reown/appkit/react";
 
 interface SeizeConnectContextType {
   address: string | undefined;
@@ -36,8 +37,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const connections = useConnections().flat();
   const { disconnect } = useDisconnect();
-  const { open: onConnect } = useWeb3Modal();
-  const { open } = useWeb3ModalState();
+  const { open } = useAppKit();
+  const state = useAppKitState()
+  // const { open: onConnect } = useWeb3Modal();
+  // const { open } = useWeb3ModalState();
 
   const account = useAccount();
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
@@ -57,8 +60,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [account.address, account.isConnected]);
 
   const seizeConnect = useCallback(() => {
-    onConnect({ view: "Connect" });
-  }, [onConnect]);
+    open({ view: "Connect" });
+  }, [open]);
 
   const seizeDisconnect = useCallback(() => {
     for (const connection of connections) {
@@ -96,7 +99,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeDisconnect,
       seizeDisconnectAndLogout,
       seizeAcceptConnection,
-      seizeConnectOpen: open,
+      seizeConnectOpen: state.open,
       isConnected: account.isConnected,
       isAuthenticated: !!connectedAddress,
     };
@@ -106,7 +109,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     seizeDisconnect,
     seizeDisconnectAndLogout,
     seizeAcceptConnection,
-    open,
+    state.open,
     account.isConnected,
   ]);
 
