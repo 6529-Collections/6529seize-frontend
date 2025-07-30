@@ -110,7 +110,7 @@ export default function MediaDisplayGLB({
 
       {/* Custom 3D Cube Icon - positioned like native AR icon */}
       {!disableMediaInteractions && (
-        <div className="tw-absolute tw-bottom-2 tw-right-2 tw-z-20">
+        <div className="tw-absolute tw-bottom-2 tw-right-2 tw-z-[1]">
         <button
           onClick={handleCubeToggle}
           className={`tw-w-9 tw-h-9 tw-border tw-border-solid tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-200 ${
