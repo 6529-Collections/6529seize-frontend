@@ -88,11 +88,20 @@ export default function MediaDisplayGLB({
     }
   };
 
+  const handleContainerKeyDown = (e: React.KeyboardEvent) => {
+    // Prevent navigation when 3D controls are active and Enter/Space is pressed
+    if (isActive && (e.key === 'Enter' || e.key === ' ')) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  };
+
   return (
     <div
       ref={containerRef}
       className="tw-w-full tw-h-full tw-relative tw-select-none"
       onClick={handleContainerClick}
+      onKeyDown={handleContainerKeyDown}
       onTouchStart={handleContainerTouch}
       onTouchMove={handleContainerTouch}
       onTouchEnd={handleContainerTouch}
