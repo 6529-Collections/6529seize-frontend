@@ -1,7 +1,8 @@
 import React from "react";
 import { render, act } from "@testing-library/react";
 import ClientCommunityNerdPage from "@/app/network/nerd/[[...focus]]/page.client";
-import { LeaderboardFocus } from "@/components/leaderboard/Leaderboard";
+import { LeaderboardFocus } from "@/enums";
+
 
 // 🧪 Mock leaderboard component and capture props
 let capturedProps: any;

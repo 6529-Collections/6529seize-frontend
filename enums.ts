@@ -107,3 +107,8 @@ export enum GasRoyaltiesCollectionFocus {
   MEMES = "the-memes",
   MEMELAB = "meme-lab",
 }
+
+export enum LeaderboardFocus {
+  TDH = "Cards Collected",
+  INTERACTIONS = "Interactions",
+}

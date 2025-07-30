@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 
 import ClientCommunityNerdPage from "@/app/network/nerd/[[...focus]]/page.client";
 import { generateMetadata } from "@/app/network/nerd/[[...focus]]/page";
-import { LeaderboardFocus } from "@/components/leaderboard/Leaderboard";
+import { LeaderboardFocus } from "@/enums";
 
 // 🧪 Mock dynamic Leaderboard
 jest.mock("@/components/leaderboard/Leaderboard", () => {
