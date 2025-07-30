@@ -8,20 +8,19 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useAccount, useConnections, useDisconnect } from "wagmi";
-// import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
+
 import {
   migrateCookiesToLocalStorage,
   getWalletAddress,
   removeAuthJwt,
 } from "../../services/auth/auth.utils";
-import { useAppKit, useAppKitState } from "@reown/appkit/react";
+import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from "@reown/appkit/react";
 
 interface SeizeConnectContextType {
   address: string | undefined;
   seizeConnect: () => void;
-  seizeDisconnect: () => void;
-  seizeDisconnectAndLogout: (reconnect?: boolean) => void;
+  seizeDisconnect: () => Promise<void>;
+  seizeDisconnectAndLogout: (reconnect?: boolean) => Promise<void>;
   seizeAcceptConnection: (address: string) => void;
   seizeConnectOpen: boolean;
   isConnected: boolean;
@@ -35,16 +34,15 @@ const SeizeConnectContext = createContext<SeizeConnectContextType | undefined>(
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const connections = useConnections().flat();
+  const account = useAppKitAccount();
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
-  const state = useAppKitState()
-  // const { open: onConnect } = useWeb3Modal();
-  // const { open } = useWeb3ModalState();
+  const state = useAppKitState();
 
-  const account = useAccount();
+
+
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
-    account.address ?? getWalletAddress() ?? undefined
+    getWalletAddress() ?? undefined
   );
 
   useEffect(() => {
@@ -59,38 +57,41 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [account.address, account.isConnected]);
 
-  const seizeConnect = useCallback(() => {
+  const seizeConnect = useCallback((): void => {
     open({ view: "Connect" });
   }, [open]);
 
-  const seizeDisconnect = useCallback(() => {
-    for (const connection of connections) {
-      disconnect({
-        connector: connection.connector,
-      });
+  const seizeDisconnect = useCallback(async (): Promise<void> => {
+    try {
+      await disconnect();
+    } catch (error: unknown) {
+      console.error('Failed to disconnect:', error instanceof Error ? error.message : error);
     }
-  }, [connections, disconnect]);
+  }, [disconnect]);
 
   const seizeDisconnectAndLogout = useCallback(
-    async (reconnect?: boolean) => {
-      for (const connection of connections) {
-        disconnect({
-          connector: connection.connector,
-        });
-      }
-      removeAuthJwt();
-      setConnectedAddress(undefined);
+    async (reconnect?: boolean): Promise<void> => {
+      try {
+        await disconnect();
+        removeAuthJwt();
+        setConnectedAddress(undefined);
 
-      if (reconnect) {
-        seizeConnect();
+        if (reconnect) {
+          seizeConnect();
+        }
+      } catch (error: unknown) {
+        console.error('Failed to disconnect and logout:', error instanceof Error ? error.message : error);
+        // Still clean up auth state even if disconnect fails
+        removeAuthJwt();
+        setConnectedAddress(undefined);
       }
     },
-    [connections, disconnect, seizeConnect]
+    [disconnect, seizeConnect]
   );
 
-  const seizeAcceptConnection = (address: string) => {
+  const seizeAcceptConnection = useCallback((address: string): void => {
     setConnectedAddress(address);
-  };
+  }, []);
 
   const contextValue = useMemo(() => {
     return {
