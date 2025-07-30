@@ -58,6 +58,40 @@ export async function multiPartUpload({
   // 1) Start the multi-part upload on your backend
   //    e.g. POST /api/<path>-media/multipart-upload
   // -----------------------------------------------------
+  // Determine content type, with fallback for GLB files
+  const getContentType = (file: File): string => {
+    if (file.type) {
+      return file.type;
+    }
+    
+    // Fallback MIME type detection for files without type
+    const fileName = file.name.toLowerCase();
+    if (fileName.endsWith('.glb')) {
+      return 'model/gltf-binary';
+    }
+    if (fileName.endsWith('.gltf')) {
+      return 'model/gltf+json';
+    }
+    if (fileName.endsWith('.mp4')) {
+      return 'video/mp4';
+    }
+    if (fileName.endsWith('.png')) {
+      return 'image/png';
+    }
+    if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+      return 'image/jpeg';
+    }
+    if (fileName.endsWith('.gif')) {
+      return 'image/gif';
+    }
+    
+    // Default fallback
+    return 'application/octet-stream';
+  };
+
+  const contentType = getContentType(file);
+  console.log('File upload - detected content type:', contentType, 'for file:', file.name);
+
   const startData = await commonApiPost<
     { file_name: string; content_type: string },
     StartMultipartResponse
@@ -65,7 +99,7 @@ export async function multiPartUpload({
     endpoint: `${path}-media/multipart-upload`,
     body: {
       file_name: file.name,
-      content_type: file.type,
+      content_type: contentType,
     },
   });
 
@@ -197,6 +231,6 @@ export async function multiPartUpload({
   // -----------------------------------------------------
   return {
     url: media_url,
-    mime_type: file.type,
+    mime_type: contentType,
   };
 }

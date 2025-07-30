@@ -42,7 +42,10 @@ export default function MediaDisplay({
     if (media_mime_type.includes("audio")) {
       return MediaType.AUDIO;
     }
-    if (media_url.endsWith(".glb")) {
+    if (media_mime_type === "model/gltf-binary" || 
+        media_mime_type === "model/gltf+json" ||
+        media_url.endsWith(".glb") || 
+        media_url.endsWith(".gltf")) {
       return MediaType.GLB;
     }
     return MediaType.UNKNOWN;
