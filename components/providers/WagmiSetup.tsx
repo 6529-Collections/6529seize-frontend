@@ -11,8 +11,7 @@ import { useEffect, useState } from "react";
 //   createAppWalletConnector,
 // } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-// import { getWagmiConfig, WagmiConfig } from "@/wagmiConfig/wagmiConfig";
-// import { initWeb3Modal } from "./web3ModalSetup";
+
 import { createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 
@@ -25,12 +24,8 @@ export default function WagmiSetup({
   readonly children: React.ReactNode;
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
-  // const [wagmiConfig, setWagmiConfig] = useState<WagmiConfig>();
-  // useEffect(() => {
-  //   const wagmiConfig = getWagmiConfig();
-  //   initWeb3Modal(wagmiConfig.config);
-  //   setWagmiConfig(wagmiConfig);
-  // }, []);
+
+
 
   // useEffect(() => {
   //   if (!wagmiConfig) return;
@@ -98,9 +93,6 @@ export default function WagmiSetup({
   //   };
   // }, [wagmiConfig]);
 
-  // if (!wagmiConfig) {
-  //   return null;
-  // }
 
   const networks = [mainnet]
 
