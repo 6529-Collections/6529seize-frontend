@@ -6,7 +6,6 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
-import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDoorOpen,
@@ -132,7 +131,6 @@ export default function HeaderUserProxyDropdown({
                       />
                     ))}
                   </div>
-                  <HeaderUserProxyDropdownChains onSwitchChain={onClose} />
                   <div className="tw-h-full tw-px-2 tw-pt-2">
                     {isConnected ? (
                       <button
