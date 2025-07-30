@@ -1,23 +1,21 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { SeizeConnectProvider, useSeizeConnectContext } from '../../../components/auth/SeizeConnectContext';
-import { useAccount, useConnections, useDisconnect } from 'wagmi';
-import { useWeb3Modal, useWeb3ModalState } from '@web3modal/wagmi/react';
-import { getWalletAddress, removeAuthJwt } from '../../../services/auth/auth.utils';
+import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from '@reown/appkit/react';
+import { getWalletAddress, removeAuthJwt, migrateCookiesToLocalStorage } from '../../../services/auth/auth.utils';
 
-jest.mock('wagmi');
-jest.mock('@web3modal/wagmi/react');
+jest.mock('@reown/appkit/react');
 jest.mock('../../../services/auth/auth.utils');
 
-const disconnect = jest.fn();
-const openConnect = jest.fn();
+const disconnect = jest.fn().mockResolvedValue(undefined);
+const open = jest.fn();
 
-(useConnections as jest.Mock).mockReturnValue([{ connector: 'c1' }]);
 (useDisconnect as jest.Mock).mockReturnValue({ disconnect });
-(useWeb3Modal as jest.Mock).mockReturnValue({ open: openConnect });
-(useWeb3ModalState as jest.Mock).mockReturnValue({ open: false });
-(useAccount as jest.Mock).mockReturnValue({ address: '0x1', isConnected: true });
+(useAppKit as jest.Mock).mockReturnValue({ open });
+(useAppKitState as jest.Mock).mockReturnValue({ open: false });
+(useAppKitAccount as jest.Mock).mockReturnValue({ address: '0x1', isConnected: true });
 (getWalletAddress as jest.Mock).mockReturnValue('0x1');
+(migrateCookiesToLocalStorage as jest.Mock).mockImplementation(() => {});
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -29,7 +27,7 @@ describe('SeizeConnectContext', () => {
     expect(() => result.current()).toThrow();
   });
 
-  it('provides connect and disconnect logic', () => {
+  it('provides connect and disconnect logic', async () => {
     const { result } = renderHook(() => useSeizeConnectContext(), {
       wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
     });
@@ -37,12 +35,12 @@ describe('SeizeConnectContext', () => {
     act(() => {
       result.current.seizeConnect();
     });
-    expect(openConnect).toHaveBeenCalledWith({ view: 'Connect' });
+    expect(open).toHaveBeenCalledWith({ view: 'Connect' });
 
-    act(() => {
-      result.current.seizeDisconnect();
+    await act(async () => {
+      await result.current.seizeDisconnect();
     });
-    expect(disconnect).toHaveBeenCalledWith({ connector: 'c1' });
+    expect(disconnect).toHaveBeenCalled();
   });
 
   it('disconnects and logs out then reconnects', async () => {
@@ -56,6 +54,6 @@ describe('SeizeConnectContext', () => {
 
     expect(removeAuthJwt).toHaveBeenCalled();
     expect(disconnect).toHaveBeenCalled();
-    expect(openConnect).toHaveBeenCalled();
+    expect(open).toHaveBeenCalledWith({ view: 'Connect' });
   });
 });
