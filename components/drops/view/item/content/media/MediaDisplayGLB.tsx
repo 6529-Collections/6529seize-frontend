@@ -9,7 +9,13 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
  * - Desktop: Double-click model as secondary disable method
  * - Prevents scroll hijacking when controls are active
  */
-export default function MediaDisplayGLB({ src }: { readonly src: string }) {
+export default function MediaDisplayGLB({ 
+  src, 
+  disableMediaInteractions = false 
+}: { 
+  readonly src: string;
+  readonly disableMediaInteractions?: boolean;
+}) {
   const modelRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
@@ -32,33 +38,11 @@ export default function MediaDisplayGLB({ src }: { readonly src: string }) {
       modelViewer.removeAttribute("camera-controls");
     };
 
-    const handleClick = (e: Event) => {
-      if (!isActive) {
-        enableControls(e);
-      }
-    };
-
-    const handleDoubleClick = (e: Event) => {
-      if (isActive && !hasTouchScreen) {
-        e.stopPropagation();
-        e.preventDefault();
-        disableControls();
-      }
-    };
-
     const handleClickOutside = (e: Event) => {
       if (isActive && !container.contains(e.target as Node)) {
         disableControls();
       }
     };
-
-    // Enable controls on click
-    modelViewer.addEventListener("click", handleClick);
-
-    // Disable controls on double-click (desktop only)
-    if (!hasTouchScreen) {
-      modelViewer.addEventListener("dblclick", handleDoubleClick);
-    }
 
     // Disable controls when clicking outside (only when active)
     if (isActive) {
@@ -67,10 +51,6 @@ export default function MediaDisplayGLB({ src }: { readonly src: string }) {
 
     // Cleanup
     return () => {
-      if (modelViewer) {
-        modelViewer.removeEventListener("click", handleClick);
-        modelViewer.removeEventListener("dblclick", handleDoubleClick);
-      }
       document.removeEventListener("click", handleClickOutside);
     };
   }, [isActive, hasTouchScreen]);
@@ -101,10 +81,18 @@ export default function MediaDisplayGLB({ src }: { readonly src: string }) {
     }
   };
 
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Prevent navigation when 3D controls are active
+    if (isActive) {
+      e.stopPropagation();
+    }
+  };
+
   return (
     <div
       ref={containerRef}
       className="tw-w-full tw-h-full tw-relative tw-select-none"
+      onClick={handleContainerClick}
       onTouchStart={handleContainerTouch}
       onTouchMove={handleContainerTouch}
       onTouchEnd={handleContainerTouch}
@@ -121,7 +109,8 @@ export default function MediaDisplayGLB({ src }: { readonly src: string }) {
       ></model-viewer>
 
       {/* Custom 3D Cube Icon - positioned like native AR icon */}
-      <div className="tw-absolute tw-bottom-2 tw-right-2 tw-z-20">
+      {!disableMediaInteractions && (
+        <div className="tw-absolute tw-bottom-2 tw-right-2 tw-z-20">
         <button
           onClick={handleCubeToggle}
           className={`tw-w-9 tw-h-9 tw-border tw-border-solid tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-200 ${
@@ -192,7 +181,8 @@ export default function MediaDisplayGLB({ src }: { readonly src: string }) {
               : "Click to enable 3D controls"}
           </Tooltip>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
