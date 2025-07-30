@@ -41,17 +41,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     return `tw-w-full tw-flex tw-flex-col lg:[--tab-height:0px]`;
   }, []);
 
-  // On mobile app, start with null to match native app behavior
-  // On desktop/web, pre-set reply for convenience
-  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(
-    isApp
-      ? null
-      : {
-          action: ActiveDropAction.REPLY,
-          drop: drop,
-          partId: 1,
-        }
-  );
+  // Always start with reply to main drop for consistent behavior
+  // This ensures posts in discussion tab are replies to the drop
+  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
+    action: ActiveDropAction.REPLY,
+    drop: drop,
+    partId: 1,
+  });
 
   const handleDropAction = ({
     drop,
@@ -66,17 +62,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   };
 
   const resetActiveDrop = () => {
-    if (isApp) {
-      // Mobile app: Set to null to prevent keyboard issues
-      setActiveDrop(null);
-    } else {
-      // Desktop/web: Reset to replying to main drop for convenience
-      setActiveDrop({
-        action: ActiveDropAction.REPLY,
-        drop: drop,
-        partId: 1,
-      });
-    }
+    // Always reset to replying to main drop for consistent behavior
+    // This ensures posts in discussion tab are replies to the drop
+    setActiveDrop({
+      action: ActiveDropAction.REPLY,
+      drop: drop,
+      partId: 1,
+    });
   };
 
   return (
