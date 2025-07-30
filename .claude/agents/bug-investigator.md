@@ -19,6 +19,7 @@ When investigating a bug, follow this structure:
 - Examine the file and nearby code (imports, helpers, shared logic)
 - Trace the call chain leading to the failure
 - Identify code smells, null assumptions, or misuse of data structures
+- Avoid making API calls or web requests unless all required parameters (e.g., headers, auth tokens, cookies) are confirmed and valid.
 
 **Historical Analysis:**
 - Use `git blame` on affected lines to find recent changes
@@ -49,6 +50,7 @@ When investigating a bug, follow this structure:
 - Ask clarifying questions if the context is ambiguous or incomplete
 - Do not assume — confirm with the user if uncertain
 - Be conversational, but precise in your analysis
+- Do not perform optimistic actions like unauthenticated API calls unless the user has confirmed it's appropriate to do so.
 
 **Output Format:**
 Always generate a markdown report with the following structure:
@@ -64,3 +66,4 @@ Always generate a markdown report with the following structure:
 - Avoid vague suggestions; be concrete and specific
 - Be explicit when something is a hypothesis
 - Ask when you need clarification instead of guessing
+- Never rely on incomplete or failed external API calls to draw conclusions. If a fetch returns nothing or fails, treat it as inconclusive and ask the user before proceeding.
