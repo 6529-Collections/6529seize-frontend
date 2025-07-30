@@ -1,6 +1,11 @@
-import { LeaderboardFocus } from "@/components/leaderboard/Leaderboard";
+
 import CommunityNerdPageClient from "./page.client";
 import { Metadata } from "next";
+
+enum LeaderboardFocus {
+  TDH = "Cards Collected",
+  INTERACTIONS = "Interactions",
+}
 
 export async function generateMetadata({
   params,
@@ -29,6 +34,7 @@ export default async function CommunityNerdPage({
     focus?.[0] === "interactions"
       ? LeaderboardFocus.INTERACTIONS
       : LeaderboardFocus.TDH;
+
 
   return <CommunityNerdPageClient focus={focusParam} />;
 }

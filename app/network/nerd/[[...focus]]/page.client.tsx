@@ -18,6 +18,8 @@ export default function CommunityNerdPageClient({
   const pathname = usePathname();
   const [focus, setFocus] = useState<LeaderboardFocus>(initialFocus);
 
+
+
   const syncPath = useCallback(
     (newFocus: LeaderboardFocus) => {
       let path = "/network/nerd";
