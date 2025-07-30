@@ -51,16 +51,26 @@ export function createAppWalletConnector(
 
   return createConnector(({ emitter }) => ({
     get icon() {
-      return `https://robohash.org/${options.appWallet.address}.png`;
+      return `https://robohash.org/${options.appWallet.address}.png?set=set2&size=64x64`;
     },
     get id() {
       return options.appWallet.address;
     },
     get name() {
-      return options.appWallet.name;
+      const shortAddress = options.appWallet.address.slice(0, 6) + '...' + options.appWallet.address.slice(-4);
+      return `${options.appWallet.name} (${shortAddress})`;
     },
     get supportsSimulation() {
       return false;
+    },
+    get supportedConnectors() {
+      return [APP_WALLET_CONNECTOR_TYPE];
+    },
+    get iconUrl() {
+      return `https://robohash.org/${options.appWallet.address}.png?set=set2&size=64x64`;
+    },
+    get walletConnectId() {
+      return undefined; // Not a WalletConnect connector
     },
     type: APP_WALLET_CONNECTOR_TYPE,
 
