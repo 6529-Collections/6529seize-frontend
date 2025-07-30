@@ -40,9 +40,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col lg:[--tab-height:0px]`;
   }, []);
-
-  // Always start with reply to main drop for consistent behavior
-  // This ensures posts in discussion tab are replies to the drop
+  
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
     drop: drop,
@@ -62,8 +60,6 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   };
 
   const resetActiveDrop = () => {
-    // Always reset to replying to main drop for consistent behavior
-    // This ensures posts in discussion tab are replies to the drop
     setActiveDrop({
       action: ActiveDropAction.REPLY,
       drop: drop,
