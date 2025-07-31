@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { SeizeConnectProvider, useSeizeConnectContext } from '../../../components/auth/SeizeConnectContext';
-import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from '@reown/appkit/react';
+import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from '@reown/appkit/react';
 import { getWalletAddress, removeAuthJwt, migrateCookiesToLocalStorage } from '../../../services/auth/auth.utils';
 
 jest.mock('@reown/appkit/react');
@@ -14,6 +14,7 @@ const open = jest.fn();
 (useAppKit as jest.Mock).mockReturnValue({ open });
 (useAppKitState as jest.Mock).mockReturnValue({ open: false });
 (useAppKitAccount as jest.Mock).mockReturnValue({ address: '0x1', isConnected: true });
+(useWalletInfo as jest.Mock).mockReturnValue({ walletInfo: { name: 'MetaMask', icon: 'metamask-icon.svg' } });
 (getWalletAddress as jest.Mock).mockReturnValue('0x1');
 (migrateCookiesToLocalStorage as jest.Mock).mockImplementation(() => {});
 
