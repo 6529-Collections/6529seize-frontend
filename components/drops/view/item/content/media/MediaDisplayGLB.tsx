@@ -26,13 +26,6 @@ export default function MediaDisplayGLB({
     const container = containerRef.current;
     if (!modelViewer || !container) return;
 
-    const enableControls = (e: Event) => {
-      e.stopPropagation();
-      e.preventDefault();
-      setIsActive(true);
-      modelViewer.setAttribute("camera-controls", "");
-    };
-
     const disableControls = () => {
       setIsActive(false);
       modelViewer.removeAttribute("camera-controls");
@@ -74,15 +67,8 @@ export default function MediaDisplayGLB({
     }
   };
 
-  const handleContainerTouch = (e: React.TouchEvent) => {
-    // Only prevent touch events from bubbling when GLB is in interactive mode
-    if (isActive) {
-      e.stopPropagation();
-    }
-  };
-
-  const handleContainerClick = (e: React.MouseEvent) => {
-    // Prevent navigation when 3D controls are active
+  const handleContainerInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent navigation/touch events from bubbling when 3D controls are active
     if (isActive) {
       e.stopPropagation();
     }
@@ -100,11 +86,14 @@ export default function MediaDisplayGLB({
     <div
       ref={containerRef}
       className="tw-w-full tw-h-full tw-relative tw-select-none"
-      onClick={handleContainerClick}
+      onClick={handleContainerInteraction}
       onKeyDown={handleContainerKeyDown}
-      onTouchStart={handleContainerTouch}
-      onTouchMove={handleContainerTouch}
-      onTouchEnd={handleContainerTouch}
+      onTouchStart={handleContainerInteraction}
+      onTouchMove={handleContainerInteraction}
+      onTouchEnd={handleContainerInteraction}
+      role="region"
+      aria-label="3D model viewer"
+      tabIndex={0}
     >
       {/* @ts-ignore */}
       <model-viewer
