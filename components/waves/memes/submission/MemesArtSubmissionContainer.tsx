@@ -11,6 +11,7 @@ import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { SubmissionPhase } from "./ui/SubmissionProgress";
 import { ApiWave } from "../../../../generated/models/ApiWave";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface MemesArtSubmissionContainerProps {
   readonly onClose: () => void;
@@ -33,6 +34,7 @@ const MemesArtSubmissionContainer: React.FC<
 > = ({ onClose, wave }) => {
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm();
+  const { isSafeWallet, address } = useSeizeConnectContext();
 
   // Use the mutation hook for submission
   const {
@@ -97,6 +99,8 @@ const MemesArtSubmissionContainer: React.FC<
         waveId: wave.id,
         termsOfService: wave.participation.terms,
       },
+      address ?? "",
+      isSafeWallet,
       {
         onPhaseChange: handlePhaseChange,
       }

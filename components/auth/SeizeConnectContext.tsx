@@ -59,6 +59,9 @@ interface SeizeConnectContextType {
   /** Icon URL of the connected wallet */
   walletIcon: string | undefined;
   
+  /** Whether the connected wallet is a Safe (Gnosis Safe) wallet */
+  isSafeWallet: boolean;
+  
   /** Opens the wallet connection modal */
   seizeConnect: () => void;
   
@@ -221,6 +224,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     address: connectedAddress,
     walletName: walletInfo?.name,
     walletIcon: walletInfo?.icon,
+    isSafeWallet: walletInfo?.name === "Safe{Wallet}",
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,

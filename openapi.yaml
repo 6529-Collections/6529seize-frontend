@@ -4084,6 +4084,10 @@ components:
             - signature (+ wave.participation.terms if it exists))))
           type: string
           nullable: true
+        is_safe_signature:
+          type: boolean
+        signer_address:
+          type: string
     ApiDrop:
       type: object
       required:

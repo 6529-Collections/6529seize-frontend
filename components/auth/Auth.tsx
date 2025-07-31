@@ -64,8 +64,8 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
-  setToast: () => {},
-  setActiveProfileProxy: async () => {},
+  setToast: () => { },
+  setActiveProfileProxy: async () => { },
 });
 
 export const useAuth = () => {
@@ -79,10 +79,9 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, isConnected, seizeDisconnectAndLogout, walletName } =
+  const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet } =
     useSeizeConnectContext();
 
-  useEffect(() => console.log("walletName", walletName), [walletName]);
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -277,7 +276,7 @@ export default function Auth({
           server_signature,
           client_signature: clientSignature.signature,
           role: role ?? undefined,
-          is_safe_wallet: walletName === "Safe{Wallet}",
+          is_safe_wallet: isSafeWallet,
           client_address: signerAddress,
         },
       });

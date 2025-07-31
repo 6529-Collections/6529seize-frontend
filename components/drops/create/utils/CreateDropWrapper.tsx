@@ -35,6 +35,7 @@ import { ApiWaveParticipationRequirement } from "../../../../generated/models/Ap
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -124,6 +125,7 @@ const CreateDropWrapper = forwardRef<
     },
     ref
   ) => {
+    const { isSafeWallet, address } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
       CreateDropScreenType.DESKTOP
@@ -338,6 +340,8 @@ const CreateDropWrapper = forwardRef<
           referenced_nfts: drop?.referenced_nfts ?? [],
           metadata,
           signature: null,
+          is_safe_signature: isSafeWallet,
+          signer_address: address ?? "",
         };
         setDrop(currentDrop);
         clearInputState();
@@ -378,6 +382,8 @@ const CreateDropWrapper = forwardRef<
         referenced_nfts: allNfts,
         metadata,
         signature: null,
+        is_safe_signature: isSafeWallet,
+        signer_address: address ?? "",
       };
       currentDrop.parts.push({
         content: markdown?.length ? markdown : null,
