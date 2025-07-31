@@ -14,7 +14,7 @@ import {
   getWalletAddress,
   removeAuthJwt,
 } from "../../services/auth/auth.utils";
-import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from "@reown/appkit/react";
+import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from "@reown/appkit/react";
 
 // Custom error types for better error handling
 export class WalletConnectionError extends Error {
@@ -52,6 +52,12 @@ export class AuthenticationError extends Error {
 interface SeizeConnectContextType {
   /** Current connected wallet address, undefined if not connected */
   address: string | undefined;
+  
+  /** Name of the connected wallet (e.g. "MetaMask", "Trust Wallet") */
+  walletName: string | undefined;
+  
+  /** Icon URL of the connected wallet */
+  walletIcon: string | undefined;
   
   /** Opens the wallet connection modal */
   seizeConnect: () => void;
@@ -130,7 +136,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
   const state = useAppKitState();
-
+  const { walletInfo } = useWalletInfo();
 
 
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
@@ -213,6 +219,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue = useMemo((): SeizeConnectContextType => ({
     address: connectedAddress,
+    walletName: walletInfo?.name,
+    walletIcon: walletInfo?.icon,
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,
@@ -222,6 +230,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isAuthenticated: !!connectedAddress,
   }), [
     connectedAddress,
+    walletInfo,
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,

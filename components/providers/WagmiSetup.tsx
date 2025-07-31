@@ -47,8 +47,16 @@ export default function WagmiSetup({
             "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
           ],
         },
+        // Customize what appears in modal
+        enableWalletGuide: false, // Remove wallet guide text
+        featuredWalletIds: ['metamask', 'walletConnect'], // Show these first
+        allWallets: 'SHOW', // Keep "All Wallets" button
+    
         features: {
-          analytics: true
+          analytics: true,
+          email: false, // Disable if you don't want email login
+          socials: [], // Disable social logins
+          connectMethodsOrder: ['wallet'] // Only show wallet tab
         }
       });
       

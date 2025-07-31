@@ -169,6 +169,7 @@ export * from '../models/ApiWaveVoter';
 export * from '../models/ApiWaveVotersPage';
 export * from '../models/ApiWaveVotingConfig';
 export * from '../models/ApiWavesOverviewType';
+export * from '../models/ApiWavesPinFilter';
 export * from '../models/CreateDirectMessageWaveRequest';
 export * from '../models/GetWaveSubscription200Response';
 
@@ -325,7 +326,7 @@ import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
 import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                   } from '../models/ApiWaveMin';
+import { ApiWaveMin                    } from '../models/ApiWaveMin';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
@@ -343,6 +344,7 @@ import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
 import { ApiWaveVotingConfig         } from '../models/ApiWaveVotingConfig';
 import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
+import { ApiWavesPinFilter } from '../models/ApiWavesPinFilter';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
 
@@ -383,6 +385,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWaveSubscriptionTargetAction",
     "ApiWaveType",
     "ApiWavesOverviewType",
+    "ApiWavesPinFilter",
 ]);
 
 let typeMap: {[index: string]: any} = {
