@@ -74,26 +74,16 @@ export default function MediaDisplayGLB({
     }
   };
 
-  const handleContainerKeyDown = (e: React.KeyboardEvent) => {
-    // Prevent navigation when 3D controls are active and Enter/Space is pressed
-    if (isActive && (e.key === 'Enter' || e.key === ' ')) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
-  };
 
   return (
-    <div
+    <section
       ref={containerRef}
       className="tw-w-full tw-h-full tw-relative tw-select-none"
       onClick={handleContainerInteraction}
-      onKeyDown={handleContainerKeyDown}
       onTouchStart={handleContainerInteraction}
       onTouchMove={handleContainerInteraction}
       onTouchEnd={handleContainerInteraction}
-      role="region"
       aria-label="3D model viewer"
-      tabIndex={0}
     >
       {/* @ts-ignore */}
       <model-viewer
@@ -181,6 +171,6 @@ export default function MediaDisplayGLB({
         )}
         </div>
       )}
-    </div>
+    </section>
   );
 }
