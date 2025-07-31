@@ -44,6 +44,9 @@ export default function useLongPressInteraction(
     (e: React.TouchEvent) => {
       if (!hasTouchScreen) return;
 
+      // Prevent text selection highlighting during long press
+      e.preventDefault();
+
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
 
@@ -57,6 +60,9 @@ export default function useLongPressInteraction(
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
       if (!longPressTimeout.current) return;
+
+      // Prevent scrolling/selection during long press detection
+      e.preventDefault();
 
       const touchX = e.touches[0].clientX;
       const touchY = e.touches[0].clientY;

@@ -18,7 +18,7 @@ describe('UploadArea', () => {
       <UploadArea visualState="idle" error={null} hasRecoveryOption={false} onRetry={jest.fn()} />
     );
     expect(screen.getByText('Select Art')).toBeInTheDocument();
-    expect(getAllByTestId('format')).toHaveLength(4);
+    expect(getAllByTestId('format')).toHaveLength(5);
   });
 
   it('shows processing overlay', () => {
