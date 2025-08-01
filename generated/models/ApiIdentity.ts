@@ -32,6 +32,7 @@ export class ApiIdentity {
     'sub_classification': string | null;
     'query'?: string | null;
     'wallets'?: Array<ApiWallet>;
+    'active_main_stage_submission_ids': Array<string>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -136,6 +137,12 @@ export class ApiIdentity {
             "name": "wallets",
             "baseName": "wallets",
             "type": "Array<ApiWallet>",
+            "format": ""
+        },
+        {
+            "name": "active_main_stage_submission_ids",
+            "baseName": "active_main_stage_submission_ids",
+            "type": "Array<string>",
             "format": ""
         }    ];
 

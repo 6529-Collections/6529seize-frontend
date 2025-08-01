@@ -76,23 +76,23 @@ const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
 
 export type CreateDropMetadataType =
   | {
-      key: string;
-      readonly type: ApiWaveMetadataType.String;
-      value: string | null;
-      readonly required: boolean;
-    }
+    key: string;
+    readonly type: ApiWaveMetadataType.String;
+    value: string | null;
+    readonly required: boolean;
+  }
   | {
-      key: string;
-      readonly type: ApiWaveMetadataType.Number;
-      value: number | null;
-      readonly required: boolean;
-    }
+    key: string;
+    readonly type: ApiWaveMetadataType.Number;
+    value: number | null;
+    readonly required: boolean;
+  }
   | {
-      key: string;
-      readonly type: null;
-      value: string | null;
-      readonly required: boolean;
-    };
+    key: string;
+    readonly type: null;
+    value: string | null;
+    readonly required: boolean;
+  };
 
 interface CreateDropContentProps {
   readonly activeDrop: ActiveDropState | null;
@@ -266,6 +266,7 @@ const getOptimisticDrop = (
   wave: {
     id: string;
     name: string;
+    pinned: boolean;
     picture: string | null;
     description_drop: { id: string };
     participation: { authenticated_user_eligible: boolean };
@@ -303,6 +304,7 @@ const getOptimisticDrop = (
     wave: {
       id: wave.id,
       name: wave.name,
+      pinned: wave.pinned,
       picture: wave.picture ?? "",
       description_drop_id: wave.description_drop.id,
       authenticated_user_eligible_to_participate:
@@ -326,6 +328,7 @@ const getOptimisticDrop = (
     author: {
       id: connectedProfile.id,
       handle: connectedProfile.handle,
+      active_main_stage_submission_ids: connectedProfile.active_main_stage_submission_ids,
       pfp: connectedProfile.pfp ?? null,
       banner1_color: connectedProfile.banner1 ?? null,
       banner2_color: connectedProfile.banner2 ?? null,
@@ -349,9 +352,9 @@ const getOptimisticDrop = (
       })),
       quoted_drop: part.quoted_drop
         ? {
-            ...part.quoted_drop,
-            is_deleted: false,
-          }
+          ...part.quoted_drop,
+          is_deleted: false,
+        }
         : null,
       replies_count: 0,
       quotes_count: 0,
@@ -524,9 +527,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           quoted_drop:
             activeDrop?.action === ActiveDropAction.QUOTE
               ? {
-                  drop_id: activeDrop.drop.id,
-                  drop_part_id: activeDrop.partId,
-                }
+                drop_id: activeDrop.drop.id,
+                drop_part_id: activeDrop.partId,
+              }
               : null,
           media: files,
         },
@@ -554,9 +557,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           quoted_drop:
             activeDrop?.action === ActiveDropAction.QUOTE
               ? {
-                  drop_id: activeDrop.drop.id,
-                  drop_part_id: activeDrop.partId,
-                }
+                drop_id: activeDrop.drop.id,
+                drop_part_id: activeDrop.partId,
+              }
               : null,
           media: files,
         },
@@ -743,7 +746,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
             import("@capacitor/keyboard").then(({ Keyboard }) => {
-              Keyboard.hide().catch(() => {});
+              Keyboard.hide().catch(() => { });
             });
           }
         });
@@ -847,9 +850,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       updatedFiles = updatedFiles.slice(-MAX_DROP_UPLOAD_FILES);
 
       setToast({
-        message: `File limit exceeded. The ${removedCount} oldest file${
-          removedCount > 1 ? "s were" : " was"
-        } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
+        message: `File limit exceeded. The ${removedCount} oldest file${removedCount > 1 ? "s were" : " was"
+          } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
         type: "warning",
       });
     }

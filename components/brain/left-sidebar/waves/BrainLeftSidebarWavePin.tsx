@@ -5,10 +5,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import { Tooltip } from "react-tooltip";
+import { useAuth } from "../../../../components/auth/Auth";
 import {
-  usePinnedWaves,
+  usePinnedWavesServer,
   MAX_PINNED_WAVES,
-} from "../../../../hooks/usePinnedWaves";
+} from "../../../../hooks/usePinnedWavesServer";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
@@ -20,31 +21,22 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   isPinned,
 }) => {
   const { waves } = useMyStream();
-  const { pinnedIds } = usePinnedWaves();
+  const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
+  const { setToast } = useAuth();
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
+  
+  // Check if this specific wave operation is in progress
+  const isCurrentlyProcessing = isOperationInProgress(waveId);
 
-  // Check if we can pin this wave by directly checking the localStorage
+  // Check if we can pin this wave using server data
   const canPinWave = useCallback(() => {
     // If this wave is already pinned, we can always unpin it
     if (isPinned) return true;
-
-    // Check if we have room for another pinned wave
-    try {
-      // Get the most up-to-date pinned waves from localStorage
-      const storedPinnedWaves = localStorage.getItem("pinnedWave");
-      const currentPinnedIds = storedPinnedWaves
-        ? JSON.parse(storedPinnedWaves)
-        : [];
-
-      // Return true if we have less than MAX_PINNED_WAVES waves pinned
-      return currentPinnedIds.length < MAX_PINNED_WAVES;
-    } catch (error) {
-      console.error("Error checking pinned waves count:", error);
-      // If there's an error, assume we can pin it
-      return true;
-    }
-  }, [isPinned]);
+    
+    // Check if we have room for another pinned wave using the hook's data
+    return pinnedIds.length < MAX_PINNED_WAVES;
+  }, [isPinned, pinnedIds.length]);
 
   // Reset tooltip state when pinned state changes
   useEffect(() => {
@@ -57,6 +49,14 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       setShowMaxLimitTooltip(false);
     }
   }, [pinnedIds, canPinWave]);
+
+  // Auto-hide tooltip after 3 seconds with proper cleanup
+  useEffect(() => {
+    if (showMaxLimitTooltip) {
+      const timer = setTimeout(() => setShowMaxLimitTooltip(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showMaxLimitTooltip]);
 
   // Detect touch device on component mount
   useEffect(() => {
@@ -78,22 +78,39 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     };
   }, []);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
-    if (isPinned) {
-      waves.removePinnedWave(waveId);
-      setShowMaxLimitTooltip(false);
-    } else {
-      // Always perform a fresh check directly from localStorage
-      if (!canPinWave()) {
-        setShowMaxLimitTooltip(true);
-        // Auto-hide the tooltip after 3 seconds
-        setTimeout(() => setShowMaxLimitTooltip(false), 3000);
+    // Don't proceed if operation is already in progress
+    if (isCurrentlyProcessing) {
+      return;
+    }
+
+    try {
+      if (isPinned) {
+        await waves.removePinnedWave(waveId);
+        setShowMaxLimitTooltip(false);
       } else {
-        waves.addPinnedWave(waveId);
+        if (!canPinWave()) {
+          setShowMaxLimitTooltip(true);
+          setToast({
+            type: "error",
+            message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
+          });
+        } else {
+          await waves.addPinnedWave(waveId);
+        }
       }
+    } catch (error) {
+      console.error('Error updating wave pin status:', error);
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
+      setToast({
+        type: "error",
+        message: `Failed to ${isPinned ? 'unpin' : 'pin'} wave: ${errorMessage}`,
+      });
     }
   };
 
@@ -128,7 +145,8 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     <>
       <button
         onClick={handleClick}
-        className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()}`}
+        disabled={isCurrentlyProcessing}
+        className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()} ${isCurrentlyProcessing ? 'tw-opacity-50 tw-cursor-not-allowed' : ''}`}
         aria-label={getAriaLabel()}
         data-tooltip-id={`wave-pin-${waveId}`}
       >
