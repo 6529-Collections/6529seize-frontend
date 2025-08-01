@@ -23,7 +23,8 @@ describe('useLongPressInteraction', () => {
     );
     
     const mockTouchEvent = {
-      touches: [{ clientX: 100, clientY: 100 }]
+      touches: [{ clientX: 100, clientY: 100 }],
+      preventDefault: jest.fn()
     } as React.TouchEvent;
     
     act(() => {
@@ -48,7 +49,8 @@ describe('useLongPressInteraction', () => {
     );
     
     const mockTouchEvent = {
-      touches: [{ clientX: 100, clientY: 100 }]
+      touches: [{ clientX: 100, clientY: 100 }],
+      preventDefault: jest.fn()
     } as React.TouchEvent;
     
     act(() => {
@@ -75,11 +77,13 @@ describe('useLongPressInteraction', () => {
     );
     
     const startEvent = {
-      touches: [{ clientX: 100, clientY: 100 }]
+      touches: [{ clientX: 100, clientY: 100 }],
+      preventDefault: jest.fn()
     } as React.TouchEvent;
     
     const moveEvent = {
-      touches: [{ clientX: 120, clientY: 100 }] // moved 20px, beyond threshold
+      touches: [{ clientX: 120, clientY: 100 }], // moved 20px, beyond threshold
+      preventDefault: jest.fn()
     } as React.TouchEvent;
     
     act(() => {
@@ -108,11 +112,13 @@ describe('useLongPressInteraction', () => {
     );
     
     const startEvent = {
-      touches: [{ clientX: 100, clientY: 100 }]
+      touches: [{ clientX: 100, clientY: 100 }],
+      preventDefault: jest.fn()
     } as React.TouchEvent;
     
     const moveEvent = {
-      touches: [{ clientX: 105, clientY: 103 }] // moved 5px, within threshold
+      touches: [{ clientX: 105, clientY: 103 }], // moved 5px, within threshold
+      preventDefault: jest.fn()
     } as React.TouchEvent;
     
     act(() => {
@@ -140,7 +146,8 @@ describe('useLongPressInteraction', () => {
     );
     
     const mockTouchEvent = {
-      touches: [{ clientX: 100, clientY: 100 }]
+      touches: [{ clientX: 100, clientY: 100 }],
+      preventDefault: jest.fn()
     } as React.TouchEvent;
     
     act(() => {

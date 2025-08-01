@@ -275,6 +275,8 @@ export default function Auth({
           server_signature,
           client_signature: clientSignature.signature,
           role: role ?? undefined,
+          // is_safe_wallet: false,
+          // client_address: signerAddress,
         },
       });
       setAuthJwt(

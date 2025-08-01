@@ -2434,8 +2434,7 @@ paths:
       tags:
         - Waves
       summary: >-
-        Get overview of waves by different criteria. User must be authenticated.
-        Public alternative is /public/waves-overview.
+        Get overview of waves by different criteria.
       operationId: getWavesOverview
       parameters:
         - name: limit
@@ -2456,6 +2455,12 @@ paths:
             type: integer
             format: int64
             minimum: 0
+        - name: pinned
+          in: query
+          description: Filter only PINNED or UNPINNED waves
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiWavesPinFilter"
         - name: type
           in: query
           description: Type of overview
@@ -2718,6 +2723,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
+  /waves/{id}/pins:
+    post:
+      tags:
+        - Waves
+      summary: Pin a wave
+      operationId: pinWave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+    delete:
+      tags:
+        - Waves
+      summary: Unpin a wave
+      operationId: unPinWave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
   /waves/{id}/leaderboard:
     get:
       tags:
@@ -4040,6 +4084,10 @@ components:
             - signature (+ wave.participation.terms if it exists))))
           type: string
           nullable: true
+        is_safe_signature:
+          type: boolean
+        signer_address:
+          type: string
     ApiDrop:
       type: object
       required:
@@ -4736,6 +4784,7 @@ components:
         - primary_wallet
         - banner1
         - banner2
+        - active_main_stage_submission_ids
       properties:
         id:
           type: string
@@ -4785,6 +4834,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWallet"
+        active_main_stage_submission_ids:
+          type: array
+          items:
+            type: string
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -4884,9 +4937,15 @@ components:
     ApiLoginRequest:
       type: object
       required:
+        - client_address
         - client_signature
         - server_signature
+        - is_safe_wallet
       properties:
+        is_safe_wallet:
+          type: boolean
+        client_address:
+          type: string
         client_signature:
           type: string
         server_signature:
@@ -5415,6 +5474,7 @@ components:
         - banner2_color
         - subscribed_actions
         - archived
+        - active_main_stage_submission_ids
       properties:
         id:
           type: string
@@ -5451,6 +5511,10 @@ components:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
         archived:
           type: boolean
+        active_main_stage_submission_ids:
+          type: array
+          items:
+            type: string
     ApiProfileProxy:
       type: object
       required:
@@ -5983,6 +6047,7 @@ components:
         - subscribed_actions
         - metrics
         - pauses
+        - pinned
       properties:
         id:
           description: The ID of the wave
@@ -6034,6 +6099,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveDecisionPause"
+        pinned:
+          type: boolean
     ApiWaveChatConfig:
       type: object
       required:
@@ -6331,6 +6398,7 @@ components:
         - admin_group_id
         - admin_drop_deletion_enabled
         - forbid_negative_votes
+        - pinned
       properties:
         id:
           type: string
@@ -6377,6 +6445,8 @@ components:
         admin_drop_deletion_enabled:
           type: boolean
         forbid_negative_votes:
+          type: boolean
+        pinned:
           type: boolean
     ApiWaveOutcome:
       type: object
@@ -6506,6 +6576,11 @@ components:
         - MOST_DROPPED_BY_YOU
         - RECENTLY_DROPPED_TO
         - RECENTLY_DROPPED_TO_BY_YOU
+    ApiWavesPinFilter:
+      type: string
+      enum:
+        - PINNED
+        - NOT_PINNED
     ApiWaveSubscriptionActions:
       type: object
       required:

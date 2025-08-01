@@ -26,6 +26,7 @@ export class ApiProfileMin {
     'primary_address': string;
     'subscribed_actions': Array<ApiIdentitySubscriptionTargetAction>;
     'archived': boolean;
+    'active_main_stage_submission_ids': Array<string>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -100,6 +101,12 @@ export class ApiProfileMin {
             "name": "archived",
             "baseName": "archived",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "active_main_stage_submission_ids",
+            "baseName": "active_main_stage_submission_ids",
+            "type": "Array<string>",
             "format": ""
         }    ];
 
