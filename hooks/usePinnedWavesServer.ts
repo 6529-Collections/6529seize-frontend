@@ -14,6 +14,12 @@ export const MAX_PINNED_WAVES = 10;
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const PINNED_WAVES_GC_TIME = 10 * 60 * 1000; // 10 minutes
 
+// Type definitions for React Query data structures
+interface InfiniteQueryData<T> {
+  pages: T[][];
+  pageParams: unknown[];
+}
+
 export interface UsePinnedWavesServerReturn {
   pinnedWaves: ApiWave[];
   pinnedIds: string[];
@@ -76,8 +82,47 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       
       const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(PINNED_WAVES_QUERY_KEY);
       
-      // We don't have the full wave object for optimistic update
-      // So we'll rely on fast server response + invalidation
+      // Try to find the wave object in other queries for optimistic update
+      let waveToPin: ApiWave | undefined;
+      
+      // Search through all waves overview queries to find the wave
+      queryClient.getQueriesData<ApiWave[] | InfiniteQueryData<ApiWave>>({ 
+        queryKey: [QueryKey.WAVES_OVERVIEW] 
+      }).forEach(([_, data]) => {
+        if (data && !waveToPin) {
+          // Type guard for array data
+          if (Array.isArray(data)) {
+            const waves = data as ApiWave[];
+            waveToPin = waves.find((wave): wave is ApiWave => 
+              wave && typeof wave.id === 'string' && wave.id === waveId
+            );
+          } else if (data && typeof data === 'object' && 'pages' in data) {
+            // Type guard for infinite query structure
+            const infiniteData = data as InfiniteQueryData<ApiWave>;
+            if (Array.isArray(infiniteData.pages)) {
+              for (const page of infiniteData.pages) {
+                if (Array.isArray(page)) {
+                  waveToPin = page.find((wave): wave is ApiWave => 
+                    wave && typeof wave.id === 'string' && wave.id === waveId
+                  );
+                  if (waveToPin) break;
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // If we found the wave, optimistically add it to pinned waves
+      if (waveToPin && previousPinnedWaves) {
+        // Check if wave is already pinned to avoid duplicates
+        const isAlreadyPinned = previousPinnedWaves.some(wave => wave.id === waveId);
+        if (!isAlreadyPinned) {
+          const optimisticWave: ApiWave = { ...waveToPin, pinned: true };
+          queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, [optimisticWave, ...previousPinnedWaves]);
+        }
+      }
+      
       return { previousPinnedWaves };
     },
     onError: (err, waveId, context) => {
