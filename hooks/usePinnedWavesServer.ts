@@ -83,7 +83,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       predicate: (query) => {
         // Only invalidate main waves queries, not pinned waves
         const [key, params] = query.queryKey;
-        return key === QueryKey.WAVES_OVERVIEW && (!params || !params?.pinned);
+        return key === QueryKey.WAVES_OVERVIEW && !(params as any)?.pinned;
       }
     });
   }, [queryClient, PINNED_WAVES_QUERY_KEY]);
