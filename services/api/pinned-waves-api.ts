@@ -1,4 +1,4 @@
-import { commonApiFetch, commonApiPostWithoutBodyAndResponse, commonApiDelete } from './common-api';
+import { commonApiFetch, commonApiFetchWithRetry, commonApiPostWithoutBodyAndResponse, commonApiDelete } from './common-api';
 import { ApiWave } from '../../generated/models/ApiWave';
 import { ApiWavesPinFilter } from '../../generated/models/ApiWavesPinFilter';
 import { ApiWavesOverviewType } from '../../generated/models/ApiWavesOverviewType';
@@ -11,12 +11,18 @@ export interface PinnedWavesService {
 
 export const pinnedWavesApi: PinnedWavesService = {
   fetchPinnedWaves: async (): Promise<ApiWave[]> => {
-    return await commonApiFetch<ApiWave[]>({
+    return await commonApiFetchWithRetry<ApiWave[]>({
       endpoint: 'waves-overview',
       params: {
         pinned: ApiWavesPinFilter.Pinned,
         type: ApiWavesOverviewType.MostSubscribed,
         limit: '20',
+      },
+      retryOptions: {
+        maxRetries: 2,
+        initialDelayMs: 1000,
+        backoffFactor: 2,
+        jitter: 0.1,
       },
     });
   },

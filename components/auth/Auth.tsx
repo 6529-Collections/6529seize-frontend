@@ -277,7 +277,7 @@ export default function Auth({
           role: role ?? undefined,
           // is_safe_wallet: false,
           // client_address: signerAddress,
-        },
+        } as ApiLoginRequest,
       });
       setAuthJwt(
         signerAddress,
