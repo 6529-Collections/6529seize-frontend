@@ -1,9 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BrainLeftSidebarWavePin from '../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWavePin';
-import { MAX_PINNED_WAVES } from '../../../../../hooks/usePinnedWavesServer';
+import { MAX_PINNED_WAVES, usePinnedWavesServer } from '../../../../../hooks/usePinnedWavesServer';
 import { useMyStream } from '../../../../../contexts/wave/MyStreamContext';
-import { usePinnedWavesServer } from '../../../../../hooks/usePinnedWavesServer';
 import { useAuth } from '../../../../../components/auth/Auth';
 
 // Mock ResizeObserver

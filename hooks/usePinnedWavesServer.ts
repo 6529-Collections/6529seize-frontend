@@ -96,7 +96,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
             waveToPin = waves.find((wave): wave is ApiWave => 
               wave && typeof wave.id === 'string' && wave.id === waveId
             );
-          } else if (data && typeof data === 'object' && 'pages' in data) {
+          } else if (typeof data === 'object' && 'pages' in data) {
             // Type guard for infinite query structure
             const infiniteData = data as InfiniteQueryData<ApiWave>;
             if (Array.isArray(infiniteData.pages)) {
@@ -143,7 +143,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
         predicate: (query) => {
           // Only invalidate main waves queries, not pinned waves
           const [key, params] = query.queryKey;
-          return key === QueryKey.WAVES_OVERVIEW && (!params || !(params as any)?.pinned);
+          return key === QueryKey.WAVES_OVERVIEW && (!params || !params?.pinned);
         }
       });
     },
@@ -188,7 +188,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
         predicate: (query) => {
           // Only invalidate main waves queries, not pinned waves
           const [key, params] = query.queryKey;
-          return key === QueryKey.WAVES_OVERVIEW && (!params || !(params as any)?.pinned);
+          return key === QueryKey.WAVES_OVERVIEW && (!params || !params?.pinned);
         }
       });
     },
