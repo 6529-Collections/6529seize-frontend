@@ -71,6 +71,23 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   // Derive pinned IDs from pinned waves
   const pinnedIds = pinnedWaves.map(wave => wave.id);
 
+  // Shared invalidation logic for both pin and unpin operations
+  const invalidateWavesQueries = useCallback(() => {
+    // Invalidate specific queries only
+    queryClient.invalidateQueries({ 
+      queryKey: PINNED_WAVES_QUERY_KEY 
+    });
+    // Also invalidate main waves to update isPinned status
+    queryClient.invalidateQueries({ 
+      queryKey: [QueryKey.WAVES_OVERVIEW],
+      predicate: (query) => {
+        // Only invalidate main waves queries, not pinned waves
+        const [key, params] = query.queryKey;
+        return key === QueryKey.WAVES_OVERVIEW && (!params || !params?.pinned);
+      }
+    });
+  }, [queryClient, PINNED_WAVES_QUERY_KEY]);
+
   // Pin wave mutation
   const pinMutation = useMutation({
     mutationFn: pinnedWavesApi.pinWave,
@@ -132,21 +149,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       }
       console.error('Error pinning wave:', err);
     },
-    onSuccess: () => {
-      // Invalidate specific queries only
-      queryClient.invalidateQueries({ 
-        queryKey: PINNED_WAVES_QUERY_KEY 
-      });
-      // Also invalidate main waves to update isPinned status
-      queryClient.invalidateQueries({ 
-        queryKey: [QueryKey.WAVES_OVERVIEW],
-        predicate: (query) => {
-          // Only invalidate main waves queries, not pinned waves
-          const [key, params] = query.queryKey;
-          return key === QueryKey.WAVES_OVERVIEW && (!params || !params?.pinned);
-        }
-      });
-    },
+    onSuccess: invalidateWavesQueries,
   });
 
   // Unpin wave mutation
@@ -177,21 +180,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       }
       console.error('Error unpinning wave:', err);
     },
-    onSuccess: () => {
-      // Invalidate specific queries only
-      queryClient.invalidateQueries({ 
-        queryKey: PINNED_WAVES_QUERY_KEY 
-      });
-      // Also invalidate main waves to update isPinned status
-      queryClient.invalidateQueries({ 
-        queryKey: [QueryKey.WAVES_OVERVIEW],
-        predicate: (query) => {
-          // Only invalidate main waves queries, not pinned waves
-          const [key, params] = query.queryKey;
-          return key === QueryKey.WAVES_OVERVIEW && (!params || !params?.pinned);
-        }
-      });
-    },
+    onSuccess: invalidateWavesQueries,
   });
 
   const pinWave = useCallback(async (waveId: string) => {
