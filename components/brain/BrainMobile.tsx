@@ -23,7 +23,7 @@ import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
-import BrainNotifications from "./notifications/Notifications";
+import BrainNotifications from "./notifications/NotificationsContainer";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",

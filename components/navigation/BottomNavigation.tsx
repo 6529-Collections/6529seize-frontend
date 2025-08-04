@@ -11,6 +11,7 @@ import BellIcon from "../common/icons/BellIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import LogoIcon from "../common/icons/LogoIcon";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import useCapacitor from "../../hooks/useCapacitor";
 
 export const items: NavItemData[] = [
   {
@@ -68,6 +69,7 @@ export const items: NavItemData[] = [
 
 const BottomNavigation: React.FC = () => {
   const { registerRef } = useLayout();
+  const { isAndroid } = useCapacitor();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
 
@@ -79,10 +81,14 @@ const BottomNavigation: React.FC = () => {
     },
     [registerRef]
   );
+  
+  // Only add safe area padding on Android
+  const paddingClass = isAndroid ? "tw-pb-[env(safe-area-inset-bottom,0px)]" : "";
+  
   return (
     <nav
       ref={setMobileNavRef}
-      className="tw-fixed tw-left-0 tw-w-full tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-z-50">
+      className={`${paddingClass} tw-fixed tw-left-0 tw-w-full tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-z-50`}>
       <div className="tw-h-full">
         <ul
           className="tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)]

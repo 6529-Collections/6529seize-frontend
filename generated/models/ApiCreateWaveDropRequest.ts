@@ -26,6 +26,8 @@ export class ApiCreateWaveDropRequest {
     * If wave requires drop signatures then this needs to be set. Signature of a drop is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature (+ wave.participation.terms if it exists))))
     */
     'signature': string | null;
+    'is_safe_signature'?: boolean;
+    'signer_address'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -63,6 +65,18 @@ export class ApiCreateWaveDropRequest {
         {
             "name": "signature",
             "baseName": "signature",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "is_safe_signature",
+            "baseName": "is_safe_signature",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "signer_address",
+            "baseName": "signer_address",
             "type": "string",
             "format": ""
         }    ];

@@ -2,7 +2,7 @@
 
 import styles from "@/styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { LeaderboardFocus } from "@/components/leaderboard/Leaderboard";
+import { LeaderboardFocus } from "@/enums";
 import { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTitle } from "@/contexts/TitleContext";
@@ -17,6 +17,8 @@ export default function CommunityNerdPageClient({
   const router = useRouter();
   const pathname = usePathname();
   const [focus, setFocus] = useState<LeaderboardFocus>(initialFocus);
+
+
 
   const syncPath = useCallback(
     (newFocus: LeaderboardFocus) => {

@@ -1,9 +1,26 @@
 import React from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import type { FilePreviewProps } from "../reducers/types";
 import VideoFallbackPreview from "./VideoFallbackPreview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faCube } from "@fortawesome/free-solid-svg-icons";
+
+// Dynamically import GLB viewer to avoid SSR issues
+const MediaDisplayGLB = dynamic(
+  () => import("../../../../drops/view/item/content/media/MediaDisplayGLB"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="tw-flex tw-items-center tw-justify-center tw-h-full tw-text-iron-400">
+        <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
+          <FontAwesomeIcon icon={faCube} className="tw-w-8 tw-h-8 tw-flex-shrink-0" />
+          <span>Loading 3D model...</span>
+        </div>
+      </div>
+    ),
+  }
+);
 
 /**
  * File Preview Component
@@ -21,12 +38,73 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   videoCompatibility,
   isCheckingCompatibility,
 }) => {
-  // Determine if this is a video file
+  // Determine file type
   const isVideo =
     file?.type.startsWith("video/") || url.startsWith("data:video/");
+  
+  const isGLB = 
+    file?.type === "model/gltf-binary" || 
+    file?.type === "model/gltf+json" ||
+    file?.name.toLowerCase().endsWith(".glb") ||
+    file?.name.toLowerCase().endsWith(".gltf");
 
   // Check if video is compatible for playback
   const canPlayVideo = !isVideo || (videoCompatibility?.canPlay ?? true);
+
+  const renderImagePreview = () => (
+    <img
+      src={url}
+      alt="Artwork preview"
+      className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg tw-absolute"
+    />
+  );
+
+  const renderVideoPreview = () => (
+    <video
+      src={url}
+      className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg"
+      controls
+      onError={(e) => {
+        console.error("Video playback error:", e);
+      }}
+    />
+  );
+
+  const renderStandardPreview = () => {
+    if (url.startsWith("data:image/")) {
+      return renderImagePreview();
+    }
+    if (isVideo) {
+      return renderVideoPreview();
+    }
+    return renderImagePreview();
+  };
+
+  const renderMediaContent = () => {
+    if (isGLB) {
+      return (
+        <div className="tw-w-full tw-h-full tw-min-h-[300px]">
+          <MediaDisplayGLB src={url} />
+        </div>
+      );
+    }
+
+    const shouldShowStandardPreview = !isVideo || canPlayVideo;
+    if (shouldShowStandardPreview) {
+      return <>{renderStandardPreview()}</>;
+    }
+
+    if (file) {
+      return (
+        <VideoFallbackPreview
+          file={file}
+          errorMessage={videoCompatibility?.errorMessage}
+        />
+      );
+    }
+
+    return null;
+  };
 
   return (
     <motion.div
@@ -64,41 +142,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
 
       {/* Media container with proper padding and centering */}
       <div className="tw-relative tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-p-4 tw-overflow-hidden">
-        {/* For images and compatible videos, render standard preview */}
-        {!isVideo || canPlayVideo ? (
-          <>
-            {url.startsWith("data:image/") ? (
-              <img
-                src={url}
-                alt="Artwork preview"
-                className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg tw-absolute"
-              />
-            ) : isVideo ? (
-              <video
-                src={url}
-                className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg"
-                controls
-                onError={(e) => {
-                  console.error("Video playback error:", e);
-                }}
-              />
-            ) : (
-              <img
-                src={url}
-                alt="Artwork preview"
-                className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg tw-absolute"
-              />
-            )}
-          </>
-        ) : (
-          // For incompatible videos, use fallback display
-          file && (
-            <VideoFallbackPreview
-              file={file}
-              errorMessage={videoCompatibility?.errorMessage}
-            />
-          )
-        )}
+        {renderMediaContent()}
       </div>
 
       {/* Control buttons */}

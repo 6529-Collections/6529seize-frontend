@@ -9,6 +9,15 @@ jest.mock('../../../../services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
+// Mock formatTimestampToMonthYear to ensure English formatting
+jest.mock('../../../../helpers/Helpers', () => ({
+  ...jest.requireActual('../../../../helpers/Helpers'),
+  formatTimestampToMonthYear: jest.fn((timestamp: number): string => {
+    const date = new Date(timestamp);
+    return date.toLocaleString("en-US", { month: "long", year: "numeric" });
+  }),
+}));
+
 const { useQuery } = require('@tanstack/react-query');
 const { commonApiFetch } = require('../../../../services/api/common-api');
 

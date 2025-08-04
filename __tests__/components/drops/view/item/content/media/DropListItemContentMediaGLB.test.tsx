@@ -1,16 +1,20 @@
 import { render } from '@testing-library/react';
+jest.mock('@google/model-viewer', () => ({}));
 import DropListItemContentMediaGLB from '../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaGLB';
 
 describe('DropListItemContentMediaGLB', () => {
-  it('renders an empty div for any src', () => {
+  it('renders GLB component with model-viewer', () => {
     const { container } = render(<DropListItemContentMediaGLB src="model.glb" />);
     const div = container.querySelector('div');
     expect(div).toBeInTheDocument();
-    expect(div?.childElementCount).toBe(0);
+    expect(div).toHaveClass('tw-w-full', 'tw-h-full');
+    const modelViewer = container.querySelector('model-viewer');
+    expect(modelViewer).toBeInTheDocument();
   });
 
-  it('ignores the src prop but does not throw', () => {
-    const { container } = render(<DropListItemContentMediaGLB src="anything.glb" />);
-    expect(container.firstChild).toBeInstanceOf(HTMLDivElement);
+  it('passes src prop to MediaDisplayGLB', () => {
+    const { container } = render(<DropListItemContentMediaGLB src="test.glb" />);
+    const modelViewer = container.querySelector('model-viewer');
+    expect(modelViewer).toHaveAttribute('src', 'test.glb');
   });
 });

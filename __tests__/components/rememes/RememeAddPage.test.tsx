@@ -76,7 +76,7 @@ jest.mock("../../../services/api/common-api", () => ({
 
 jest.mock("../../../helpers/Helpers", () => ({
   areEqualAddresses: jest.fn((a, b) => a?.toLowerCase() === b?.toLowerCase()),
-  numberWithCommas: jest.fn((n) => n.toLocaleString()),
+  numberWithCommas: jest.fn((n) => n.toLocaleString('en-US')),
 }));
 
 // Get mocked functions

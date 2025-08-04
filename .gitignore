@@ -82,7 +82,6 @@ tasks/
 jest-failed-tests.txt
 jest-results.json
 
-# Claude Code project configuration
+# Claude folder
 claude.md
-CLAUDE.md
-.claude/
+.claude/commands/

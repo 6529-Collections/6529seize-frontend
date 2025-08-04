@@ -32,6 +32,7 @@ export class ApiWaveMin {
     'voting_credit_type': ApiWaveCreditType;
     'admin_drop_deletion_enabled': boolean;
     'forbid_negative_votes': boolean;
+    'pinned': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -141,6 +142,12 @@ export class ApiWaveMin {
         {
             "name": "forbid_negative_votes",
             "baseName": "forbid_negative_votes",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "pinned",
+            "baseName": "pinned",
             "type": "boolean",
             "format": ""
         }    ];

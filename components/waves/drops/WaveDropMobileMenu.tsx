@@ -120,7 +120,10 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                   ? "tw-opacity-50 tw-cursor-default"
                   : "active:tw-bg-iron-800"
               } tw-transition-colors tw-duration-200`}
-              onClick={onReply}
+              onClick={() => {
+                setOpen(false);
+                setTimeout(() => onReply(), 250);
+              }}
               disabled={isTemporaryDrop}>
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
@@ -146,7 +149,10 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                   ? "tw-opacity-50 tw-cursor-default"
                   : "active:tw-bg-iron-800"
               } tw-transition-colors tw-duration-200`}
-              onClick={onQuote}
+              onClick={() => {
+                setOpen(false);
+                setTimeout(() => onQuote(), 250);
+              }}
               disabled={isTemporaryDrop}>
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"

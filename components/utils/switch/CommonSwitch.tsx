@@ -1,12 +1,17 @@
+interface CommonSwitchProps {
+  readonly label: string;
+  readonly isOn: boolean;
+  readonly setIsOn: (isOn: boolean) => void;
+}
+
+const generateDescriptionId = (label: string): string => 
+  `${label.toLowerCase().replace(/\s+/g, '-')}-description`;
+
 export default function CommonSwitch({
   label,
   isOn,
   setIsOn,
-}: {
-  readonly label: string;
-  readonly isOn: boolean;
-  readonly setIsOn: (isOn: boolean) => void;
-}) {
+}: CommonSwitchProps): React.JSX.Element {
   const onBackground = "tw-bg-primary-500";
   const offBackground = "tw-bg-neutral-700";
   const toggleOnPosition = "tw-translate-x-5";
@@ -17,15 +22,24 @@ export default function CommonSwitch({
 
   const onToggle = () => setIsOn(!isOn);
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onToggle();
+    }
+  };
+
   return (
     <div className="tw-flex tw-items-center">
       <button
         onClick={onToggle}
+        onKeyDown={handleKeyDown}
         type="button"
-        className={`${backGroundColor} tw-p-0 tw-relative tw-flex tw-items-center tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none`}
+        className={`${backGroundColor} tw-p-0 tw-relative tw-flex tw-items-center tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2`}
         role="switch"
-        aria-checked="false"
-        aria-label={label}
+        aria-checked={isOn}
+        aria-label={`${label} toggle, currently ${isOn ? 'on' : 'off'}. Press Enter or Space to toggle.`}
+        aria-describedby={generateDescriptionId(label)}
       >
         <span
           aria-hidden="true"
@@ -34,6 +48,12 @@ export default function CommonSwitch({
       </button>
       <span className="tw-ml-3 tw-text-sm">
         <span className="tw-font-medium tw-text-iron-300">{label}</span>
+        <span 
+          id={generateDescriptionId(label)}
+          className="tw-sr-only"
+        >
+          Toggle to {isOn ? 'disable' : 'enable'} {label.toLowerCase()} filtering
+        </span>
       </span>
     </div>
   );
