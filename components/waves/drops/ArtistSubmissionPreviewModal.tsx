@@ -7,6 +7,8 @@ import { createPortal } from "react-dom";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import { useUserArtSubmissions } from "../../../hooks/useUserArtSubmissions";
+import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 
 interface ArtistSubmission {
   id: string;
@@ -19,22 +21,15 @@ interface ArtistSubmission {
 interface ArtistSubmissionPreviewModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly submissions: ArtistSubmission[];
-  readonly userHandle?: string | null;
-  readonly userPfp?: string | null;
+  readonly user: ApiProfileMin;
 }
 
 export const ArtistSubmissionPreviewModal: React.FC<
   ArtistSubmissionPreviewModalProps
-> = ({ isOpen, onClose, submissions, userHandle, userPfp }) => {
+> = ({ isOpen, onClose, user }) => {
   
-  // Debug logging to see what submissions are being passed to the modal
-  if (isOpen && submissions.length > 0) {
-    console.log(`[DEBUG MODAL] Showing modal for ${userHandle} with ${submissions.length} submissions:`, {
-      userHandle,
-      submissions: submissions.map(s => ({ id: s.id, title: s.title, imageUrl: s.imageUrl }))
-    });
-  }
+  // Fetch submissions only when modal is open
+  const { submissions, isLoading } = useUserArtSubmissions(isOpen ? user : undefined);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams()!;
@@ -111,9 +106,9 @@ export const ArtistSubmissionPreviewModal: React.FC<
                   <div className="tw-flex sm:tw-flex-row tw-flex-col sm:tw-items-center sm:tw-gap-4 tw-gap-3">
                     <div className="tw-relative">
                       <div className="tw-h-12 tw-w-12 tw-bg-iron-900 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-shadow-lg">
-                        {userPfp ? (
+                        {user.pfp ? (
                           <img
-                            src={userPfp}
+                            src={user.pfp}
                             alt="Profile"
                             className="tw-w-full tw-h-full tw-object-contain tw-bg-transparent"
                           />
@@ -129,7 +124,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
                     </div>
                     <div className="tw-text-left">
                       <div className="tw-text-xl sm:tw-text-3xl tw-font-bold tw-text-iron-100 tw-mb-1">
-                        {userHandle || "Unknown Artist"}'s Submissions
+                        {user.handle || "Unknown Artist"}'s Submissions
                       </div>
                       <div className="tw-flex tw-items-center tw-justify-start tw-gap-2 tw-text-sm tw-text-iron-400">
                         <span>
@@ -153,8 +148,13 @@ export const ArtistSubmissionPreviewModal: React.FC<
 
               {/* Content */}
               <div className="tw-relative tw-z-[100] tw-p-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(90vh-120px)]">
-                <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
-                  {submissions.map((submission, index) => (
+                {isLoading ? (
+                  <div className="tw-flex tw-items-center tw-justify-center tw-py-12">
+                    <div className="tw-text-iron-400">Loading submissions...</div>
+                  </div>
+                ) : (
+                  <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
+                    {submissions.map((submission, index) => (
                     <motion.div
                       key={submission.id}
                       initial={{ opacity: 0 }}
@@ -199,8 +199,9 @@ export const ArtistSubmissionPreviewModal: React.FC<
                         </div>
                       </div>
                     </motion.div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

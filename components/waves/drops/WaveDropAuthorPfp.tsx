@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
 import { ArtistSubmissionPreviewModal } from "./ArtistSubmissionPreviewModal";
-import { useUserArtSubmissions } from "../../../hooks/useUserArtSubmissions";
 import { Tooltip } from "react-tooltip";
 
 interface WaveDropAuthorPfpProps {
@@ -12,24 +11,8 @@ interface WaveDropAuthorPfpProps {
 const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Get user's art submissions
-  const { submissions, submissionCount, isLoading } = useUserArtSubmissions(
-    drop.author
-  );
-
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development" && submissionCount > 0) {
-    console.log(
-      `[WaveDropAuthorPfp] Badge should show for ${
-        drop.author.handle || "Unknown"
-      }:`,
-      {
-        submissionCount,
-        submissions: submissions.length,
-        user: drop.author,
-      }
-    );
-  }
+  // Get submission count from user profile data (no API call needed)
+  const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
 
   const handlePfpClick = () => {
     if (submissionCount > 0) {
@@ -41,7 +24,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
     setIsModalOpen(false);
   };
 
-  const hasSubmissions = !isLoading && submissionCount > 0;
+  const hasSubmissions = submissionCount > 0;
   const tooltipId = `pfp-art-${drop.id}`;
 
   return (
@@ -82,9 +65,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
       <ArtistSubmissionPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        userHandle={drop.author.handle}
-        userPfp={drop.author.pfp}
-        submissions={submissions}
+        user={drop.author}
       />
 
       {/* Tooltip for entire pfp area */}
