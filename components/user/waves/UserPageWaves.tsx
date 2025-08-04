@@ -1,7 +1,6 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { useDebounce } from "react-use";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
@@ -29,9 +28,7 @@ export default function UserPageWaves({
   readonly profile: ApiIdentity;
 }) {
   const haveProfile = !!profile.handle;
-  const { connectedProfile, activeProfileProxy, requestAuth } =
-    useContext(AuthContext);
-  const router = useRouter();
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const getShowCreateNewWaveButton = () => {
     return (
