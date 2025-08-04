@@ -1,20 +1,20 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../auth/Auth";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
+import { useDebounce } from "react-use";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import WaveItem from "../../waves/list/WaveItem";
+import { commonApiFetch } from "../../../services/api/common-api";
+import { AuthContext } from "../../auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
-import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import UserPageWavesSearch from "./UserPageWavesSearch";
-import { useDebounce } from "react-use";
-import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+import WaveItem from "../../waves/list/WaveItem";
+import UserPageWavesSearch from "./UserPageWavesSearch";
 interface SearchWavesParams {
   readonly author?: string;
   readonly name?: string;
@@ -187,21 +187,12 @@ export default function UserPageWaves({
     fetchNextPageAuth();
   };
 
-  const onCreateNewWave = async () => {
-    const { success } = await requestAuth();
-    if (!success) {
-      return;
-    }
-    router.push("/waves?new=true");
-  };
-
   return (
     <div>
       <UserPageWavesSearch
         waveName={params.name ?? null}
         showCreateNewWaveButton={showCreateNewWaveButton}
         setWaveName={setWaveName}
-        onCreateNewWave={onCreateNewWave}
       />
       <div className="tw-overflow-hidden">
         <div className="tw-mt-4 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-y-3 tw-gap-x-4">

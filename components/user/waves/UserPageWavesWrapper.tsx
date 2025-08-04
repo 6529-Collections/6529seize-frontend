@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/router";
 import { useContext, useEffect } from "react";
-import { AuthContext } from "../../auth/Auth";
-import UserPageWaves from "./UserPageWaves";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import { useIdentity } from "../../../hooks/useIdentity";
+import { AuthContext } from "../../auth/Auth";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import UserPageWaves from "./UserPageWaves";
 export default function UserPageWavesWrapper({
   profile: initialProfile,
 }: {
@@ -16,17 +16,23 @@ export default function UserPageWavesWrapper({
   const user = (router.query.user as string).toLowerCase();
 
   const { address } = useSeizeConnectContext();
-  const { connectedProfile, activeProfileProxy, showWaves } =
+  const { connectedProfile, activeProfileProxy, showWaves, fetchingProfile } =
     useContext(AuthContext);
 
   useEffect(() => {
-    if (showWaves) {
+    if (showWaves || fetchingProfile) {
       return;
     }
-    if (connectedProfile || !address) {
+    if (!connectedProfile || !address) {
       router.push(`/${user}/rep`);
     }
-  }, [connectedProfile, activeProfileProxy, address, showWaves]);
+  }, [
+    connectedProfile,
+    activeProfileProxy,
+    address,
+    showWaves,
+    fetchingProfile,
+  ]);
 
   const { profile } = useIdentity({
     handleOrWallet: user,
