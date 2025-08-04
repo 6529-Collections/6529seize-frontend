@@ -8,8 +8,8 @@ jest.mock('../../hooks/useWavesOverview', () => ({
   useWavesOverview: jest.fn(),
 }));
 
-jest.mock('../../hooks/usePinnedWaves', () => ({
-  usePinnedWaves: jest.fn(),
+jest.mock('../../hooks/usePinnedWavesServer', () => ({
+  usePinnedWavesServer: jest.fn(),
 }));
 
 jest.mock('../../hooks/useWaveData', () => ({
@@ -21,7 +21,7 @@ jest.mock('../../hooks/useShowFollowingWaves', () => ({
 }));
 
 const useWavesOverviewMock = require('../../hooks/useWavesOverview').useWavesOverview as jest.Mock;
-const usePinnedWavesMock = require('../../hooks/usePinnedWaves').usePinnedWaves as jest.Mock;
+const usePinnedWavesServerMock = require('../../hooks/usePinnedWavesServer').usePinnedWavesServer as jest.Mock;
 const useWaveDataMock = require('../../hooks/useWaveData').useWaveData as jest.Mock;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -61,21 +61,36 @@ beforeEach(() => {
     status: 'success',
     refetch: jest.fn(),
   });
-  usePinnedWavesMock.mockReturnValue({ pinnedIds: ['2', '3'], addId: jest.fn(), removeId: jest.fn() });
+  usePinnedWavesServerMock.mockReturnValue({ 
+    pinnedIds: ['2', '3'], 
+    pinnedWaves: [pinnedExtra],
+    pinWave: jest.fn(), 
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn()
+  });
   useWaveDataMock.mockReturnValue({ data: pinnedExtra, isLoading: false, isError: false, refetch: jest.fn() });
 });
 
 test('combines main and pinned waves, filtering DMs and flagging pinned', () => {
   const { result } = renderHook(() => useWavesList(), { wrapper });
-  expect(useWaveDataMock).toHaveBeenCalledWith({ waveId: '3', onWaveNotFound: expect.any(Function) });
   const waves = result.current.waves;
   expect(waves.map((w: any) => w.id)).toEqual(['3', '2']);
   expect(waves.every((w: any) => w.isPinned)).toBe(true);
-  expect(result.current.pinnedWaves.map((w: any) => w.id)).toEqual(['2', '3']);
+  expect(result.current.pinnedWaves.map((w: any) => w.id)).toEqual(['3']);
 });
 
 test('indicates loading when pinned wave is still loading', () => {
-  useWaveDataMock.mockReturnValue({ data: null, isLoading: true, isError: false, refetch: jest.fn() });
+  usePinnedWavesServerMock.mockReturnValue({ 
+    pinnedIds: ['2', '3'], 
+    pinnedWaves: [],
+    pinWave: jest.fn(), 
+    unpinWave: jest.fn(),
+    isLoading: true,
+    isError: false,
+    refetch: jest.fn()
+  });
   const { result } = renderHook(() => useWavesList(), { wrapper });
   expect(result.current.isPinnedWavesLoading).toBe(true);
 });

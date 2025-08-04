@@ -13,6 +13,8 @@
 import { HttpFile } from '../http/http';
 
 export class ApiLoginRequest {
+    'is_safe_wallet': boolean;
+    'client_address': string;
     'client_signature': string;
     'server_signature': string;
     'role'?: string;
@@ -20,6 +22,18 @@ export class ApiLoginRequest {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "is_safe_wallet",
+            "baseName": "is_safe_wallet",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "client_address",
+            "baseName": "client_address",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "client_signature",
             "baseName": "client_signature",

@@ -54,6 +54,7 @@ export class ApiWave {
     'subscribed_actions': Array<ApiWaveSubscriptionTargetAction>;
     'metrics': ApiWaveMetrics;
     'pauses': Array<ApiWaveDecisionPause>;
+    'pinned': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -158,6 +159,12 @@ export class ApiWave {
             "name": "pauses",
             "baseName": "pauses",
             "type": "Array<ApiWaveDecisionPause>",
+            "format": ""
+        },
+        {
+            "name": "pinned",
+            "baseName": "pinned",
+            "type": "boolean",
             "format": ""
         }    ];
 
