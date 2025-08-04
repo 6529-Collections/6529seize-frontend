@@ -14,6 +14,7 @@ import {
 } from "../../../types/dropInteractionTypes";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
+import { useAndroidKeyboard } from "../../../hooks/useAndroidKeyboard";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
@@ -27,6 +28,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const { isApp } = useDeviceInfo();
   const { spaces } = useLayout();
+  const { getContainerStyle, isVisible: isKeyboardVisible } = useAndroidKeyboard();
 
   const containerStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
@@ -40,6 +42,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col lg:[--tab-height:0px]`;
   }, []);
+
+  // Apply Android keyboard adjustments to the fixed input area
+  const inputContainerStyle = useMemo(() => {
+    return getContainerStyle({
+      paddingBottom: isKeyboardVisible ? "0px" : "calc(env(safe-area-inset-bottom))",
+    }, 0);
+  }, [getContainerStyle, isKeyboardVisible]);
   
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
@@ -111,7 +120,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                 />
               </div>
               <div
-                style={{
+                style={isApp ? inputContainerStyle : {
                   paddingBottom: "calc(env(safe-area-inset-bottom))",
                 }}
                 className={`${

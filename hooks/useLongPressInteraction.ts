@@ -45,7 +45,9 @@ export default function useLongPressInteraction(
       if (!hasTouchScreen) return;
 
       // Prevent text selection highlighting during long press
-      e.preventDefault();
+      if (e.cancelable) {
+        e.preventDefault();
+      }
 
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
@@ -62,7 +64,9 @@ export default function useLongPressInteraction(
       if (!longPressTimeout.current) return;
 
       // Prevent scrolling/selection during long press detection
-      e.preventDefault();
+      if (e.cancelable) {
+        e.preventDefault();
+      }
 
       const touchX = e.touches[0].clientX;
       const touchY = e.touches[0].clientY;

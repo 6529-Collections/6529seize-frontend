@@ -15,6 +15,10 @@
   margin-bottom: max(5px, env(safe-area-inset-bottom));
 }
 
+.bannerIOS {
+  margin-bottom: 0;
+}
+
 .accept {
   border: none;
   padding: 5px 10px;
