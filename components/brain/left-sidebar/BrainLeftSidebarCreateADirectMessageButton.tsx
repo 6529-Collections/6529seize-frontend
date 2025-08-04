@@ -1,5 +1,6 @@
-"use client"
+"use client";
 
+import { CREATE_DIRECT_MESSAGE_SEARCH_PATH } from "@/components/waves/Waves";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -17,7 +18,6 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC<
     return !!connectedProfile?.handle && !activeProfileProxy;
   }, [connectedProfile?.handle, activeProfileProxy]);
 
-
   const label = useMemo(() => {
     if (isConnectedIdentity) {
       return "Create DM";
@@ -27,7 +27,7 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC<
 
   return (
     <Link
-      href="/waves?new-dm=true"
+      href={CREATE_DIRECT_MESSAGE_SEARCH_PATH}
       className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300">
       <FontAwesomeIcon
         icon={faPaperPlane}

@@ -32,7 +32,7 @@ export default function CreateWaveFlow({
                 strokeLinecap="round"
                 strokeLinejoin="round"></path>
             </svg>
-            <span>Back</span>
+            <span>All Waves</span>
           </button>
           <div
             className={`tw-mb-0 tw-font-bold ${
