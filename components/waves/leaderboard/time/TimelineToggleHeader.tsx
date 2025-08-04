@@ -150,12 +150,6 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
             )}
           </div>
 
-          {/* Mobile: Show date inline when not paused */}
-          {!isPaused && (
-            <div className="tw-text-sm tw-font-medium @[700px]:tw-hidden tw-mr-2">
-              {getStatusDisplay()}
-            </div>
-          )}
         </div>
 
         {/* Desktop: Show all statuses */}

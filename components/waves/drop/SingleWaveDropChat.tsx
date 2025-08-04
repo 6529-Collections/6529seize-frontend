@@ -28,7 +28,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const { isApp } = useDeviceInfo();
   const { spaces } = useLayout();
-  const { getContainerStyle, isVisible: isKeyboardVisible, keyboardHeight } = useAndroidKeyboard();
+  const { getContainerStyle, isVisible: isKeyboardVisible } = useAndroidKeyboard();
 
   const containerStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
@@ -42,13 +42,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col lg:[--tab-height:0px]`;
   }, []);
-  
+
   // Apply Android keyboard adjustments to the fixed input area
   const inputContainerStyle = useMemo(() => {
     return getContainerStyle({
-      paddingBottom: "calc(env(safe-area-inset-bottom))",
-    }, 0); // No additional adjustment needed for fixed positioning
-  }, [getContainerStyle]);
+      paddingBottom: isKeyboardVisible ? "0px" : "calc(env(safe-area-inset-bottom))",
+    }, 0);
+  }, [getContainerStyle, isKeyboardVisible]);
   
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
@@ -85,7 +85,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
           <div className="tw-h-full tw-w-full tw-flex tw-items-stretch">
             <div className={containerClassName} style={containerStyle}>
               <div
-                className={`tw-flex-1 tw-min-h-0 ${isApp ? "tw-pb-32" : ""}`}>
+                className={`tw-flex-1 tw-min-h-0 ${isApp ? "tw-mb-20" : ""}`}>
                 <WaveDropsAll
                   waveId={wave.id}
                   onReply={({
