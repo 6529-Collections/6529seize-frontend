@@ -69,8 +69,8 @@ export default function WagmiSetup({
           },
           // Mobile-specific settings
           enableWalletGuide: false,
-          featuredWalletIds: ['coinbaseWallet', 'walletConnect'], // Mobile-first wallets
-          allWallets: 'HIDE' as const, // Hide "All Wallets" on mobile for cleaner UX
+          featuredWalletIds: ['metamask', 'coinbaseWallet', 'walletConnect'], // Include MetaMask for mobile
+          allWallets: 'SHOW' as const, // Show "All Wallets" on mobile to ensure MetaMask is accessible
           features: {
             analytics: true,
             email: false,
