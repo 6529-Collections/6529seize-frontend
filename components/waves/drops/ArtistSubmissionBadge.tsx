@@ -25,11 +25,10 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
   tooltipId = "submission-badge",
 }) => {
   const isMobile = useIsMobileDevice();
-
-  if (submissionCount === 0) return null;
-
   const id = useId();
   const uniqueTooltipId = `${tooltipId}-${id}`;
+
+  if (submissionCount === 0) return null;
 
   return (
     <>
