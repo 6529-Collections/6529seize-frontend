@@ -6,11 +6,12 @@ import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 // Tooltip styles - extracted to prevent re-creation on each render
 const TOOLTIP_STYLES = {
-  backgroundColor: "#37373E",
+  backgroundColor: "#1F2937",
   color: "white",
   padding: "6px 12px",
   fontSize: "12px",
   zIndex: 99,
+  boxShadow: "0 4px 16px 0 rgba(0,0,0,0.30), 0 2px 8px 0 rgba(55,55,62,0.25)", // Added more shadow for the tooltip
 } as const;
 
 interface ArtistSubmissionBadgeProps {
@@ -38,7 +39,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
           e.stopPropagation();
           onBadgeClick?.();
         }}
-        className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5 tw-bg-gradient-to-br tw-from-purple-800 tw-to-purple-900 tw-text-white tw-rounded-md tw-border tw-border-solid tw-border-purple-700 tw-shadow-sm tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-from-purple-700 desktop-hover:hover:tw-to-purple-800 desktop-hover:hover:tw-shadow-md desktop-hover:hover:tw-border-purple-600 tw-cursor-pointer focus:tw-ring-2 focus:tw-ring-purple-600 focus:tw-ring-opacity-50"
+        className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5 tw-bg-gradient-to-br tw-from-indigo-700 tw-to-indigo-800 tw-text-white tw-rounded-md tw-border tw-border-solid tw-border-indigo-600 tw-shadow-sm tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-from-indigo-600 desktop-hover:hover:tw-to-indigo-700 desktop-hover:hover:tw-shadow-md desktop-hover:hover:tw-border-indigo-500 tw-cursor-pointer focus:tw-ring-2 focus:tw-ring-indigo-500 focus:tw-ring-opacity-50"
         aria-label={`View ${submissionCount} art submission${
           submissionCount === 1 ? "" : "s"
         }`}
