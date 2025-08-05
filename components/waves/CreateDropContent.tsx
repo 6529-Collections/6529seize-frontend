@@ -303,8 +303,6 @@ const getOptimisticDrop = (
     serial_no: Date.now(),
     reply_to: getReplyTo(),
     wave: {
-      // TODO: add pinned
-      pinned: false,
       id: wave.id,
       name: wave.name,
       pinned: wave.pinned,
