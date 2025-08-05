@@ -4784,6 +4784,7 @@ components:
         - primary_wallet
         - banner1
         - banner2
+        - active_main_stage_submission_ids
       properties:
         id:
           type: string
@@ -4833,6 +4834,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWallet"
+        active_main_stage_submission_ids:
+          type: array
+          items:
+            type: string
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -5469,6 +5474,7 @@ components:
         - banner2_color
         - subscribed_actions
         - archived
+        - active_main_stage_submission_ids
       properties:
         id:
           type: string
@@ -5505,6 +5511,10 @@ components:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
         archived:
           type: boolean
+        active_main_stage_submission_ids:
+          type: array
+          items:
+            type: string
     ApiProfileProxy:
       type: object
       required:

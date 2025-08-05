@@ -84,3 +84,4 @@ jest-results.json
 
 # Claude folder
 claude.md
+.claude/commands/

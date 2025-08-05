@@ -42,7 +42,10 @@ export default function MediaDisplay({
     if (media_mime_type.includes("audio")) {
       return MediaType.AUDIO;
     }
-    if (media_url.endsWith(".glb")) {
+    if (media_mime_type === "model/gltf-binary" || 
+        media_mime_type === "model/gltf+json" ||
+        media_url.endsWith(".glb") || 
+        media_url.endsWith(".gltf")) {
       return MediaType.GLB;
     }
     return MediaType.UNKNOWN;
@@ -62,7 +65,7 @@ export default function MediaDisplay({
     case MediaType.AUDIO:
       return <MediaDisplayAudio src={media_url} showControls={!disableMediaInteraction} />;
     case MediaType.GLB:
-      return <MediaDisplayGLB src={media_url} />;
+      return <MediaDisplayGLB src={media_url} disableMediaInteractions={disableMediaInteraction} />;
     case MediaType.UNKNOWN:
       return <></>;
     default:

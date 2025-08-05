@@ -131,7 +131,8 @@ export function useArtworkSubmissionMutation() {
       });
     },
     onError: (error, variables) => {
-      const errorMsg = `Error uploading file: ${error.message}`;
+      console.error("Upload error:", error);
+      const errorMsg = `Error uploading file: ${error?.message || error?.toString() || 'Unknown error'}`;
       updatePhase("error", variables.callbacks, errorMsg);
 
       setToast({
@@ -176,8 +177,8 @@ export function useArtworkSubmissionMutation() {
       });
     },
     onError: (error, variables) => {
-      console.error(error);
-      const errorMsg = `Submission failed: ${error}`;
+      console.error("Submission error:", error);
+      const errorMsg = `Submission failed: ${error?.message || error?.toString() || 'Unknown error'}`;
       updatePhase("error", variables.callbacks, errorMsg);
 
       setToast({
@@ -209,11 +210,18 @@ export function useArtworkSubmissionMutation() {
       // Validate required fields
       if (!data.imageFile) {
         setToast({
-          message: "Please upload an artwork image",
+          message: "Please upload an artwork file",
           type: "error",
         });
         return null;
       }
+
+      // Debug logging for file info
+      console.log("Uploading file:", {
+        name: data.imageFile.name,
+        type: data.imageFile.type,
+        size: data.imageFile.size
+      });
 
       if (!data.traits.title) {
         setToast({

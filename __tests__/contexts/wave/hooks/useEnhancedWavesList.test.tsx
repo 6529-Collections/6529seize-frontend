@@ -27,6 +27,7 @@ describe('useEnhancedWavesList', () => {
       contributors_overview: [{ contributor_pfp: '2.png' }],
       metrics: { latest_drop_timestamp: 200 },
       wave: { type: ApiWaveType.Rank },
+      isPinned: true,
     };
     wavesListMock.mockReturnValue({
       waves: [waveA, waveB],

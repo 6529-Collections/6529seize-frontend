@@ -41,6 +41,11 @@ export default function DropMobileMenuHandler({
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (isTemporaryDrop) return;
 
+    // Prevent text selection highlighting during long press
+    if (isMobile) {
+      e.preventDefault();
+    }
+
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
 
@@ -51,6 +56,11 @@ export default function DropMobileMenuHandler({
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Prevent scrolling/selection during long press detection
+    if (isMobile && longPressTimeout.current) {
+      e.preventDefault();
+    }
+
     const touchX = e.touches[0].clientX;
     const touchY = e.touches[0].clientY;
 
