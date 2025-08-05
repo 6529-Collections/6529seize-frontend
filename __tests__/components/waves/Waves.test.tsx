@@ -4,6 +4,7 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
@@ -59,24 +60,29 @@ function renderWaves(params: Map<string, string | null>) {
   );
 }
 
-it("shows CreateWave when ?new is present", () => {
-  renderWaves(new Map([["new", "1"]]));
+it("shows CreateWave when ?create=wave is present", () => {
+  renderWaves(new Map([["create", "wave"]]));
   expect(screen.getByTestId("create-wave")).toBeInTheDocument();
 });
 
-it("shows CreateDM when ?new-dm is present", () => {
-  renderWaves(new Map([["new-dm", "1"]]));
+it("shows CreateDM when ?create=dm is present", () => {
+  renderWaves(new Map([["create", "dm"]]));
   expect(screen.getByTestId("create-dm")).toBeInTheDocument();
 });
 
-it("switches view modes on button clicks", async () => {
+it("navigates on button clicks", async () => {
+  const push = jest.fn();
+  (useRouter as jest.Mock).mockReturnValue({ push });
+
   const user = userEvent.setup();
   const { unmount } = renderWaves(new Map());
-  await user.click(screen.getByText("open-create-wave"));
-  expect(screen.getByTestId("create-wave")).toBeInTheDocument();
-  unmount();
 
+  await user.click(screen.getByText("open-create-wave"));
+  expect(push).toHaveBeenCalledWith("/waves?create=wave");
+
+  unmount();
   renderWaves(new Map());
+
   await user.click(screen.getByText("open-create-dm"));
-  expect(screen.getByTestId("create-dm")).toBeInTheDocument();
+  expect(push).toHaveBeenCalledWith("/waves?create=dm");
 });

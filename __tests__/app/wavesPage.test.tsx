@@ -1,12 +1,17 @@
+import WavesPage from "@/app/waves/page";
+import { AuthContext } from "@/components/auth/Auth";
 import { render } from "@testing-library/react";
 import React from "react";
-import WavesPage from "@/app/waves/page";
-import { AuthContext } from "../../components/auth/Auth";
+
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
 // Mock TitleContext
-jest.mock("../../contexts/TitleContext", () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
     title: "Test Title",
     setTitle: jest.fn(),
@@ -20,6 +25,12 @@ jest.mock("../../contexts/TitleContext", () => ({
   useSetWaveData: jest.fn(),
   useSetStreamHasNewItems: jest.fn(),
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    seizeConnect: jest.fn(),
+  })),
 }));
 
 describe("Waves page", () => {
