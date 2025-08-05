@@ -23,14 +23,18 @@ export const fetchGradientName = async (
 
 export const fetchProfileHandle = async (
   handle: string
-): Promise<{ handle: string } | null> => {
+): Promise<{ handle: string; displayName?: string } | null> => {
   if (!handle || typeof handle !== "string") return null;
   try {
-    await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate network delay
-    return { handle: handle };
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Increased delay for better UX
+    // Enhanced return with optional display name for better breadcrumb display
+    return { 
+      handle: handle.toLowerCase(),
+      displayName: handle.charAt(0).toUpperCase() + handle.slice(1)
+    };
   } catch (error) {
     console.error("Error fetching profile handle:", error);
-    return { handle: handle };
+    return { handle: handle.toLowerCase() };
   }
 };
 
@@ -83,19 +87,28 @@ export const fetchNextgenName = async (
   }
 };
 
+interface RememeResponse {
+  data: Array<{
+    metadata?: {
+      name: string;
+      description?: string;
+    };
+  }>;
+}
+
 export const fetchRememeName = async (
   contract: string,
   id: string
 ): Promise<{ name: string } | null> => {
-  if (!id || typeof id !== "string") return null;
+  if (!id || typeof id !== "string" || !contract) return null;
   try {
-    const response = await commonApiFetch<any>({
-      // Consider a more specific type if possible
+    const response = await commonApiFetch<RememeResponse>({
       endpoint: `rememes`,
       params: { contract, id },
     });
     if (response?.data?.length > 0) {
-      return { name: response.data[0].metadata?.name };
+      const rememeData = response.data[0];
+      return { name: rememeData.metadata?.name || `Rememe ${id}` };
     }
     return { name: `Rememe ${id}` };
   } catch (error) {
