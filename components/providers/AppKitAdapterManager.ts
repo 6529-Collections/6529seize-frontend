@@ -82,14 +82,13 @@ export class AppKitAdapterManager {
       if (firstKey) {
         const oldAdapter = this.adapterCache.get(firstKey)
         if (oldAdapter && oldAdapter !== this.currentAdapter) {
-          // Cleanup the old adapter's wagmi client
+          // Cleanup the old adapter more safely
           try {
-            // Wagmi Config doesn't have a destroy method, but we can clear internal state
-            if (oldAdapter.wagmiConfig._internal) {
-              oldAdapter.wagmiConfig._internal.connectors.setState([])
-            }
+            // Mark adapter as obsolete instead of trying to manipulate internals
+            console.log('[AppKitAdapterManager] Removing obsolete adapter from cache:', firstKey)
+            // Let garbage collection handle the cleanup naturally
           } catch (error) {
-            console.warn('[AppKitAdapterManager] Error cleaning up old adapter:', error)
+            console.warn('[AppKitAdapterManager] Error during adapter cleanup:', error)
           }
         }
         this.adapterCache.delete(firstKey)

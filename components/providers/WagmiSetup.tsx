@@ -28,7 +28,8 @@ export default function WagmiSetup({
   const [isMounted, setIsMounted] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isCapacitor = Capacitor.isNativePlatform();
+  // Memoize platform detection to avoid repeated calls
+  const isCapacitor = useMemo(() => Capacitor.isNativePlatform(), []);
 
   // Handle client-side mounting for App Router
   useEffect(() => {
@@ -167,7 +168,14 @@ export default function WagmiSetup({
 
   // Don't render anything until mounted (fixes SSR issues)
   if (!isMounted) {
-    return <div>Loading...</div>;
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+        <div className="text-center">
+          <div className="spinner-border" role="status" aria-hidden="true"></div>
+          <div className="mt-2">Initializing...</div>
+        </div>
+      </div>
+    );
   }
 
   if (!currentAdapter || !isInitialized) {
@@ -177,7 +185,16 @@ export default function WagmiSetup({
       isCapacitor,
       isMounted
     });
-    return <div>Loading wallet connection...</div>;
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+        <div className="text-center">
+          <div className="spinner-border" role="status" aria-hidden="true"></div>
+          <div className="mt-2">
+            Connecting to {isCapacitor ? 'mobile' : 'web'} wallet service...
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
