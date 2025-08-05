@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { cicToType } from "../../../helpers/Helpers";
 import UserCICAndLevel, {
@@ -9,6 +9,8 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
+import { ArtistSubmissionBadge } from "../../waves/drops/ArtistSubmissionBadge";
+import { ArtistSubmissionPreviewModal } from "../../waves/drops/ArtistSubmissionPreviewModal";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -17,15 +19,22 @@ interface MemesLeaderboardDropArtistInfoProps {
 const MemesLeaderboardDropArtistInfo: React.FC<
   MemesLeaderboardDropArtistInfoProps
 > = ({ drop }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
+  const hasSubmissions = submissionCount > 0;
+
+  const handleSubmissionBadgeClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
-      <Link
-        href={`/${drop.author?.handle}`}
-        onClick={(e) => e.stopPropagation()}
-        className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
-      >
-        <WaveDropAuthorPfp drop={drop} />
-      </Link>
+      <WaveDropAuthorPfp drop={drop} />
       <div className="tw-flex tw-items-center tw-gap-x-3">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           {drop.author?.level && (
@@ -58,6 +67,13 @@ const MemesLeaderboardDropArtistInfo: React.FC<
               </span>
             </Link>
           )}
+          {hasSubmissions && (
+            <ArtistSubmissionBadge
+              submissionCount={submissionCount}
+              onBadgeClick={handleSubmissionBadgeClick}
+              tooltipId={`leaderboard-badge-${drop.id}`}
+            />
+          )}
 
           {/* Divider followed by WaveDropTime component */}
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
@@ -70,6 +86,13 @@ const MemesLeaderboardDropArtistInfo: React.FC<
           decisionTime={drop.winning_context?.decision_time || null}
         />
       </div>
+      
+      {/* Artist Submission Preview Modal */}
+      <ArtistSubmissionPreviewModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        user={drop.author}
+      />
     </div>
   );
 };
