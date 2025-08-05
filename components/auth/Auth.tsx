@@ -64,8 +64,8 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
-  setToast: () => { },
-  setActiveProfileProxy: async () => { },
+  setToast: () => {},
+  setActiveProfileProxy: async () => {},
 });
 
 export const useAuth = () => {
@@ -81,7 +81,6 @@ export default function Auth({
 
   const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet } =
     useSeizeConnectContext();
-
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -212,6 +211,11 @@ export default function Auth({
     userRejected: boolean;
   }> => {
     try {
+      setToast({
+        message: "Signing message",
+        type: "info",
+      });
+
       const signedMessage = await signMessage.signMessageAsync({
         message,
       });
@@ -258,11 +262,6 @@ export default function Auth({
       });
       return { success: false };
     }
-
-    setToast({
-      message: JSON.stringify(clientSignature),
-      type: "info",
-    });
 
     if (!clientSignature.signature) {
       setToast({
