@@ -4,7 +4,9 @@ import styles from "./Auth.module.scss";
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSignMessage } from "wagmi";
+import { useAppKit } from "@reown/appkit/react";
+import { useSecureSign, MobileSigningError, ConnectionMismatchError } from "../../hooks/useSecureSign";
+import { useMobileWalletConnection } from "../../hooks/useMobileWalletConnection";
 import {
   getAuthJwt,
   getRefreshToken,
@@ -64,8 +66,8 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
-  setToast: () => { },
-  setActiveProfileProxy: async () => { },
+  setToast: () => {},
+  setActiveProfileProxy: async () => {},
 });
 
 export const useAuth = () => {
@@ -82,8 +84,9 @@ export default function Auth({
   const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet, connectionState } =
     useSeizeConnectContext();
 
-
-  const signMessage = useSignMessage();
+  const { open } = useAppKit();
+  const { signMessage, isSigningPending, reset: resetSigning } = useSecureSign();
+  const { mobileInfo, getMobileInstructions } = useMobileWalletConnection();
   const [showSignModal, setShowSignModal] = useState(false);
 
   const [connectedProfile, setConnectedProfile] = useState<ApiIdentity>();
@@ -146,6 +149,13 @@ export default function Auth({
     setActiveProfileProxy(null);
     seizeDisconnectAndLogout();
   }
+
+  // Cleanup signing state on unmount or when address changes
+  useEffect(() => {
+    return () => {
+      resetSigning();
+    };
+  }, [resetSigning, address]);
 
   useEffect(() => {
     if (address && connectionState === 'connected') {
@@ -221,17 +231,42 @@ export default function Auth({
     userRejected: boolean;
   }> => {
     try {
-      const signedMessage = await signMessage.signMessageAsync({
-        message,
+      const result = await signMessage(message);
+      
+      // Handle specific mobile signing errors
+      if (result.error) {
+        if (result.error instanceof ConnectionMismatchError) {
+          setToast({
+            message: "Wallet address mismatch. Please disconnect and reconnect your wallet.",
+            type: "error",
+          });
+        } else if (result.error instanceof MobileSigningError) {
+          // Show mobile-specific error messages
+          setToast({
+            message: result.error.message,
+            type: "error",
+          });
+        }
+      }
+      
+      return {
+        signature: result.signature,
+        userRejected: result.userRejected,
+      };
+    } catch (error) {
+      // Fallback error handling
+      console.error('Signature error:', error);
+      setToast({
+        message: "Error requesting authentication, please try again",
+        type: "error",
+      });
+      setToast({
+        message: `Error: ${JSON.stringify(error)}`,
+        type: "info",
       });
       return {
-        signature: signedMessage,
-        userRejected: false,
-      };
-    } catch (e) {
-      return {
         signature: null,
-        userRejected: e instanceof UserRejectedRequestError,
+        userRejected: false,
       };
     }
   };
@@ -523,6 +558,19 @@ export default function Auth({
             To connect your wallet, you will need to sign a message to confirm
             your identity.
           </p>
+          
+          {mobileInfo.isMobile && (
+            <div className="mb-3 p-2 bg-info text-dark rounded">
+              <small>
+                <strong>Mobile Instructions:</strong><br />
+                {getMobileInstructions()}
+                {mobileInfo.isInAppBrowser && (
+                  <><br /><em>Note: You're using an in-app browser. For best results, open this page in your device's default browser.</em></>
+                )}
+              </small>
+            </div>
+          )}
+          
           <ul className="font-lighter">
             <li className="mt-1 mb-1">
               This signature will be used to generate a secure token (JWT) to
@@ -532,6 +580,11 @@ export default function Auth({
               Your signature will not cost any gas and is purely for
               authentication purposes.
             </li>
+            {mobileInfo.isMobile && (
+              <li className="mt-1 mb-1">
+                <em>The signing request will open in your wallet app. Please approve it and return to this page.</em>
+              </li>
+            )}
           </ul>
         </Modal.Body>
         <Modal.Footer className={styles.signModalContent}>
@@ -547,14 +600,14 @@ export default function Auth({
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}
+            disabled={isSigningPending}
           >
-            {signMessage.isPending ? (
+            {isSigningPending ? (
               <>
-                Confirm in your wallet <DotLoader />
+                {mobileInfo.isMobile ? "Check your wallet app" : "Confirm in your wallet"} <DotLoader />
               </>
             ) : (
-              "Sign"
+              mobileInfo.isMobile ? "Sign in Wallet App" : "Sign"
             )}
           </Button>
         </Modal.Footer>
