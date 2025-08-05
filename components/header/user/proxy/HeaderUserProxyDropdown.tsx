@@ -1,19 +1,20 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../auth/Auth";
-import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
-import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
-import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faDoorClosed,
   faDoorOpen,
   faRepeat,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AnimatePresence, motion } from "framer-motion";
+import { useContext, useEffect, useState } from "react";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
+import { AuthContext } from "../../../auth/Auth";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
+import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
+import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
 export default function HeaderUserProxyDropdown({
   isOpen,
@@ -145,7 +146,7 @@ export default function HeaderUserProxyDropdown({
                         title="Disconnect"
                         className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                         <FontAwesomeIcon
-                          icon={faDoorOpen}
+                          icon={faDoorClosed}
                           height={16}
                           width={16}
                         />
