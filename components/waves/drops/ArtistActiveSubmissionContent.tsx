@@ -8,14 +8,6 @@ import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import { useUserArtSubmissions } from "../../../hooks/useUserArtSubmissions";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 
-interface ArtistSubmission {
-  id: string;
-  imageUrl: string;
-  mediaMimeType: string;
-  title?: string;
-  createdAt: number;
-}
-
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;
   readonly isOpen: boolean;
