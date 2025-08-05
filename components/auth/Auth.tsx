@@ -219,6 +219,10 @@ export default function Auth({
       const signedMessage = await signMessage.signMessageAsync({
         message,
       });
+      setToast({
+        message: JSON.stringify(signedMessage),
+        type: "info",
+      });
       return {
         signature: signedMessage,
         userRejected: false,
