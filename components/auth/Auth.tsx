@@ -220,7 +220,7 @@ export default function Auth({
         message,
       });
       setToast({
-        message: JSON.stringify(signedMessage),
+        message: `Signature: ${JSON.stringify(signedMessage)}`,
         type: "info",
       });
       return {
@@ -228,6 +228,10 @@ export default function Auth({
         userRejected: false,
       };
     } catch (e) {
+      setToast({
+        message: `Error: ${JSON.stringify(e)}`,
+        type: "error",
+      });
       return {
         signature: null,
         userRejected: e instanceof UserRejectedRequestError,
