@@ -237,7 +237,7 @@ export default function Auth({
     const nonceResponse = await getNonce({ signerAddress });
     if (!nonceResponse) {
       setToast({
-        message: "Error requesting authentication, please try again 1",
+        message: "Error requesting authentication, please try again",
         type: "error",
       });
       return { success: false };
@@ -245,7 +245,7 @@ export default function Auth({
     const { nonce, server_signature } = nonceResponse;
     if (!nonce || !server_signature) {
       setToast({
-        message: "Error requesting authentication, please try again 2",
+        message: "Error requesting authentication, please try again",
         type: "error",
       });
       return { success: false };
@@ -259,9 +259,14 @@ export default function Auth({
       return { success: false };
     }
 
+    setToast({
+      message: JSON.stringify(clientSignature),
+      type: "info",
+    });
+
     if (!clientSignature.signature) {
       setToast({
-        message: "Error requesting authentication, please try again 3",
+        message: "Error requesting authentication, please try again",
         type: "error",
       });
       return { success: false };
@@ -289,7 +294,7 @@ export default function Auth({
       return { success: true };
     } catch {
       setToast({
-        message: "Error requesting authentication, please try again 4",
+        message: "Error requesting authentication, please try again",
         type: "error",
       });
       return { success: false };
