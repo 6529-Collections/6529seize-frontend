@@ -17,7 +17,6 @@ import {
 } from "../../services/auth/auth.utils";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import { jwtDecode } from "jwt-decode";
-import { UserRejectedRequestError } from "viem";
 import { ProfileConnectedStatus } from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import {
