@@ -10,8 +10,8 @@ const TOOLTIP_STYLES = {
   color: "white",
   padding: "6px 12px",
   fontSize: "12px",
-  zIndex: 999,
-  boxShadow: "0 4px 16px 0 rgba(0,0,0,0.30), 0 2px 8px 0 rgba(55,55,62,0.25)", // Added more shadow for the tooltip
+  zIndex: 50,
+  boxShadow: "0 4px 16px 0 rgba(0,0,0,0.30), 0 2px 8px 0 rgba(55,55,62,0.25)",
 } as const;
 
 interface ArtistSubmissionBadgeProps {
