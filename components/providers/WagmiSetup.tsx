@@ -9,9 +9,12 @@ import {
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import type { AppKitNetwork } from '@reown/appkit-common'
 import { CW_PROJECT_ID } from "@/constants";
 import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
+import { AppKitAdapterCapacitor } from './AppKitAdapterCapacitor';
+import { Capacitor } from '@capacitor/core';
 
 export default function WagmiSetup({
   children,
@@ -21,44 +24,82 @@ export default function WagmiSetup({
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [appKitInitialized, setAppKitInitialized] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const isCapacitor = Capacitor.isNativePlatform();
+  
   const adapterManager = useMemo(
-    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
-    [appWalletPasswordModal.requestPassword]
+    () => isCapacitor 
+      ? new AppKitAdapterCapacitor(appWalletPasswordModal.requestPassword)
+      : new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
+    [appWalletPasswordModal.requestPassword, isCapacitor]
   );
 
   // Initialize AppKit with wallets
   const initializeAppKit = (wallets: AppWallet[]) => {
     try {
-      console.log('Initializing AppKit adapter with', wallets.length, 'AppWallets');
+      console.log(`Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
       
-      const newAdapter = adapterManager.createAdapterWithCache(wallets);
+      const newAdapter = isCapacitor 
+        ? (adapterManager as AppKitAdapterCapacitor).createAdapter(wallets)
+        : (adapterManager as AppKitAdapterManager).createAdapterWithCache(wallets);
       
-      createAppKit({
-        adapters: [newAdapter],
-        networks: [mainnet],
-        projectId: CW_PROJECT_ID,
-        metadata: {
-          name: "6529.io",
-          description: "6529.io",
-          url: process.env.BASE_ENDPOINT!,
-          icons: [
-            "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-          ],
-        },
-        // Customize what appears in modal
-        enableWalletGuide: false, // Remove wallet guide text
-        featuredWalletIds: ['metamask', 'walletConnect'], // Show these first
-        allWallets: 'SHOW', // Keep "All Wallets" button
-    
-        features: {
-          analytics: true,
-          email: false, // Disable if you don't want email login
-          socials: [], // Disable social logins
-          connectMethodsOrder: ['wallet'] // Only show wallet tab
-        }
-      });
+      // Only create AppKit once
+      if (!appKitInitialized) {
+        // Mobile-specific AppKit configuration
+        const appKitConfig = isCapacitor ? {
+          adapters: [newAdapter],
+          networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
+          projectId: CW_PROJECT_ID,
+          metadata: {
+            name: "6529.io",
+            description: "6529.io",
+            url: process.env.BASE_ENDPOINT!,
+            icons: [
+              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+            ],
+          },
+          // Mobile-specific settings
+          enableWalletGuide: false,
+          featuredWalletIds: ['coinbaseWallet', 'walletConnect'], // Mobile-first wallets
+          allWallets: 'HIDE' as const, // Hide "All Wallets" on mobile for cleaner UX
+          features: {
+            analytics: true,
+            email: false,
+            socials: [],
+            connectMethodsOrder: ['wallet' as const]
+          }
+        } : {
+          adapters: [newAdapter],
+          networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
+          projectId: CW_PROJECT_ID,
+          metadata: {
+            name: "6529.io",
+            description: "6529.io",
+            url: process.env.BASE_ENDPOINT!,
+            icons: [
+              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+            ],
+          },
+          // Web-specific settings
+          enableWalletGuide: false,
+          featuredWalletIds: ['metamask', 'walletConnect'],
+          allWallets: 'SHOW' as const,
+          features: {
+            analytics: true,
+            email: false,
+            socials: [],
+            connectMethodsOrder: ['wallet' as const]
+          }
+        };
+        
+        createAppKit(appKitConfig);
+        setAppKitInitialized(true);
+        console.log('[WagmiSetup] AppKit initialized successfully');
+      } else {
+        console.log('[WagmiSetup] AppKit already initialized, only updating adapter');
+      }
       
       setCurrentAdapter(newAdapter);
       setIsInitialized(true);
@@ -75,7 +116,11 @@ export default function WagmiSetup({
     
     // Debounce updates
     timeoutRef.current = setTimeout(() => {
-      if (adapterManager.shouldRecreateAdapter(wallets)) {
+      const shouldRecreate = isCapacitor 
+        ? (adapterManager as AppKitAdapterCapacitor).shouldRecreateAdapter(wallets)
+        : (adapterManager as AppKitAdapterManager).shouldRecreateAdapter(wallets);
+        
+      if (shouldRecreate) {
         initializeAppKit(wallets);
       }
     }, 300);
@@ -100,7 +145,12 @@ export default function WagmiSetup({
   }, [adapterManager]);
 
   if (!currentAdapter || !isInitialized) {
-    return <div></div>;
+    console.log('[WagmiSetup] Waiting for AppKit initialization...', { 
+      hasAdapter: !!currentAdapter, 
+      isInitialized,
+      isCapacitor 
+    });
+    return <div>Loading wallet connection...</div>;
   }
 
   return (

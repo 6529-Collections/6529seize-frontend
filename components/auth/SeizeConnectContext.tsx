@@ -93,6 +93,9 @@ interface SeizeConnectContextType {
   
   /** Whether the user is authenticated with a wallet address */
   isAuthenticated: boolean;
+  
+  /** Current connection state for better timing control */
+  connectionState: 'disconnected' | 'connecting' | 'connected';
 }
 
 const SeizeConnectContext = createContext<SeizeConnectContextType | undefined>(
@@ -145,6 +148,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
     getWalletAddress() ?? undefined
   );
+  const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
 
   useEffect(() => {
     migrateCookiesToLocalStorage();
@@ -152,14 +156,32 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (account.address && account.isConnected) {
+      console.log('[SeizeConnect] AppKit connected:', account.address);
       setConnectedAddress(account.address);
-    } else {
+      setConnectionState('connected');
+    } else if (account.isConnected === false) {
+      console.log('[SeizeConnect] AppKit disconnected');
       setConnectedAddress(getWalletAddress() ?? undefined);
+      setConnectionState('disconnected');
+    } else {
+      // Connection is in progress
+      setConnectionState('connecting');
     }
   }, [account.address, account.isConnected]);
 
   const seizeConnect = useCallback((): void => {
-    open({ view: "Connect" });
+    try {
+      console.log('[SeizeConnect] Opening wallet connection modal');
+      open({ view: "Connect" });
+    } catch (error) {
+      console.error('[SeizeConnect] Error opening connection modal:', error);
+      const connectionError = new WalletConnectionError(
+        'Failed to open wallet connection modal',
+        error
+      );
+      logError('seizeConnect', connectionError);
+      throw connectionError;
+    }
   }, [open]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
@@ -232,6 +254,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     seizeConnectOpen: state.open,
     isConnected: account.isConnected,
     isAuthenticated: !!connectedAddress,
+    connectionState,
   }), [
     connectedAddress,
     walletInfo,
@@ -241,6 +264,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     seizeAcceptConnection,
     state.open,
     account.isConnected,
+    connectionState,
   ]);
 
   return (
