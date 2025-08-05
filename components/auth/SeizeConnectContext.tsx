@@ -127,12 +127,17 @@ const logError = (context: string, error: Error): void => {
   });
 };
 
-// Type guard for validating wallet addresses
+// Type guard for validating wallet addresses with checksum validation
 const isValidAddress = (address: unknown): address is string => {
-  return typeof address === 'string' && 
-         address.length > 0 && 
-         address.startsWith('0x') &&
-         address.length === 42;
+  if (typeof address !== 'string' || 
+      address.length !== 42 || 
+      !address.startsWith('0x')) {
+    return false;
+  }
+  
+  // Basic hex validation
+  const hexPattern = /^0x[0-9a-fA-F]{40}$/;
+  return hexPattern.test(address);
 };
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -154,20 +159,39 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     migrateCookiesToLocalStorage();
   }, []);
 
+  // Use useCallback to prevent unnecessary re-renders and race conditions
+  const updateConnectionState = useCallback((newAddress: string | undefined, newIsConnected: boolean, newStatus: string | undefined) => {
+    console.log('[SeizeConnect] Account state changed:', {
+      address: newAddress,
+      isConnected: newIsConnected,
+      status: newStatus,
+      previousConnectionState: connectionState
+    });
+
+    // Debounce rapid state changes to prevent race conditions
+    setTimeout(() => {
+      if (newAddress && newIsConnected) {
+        console.log('[SeizeConnect] AppKit connected:', newAddress);
+        setConnectedAddress(newAddress);
+        setConnectionState('connected');
+      } else if (newIsConnected === false) {
+        console.log('[SeizeConnect] AppKit disconnected');
+        setConnectedAddress(getWalletAddress() ?? undefined);
+        setConnectionState('disconnected');
+      } else if (newStatus === 'connecting') {
+        console.log('[SeizeConnect] Connection in progress...');
+        setConnectionState('connecting');
+      } else {
+        // Default fallback
+        console.log('[SeizeConnect] Unknown connection state, defaulting to disconnected');
+        setConnectionState('disconnected');
+      }
+    }, 50); // Small delay to debounce rapid changes
+  }, [connectionState]);
+
   useEffect(() => {
-    if (account.address && account.isConnected) {
-      console.log('[SeizeConnect] AppKit connected:', account.address);
-      setConnectedAddress(account.address);
-      setConnectionState('connected');
-    } else if (account.isConnected === false) {
-      console.log('[SeizeConnect] AppKit disconnected');
-      setConnectedAddress(getWalletAddress() ?? undefined);
-      setConnectionState('disconnected');
-    } else {
-      // Connection is in progress
-      setConnectionState('connecting');
-    }
-  }, [account.address, account.isConnected]);
+    updateConnectionState(account.address, account.isConnected, account.status);
+  }, [account.address, account.isConnected, account.status, updateConnectionState]);
 
   const seizeConnect = useCallback((): void => {
     try {

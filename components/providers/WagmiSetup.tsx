@@ -25,9 +25,15 @@ export default function WagmiSetup({
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [appKitInitialized, setAppKitInitialized] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isCapacitor = Capacitor.isNativePlatform();
+
+  // Handle client-side mounting for App Router
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   const adapterManager = useMemo(
     () => isCapacitor 
@@ -47,6 +53,7 @@ export default function WagmiSetup({
       
       // Only create AppKit once
       if (!appKitInitialized) {
+        console.log('[WagmiSetup] Creating AppKit instance for the first time');
         // Mobile-specific AppKit configuration
         const appKitConfig = isCapacitor ? {
           adapters: [newAdapter],
@@ -69,7 +76,9 @@ export default function WagmiSetup({
             email: false,
             socials: [],
             connectMethodsOrder: ['wallet' as const]
-          }
+          },
+          enableOnramp: false, // Disable for mobile
+          enableSwaps: false   // Disable for mobile
         } : {
           adapters: [newAdapter],
           networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
@@ -91,12 +100,21 @@ export default function WagmiSetup({
             email: false,
             socials: [],
             connectMethodsOrder: ['wallet' as const]
-          }
+          },
+          enableOnramp: false, // Keep disabled for now
+          enableSwaps: false   // Keep disabled for now
         };
         
-        createAppKit(appKitConfig);
-        setAppKitInitialized(true);
-        console.log('[WagmiSetup] AppKit initialized successfully');
+        try {
+          createAppKit(appKitConfig);
+          setAppKitInitialized(true);
+          console.log('[WagmiSetup] AppKit initialized successfully');
+        } catch (appKitError) {
+          console.error('[WagmiSetup] Failed to create AppKit:', appKitError);
+          // Set a flag to prevent infinite retry loops
+          setAppKitInitialized(true); // Prevent retries
+          throw new Error(`AppKit initialization failed: ${appKitError instanceof Error ? appKitError.message : String(appKitError)}`);
+        }
       } else {
         console.log('[WagmiSetup] AppKit already initialized, only updating adapter');
       }
@@ -126,10 +144,13 @@ export default function WagmiSetup({
     }, 300);
   };
 
-  // Initialize on mount
+  // Initialize only after mounting to avoid SSR issues
   useEffect(() => {
-    initializeAppKit([]);
-  }, []);
+    if (isMounted) {
+      console.log('[WagmiSetup] Client-side mounted, initializing AppKit');
+      initializeAppKit([]);
+    }
+  }, [isMounted]);
 
   // Listen for AppWallet changes
   useEffect(() => {
@@ -144,11 +165,17 @@ export default function WagmiSetup({
     };
   }, [adapterManager]);
 
+  // Don't render anything until mounted (fixes SSR issues)
+  if (!isMounted) {
+    return <div>Loading...</div>;
+  }
+
   if (!currentAdapter || !isInitialized) {
     console.log('[WagmiSetup] Waiting for AppKit initialization...', { 
       hasAdapter: !!currentAdapter, 
       isInitialized,
-      isCapacitor 
+      isCapacitor,
+      isMounted
     });
     return <div>Loading wallet connection...</div>;
   }
