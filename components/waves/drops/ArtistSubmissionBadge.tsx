@@ -1,8 +1,17 @@
-import React, { useMemo } from "react";
+import React, { useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
+
+// Tooltip styles - extracted to prevent re-creation on each render
+const TOOLTIP_STYLES = {
+  backgroundColor: "#37373E",
+  color: "white",
+  padding: "6px 12px",
+  fontSize: "12px",
+  zIndex: 99,
+} as const;
 
 interface ArtistSubmissionBadgeProps {
   readonly submissionCount: number;
@@ -19,10 +28,8 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
 
   if (submissionCount === 0) return null;
 
-  const uniqueTooltipId = useMemo(
-    () => `${tooltipId}-${Math.random().toString(36).substring(2, 11)}`,
-    [tooltipId]
-  );
+  const id = useId();
+  const uniqueTooltipId = `${tooltipId}-${id}`;
 
   return (
     <>
@@ -36,6 +43,8 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         aria-label={`View ${submissionCount} art submission${
           submissionCount === 1 ? "" : "s"
         }`}
+        aria-expanded="false"
+        aria-haspopup="dialog"
         data-tooltip-id={!isMobile ? uniqueTooltipId : undefined}
       >
         <FontAwesomeIcon
@@ -55,13 +64,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
           }`}
           delayShow={300}
           opacity={1}
-          style={{
-            backgroundColor: "#37373E",
-            color: "white",
-            padding: "6px 12px",
-            fontSize: "12px",
-            zIndex: 99,
-          }}
+          style={TOOLTIP_STYLES}
         />
       )}
     </>

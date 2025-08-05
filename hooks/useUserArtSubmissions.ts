@@ -31,9 +31,13 @@ interface UseUserArtSubmissionsReturn {
 }
 
 export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn => {
+  // Stable query key to prevent unnecessary re-renders
+  const authorKey = useMemo(() => user?.handle ?? user?.id, [user?.handle, user?.id]);
+  const queryKey = useMemo(() => [QueryKey.PROFILE_DROPS, authorKey, 'art-submissions'] as const, [authorKey]);
+
   // Query to fetch user's participatory drops (art submissions)
   const { data: drops, isLoading, error } = useQuery({
-    queryKey: [QueryKey.PROFILE_DROPS, user?.handle || user?.id, 'art-submissions'],
+    queryKey,
     queryFn: async () => {
       if (!user?.handle && !user?.id) return [];
       
