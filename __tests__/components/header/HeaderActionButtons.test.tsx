@@ -1,7 +1,6 @@
-import React from "react";
+import HeaderActionButtons from "@/components/header/HeaderActionButtons";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import HeaderActionButtons from "@/components/header/HeaderActionButtons";
 
 jest.mock("@/components/navigation/ViewContext", () => ({
   useViewContext: jest.fn(),
@@ -22,7 +21,7 @@ describe("HeaderActionButtons", () => {
     (useRt as jest.Mock).mockReturnValue({ push });
     render(<HeaderActionButtons />);
     await userEvent.click(screen.getByRole("button", { name: "Create Wave" }));
-    expect(push).toHaveBeenCalledWith("/waves?new=true");
+    expect(push).toHaveBeenCalledWith("/waves?create=wave");
   });
 
   it("creates new dm when active view is messages", async () => {
@@ -31,7 +30,7 @@ describe("HeaderActionButtons", () => {
     (useRt as jest.Mock).mockReturnValue({ push });
     render(<HeaderActionButtons />);
     await userEvent.click(screen.getByRole("button", { name: "Create DM" }));
-    expect(push).toHaveBeenCalledWith("/waves?new-dm=true");
+    expect(push).toHaveBeenCalledWith("/waves?create=dm");
   });
 
   it("renders nothing for other views", () => {

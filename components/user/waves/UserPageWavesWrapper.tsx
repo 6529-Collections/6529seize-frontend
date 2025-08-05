@@ -20,10 +20,10 @@ export default function UserPageWavesWrapper({
     useContext(AuthContext);
 
   useEffect(() => {
-    if (showWaves || fetchingProfile) {
+    if (fetchingProfile) {
       return;
     }
-    if (!connectedProfile || !address) {
+    if (!connectedProfile || !address || !showWaves) {
       router.push(`/${user}/rep`);
     }
   }, [
