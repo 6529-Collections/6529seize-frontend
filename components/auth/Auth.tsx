@@ -79,7 +79,7 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet } =
+  const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet, connectionState } =
     useSeizeConnectContext();
 
 
@@ -148,7 +148,8 @@ export default function Auth({
   }
 
   useEffect(() => {
-    if (address) {
+    if (address && connectionState === 'connected') {
+      console.log('[Auth] Validating JWT for connected wallet:', address);
       validateJwt({
         jwt: getAuthJwt(),
         wallet: address,
@@ -158,14 +159,22 @@ export default function Auth({
           if (!isConnected) {
             reset();
           } else {
+            console.log('[Auth] JWT invalid, requesting authentication');
             removeAuthJwt();
             invalidateAll();
             setShowSignModal(true);
           }
+        } else {
+          console.log('[Auth] JWT valid, user authenticated');
         }
       });
+    } else if (connectionState === 'connecting') {
+      console.log('[Auth] Connection in progress, waiting...');
+    } else if (!address && connectionState === 'disconnected') {
+      console.log('[Auth] No address, resetting auth state');
+      setShowSignModal(false);
     }
-  }, [address, activeProfileProxy]);
+  }, [address, activeProfileProxy, connectionState]);
 
   const getNonce = async ({
     signerAddress,
