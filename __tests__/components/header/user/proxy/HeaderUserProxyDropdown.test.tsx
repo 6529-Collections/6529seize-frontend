@@ -4,7 +4,6 @@ import HeaderUserProxyDropdown from '../../../../../components/header/user/proxy
 import { AuthContext } from '../../../../../components/auth/Auth';
 
 jest.mock('../../../../../components/header/user/proxy/HeaderUserProxyDropdownItem', () => () => <div data-testid="item" />);
-jest.mock('../../../../../components/header/user/proxy/HeaderUserProxyDropdownChains', () => () => <div data-testid="chains" />);
 jest.mock('../../../../../components/auth/SeizeConnectContext');
 
 const { useSeizeConnectContext: mockConnect } = require('../../../../../components/auth/SeizeConnectContext');
@@ -19,8 +18,8 @@ function renderDropdown(options: any) {
     address: options.address,
     isConnected: options.isConnected,
     seizeConnect: options.seizeConnect || jest.fn(),
-    seizeDisconnect: options.seizeDisconnect || jest.fn(),
-    seizeDisconnectAndLogout: jest.fn(),
+    seizeDisconnect: options.seizeDisconnect || jest.fn().mockResolvedValue(undefined),
+    seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
   });
   const authValue = {
     activeProfileProxy: null,
@@ -52,8 +51,8 @@ describe('HeaderUserProxyDropdown', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('disconnects wallet when connected', () => {
-    const seizeDisconnect = jest.fn();
+  it('disconnects wallet when connected', async () => {
+    const seizeDisconnect = jest.fn().mockResolvedValue(undefined);
     const { onClose } = renderDropdown({ profile: profileBase, address: '0xabc', isConnected: true, seizeDisconnect });
     fireEvent.click(screen.getAllByRole('button', { name: /disconnect/i })[0]);
     expect(seizeDisconnect).toHaveBeenCalled();

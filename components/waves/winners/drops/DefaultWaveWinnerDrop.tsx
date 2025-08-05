@@ -71,7 +71,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     >
       <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
         <div className="tw-flex tw-justify-between tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
-          <div className="tw-flex tw-gap-x-3">
+          <div className="tw-flex tw-gap-x-3 tw-flex-1">
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
             <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
               <WaveWinnersDropHeader winner={winner} showVotingInfo={false} />
@@ -81,7 +81,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 
           {/* Show open icon when not a touch device */}
           {!hasTouchScreen && (
-            <div className="tw-flex tw-items-start">
+            <div className="tw-flex tw-items-start tw-flex-shrink-0">
               <div className="tw-h-8">
                 <WaveDropActionsOpen drop={extendedDrop} />
               </div>

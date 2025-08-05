@@ -64,8 +64,8 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
-  setToast: () => {},
-  setActiveProfileProxy: async () => {},
+  setToast: () => { },
+  setActiveProfileProxy: async () => { },
 });
 
 export const useAuth = () => {
@@ -79,8 +79,9 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, isConnected, seizeDisconnectAndLogout } =
+  const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet } =
     useSeizeConnectContext();
+
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -275,9 +276,9 @@ export default function Auth({
           server_signature,
           client_signature: clientSignature.signature,
           role: role ?? undefined,
-          // is_safe_wallet: false,
-          // client_address: signerAddress,
-        } as ApiLoginRequest,
+          is_safe_wallet: isSafeWallet,
+          client_address: signerAddress,
+        },
       });
       setAuthJwt(
         signerAddress,
@@ -494,7 +495,8 @@ export default function Auth({
           isProxy: !!activeProfileProxy,
         }),
         setActiveProfileProxy: onActiveProfileProxy,
-      }}>
+      }}
+    >
       {children}
       <ToastContainer />
       <Modal
@@ -502,7 +504,8 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered>
+        centered
+      >
         <div className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </div>
@@ -528,13 +531,15 @@ export default function Auth({
             onClick={() => {
               setShowSignModal(false);
               seizeDisconnectAndLogout();
-            }}>
+            }}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}>
+            disabled={signMessage.isPending}
+          >
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />

@@ -1,18 +1,17 @@
 "use client";
 
-import { Connector, WagmiProvider } from "wagmi";
-import { useEffect, useState } from "react";
-import {
+import { WagmiProvider } from "wagmi";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { 
   AppWallet,
   appWalletsEventEmitter,
 } from "../app-wallets/AppWalletsContext";
-import {
-  APP_WALLET_CONNECTOR_TYPE,
-  createAppWalletConnector,
-} from "@/wagmiConfig/wagmiAppWalletConnector";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { getWagmiConfig, WagmiConfig } from "@/wagmiConfig/wagmiConfig";
-import { initWeb3Modal } from "./web3ModalSetup";
+import { createAppKit } from '@reown/appkit/react'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { CW_PROJECT_ID } from "@/constants";
+import { mainnet } from "viem/chains";
+import { AppKitAdapterManager } from './AppKitAdapterManager';
 
 export default function WagmiSetup({
   children,
@@ -20,85 +19,92 @@ export default function WagmiSetup({
   readonly children: React.ReactNode;
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
-  const [wagmiConfig, setWagmiConfig] = useState<WagmiConfig>();
+  const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const adapterManager = useMemo(
+    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
+    [appWalletPasswordModal.requestPassword]
+  );
+
+  // Initialize AppKit with wallets
+  const initializeAppKit = (wallets: AppWallet[]) => {
+    try {
+      console.log('Initializing AppKit adapter with', wallets.length, 'AppWallets');
+      
+      const newAdapter = adapterManager.createAdapterWithCache(wallets);
+      
+      createAppKit({
+        adapters: [newAdapter],
+        networks: [mainnet],
+        projectId: CW_PROJECT_ID,
+        metadata: {
+          name: "6529.io",
+          description: "6529.io",
+          url: process.env.BASE_ENDPOINT!,
+          icons: [
+            "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+          ],
+        },
+        // Customize what appears in modal
+        enableWalletGuide: false, // Remove wallet guide text
+        featuredWalletIds: ['metamask', 'walletConnect'], // Show these first
+        allWallets: 'SHOW', // Keep "All Wallets" button
+    
+        features: {
+          analytics: true,
+          email: false, // Disable if you don't want email login
+          socials: [], // Disable social logins
+          connectMethodsOrder: ['wallet'] // Only show wallet tab
+        }
+      });
+      
+      setCurrentAdapter(newAdapter);
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Error initializing AppKit:', error);
+    }
+  };
+
+  const handleAppWalletUpdate = (wallets: AppWallet[]) => {
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    // Debounce updates
+    timeoutRef.current = setTimeout(() => {
+      if (adapterManager.shouldRecreateAdapter(wallets)) {
+        initializeAppKit(wallets);
+      }
+    }, 300);
+  };
+
+  // Initialize on mount
   useEffect(() => {
-    const wagmiConfig = getWagmiConfig();
-    initWeb3Modal(wagmiConfig.config);
-    setWagmiConfig(wagmiConfig);
+    initializeAppKit([]);
   }, []);
 
+  // Listen for AppWallet changes
   useEffect(() => {
-    if (!wagmiConfig) return;
-
-    const createConnectorForWallet = (
-      wallet: AppWallet,
-      requestPassword: (
-        address: string,
-        addressHashed: string
-      ) => Promise<string>
-    ): Connector | null => {
-      const connector = createAppWalletConnector(
-        wagmiConfig.chains,
-        { appWallet: wallet },
-        () => requestPassword(wallet.address, wallet.address_hashed)
-      );
-      return wagmiConfig.config?._internal.connectors.setup(connector) ?? null;
-    };
-
-    const isConnectorNew = (
-      connector: Connector,
-      existingConnectors: Connector[]
-    ): boolean => {
-      return !existingConnectors.some(
-        (existing) => existing.id === connector.id
-      );
-    };
-
-    const getNewConnectors = (
-      connectors: Connector[],
-      existingConnectors: Connector[]
-    ): Connector[] => {
-      return connectors.filter((connector) =>
-        isConnectorNew(connector, existingConnectors)
-      );
-    };
-
-    const appWalletsEventEmitterHandler = async (wallets: AppWallet[]) => {
-      const connectors = wallets
-        .map((wallet) =>
-          createConnectorForWallet(
-            wallet,
-            appWalletPasswordModal.requestPassword
-          )
-        )
-        .filter((connector): connector is Connector => connector !== null);
-
-      const existingConnectors =
-        wagmiConfig.config?.connectors.filter(
-          (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
-        ) ?? [];
-
-      const newConnectors = getNewConnectors(connectors, existingConnectors);
-
-      wagmiConfig.config?._internal.connectors.setState([
-        ...newConnectors,
-        ...existingConnectors,
-      ]);
-    };
-
-    appWalletsEventEmitter.on("update", appWalletsEventEmitterHandler);
-
+    appWalletsEventEmitter.on("update", handleAppWalletUpdate);
+    
     return () => {
-      appWalletsEventEmitter.off("update", appWalletsEventEmitterHandler);
+      appWalletsEventEmitter.off("update", handleAppWalletUpdate);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      adapterManager.cleanup();
     };
-  }, [wagmiConfig]);
+  }, [adapterManager]);
 
-  if (!wagmiConfig) {
-    return null;
+  if (!currentAdapter || !isInitialized) {
+    return <div></div>;
   }
 
   return (
-    <WagmiProvider config={wagmiConfig.config}>
+    <WagmiProvider config={currentAdapter.wagmiConfig}>
       {children}
       {appWalletPasswordModal.modal}
     </WagmiProvider>
