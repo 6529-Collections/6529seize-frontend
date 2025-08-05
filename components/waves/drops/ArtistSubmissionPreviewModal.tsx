@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -16,6 +16,16 @@ export const ArtistSubmissionPreviewModal: React.FC<
   ArtistSubmissionPreviewModalProps
 > = ({ isOpen, onClose, user }) => {
   const { isApp } = useDeviceInfo();
+
+  // Cleanup body overflow on unmount
+  useEffect(() => {
+    if (isOpen && !isApp) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [isOpen, isApp]);
 
   if (!isOpen) return null;
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
@@ -19,9 +19,10 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
 
   if (submissionCount === 0) return null;
 
-  const uniqueTooltipId = `${tooltipId}-${Math.random()
-    .toString(36)
-    .substring(2, 11)}`;
+  const uniqueTooltipId = useMemo(
+    () => `${tooltipId}-${Math.random().toString(36).substring(2, 11)}`,
+    [tooltipId]
+  );
 
   return (
     <>

@@ -7,14 +7,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import { useUserArtSubmissions } from "../../../hooks/useUserArtSubmissions";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-
-interface ArtistSubmission {
-  id: string;
-  imageUrl: string;
-  mediaMimeType: string;
-  title?: string;
-  createdAt: number;
-}
+import { ArtistSubmission } from "../../../types/submissions";
 
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;
@@ -26,12 +19,16 @@ interface ArtistActiveSubmissionContentProps {
 export const ArtistActiveSubmissionContent: React.FC<
   ArtistActiveSubmissionContentProps
 > = ({ user, isOpen, onClose, isApp = false }) => {
-  const { submissions, isLoading } = useUserArtSubmissions(
+  const { submissions, isLoading, error } = useUserArtSubmissions(
     isOpen ? user : undefined
   );
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams()!;
+  const searchParams = useSearchParams();
+  
+  if (!searchParams) {
+    return null;
+  }
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -121,6 +118,18 @@ export const ArtistActiveSubmissionContent: React.FC<
         {isLoading ? (
           <div className="tw-flex tw-items-center tw-justify-center tw-py-12">
             <div className="tw-text-iron-400">Loading submissions...</div>
+          </div>
+        ) : error ? (
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-12 tw-gap-4">
+            <div className="tw-text-red-400 tw-text-center">
+              Failed to load submissions
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="tw-px-4 tw-py-2 tw-bg-iron-700 tw-text-iron-200 tw-rounded-md tw-transition-colors desktop-hover:hover:tw-bg-iron-600"
+            >
+              Try Again
+            </button>
           </div>
         ) : (
           <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 tw-gap-6">
