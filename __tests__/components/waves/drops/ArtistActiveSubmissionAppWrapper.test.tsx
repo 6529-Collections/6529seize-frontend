@@ -25,7 +25,7 @@ jest.mock('framer-motion', () => ({
   motion: {
     div: React.forwardRef(function MockMotionDiv({ children, onDragEnd, drag, ...props }: any, ref) {
       return (
-        <div
+        <button
           ref={ref}
           data-testid="motion-div"
           data-drag={drag}
@@ -38,7 +38,7 @@ jest.mock('framer-motion', () => ({
           {...props}
         >
           {children}
-        </div>
+        </button>
       );
     }),
   },
@@ -144,8 +144,10 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
     
     // Find the container that prevents propagation
     const container = screen.getByTestId('dialog-panel').parentElement;
-    fireEvent.click(container!);
-    fireEvent.touchStart(container!);
+    if (container) {
+      fireEvent.click(container);
+      fireEvent.touchStart(container);
+    }
     
     expect(mockParentClick).not.toHaveBeenCalled();
   });

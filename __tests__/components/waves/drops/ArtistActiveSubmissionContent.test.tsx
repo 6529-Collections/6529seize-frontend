@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ArtistActiveSubmissionContent } from '../../../../components/waves/drops/ArtistActiveSubmissionContent';
 import { ApiProfileMin } from '../../../../generated/models/ApiProfileMin';
@@ -193,7 +193,9 @@ describe('ArtistActiveSubmissionContent', () => {
     render(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     const firstSubmission = screen.getByText('Test Artwork 1').closest('.tw-group');
-    fireEvent.click(firstSubmission!);
+    if (firstSubmission) {
+      fireEvent.click(firstSubmission);
+    }
     
     expect(mockPush).toHaveBeenCalledWith('/test-path?drop=drop-1');
   });
@@ -211,7 +213,9 @@ describe('ArtistActiveSubmissionContent', () => {
     render(<ArtistActiveSubmissionContent {...defaultProps} onClose={mockOnClose} />);
     
     const firstSubmission = screen.getByText('Test Artwork 1').closest('.tw-group');
-    fireEvent.click(firstSubmission!);
+    if (firstSubmission) {
+      fireEvent.click(firstSubmission);
+    }
     
     expect(mockOnClose).toHaveBeenCalled();
   });
