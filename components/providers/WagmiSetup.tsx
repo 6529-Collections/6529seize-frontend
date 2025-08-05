@@ -9,6 +9,7 @@ import {
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import type { AppKitNetwork } from '@reown/appkit-common'
 import { CW_PROJECT_ID } from "@/constants";
 import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
@@ -49,7 +50,7 @@ export default function WagmiSetup({
         // Mobile-specific AppKit configuration
         const appKitConfig = isCapacitor ? {
           adapters: [newAdapter],
-          networks: [mainnet],
+          networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
           projectId: CW_PROJECT_ID,
           metadata: {
             name: "6529.io",
@@ -62,16 +63,16 @@ export default function WagmiSetup({
           // Mobile-specific settings
           enableWalletGuide: false,
           featuredWalletIds: ['coinbaseWallet', 'walletConnect'], // Mobile-first wallets
-          allWallets: 'HIDE', // Hide "All Wallets" on mobile for cleaner UX
+          allWallets: 'HIDE' as const, // Hide "All Wallets" on mobile for cleaner UX
           features: {
             analytics: true,
             email: false,
             socials: [],
-            connectMethodsOrder: ['wallet']
+            connectMethodsOrder: ['wallet' as const]
           }
         } : {
           adapters: [newAdapter],
-          networks: [mainnet],
+          networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
           projectId: CW_PROJECT_ID,
           metadata: {
             name: "6529.io",
@@ -84,12 +85,12 @@ export default function WagmiSetup({
           // Web-specific settings
           enableWalletGuide: false,
           featuredWalletIds: ['metamask', 'walletConnect'],
-          allWallets: 'SHOW',
+          allWallets: 'SHOW' as const,
           features: {
             analytics: true,
             email: false,
             socials: [],
-            connectMethodsOrder: ['wallet']
+            connectMethodsOrder: ['wallet' as const]
           }
         };
         
