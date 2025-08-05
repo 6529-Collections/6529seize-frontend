@@ -6,6 +6,7 @@ import ArtistActiveSubmissionAppWrapper from '../../../../components/waves/drops
 // Mock Headless UI components
 jest.mock('@headlessui/react', () => ({
   Dialog: ({ children, onClose, ...props }: any) => (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div data-testid="dialog" onClick={onClose} {...props}>
       {children}
     </div>
@@ -22,22 +23,24 @@ jest.mock('@headlessui/react', () => ({
 // Mock Framer Motion
 jest.mock('framer-motion', () => ({
   motion: {
-    div: React.forwardRef(({ children, onDragEnd, drag, ...props }: any, ref) => (
-      <div
-        ref={ref}
-        data-testid="motion-div"
-        data-drag={drag}
-        onMouseUp={(e) => {
-          // Simulate drag end with different velocities/offsets for testing
-          if (onDragEnd) {
-            onDragEnd(e, { offset: { y: 0 }, velocity: { y: 0 } });
-          }
-        }}
-        {...props}
-      >
-        {children}
-      </div>
-    )),
+    div: React.forwardRef(function MockMotionDiv({ children, onDragEnd, drag, ...props }: any, ref) {
+      return (
+        <div
+          ref={ref}
+          data-testid="motion-div"
+          data-drag={drag}
+          onMouseUp={(e) => {
+            // Simulate drag end with different velocities/offsets for testing
+            if (onDragEnd) {
+              onDragEnd(e, { offset: { y: 0 }, velocity: { y: 0 } });
+            }
+          }}
+          {...props}
+        >
+          {children}
+        </div>
+      );
+    }),
   },
   useDragControls: () => ({
     start: jest.fn(),
@@ -133,6 +136,7 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
     const mockParentClick = jest.fn();
     
     render(
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
       <div onClick={mockParentClick}>
         <ArtistActiveSubmissionAppWrapper {...defaultProps} />
       </div>

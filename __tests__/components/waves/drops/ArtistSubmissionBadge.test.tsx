@@ -62,6 +62,7 @@ describe('ArtistSubmissionBadge', () => {
     const mockParentClick = jest.fn();
     
     render(
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
       <div onClick={mockParentClick}>
         <ArtistSubmissionBadge {...defaultProps} onBadgeClick={mockOnClick} />
       </div>
