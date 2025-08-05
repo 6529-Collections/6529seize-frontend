@@ -114,23 +114,32 @@ export const ArtistActiveSubmissionContent: React.FC<
             : "tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(75vh-120px)] sm:tw-max-h-[calc(80vh-120px)]"
         }`}
       >
-        {isLoading ? (
-          <div className="tw-flex tw-items-center tw-justify-center tw-py-12">
-            <div className="tw-text-iron-400">Loading submissions...</div>
-          </div>
-        ) : error ? (
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-12 tw-gap-4">
-            <div className="tw-text-red-400 tw-text-center">
-              Failed to load submissions
-            </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="tw-px-4 tw-py-2 tw-bg-iron-700 tw-text-iron-200 tw-rounded-md tw-transition-colors desktop-hover:hover:tw-bg-iron-600"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : (
+        {(() => {
+          if (isLoading) {
+            return (
+              <div className="tw-flex tw-items-center tw-justify-center tw-py-12">
+                <div className="tw-text-iron-400">Loading submissions...</div>
+              </div>
+            );
+          }
+
+          if (error) {
+            return (
+              <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-12 tw-gap-4">
+                <div className="tw-text-red-400 tw-text-center">
+                  Failed to load submissions
+                </div>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="tw-px-4 tw-py-2 tw-bg-iron-700 tw-text-iron-200 tw-rounded-md tw-transition-colors desktop-hover:hover:tw-bg-iron-600"
+                >
+                  Try Again
+                </button>
+              </div>
+            );
+          }
+
+          return (
           <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 tw-gap-6">
             {submissions.map((submission, index) => (
               <motion.div
@@ -179,7 +188,8 @@ export const ArtistActiveSubmissionContent: React.FC<
               </motion.div>
             ))}
           </div>
-        )}
+          );
+        })()}
       </div>
     </>
   );
