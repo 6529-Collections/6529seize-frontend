@@ -5,9 +5,11 @@ import MemesArtSubmissionContainer from '../../../../../components/waves/memes/s
 import { SubmissionStep } from '../../../../../components/waves/memes/submission/types/Steps';
 import { useArtworkSubmissionForm } from '../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionForm';
 import { useArtworkSubmissionMutation } from '../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionMutation';
+import { useSeizeConnectContext } from '../../../../../components/auth/SeizeConnectContext';
 
 jest.mock('../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionForm');
 jest.mock('../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionMutation');
+jest.mock('../../../../../components/auth/SeizeConnectContext');
 jest.mock('../../../../../components/waves/memes/submission/layout/ModalLayout', () => ({ children }: any) => <div>{children}</div>);
 jest.mock('../../../../../components/waves/memes/submission/steps/AgreementStep', () => (props: any) => <div data-testid="agreement" {...props} />);
 let artworkProps: any;
@@ -17,6 +19,7 @@ jest.mock('../../../../../components/waves/memes/submission/steps/ArtworkStep', 
 
 const mockForm = useArtworkSubmissionForm as jest.MockedFunction<typeof useArtworkSubmissionForm>;
 const mockMutation = useArtworkSubmissionMutation as jest.MockedFunction<typeof useArtworkSubmissionMutation>;
+const mockSeizeConnect = useSeizeConnectContext as jest.MockedFunction<typeof useSeizeConnectContext>;
 
 describe('MemesArtSubmissionContainer', () => {
   const wave = { id: 'w1', participation: { terms: 't' } } as any;
@@ -44,6 +47,19 @@ describe('MemesArtSubmissionContainer', () => {
       submissionPhase: 'idle',
       submissionError: undefined,
       isSubmitting: false,
+    } as any);
+    mockSeizeConnect.mockReturnValue({
+      address: '0x123',
+      isSafeWallet: false,
+      walletName: 'MetaMask',
+      walletIcon: 'metamask-icon.svg',
+      seizeConnect: jest.fn(),
+      seizeDisconnect: jest.fn(),
+      seizeDisconnectAndLogout: jest.fn(),
+      seizeAcceptConnection: jest.fn(),
+      seizeConnectOpen: false,
+      isConnected: true,
+      isAuthenticated: true,
     } as any);
   });
 
