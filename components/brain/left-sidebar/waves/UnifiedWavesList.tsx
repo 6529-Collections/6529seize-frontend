@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
+import React, { useEffect, useRef } from "react";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
+import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
 import UnifiedWavesListWaves, {
   UnifiedWavesListWavesHandle,
 } from "./UnifiedWavesListWaves";
-import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -79,7 +79,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
         {!isApp && (
           <div className="tw-px-4 tw-mb-4 tw-w-full">
             <Link
-              href="/waves?new=true"
+              href="/waves?create=wave"
               className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300">
               <FontAwesomeIcon
                 icon={faPlus}
@@ -100,9 +100,9 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           />
 
           {/* Loading indicator and intersection trigger */}
-          <UnifiedWavesListLoader 
+          <UnifiedWavesListLoader
             isFetching={isFetching && waves.length === 0}
-            isFetchingNextPage={isFetchingNextPage} 
+            isFetchingNextPage={isFetchingNextPage}
           />
 
           {/* Empty state */}

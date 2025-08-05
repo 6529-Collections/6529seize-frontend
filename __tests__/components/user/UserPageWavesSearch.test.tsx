@@ -1,58 +1,67 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import UserPageWavesSearch from '../../../components/user/waves/UserPageWavesSearch';
+import UserPageWavesSearch from "@/components/user/waves/UserPageWavesSearch";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { useRouter } from "next/navigation";
 
-jest.mock('../../../components/utils/button/PrimaryButton', () => ({
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+}));
+
+jest.mock("@/components/utils/button/PrimaryButton", () => ({
   __esModule: true,
   default: ({ onClicked, children }: any) => (
-    <button data-testid="primary" onClick={onClicked}>{children}</button>
+    <button data-testid="primary" onClick={onClicked}>
+      {children}
+    </button>
   ),
 }));
 
-describe('UserPageWavesSearch', () => {
-  it('updates wave name on input change', async () => {
+describe("UserPageWavesSearch", () => {
+  it("updates wave name on input change", async () => {
     const setWaveName = jest.fn();
     render(
       <UserPageWavesSearch
-        waveName={''}
+        waveName={""}
         showCreateNewWaveButton={false}
         setWaveName={setWaveName}
-        onCreateNewWave={jest.fn()}
       />
     );
 
-    await userEvent.type(screen.getByRole('textbox'), 'test');
+    await userEvent.type(screen.getByRole("textbox"), "test");
     expect(setWaveName).toHaveBeenCalled();
-    expect(setWaveName.mock.calls[setWaveName.mock.calls.length - 1][0]).toBe('t');
+    expect(setWaveName.mock.calls[setWaveName.mock.calls.length - 1][0]).toBe(
+      "t"
+    );
   });
 
-  it('clears wave name when clear icon clicked', async () => {
+  it("clears wave name when clear icon clicked", async () => {
     const setWaveName = jest.fn();
     render(
       <UserPageWavesSearch
-        waveName={'abc'}
+        waveName={"abc"}
         showCreateNewWaveButton={false}
         setWaveName={setWaveName}
-        onCreateNewWave={jest.fn()}
       />
     );
 
-    await userEvent.click(screen.getByRole('button', { name: 'Clear wave name' }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Clear wave name" })
+    );
     expect(setWaveName).toHaveBeenLastCalledWith(null);
   });
 
-  it('calls onCreateNewWave when button clicked', async () => {
-    const onCreateNewWave = jest.fn();
+  it("redirects to create wave page when button clicked", async () => {
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push });
     render(
       <UserPageWavesSearch
         waveName={null}
         showCreateNewWaveButton={true}
         setWaveName={jest.fn()}
-        onCreateNewWave={onCreateNewWave}
       />
     );
 
-    await userEvent.click(screen.getByTestId('primary'));
-    expect(onCreateNewWave).toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Create Wave" }));
+    expect(push).toHaveBeenCalledWith("/waves?create=wave");
   });
 });
