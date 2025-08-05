@@ -80,7 +80,8 @@ export default function CommonDropdownItemsMobileWrapper({
                     </div>
                   </Transition.Child>
                   <div
-                    className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-pt-6 tw-pb-[env(safe-area-inset-bottom,0px)]"
+                    className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-pt-6 
+                    "
                     style={{ maxHeight: "calc(100vh - 8rem)" }}
                   >
                     {label && (
@@ -90,7 +91,7 @@ export default function CommonDropdownItemsMobileWrapper({
                         </Dialog.Title>
                       </div>
                     )}
-                    <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
+                    <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-pb-[env(safe-area-inset-bottom,0px)]">
                       <ul className="tw-flex tw-flex-col tw-mx-0 tw-pl-0 tw-space-y-3 tw-mb-0 tw-list-none">
                         {children}
                       </ul>

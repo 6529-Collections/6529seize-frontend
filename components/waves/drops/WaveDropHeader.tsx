@@ -9,6 +9,9 @@ import UserCICAndLevel, {
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
+import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
+import { ArtistSubmissionPreviewModal } from "./ArtistSubmissionPreviewModal";
+import { useState } from "react";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -29,11 +32,23 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const cicType = cicToType(drop.author.cic);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
+  const hasSubmissions = submissionCount > 0;
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
     e.stopPropagation();
     router.push(path);
+  };
+
+  const handleSubmissionBadgeClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -58,6 +73,13 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 </Link>
               </UserProfileTooltipWrapper>
             </p>
+            {hasSubmissions && (
+              <ArtistSubmissionBadge
+                submissionCount={submissionCount}
+                onBadgeClick={handleSubmissionBadgeClick}
+                tooltipId={`header-badge-${drop.id}`}
+              />
+            )}
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
             <WaveDropTime timestamp={drop.created_at} />
           </div>
@@ -85,6 +107,13 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           </span>
         </div>
       )}
+
+      {/* Artist Submission Preview Modal */}
+      <ArtistSubmissionPreviewModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        user={drop.author}
+      />
     </>
   );
 };
