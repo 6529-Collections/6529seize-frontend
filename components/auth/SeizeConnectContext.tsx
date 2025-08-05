@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useMemo,
   useState,
+  useRef,
 } from "react";
 
 import {
@@ -154,31 +155,36 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     getWalletAddress() ?? undefined
   );
   const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     migrateCookiesToLocalStorage();
   }, []);
 
-  // Use useCallback to prevent unnecessary re-renders and race conditions
-  const updateConnectionState = useCallback((newAddress: string | undefined, newIsConnected: boolean, newStatus: string | undefined) => {
+  useEffect(() => {
     console.log('[SeizeConnect] Account state changed:', {
-      address: newAddress,
-      isConnected: newIsConnected,
-      status: newStatus,
+      address: account.address,
+      isConnected: account.isConnected,
+      status: account.status,
       previousConnectionState: connectionState
     });
 
-    // Debounce rapid state changes to prevent race conditions
-    setTimeout(() => {
-      if (newAddress && newIsConnected) {
-        console.log('[SeizeConnect] AppKit connected:', newAddress);
-        setConnectedAddress(newAddress);
+    // Clear any existing timeout to debounce rapid changes
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    // Use debounced state update to prevent race conditions
+    debounceTimeoutRef.current = setTimeout(() => {
+      if (account.address && account.isConnected) {
+        console.log('[SeizeConnect] AppKit connected:', account.address);
+        setConnectedAddress(account.address);
         setConnectionState('connected');
-      } else if (newIsConnected === false) {
+      } else if (account.isConnected === false) {
         console.log('[SeizeConnect] AppKit disconnected');
         setConnectedAddress(getWalletAddress() ?? undefined);
         setConnectionState('disconnected');
-      } else if (newStatus === 'connecting') {
+      } else if (account.status === 'connecting') {
         console.log('[SeizeConnect] Connection in progress...');
         setConnectionState('connecting');
       } else {
@@ -187,11 +193,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         setConnectionState('disconnected');
       }
     }, 50); // Small delay to debounce rapid changes
-  }, [connectionState]);
 
-  useEffect(() => {
-    updateConnectionState(account.address, account.isConnected, account.status);
-  }, [account.address, account.isConnected, account.status, updateConnectionState]);
+    // Cleanup on unmount
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [account.address, account.isConnected, account.status, connectionState]);
 
   const seizeConnect = useCallback((): void => {
     try {
