@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Page } from "../../../../../helpers/Types";
-import { Distribution } from "../../../../../entities/IDistribution";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
-import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
-import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { Distribution } from "../../../../../entities/IDistribution";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { Page } from "../../../../../helpers/Types";
+import { commonApiFetch } from "../../../../../services/api/common-api";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
+import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 export default function UserPageStatsActivityDistributions({
   profile,
@@ -84,7 +84,7 @@ export default function UserPageStatsActivityDistributions({
       {
         page_size: `${PAGE_SIZE}`,
         page: `${pageFilter}`,
-        search: walletsParam,
+        wallet: walletsParam,
       },
     ],
     queryFn: async () =>
@@ -93,7 +93,7 @@ export default function UserPageStatsActivityDistributions({
         params: {
           page_size: `${PAGE_SIZE}`,
           page: `${pageFilter}`,
-          search: walletsParam,
+          wallet: walletsParam,
         },
       }),
     placeholderData: keepPreviousData,

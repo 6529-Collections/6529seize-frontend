@@ -1,28 +1,28 @@
 "use client";
 
-import styles from "./Distribution.module.scss";
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import { Container, Row, Col, Carousel, Table } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { Distribution, DistributionPhoto } from "../../entities/IDistribution";
-import ScrollToButton from "../scrollTo/ScrollToButton";
+import Address from "@/components/address/Address";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import Pagination from "@/components/pagination/Pagination";
+import ScrollToButton from "@/components/scrollTo/ScrollToButton";
+import {
+  SearchModalDisplay,
+  SearchWalletsDisplay,
+} from "@/components/searchModal/SearchModal";
+import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
+import { MEMES_CONTRACT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { Distribution, DistributionPhoto } from "@/entities/IDistribution";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
   numberWithCommas,
-} from "../../helpers/Helpers";
-import Pagination from "../pagination/Pagination";
-import {
-  SearchModalDisplay,
-  SearchWalletsDisplay,
-} from "../searchModal/SearchModal";
-import DotLoader from "../dotLoader/DotLoader";
-import Address from "../address/Address";
-import { MEMES_CONTRACT } from "../../constants";
-import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
+} from "@/helpers/Helpers";
+import { fetchAllPages, fetchUrl } from "@/services/6529api";
+import Image from "next/image";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+import styles from "./Distribution.module.scss";
 
 interface Props {
   header: string;
