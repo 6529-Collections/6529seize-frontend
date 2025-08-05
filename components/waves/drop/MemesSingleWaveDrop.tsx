@@ -33,14 +33,14 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   );
 
   return (
-    <div className="tw-w-full tw-h-full tw-bg-iron-950">
+    <div className="tw-w-full tw-h-full tw-bg-iron-950 tw-flex tw-flex-col tw-pb-[env(safe-area-inset-bottom,0px)]">
       <SingleWaveDropHeader
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onClose={onClose}
       />
 
-      <div className="tw-flex tw-flex-col lg:tw-flex-row tw-flex-1">
+      <div className="tw-flex tw-flex-col lg:tw-flex-row tw-flex-1 tw-overflow-hidden">
         {!!drop && !!wave && (
           <MemesSingleWaveDropInfoPanel
             drop={{
