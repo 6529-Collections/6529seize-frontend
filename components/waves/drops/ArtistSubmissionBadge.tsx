@@ -1,19 +1,27 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette } from "@fortawesome/free-solid-svg-icons";
+import { Tooltip } from "react-tooltip";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface ArtistSubmissionBadgeProps {
   readonly submissionCount: number;
   readonly onBadgeClick?: () => void;
+  readonly tooltipId?: string;
 }
 
 export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
   submissionCount,
   onBadgeClick,
+  tooltipId = "submission-badge",
 }) => {
+  const isMobile = useIsMobileDevice();
+
   if (submissionCount === 0) return null;
 
-  const displayCount = submissionCount > 9 ? "9+" : submissionCount.toString();
+  const uniqueTooltipId = `${tooltipId}-${Math.random()
+    .toString(36)
+    .substring(2, 11)}`;
 
   return (
     <>
@@ -23,28 +31,38 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
           e.stopPropagation();
           onBadgeClick?.();
         }}
-        className="tw-absolute -tw-top-1 -tw-right-1 tw-z-10 tw-flex tw-items-center tw-justify-center tw-w-5 tw-h-5 tw-bg-gradient-to-br tw-from-indigo-600 tw-to-indigo-800 tw-text-white tw-text-xs tw-font-semibold tw-rounded-full tw-border tw-border-solid tw-border-indigo-400/50 tw-shadow-md tw-shadow-indigo-500/30 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:group-hover/pfptw-bg-gradient-to-br desktop-hover:group-hover/pfphover:tw-from-indigo-500 desktop-hover:group-hover/pfphover:tw-to-indigo-700 desktop-hover:hover:tw-scale-110 desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-indigo-400/40 desktop-hover:group-hover/pfp:tw-scale-110 desktop-hover:group-hover/pfp:tw-shadow-lg desktop-hover:group-hover/pfp:tw-shadow-indigo-400/40 tw-cursor-pointer"
+        className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5 tw-bg-gradient-to-br tw-from-indigo-800 tw-to-indigo-900 tw-text-white tw-rounded-md tw-border tw-border-solid tw-border-indigo-700 tw-shadow-sm tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-from-indigo-700 desktop-hover:hover:tw-to-indigo-800 desktop-hover:hover:tw-shadow-md desktop-hover:hover:tw-border-indigo-600 tw-cursor-pointer focus:tw-ring-2 focus:tw-ring-indigo-600 focus:tw-ring-opacity-50"
         aria-label={`View ${submissionCount} art submission${
           submissionCount === 1 ? "" : "s"
         }`}
+        data-tooltip-id={!isMobile ? uniqueTooltipId : undefined}
       >
-        {/* Subtle glow effect */}
-        <div className="tw-absolute tw-inset-0 tw-rounded-full tw-bg-indigo-500/20 tw-blur-sm tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-indigo-400/30 desktop-hover:group-hover/pfp:tw-bg-indigo-400/30"></div>
-
-        {/* Content */}
-        <div className="tw-relative tw-flex tw-items-center tw-justify-center">
-          {submissionCount <= 3 ? (
-            <FontAwesomeIcon
-              icon={faPalette}
-              className="tw-w-2.5 tw-h-2.5 tw-text-indigo-100"
-            />
-          ) : (
-            <span className="tw-leading-none tw-text-[10px]">
-              {displayCount}
-            </span>
-          )}
-        </div>
+        <FontAwesomeIcon
+          icon={faPalette}
+          className="tw-w-3.5 tw-h-3.5 md:tw-w-3 md:tw-h-3 tw-text-white tw-drop-shadow-sm"
+        />
       </button>
+
+      {/* Tooltip - only on non-touch devices */}
+      {!isMobile && (
+        <Tooltip
+          id={uniqueTooltipId}
+          place="top"
+          positionStrategy="fixed"
+          content={`View ${submissionCount} art submission${
+            submissionCount === 1 ? "" : "s"
+          }`}
+          delayShow={300}
+          opacity={1}
+          style={{
+            backgroundColor: "#37373E",
+            color: "white",
+            padding: "6px 12px",
+            fontSize: "12px",
+            zIndex: 99,
+          }}
+        />
+      )}
     </>
   );
 };
