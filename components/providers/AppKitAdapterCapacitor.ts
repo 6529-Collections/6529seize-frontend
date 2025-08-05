@@ -12,6 +12,7 @@ export class AppKitAdapterCapacitor {
   private currentAdapter: WagmiAdapter | null = null
   private currentWallets: AppWallet[] = []
   private requestPassword: (address: string, addressHashed: string) => Promise<string>
+  private connectionStates = new Map<string, 'connecting' | 'connected' | 'disconnected'>()
 
   constructor(requestPassword: (address: string, addressHashed: string) => Promise<string>) {
     this.requestPassword = requestPassword
@@ -62,7 +63,7 @@ export class AppKitAdapterCapacitor {
     const wagmiAdapter = new WagmiAdapter({
       networks,
       projectId: CW_PROJECT_ID,
-      ssr: false, // Mobile apps are not SSR
+      ssr: false, // Mobile apps are not SSR and App Router needs this false
       connectors: allConnectors
     })
 
@@ -94,8 +95,17 @@ export class AppKitAdapterCapacitor {
     return this.currentAdapter
   }
 
+  getConnectionState(walletAddress: string): string {
+    return this.connectionStates.get(walletAddress) || 'disconnected'
+  }
+
+  setConnectionState(walletAddress: string, state: 'connecting' | 'connected' | 'disconnected'): void {
+    this.connectionStates.set(walletAddress, state)
+  }
+
   cleanup(): void {
     this.currentAdapter = null
     this.currentWallets = []
+    this.connectionStates.clear()
   }
 }

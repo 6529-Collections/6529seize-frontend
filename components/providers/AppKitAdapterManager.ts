@@ -36,7 +36,7 @@ export class AppKitAdapterManager {
     const wagmiAdapter = new WagmiAdapter({
       networks,
       projectId: CW_PROJECT_ID,
-      ssr: true,
+      ssr: false, // App Router requires this to be false to avoid hydration mismatches
       connectors: appWalletConnectors
     })
 
@@ -76,10 +76,22 @@ export class AppKitAdapterManager {
     
     const adapter = this.createAdapter(appWallets)
     
-    // Maintain cache size limit
+    // Maintain cache size limit and cleanup old adapters
     if (this.adapterCache.size >= this.maxCacheSize) {
       const firstKey = Array.from(this.adapterCache.keys())[0]
       if (firstKey) {
+        const oldAdapter = this.adapterCache.get(firstKey)
+        if (oldAdapter && oldAdapter !== this.currentAdapter) {
+          // Cleanup the old adapter's wagmi client
+          try {
+            // Wagmi Config doesn't have a destroy method, but we can clear internal state
+            if (oldAdapter.wagmiConfig._internal) {
+              oldAdapter.wagmiConfig._internal.connectors.setState([])
+            }
+          } catch (error) {
+            console.warn('[AppKitAdapterManager] Error cleaning up old adapter:', error)
+          }
+        }
         this.adapterCache.delete(firstKey)
       }
     }
