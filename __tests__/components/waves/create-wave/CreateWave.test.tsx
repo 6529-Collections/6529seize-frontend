@@ -540,8 +540,12 @@ describe("CreateWave", () => {
     const descriptionComponent = screen.getByTestId("create-wave-description");
     const inputElement = descriptionComponent.querySelector("input");
 
+    expect(inputElement).not.toBeNull();
+
     // Simulate the onHaveDropToSubmitChange callback
-    fireEvent.change(inputElement!, { target: { value: "some content" } });
+    fireEvent.change(inputElement as HTMLInputElement, {
+      target: { value: "some content" },
+    });
 
     // This would normally clear the showDropError state
     expect(descriptionComponent).toBeInTheDocument();
