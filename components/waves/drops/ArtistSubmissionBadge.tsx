@@ -10,7 +10,7 @@ const TOOLTIP_STYLES = {
   color: "white",
   padding: "6px 12px",
   fontSize: "12px",
-  zIndex: 99,
+  zIndex: 999,
   boxShadow: "0 4px 16px 0 rgba(0,0,0,0.30), 0 2px 8px 0 rgba(55,55,62,0.25)", // Added more shadow for the tooltip
 } as const;
 
@@ -58,7 +58,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         <Tooltip
           id={uniqueTooltipId}
           place="top"
-          positionStrategy="fixed"
+          positionStrategy="absolute"
           content={`View ${submissionCount} art submission${
             submissionCount === 1 ? "" : "s"
           }`}
