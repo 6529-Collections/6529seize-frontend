@@ -6,7 +6,7 @@ import {
   createAppWalletConnector,
   APP_WALLET_CONNECTOR_TYPE 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
-import { walletConnect, coinbaseWallet, injected } from 'wagmi/connectors'
+import { walletConnect, coinbaseWallet, injected, metaMask } from 'wagmi/connectors'
 
 export class AppKitAdapterCapacitor {
   private currentAdapter: WagmiAdapter | null = null
@@ -23,7 +23,14 @@ export class AppKitAdapterCapacitor {
 
     // Create mobile-specific connectors
     const mobileConnectors = [
-      // WalletConnect for mobile - no QR modal since we're in a mobile app
+      // MetaMask connector for mobile - critical for mobile MetaMask connections
+      metaMask({
+        dappMetadata: {
+          name: "6529.io",
+          url: process.env.BASE_ENDPOINT!,
+        },
+      }),
+      // WalletConnect for mobile with improved deep linking
       walletConnect({
         projectId: CW_PROJECT_ID,
         metadata: {
@@ -35,6 +42,9 @@ export class AppKitAdapterCapacitor {
           ],
         },
         showQrModal: false, // Critical for mobile - don't show QR modal
+        qrModalOptions: {
+          enableExplorer: true, // Enable wallet discovery for mobile
+        },
       }),
       // Coinbase Wallet with mobile wallet link enabled
       coinbaseWallet({
