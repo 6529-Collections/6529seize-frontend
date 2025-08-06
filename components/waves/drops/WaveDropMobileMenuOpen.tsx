@@ -33,7 +33,7 @@ const WaveDropMobileMenuOpen: React.FC<WaveDropMobileMenuOpenProps> = ({
   return (
     <button
       onClick={onDropClick}
-      className="tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl active:tw-bg-iron-800 tw-transition-colors tw-duration-200">
+      className="tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl active:tw-bg-iron-800 tw-transition-colors tw-duration-200 tw-select-none">
       <svg
         width="24"
         height="24"
