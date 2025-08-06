@@ -58,7 +58,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   }, [isAuthenticated, connectedProfile, fetchingProfile]);
 
   const content = shouldShowContent ? (
-    <div className="tw-flex-1 tw-flex tw-flex-col" id="my-stream-content">
+    <div className="tw-flex-1" id="my-stream-content">
       <Brain>
         <div className={containerClassName}>{children}</div>
       </Brain>
@@ -87,7 +87,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       <Head>
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
-      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden tw-h-screen">
+      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
         <ClientOnly>{content}</ClientOnly>
       </div>
     </>
