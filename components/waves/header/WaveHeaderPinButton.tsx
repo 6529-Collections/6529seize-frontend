@@ -102,14 +102,16 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
       if (isPinned) {
         waves.removePinnedWave(waveId);
         hideTooltip();
-      } else {
-        if (!canPinWave()) {
-          setShowMaxLimitTooltip(true);
-          showErrorToast(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
-        } else {
-          waves.addPinnedWave(waveId);
-        }
+        return;
       }
+      
+      if (!canPinWave()) {
+        setShowMaxLimitTooltip(true);
+        showErrorToast(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
+        return;
+      }
+      
+      waves.addPinnedWave(waveId);
     } catch (error) {
       console.error('Error updating wave pin status:', error);
       

@@ -14,6 +14,50 @@ interface WaveHeaderDescriptionProps {
   readonly side: WaveHeaderPinnedSide;
 }
 
+// Helper functions to reduce cognitive complexity
+const calculatePosition = (
+  buttonRect: DOMRect,
+  contentHeight: number,
+  viewportHeight: number
+): { position: "bottom" | "top"; maxHeight: number } => {
+  const bottomSpace = viewportHeight - buttonRect.bottom;
+  const topSpace = buttonRect.top;
+  
+  if (bottomSpace >= contentHeight || bottomSpace >= topSpace) {
+    return { position: "bottom", maxHeight: bottomSpace - 16 };
+  }
+  return { position: "top", maxHeight: topSpace - 16 };
+};
+
+const getMobilePositionStyles = (
+  position: "bottom" | "top",
+  buttonRect: DOMRect | undefined
+) => {
+  if (!buttonRect) return {};
+  
+  return {
+    top: position === "bottom" ? buttonRect.bottom + 8 : undefined,
+    bottom: position === "top" ? window.innerHeight - buttonRect.top + 8 : undefined,
+    left: 0,
+    right: 0,
+  };
+};
+
+const getDesktopPositionStyles = (
+  position: "bottom" | "top",
+  buttonRect: DOMRect | undefined,
+  side: WaveHeaderPinnedSide
+) => {
+  if (!buttonRect) return {};
+  
+  return {
+    top: position === "bottom" ? buttonRect.top : undefined,
+    bottom: position === "top" ? window.innerHeight - buttonRect.top : undefined,
+    left: side === WaveHeaderPinnedSide.RIGHT ? buttonRect.right + 8 : undefined,
+    right: side === WaveHeaderPinnedSide.LEFT ? 56 : undefined,
+  };
+};
+
 const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, side }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -38,19 +82,14 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, sid
 
         if (!buttonRect || !dropdownRect) return;
 
-        const viewportHeight = window.innerHeight;
-        const bottomSpace = viewportHeight - buttonRect.bottom;
-        const topSpace = buttonRect.top;
-        const contentHeight = dropdownRect.height;
-
-        // Check if content fits below
-        if (bottomSpace >= contentHeight || bottomSpace >= topSpace) {
-          setPosition("bottom");
-          setMaxHeight(bottomSpace - 16); // Subtract padding
-        } else {
-          setPosition("top");
-          setMaxHeight(topSpace - 16); // Subtract padding
-        }
+        const result = calculatePosition(
+          buttonRect,
+          dropdownRect.height,
+          window.innerHeight
+        );
+        
+        setPosition(result.position);
+        setMaxHeight(result.maxHeight);
       };
 
       // Run once after render and add resize listener
@@ -108,41 +147,9 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, sid
                 maxHeight: maxHeight,
                 overflowY: "auto",
                 ...(isMobile
-                  ? {
-                      top:
-                        position === "bottom"
-                          ? (buttonRef.current?.getBoundingClientRect()
-                              .bottom ?? 0) + 8
-                          : undefined,
-                      bottom:
-                        position === "top"
-                          ? window.innerHeight -
-                            (buttonRef.current?.getBoundingClientRect().top ??
-                              0) +
-                            8
-                          : undefined,
-                      left: 0,
-                      right: 0,
-                    }
-                  : {
-                      top:
-                        position === "bottom"
-                          ? buttonRef.current?.getBoundingClientRect().top ?? 0
-                          : undefined,
-                      bottom:
-                        position === "top"
-                          ? window.innerHeight -
-                            (buttonRef.current?.getBoundingClientRect().top ??
-                              0)
-                          : undefined,
-                      left:
-                        side === WaveHeaderPinnedSide.RIGHT
-                          ? (buttonRef.current?.getBoundingClientRect().right ??
-                              0) + 8
-                          : undefined,
-                      right:
-                        side === WaveHeaderPinnedSide.LEFT ? 56 : undefined,
-                    }),
+                  ? getMobilePositionStyles(position, buttonRef.current?.getBoundingClientRect())
+                  : getDesktopPositionStyles(position, buttonRef.current?.getBoundingClientRect(), side)
+                ),
               }}
               className={`tw-z-50 tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${
                 isMobile

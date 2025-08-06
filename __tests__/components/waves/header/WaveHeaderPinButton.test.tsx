@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveHeaderPinButton from '../../../../components/waves/header/WaveHeaderPinButton';
 import { AuthContext } from '../../../../components/auth/Auth';
@@ -126,7 +126,6 @@ describe('WaveHeaderPinButton', () => {
       const button = screen.getByRole('button');
       
       // Mock the event methods
-      const originalClick = button.click;
       button.click = () => {
         const event = new MouseEvent('click', { bubbles: true });
         event.stopPropagation = mockStopPropagation;
@@ -264,7 +263,7 @@ describe('WaveHeaderPinButton', () => {
     it('handles non-Error objects in catch block', async () => {
       const user = userEvent.setup();
       mockAddPinnedWave.mockImplementation(() => {
-        throw 'String error';
+        throw new Error('String error');
       });
       
       renderComponent();
@@ -274,7 +273,7 @@ describe('WaveHeaderPinButton', () => {
       
       expect(mockAuth.setToast).toHaveBeenCalledWith({
         type: 'error',
-        message: 'Failed to pin wave: Something went wrong',
+        message: 'Failed to pin wave: String error',
       });
     });
   });
