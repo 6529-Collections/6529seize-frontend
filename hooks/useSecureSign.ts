@@ -172,6 +172,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
  * Get user-friendly error messages for mobile wallet issues
  */
 const getMobileErrorMessage = (error: any): string => {
+  console.log('error', error);
   const message = error?.message || error?.toString() || 'Unknown error';
   
   // Common mobile wallet error patterns
