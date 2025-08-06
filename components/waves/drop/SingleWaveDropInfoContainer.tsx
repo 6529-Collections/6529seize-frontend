@@ -12,7 +12,7 @@ interface SingleWaveDropInfoContainerProps {
 export const SingleWaveDropInfoContainer: React.FC<
   SingleWaveDropInfoContainerProps
 > = ({ activeTab, children }) => {
-  const { spaces } = useLayout();
+  useLayout();
 
   return (
     <div
