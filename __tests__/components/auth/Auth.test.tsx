@@ -45,6 +45,32 @@ jest.mock('wagmi', () => ({
   useSignMessage: () => ({ signMessageAsync: jest.fn(), isPending: false }),
 }));
 
+jest.mock('@reown/appkit/react', () => ({
+  useAppKit: jest.fn(() => ({
+    open: jest.fn(),
+  })),
+}));
+
+jest.mock('../../../hooks/useSecureSign', () => ({
+  useSecureSign: jest.fn(() => ({
+    signMessage: jest.fn(),
+    isSigningPending: false,
+    reset: jest.fn(),
+  })),
+  MobileSigningError: class MobileSigningError extends Error {},
+  ConnectionMismatchError: class ConnectionMismatchError extends Error {},
+}));
+
+jest.mock('../../../hooks/useMobileWalletConnection', () => ({
+  useMobileWalletConnection: jest.fn(() => ({
+    mobileInfo: {
+      isMobile: false,
+      isInAppBrowser: false,
+    },
+    getMobileInstructions: jest.fn(() => "Test instructions"),
+  })),
+}));
+
 jest.mock('react-bootstrap', () => ({
   Modal: Object.assign(
     ({ children }: any) => <div>{children}</div>,
