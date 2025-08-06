@@ -3,8 +3,7 @@ import { mainnet } from 'viem/chains'
 import { CW_PROJECT_ID } from '@/constants'
 import { AppWallet } from '../app-wallets/AppWalletsContext'
 import { 
-  createAppWalletConnector,
-  APP_WALLET_CONNECTOR_TYPE 
+  createAppWalletConnector 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
 import { walletConnect, coinbaseWallet, injected, metaMask } from 'wagmi/connectors'
 

@@ -38,6 +38,28 @@ import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
 
+// Custom error classes for authentication failures
+class AuthenticationNonceError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'AuthenticationNonceError';
+  }
+}
+
+class InvalidSignerAddressError extends Error {
+  constructor(signerAddress: string) {
+    super(`Invalid signer address: ${signerAddress}`);
+    this.name = 'InvalidSignerAddressError';
+  }
+}
+
+class NonceResponseValidationError extends Error {
+  constructor(message: string, public readonly response?: unknown) {
+    super(message);
+    this.name = 'NonceResponseValidationError';
+  }
+}
+
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
   readonly fetchingProfile: boolean;
@@ -400,16 +422,52 @@ export default function Auth({
     signerAddress,
   }: {
     signerAddress: string;
-  }): Promise<ApiNonceResponse | null> => {
+  }): Promise<ApiNonceResponse> => {
+    // Input validation - fail fast on invalid input
+    if (!signerAddress || typeof signerAddress !== 'string') {
+      throw new InvalidSignerAddressError(signerAddress);
+    }
+    
+    // Validate address format (basic Ethereum address check)
+    const addressRegex = /^0x[a-fA-F0-9]{40}$/;
+    if (!addressRegex.test(signerAddress)) {
+      throw new InvalidSignerAddressError(signerAddress);
+    }
+
     try {
-      return await commonApiFetch<ApiNonceResponse>({
+      const response = await commonApiFetch<ApiNonceResponse>({
         endpoint: "auth/nonce",
         params: {
           signer_address: signerAddress,
         },
       });
-    } catch {
-      return null;
+
+      // Response validation - fail fast on invalid response
+      if (!response) {
+        throw new NonceResponseValidationError('Nonce API returned null or undefined response');
+      }
+
+      if (!response.nonce || typeof response.nonce !== 'string' || response.nonce.trim().length === 0) {
+        throw new NonceResponseValidationError('Invalid nonce in API response', response);
+      }
+
+      if (!response.server_signature || typeof response.server_signature !== 'string' || response.server_signature.trim().length === 0) {
+        throw new NonceResponseValidationError('Invalid server_signature in API response', response);
+      }
+
+      // Return valid response - FAIL-FAST: Only returns valid data or throws
+      return response;
+    } catch (error) {
+      // Re-throw our custom errors without modification
+      if (error instanceof NonceResponseValidationError || error instanceof InvalidSignerAddressError) {
+        throw error;
+      }
+      
+      // Wrap API/network errors in our custom error type
+      throw new AuthenticationNonceError(
+        'Failed to obtain authentication nonce from server',
+        error
+      );
     }
   };
 
@@ -484,39 +542,27 @@ export default function Auth({
     readonly signerAddress: string;
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
-    const nonceResponse = await getNonce({ signerAddress });
-    if (!nonceResponse) {
-      setToast({
-        message: "Error requesting authentication, please try again",
-        type: "error",
-      });
-      return { success: false };
-    }
-    const { nonce, server_signature } = nonceResponse;
-    if (!nonce || !server_signature) {
-      setToast({
-        message: "Error requesting authentication, please try again",
-        type: "error",
-      });
-      return { success: false };
-    }
-    const clientSignature = await getSignature({ message: nonce });
-    if (clientSignature.userRejected) {
-      setToast({
-        message: "Authentication rejected",
-        type: "error",
-      });
-      return { success: false };
-    }
-
-    if (!clientSignature.signature) {
-      setToast({
-        message: "Error requesting authentication, please try again",
-        type: "error",
-      });
-      return { success: false };
-    }
     try {
+      const nonceResponse = await getNonce({ signerAddress });
+      const { nonce, server_signature } = nonceResponse;
+      
+      const clientSignature = await getSignature({ message: nonce });
+      if (clientSignature.userRejected) {
+        setToast({
+          message: "Authentication rejected",
+          type: "error",
+        });
+        return { success: false };
+      }
+
+      if (!clientSignature.signature) {
+        setToast({
+          message: "Error requesting authentication, please try again",
+          type: "error",
+        });
+        return { success: false };
+      }
+      
       const tokenResponse = await commonApiPost<
         ApiLoginRequest,
         ApiLoginResponse
@@ -538,11 +584,30 @@ export default function Auth({
       );
       return { success: true };
     } catch (error) {
-      logErrorSecurely('requestSignIn', error);
-      setToast({
-        message: sanitizeErrorForUser(error),
-        type: "error",
-      });
+      // Handle specific authentication nonce errors with detailed messages
+      if (error instanceof InvalidSignerAddressError) {
+        setToast({
+          message: "Invalid wallet address format",
+          type: "error",
+        });
+      } else if (error instanceof NonceResponseValidationError) {
+        setToast({
+          message: "Authentication server error, please try again",
+          type: "error",
+        });
+      } else if (error instanceof AuthenticationNonceError) {
+        setToast({
+          message: "Failed to connect to authentication server",
+          type: "error",
+        });
+      } else {
+        // Handle other errors (login API errors, etc.)
+        logErrorSecurely('requestSignIn', error);
+        setToast({
+          message: sanitizeErrorForUser(error),
+          type: "error",
+        });
+      }
       return { success: false };
     }
   };

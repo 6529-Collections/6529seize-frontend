@@ -3,10 +3,8 @@ import { mainnet } from 'viem/chains'
 import { CW_PROJECT_ID } from '@/constants'
 import { AppWallet } from '../app-wallets/AppWalletsContext'
 import { 
-  createAppWalletConnector,
-  APP_WALLET_CONNECTOR_TYPE 
+  createAppWalletConnector 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
-import type { Config } from 'wagmi'
 
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null
