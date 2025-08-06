@@ -118,7 +118,7 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, sid
         aria-haspopup="dialog"
         className="tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-size-8 tw-border-0 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-700 desktop-hover:hover:tw-ring-inset tw-transition tw-duration-300 tw-ease-out">
         <svg
-          className="tw-size-4 tw-flex-shrink-0"
+          className="tw-h-5 tw-w-5 tw-flex-shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
