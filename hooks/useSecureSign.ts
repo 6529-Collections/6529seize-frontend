@@ -99,16 +99,25 @@ export const useSecureSign = (): UseSecureSignReturn => {
             throw new ConnectionMismatchError(expectedAddress, providerAddress);
           }
         } catch (providerError: any) {
-          // Handle mobile wallet provider errors gracefully
+          // STRICT VALIDATION: Any provider error fails immediately
           if (providerError instanceof ConnectionMismatchError) {
             throw providerError;
           }
           
-          console.warn('Provider validation failed, continuing with Wagmi signing:', providerError);
-          // Continue with signing if provider validation fails but connection state is good
+          if (providerError instanceof MobileSigningError) {
+            throw providerError;
+          }
+          
+          // Any other provider validation failure - fail immediately
+          throw new MobileSigningError(
+            "Wallet provider validation failed. Please disconnect and reconnect your wallet.",
+            "PROVIDER_VALIDATION_FAILED",
+            providerError
+          );
         }
       }
 
+      // Only reach here if ALL validations passed
       // Use Wagmi's secure signing method
       const signature = await signMessageAsync({ message });
 
@@ -172,7 +181,6 @@ export const useSecureSign = (): UseSecureSignReturn => {
  * Get user-friendly error messages for mobile wallet issues
  */
 const getMobileErrorMessage = (error: any): string => {
-  console.log('error', error);
   const message = error?.message || error?.toString() || 'Unknown error';
   
   // Common mobile wallet error patterns

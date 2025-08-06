@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./Auth.module.scss";
-import { createContext, useContext, useEffect, useState, useMemo } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAppKit } from "@reown/appkit/react";
@@ -36,6 +36,7 @@ import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRe
 import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
+import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
@@ -90,6 +91,24 @@ export default function Auth({
 
   const [connectedProfile, setConnectedProfile] = useState<ApiIdentity>();
   const [fetchingProfile, setFetchingProfile] = useState(false);
+  
+  // Race condition prevention: AbortController and operation tracking
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const authTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [authLoadingState, setAuthLoadingState] = useState<'idle' | 'validating' | 'signing'>('idle');
+  
+  // Centralized abort mechanism for cancelling in-flight operations
+  const abortCurrentAuthOperation = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (authTimeoutRef.current) {
+      clearTimeout(authTimeoutRef.current);
+      authTimeoutRef.current = null;
+    }
+    setAuthLoadingState('idle');
+  }, []);
 
   useEffect(() => {
     if (address) {
@@ -143,47 +162,239 @@ export default function Auth({
     }
   }, [receivedProfileProxies]);
 
-  function reset() {
+  const reset = useCallback(() => {
     invalidateAll();
     setActiveProfileProxy(null);
     seizeDisconnectAndLogout();
+  }, [invalidateAll, seizeDisconnectAndLogout]);
+
+  // Helper function for JWT validation
+  const doJWTValidation = ({
+    jwt,
+    wallet,
+    role,
+  }: {
+    jwt: string | null;
+    wallet: string;
+    role: string | null;
+  }): boolean => {
+    if (!jwt) return false;
+    const decodedJwt = jwtDecode<{
+      id: string;
+      sub: string;
+      iat: number;
+      exp: number;
+      role: string;
+    }>(jwt);
+    if (role && decodedJwt.role !== role) return false;
+    return (
+      decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
+      decodedJwt.exp > Date.now() / 1000
+    );
+  };
+
+  // Helper function for redeeming refresh token with retries
+  async function redeemRefreshTokenWithRetries(
+    walletAddress: string,
+    refreshToken: string,
+    role: string | null,
+    retryCount = 3,
+    abortSignal?: AbortSignal
+  ): Promise<ApiRedeemRefreshTokenResponse | null> {
+    let attempt = 0;
+    let lastError: unknown = null;
+
+    while (attempt < retryCount && !abortSignal?.aborted) {
+      attempt++;
+      try {
+        const redeemResponse = await commonApiPost<
+          ApiRedeemRefreshTokenRequest,
+          ApiRedeemRefreshTokenResponse
+        >({
+          endpoint: "auth/redeem-refresh-token",
+          body: {
+            address: walletAddress,
+            token: refreshToken,
+            role: role ?? undefined,
+          },
+          // TODO: Pass abortSignal when API layer supports it
+          // abortSignal
+        });
+        return redeemResponse;
+      } catch (err: any) {
+        if (err.name === 'AbortError' || abortSignal?.aborted) {
+          return null; // Request was cancelled
+        }
+        lastError = err;
+      }
+    }
+
+    // Refresh token failed after retries
+    return null;
   }
 
-  // Cleanup signing state on unmount or when address changes
+  // Main JWT validation function with cancellation support
+  const validateJwt = useCallback(async ({
+    jwt,
+    wallet,
+    role,
+    operationId,
+    abortSignal,
+  }: {
+    jwt: string | null;
+    wallet: string;
+    role: string | null;
+    operationId: string;
+    abortSignal: AbortSignal;
+  }): Promise<{ isValid: boolean; wasCancelled: boolean }> => {
+    // Check if already aborted
+    if (abortSignal.aborted) {
+      return { isValid: false, wasCancelled: true };
+    }
+
+    const isValid = doJWTValidation({ jwt, wallet, role });
+
+    if (!isValid) {
+      const refreshToken = getRefreshToken();
+      const walletAddress = getWalletAddress();
+      
+      // Check for cancellation before proceeding
+      if (!refreshToken || !walletAddress || abortSignal.aborted) {
+        return { isValid: false, wasCancelled: abortSignal.aborted };
+      }
+      
+      try {
+        const redeemResponse = await redeemRefreshTokenWithRetries(
+          walletAddress,
+          refreshToken,
+          role,
+          3,
+          abortSignal
+        );
+        
+        // Check if operation was cancelled before processing response
+        if (abortSignal.aborted) {
+          return { isValid: false, wasCancelled: true };
+        }
+        
+        // Operation ID check removed - rely on AbortSignal for cancellation
+        
+        if (redeemResponse && areEqualAddresses(redeemResponse.address, wallet)) {
+          const walletRole = getWalletRole();
+          const tokenRole = getRole({ jwt });
+          if (
+            (walletRole && tokenRole && tokenRole === walletRole) ||
+            (!walletRole && !tokenRole)
+          ) {
+            setAuthJwt(
+              redeemResponse.address,
+              redeemResponse.token,
+              refreshToken,
+              walletRole ?? undefined
+            );
+            return { isValid: true, wasCancelled: false };
+          }
+        }
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          return { isValid: false, wasCancelled: true };
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+
+    return { isValid, wasCancelled: false };
+  }, []);
+
+  // Comprehensive cleanup effect for unmount and address changes
   useEffect(() => {
     return () => {
+      // Cancel any pending auth operations
+      abortCurrentAuthOperation();
+      // Reset signing state
       resetSigning();
     };
-  }, [resetSigning, address]);
+  }, [resetSigning, abortCurrentAuthOperation]);
 
+  // Cleanup when address changes to prevent stale responses
   useEffect(() => {
-    if (address && connectionState === 'connected') {
-      console.log('[Auth] Validating JWT for connected wallet:', address);
-      validateJwt({
-        jwt: getAuthJwt(),
-        wallet: address,
-        role: activeProfileProxy?.created_by.id ?? null,
-      }).then((isAuth) => {
-        if (!isAuth) {
-          if (!isConnected) {
-            reset();
-          } else {
-            console.log('[Auth] JWT invalid, requesting authentication');
-            removeAuthJwt();
-            invalidateAll();
+    return () => {
+      abortCurrentAuthOperation();
+    };
+  }, [address, abortCurrentAuthOperation]);
+
+  // Debounced authentication effect with cancellation support
+  useEffect(() => {
+    // Clear previous operations when dependencies change
+    abortCurrentAuthOperation();
+    
+    // Don't start validation during transitional states
+    if (connectionState === 'connecting') {
+      return;
+    }
+    
+    if (!address || connectionState !== 'connected') {
+      setShowSignModal(false);
+      return;
+    }
+    
+    // Generate unique operation ID for this validation attempt
+    const operationId = `auth-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    
+    // Debounce validation to prevent race conditions (500ms delay)
+    authTimeoutRef.current = setTimeout(async () => {
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      setAuthLoadingState('validating');
+      
+      try {
+        const { isValid, wasCancelled } = await validateJwt({
+          jwt: getAuthJwt(),
+          wallet: address,
+          role: activeProfileProxy?.created_by.id ?? null,
+          operationId,
+          abortSignal: abortController.signal
+        });
+        
+        // Only process result if operation wasn't cancelled
+        if (!wasCancelled) {
+          if (!isValid) {
+            if (!isConnected) {
+              reset();
+            } else {
+              removeAuthJwt();
+              invalidateAll();
+              setShowSignModal(true);
+            }
+          }
+        }
+      } catch (error) {
+        // Handle validation errors only if not cancelled
+        if (!abortController.signal.aborted) {
+          logErrorSecurely('validateJwt', error);
+          // Show sign modal on error if still connected
+          if (isConnected) {
             setShowSignModal(true);
           }
-        } else {
-          console.log('[Auth] JWT valid, user authenticated');
         }
-      });
-    } else if (connectionState === 'connecting') {
-      console.log('[Auth] Connection in progress, waiting...');
-    } else if (!address && connectionState === 'disconnected') {
-      console.log('[Auth] No address, resetting auth state');
-      setShowSignModal(false);
-    }
-  }, [address, activeProfileProxy, connectionState]);
+      } finally {
+        // Clean up
+        if (!abortController.signal.aborted) {
+          abortControllerRef.current = null;
+          setAuthLoadingState('idle');
+        }
+      }
+    }, 500); // 500ms debounce to handle rapid address changes
+    
+    // Cleanup function for this effect
+    return () => {
+      if (authTimeoutRef.current) {
+        clearTimeout(authTimeoutRef.current);
+        authTimeoutRef.current = null;
+      }
+    };
+  }, [address, activeProfileProxy, connectionState, isConnected, validateJwt, abortCurrentAuthOperation, invalidateAll, reset]);
 
   const getNonce = async ({
     signerAddress,
@@ -253,15 +464,11 @@ export default function Auth({
         userRejected: result.userRejected,
       };
     } catch (error) {
-      // Fallback error handling
-      console.error('Signature error:', error);
+      // Fallback error handling with secure logging
+      logErrorSecurely('getSignature', error);
       setToast({
-        message: "Error requesting authentication, please try again",
+        message: sanitizeErrorForUser(error),
         type: "error",
-      });
-      setToast({
-        message: `Error: ${JSON.stringify(error)}`,
-        type: "info",
       });
       return {
         signature: null,
@@ -330,9 +537,10 @@ export default function Auth({
         role ?? undefined
       );
       return { success: true };
-    } catch {
+    } catch (error) {
+      logErrorSecurely('requestSignIn', error);
       setToast({
-        message: "Error requesting authentication, please try again",
+        message: sanitizeErrorForUser(error),
         type: "error",
       });
       return { success: false };
@@ -352,108 +560,7 @@ export default function Auth({
     return decodedJwt.role;
   };
 
-  const validateJwt = async ({
-    jwt,
-    wallet,
-    role,
-  }: {
-    jwt: string | null;
-    wallet: string;
-    role: string | null;
-  }): Promise<boolean> => {
-    const isValid = doJWTValidation({ jwt, wallet, role });
-
-    if (!isValid) {
-      const refreshToken = getRefreshToken();
-      const walletAddress = getWalletAddress();
-      if (!refreshToken || !walletAddress) {
-        return false;
-      }
-      const redeemResponse = await redeemRefreshTokenWithRetries(
-        walletAddress,
-        refreshToken,
-        role
-      );
-      if (redeemResponse && areEqualAddresses(redeemResponse.address, wallet)) {
-        const walletRole = getWalletRole();
-        const tokenRole = getRole({ jwt });
-        if (
-          (walletRole && tokenRole && tokenRole === walletRole) ||
-          (!walletRole && !tokenRole)
-        ) {
-          setAuthJwt(
-            redeemResponse.address,
-            redeemResponse.token,
-            refreshToken,
-            walletRole ?? undefined
-          );
-          return true;
-        }
-      }
-    }
-
-    return isValid;
-  };
-
-  const doJWTValidation = ({
-    jwt,
-    wallet,
-    role,
-  }: {
-    jwt: string | null;
-    wallet: string;
-    role: string | null;
-  }): boolean => {
-    if (!jwt) return false;
-    const decodedJwt = jwtDecode<{
-      id: string;
-      sub: string;
-      iat: number;
-      exp: number;
-      role: string;
-    }>(jwt);
-    if (role && decodedJwt.role !== role) return false;
-    return (
-      decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
-      decodedJwt.exp > Date.now() / 1000
-    );
-  };
-
-  async function redeemRefreshTokenWithRetries(
-    walletAddress: string,
-    refreshToken: string,
-    role: string | null,
-    retryCount = 3
-  ): Promise<ApiRedeemRefreshTokenResponse | null> {
-    let attempt = 0;
-    let lastError: unknown = null;
-
-    while (attempt < retryCount) {
-      attempt++;
-      try {
-        const redeemResponse = await commonApiPost<
-          ApiRedeemRefreshTokenRequest,
-          ApiRedeemRefreshTokenResponse
-        >({
-          endpoint: "auth/redeem-refresh-token",
-          body: {
-            address: walletAddress,
-            token: refreshToken,
-            role: role ?? undefined,
-          },
-        });
-        return redeemResponse;
-      } catch (err) {
-        lastError = err;
-      }
-    }
-
-    console.error(
-      `Refresh token failed after ${retryCount} attempts`,
-      lastError
-    );
-    return null;
-  }
+  // These functions have been moved above to fix initialization order
 
   const requestAuth = async (): Promise<{ success: boolean }> => {
     if (!address) {
@@ -464,24 +571,40 @@ export default function Auth({
       invalidateAll();
       return { success: false };
     }
-    const isAuth = await validateJwt({
-      jwt: getAuthJwt(),
-      wallet: address,
-      role: activeProfileProxy?.created_by.id ?? null,
-    });
-    if (!isAuth) {
-      removeAuthJwt();
-      await requestSignIn({
-        signerAddress: address,
+    
+    // Set loading state for signing
+    setAuthLoadingState('signing');
+    
+    try {
+      // Create a new abort controller for this auth request
+      const abortController = new AbortController();
+      const operationId = `manual-auth-${Date.now()}`;
+      
+      const { isValid } = await validateJwt({
+        jwt: getAuthJwt(),
+        wallet: address,
         role: activeProfileProxy?.created_by.id ?? null,
+        operationId,
+        abortSignal: abortController.signal
       });
-      invalidateAll();
+      
+      if (!isValid) {
+        removeAuthJwt();
+        await requestSignIn({
+          signerAddress: address,
+          role: activeProfileProxy?.created_by.id ?? null,
+        });
+        invalidateAll();
+      }
+      
+      const isSuccess = !!getAuthJwt();
+      if (isSuccess) {
+        setShowSignModal(false);
+      }
+      return { success: isSuccess };
+    } finally {
+      setAuthLoadingState('idle');
     }
-    const isSuccess = !!getAuthJwt();
-    if (isSuccess) {
-      setShowSignModal(false);
-    }
-    return { success: isSuccess };
   };
 
   const onActiveProfileProxy = async (
@@ -522,6 +645,13 @@ export default function Auth({
   useEffect(() => {
     setShowWaves(getShowWaves());
   }, [connectedProfile, activeProfileProxy, address]);
+  
+  // Computed modal visibility to prevent flickering during rapid state changes
+  const shouldShowSignModal = useMemo(() => {
+    return showSignModal && 
+           authLoadingState !== 'validating' && 
+           connectionState === 'connected';
+  }, [showSignModal, authLoadingState, connectionState]);
 
   return (
     <AuthContext.Provider
@@ -543,8 +673,13 @@ export default function Auth({
       {children}
       <ToastContainer />
       <Modal
-        show={showSignModal}
-        onHide={() => setShowSignModal(false)}
+        show={shouldShowSignModal}
+        onHide={() => {
+          // Only allow modal dismissal when not actively validating
+          if (authLoadingState !== 'validating') {
+            setShowSignModal(false);
+          }
+        }}
         backdrop="static"
         keyboard={false}
         centered

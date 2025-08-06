@@ -126,7 +126,6 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
       await connect({ connector: targetConnector });
       
     } catch (error: any) {
-      console.error('Mobile wallet connection failed:', error);
       setConnectionState(MobileConnectionState.FAILED);
       
       // Re-throw for upstream error handling

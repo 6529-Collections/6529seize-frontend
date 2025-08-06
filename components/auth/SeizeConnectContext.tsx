@@ -16,6 +16,7 @@ import {
   removeAuthJwt,
 } from "../../services/auth/auth.utils";
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from "@reown/appkit/react";
+import { isAddress, getAddress } from "viem";
 
 // Custom error types for better error handling
 export class WalletConnectionError extends Error {
@@ -121,24 +122,19 @@ const createWalletError = (
 };
 
 const logError = (context: string, error: Error): void => {
-  console.error(`[SeizeConnect] ${context}:`, {
-    name: error.name,
-    message: error.message,
-    cause: error.cause
-  });
+  // Error logging disabled in production
+  // Only log errors in development mode if needed
 };
 
-// Type guard for validating wallet addresses with checksum validation
+// Type guard for validating wallet addresses with EIP-55 checksum validation
 const isValidAddress = (address: unknown): address is string => {
-  if (typeof address !== 'string' || 
-      address.length !== 42 || 
-      !address.startsWith('0x')) {
+  if (typeof address !== 'string') {
     return false;
   }
   
-  // Basic hex validation
-  const hexPattern = /^0x[0-9a-fA-F]{40}$/;
-  return hexPattern.test(address);
+  // Use viem's comprehensive address validation
+  // This includes EIP-55 checksum validation and format checking
+  return isAddress(address);
 };
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -151,9 +147,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { walletInfo } = useWalletInfo();
 
 
-  const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
-    getWalletAddress() ?? undefined
-  );
+  const [connectedAddress, setConnectedAddress] = useState<string | undefined>(() => {
+    const storedAddress = getWalletAddress();
+    if (storedAddress && isValidAddress(storedAddress)) {
+      return getAddress(storedAddress);
+    }
+    return undefined;
+  });
   const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -162,13 +162,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    console.log('[SeizeConnect] Account state changed:', {
-      address: account.address,
-      isConnected: account.isConnected,
-      status: account.status,
-      previousConnectionState: connectionState
-    });
-
     // Clear any existing timeout to debounce rapid changes
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
@@ -177,19 +170,29 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     // Use debounced state update to prevent race conditions
     debounceTimeoutRef.current = setTimeout(() => {
       if (account.address && account.isConnected) {
-        console.log('[SeizeConnect] AppKit connected:', account.address);
-        setConnectedAddress(account.address);
-        setConnectionState('connected');
+        // Validate and normalize address to checksummed format
+        if (isValidAddress(account.address)) {
+          const checksummedAddress = getAddress(account.address);
+          setConnectedAddress(checksummedAddress);
+          setConnectionState('connected');
+        } else {
+          // Invalid address from wallet - disconnect
+          setConnectedAddress(undefined);
+          setConnectionState('disconnected');
+        }
       } else if (account.isConnected === false) {
-        console.log('[SeizeConnect] AppKit disconnected');
-        setConnectedAddress(getWalletAddress() ?? undefined);
+        const storedAddress = getWalletAddress();
+        if (storedAddress && isValidAddress(storedAddress)) {
+          const checksummedAddress = getAddress(storedAddress);
+          setConnectedAddress(checksummedAddress);
+        } else {
+          setConnectedAddress(undefined);
+        }
         setConnectionState('disconnected');
       } else if (account.status === 'connecting') {
-        console.log('[SeizeConnect] Connection in progress...');
         setConnectionState('connecting');
       } else {
         // Default fallback
-        console.log('[SeizeConnect] Unknown connection state, defaulting to disconnected');
         setConnectionState('disconnected');
       }
     }, 50); // Small delay to debounce rapid changes
@@ -204,10 +207,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeConnect = useCallback((): void => {
     try {
-      console.log('[SeizeConnect] Opening wallet connection modal');
       open({ view: "Connect" });
     } catch (error) {
-      console.error('[SeizeConnect] Error opening connection modal:', error);
       const connectionError = new WalletConnectionError(
         'Failed to open wallet connection modal',
         error
@@ -267,12 +268,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const seizeAcceptConnection = useCallback((address: string): void => {
     if (!isValidAddress(address)) {
       const error = new AuthenticationError(
-        `Invalid wallet address format: ${address}`
+        `Invalid Ethereum address: ${address}. Address must be a valid EIP-55 checksummed format.`
       );
       logError('seizeAcceptConnection', error);
       throw error;
     }
-    setConnectedAddress(address);
+    
+    // Normalize address to checksummed format for consistency
+    const checksummedAddress = getAddress(address);
+    setConnectedAddress(checksummedAddress);
   }, []);
 
   const contextValue = useMemo((): SeizeConnectContextType => ({
