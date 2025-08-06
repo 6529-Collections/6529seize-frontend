@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
 import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
 
@@ -13,20 +13,6 @@ export const SingleWaveDropInfoContainer: React.FC<
   SingleWaveDropInfoContainerProps
 > = ({ activeTab, children }) => {
   const { spaces } = useLayout();
-
-  // Calculate the height with different offsets based on screen size
-  const dropContainerStyle = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      return {};
-    }
-
-    // Base height calculation from header space
-    return {
-      // On screens below lg, we need to account for the 47px tab height
-      height: `calc(100vh - ${spaces.headerSpace}px - var(--tab-height, 47px))`,
-      // CSS custom property will be changed via the classname based on screen size
-    };
-  }, [spaces.measurementsComplete, spaces.headerSpace]);
 
   return (
     <div
