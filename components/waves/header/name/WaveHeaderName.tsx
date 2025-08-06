@@ -21,7 +21,7 @@ export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
           {wave.name}
         </h1>
       </Link>
-      {showEdit && <div className="tw-mt-[7px] tw-size-5"><WaveHeaderNameEdit wave={wave} /></div>}
+      {showEdit && <div className="tw-mt-[7px]"><WaveHeaderNameEdit wave={wave} /></div>}
     </div>
   );
 }
