@@ -40,72 +40,92 @@ export default function UserPageIdentityStatementsStatement({
   }, [router.isReady]);
 
   return (
-    <li className="hover:tw-bg-iron-800 tw-group -tw-ml-1 tw-inline-flex tw-h-8 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm sm:tw-text-md tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
-      <div className="tw-inline-flex tw-items-center tw-space-x-3">
-        <div className="tw-flex-shrink-0 tw-cursor-pointer tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
-          <SocialStatementIcon statementType={statement.statement_type} />
+    <li className="tw-mb-3">
+      {/* Card/Badge Design */}
+      <div className="tw-bg-iron-800 hover:tw-bg-iron-800 tw-border tw-border-iron-700 desktop-hover:hover:tw-border-iron-600 tw-rounded-lg tw-p-3 tw-transition-all tw-duration-200">
+        {/* Header with Platform Icon + Name */}
+        <div className="tw-flex tw-items-center tw-space-x-2 tw-mb-2">
+          <div className="tw-w-5 tw-h-5 tw-flex-shrink-0">
+            <SocialStatementIcon statementType={statement.statement_type} />
+          </div>
+          <span className="tw-text-xs tw-font-medium tw-text-iron-400 tw-uppercase tracking-wide">
+            {STATEMENT_META[statement.statement_type].title}
+          </span>
         </div>
-        <span>{title}</span>
-      </div>
-      {canOpen && (
-        <>
-          <a
-            href={statement.statement_value}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${
-              isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-            } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-            data-tooltip-id={`open-statement-${statement.statement_type}`}
-          >
-            <OutsideLinkIcon />
-          </a>
-          {!isTouchScreen && (
+
+        {/* Social Link with Actions */}
+        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
+          <div className="tw-text-sm tw-text-iron-200 tw-break-all tw-leading-relaxed tw-flex-1">
+            {statement.statement_value}
+          </div>
+          
+          {/* Action Icons */}
+          <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-shrink-0 tw-self-start">
+            {canOpen && (
+              <a
+                href={statement.statement_value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-rounded-full tw-text-iron-400 hover:tw-text-iron-200 desktop-hover:hover:tw-bg-iron-700 tw-transition-all tw-duration-200"
+                aria-label="Open link"
+                data-tooltip-id={`open-${statement.statement_type}-${statement.id}`}
+              >
+                <OutsideLinkIcon />
+              </a>
+            )}
+
+            <button
+              onClick={handleCopy}
+              className="tw-rounded-full tw-bg-transparent tw-border-0 tw-text-iron-400 hover:tw-text-iron-200 desktop-hover:hover:tw-bg-iron-700 tw-transition-all tw-duration-200"
+              aria-label="Copy link"
+              data-tooltip-id={`copy-${statement.statement_type}-${statement.id}`}
+            >
+              <CopyIcon />
+            </button>
+
+            {canEdit && (
+              <div>
+                <UserPageIdentityDeleteStatementButton
+                  statement={statement}
+                  profile={profile}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Simple Tooltips for Actions */}
+        {!isTouchScreen && (
+          <>
+            {canOpen && (
+              <Tooltip
+                id={`open-${statement.statement_type}-${statement.id}`}
+                place="top"
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                  fontSize: "12px",
+                }}
+              >
+                Open
+              </Tooltip>
+            )}
             <Tooltip
-              id={`open-statement-${statement.statement_type}`}
+              id={`copy-${statement.statement_type}-${statement.id}`}
               place="top"
               style={{
                 backgroundColor: "#1F2937",
                 color: "white",
                 padding: "4px 8px",
+                fontSize: "12px",
               }}
             >
-              Open
+              {title === "Copied!" ? "Copied!" : "Copy"}
             </Tooltip>
-          )}
-        </>
-      )}
-      <>
-        <button
-          aria-label="Copy"
-          className={`${
-            isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-          } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-          onClick={handleCopy}
-          data-tooltip-id={`copy-statement-${statement.statement_type}`}
-        >
-          <CopyIcon />
-        </button>
-        {!isTouchScreen && (
-          <Tooltip
-            id={`copy-statement-${statement.statement_type}`}
-            place="top"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
-          >
-            Copy
-          </Tooltip>
+          </>
         )}
-      </>
-      {canEdit && (
-        <UserPageIdentityDeleteStatementButton
-          statement={statement}
-          profile={profile}
-        />
-      )}
+      </div>
     </li>
   );
 }
