@@ -12,6 +12,12 @@ interface WaveHeaderPinButtonProps {
   readonly waveId: string;
 }
 
+// Constants to reduce string duplication
+const PIN_ACTIONS = {
+  PIN: 'Pin wave',
+  UNPIN: 'Unpin wave',
+} as const;
+
 const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   waveId,
 }) => {
@@ -20,13 +26,16 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
-  // Don't render if user is not authenticated or using proxy
-  if (!connectedProfile?.handle || activeProfileProxy) {
-    return null;
-  }
-  
   const isCurrentlyProcessing = isOperationInProgress(waveId);
   const isPinned = pinnedIds.includes(waveId);
+  
+  // Helper function to hide tooltip
+  const hideTooltip = useCallback(() => setShowMaxLimitTooltip(false), []);
+  
+  // Helper function to show error toast
+  const showErrorToast = useCallback((message: string) => {
+    setToast({ type: "error", message });
+  }, [setToast]);
 
   // Check if we can pin this wave using server data
   const canPinWave = useCallback(() => {
@@ -37,25 +46,48 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     return pinnedIds.length < MAX_PINNED_WAVES;
   }, [isPinned, pinnedIds.length]);
 
+  // Memoize tooltip content to prevent unnecessary re-calculations
+  const tooltipContent = useMemo(() => {
+    if (isPinned) return PIN_ACTIONS.UNPIN;
+    if (canPinWave()) return PIN_ACTIONS.PIN;
+    return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+  }, [isPinned, canPinWave]);
+
+  const buttonStyles = useMemo(() => {
+    if (isPinned) {
+      return "tw-text-iron-200 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-text-iron-100";
+    }
+    return "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700";
+  }, [isPinned]);
+
+  const ariaLabel = useMemo(() => {
+    return isPinned ? PIN_ACTIONS.UNPIN : PIN_ACTIONS.PIN;
+  }, [isPinned]);
+
   // Reset tooltip state when pinned state changes
   useEffect(() => {
-    setShowMaxLimitTooltip(false);
-  }, [isPinned]);
+    hideTooltip();
+  }, [isPinned, hideTooltip]);
 
   // Also reset tooltip state when pinnedIds array changes
   useEffect(() => {
     if (canPinWave()) {
-      setShowMaxLimitTooltip(false);
+      hideTooltip();
     }
-  }, [pinnedIds, canPinWave]);
+  }, [pinnedIds, canPinWave, hideTooltip]);
 
   // Auto-hide tooltip after 3 seconds with proper cleanup
   useEffect(() => {
     if (showMaxLimitTooltip) {
-      const timer = setTimeout(() => setShowMaxLimitTooltip(false), 3000);
+      const timer = setTimeout(hideTooltip, 3000);
       return () => clearTimeout(timer);
     }
-  }, [showMaxLimitTooltip]);
+  }, [showMaxLimitTooltip, hideTooltip]);
+
+  // Don't render if user is not authenticated or using proxy
+  if (!connectedProfile?.handle || activeProfileProxy) {
+    return null;
+  }
 
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -69,14 +101,11 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     try {
       if (isPinned) {
         waves.removePinnedWave(waveId);
-        setShowMaxLimitTooltip(false);
+        hideTooltip();
       } else {
         if (!canPinWave()) {
           setShowMaxLimitTooltip(true);
-          setToast({
-            type: "error",
-            message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
-          });
+          showErrorToast(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
         } else {
           waves.addPinnedWave(waveId);
         }
@@ -85,29 +114,9 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
       console.error('Error updating wave pin status:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
-      setToast({
-        type: "error",
-        message: `Failed to ${isPinned ? 'unpin' : 'pin'} wave: ${errorMessage}`,
-      });
+      const action = isPinned ? 'unpin' : 'pin';
+      showErrorToast(`Failed to ${action} wave: ${errorMessage}`);
     }
-  };
-
-  // Memoize tooltip content to prevent unnecessary re-calculations
-  const tooltipContent = useMemo(() => {
-    if (isPinned) return "Unpin wave";
-    if (canPinWave()) return "Pin wave";
-    return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
-  }, [isPinned, canPinWave]);
-
-  const getButtonStyles = () => {
-    if (isPinned) {
-      return "tw-text-iron-200 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-text-iron-100";
-    }
-    return "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700";
-  };
-
-  const getAriaLabel = () => {
-    return isPinned ? "Unpin wave" : "Pin wave";
   };
 
   return (
@@ -115,8 +124,8 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-lg tw-transition-all tw-duration-200 ${getButtonStyles()} ${isCurrentlyProcessing ? 'tw-opacity-50 tw-cursor-not-allowed' : ''}`}
-        aria-label={getAriaLabel()}
+        className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-lg tw-transition-all tw-duration-200 ${buttonStyles} ${isCurrentlyProcessing ? 'tw-opacity-50 tw-cursor-not-allowed' : ''}`}
+        aria-label={ariaLabel}
         data-tooltip-id={`wave-header-pin-${waveId}`}
       >
         <FontAwesomeIcon

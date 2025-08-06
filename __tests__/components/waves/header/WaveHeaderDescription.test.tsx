@@ -60,33 +60,70 @@ const mockWave: ApiWave = {
   },
 } as any;
 
+// Helper functions to reduce code duplication
+const mockWindowSize = (width: number, height: number = 800) => {
+  Object.defineProperty(window, 'innerHeight', {
+    writable: true,
+    configurable: true,
+    value: height,
+  });
+  Object.defineProperty(window, 'innerWidth', {
+    writable: true,
+    configurable: true,
+    value: width,
+  });
+};
+
+const mockButtonPosition = (overrides: Partial<DOMRect> = {}) => {
+  const defaultRect = {
+    bottom: 100,
+    height: 50,
+    left: 50,
+    right: 150,
+    top: 50,
+    width: 100,
+    x: 50,
+    y: 50,
+    toJSON: jest.fn(),
+  };
+  
+  Element.prototype.getBoundingClientRect = jest.fn(() => ({
+    ...defaultRect,
+    ...overrides,
+  }));
+};
+
+const renderComponentAndClickButton = async (side: WaveHeaderPinnedSide = WaveHeaderPinnedSide.LEFT) => {
+  render(<WaveHeaderDescription wave={mockWave} side={side} />);
+  const button = screen.getByRole('button');
+  await userEvent.click(button);
+  return button;
+};
+
+const expectDropdownVisible = async () => {
+  await waitFor(() => {
+    expect(screen.getByTestId('mock-drop')).toBeInTheDocument();
+  });
+};
+
+const expectDropdownHidden = async () => {
+  await waitFor(() => {
+    expect(screen.queryByTestId('mock-drop')).not.toBeInTheDocument();
+  });
+};
+
+const expectDropdownPositioned = async () => {
+  await waitFor(() => {
+    const dropdown = screen.getByTestId('mock-drop').parentElement;
+    expect(dropdown).toBeInTheDocument();
+    expect(dropdown?.getAttribute('style')).toContain('position');
+  });
+};
+
 describe('WaveHeaderDescription', () => {
   beforeEach(() => {
-    // Mock getBoundingClientRect
-    Element.prototype.getBoundingClientRect = jest.fn(() => ({
-      bottom: 100,
-      height: 50,
-      left: 50,
-      right: 150,
-      top: 50,
-      width: 100,
-      x: 50,
-      y: 50,
-      toJSON: jest.fn(),
-    }));
-
-    // Mock window dimensions
-    Object.defineProperty(window, 'innerHeight', {
-      writable: true,
-      configurable: true,
-      value: 800,
-    });
-
-    Object.defineProperty(window, 'innerWidth', {
-      writable: true,
-      configurable: true,
-      value: 1200,
-    });
+    mockButtonPosition();
+    mockWindowSize(1200, 800);
   });
 
   it('renders pin button', () => {
@@ -98,74 +135,32 @@ describe('WaveHeaderDescription', () => {
   });
 
   it('opens dropdown when button is clicked', async () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('mock-drop')).toBeInTheDocument();
-    });
+    await renderComponentAndClickButton();
+    await expectDropdownVisible();
   });
 
   it('closes dropdown when button is clicked again', async () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    
-    // Open dropdown
-    await userEvent.click(button);
-    await waitFor(() => {
-      expect(screen.getByTestId('mock-drop')).toBeInTheDocument();
-    });
+    const button = await renderComponentAndClickButton();
+    await expectDropdownVisible();
     
     // Close dropdown
     await userEvent.click(button);
-    await waitFor(() => {
-      expect(screen.queryByTestId('mock-drop')).not.toBeInTheDocument();
-    });
+    await expectDropdownHidden();
   });
 
   it('positions dropdown on the right side', async () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.RIGHT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
-    
-    await waitFor(() => {
-      const dropdown = screen.getByTestId('mock-drop').parentElement;
-      expect(dropdown).toBeInTheDocument();
-      // Check that dropdown has positioning (inline styles are applied)
-      expect(dropdown?.getAttribute('style')).toContain('position');
-    });
+    await renderComponentAndClickButton(WaveHeaderPinnedSide.RIGHT);
+    await expectDropdownPositioned();
   });
 
   it('positions dropdown on the left side', async () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
-    
-    await waitFor(() => {
-      const dropdown = screen.getByTestId('mock-drop').parentElement;
-      expect(dropdown).toBeInTheDocument();
-      // Check that dropdown has positioning (inline styles are applied)
-      expect(dropdown?.getAttribute('style')).toContain('position');
-    });
+    await renderComponentAndClickButton(WaveHeaderPinnedSide.LEFT);
+    await expectDropdownPositioned();
   });
 
   it('adjusts layout for mobile screen size', async () => {
-    // Mock mobile width
-    Object.defineProperty(window, 'innerWidth', {
-      writable: true,
-      configurable: true,
-      value: 800,
-    });
-
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
+    mockWindowSize(800);
+    await renderComponentAndClickButton();
     
     await waitFor(() => {
       const dropdown = screen.getByTestId('mock-drop').parentElement;
@@ -175,73 +170,21 @@ describe('WaveHeaderDescription', () => {
   });
 
   it('calculates position when content fits below button', async () => {
-    // Mock button position near top of screen
-    Element.prototype.getBoundingClientRect = jest.fn(() => ({
-      bottom: 100,
-      height: 50,
-      left: 50,
-      right: 150,
-      top: 50,
-      width: 100,
-      x: 50,
-      y: 50,
-      toJSON: jest.fn(),
-    }));
-
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
-    
-    await waitFor(() => {
-      const dropdown = screen.getByTestId('mock-drop').parentElement;
-      expect(dropdown).toBeInTheDocument();
-      // Check that dropdown has positioning (inline styles are applied)
-      expect(dropdown?.getAttribute('style')).toContain('position');
-    });
+    mockButtonPosition({ top: 50, bottom: 100 });
+    await renderComponentAndClickButton();
+    await expectDropdownPositioned();
   });
 
   it('calculates position when content needs to be above button', async () => {
-    // Mock button position near bottom of screen
-    Element.prototype.getBoundingClientRect = jest.fn(() => ({
-      bottom: 750,
-      height: 50,
-      left: 50,
-      right: 150,
-      top: 700,
-      width: 100,
-      x: 50,
-      y: 700,
-      toJSON: jest.fn(),
-    }));
-
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
-    
-    await waitFor(() => {
-      const dropdown = screen.getByTestId('mock-drop').parentElement;
-      expect(dropdown).toBeInTheDocument();
-      // Check that dropdown has positioning (inline styles are applied)
-      expect(dropdown?.getAttribute('style')).toContain('position');
-    });
+    mockButtonPosition({ top: 700, bottom: 750, y: 700 });
+    await renderComponentAndClickButton();
+    await expectDropdownPositioned();
   });
 
   it('handles window resize events', async () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    await renderComponentAndClickButton();
     
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
-    
-    // Simulate window resize
-    Object.defineProperty(window, 'innerWidth', {
-      writable: true,
-      configurable: true,
-      value: 500,
-    });
-    
-    // Trigger resize event
+    mockWindowSize(500);
     window.dispatchEvent(new Event('resize'));
     
     await waitFor(() => {
@@ -251,10 +194,7 @@ describe('WaveHeaderDescription', () => {
   });
 
   it('applies correct styles for desktop dropdown', async () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
+    await renderComponentAndClickButton();
     
     await waitFor(() => {
       const dropdown = screen.getByTestId('mock-drop').parentElement;
@@ -270,13 +210,7 @@ describe('WaveHeaderDescription', () => {
   });
 
   it('passes correct props to Drop component', async () => {
-    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
-    
-    const button = screen.getByRole('button');
-    await userEvent.click(button);
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('mock-drop')).toBeInTheDocument();
-    });
+    await renderComponentAndClickButton();
+    await expectDropdownVisible();
   });
 });
