@@ -152,7 +152,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       >
         <FontAwesomeIcon
           icon={faThumbtack}
-          className={`tw-size-3 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
+          className={`tw-size-2.5 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
         />
       </button>
       <Tooltip
