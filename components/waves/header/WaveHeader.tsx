@@ -131,7 +131,7 @@ export default function WaveHeader({
               }
             </div>
           </div>
-          <div className="tw-flex tw-items-center tw-justify-between tw-mt-1">
+          <div className="tw-flex tw-items-center tw-justify-between tw-mt-2">
             <div className="tw-text-sm tw-flex-1">
               <span className="tw-font-normal tw-text-iron-400/90">
                 Created {created} ·{" "}
