@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderPinned from '../../../../components/waves/header/WaveHeaderPinned';
+import WaveHeaderDescription from '../../../../components/waves/header/WaveHeaderDescription';
 import { WaveHeaderPinnedSide } from '../../../../components/waves/header/WaveHeader';
 import { ApiWave } from '../../../../generated/models/ApiWave';
 
@@ -60,7 +60,7 @@ const mockWave: ApiWave = {
   },
 } as any;
 
-describe('WaveHeaderPinned', () => {
+describe('WaveHeaderDescription', () => {
   beforeEach(() => {
     // Mock getBoundingClientRect
     Element.prototype.getBoundingClientRect = jest.fn(() => ({
@@ -90,7 +90,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('renders pin button', () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('opens dropdown when button is clicked', async () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -109,7 +109,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('closes dropdown when button is clicked again', async () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     
@@ -127,7 +127,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('positions dropdown on the right side', async () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.RIGHT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.RIGHT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -141,7 +141,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('positions dropdown on the left side', async () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -162,7 +162,7 @@ describe('WaveHeaderPinned', () => {
       value: 800,
     });
 
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -188,7 +188,7 @@ describe('WaveHeaderPinned', () => {
       toJSON: jest.fn(),
     }));
 
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -215,7 +215,7 @@ describe('WaveHeaderPinned', () => {
       toJSON: jest.fn(),
     }));
 
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -229,7 +229,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('handles window resize events', async () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -251,7 +251,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('applies correct styles for desktop dropdown', async () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);
@@ -270,7 +270,7 @@ describe('WaveHeaderPinned', () => {
   });
 
   it('passes correct props to Drop component', async () => {
-    render(<WaveHeaderPinned wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
+    render(<WaveHeaderDescription wave={mockWave} side={WaveHeaderPinnedSide.LEFT} />);
     
     const button = screen.getByRole('button');
     await userEvent.click(button);

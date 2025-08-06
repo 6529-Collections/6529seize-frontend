@@ -8,7 +8,7 @@ jest.mock('../../../../components/waves/header/WaveHeaderFollow', () => () => <d
 jest.mock('../../../../components/waves/header/options/WaveHeaderOptions', () => () => <div />);
 jest.mock('../../../../components/waves/header/name/WaveHeaderName', () => () => <div data-testid="name" />);
 jest.mock('../../../../components/waves/header/WaveHeaderFollowers', () => () => <div />);
-jest.mock('../../../../components/waves/header/WaveHeaderPinned', () => () => <div data-testid="pinned" />);
+jest.mock('../../../../components/waves/header/WaveHeaderDescription', () => () => <div data-testid="description" />);
 jest.mock('../../../../components/waves/WavePicture', () => () => <div />);
 jest.mock('../../../../components/waves/specs/WaveNotificationSettings', () => () => <div />);
 

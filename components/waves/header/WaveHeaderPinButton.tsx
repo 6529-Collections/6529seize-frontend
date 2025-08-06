@@ -1,33 +1,32 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
-import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 import { Tooltip } from "react-tooltip";
-import { useAuth } from "../../../../components/auth/Auth";
-import {
-  usePinnedWavesServer,
-  MAX_PINNED_WAVES,
-} from "../../../../hooks/usePinnedWavesServer";
+import { useAuth } from "../../../components/auth/Auth";
+import { usePinnedWavesServer, MAX_PINNED_WAVES } from "../../../hooks/usePinnedWavesServer";
 
-interface BrainLeftSidebarWavePinProps {
+interface WaveHeaderPinButtonProps {
   readonly waveId: string;
-  readonly isPinned: boolean;
 }
 
-const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
+const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   waveId,
-  isPinned,
 }) => {
   const { waves } = useMyStream();
   const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
-  const { setToast } = useAuth();
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
+
+  // Don't render if user is not authenticated or using proxy
+  if (!connectedProfile?.handle || activeProfileProxy) {
+    return null;
+  }
   
-  // Check if this specific wave operation is in progress
   const isCurrentlyProcessing = isOperationInProgress(waveId);
+  const isPinned = pinnedIds.includes(waveId);
 
   // Check if we can pin this wave using server data
   const canPinWave = useCallback(() => {
@@ -58,38 +57,18 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     }
   }, [showMaxLimitTooltip]);
 
-  // Detect touch device on component mount
-  useEffect(() => {
-    const checkTouch = () => {
-      // Check if device supports touch events
-      setIsTouchDevice(
-        "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0 ||
-          // @ts-ignore: matchMedia may not be available in all environments
-          (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
-      );
-    };
-
-    checkTouch();
-    window.addEventListener("resize", checkTouch);
-
-    return () => {
-      window.removeEventListener("resize", checkTouch);
-    };
-  }, []);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
-    // Don't proceed if operation is already in progress
     if (isCurrentlyProcessing) {
       return;
     }
 
     try {
       if (isPinned) {
-        await waves.removePinnedWave(waveId);
+        waves.removePinnedWave(waveId);
         setShowMaxLimitTooltip(false);
       } else {
         if (!canPinWave()) {
@@ -99,13 +78,12 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
             message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
           });
         } else {
-          await waves.addPinnedWave(waveId);
+          waves.addPinnedWave(waveId);
         }
       }
     } catch (error) {
       console.error('Error updating wave pin status:', error);
       
-      // Show user-friendly error message
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
       setToast({
         type: "error",
@@ -114,21 +92,12 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     }
   };
 
-  // Apply visibility logic: always show pinned waves on desktop, hide unpinned until hover
-  const getOpacityClass = () => {
-    if (isTouchDevice) return "tw-opacity-100";
-    if (isPinned) return "tw-opacity-100";
-    return "tw-opacity-0 group-hover:tw-opacity-100";
-  };
-  const opacityClass = getOpacityClass();
-
-  // Ensure tooltip is updated immediately by always checking the current state
-  const getTooltipContent = () => {
-    if (isPinned) return "Unpin";
-    if (canPinWave()) return "Pin";
+  // Memoize tooltip content to prevent unnecessary re-calculations
+  const tooltipContent = useMemo(() => {
+    if (isPinned) return "Unpin wave";
+    if (canPinWave()) return "Pin wave";
     return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
-  };
-  const tooltipContent = getTooltipContent();
+  }, [isPinned, canPinWave]);
 
   const getButtonStyles = () => {
     if (isPinned) {
@@ -146,17 +115,17 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()} ${isCurrentlyProcessing ? 'tw-opacity-50 tw-cursor-not-allowed' : ''}`}
+        className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-lg tw-transition-all tw-duration-200 ${getButtonStyles()} ${isCurrentlyProcessing ? 'tw-opacity-50 tw-cursor-not-allowed' : ''}`}
         aria-label={getAriaLabel()}
-        data-tooltip-id={`wave-pin-${waveId}`}
+        data-tooltip-id={`wave-header-pin-${waveId}`}
       >
         <FontAwesomeIcon
           icon={faThumbtack}
-          className={`tw-size-2.5 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
+          className={`tw-size-3.5 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
         />
       </button>
       <Tooltip
-        id={`wave-pin-${waveId}`}
+        id={`wave-header-pin-${waveId}`}
         place="top"
         style={{
           backgroundColor: "#1F2937",
@@ -170,4 +139,4 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   );
 };
 
-export default BrainLeftSidebarWavePin;
+export default WaveHeaderPinButton;
