@@ -4,12 +4,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette, faEye } from "@fortawesome/free-solid-svg-icons";
 import { CalendarDaysIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
-import { useUserArtSubmissions, useSubmissionDrops } from "../../../hooks/useUserArtSubmissions";
-import { SingleWaveDropVote, SingleWaveDropVoteSize } from "../drop/SingleWaveDropVote";
+import {
+  useUserArtSubmissions,
+  useSubmissionDrops,
+} from "../../../hooks/useUserArtSubmissions";
+import {
+  SingleWaveDropVote,
+  SingleWaveDropVoteSize,
+} from "../drop/SingleWaveDropVote";
 import { SubmissionVotingStats } from "./SubmissionVotingStats";
 import { SubmissionPosition } from "./SubmissionPosition";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;
@@ -21,14 +29,16 @@ interface ArtistActiveSubmissionContentProps {
 export const ArtistActiveSubmissionContent: React.FC<
   ArtistActiveSubmissionContentProps
 > = ({ user, isOpen, onClose, isApp = false }) => {
+  const queryClient = useQueryClient();
   const { submissions, isLoading, error } = useUserArtSubmissions(
     isOpen ? user : undefined
   );
-  const { submissionsWithDrops, isLoading: dropsLoading } = useSubmissionDrops(submissions);
+  const { submissionsWithDrops, isLoading: dropsLoading } =
+    useSubmissionDrops(submissions);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+
   if (!searchParams) {
     return null;
   }
@@ -144,77 +154,92 @@ export const ArtistActiveSubmissionContent: React.FC<
           }
 
           return (
-          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-6">
-            {submissionsWithDrops.map((submission, index) => (
-              <motion.div
-                key={submission.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.1 }}
-                className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60  tw-transition-opacity tw-duration-500 tw-ease-out"
-                onClick={() => handleDropClick(submission.id)}
-              >
-                {/* Image container */}
-                <div className="tw-w-full tw-max-w-full tw-relative">
-                  <div className="tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
-                    <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-                      <MediaDisplay
-                        media_url={submission.imageUrl}
-                        media_mime_type={submission.mediaMimeType}
-                        disableMediaInteraction={true}
-                      />
-                    </div>
+            <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
+              {submissionsWithDrops.map((submission, index) => (
+                <div
+                  key={submission.id}
+                  className="tw-flex tw-flex-col tw-h-full"
+                >
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650  tw-transition-opacity tw-duration-500 tw-ease-out tw-mb-3"
+                    onClick={() => handleDropClick(submission.id)}
+                  >
+                    {/* Image container */}
+                    <div className="tw-w-full tw-max-w-full tw-relative">
+                      <div className="tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
+                        <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+                          <MediaDisplay
+                            media_url={submission.imageUrl}
+                            media_mime_type={submission.mediaMimeType}
+                            disableMediaInteraction={true}
+                          />
+                        </div>
 
-                    {/* View indicator */}
-                    <div className="tw-absolute tw-top-3 tw-right-3 tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300">
-                      <div className="tw-w-8 tw-h-8 tw-bg-black/50 tw-backdrop-blur-sm tw-rounded-full tw-flex tw-items-center tw-justify-center">
-                        <FontAwesomeIcon
-                          icon={faEye}
-                          className="tw-w-3.5 tw-h-3.5 tw-text-white"
-                        />
+                        {/* View indicator */}
+                        <div className="tw-absolute tw-top-3 tw-right-3 tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300">
+                          <div className="tw-w-8 tw-h-8 tw-bg-black/50 tw-backdrop-blur-sm tw-rounded-full tw-flex tw-items-center tw-justify-center">
+                            <FontAwesomeIcon
+                              icon={faEye}
+                              className="tw-w-3.5 tw-h-3.5 tw-text-white"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Content */}
-                <div className="tw-p-4 tw-flex tw-flex-col tw-flex-1 tw-justify-between">
-                  {submission.title && (
-                    <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-3">
-                      {submission.title}
-                    </p>
-                  )}
-                  
-                  {/* Position and Stats */}
-                  {submission.drop && (
-                    <div className="tw-mb-3 tw-space-y-2">
-                      <SubmissionPosition drop={submission.drop} />
-                      <SubmissionVotingStats drop={submission.drop} />
+                    {/* Content */}
+                    <div className="tw-p-4 tw-flex tw-flex-col tw-flex-1 tw-justify-between">
+                      {/* Position */}
+                      {submission.drop && (
+                        <div className="tw-mb-3">
+                          <SubmissionPosition drop={submission.drop} />
+                        </div>
+                      )}
+
+                      <div className="tw-flex-1">
+                        {submission.title && (
+                          <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-2">
+                            {submission.title}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Stats */}
+                      {submission.drop && (
+                        <div className="tw-mb-3">
+                          <SubmissionVotingStats drop={submission.drop} />
+                        </div>
+                      )}
+
+                      <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500 tw-mt-auto">
+                        <CalendarDaysIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
+                        <span>{formatDate(submission.createdAt)}</span>
+                      </div>
                     </div>
-                  )}
-                  
-                  {/* Voting Interface */}
+                  </motion.div>
+
+                  {/* Voting Interface - Outside the clickable card */}
                   {submission.drop && (
-                    <div className="tw-mb-3" onClick={(e) => e.stopPropagation()}>
-                      <SingleWaveDropVote 
-                        drop={submission.drop} 
-                        size={SingleWaveDropVoteSize.COMPACT}
-                        onVoteSuccess={() => {
-                          // Refresh the drop data after successful vote
-                          window.location.reload();
-                        }}
-                      />
-                    </div>
+                    <SingleWaveDropVote
+                      drop={submission.drop}
+                      size={SingleWaveDropVoteSize.MINI}
+                      onVoteSuccess={() => {
+                        // Invalidate queries to refresh drop data after successful vote
+                        queryClient.invalidateQueries({
+                          queryKey: [QueryKey.DROP],
+                        });
+                        queryClient.invalidateQueries({
+                          queryKey: [QueryKey.PROFILE_DROPS],
+                        });
+                      }}
+                    />
                   )}
-                  
-                  <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500 tw-mt-auto">
-                    <CalendarDaysIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
-                    <span>{formatDate(submission.createdAt)}</span>
-                  </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
           );
         })()}
       </div>

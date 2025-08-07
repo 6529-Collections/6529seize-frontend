@@ -15,6 +15,7 @@ import { commonApiPost } from "../../../services/api/common-api";
 import { DropRateChangeRequest } from "../../../entities/IDrop";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 type ThemeColors = {
   primary: string;
@@ -48,12 +49,13 @@ interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
   readonly onVoteSuccess?: () => void;
+  readonly size?: SingleWaveDropVoteSize;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<
   SingleWaveDropVoteSubmitHandles,
   Props
->(({ drop, newRating, onVoteSuccess }: Props, ref) => {
+>(({ drop, newRating, onVoteSuccess, size = SingleWaveDropVoteSize.NORMAL }: Props, ref) => {
   const position = drop.rank;
   const { requestAuth, setToast } = useContext(AuthContext);
   const [animationTimeline, setAnimationTimeline] = useState<any>(null);
@@ -273,7 +275,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     <div className={`vote-button-container-${randomID}`}>
       <button
         id={`vote-button-${randomID}`}
-        className={`${styles.voteButton} ${
+        className={`${size === SingleWaveDropVoteSize.MINI ? styles.voteButtonMini : styles.voteButton} ${
           isProcessing ? styles.processing : ""
         }`}
         onClick={(e) => {

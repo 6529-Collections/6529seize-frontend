@@ -56,7 +56,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
         {/* Backdrop - clicking it closes the modal */}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div 
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-z-[100]"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-z-[100] tw-backdrop-blur-[1px]"
           onClick={onClose}
         ></div>
 
@@ -71,7 +71,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
               animate={modalVariants.animate}
               exit={modalVariants.exit}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="tw-relative tw-w-full tw-max-w-4xl tw-max-h-[90vh] sm:tw-max-h-[85vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25"
+              className="tw-relative tw-w-full tw-max-w-5xl tw-max-h-[90vh] sm:tw-max-h-[85vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25"
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => {
                 if (e.key === 'Escape') {

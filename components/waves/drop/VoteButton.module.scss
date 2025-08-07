@@ -119,6 +119,29 @@ $btn-dimension: 72px;
   }
 }
 
+.voteButtonMini {
+  @extend .voteButton;
+  width: 48px;
+  height: 32px;
+  font-size: 12px !important;
+  border-radius: 6px;
+  
+  .buttonContent {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border-width: 1.5px;
+  }
+}
+
 .buttonContent {
   position: relative;
   width: 100%;

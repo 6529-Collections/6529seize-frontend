@@ -90,19 +90,11 @@ export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn 
         drop_type: ApiDropType.Participatory,
       };
       
-      console.log(`[DEBUG] Fetching art submissions for user:`, {
-        userHandle: user.handle,
-        userId: user.id,
-        authorParam: user.handle ?? user.id,
-        params
-      });
       
       const result = await commonApiFetch<ApiDrop[]>({
         endpoint: '/drops',
         params,
       });
-      
-      console.log(`[DEBUG] API returned ${result?.length || 0} drops for ${user.handle ?? user.id}:`, result);
       
       return result;
     },
@@ -117,7 +109,7 @@ export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn 
     // Get the active main stage submission IDs from the user profile
     const activeSubmissionIds = user.active_main_stage_submission_ids || [];
     
-    return drops
+    const realSubmissions = drops
       .filter(drop => drop.drop_type === ApiDropType.Participatory)
       .filter(drop => activeSubmissionIds.includes(drop.id)) // Only show ongoing main stage submissions
       .map(drop => {
@@ -134,6 +126,8 @@ export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn 
         };
       })
       .filter(submission => submission.imageUrl);
+    
+    return realSubmissions;
   }, [drops, user]);
 
   return {
