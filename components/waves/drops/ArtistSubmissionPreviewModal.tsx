@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -16,13 +16,27 @@ export const ArtistSubmissionPreviewModal: React.FC<
   ArtistSubmissionPreviewModalProps
 > = ({ isOpen, onClose, user }) => {
   const { isApp } = useDeviceInfo();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Cleanup body overflow on unmount
+  // Cleanup body overflow and manage focus
   useEffect(() => {
     if (isOpen && !isApp) {
+      // Store current focus
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      
+      // Set body overflow
       document.body.style.overflow = 'hidden';
+      
+      // Focus the modal after animation
+      setTimeout(() => {
+        modalRef.current?.focus();
+      }, 100);
+      
       return () => {
         document.body.style.overflow = 'unset';
+        // Restore previous focus
+        previousFocusRef.current?.focus();
       };
     }
   }, [isOpen, isApp]);
@@ -67,6 +81,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
         >
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
             <motion.div
+              ref={modalRef}
               initial={modalVariants.initial}
               animate={modalVariants.animate}
               exit={modalVariants.exit}
@@ -79,6 +94,9 @@ export const ArtistSubmissionPreviewModal: React.FC<
                 }
               }}
               tabIndex={0}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Artist submissions gallery"
             >
               <ArtistActiveSubmissionContent
                 user={user}

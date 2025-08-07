@@ -103,7 +103,7 @@ export const SingleWaveDropVoteInput: React.FC<
       if (crossingMemeticValue !== null) {
         setIsPaused(true);
         if (pressTimer.current) clearInterval(pressTimer.current);
-        setTimeout(() => {
+        const pauseTimeout = setTimeout(() => {
           setIsPaused(false);
           if (isPressed.current) {
             pressTimer.current = setInterval(() => {
@@ -111,6 +111,8 @@ export const SingleWaveDropVoteInput: React.FC<
             }, 100);
           }
         }, 1000);
+        // Store timeout for cleanup
+        pressTimer.current = pauseTimeout as any;
         return crossingMemeticValue;
       }
 
