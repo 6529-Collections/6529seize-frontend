@@ -80,22 +80,20 @@ export const ArtistSubmissionPreviewModal: React.FC<
           onClick={onClose}
         >
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
-            <motion.div
+            <motion.dialog
               ref={modalRef}
               initial={modalVariants.initial}
               animate={modalVariants.animate}
               exit={modalVariants.exit}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="tw-relative tw-w-full tw-max-w-5xl tw-max-h-[90vh] sm:tw-max-h-[85vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25"
+              className="tw-relative tw-w-full tw-max-w-5xl tw-max-h-[90vh] sm:tw-max-h-[85vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25 tw-m-0 tw-p-0"
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => {
                 if (e.key === 'Escape') {
                   onClose();
                 }
               }}
-              tabIndex={0}
-              role="dialog"
-              aria-modal="true"
+              open
               aria-label="Artist submissions gallery"
             >
               <ArtistActiveSubmissionContent
@@ -104,7 +102,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
                 onClose={onClose}
                 isApp={false}
               />
-            </motion.div>
+            </motion.dialog>
           </div>
         </div>
       </div>
