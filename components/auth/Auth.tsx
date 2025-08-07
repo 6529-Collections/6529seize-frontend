@@ -37,6 +37,12 @@ import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemR
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
+import { 
+  TokenRefreshError,
+  TokenRefreshCancelledError,
+  TokenRefreshNetworkError,
+  TokenRefreshServerError 
+} from "../../errors/authentication";
 
 // Custom error classes for authentication failures
 class AuthenticationNonceError extends Error {
@@ -215,19 +221,41 @@ export default function Auth({
     );
   };
 
-  // Helper function for redeeming refresh token with retries
+  // Helper function for redeeming refresh token with retries - FAIL-FAST VERSION
   async function redeemRefreshTokenWithRetries(
     walletAddress: string,
     refreshToken: string,
     role: string | null,
     retryCount = 3,
     abortSignal?: AbortSignal
-  ): Promise<ApiRedeemRefreshTokenResponse | null> {
+  ): Promise<ApiRedeemRefreshTokenResponse> {
+    // Input validation - fail fast on invalid parameters
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      throw new TokenRefreshError('Invalid walletAddress: must be non-empty string');
+    }
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      throw new TokenRefreshError('Invalid refreshToken: must be non-empty string');
+    }
+    if (retryCount < 1 || retryCount > 10) {
+      throw new TokenRefreshError('Invalid retryCount: must be between 1 and 10');
+    }
+
+    // Check for cancellation upfront
+    if (abortSignal?.aborted) {
+      throw new TokenRefreshCancelledError('Operation cancelled before starting');
+    }
+
     let attempt = 0;
     let lastError: unknown = null;
 
-    while (attempt < retryCount && !abortSignal?.aborted) {
+    while (attempt < retryCount) {
       attempt++;
+      
+      // Check for cancellation before each attempt
+      if (abortSignal?.aborted) {
+        throw new TokenRefreshCancelledError(`Operation cancelled on attempt ${attempt}`);
+      }
+      
       try {
         const redeemResponse = await commonApiPost<
           ApiRedeemRefreshTokenRequest,
@@ -242,21 +270,86 @@ export default function Auth({
           // TODO: Pass abortSignal when API layer supports it
           // abortSignal
         });
+        
+        // Response validation - fail fast on invalid response
+        if (!redeemResponse) {
+          throw new TokenRefreshServerError(
+            'Server returned null/undefined response',
+            undefined,
+            redeemResponse
+          );
+        }
+        
+        if (!redeemResponse.token || typeof redeemResponse.token !== 'string') {
+          throw new TokenRefreshServerError(
+            'Server returned invalid token',
+            undefined,
+            redeemResponse
+          );
+        }
+        
+        if (!redeemResponse.address || typeof redeemResponse.address !== 'string') {
+          throw new TokenRefreshServerError(
+            'Server returned invalid address',
+            undefined,
+            redeemResponse
+          );
+        }
+        
+        // Success - return valid response
         return redeemResponse;
       } catch (err: any) {
+        // Handle cancellation errors immediately
         if (err.name === 'AbortError' || abortSignal?.aborted) {
-          return null; // Request was cancelled
+          throw new TokenRefreshCancelledError(
+            `Operation cancelled during attempt ${attempt}`
+          );
         }
-        lastError = err;
+        
+        // If this is already one of our error types, just track it
+        if (err instanceof TokenRefreshError) {
+          lastError = err;
+        } else {
+          // Classify the error based on its characteristics
+          if (err?.code === 'NETWORK_ERROR' || 
+              err?.code === 'ENOTFOUND' || 
+              err?.code === 'ECONNREFUSED' ||
+              err?.code === 'ETIMEDOUT') {
+            lastError = new TokenRefreshNetworkError(
+              `Network error on attempt ${attempt}: ${err.message}`,
+              err
+            );
+          } else if (err?.status >= 400 && err?.status < 600) {
+            lastError = new TokenRefreshServerError(
+              `Server error ${err.status} on attempt ${attempt}: ${err.message}`,
+              err.status,
+              err.response,
+              err
+            );
+          } else {
+            lastError = new TokenRefreshError(
+              `Unknown error on attempt ${attempt}: ${err.message}`,
+              err
+            );
+          }
+        }
+        
+        // If this was the last attempt, throw the error
+        if (attempt >= retryCount) {
+          throw lastError;
+        }
+        
+        // Otherwise continue to next attempt
       }
     }
 
-    // Refresh token failed after retries
-    return null;
+    // This should never be reached due to the throw in the catch block,
+    // but TypeScript requires it for exhaustiveness
+    throw lastError || new TokenRefreshError('All retry attempts failed');
   }
 
-  // Main JWT validation function with cancellation support
-  const validateJwt = useCallback(async ({
+  // Main JWT validation function with cancellation support - FAIL-FAST VERSION
+  const validateJwt = async ({
     jwt,
     wallet,
     role,
@@ -269,6 +362,14 @@ export default function Auth({
     operationId: string;
     abortSignal: AbortSignal;
   }): Promise<{ isValid: boolean; wasCancelled: boolean }> => {
+    // Input validation - fail fast on invalid parameters
+    if (!wallet || typeof wallet !== 'string') {
+      throw new Error('Invalid wallet address: must be non-empty string');
+    }
+    if (!operationId || typeof operationId !== 'string') {
+      throw new Error('Invalid operationId: must be non-empty string');
+    }
+    
     // Check if already aborted
     if (abortSignal.aborted) {
       return { isValid: false, wasCancelled: true };
@@ -280,9 +381,20 @@ export default function Auth({
       const refreshToken = getRefreshToken();
       const walletAddress = getWalletAddress();
       
+      // If there's no refresh token, this is a first-time sign-in scenario
+      // Return false to trigger the sign modal, don't throw an error
+      if (!refreshToken) {
+        return { isValid: false, wasCancelled: false };
+      }
+      
+      // If we have a refresh token but no wallet address, that's an error
+      if (!walletAddress) {
+        throw new Error('No wallet address available for JWT renewal');
+      }
+      
       // Check for cancellation before proceeding
-      if (!refreshToken || !walletAddress || abortSignal.aborted) {
-        return { isValid: false, wasCancelled: abortSignal.aborted };
+      if (abortSignal.aborted) {
+        return { isValid: false, wasCancelled: true };
       }
       
       try {
@@ -294,40 +406,66 @@ export default function Auth({
           abortSignal
         );
         
-        // Check if operation was cancelled before processing response
+        // Check if operation was cancelled during token refresh
         if (abortSignal.aborted) {
           return { isValid: false, wasCancelled: true };
         }
         
-        // Operation ID check removed - rely on AbortSignal for cancellation
-        
-        if (redeemResponse && areEqualAddresses(redeemResponse.address, wallet)) {
-          const walletRole = getWalletRole();
-          const tokenRole = getRole({ jwt });
-          if (
-            (walletRole && tokenRole && tokenRole === walletRole) ||
-            (!walletRole && !tokenRole)
-          ) {
-            setAuthJwt(
-              redeemResponse.address,
-              redeemResponse.token,
-              refreshToken,
-              walletRole ?? undefined
-            );
-            return { isValid: true, wasCancelled: false };
-          }
+        // Validate response data - fail fast on invalid response
+        if (!areEqualAddresses(redeemResponse.address, wallet)) {
+          throw new Error(
+            `Address mismatch in token response: expected ${wallet}, got ${redeemResponse.address}`
+          );
         }
+        
+        const walletRole = getWalletRole();
+        // CRITICAL FIX: Get role from the NEW token, not the old one
+        const freshTokenRole = getRole({ jwt: redeemResponse.token });
+
+        // FIXED: Role validation using the fresh token from server
+        if (walletRole && freshTokenRole && freshTokenRole !== walletRole) {
+          throw new Error(
+            `Role mismatch in fresh token: wallet role ${walletRole} does not match fresh token role ${freshTokenRole}`
+          );
+        }
+        if (!walletRole && freshTokenRole) {
+          throw new Error(
+            `Unexpected role ${freshTokenRole} in fresh token when wallet has no role`
+          );
+        }
+        if (walletRole && !freshTokenRole) {
+          throw new Error(
+            `Missing role in fresh token when wallet has role ${walletRole}`
+          );
+        }
+
+        // ADDITIONAL VALIDATION: Ensure the requested role matches what we got
+        if (role && freshTokenRole !== role) {
+          throw new Error(
+            `Server returned unexpected role: requested ${role}, received ${freshTokenRole}`
+          );
+        }
+        
+        // Success - store the new JWT
+        setAuthJwt(
+          redeemResponse.address,
+          redeemResponse.token,
+          refreshToken,
+          walletRole ?? undefined
+        );
+        return { isValid: true, wasCancelled: false };
       } catch (error: any) {
-        if (error.name === 'AbortError') {
+        // Handle cancellation errors
+        if (error instanceof TokenRefreshCancelledError || error.name === 'AbortError') {
           return { isValid: false, wasCancelled: true };
         }
-        // Re-throw other errors
+        // Re-throw all other errors (including TokenRefreshError subclasses)
         throw error;
       }
     }
 
     return { isValid, wasCancelled: false };
-  }, []);
+  };
 
   // Comprehensive cleanup effect for unmount and address changes
   useEffect(() => {
@@ -416,7 +554,7 @@ export default function Auth({
         authTimeoutRef.current = null;
       }
     };
-  }, [address, activeProfileProxy, connectionState, isConnected, validateJwt, abortCurrentAuthOperation, invalidateAll, reset]);
+  }, [address, activeProfileProxy, connectionState, isConnected, abortCurrentAuthOperation, invalidateAll, reset]);
 
   const getNonce = async ({
     signerAddress,

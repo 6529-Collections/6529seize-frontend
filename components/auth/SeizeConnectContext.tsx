@@ -121,9 +121,64 @@ const createWalletError = (
   );
 };
 
+// Production-safe error logging with data sanitization
 const logError = (context: string, error: Error): void => {
-  // Error logging disabled in production
-  // Only log errors in development mode if needed
+  const timestamp = new Date().toISOString();
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  // Base error information that's safe to log in production
+  const errorInfo = {
+    timestamp,
+    context,
+    name: error.name,
+    message: error.message,
+    ...(error instanceof WalletConnectionError && { code: error.code }),
+    ...(error instanceof WalletDisconnectionError && { code: error.code })
+  };
+  
+  if (isProduction) {
+    // In production: sanitize sensitive data, log essential info
+    const sanitizedMessage = error.message
+      .replace(/0x[a-fA-F0-9]{40}/g, '0x***REDACTED***') // Hide wallet addresses
+      .replace(/\b[A-Za-z0-9]{32,}\b/g, '***TOKEN***'); // Hide potential tokens
+    
+    console.error(`[SEIZE_CONNECT_ERROR] ${context}:`, {
+      ...errorInfo,
+      message: sanitizedMessage,
+      userAgent: navigator.userAgent
+    });
+  } else {
+    // In development: include full details including stack trace
+    console.error(`[SEIZE_CONNECT_ERROR] ${context}:`, {
+      ...errorInfo,
+      stack: error.stack,
+      cause: error.cause,
+      userAgent: navigator.userAgent
+    });
+  }
+};
+
+// Security event logging for monitoring suspicious activity
+const logSecurityEvent = (eventType: string, details: Record<string, unknown>): void => {
+  const timestamp = new Date().toISOString();
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  // Sanitize any addresses in details for production logging
+  const sanitizedDetails = isProduction ? {
+    ...details,
+    address: details.address ? '0x***REDACTED***' : undefined,
+    // Keep other non-sensitive details as-is
+    valid: details.valid,
+    walletName: details.walletName,
+    source: details.source
+  } : details;
+  
+  console.warn(`[SEIZE_SECURITY_EVENT] ${eventType}:`, {
+    timestamp,
+    eventType,
+    ...sanitizedDetails,
+    userAgent: navigator.userAgent
+  });
 };
 
 // Type guard for validating wallet addresses with EIP-55 checksum validation
@@ -207,7 +262,19 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeConnect = useCallback((): void => {
     try {
+      // Log connection attempt for security monitoring
+      logSecurityEvent('wallet_connection_attempt', {
+        source: 'seizeConnect',
+        timestamp: new Date().toISOString()
+      });
+      
       open({ view: "Connect" });
+      
+      // Log successful modal opening
+      logSecurityEvent('wallet_modal_opened', {
+        source: 'seizeConnect',
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       const connectionError = new WalletConnectionError(
         'Failed to open wallet connection modal',
@@ -267,12 +334,28 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeAcceptConnection = useCallback((address: string): void => {
     if (!isValidAddress(address)) {
+      // Log invalid address attempt for security monitoring
+      logSecurityEvent('invalid_address_attempt', {
+        address,
+        source: 'seizeAcceptConnection',
+        valid: false,
+        timestamp: new Date().toISOString()
+      });
+      
       const error = new AuthenticationError(
         `Invalid Ethereum address: ${address}. Address must be a valid EIP-55 checksummed format.`
       );
       logError('seizeAcceptConnection', error);
       throw error;
     }
+    
+    // Log successful address validation for security monitoring
+    logSecurityEvent('address_validation_success', {
+      address,
+      source: 'seizeAcceptConnection',
+      valid: true,
+      timestamp: new Date().toISOString()
+    });
     
     // Normalize address to checksummed format for consistency
     const checksummedAddress = getAddress(address);

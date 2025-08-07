@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAccount, useConnect } from "wagmi";
+import { useAppKitAccount, useAppKit } from "@reown/appkit/react";
 
 /**
  * Mobile wallet connection states
@@ -45,8 +45,8 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
   const [connectionTimeout, setConnectionTimeout] = useState(0);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
   
-  const { isConnected } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
+  const { isConnected } = useAppKitAccount();
+  const { open } = useAppKit();
 
   // Detect mobile environment and wallet capabilities
   const mobileInfo: MobileWalletInfo = getMobileWalletInfo();
@@ -87,26 +87,6 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
     try {
       setConnectionState(MobileConnectionState.CONNECTING);
 
-      // Find the appropriate connector
-      let targetConnector = connectors.find(c => c.id === connectorId);
-      
-      // Default to WalletConnect for mobile if no specific connector
-      if (!targetConnector && mobileInfo.isMobile) {
-        targetConnector = connectors.find(c => 
-          c.id === 'walletConnect' || 
-          c.name.toLowerCase().includes('walletconnect')
-        );
-      }
-
-      if (!targetConnector) {
-        // Fallback to first available connector
-        targetConnector = connectors[0];
-      }
-
-      if (!targetConnector) {
-        throw new Error('No wallet connector available');
-      }
-
       // Handle deep linking for mobile wallets
       if (mobileInfo.isMobile && mobileInfo.supportsDeepLinking) {
         setConnectionState(MobileConnectionState.DEEP_LINKING);
@@ -122,8 +102,11 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         document.addEventListener('visibilitychange', handleVisibilityChange);
       }
 
-      // Attempt connection
-      await connect({ connector: targetConnector });
+      // Use AppKit modal to handle connection with proper namespace
+      await open({ 
+        view: 'Connect', 
+        namespace: connectorId === 'solana' ? 'solana' : 'eip155' 
+      });
       
     } catch (error: any) {
       setConnectionState(MobileConnectionState.FAILED);
@@ -131,7 +114,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
       // Re-throw for upstream error handling
       throw error;
     }
-  }, [connect, connectors, mobileInfo]);
+  }, [open, mobileInfo]);
 
   // Handle return from deep link
   const handleDeepLinkReturn = useCallback(() => {
@@ -195,7 +178,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
     mobileInfo,
     connectionState,
     connectionTimeout,
-    isConnecting: isPending || connectionState === MobileConnectionState.CONNECTING,
+    isConnecting: connectionState === MobileConnectionState.CONNECTING,
     handleMobileConnection,
     handleDeepLinkReturn,
     resetConnection,
