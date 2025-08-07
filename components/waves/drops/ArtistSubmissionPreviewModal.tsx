@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -16,13 +16,27 @@ export const ArtistSubmissionPreviewModal: React.FC<
   ArtistSubmissionPreviewModalProps
 > = ({ isOpen, onClose, user }) => {
   const { isApp } = useDeviceInfo();
+  const modalRef = useRef<HTMLDialogElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Cleanup body overflow on unmount
+  // Cleanup body overflow and manage focus
   useEffect(() => {
     if (isOpen && !isApp) {
+      // Store current focus
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      
+      // Set body overflow
       document.body.style.overflow = 'hidden';
+      
+      // Focus the modal after animation
+      setTimeout(() => {
+        modalRef.current?.focus();
+      }, 100);
+      
       return () => {
         document.body.style.overflow = 'unset';
+        // Restore previous focus
+        previousFocusRef.current?.focus();
       };
     }
   }, [isOpen, isApp]);
@@ -56,7 +70,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
         {/* Backdrop - clicking it closes the modal */}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div 
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-z-[100]"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-z-[100] tw-backdrop-blur-[1px]"
           onClick={onClose}
         ></div>
 
@@ -66,19 +80,21 @@ export const ArtistSubmissionPreviewModal: React.FC<
           onClick={onClose}
         >
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
-            <motion.div
+            <motion.dialog
+              ref={modalRef}
               initial={modalVariants.initial}
               animate={modalVariants.animate}
               exit={modalVariants.exit}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="tw-relative tw-w-full tw-max-w-4xl tw-max-h-[90vh] sm:tw-max-h-[85vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25"
+              className="tw-relative tw-w-full tw-max-w-5xl tw-max-h-[90vh] sm:tw-max-h-[85vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25 tw-m-0 tw-p-0"
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => {
                 if (e.key === 'Escape') {
                   onClose();
                 }
               }}
-              tabIndex={0}
+              open
+              aria-label="Artist submissions gallery"
             >
               <ArtistActiveSubmissionContent
                 user={user}
@@ -86,7 +102,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
                 onClose={onClose}
                 isApp={false}
               />
-            </motion.div>
+            </motion.dialog>
           </div>
         </div>
       </div>

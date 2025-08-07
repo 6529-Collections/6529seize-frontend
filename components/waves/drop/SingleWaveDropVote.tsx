@@ -4,6 +4,7 @@ import { ApiDrop } from "../../../generated/models/ObjectSerializer";
 export enum SingleWaveDropVoteSize {
   NORMAL = "NORMAL",
   COMPACT = "COMPACT",
+  MINI = "MINI",
 }
 
 interface SingleWaveDropVoteProps {
