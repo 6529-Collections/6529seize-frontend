@@ -14,10 +14,11 @@ import {
   SingleWaveDropVote,
   SingleWaveDropVoteSize,
 } from "../drop/SingleWaveDropVote";
-import { SubmissionVotingStats } from "./SubmissionVotingStats";
 import { SubmissionPosition } from "./SubmissionPosition";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { formatNumberWithCommas } from "../../../helpers/Helpers";
 
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;
@@ -192,7 +193,6 @@ export const ArtistActiveSubmissionContent: React.FC<
 
                     {/* Content */}
                     <div className="tw-p-4 tw-flex tw-flex-col tw-flex-1 tw-justify-between">
-                      {/* Position */}
                       {submission.drop && (
                         <div className="tw-mb-3">
                           <SubmissionPosition drop={submission.drop} />
@@ -210,7 +210,27 @@ export const ArtistActiveSubmissionContent: React.FC<
                       {/* Stats */}
                       {submission.drop && (
                         <div className="tw-mb-3">
-                          <SubmissionVotingStats drop={submission.drop} />
+                          <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-flex-wrap">
+                            <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm">
+                              <span
+                                className={`tw-font-medium ${
+                                  submission.drop.rating >= 0
+                                    ? "tw-text-iron-300"
+                                    : "tw-text-iron-400"
+                                }`}
+                              >
+                                {formatNumberWithCommas(submission.drop.rating)}
+                              </span>
+                              <DropVoteProgressing
+                                current={submission.drop.rating}
+                                projected={submission.drop.rating_prediction}
+                                subtle={true}
+                              />
+                            </div>
+                            <div className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
+                              <span className="tw-font-medium">TDH total</span>
+                            </div>
+                          </div>
                         </div>
                       )}
 
