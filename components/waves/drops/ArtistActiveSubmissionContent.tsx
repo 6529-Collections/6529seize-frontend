@@ -5,7 +5,10 @@ import { faPalette, faEye } from "@fortawesome/free-solid-svg-icons";
 import { CalendarDaysIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
-import { useUserArtSubmissions } from "../../../hooks/useUserArtSubmissions";
+import { useUserArtSubmissions, useSubmissionDrops } from "../../../hooks/useUserArtSubmissions";
+import { SingleWaveDropVote, SingleWaveDropVoteSize } from "../drop/SingleWaveDropVote";
+import { SubmissionVotingStats } from "./SubmissionVotingStats";
+import { SubmissionPosition } from "./SubmissionPosition";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 
 interface ArtistActiveSubmissionContentProps {
@@ -21,6 +24,7 @@ export const ArtistActiveSubmissionContent: React.FC<
   const { submissions, isLoading, error } = useUserArtSubmissions(
     isOpen ? user : undefined
   );
+  const { submissionsWithDrops, isLoading: dropsLoading } = useSubmissionDrops(submissions);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -115,7 +119,7 @@ export const ArtistActiveSubmissionContent: React.FC<
         }`}
       >
         {(() => {
-          if (isLoading) {
+          if (isLoading || dropsLoading) {
             return (
               <div className="tw-flex tw-items-center tw-justify-center tw-py-12">
                 <div className="tw-text-iron-400">Loading submissions...</div>
@@ -140,8 +144,8 @@ export const ArtistActiveSubmissionContent: React.FC<
           }
 
           return (
-          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 tw-gap-6">
-            {submissions.map((submission, index) => (
+          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-6">
+            {submissionsWithDrops.map((submission, index) => (
               <motion.div
                 key={submission.id}
                 initial={{ opacity: 0 }}
@@ -176,10 +180,33 @@ export const ArtistActiveSubmissionContent: React.FC<
                 {/* Content */}
                 <div className="tw-p-4 tw-flex tw-flex-col tw-flex-1 tw-justify-between">
                   {submission.title && (
-                    <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-2">
+                    <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-3">
                       {submission.title}
                     </p>
                   )}
+                  
+                  {/* Position and Stats */}
+                  {submission.drop && (
+                    <div className="tw-mb-3 tw-space-y-2">
+                      <SubmissionPosition drop={submission.drop} />
+                      <SubmissionVotingStats drop={submission.drop} />
+                    </div>
+                  )}
+                  
+                  {/* Voting Interface */}
+                  {submission.drop && (
+                    <div className="tw-mb-3" onClick={(e) => e.stopPropagation()}>
+                      <SingleWaveDropVote 
+                        drop={submission.drop} 
+                        size={SingleWaveDropVoteSize.COMPACT}
+                        onVoteSuccess={() => {
+                          // Refresh the drop data after successful vote
+                          window.location.reload();
+                        }}
+                      />
+                    </div>
+                  )}
+                  
                   <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500 tw-mt-auto">
                     <CalendarDaysIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
                     <span>{formatDate(submission.createdAt)}</span>
