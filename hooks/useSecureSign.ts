@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useSignMessage, useAccount } from "wagmi";
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
+import { BrowserProvider } from "ethers";
 import { UserRejectedRequestError } from "viem";
 
 /**
@@ -25,10 +26,17 @@ export class ConnectionMismatchError extends Error {
   }
 }
 
+export class SigningProviderError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'SigningProviderError';
+  }
+}
+
 interface SignatureResult {
   signature: string | null;
   userRejected: boolean;
-  error?: MobileSigningError | ConnectionMismatchError;
+  error?: MobileSigningError | ConnectionMismatchError | SigningProviderError;
 }
 
 interface UseSecureSignReturn {
@@ -43,8 +51,8 @@ interface UseSecureSignReturn {
  */
 export const useSecureSign = (): UseSecureSignReturn => {
   const [isSigningPending, setIsSigningPending] = useState(false);
-  const { signMessageAsync } = useSignMessage();
-  const { address: connectedAddress, isConnected } = useAccount();
+  const { address: connectedAddress, isConnected } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider('eip155');
 
   const reset = useCallback(() => {
     setIsSigningPending(false);
@@ -118,8 +126,22 @@ export const useSecureSign = (): UseSecureSignReturn => {
       }
 
       // Only reach here if ALL validations passed
-      // Use Wagmi's secure signing method
-      const signature = await signMessageAsync({ message });
+      // FAIL-FAST: Provider must exist or we throw immediately
+      if (!walletProvider) {
+        throw new SigningProviderError('Wallet provider not available');
+      }
+
+      // Use ethers BrowserProvider for secure signing through AppKit
+      const ethersProvider = new BrowserProvider(walletProvider as any);
+      const signer = await ethersProvider.getSigner();
+      
+      // FAIL-FAST: Verify signer address matches connected address
+      const signerAddress = await signer.getAddress();
+      if (signerAddress.toLowerCase() !== connectedAddress.toLowerCase()) {
+        throw new ConnectionMismatchError(connectedAddress, signerAddress);
+      }
+      
+      const signature = await signer.signMessage(message);
 
       return {
         signature,
@@ -136,7 +158,9 @@ export const useSecureSign = (): UseSecureSignReturn => {
       }
 
       // Handle custom errors we've defined
-      if (error instanceof MobileSigningError || error instanceof ConnectionMismatchError) {
+      if (error instanceof MobileSigningError || 
+          error instanceof ConnectionMismatchError || 
+          error instanceof SigningProviderError) {
         return {
           signature: null,
           userRejected: false,
@@ -168,7 +192,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
     } finally {
       setIsSigningPending(false);
     }
-  }, [signMessageAsync, connectedAddress, isConnected]);
+  }, [walletProvider, connectedAddress, isConnected]);
 
   return {
     signMessage,

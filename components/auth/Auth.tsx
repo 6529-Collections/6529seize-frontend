@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState, useMemo, useCallback, u
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAppKit } from "@reown/appkit/react";
-import { useSecureSign, MobileSigningError, ConnectionMismatchError } from "../../hooks/useSecureSign";
+import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "../../hooks/useSecureSign";
 import { useMobileWalletConnection } from "../../hooks/useMobileWalletConnection";
 import {
   getAuthJwt,
@@ -506,6 +506,11 @@ export default function Auth({
         if (result.error instanceof ConnectionMismatchError) {
           setToast({
             message: "Wallet address mismatch. Please disconnect and reconnect your wallet.",
+            type: "error",
+          });
+        } else if (result.error instanceof SigningProviderError) {
+          setToast({
+            message: "Wallet provider error. Please reconnect your wallet and try again.",
             type: "error",
           });
         } else if (result.error instanceof MobileSigningError) {
