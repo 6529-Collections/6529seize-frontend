@@ -18,8 +18,9 @@ export default function UserPageRepNewRepError({
             <p className="tw-text-justify tw-mt-2 tw-mb-0 tw-text-sm tw-text-iron-300 tw-font-normal">
               Rep is not meant for insults or doxxing so we run proposed rep
               categories through an AI filter. If you think the filter got your
-              proposed category wrong, hop into Discord and let us know. In the
-              meantime, perhaps you can rephrase that you are trying to say.
+              proposed category wrong, hop into Brain on 6529.io and let us
+              know. In the meantime, perhaps you can rephrase that you are
+              trying to say.
             </p>
           </div>
         </div>
