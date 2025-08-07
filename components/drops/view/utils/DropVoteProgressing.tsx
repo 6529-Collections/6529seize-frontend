@@ -57,11 +57,12 @@ export default function DropVoteProgressing({
       <Tooltip
         id={`drop-vote-progress-${current}-${projected}`}
         place="top"
-        positionStrategy="fixed"
+        positionStrategy="absolute"
         style={{
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
+          zIndex: 50,
         }}
       >
         <span className="tw-text-xs">

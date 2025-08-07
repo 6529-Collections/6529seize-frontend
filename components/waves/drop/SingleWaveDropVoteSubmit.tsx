@@ -6,6 +6,7 @@ import {
   useContext,
   forwardRef,
   useImperativeHandle,
+  useRef,
 } from "react";
 import mojs from "@mojs/core";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
@@ -15,6 +16,7 @@ import { commonApiPost } from "../../../services/api/common-api";
 import { DropRateChangeRequest } from "../../../entities/IDrop";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 type ThemeColors = {
   primary: string;
@@ -48,12 +50,13 @@ interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
   readonly onVoteSuccess?: () => void;
+  readonly size?: SingleWaveDropVoteSize;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<
   SingleWaveDropVoteSubmitHandles,
   Props
->(({ drop, newRating, onVoteSuccess }: Props, ref) => {
+>(({ drop, newRating, onVoteSuccess, size = SingleWaveDropVoteSize.NORMAL }: Props, ref) => {
   const position = drop.rank;
   const { requestAuth, setToast } = useContext(AuthContext);
   const [animationTimeline, setAnimationTimeline] = useState<any>(null);
@@ -67,6 +70,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
   const [isSpinnerExiting, setIsSpinnerExiting] = useState(false);
   const [isTextExiting, setIsTextExiting] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const randomID = getRandomObjectId();
   const tlDuration = 300;
   const particlesDuration = 800;
@@ -185,6 +189,14 @@ const SingleWaveDropVoteSubmit = forwardRef<
     setAnimationTimeline(tempAnimationTimeline);
   }, [init]);
 
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      timeoutsRef.current = [];
+    };
+  }, []);
+
   const handleClick = async () => {
     if (isProcessing || loading || isSpinnerExiting || isTextExiting) return;
 
@@ -225,16 +237,23 @@ const SingleWaveDropVoteSubmit = forwardRef<
     }
 
     // Allow animation to show before closing modal
-    setTimeout(() => {
+    const successTimeout = setTimeout(() => {
       if (onVoteSuccess) {
         onVoteSuccess();
       }
     }, 1000); // Shorter time than totalParticlesTime to allow user to see the "Voted!" message
+    timeoutsRef.current.push(successTimeout);
 
-    await new Promise((resolve) => setTimeout(resolve, totalParticlesTime));
+    await new Promise((resolve) => {
+      const timeout = setTimeout(resolve, totalParticlesTime);
+      timeoutsRef.current.push(timeout);
+    });
 
     setIsTextExiting(true);
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => {
+      const timeout = setTimeout(resolve, 300);
+      timeoutsRef.current.push(timeout);
+    });
     setShowSuccess(false);
     setIsTextExiting(false);
     setIsProcessing(false);
@@ -273,7 +292,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     <div className={`vote-button-container-${randomID}`}>
       <button
         id={`vote-button-${randomID}`}
-        className={`${styles.voteButton} ${
+        className={`${size === SingleWaveDropVoteSize.MINI ? styles.voteButtonMini : styles.voteButton} ${
           isProcessing ? styles.processing : ""
         }`}
         onClick={(e) => {
