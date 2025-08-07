@@ -16,7 +16,7 @@ export const ArtistSubmissionPreviewModal: React.FC<
   ArtistSubmissionPreviewModalProps
 > = ({ isOpen, onClose, user }) => {
   const { isApp } = useDeviceInfo();
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
   // Cleanup body overflow and manage focus
