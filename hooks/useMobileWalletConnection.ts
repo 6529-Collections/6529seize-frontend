@@ -2,6 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAppKitAccount, useAppKit } from "@reown/appkit/react";
+import { 
+  WalletConnectionError, 
+  DeepLinkTimeoutError, 
+  ConnectionVerificationError 
+} from "./errors/WalletConnectionError";
 
 /**
  * Mobile wallet connection states
@@ -30,7 +35,7 @@ interface UseMobileWalletConnectionReturn {
   connectionTimeout: number;
   isConnecting: boolean;
   handleMobileConnection: (connectorId?: string) => Promise<void>;
-  handleDeepLinkReturn: () => void;
+  handleDeepLinkReturn: () => Promise<void>;
   resetConnection: () => void;
   getMobileInstructions: () => string;
 }
@@ -116,16 +121,43 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
     }
   }, [open, mobileInfo]);
 
-  // Handle return from deep link
-  const handleDeepLinkReturn = useCallback(() => {
-    if (connectionState === MobileConnectionState.WAITING_FOR_RETURN) {
-      // Check if connection was successful
-      setTimeout(() => {
-        if (!isConnected) {
-          setConnectionState(MobileConnectionState.FAILED);
-        }
-      }, 2000); // Give some time for connection to establish
+  // Handle return from deep link - SECURE Promise-based implementation
+  const handleDeepLinkReturn = useCallback(async (): Promise<void> => {
+    // Validate current state - fail fast if not in correct state
+    if (connectionState !== MobileConnectionState.WAITING_FOR_RETURN) {
+      throw new ConnectionVerificationError(connectionState, 'waiting_for_return');
     }
+
+    // Promise-based connection verification with proper timeout
+    return new Promise((resolve, reject) => {
+      const TIMEOUT_MS = 10000; // 10 seconds
+      const POLL_INTERVAL_MS = 500; // 500ms polling
+      const startTime = Date.now();
+      
+      const checkConnection = () => {
+        const elapsed = Date.now() - startTime;
+        
+        // Check if we've exceeded timeout
+        if (elapsed >= TIMEOUT_MS) {
+          setConnectionState(MobileConnectionState.TIMEOUT);
+          reject(new DeepLinkTimeoutError(TIMEOUT_MS));
+          return;
+        }
+        
+        // Check if connection is established
+        if (isConnected) {
+          setConnectionState(MobileConnectionState.CONNECTED);
+          resolve();
+          return;
+        }
+        
+        // Continue polling
+        setTimeout(checkConnection, POLL_INTERVAL_MS);
+      };
+      
+      // Start the polling
+      checkConnection();
+    });
   }, [connectionState, isConnected]);
 
   // Reset connection state
