@@ -96,9 +96,43 @@ const nextConfig = {
     ];
   },
 
-  webpack: (config) => {
+  webpack: (config, { dev, isServer }) => {
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
+    
+    // Validate required environment variables at build time
+    if (!dev && !isServer) {
+      const requiredEnvVars = [
+        'NEXT_PUBLIC_BASE_ENDPOINT',
+        'NEXT_PUBLIC_CW_PROJECT_ID'
+      ];
+      
+      const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+      
+      if (missingEnvVars.length > 0) {
+        throw new Error(
+          `Missing required environment variables for production build: ${missingEnvVars.join(', ')}. ` +
+          `Please set these in your environment or .env.local file. See .env.example for reference.`
+        );
+      }
+      
+      // Validate NEXT_PUBLIC_BASE_ENDPOINT format
+      const baseEndpoint = process.env.NEXT_PUBLIC_BASE_ENDPOINT;
+      try {
+        const url = new URL(baseEndpoint);
+        if (url.protocol !== 'https:' && !baseEndpoint.includes('localhost') && !baseEndpoint.includes('127.0.0.1')) {
+          throw new Error(`NEXT_PUBLIC_BASE_ENDPOINT must use HTTPS in production: ${baseEndpoint}`);
+        }
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw new Error(`NEXT_PUBLIC_BASE_ENDPOINT is not a valid URL: ${baseEndpoint}`);
+        }
+        throw error;
+      }
+      
+      console.log('[Build] Environment variables validated successfully');
+    }
+    
     return config;
   },
   turbopack: {

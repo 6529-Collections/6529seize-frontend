@@ -1,71 +1,21 @@
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { mainnet } from 'viem/chains'
-import { CW_PROJECT_ID } from '@/constants'
+import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from '@/constants'
 import { AppWallet } from '../app-wallets/AppWalletsContext'
 import { 
   createAppWalletConnector 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
 import { walletConnect, coinbaseWallet, injected, metaMask } from 'wagmi/connectors'
 
-function validateBaseEndpoint(): string {
-  const baseEndpoint = process.env.BASE_ENDPOINT;
-  
-  if (!baseEndpoint) {
-    throw new Error(
-      'BASE_ENDPOINT environment variable is required for AppKit adapter initialization'
-    );
-  }
-  
-  // Validate it's a legitimate URL
-  let validatedUrl: URL;
-  try {
-    validatedUrl = new URL(baseEndpoint);
-  } catch (error) {
-    throw new Error(
-      `BASE_ENDPOINT environment variable contains invalid URL: ${baseEndpoint}`
-    );
-  }
-  
-  // Ensure it uses HTTPS in production
-  if (validatedUrl.protocol !== 'https:' && !baseEndpoint.includes('localhost')) {
-    throw new Error(
-      `BASE_ENDPOINT must use HTTPS protocol in production. Got: ${validatedUrl.protocol}`
-    );
-  }
-  
-  // Validate against expected domains - prevent domain spoofing
-  const allowedDomains = [
-    '6529.io',
-    'www.6529.io',
-    'staging.6529.io',
-    'localhost',
-    '127.0.0.1'
-  ];
-  
-  const hostname = validatedUrl.hostname;
-  const isAllowedDomain = allowedDomains.some(domain => 
-    hostname === domain || hostname.endsWith(`.${domain}`)
-  );
-  
-  if (!isAllowedDomain) {
-    throw new Error(
-      `BASE_ENDPOINT domain not in allowlist. Got: ${hostname}. Allowed: ${allowedDomains.join(', ')}`
-    );
-  }
-  
-  return baseEndpoint;
-}
 
 export class AppKitAdapterCapacitor {
   private currentAdapter: WagmiAdapter | null = null
   private currentWallets: AppWallet[] = []
   private requestPassword: (address: string, addressHashed: string) => Promise<string>
   private connectionStates = new Map<string, 'connecting' | 'connected' | 'disconnected'>()
-  private readonly baseEndpoint: string
 
   constructor(requestPassword: (address: string, addressHashed: string) => Promise<string>) {
     this.requestPassword = requestPassword
-    this.baseEndpoint = validateBaseEndpoint()
   }
 
   createAdapter(appWallets: AppWallet[]): WagmiAdapter {
@@ -77,7 +27,7 @@ export class AppKitAdapterCapacitor {
       metaMask({
         dappMetadata: {
           name: "6529.io",
-          url: this.baseEndpoint,
+          url: VALIDATED_BASE_ENDPOINT,
         },
       }),
       // WalletConnect for mobile with improved deep linking
@@ -86,7 +36,7 @@ export class AppKitAdapterCapacitor {
         metadata: {
           name: "6529.io",
           description: "6529.io",
-          url: this.baseEndpoint,
+          url: VALIDATED_BASE_ENDPOINT,
           icons: [
             "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
           ],

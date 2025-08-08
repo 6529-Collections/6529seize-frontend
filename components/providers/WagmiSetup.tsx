@@ -10,7 +10,7 @@ import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import type { AppKitNetwork } from '@reown/appkit-common'
-import { CW_PROJECT_ID } from "@/constants";
+import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
 import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
 import { AppKitAdapterCapacitor } from './AppKitAdapterCapacitor';
@@ -74,7 +74,7 @@ export default function WagmiSetup({
           metadata: {
             name: "6529.io",
             description: "6529.io",
-            url: process.env.BASE_ENDPOINT!,
+            url: VALIDATED_BASE_ENDPOINT,
             icons: [
               "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
             ],
@@ -98,7 +98,7 @@ export default function WagmiSetup({
           metadata: {
             name: "6529.io",
             description: "6529.io",
-            url: process.env.BASE_ENDPOINT!,
+            url: VALIDATED_BASE_ENDPOINT,
             icons: [
               "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
             ],
