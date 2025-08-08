@@ -42,27 +42,10 @@ export const ArtistActiveSubmissionContent: React.FC<
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // MOCK DATA - TODO: Replace with real winner_main_stage_drop_ids when available
-  const getMockWinnerData = (userId: string) => {
-    // Generate different winner patterns based on user ID hash
-    if (!userId) return { winCount: 0, bestRank: 1 };
-    const hash = userId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-    const patterns = [
-      { winCount: 1, bestRank: 1 }, // Gold single winner
-      { winCount: 3, bestRank: 1 }, // Gold multiple winner
-      { winCount: 1, bestRank: 2 }, // Silver single winner
-      { winCount: 2, bestRank: 2 }, // Silver multiple winner
-      { winCount: 1, bestRank: 3 }, // Bronze single winner
-      { winCount: 5, bestRank: 1 }, // Gold heavy winner
-      { winCount: 7, bestRank: 1 }, // Gold super winner
-    ];
-    
-    // Use hash to pick a pattern, ensuring variety
-    const patternIndex = hash % patterns.length;
-    return patterns[patternIndex];
-  };
-
-  const mockWinnerData = getMockWinnerData(user.id);
+  // Check if user has any 1st place winner drops from real data
+  const hasFirstPlaceWins = submissions && submissionDrops.some((drop: any) => 
+    drop && drop.winning_context && drop.winning_context.place === 1
+  );
 
   if (!searchParams) {
     return null;
@@ -96,11 +79,30 @@ export const ArtistActiveSubmissionContent: React.FC<
         <div className="tw-flex-1">
           <div className="tw-flex sm:tw-flex-row tw-flex-col sm:tw-items-center sm:tw-gap-4 tw-gap-3">
             <div className="tw-relative">
-              <ProfileWinnerRing 
-                winCount={mockWinnerData.winCount} 
-                bestRank={mockWinnerData.bestRank}
-                size="medium"
-              >
+              {hasFirstPlaceWins ? (
+                <ProfileWinnerRing 
+                  winCount={1} 
+                  bestRank={1}
+                  size="medium"
+                >
+                  <div className="tw-h-12 tw-w-12 tw-bg-iron-900 tw-rounded-lg tw-overflow-hidden tw-shadow-lg">
+                    {user.pfp ? (
+                      <img
+                        src={user.pfp}
+                        alt="Profile"
+                        className="tw-w-full tw-h-full tw-object-contain tw-bg-transparent"
+                      />
+                    ) : (
+                      <div className="tw-w-full tw-h-full tw-bg-iron-900 tw-flex tw-items-center tw-justify-center">
+                        <FontAwesomeIcon
+                          icon={faPalette}
+                          className="tw-w-5 tw-h-5 tw-text-iron-600 tw-flex-shrink-0"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </ProfileWinnerRing>
+              ) : (
                 <div className="tw-h-12 tw-w-12 tw-bg-iron-900 tw-rounded-lg tw-overflow-hidden tw-shadow-lg">
                   {user.pfp ? (
                     <img
@@ -117,19 +119,16 @@ export const ArtistActiveSubmissionContent: React.FC<
                     </div>
                   )}
                 </div>
-              </ProfileWinnerRing>
+              )}
             </div>
             <div className="tw-text-left">
               <div className="tw-flex tw-items-center tw-gap-3 tw-mb-1">
                 <div className="tw-text-xl sm:tw-text-3xl tw-font-bold tw-text-iron-100">
                   {user.handle || "Unknown Artist"}'s Submissions
                 </div>
-                {mockWinnerData.winCount > 0 && (
+                {hasFirstPlaceWins && (
                   <ProfileWinnerBadge 
-                    winCount={mockWinnerData.winCount}
-                    bestRank={mockWinnerData.bestRank}
-                    size="small"
-                    variant="trophy"
+                    winCount={1}
                   />
                 )}
               </div>
