@@ -25,7 +25,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       {activePart.media.map((media, i) => (
         <div
           key={`part-${i}-media-${media.url}`}
-          className="tw-flex tw-h-80"
+          className="tw-flex tw-h-64"
         >
           {disableMediaInteraction ? (
             <MediaDisplay
