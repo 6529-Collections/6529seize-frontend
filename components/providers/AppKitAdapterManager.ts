@@ -5,6 +5,7 @@ import { AppWallet } from '../app-wallets/AppWalletsContext'
 import { 
   createAppWalletConnector 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
+import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter'
 
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null
@@ -15,20 +16,44 @@ export class AppKitAdapterManager {
   private connectionStates = new Map<string, 'connecting' | 'connected' | 'disconnected'>()
 
   constructor(requestPassword: (address: string, addressHashed: string) => Promise<string>) {
+    if (!requestPassword) {
+      throw new AdapterError('requestPassword function is required')
+    }
+    if (typeof requestPassword !== 'function') {
+      throw new AdapterError('requestPassword must be a function')
+    }
     this.requestPassword = requestPassword
   }
 
   createAdapter(appWallets: AppWallet[]): WagmiAdapter {
+    if (!Array.isArray(appWallets)) {
+      throw new AdapterError('appWallets must be an array')
+    }
+
     const networks = [mainnet]
 
     // Create AppWallet connectors if any exist
-    const appWalletConnectors = appWallets.map(wallet => 
-      createAppWalletConnector(
+    const appWalletConnectors = appWallets.map(wallet => {
+      if (!wallet) {
+        throw new AdapterError('Invalid wallet object found in appWallets array')
+      }
+      if (!wallet.address) {
+        throw new AdapterError(`Wallet is missing required address property: ${JSON.stringify(wallet)}`)
+      }
+      if (!wallet.address_hashed) {
+        throw new AdapterError(`Wallet is missing required address_hashed property: ${JSON.stringify(wallet)}`)
+      }
+
+      return createAppWalletConnector(
         networks,
         { appWallet: wallet },
         () => this.requestPassword(wallet.address, wallet.address_hashed)
       )
-    )
+    })
+
+    if (!CW_PROJECT_ID) {
+      throw new AdapterError('CW_PROJECT_ID is not defined')
+    }
 
     // Create adapter with all connectors
     const wagmiAdapter = new WagmiAdapter({
@@ -45,11 +70,25 @@ export class AppKitAdapterManager {
   }
 
   shouldRecreateAdapter(newWallets: AppWallet[]): boolean {
+    if (!Array.isArray(newWallets)) {
+      throw new AdapterError('newWallets must be an array')
+    }
+
     if (!this.currentAdapter) return true
     if (newWallets.length !== this.currentWallets.length) return true
     
-    const currentAddresses = new Set(this.currentWallets.map(w => w.address))
-    const newAddresses = new Set(newWallets.map(w => w.address))
+    const currentAddresses = new Set(this.currentWallets.map(w => {
+      if (!w || !w.address) {
+        throw new AdapterError('Invalid wallet in currentWallets array')
+      }
+      return w.address
+    }))
+    const newAddresses = new Set(newWallets.map(w => {
+      if (!w || !w.address) {
+        throw new AdapterError('Invalid wallet in newWallets array')
+      }
+      return w.address
+    }))
     
     for (const addr of Array.from(newAddresses)) {
       if (!currentAddresses.has(addr)) return true
@@ -63,10 +102,17 @@ export class AppKitAdapterManager {
   }
 
   createAdapterWithCache(appWallets: AppWallet[]): WagmiAdapter {
+    if (!Array.isArray(appWallets)) {
+      throw new AdapterError('appWallets must be an array')
+    }
+
     const cacheKey = this.getCacheKey(appWallets)
     
     if (this.adapterCache.has(cacheKey)) {
-      const cachedAdapter = this.adapterCache.get(cacheKey)!
+      const cachedAdapter = this.adapterCache.get(cacheKey)
+      if (!cachedAdapter) {
+        throw new AdapterCacheError('Cached adapter is null or undefined')
+      }
       this.currentAdapter = cachedAdapter
       this.currentWallets = [...appWallets]
       return cachedAdapter
@@ -80,14 +126,7 @@ export class AppKitAdapterManager {
       if (firstKey) {
         const oldAdapter = this.adapterCache.get(firstKey)
         if (oldAdapter && oldAdapter !== this.currentAdapter) {
-          // Cleanup the old adapter more safely
-          try {
-            // Mark adapter as obsolete instead of trying to manipulate internals
-            console.log('[AppKitAdapterManager] Removing obsolete adapter from cache:', firstKey)
-            // Let garbage collection handle the cleanup naturally
-          } catch (error) {
-            console.warn('[AppKitAdapterManager] Error during adapter cleanup:', error)
-          }
+          this.performAdapterCleanup(oldAdapter, firstKey)
         }
         this.adapterCache.delete(firstKey)
       }
@@ -97,26 +136,126 @@ export class AppKitAdapterManager {
     return adapter
   }
 
+  private performAdapterCleanup(adapter: WagmiAdapter, cacheKey: string): void {
+    if (!adapter) {
+      throw new AdapterCleanupError('Cannot cleanup null or undefined adapter')
+    }
+    if (!cacheKey) {
+      throw new AdapterCleanupError('Cannot cleanup adapter without cache key')
+    }
+
+    try {
+      // Mark adapter as obsolete - explicit cleanup approach
+      // Since WagmiAdapter doesn't expose direct cleanup methods, 
+      // we rely on proper reference management and garbage collection
+      
+      // Verify the adapter is not currently active
+      if (adapter === this.currentAdapter) {
+        throw new AdapterCleanupError(`Cannot cleanup currently active adapter for key: ${cacheKey}`)
+      }
+
+      // Log cleanup for monitoring purposes
+      console.log(`[AppKitAdapterManager] Cleaning up obsolete adapter: ${cacheKey}`)
+      
+      // The adapter will be removed from cache by caller
+      // Memory cleanup will be handled by garbage collection
+      
+    } catch (error) {
+      throw new AdapterCleanupError(`Failed to cleanup adapter for key ${cacheKey}`, error)
+    }
+  }
+
   private getCacheKey(wallets: AppWallet[]): string {
-    return wallets.map(w => w.address).sort().join(',')
+    if (!Array.isArray(wallets)) {
+      throw new AdapterError('Cannot generate cache key: wallets must be an array')
+    }
+
+    const addresses = wallets.map(w => {
+      if (!w || !w.address) {
+        throw new AdapterError('Cannot generate cache key: invalid wallet object')
+      }
+      return w.address
+    })
+
+    if (addresses.length === 0) {
+      return 'empty-wallets'
+    }
+
+    return addresses.sort().join(',')
   }
 
   getCurrentAdapter(): WagmiAdapter | null {
     return this.currentAdapter
   }
 
-  getConnectionState(walletAddress: string): string {
-    return this.connectionStates.get(walletAddress) || 'disconnected'
+  getConnectionState(walletAddress: string): 'connecting' | 'connected' | 'disconnected' {
+    if (!walletAddress) {
+      throw new AdapterError('walletAddress is required')
+    }
+    if (typeof walletAddress !== 'string') {
+      throw new AdapterError('walletAddress must be a string')
+    }
+
+    const state = this.connectionStates.get(walletAddress)
+    return state || 'disconnected'
   }
 
   setConnectionState(walletAddress: string, state: 'connecting' | 'connected' | 'disconnected'): void {
+    if (!walletAddress) {
+      throw new AdapterError('walletAddress is required')
+    }
+    if (typeof walletAddress !== 'string') {
+      throw new AdapterError('walletAddress must be a string')
+    }
+    if (!state) {
+      throw new AdapterError('state is required')
+    }
+    if (!['connecting', 'connected', 'disconnected'].includes(state)) {
+      throw new AdapterError(`Invalid state: ${state}. Must be 'connecting', 'connected', or 'disconnected'`)
+    }
+
     this.connectionStates.set(walletAddress, state)
   }
 
   cleanup(): void {
-    this.currentAdapter = null
-    this.currentWallets = []
-    this.adapterCache.clear()
-    this.connectionStates.clear()
+    try {
+      // Clear current adapter reference
+      this.currentAdapter = null
+      this.currentWallets = []
+
+      // Clear connection states
+      this.connectionStates.clear()
+
+      // Perform cleanup on all cached adapters
+      const cacheEntries = Array.from(this.adapterCache.entries())
+      const cleanupErrors: Array<{ key: string; error: unknown }> = []
+
+      for (const [key, adapter] of cacheEntries) {
+        try {
+          this.performAdapterCleanup(adapter, key)
+        } catch (error) {
+          cleanupErrors.push({ key, error })
+        }
+      }
+
+      // Clear the cache
+      this.adapterCache.clear()
+
+      // If any cleanup operations failed, throw an error with details
+      if (cleanupErrors.length > 0) {
+        const errorMessages = cleanupErrors.map(({ key, error }) => 
+          `Key: ${key}, Error: ${error instanceof Error ? error.message : String(error)}`
+        )
+        throw new AdapterCleanupError(
+          `Failed to cleanup ${cleanupErrors.length} adapter(s): ${errorMessages.join('; ')}`
+        )
+      }
+
+    } catch (error) {
+      if (error instanceof AdapterCleanupError) {
+        throw error
+      }
+      throw new AdapterCleanupError('Unexpected error during cleanup', error)
+    }
   }
 }

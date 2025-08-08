@@ -14,6 +14,7 @@ import { CW_PROJECT_ID } from "@/constants";
 import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
 import { AppKitAdapterCapacitor } from './AppKitAdapterCapacitor';
+import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter';
 import { Capacitor } from '@capacitor/core';
 
 export default function WagmiSetup({
@@ -48,9 +49,19 @@ export default function WagmiSetup({
     try {
       console.log(`Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
       
-      const newAdapter = isCapacitor 
-        ? (adapterManager as AppKitAdapterCapacitor).createAdapter(wallets)
-        : (adapterManager as AppKitAdapterManager).createAdapterWithCache(wallets);
+      let newAdapter: WagmiAdapter;
+      try {
+        newAdapter = isCapacitor 
+          ? (adapterManager as AppKitAdapterCapacitor).createAdapter(wallets)
+          : (adapterManager as AppKitAdapterManager).createAdapterWithCache(wallets);
+      } catch (error) {
+        if (error instanceof AdapterError || error instanceof AdapterCacheError) {
+          console.error('[WagmiSetup] Adapter creation failed with specific error:', error.message);
+          throw new Error(`Wallet adapter setup failed: ${error.message}. Please refresh the page and try again.`);
+        }
+        console.error('[WagmiSetup] Adapter creation failed with unexpected error:', error);
+        throw new Error('Failed to initialize wallet connection. Please refresh the page and try again.');
+      }
       
       // Only create AppKit once
       if (!appKitInitialized) {
@@ -124,6 +135,12 @@ export default function WagmiSetup({
       setIsInitialized(true);
     } catch (error) {
       console.error('Error initializing AppKit:', error);
+      // Show user-friendly error message
+      if (error instanceof Error) {
+        // In a real app, you'd show this to the user via a toast/modal
+        alert(`Wallet Connection Error: ${error.message}`);
+      }
+      throw error; // Re-throw to prevent app from continuing in broken state
     }
   };
 
@@ -135,12 +152,21 @@ export default function WagmiSetup({
     
     // Debounce updates
     timeoutRef.current = setTimeout(() => {
-      const shouldRecreate = isCapacitor 
-        ? (adapterManager as AppKitAdapterCapacitor).shouldRecreateAdapter(wallets)
-        : (adapterManager as AppKitAdapterManager).shouldRecreateAdapter(wallets);
-        
-      if (shouldRecreate) {
-        initializeAppKit(wallets);
+      try {
+        const shouldRecreate = isCapacitor 
+          ? (adapterManager as AppKitAdapterCapacitor).shouldRecreateAdapter(wallets)
+          : (adapterManager as AppKitAdapterManager).shouldRecreateAdapter(wallets);
+          
+        if (shouldRecreate) {
+          initializeAppKit(wallets);
+        }
+      } catch (error) {
+        console.error('[WagmiSetup] Error during wallet update:', error);
+        if (error instanceof AdapterError) {
+          // Show user-friendly error message
+          alert(`Wallet Update Error: ${error.message}`);
+        }
+        throw error;
       }
     }, 300);
   };
@@ -162,7 +188,16 @@ export default function WagmiSetup({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      adapterManager.cleanup();
+      
+      try {
+        adapterManager.cleanup();
+      } catch (error) {
+        console.error('[WagmiSetup] Error during cleanup:', error);
+        if (error instanceof AdapterCleanupError) {
+          console.error('Adapter cleanup failed:', error.message);
+          // Don't throw here as this is in cleanup - just log the error
+        }
+      }
     };
   }, [adapterManager]);
 
