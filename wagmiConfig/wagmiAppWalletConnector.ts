@@ -5,6 +5,7 @@ import type { Address, Hex, Chain } from "viem";
 import type { AppWallet } from "../components/app-wallets/AppWalletsContext";
 import { decryptData } from "../components/app-wallets/app-wallet-helpers";
 import { areEqualAddresses } from "../helpers/Helpers";
+import { WalletAuthenticationError, InvalidPasswordError, PrivateKeyDecryptionError } from "../src/errors/wallet-auth";
 
 export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";
 
@@ -74,32 +75,65 @@ export function createAppWalletConnector(
     },
     type: APP_WALLET_CONNECTOR_TYPE,
 
-    async setPassword(password: string): Promise<boolean> {
+    async setPassword(password: string): Promise<void> { // VOID RETURN - NO SILENT FAILURES
+      // Input validation - fail fast
+      if (!password || typeof password !== 'string') {
+        throw new InvalidPasswordError('Password is required and must be a string');
+      }
+      
+      if (password.length < 8) {
+        throw new InvalidPasswordError('Password must be at least 8 characters long');
+      }
+
       try {
-        const test = await decryptData(
+        // Validate password by decrypting address hash
+        const decryptedAddress = await decryptData(
           options.appWallet.address,
           options.appWallet.address_hashed,
           password
         );
 
-        if (!areEqualAddresses(test, options.appWallet.address)) {
-          return false;
+        if (!decryptedAddress) {
+          throw new InvalidPasswordError('Password decryption resulted in empty data');
         }
 
-        decryptedPrivateKey = await decryptData(
+        if (!areEqualAddresses(decryptedAddress, options.appWallet.address)) {
+          throw new InvalidPasswordError('Password does not match wallet - address verification failed');
+        }
+
+        // Decrypt the private key
+        const privateKey = await decryptData(
           options.appWallet.address,
           options.appWallet.private_key,
           password
         );
 
-        if (!decryptedPrivateKey) {
-          return false;
+        if (!privateKey) {
+          throw new PrivateKeyDecryptionError('Private key decryption returned empty result');
         }
 
-        return true;
+        // Validate private key format
+        if (!privateKey.match(/^[0-9a-fA-F]{64}$/)) {
+          throw new PrivateKeyDecryptionError('Decrypted private key has invalid format');
+        }
+
+        // Only set after all validations pass
+        decryptedPrivateKey = privateKey;
+        
       } catch (error) {
-        console.error("Error decrypting private key", error);
-        return false;
+        // Clear any potentially set private key on error
+        decryptedPrivateKey = null;
+        
+        // Re-throw our custom errors unchanged
+        if (error instanceof WalletAuthenticationError) {
+          throw error;
+        }
+        
+        // Wrap unexpected errors
+        throw new PrivateKeyDecryptionError(
+          'Unexpected error during password validation',
+          error
+        );
       }
     },
 
@@ -116,13 +150,35 @@ export function createAppWalletConnector(
     } = {}) {
       const chainId = maybeChainId ?? chains[0].id;
 
+      // Validate chainId
+      const validChain = chains.find((c) => c.id === chainId);
+      if (!validChain) {
+        throw new Error(`Chain ID ${chainId} is not supported. Supported chains: ${chains.map(c => c.id).join(', ')}`);
+      }
+
       if (!decryptedPrivateKey) {
         const password = await requestPasswordModal();
+        if (!password) {
+          throw new InvalidPasswordError('Password is required for wallet connection');
+        }
+        
+        // This will throw on failure - no silent failures
         await this.setPassword(password);
       }
+
+      // Verify we have the decrypted key after password validation
+      if (!decryptedPrivateKey) {
+        throw new PrivateKeyDecryptionError('Private key not available after password validation');
+      }
+
       const client = await getOrCreateClient(chainId);
       if (!client.account?.address) {
         throw new Error("No valid local account found after decryption.");
+      }
+
+      // Verify the account address matches the expected wallet address
+      if (!areEqualAddresses(client.account.address, options.appWallet.address)) {
+        throw new WalletAuthenticationError('Account address mismatch - potential security breach');
       }
 
       emitter.emit("connect", {
