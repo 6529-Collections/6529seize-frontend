@@ -18,7 +18,7 @@ import { wait } from "@/helpers/Helpers";
 import { TypedFeedItem } from "@/types/feed.types";
 import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
 import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
-import { addDropToDrops, replaceDropInCache } from "./utils/addDropsToDrops";
+import { addDropToDrops } from "./utils/addDropsToDrops";
 import { ApiWave } from "@/generated/models/ApiWave";
 import {
   WAVE_DROPS_PARAMS,
@@ -167,7 +167,6 @@ type ReactQueryWrapperContextType = {
   }) => void;
   waitAndInvalidateDrops: () => void;
   addOptimisticDrop: (params: { readonly drop: ApiDrop }) => void;
-  replaceOptimisticDrop: (params: { readonly tempDropId: string; readonly newDrop: ApiDrop }) => void;
   readonly invalidateDrops: () => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
@@ -201,7 +200,6 @@ export const ReactQueryWrapperContext =
     initCommunityActivityPage: () => {},
     waitAndInvalidateDrops: () => {},
     addOptimisticDrop: () => {},
-    replaceOptimisticDrop: () => {},
     invalidateDrops: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
@@ -1076,16 +1074,6 @@ export default function ReactQueryWrapper({
     }
   };
 
-  const replaceOptimisticDrop = ({
-    tempDropId,
-    newDrop,
-  }: {
-    readonly tempDropId: string;
-    readonly newDrop: ApiDrop;
-  }): void => {
-    replaceDropInCache(queryClient, { tempDropId, newDrop });
-  };
-
   const waitAndInvalidateDrops = async (): Promise<void> => {
     await wait(500);
     invalidateDrops();
@@ -1233,7 +1221,6 @@ export default function ReactQueryWrapper({
       onGroupChanged,
       waitAndInvalidateDrops,
       addOptimisticDrop,
-      replaceOptimisticDrop,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
@@ -1262,7 +1249,6 @@ export default function ReactQueryWrapper({
       onGroupChanged,
       waitAndInvalidateDrops,
       addOptimisticDrop,
-      replaceOptimisticDrop,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
