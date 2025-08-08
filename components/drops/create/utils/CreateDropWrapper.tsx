@@ -36,6 +36,7 @@ import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { WalletValidationError } from "../../../../src/errors/wallet";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -127,6 +128,36 @@ const CreateDropWrapper = forwardRef<
   ) => {
     const { isSafeWallet, address } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
+    
+    const validateWalletConnection = (address: string | undefined, isSafeWallet: boolean): string => {
+      if (!address) {
+        throw new WalletValidationError(
+          'Wallet connection required for drop creation. Please connect your wallet first.'
+        );
+      }
+      
+      if (typeof address !== 'string') {
+        throw new WalletValidationError(
+          'Invalid address type received from wallet connection'
+        );
+      }
+      
+      // Validate Ethereum address format
+      if (!address.match(/^0x[a-fA-F0-9]{40}$/)) {
+        throw new WalletValidationError(
+          'Invalid Ethereum address format. Expected 40-character hex string with 0x prefix.'
+        );
+      }
+      
+      // Additional validation for Safe wallets
+      if (isSafeWallet && address.length !== 42) {
+        throw new WalletValidationError(
+          'Safe wallet address validation failed - invalid format'
+        );
+      }
+      
+      return address;
+    };
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
       CreateDropScreenType.DESKTOP
     );
@@ -341,7 +372,8 @@ const CreateDropWrapper = forwardRef<
           metadata,
           signature: null,
           is_safe_signature: isSafeWallet,
-          signer_address: address ?? "",
+          // SECURITY: Validate wallet connection to prevent authentication bypass
+          signer_address: validateWalletConnection(address, isSafeWallet),
         };
         setDrop(currentDrop);
         clearInputState();
@@ -383,7 +415,8 @@ const CreateDropWrapper = forwardRef<
         metadata,
         signature: null,
         is_safe_signature: isSafeWallet,
-        signer_address: address ?? "",
+        // SECURITY: Validate wallet connection to prevent authentication bypass
+        signer_address: validateWalletConnection(address, isSafeWallet),
       };
       currentDrop.parts.push({
         content: markdown?.length ? markdown : null,
