@@ -55,9 +55,7 @@ export default function CreateDrop({
   privileges,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
-  const { waitAndInvalidateDrops, replaceOptimisticDrop } = useContext(ReactQueryWrapperContext);
-  
-  
+  const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
@@ -135,21 +133,10 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: DropMutationBody) => {
-      const response = await commonApiPost<ApiCreateDropRequest, ApiDrop>({
+      await commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
       });
-      
-      return { response, tempDropId: body.dropId };
-    },
-    onSuccess: (data) => {
-      // Replace optimistic drop with real server data immediately (faster than waiting for WebSocket)
-      if (data?.tempDropId && data?.response && replaceOptimisticDrop) {
-        replaceOptimisticDrop({
-          tempDropId: data.tempDropId,
-          newDrop: data.response,
-        });
-      }
     },
     onError: (error, body) => {
       setTimeout(() => {
@@ -173,7 +160,7 @@ export default function CreateDrop({
     },
   });
 
-  // Use refs only for queue management - no state that can become stale
+  // Use refs to avoid stale closures - fixes the stream unmounting issue
   const queueRef = useRef<DropMutationBody[]>([]);
   const isProcessingRef = useRef(false);
   const [hasQueueChanged, setHasQueueChanged] = useState(false);
@@ -194,7 +181,6 @@ export default function CreateDrop({
     }
   );
 
-  // Process queue items immediately without relying on state updates
   const processNextDrop = useCallback(async () => {
     if (isProcessingRef.current || queueRef.current.length === 0) {
       return;
@@ -225,10 +211,10 @@ export default function CreateDrop({
       queueRef.current.push(dropRequest);
       setHasQueueChanged(true);
       
-      // Process immediately - no state updates needed
+      // Process immediately - avoids state update timing issues
       processNextDrop();
       
-      // Now safe to trigger UI updates
+      // Trigger UI updates
       onDropAddedToQueue();
       
       // Explicitly blur any focused input to close keyboard
