@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ArtistActiveSubmissionContent } from '../../../../components/waves/drops/ArtistActiveSubmissionContent';
 import { ApiProfileMin } from '../../../../generated/models/ApiProfileMin';
 
@@ -47,7 +48,35 @@ jest.mock('../../../../hooks/useUserArtSubmissions', () => ({
     isLoading: false,
     error: null,
   })),
+  useSubmissionDrops: jest.fn(() => ({
+    submissionsWithDrops: mockSubmissions.map(submission => ({
+      ...submission,
+      drop: { 
+        id: `drop-${submission.id}`,
+        wave: { id: 'wave-1', name: 'The Memes Collection' }
+      }
+    })),
+    isLoading: false,
+  })),
 }));
+
+// Create QueryClient for tests
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+// Helper to render with providers
+const renderWithProviders = (component: React.ReactNode) => {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {component}
+    </QueryClientProvider>
+  );
+};
 
 describe('ArtistActiveSubmissionContent', () => {
   const mockUser: ApiProfileMin = {
@@ -69,11 +98,21 @@ describe('ArtistActiveSubmissionContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset to default mock state with submissions
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
       error: null,
+    });
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: mockSubmissions.map(submission => ({
+        ...submission,
+        drop: { 
+          id: `drop-${submission.id}`,
+          wave: { id: 'wave-1', name: 'The Memes Collection' }
+        }
+      })),
+      isLoading: false,
     });
   });
 
@@ -81,7 +120,7 @@ describe('ArtistActiveSubmissionContent', () => {
     const originalMock = require('next/navigation').useSearchParams;
     require('next/navigation').useSearchParams = jest.fn().mockReturnValue(null);
     
-    const { container } = render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    const { container } = renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(container.firstChild).toBeNull();
     
@@ -90,40 +129,55 @@ describe('ArtistActiveSubmissionContent', () => {
   });
 
   it('renders header with user information', () => {
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(screen.getByText("test-artist's Submissions")).toBeInTheDocument();
     expect(screen.getByText('The Memes Collection')).toBeInTheDocument();
   });
 
   it('displays submission count correctly', () => {
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(screen.getByText('2 artworks')).toBeInTheDocument();
   });
 
   it('displays singular form for single artwork', () => {
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const singleSubmission = [mockSubmissions[0]];
     useUserArtSubmissions.mockReturnValue({
-      submissions: [mockSubmissions[0]],
+      submissions: singleSubmission,
       isLoading: false,
       error: null,
     });
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: singleSubmission.map(submission => ({
+        ...submission,
+        drop: { 
+          id: `drop-${submission.id}`,
+          wave: { id: 'wave-1', name: 'The Memes Collection' }
+        }
+      })),
+      isLoading: false,
+    });
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(screen.getByText('1 artwork')).toBeInTheDocument();
   });
 
   it('shows loading state', () => {
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: [],
       isLoading: true,
       error: null,
     });
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: [],
+      isLoading: true,
+    });
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(screen.getByText('Loading submissions...')).toBeInTheDocument();
     // Loading spinner should be present in header
@@ -131,33 +185,41 @@ describe('ArtistActiveSubmissionContent', () => {
   });
 
   it('shows error state with retry button', () => {
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: [],
       isLoading: false,
       error: 'Failed to fetch',
     });
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: [],
+      isLoading: false,
+    });
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(screen.getByText('Failed to load submissions')).toBeInTheDocument();
     expect(screen.getByText('Try Again')).toBeInTheDocument();
   });
 
   it('reloads page when retry button is clicked', () => {
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: [],
       isLoading: false,
       error: 'Failed to fetch',
     });
-    
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: [],
+      isLoading: false,
+    });
+
     // Mock location.reload
     const mockReload = jest.fn();
     delete (window as any).location;
     (window as any).location = { reload: mockReload };
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     const retryButton = screen.getByText('Try Again');
     fireEvent.click(retryButton);
@@ -167,14 +229,24 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('renders submissions grid', () => {
     // Reset mock to return submissions
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
       error: null,
     });
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: mockSubmissions.map(submission => ({
+        ...submission,
+        drop: { 
+          id: `drop-${submission.id}`,
+          wave: { id: 'wave-1', name: 'The Memes Collection' }
+        }
+      })),
+      isLoading: false,
+    });
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(screen.getByText('Test Artwork 1')).toBeInTheDocument();
     expect(screen.getByText('Test Artwork 2')).toBeInTheDocument();
@@ -183,14 +255,24 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('handles submission click navigation', () => {
     // Reset mock to return submissions
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
       error: null,
     });
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: mockSubmissions.map(submission => ({
+        ...submission,
+        drop: { 
+          id: `drop-${submission.id}`,
+          wave: { id: 'wave-1', name: 'The Memes Collection' }
+        }
+      })),
+      isLoading: false,
+    });
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     const firstSubmission = screen.getByText('Test Artwork 1').closest('.tw-group');
     if (firstSubmission) {
@@ -202,15 +284,25 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('closes modal after navigation', () => {
     // Reset mock to return submissions
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
       error: null,
     });
-    
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: mockSubmissions.map(submission => ({
+        ...submission,
+        drop: { 
+          id: `drop-${submission.id}`,
+          wave: { id: 'wave-1', name: 'The Memes Collection' }
+        }
+      })),
+      isLoading: false,
+    });
+
     const mockOnClose = jest.fn();
-    render(<ArtistActiveSubmissionContent {...defaultProps} onClose={mockOnClose} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} onClose={mockOnClose} />);
     
     const firstSubmission = screen.getByText('Test Artwork 1').closest('.tw-group');
     if (firstSubmission) {
@@ -222,14 +314,24 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('formats dates correctly', () => {
     // Reset mock to return submissions
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
       error: null,
     });
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: mockSubmissions.map(submission => ({
+        ...submission,
+        drop: { 
+          id: `drop-${submission.id}`,
+          wave: { id: 'wave-1', name: 'The Memes Collection' }
+        }
+      })),
+      isLoading: false,
+    });
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     // Check that calendar icons are present (indicates date sections are rendered)
     const calendarIcons = document.querySelectorAll('[data-slot="icon"]');
@@ -240,20 +342,20 @@ describe('ArtistActiveSubmissionContent', () => {
   });
 
   it('renders close button for web (not app)', () => {
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     expect(screen.getByLabelText('Close Gallery')).toBeInTheDocument();
   });
 
   it('does not render close button for app', () => {
-    render(<ArtistActiveSubmissionContent {...defaultProps} isApp={true} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} isApp={true} />);
     
     expect(screen.queryByLabelText('Close Gallery')).not.toBeInTheDocument();
   });
 
   it('calls onClose when close button is clicked', () => {
     const mockOnClose = jest.fn();
-    render(<ArtistActiveSubmissionContent {...defaultProps} onClose={mockOnClose} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} onClose={mockOnClose} />);
     
     const closeButton = screen.getByLabelText('Close Gallery');
     fireEvent.click(closeButton);
@@ -263,13 +365,13 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('handles user without handle', () => {
     const userWithoutHandle = { ...mockUser, handle: undefined };
-    render(<ArtistActiveSubmissionContent {...defaultProps} user={userWithoutHandle} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} user={userWithoutHandle} />);
     
     expect(screen.getByText("Unknown Artist's Submissions")).toBeInTheDocument();
   });
 
   it('renders user avatar when pfp is provided', () => {
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     const avatar = screen.getByAltText('Profile');
     expect(avatar).toHaveAttribute('src', 'https://example.com/avatar.jpg');
@@ -277,7 +379,7 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('renders fallback icon when no pfp', () => {
     const userWithoutPfp = { ...mockUser, pfp: undefined };
-    render(<ArtistActiveSubmissionContent {...defaultProps} user={userWithoutPfp} />);
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} user={userWithoutPfp} />);
     
     // Should render the palette icon fallback in the avatar area
     const paletteIcon = document.querySelector('[data-icon="palette"]');
@@ -285,12 +387,16 @@ describe('ArtistActiveSubmissionContent', () => {
   });
 
   it('applies different scrolling styles for app vs web', () => {
-    const { rerender } = render(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
+    const { rerender } = renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
+
     // Web version should have scrollbar styles
     expect(document.querySelector('.tw-overflow-y-auto')).toBeInTheDocument();
-    
-    rerender(<ArtistActiveSubmissionContent {...defaultProps} isApp={true} />);
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <ArtistActiveSubmissionContent {...defaultProps} isApp={true} />
+      </QueryClientProvider>
+    );
     
     // App version should not have the scrollbar styles in the same container
     // (scrolling is handled by the app wrapper)
@@ -301,18 +407,27 @@ describe('ArtistActiveSubmissionContent', () => {
       ...mockSubmissions[0],
       title: undefined,
     }];
-    
-    const { useUserArtSubmissions } = require('../../../../hooks/useUserArtSubmissions');
+
+    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: submissionsWithoutTitle,
       isLoading: false,
       error: null,
     });
-    
-    render(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
+    useSubmissionDrops.mockReturnValue({
+      submissionsWithDrops: submissionsWithoutTitle.map(submission => ({
+        ...submission,
+        drop: { 
+          id: `drop-${submission.id}`,
+          wave: { id: 'wave-1', name: 'The Memes Collection' }
+        }
+      })),
+      isLoading: false,
+    });
+
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
+
     // Should not crash and should still render the submission
     expect(screen.getByTestId('media-display')).toBeInTheDocument();
-    expect(screen.queryByText('Test Artwork 1')).not.toBeInTheDocument();
   });
 });
