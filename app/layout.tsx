@@ -36,7 +36,7 @@ export default function RootLayout({
         <link rel="preconnect" href={process.env.API_ENDPOINT} />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
       </Head>
-      <body suppressHydrationWarning={true}>
+      <body>
         <StoreSetup>
           <Providers>
             <DynamicHeadTitle />
