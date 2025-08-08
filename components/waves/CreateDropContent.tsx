@@ -729,6 +729,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         activeDrop,
         isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
+      
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
         setTimeout(
@@ -753,6 +754,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
       setFiles([]);
       refreshState();
+      
       submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,

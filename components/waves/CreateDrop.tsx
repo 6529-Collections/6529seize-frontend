@@ -160,41 +160,19 @@ export default function CreateDrop({
     },
   });
 
-  const [queueSize, setQueueSize] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [hasQueueChanged, setHasQueueChanged] = useState(false);
+  // Use refs to avoid stale closures - fixes the stream unmounting issue
   const queueRef = useRef<DropMutationBody[]>([]);
-
-  const addToQueue = useCallback(
-    (dropRequest: DropMutationBody) => {
-      queueRef.current.push(dropRequest);
-      const newQueueSize = queueRef.current.length;
-      if (newQueueSize !== queueSize) {
-        setQueueSize(newQueueSize);
-        setHasQueueChanged(true);
-      }
-    },
-    [queueSize]
-  );
-
-  const removeFromQueue = useCallback(() => {
-    if (queueRef.current.length === 0) {
-      return undefined;
-    }
-    const item = queueRef.current.shift();
-    const newQueueSize = queueRef.current.length;
-    setQueueSize(newQueueSize);
-    return item;
-  }, []);
+  const isProcessingRef = useRef(false);
+  const [hasQueueChanged, setHasQueueChanged] = useState(false);
 
   useProgressiveDebounce(
     () => {
-      if (queueSize === 0 && !isProcessing && hasQueueChanged) {
+      if (queueRef.current.length === 0 && !isProcessingRef.current && hasQueueChanged) {
         waitAndInvalidateDrops();
         onAllDropsAdded?.();
       }
     },
-    [queueSize, isProcessing, hasQueueChanged],
+    [hasQueueChanged],
     {
       minDelay: 1000,
       maxDelay: 4000,
@@ -203,11 +181,13 @@ export default function CreateDrop({
     }
   );
 
-  const processQueue = useCallback(async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+  const processNextDrop = useCallback(async () => {
+    if (isProcessingRef.current || queueRef.current.length === 0) {
+      return;
+    }
 
-    const dropRequest = removeFromQueue();
+    isProcessingRef.current = true;
+    const dropRequest = queueRef.current.shift();
 
     if (dropRequest) {
       try {
@@ -217,21 +197,30 @@ export default function CreateDrop({
       }
     }
 
-    setIsProcessing(false);
-  }, [isProcessing, removeFromQueue, addDropMutation]);
+    isProcessingRef.current = false;
 
-  useEffect(() => {
-    processQueue();
-  }, [processQueue, queueSize]);
+    // Process next item if queue has more
+    if (queueRef.current.length > 0) {
+      processNextDrop();
+    }
+  }, [addDropMutation]);
 
   const submitDrop = useCallback(
     (dropRequest: DropMutationBody) => {
-      addToQueue(dropRequest);
+      // Add to queue
+      queueRef.current.push(dropRequest);
+      setHasQueueChanged(true);
+      
+      // Process immediately - avoids state update timing issues
+      processNextDrop();
+      
+      // Trigger UI updates
       onDropAddedToQueue();
+      
       // Explicitly blur any focused input to close keyboard
       (document.activeElement as HTMLElement)?.blur();
     },
-    [addToQueue, onDropAddedToQueue]
+    [onDropAddedToQueue, processNextDrop]
   );
 
   const createDropContentProps = useMemo(
