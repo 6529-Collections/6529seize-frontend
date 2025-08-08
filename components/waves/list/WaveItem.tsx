@@ -167,7 +167,7 @@ export default function WaveItem({
               </Tooltip>
             )}
           </div>
-          <div className="tw-flex lg:tw-flex-col min-[1400px]:tw-flex-row tw-justify-between tw-gap-y-4 tw-gap-x-2 tw-mt-4 tw-overflow-x-auto">
+          <div className="tw-flex lg:tw-flex-col min-[1400px]:tw-flex-row tw-justify-between tw-gap-y-4 tw-gap-x-2 tw-mt-4 tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
             {wave && <WaveItemDropped wave={wave} />}
             <div className="tw-flex tw-items-center tw-gap-x-3 min-w-[1400px]:tw-ml-auto tw-mt-auto">
               <Link

@@ -13,8 +13,8 @@ export const SingleWaveDropVoteStats: React.FC<SingleWaveDropVoteStatsProps> = (
   creditType,
 }) => {
   return (
-    <div className="tw-mt-0.5 tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-400">
-      <div className="tw-flex tw-items-center tw-gap-1">
+    <div className="tw-mt-0.5 tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-text-iron-400">
+      <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
         <span>
           Your votes:{" "}
           <span className="tw-text-iron-200">
@@ -22,7 +22,7 @@ export const SingleWaveDropVoteStats: React.FC<SingleWaveDropVoteStatsProps> = (
           </span>
         </span>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-1">
+      <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
         <span>Available: </span>
         <div className="tw-flex tw-items-center">
           <div className="tw-flex tw-flex-col tw-items-center tw-mr-1 tw-leading-[0.15rem] -tw-space-y-2.5 tw-mt-0.5">

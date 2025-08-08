@@ -70,7 +70,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="tw-mt-4 tw-border-0 tw-w-full tw-flex tw-items-center tw-gap-x-4 tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl  tw-transition-colors tw-duration-200"
+            className="tw-mt-4 tw-border-0 tw-w-full tw-flex tw-items-center tw-gap-x-4 tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl tw-transition-colors tw-duration-200 tw-select-none"
             onClick={() => setIsDeleteMode(true)}>
             <svg
               className="tw-size-5 tw-flex-shrink-0 tw-text-red"

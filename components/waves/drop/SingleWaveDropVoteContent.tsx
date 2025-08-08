@@ -25,7 +25,7 @@ export const SingleWaveDropVoteContent: React.FC<
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
   const [voteValue, setVoteValue] = useState<number | string>(currentVoteValue);
-  const [isSliderMode, setIsSliderMode] = useState(true);
+  const [isSliderMode, setIsSliderMode] = useState(size !== SingleWaveDropVoteSize.MINI);
 
   useEffect(() => {
     setVoteValue(currentVoteValue);
@@ -39,11 +39,86 @@ export const SingleWaveDropVoteContent: React.FC<
     }
   };
 
+  // MINI layout uses single horizontal row, others use existing responsive layout
+  if (size === SingleWaveDropVoteSize.MINI) {
+    return (
+      /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+      <div
+        className="tw-bg-iron-800 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-2 tw-py-1.5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* MINI: Horizontal single-row layout */}
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          {/* Toggle button - icon only */}
+          <button
+            onClick={() => setIsSliderMode(!isSliderMode)}
+            className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
+                    tw-flex tw-items-center tw-justify-center tw-transition-all tw-flex-shrink-0
+                    desktop-hover:hover:tw-bg-iron-600"
+            title={isSliderMode ? "Switch to numeric" : "Switch to slider"}
+          >
+            <FontAwesomeIcon
+              icon={faExchange}
+              className="tw-text-white tw-size-3 tw-flex-shrink-0"
+              flip={isSliderMode ? "horizontal" : "vertical"}
+            />
+          </button>
+
+          {/* Input controls - flex-1 to fill space */}
+          <div className="tw-flex-1 tw-min-w-0 tw-h-8">
+            {isSliderMode ? (
+              <SingleWaveDropVoteSlider
+                voteValue={voteValue}
+                minValue={minRating}
+                maxValue={maxRating}
+                creditType={drop.wave.voting_credit_type}
+                setVoteValue={setVoteValue}
+                rank={drop.rank}
+                size={size}
+              />
+            ) : (
+              <SingleWaveDropVoteInput
+                voteValue={voteValue}
+                minValue={minRating}
+                maxValue={maxRating}
+                setVoteValue={setVoteValue}
+                onSubmit={handleSubmit}
+                creditType={drop.wave.voting_credit_type}
+                size={size}
+              />
+            )}
+          </div>
+
+          {/* Submit button - compact */}
+          <div className="tw-flex-shrink-0 tw-h-8">
+            <SingleWaveDropVoteSubmit
+              drop={drop}
+              newRating={Number(voteValue)}
+              ref={submitRef}
+              onVoteSuccess={onVoteSuccess}
+              size={size}
+            />
+          </div>
+        </div>
+        
+        {/* Stats below the controls */}
+        <div className="tw-mt-3">
+          <SingleWaveDropVoteStats
+            currentRating={drop.context_profile_context?.rating ?? 0}
+            maxRating={maxRating}
+            creditType={drop.wave.voting_credit_type}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Clean, sleek design with flexbox ordering for responsive layout
   return (
     <div
       className="tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-2 tw-py-3 sm:tw-p-4"
-      onClick={(e) => e.stopPropagation()}>
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Main container using flexbox and wrapping */}
       <div className="tw-flex tw-flex-wrap tw-gap-3 sm:tw-gap-2.5">
         {/* Toggle button - first item in both layouts */}
@@ -53,7 +128,8 @@ export const SingleWaveDropVoteContent: React.FC<
             className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
                     tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
                     desktop-hover:hover:tw-bg-iron-600"
-            title="Switch mode">
+            title="Switch mode"
+          >
             <FontAwesomeIcon
               icon={faExchange}
               className="tw-text-white tw-size-3 tw-flex-shrink-0"

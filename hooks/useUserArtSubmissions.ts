@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
 import { ApiDrop } from "../generated/models/ApiDrop";
 import { ApiDropType } from "../generated/models/ApiDropType";
@@ -11,6 +11,7 @@ interface ArtistSubmission {
   mediaMimeType: string;
   title?: string;
   createdAt: number;
+  drop?: ApiDrop;
 }
 
 interface User {
@@ -30,6 +31,48 @@ interface UseUserArtSubmissionsReturn {
   error: string | null;
 }
 
+interface UseSubmissionDropsReturn {
+  submissionsWithDrops: ArtistSubmission[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+const fetchDrop = (dropId: string) =>
+  commonApiFetch<ApiDrop>({
+    endpoint: `drops/${dropId}`,
+  });
+
+export const useSubmissionDrops = (submissions: ArtistSubmission[]): UseSubmissionDropsReturn => {
+  const dropQueries = useQueries({
+    queries: submissions.map(submission => ({
+      queryKey: [QueryKey.DROP, { drop_id: submission.id }],
+      queryFn: () => fetchDrop(submission.id),
+      enabled: !!submission.id,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    }))
+  });
+
+  const submissionsWithDrops = useMemo(() => {
+    return submissions.map((submission, index) => {
+      const dropQuery = dropQueries[index];
+      return {
+        ...submission,
+        drop: dropQuery?.data
+      };
+    }).filter(submission => submission.drop);
+  }, [submissions, dropQueries]);
+
+  const isLoading = dropQueries.some(query => query.isLoading);
+  const hasError = dropQueries.some(query => query.error);
+  const error = hasError ? "Failed to load drop data" : null;
+  
+  return {
+    submissionsWithDrops,
+    isLoading,
+    error
+  };
+};
+
 export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn => {
   // Stable query key to prevent unnecessary re-renders
   const authorKey = useMemo(() => user?.handle ?? user?.id, [user?.handle, user?.id]);
@@ -47,19 +90,11 @@ export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn 
         drop_type: ApiDropType.Participatory,
       };
       
-      console.log(`[DEBUG] Fetching art submissions for user:`, {
-        userHandle: user.handle,
-        userId: user.id,
-        authorParam: user.handle ?? user.id,
-        params
-      });
       
       const result = await commonApiFetch<ApiDrop[]>({
         endpoint: '/drops',
         params,
       });
-      
-      console.log(`[DEBUG] API returned ${result?.length || 0} drops for ${user.handle ?? user.id}:`, result);
       
       return result;
     },
@@ -74,7 +109,7 @@ export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn 
     // Get the active main stage submission IDs from the user profile
     const activeSubmissionIds = user.active_main_stage_submission_ids || [];
     
-    return drops
+    const realSubmissions = drops
       .filter(drop => drop.drop_type === ApiDropType.Participatory)
       .filter(drop => activeSubmissionIds.includes(drop.id)) // Only show ongoing main stage submissions
       .map(drop => {
@@ -91,6 +126,8 @@ export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn 
         };
       })
       .filter(submission => submission.imageUrl);
+    
+    return realSubmissions;
   }, [drops, user]);
 
   return {

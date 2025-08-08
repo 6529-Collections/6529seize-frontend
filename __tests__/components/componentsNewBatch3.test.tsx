@@ -31,10 +31,10 @@ describe('Complex Components Import Tests', () => {
       expect(typeof UserPageLayout.default).toBe('function');
     });
 
-    it('should import WaveHeaderPinned without errors', async () => {
-      const WaveHeaderPinned = await import('../../components/waves/header/WaveHeaderPinned');
-      expect(WaveHeaderPinned.default).toBeDefined();
-      expect(typeof WaveHeaderPinned.default).toBe('function');
+    it('should import WaveHeaderDescription without errors', async () => {
+      const WaveHeaderDescription = await import('../../components/waves/header/WaveHeaderDescription');
+      expect(WaveHeaderDescription.default).toBeDefined();
+      expect(typeof WaveHeaderDescription.default).toBe('function');
     });
 
     it('should import CreateDropActions without errors', async () => {
@@ -70,7 +70,7 @@ describe('Complex Components Import Tests', () => {
         import('../../components/user/user-page-header/name/UserPageHeaderEditName'),
         import('../../components/drops/view/part/DropPartMarkdownWithPropLogger'),
         import('../../components/user/layout/UserPageLayout'),
-        import('../../components/waves/header/WaveHeaderPinned'),
+        import('../../components/waves/header/WaveHeaderDescription'),
         import('../../components/waves/CreateDropActions'),
         import('../../components/drops/view/item/rate/give/DropListItemRateGiveSubmit'),
         import('../../components/user/rep/modify-rep/UserPageRepModifyModalRaterStats'),
@@ -96,7 +96,7 @@ describe('Complex Components Import Tests', () => {
         'UserPageHeaderEditName',
         'DropPartMarkdownWithPropLogger',
         'UserPageLayout',
-        'WaveHeaderPinned',
+        'WaveHeaderDescription',
         'CreateDropActions',
         'DropListItemRateGiveSubmit',
         'UserPageRepModifyModalRaterStats',
@@ -176,7 +176,7 @@ describe('Complex Components Import Tests', () => {
     });
 
     it('should handle sequential imports', async () => {
-      const component1 = await import('../../components/waves/header/WaveHeaderPinned');
+      const component1 = await import('../../components/waves/header/WaveHeaderDescription');
       expect(component1.default).toBeDefined();
 
       const component2 = await import('../../components/waves/CreateDropActions');

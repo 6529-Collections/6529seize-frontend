@@ -10,8 +10,8 @@ const TOOLTIP_STYLES = {
   color: "white",
   padding: "6px 12px",
   fontSize: "12px",
-  zIndex: 99,
-  boxShadow: "0 4px 16px 0 rgba(0,0,0,0.30), 0 2px 8px 0 rgba(55,55,62,0.25)", // Added more shadow for the tooltip
+  zIndex: 50,
+  boxShadow: "0 4px 16px 0 rgba(0,0,0,0.30), 0 2px 8px 0 rgba(55,55,62,0.25)",
 } as const;
 
 interface ArtistSubmissionBadgeProps {
@@ -28,6 +28,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
   const isMobile = useIsMobileDevice();
   const id = useId();
   const uniqueTooltipId = `${tooltipId}-${id}`;
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
 
   if (submissionCount === 0) return null;
 
@@ -37,8 +38,12 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          // Hide tooltip immediately on click
+          setIsTooltipOpen(false);
           onBadgeClick?.();
         }}
+        onMouseEnter={() => setIsTooltipOpen(true)}
+        onMouseLeave={() => setIsTooltipOpen(false)}
         className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5 tw-bg-gradient-to-br tw-from-indigo-700 tw-to-indigo-800 tw-text-white tw-rounded-md tw-border tw-border-solid tw-border-indigo-600 tw-shadow-sm tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-from-indigo-600 desktop-hover:hover:tw-to-indigo-700 desktop-hover:hover:tw-shadow-md desktop-hover:hover:tw-border-indigo-500 tw-cursor-pointer focus:tw-ring-2 focus:tw-ring-indigo-500 focus:tw-ring-opacity-50"
         aria-label={`View ${submissionCount} art submission${
           submissionCount === 1 ? "" : "s"
@@ -58,13 +63,14 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         <Tooltip
           id={uniqueTooltipId}
           place="top"
-          positionStrategy="fixed"
+          positionStrategy="absolute"
           content={`View ${submissionCount} art submission${
             submissionCount === 1 ? "" : "s"
           }`}
           delayShow={300}
           opacity={1}
           style={TOOLTIP_STYLES}
+          isOpen={isTooltipOpen}
         />
       )}
     </>

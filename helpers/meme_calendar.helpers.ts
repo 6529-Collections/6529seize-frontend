@@ -170,6 +170,17 @@ const CALENDAR_2025: YearCalendar = {
       end: Time.fromString("2025-09-30"),
       title: "Harvest",
     },
+    {
+      start: Time.fromString("2025-10-01"),
+      end: Time.fromString("2025-12-12"),
+      title: "Fall SZN13",
+      szn: 13,
+    },
+    {
+      start: Time.fromString("2025-12-13"),
+      end: Time.fromString("2026-01-01"),
+      title: "The Festivities",
+    },
   ],
 };
 

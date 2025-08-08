@@ -5,6 +5,7 @@ import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { SliderTheme, SLIDER_THEMES } from "./types/slider.types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
@@ -13,6 +14,7 @@ interface WaveDropVoteSliderProps {
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly rank?: number | null;
   readonly creditType: ApiWaveCreditType;
+  readonly size?: SingleWaveDropVoteSize;
 }
 
 interface PresetMark {
@@ -117,6 +119,7 @@ export default function WaveDropVoteSlider({
   maxValue,
   rank = null,
   creditType,
+  size = SingleWaveDropVoteSize.NORMAL,
 }: WaveDropVoteSliderProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -169,10 +172,10 @@ export default function WaveDropVoteSlider({
 
   return (
     <div
-      className="tw-h-9 tw-flex tw-items-center"
+      className={`tw-flex tw-items-center [touch-action:none] ${size === SingleWaveDropVoteSize.MINI ? 'tw-h-6' : 'tw-h-9'}`}
       onClick={(e) => e.stopPropagation()}>
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
-        <div className="tw-relative tw-h-[6px] tw-group tw-mt-6 sm:tw-mt-0">
+        <div className={`tw-relative tw-h-[6px] tw-group ${size === SingleWaveDropVoteSize.MINI ? 'tw-mt-3' : 'tw-mt-6 sm:tw-mt-0'}`}>
           {/* Base range input for track clicks */}
           <input
             type="range"
@@ -180,6 +183,11 @@ export default function WaveDropVoteSlider({
             max={maxValue}
             value={logValue}
             onChange={(e) => handleSliderChange(Number(e.target.value))}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              // Force immediate focus to allow dragging without double-tap
+              e.currentTarget.focus();
+            }}
             className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-appearance-none tw-cursor-pointer tw-opacity-0 tw-z-10"
           />
 
@@ -222,6 +230,8 @@ export default function WaveDropVoteSlider({
               onTouchStart={(e) => {
                 e.stopPropagation();
                 setIsDragging(true);
+                // Force immediate focus to allow dragging without double-tap
+                e.currentTarget.focus();
               }}
               onTouchEnd={(e) => {
                 e.stopPropagation();
