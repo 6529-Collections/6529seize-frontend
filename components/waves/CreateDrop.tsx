@@ -55,7 +55,7 @@ export default function CreateDrop({
   privileges,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
-  const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
+  const { waitAndInvalidateDrops, replaceOptimisticDrop } = useContext(ReactQueryWrapperContext);
   
   
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
@@ -143,13 +143,12 @@ export default function CreateDrop({
       return { response, tempDropId: body.dropId };
     },
     onSuccess: (data) => {
-      // Replace optimistic drop with real server data if we have both
-      if (data?.tempDropId && data?.response) {
-        // TODO: Implement replaceOptimisticDrop when available
-        // replaceOptimisticDrop({
-        //   tempDropId: data.tempDropId,
-        //   newDrop: data.response,
-        // });
+      // Replace optimistic drop with real server data immediately (faster than waiting for WebSocket)
+      if (data?.tempDropId && data?.response && replaceOptimisticDrop) {
+        replaceOptimisticDrop({
+          tempDropId: data.tempDropId,
+          newDrop: data.response,
+        });
       }
     },
     onError: (error, body) => {
