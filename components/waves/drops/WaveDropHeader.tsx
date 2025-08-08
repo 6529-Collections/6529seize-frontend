@@ -11,6 +11,7 @@ import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
 import { ArtistSubmissionPreviewModal } from "./ArtistSubmissionPreviewModal";
+import { ProfileWinnerBadge } from "./ProfileWinnerBadge";
 import { useState } from "react";
 
 interface WaveDropHeaderProps {
@@ -36,6 +37,25 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
+
+  // MOCK DATA - TODO: Replace with real winner_main_stage_drop_ids when available
+  const getMockWinnerData = (userId: string) => {
+    if (!userId) return { winCount: 0, bestRank: 1 };
+    const hash = userId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+    const patterns = [
+      { winCount: 1, bestRank: 1 }, // Gold single winner
+      { winCount: 3, bestRank: 1 }, // Gold multiple winner
+      { winCount: 1, bestRank: 2 }, // Silver single winner
+      { winCount: 2, bestRank: 2 }, // Silver multiple winner
+      { winCount: 1, bestRank: 3 }, // Bronze single winner
+      { winCount: 5, bestRank: 1 }, // Gold heavy winner
+      { winCount: 7, bestRank: 1 }, // Gold super winner
+    ];
+    const patternIndex = hash % patterns.length;
+    return patterns[patternIndex];
+  };
+
+  const mockWinnerData = getMockWinnerData(drop.author.id);
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -73,6 +93,14 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 </Link>
               </UserProfileTooltipWrapper>
             </p>
+            {mockWinnerData.winCount > 0 && (
+              <ProfileWinnerBadge 
+                winCount={mockWinnerData.winCount}
+                bestRank={mockWinnerData.bestRank}
+                size="small"
+                variant="trophy"
+              />
+            )}
             {hasSubmissions && (
               <ArtistSubmissionBadge
                 submissionCount={submissionCount}
