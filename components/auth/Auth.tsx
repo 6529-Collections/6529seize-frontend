@@ -131,10 +131,6 @@ export default function Auth({
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    if (authTimeoutRef.current) {
-      clearTimeout(authTimeoutRef.current);
-      authTimeoutRef.current = null;
-    }
     setAuthLoadingState('idle');
   }, []);
 
@@ -484,7 +480,7 @@ export default function Auth({
     };
   }, [address, abortCurrentAuthOperation]);
 
-  // Debounced authentication effect with cancellation support
+  // Immediate authentication effect with race condition prevention
   useEffect(() => {
     // Clear previous operations when dependencies change
     abortCurrentAuthOperation();
@@ -499,25 +495,44 @@ export default function Auth({
       return;
     }
     
+    // Capture current address at validation time to prevent race conditions
+    const currentAddress = address;
+    
     // Generate unique operation ID for this validation attempt
     const operationId = `auth-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     
-    // Debounce validation to prevent race conditions (500ms delay)
-    authTimeoutRef.current = setTimeout(async () => {
+    // IMMEDIATE validation - no setTimeout to prevent timing window vulnerability
+    const validateImmediately = async () => {
+      // Address consistency check - ensure address hasn't changed since effect start
+      if (currentAddress !== address) {
+        // Address changed during setup - abort this operation
+        return;
+      }
+      
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
       setAuthLoadingState('validating');
       
       try {
+        // Pre-validation address check - fail fast if address changed
+        if (abortController.signal.aborted || currentAddress !== address) {
+          return;
+        }
+        
         const { isValid, wasCancelled } = await validateJwt({
           jwt: getAuthJwt(),
-          wallet: address,
+          wallet: currentAddress, // Use captured address, not current state
           role: activeProfileProxy?.created_by.id ?? null,
           operationId,
           abortSignal: abortController.signal
         });
         
-        // Only process result if operation wasn't cancelled
+        // Post-validation address check - ensure address is still consistent
+        if (abortController.signal.aborted || currentAddress !== address) {
+          return;
+        }
+        
+        // Only process result if operation wasn't cancelled and address is still valid
         if (!wasCancelled) {
           if (!isValid) {
             if (!isConnected) {
@@ -530,8 +545,8 @@ export default function Auth({
           }
         }
       } catch (error) {
-        // Handle validation errors only if not cancelled
-        if (!abortController.signal.aborted) {
+        // Handle validation errors only if not cancelled and address hasn't changed
+        if (!abortController.signal.aborted && currentAddress === address) {
           logErrorSecurely('validateJwt', error);
           // Show sign modal on error if still connected
           if (isConnected) {
@@ -539,21 +554,17 @@ export default function Auth({
           }
         }
       } finally {
-        // Clean up
-        if (!abortController.signal.aborted) {
+        // Clean up only if this is still the current operation
+        if (!abortController.signal.aborted && currentAddress === address) {
           abortControllerRef.current = null;
           setAuthLoadingState('idle');
         }
       }
-    }, 500); // 500ms debounce to handle rapid address changes
-    
-    // Cleanup function for this effect
-    return () => {
-      if (authTimeoutRef.current) {
-        clearTimeout(authTimeoutRef.current);
-        authTimeoutRef.current = null;
-      }
     };
+    
+    validateImmediately();
+    
+    // No cleanup needed - immediate execution prevents stale timeouts
   }, [address, activeProfileProxy, connectionState, isConnected, abortCurrentAuthOperation, invalidateAll, reset]);
 
   const getNonce = async ({
