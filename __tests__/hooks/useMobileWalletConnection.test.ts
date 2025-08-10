@@ -57,6 +57,115 @@ describe('useMobileWalletConnection - Memory Leak Prevention Tests', () => {
     jest.useRealTimers();
   });
 
+  describe('CRITICAL SECURITY: Event Listener Memory Leak Prevention', () => {
+    it('should clean up visibilitychange event listener on unmount', () => {
+      const mockAddEventListener = jest.spyOn(document, 'addEventListener');
+      const { result, unmount } = renderHook(() => useMobileWalletConnection());
+      
+      // Trigger mobile connection to add visibility listener
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // Verify listener was added with AbortController signal
+      expect(mockAddEventListener).toHaveBeenCalledWith(
+        'visibilitychange', 
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+      
+      // SECURITY TEST: Unmounting should abort the signal, cleaning up listener
+      const calls = mockAddEventListener.mock.calls;
+      const visibilityCall = calls.find(call => call[0] === 'visibilitychange');
+      expect(visibilityCall).toBeDefined();
+      
+      const signal = visibilityCall![2] as { signal: AbortSignal };
+      expect(signal.signal.aborted).toBe(false);
+      
+      // Unmount should abort the signal
+      unmount();
+      
+      // The signal should be aborted after unmount
+      expect(signal.signal.aborted).toBe(true);
+      
+      mockAddEventListener.mockRestore();
+    });
+    
+    it('should abort visibility listener on first trigger to prevent memory leak', () => {
+      const mockAddEventListener = jest.spyOn(document, 'addEventListener');
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      // Mock document.visibilityState
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'hidden',
+        writable: true,
+      });
+      
+      // Trigger mobile connection to add visibility listener
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // Get the registered listener
+      const calls = mockAddEventListener.mock.calls;
+      const visibilityCall = calls.find(call => call[0] === 'visibilitychange');
+      const listener = visibilityCall![1] as () => void;
+      const signal = visibilityCall![2] as { signal: AbortSignal };
+      
+      expect(signal.signal.aborted).toBe(false);
+      
+      // Simulate visibility change
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        writable: true,
+      });
+      
+      // SECURITY TEST: Calling listener should abort signal immediately
+      act(() => {
+        listener();
+      });
+      
+      // Signal should be aborted after first trigger
+      expect(signal.signal.aborted).toBe(true);
+      
+      mockAddEventListener.mockRestore();
+    });
+    
+    it('should prevent DoS attacks through rapid connection attempts', async () => {
+      const mockAddEventListener = jest.spyOn(document, 'addEventListener');
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      // SECURITY TEST: Rapid connection attempts should not accumulate listeners
+      const attempts = 10;
+      
+      for (let i = 0; i < attempts; i++) {
+        await act(async () => {
+          try {
+            await result.current.handleMobileConnection();
+          } catch {
+            // Connection might fail, but cleanup should still work
+          }
+        });
+      }
+      
+      // Only the latest listener should be active
+      const visibilityCalls = mockAddEventListener.mock.calls.filter(
+        call => call[0] === 'visibilitychange'
+      );
+      
+      // Should have exactly one call per attempt
+      expect(visibilityCalls.length).toBe(attempts);
+      
+      // All but the last signal should be aborted
+      for (let i = 0; i < visibilityCalls.length - 1; i++) {
+        const signal = visibilityCalls[i][2] as { signal: AbortSignal };
+        expect(signal.signal.aborted).toBe(true);
+      }
+      
+      mockAddEventListener.mockRestore();
+    });
+  });
+  
   describe('CRITICAL SECURITY: Memory Leak Prevention', () => {
     it('should clean up polling timeout on unmount', () => {
       const { result, unmount } = renderHook(() => useMobileWalletConnection());
@@ -142,6 +251,33 @@ describe('useMobileWalletConnection - Memory Leak Prevention Tests', () => {
       
       // No memory leaks should remain
       expect(jest.getTimerCount()).toBe(0);
+    });
+    
+    it('should clean up visibility AbortController in resetConnection', () => {
+      const mockAddEventListener = jest.spyOn(document, 'addEventListener');
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      // Start connection to create visibility listener
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // Get the signal from the listener
+      const visibilityCalls = mockAddEventListener.mock.calls.filter(
+        call => call[0] === 'visibilitychange'
+      );
+      const signal = visibilityCalls[0][2] as { signal: AbortSignal };
+      
+      expect(signal.signal.aborted).toBe(false);
+      
+      // SECURITY TEST: Reset should abort visibility controller
+      act(() => {
+        result.current.resetConnection();
+      });
+      
+      expect(signal.signal.aborted).toBe(true);
+      
+      mockAddEventListener.mockRestore();
     });
   });
 

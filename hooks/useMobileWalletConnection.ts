@@ -53,6 +53,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
   // SECURITY: Use refs for cleanup tracking to prevent memory leaks
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const visibilityControllerRef = useRef<AbortController | null>(null);
   const isMountedRef = useRef(true);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -82,6 +83,15 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
+      
+      // SECURITY: Abort visibility listener to prevent memory leak
+      if (visibilityControllerRef.current) {
+        visibilityControllerRef.current.abort();
+        visibilityControllerRef.current = null;
+      }
+      
+      // SECURITY: Safety net - AbortController handles cleanup automatically
+      // No manual removeEventListener needed as AbortController cleans up
     };
   }, []);
 
@@ -151,15 +161,29 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         
         setConnectionState(MobileConnectionState.DEEP_LINKING);
         
-        // Add event listener for when user returns from wallet app
+        // SECURITY: Create AbortController for visibility listener cleanup
+        // Abort previous controller if it exists to prevent accumulation
+        if (visibilityControllerRef.current) {
+          visibilityControllerRef.current.abort();
+        }
+        
+        const visibilityController = new AbortController();
+        visibilityControllerRef.current = visibilityController;
+        
+        // Add event listener for when user returns from wallet app with guaranteed cleanup
         const handleVisibilityChange = () => {
           if (document.visibilityState === 'visible' && isMountedRef.current) {
             setConnectionState(MobileConnectionState.WAITING_FOR_RETURN);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            // SECURITY: Immediately abort to ensure cleanup
+            visibilityController.abort();
+            visibilityControllerRef.current = null;
           }
         };
         
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+        // SECURITY: Use AbortController signal to guarantee cleanup
+        document.addEventListener('visibilitychange', handleVisibilityChange, {
+          signal: visibilityController.signal
+        });
       }
 
       // Use AppKit modal to handle connection with proper namespace
@@ -263,6 +287,12 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
+    }
+    
+    // SECURITY: Abort visibility listener to prevent memory leak
+    if (visibilityControllerRef.current) {
+      visibilityControllerRef.current.abort();
+      visibilityControllerRef.current = null;
     }
     
     // SECURITY: Guard state updates with mount check
