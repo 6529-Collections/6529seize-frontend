@@ -115,6 +115,18 @@ export const removeAuthJwt = () => {
  * @returns The validated role from the fresh JWT
  * @throws Error if validation fails
  */
+export const syncWalletRoleWithServer = (serverRole: string | null, address: string): void => {
+  const currentRole = getWalletRole();
+  if (currentRole !== serverRole) {
+    // Update local storage to match server
+    if (serverRole) {
+      safeLocalStorage.setItem(`auth-role-${address.toLowerCase()}`, serverRole);
+    } else {
+      safeLocalStorage.removeItem(`auth-role-${address.toLowerCase()}`);
+    }
+  }
+};
+
 export const validateJwtRole = (
   freshJwt: string,
   walletRole: string | null,

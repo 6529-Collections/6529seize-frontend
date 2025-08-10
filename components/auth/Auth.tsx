@@ -14,6 +14,7 @@ import {
   getWalletRole,
   removeAuthJwt,
   setAuthJwt,
+  syncWalletRoleWithServer,
 } from "../../services/auth/auth.utils";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import { jwtDecode } from "jwt-decode";
@@ -415,40 +416,49 @@ export default function Auth({
         }
         
         const walletRole = getWalletRole();
-        // CRITICAL FIX: Get role from the NEW token, not the old one
+        // CRITICAL FIX: Get role from the NEW token, not the old one  
         const freshTokenRole = getRole({ jwt: redeemResponse.token });
 
-        // FIXED: Role validation using the fresh token from server
-        if (walletRole && freshTokenRole && freshTokenRole !== walletRole) {
-          throw new Error(
-            `Role mismatch in fresh token: wallet role ${walletRole} does not match fresh token role ${freshTokenRole}`
-          );
-        }
-        if (!walletRole && freshTokenRole) {
-          throw new Error(
-            `Unexpected role ${freshTokenRole} in fresh token when wallet has no role`
-          );
-        }
-        if (walletRole && !freshTokenRole) {
-          throw new Error(
-            `Missing role in fresh token when wallet has role ${walletRole}`
-          );
-        }
-
-        // ADDITIONAL VALIDATION: Ensure the requested role matches what we got
+        // CORRECTED VALIDATION LOGIC: Server token is authoritative
+        // The server is the source of truth for roles, not local storage
         if (role && freshTokenRole !== role) {
+          // If we specifically requested a role, ensure server provided it
           throw new Error(
             `Server returned unexpected role: requested ${role}, received ${freshTokenRole}`
           );
         }
+
+        // ADDITIONAL VALIDATION: Ensure role consistency with what was requested
+        // This validates the actual request parameter against the response
+        const requestedRole = activeProfileProxy?.created_by.id ?? null;
+        if (requestedRole && freshTokenRole !== requestedRole) {
+          throw new Error(
+            `Role mismatch: requested role ${requestedRole} but server returned ${freshTokenRole}`
+          );
+        }
+
+        // UPDATE LOCAL STORAGE: Sync local wallet role with server response
+        // The server response is authoritative - update local storage to match
+        if (walletRole !== freshTokenRole) {
+          // Log the role change for security monitoring
+          logErrorSecurely('JWT_ROLE_UPDATE', {
+            message: `Updating local wallet role from ${walletRole} to ${freshTokenRole}`,
+            oldRole: walletRole,
+            newRole: freshTokenRole,
+            address: redeemResponse.address
+          });
+        }
         
-        // Success - store the new JWT
+        // Success - store the new JWT with the SERVER-PROVIDED role (not local role)
         setAuthJwt(
           redeemResponse.address,
           redeemResponse.token,
           refreshToken,
-          walletRole ?? undefined
+          freshTokenRole ?? undefined  // ✅ USE SERVER ROLE, NOT LOCAL ROLE
         );
+        
+        // Sync local wallet role with server role
+        syncWalletRoleWithServer(freshTokenRole, redeemResponse.address);
         return { isValid: true, wasCancelled: false };
       } catch (error: any) {
         // Handle cancellation errors
