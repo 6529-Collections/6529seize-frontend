@@ -6,6 +6,7 @@ import {
   createAppWalletConnector 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
 import { walletConnect, coinbaseWallet, injected, metaMask } from 'wagmi/connectors'
+import { WalletConnectionError, ConnectionStateError } from '@/src/errors/wallet-connection'
 
 
 export class AppKitAdapterCapacitor {
@@ -15,10 +16,40 @@ export class AppKitAdapterCapacitor {
   private connectionStates = new Map<string, 'connecting' | 'connected' | 'disconnected'>()
 
   constructor(requestPassword: (address: string, addressHashed: string) => Promise<string>) {
+    if (!requestPassword) {
+      throw new WalletConnectionError('requestPassword function is required but not provided')
+    }
+    if (typeof requestPassword !== 'function') {
+      throw new WalletConnectionError('requestPassword must be a function')
+    }
     this.requestPassword = requestPassword
   }
 
+  private initializeWalletConnectionState(walletAddress: string): void {
+    if (walletAddress === null || walletAddress === undefined) {
+      throw new ConnectionStateError('Cannot initialize connection state: wallet address is required')
+    }
+    if (typeof walletAddress !== 'string') {
+      throw new ConnectionStateError('Cannot initialize connection state: wallet address must be a string', walletAddress)
+    }
+    if (walletAddress.trim() === '') {
+      throw new ConnectionStateError('Cannot initialize connection state: wallet address cannot be empty', walletAddress)
+    }
+    
+    // Only initialize if not already present
+    if (!this.connectionStates.has(walletAddress)) {
+      this.connectionStates.set(walletAddress, 'disconnected')
+    }
+  }
+
   createAdapter(appWallets: AppWallet[]): WagmiAdapter {
+    // Validate wallets FIRST before creating anything
+    for (const wallet of appWallets) {
+      if (!wallet?.address) {
+        throw new WalletConnectionError(`Invalid wallet in appWallets: missing address. Wallet: ${JSON.stringify(wallet)}`)
+      }
+    }
+    
     const networks = [mainnet]
 
     // Create mobile-specific connectors
@@ -77,8 +108,14 @@ export class AppKitAdapterCapacitor {
       connectors: allConnectors
     })
 
+    // Only set state after everything succeeds
     this.currentAdapter = wagmiAdapter
     this.currentWallets = [...appWallets]
+    
+    // Initialize connection states for all wallets
+    for (const wallet of appWallets) {
+      this.initializeWalletConnectionState(wallet.address)
+    }
     
     return wagmiAdapter
   }
@@ -105,11 +142,55 @@ export class AppKitAdapterCapacitor {
     return this.currentAdapter
   }
 
-  getConnectionState(walletAddress: string): string {
-    return this.connectionStates.get(walletAddress) || 'disconnected'
+  getConnectionState(walletAddress: string): 'connecting' | 'connected' | 'disconnected' {
+    if (walletAddress === null || walletAddress === undefined) {
+      throw new ConnectionStateError('Wallet address is required but not provided')
+    }
+    if (typeof walletAddress !== 'string') {
+      throw new ConnectionStateError('Wallet address must be a string', walletAddress)
+    }
+    if (walletAddress.trim() === '') {
+      throw new ConnectionStateError('Wallet address cannot be empty', walletAddress)
+    }
+    
+    const state = this.connectionStates.get(walletAddress)
+    if (state === undefined) {
+      throw new ConnectionStateError(`No connection state found for wallet address: ${walletAddress}`, walletAddress)
+    }
+    
+    return state
   }
 
   setConnectionState(walletAddress: string, state: 'connecting' | 'connected' | 'disconnected'): void {
+    if (walletAddress === null || walletAddress === undefined) {
+      throw new ConnectionStateError('Wallet address is required but not provided')
+    }
+    if (typeof walletAddress !== 'string') {
+      throw new ConnectionStateError('Wallet address must be a string', walletAddress)
+    }
+    if (walletAddress.trim() === '') {
+      throw new ConnectionStateError('Wallet address cannot be empty', walletAddress)
+    }
+    
+    if (!state) {
+      throw new ConnectionStateError('Connection state is required but not provided', walletAddress)
+    }
+    if (!['connecting', 'connected', 'disconnected'].includes(state)) {
+      throw new ConnectionStateError(`Invalid connection state: ${state} for wallet ${walletAddress}. Must be 'connecting', 'connected', or 'disconnected'`, walletAddress, state)
+    }
+    
+    const currentState = this.connectionStates.get(walletAddress)
+    
+    // Validate state transitions
+    if (currentState) {
+      if (currentState === 'connected' && state === 'connecting') {
+        throw new ConnectionStateError(`Invalid state transition from '${currentState}' to '${state}' for wallet ${walletAddress}`, walletAddress, state)
+      }
+      if (currentState === 'disconnected' && state === 'connected') {
+        throw new ConnectionStateError(`Invalid state transition from '${currentState}' to '${state}' for wallet ${walletAddress}. Must go through 'connecting' state first`, walletAddress, state)
+      }
+    }
+    
     this.connectionStates.set(walletAddress, state)
   }
 

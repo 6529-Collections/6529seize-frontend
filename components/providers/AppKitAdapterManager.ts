@@ -84,11 +84,6 @@ export class AppKitAdapterManager {
       throw new AdapterError('ADAPTER_003: CW_PROJECT_ID is not defined')
     }
     
-    // Validate CW_PROJECT_ID format (should be UUID-like)
-    if (typeof CW_PROJECT_ID !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(CW_PROJECT_ID)) {
-      throw new AdapterError(`ADAPTER_004: CW_PROJECT_ID has invalid format. Expected UUID format, got: ${CW_PROJECT_ID.substring(0, 8)}...`)
-    }
-
     // Create adapter with all connectors
     const wagmiAdapter = new WagmiAdapter({
       networks,

@@ -16,6 +16,8 @@ import { AppKitAdapterManager } from './AppKitAdapterManager';
 import { AppKitAdapterCapacitor } from './AppKitAdapterCapacitor';
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter';
 import { Capacitor } from '@capacitor/core';
+import { useAuth } from '../auth/Auth';
+import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
 
 export default function WagmiSetup({
   children,
@@ -23,6 +25,7 @@ export default function WagmiSetup({
   readonly children: React.ReactNode;
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
+  const { setToast } = useAuth();
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [appKitInitialized, setAppKitInitialized] = useState(false);
@@ -47,7 +50,10 @@ export default function WagmiSetup({
   // Initialize AppKit with wallets
   const initializeAppKit = (wallets: AppWallet[]) => {
     try {
-      console.log(`Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
+      // Initialize AppKit adapter for platform-specific wallet management
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[WagmiSetup] Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
+      }
       
       let newAdapter: WagmiAdapter;
       try {
@@ -56,16 +62,28 @@ export default function WagmiSetup({
           : (adapterManager as AppKitAdapterManager).createAdapterWithCache(wallets);
       } catch (error) {
         if (error instanceof AdapterError || error instanceof AdapterCacheError) {
-          console.error('[WagmiSetup] Adapter creation failed with specific error:', error.message);
+          logErrorSecurely('[WagmiSetup] Adapter creation failed', error);
+          const userMessage = sanitizeErrorForUser(error);
+          setToast({
+            message: userMessage,
+            type: "error",
+          });
           throw new Error(`Wallet adapter setup failed: ${error.message}. Please refresh the page and try again.`);
         }
-        console.error('[WagmiSetup] Adapter creation failed with unexpected error:', error);
+        logErrorSecurely('[WagmiSetup] Adapter creation failed with unexpected error', error);
+        const userMessage = sanitizeErrorForUser(error);
+        setToast({
+          message: userMessage,
+          type: "error",
+        });
         throw new Error('Failed to initialize wallet connection. Please refresh the page and try again.');
       }
       
       // Only create AppKit once
       if (!appKitInitialized) {
-        console.log('[WagmiSetup] Creating AppKit instance for the first time');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[WagmiSetup] Creating AppKit instance for the first time');
+        }
         // Mobile-specific AppKit configuration
         const appKitConfig = isCapacitor ? {
           adapters: [newAdapter],
@@ -120,7 +138,9 @@ export default function WagmiSetup({
         try {
           createAppKit(appKitConfig);
           setAppKitInitialized(true);
-          console.log('[WagmiSetup] AppKit initialized successfully');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[WagmiSetup] AppKit initialized successfully');
+          }
         } catch (appKitError) {
           console.error('[WagmiSetup] Failed to create AppKit:', appKitError);
           // Set a flag to prevent infinite retry loops
@@ -128,18 +148,21 @@ export default function WagmiSetup({
           throw new Error(`AppKit initialization failed: ${appKitError instanceof Error ? appKitError.message : String(appKitError)}`);
         }
       } else {
-        console.log('[WagmiSetup] AppKit already initialized, only updating adapter');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[WagmiSetup] AppKit already initialized, only updating adapter');
+        }
       }
       
       setCurrentAdapter(newAdapter);
       setIsInitialized(true);
     } catch (error) {
-      console.error('Error initializing AppKit:', error);
+      logErrorSecurely('[WagmiSetup] Error initializing AppKit', error);
       // Show user-friendly error message
-      if (error instanceof Error) {
-        // In a real app, you'd show this to the user via a toast/modal
-        alert(`Wallet Connection Error: ${error.message}`);
-      }
+      const userMessage = sanitizeErrorForUser(error);
+      setToast({
+        message: userMessage,
+        type: "error",
+      });
       throw error; // Re-throw to prevent app from continuing in broken state
     }
   };
@@ -161,11 +184,13 @@ export default function WagmiSetup({
           initializeAppKit(wallets);
         }
       } catch (error) {
-        console.error('[WagmiSetup] Error during wallet update:', error);
-        if (error instanceof AdapterError) {
-          // Show user-friendly error message
-          alert(`Wallet Update Error: ${error.message}`);
-        }
+        logErrorSecurely('[WagmiSetup] Error during wallet update', error);
+        // Show user-friendly error message
+        const userMessage = sanitizeErrorForUser(error);
+        setToast({
+          message: userMessage,
+          type: "error",
+        });
         throw error;
       }
     }, 300);
@@ -174,7 +199,9 @@ export default function WagmiSetup({
   // Initialize only after mounting to avoid SSR issues
   useEffect(() => {
     if (isMounted) {
-      console.log('[WagmiSetup] Client-side mounted, initializing AppKit');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[WagmiSetup] Client-side mounted, initializing AppKit');
+      }
       initializeAppKit([]);
     }
   }, [isMounted]);
@@ -192,9 +219,9 @@ export default function WagmiSetup({
       try {
         adapterManager.cleanup();
       } catch (error) {
-        console.error('[WagmiSetup] Error during cleanup:', error);
+        logErrorSecurely('[WagmiSetup] Error during cleanup', error);
         if (error instanceof AdapterCleanupError) {
-          console.error('Adapter cleanup failed:', error.message);
+          logErrorSecurely('[WagmiSetup] Adapter cleanup failed', error);
           // Don't throw here as this is in cleanup - just log the error
         }
       }
@@ -214,12 +241,14 @@ export default function WagmiSetup({
   }
 
   if (!currentAdapter || !isInitialized) {
-    console.log('[WagmiSetup] Waiting for AppKit initialization...', { 
-      hasAdapter: !!currentAdapter, 
-      isInitialized,
-      isCapacitor,
-      isMounted
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[WagmiSetup] Waiting for AppKit initialization...', { 
+        hasAdapter: !!currentAdapter, 
+        isInitialized,
+        isCapacitor,
+        isMounted
+      });
+    }
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
         <div className="text-center">

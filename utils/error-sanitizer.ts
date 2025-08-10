@@ -65,6 +65,30 @@ export const sanitizeErrorForUser = (error: unknown): string => {
     return "An unexpected error occurred. Please try again.";
   }
 
+  // Handle adapter-specific errors first (imported from @/src/errors/adapter)
+  const errorName = (error as any)?.constructor?.name;
+  if (errorName === 'AdapterError' || errorName === 'AdapterCacheError' || errorName === 'AdapterCleanupError') {
+    const adapterError = error as Error;
+    // Map adapter-specific errors to user-friendly messages
+    if (adapterError.message.includes('CACHE_')) {
+      return 'Wallet connection data needs to be refreshed. Please try connecting again.';
+    }
+    if (adapterError.message.includes('CLEANUP_')) {
+      return 'Wallet disconnection in progress. Please wait a moment before reconnecting.';
+    }
+    if (adapterError.message.includes('Adapter creation failed')) {
+      return 'Unable to initialize wallet connection. Please refresh the page and try again.';
+    }
+    if (errorName === 'AdapterCacheError') {
+      return 'Wallet connection cache needs to be cleared. Please refresh the page.';
+    }
+    if (errorName === 'AdapterCleanupError') {
+      return 'Previous wallet connection is still being cleaned up. Please wait and try again.';
+    }
+    // Default for unknown adapter errors
+    return 'Wallet connection service is temporarily unavailable. Please try again.';
+  }
+
   // Handle different error types
   let message = "";
   let errorString = "";
