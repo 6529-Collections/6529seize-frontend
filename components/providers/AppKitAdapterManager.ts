@@ -7,6 +7,35 @@ import {
 } from '@/wagmiConfig/wagmiAppWalletConnector'
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter'
 
+// Security utility: Safe wallet info extraction without exposing sensitive data
+function getSafeWalletInfo(wallet: AppWallet): string {
+  if (!wallet) return 'null wallet'
+  
+  const safeInfo: Record<string, unknown> = {
+    address: wallet.address || 'missing',
+    address_hashed: wallet.address_hashed || 'missing',
+    name: wallet.name || 'missing',
+    type: 'AppWallet'
+  }
+  
+  // Validate encrypted fields exist without exposing values
+  if (wallet.private_key) {
+    if (typeof wallet.private_key !== 'string' || wallet.private_key.length < 32) {
+      throw new AdapterError('SECURITY_001: Invalid private_key format detected')
+    }
+    safeInfo.has_private_key = true
+  }
+  
+  if (wallet.mnemonic) {
+    if (typeof wallet.mnemonic !== 'string' || wallet.mnemonic.split(' ').length < 12) {
+      throw new AdapterError('SECURITY_002: Invalid mnemonic format detected')
+    }
+    safeInfo.has_mnemonic = true
+  }
+  
+  return JSON.stringify(safeInfo)
+}
+
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null
   private currentWallets: AppWallet[] = []
@@ -17,17 +46,17 @@ export class AppKitAdapterManager {
 
   constructor(requestPassword: (address: string, addressHashed: string) => Promise<string>) {
     if (!requestPassword) {
-      throw new AdapterError('requestPassword function is required')
+      throw new AdapterError('ADAPTER_005: requestPassword function is required')
     }
     if (typeof requestPassword !== 'function') {
-      throw new AdapterError('requestPassword must be a function')
+      throw new AdapterError('ADAPTER_006: requestPassword must be a function')
     }
     this.requestPassword = requestPassword
   }
 
   createAdapter(appWallets: AppWallet[]): WagmiAdapter {
     if (!Array.isArray(appWallets)) {
-      throw new AdapterError('appWallets must be an array')
+      throw new AdapterError('ADAPTER_007: appWallets must be an array')
     }
 
     const networks = [mainnet]
@@ -35,13 +64,13 @@ export class AppKitAdapterManager {
     // Create AppWallet connectors if any exist
     const appWalletConnectors = appWallets.map(wallet => {
       if (!wallet) {
-        throw new AdapterError('Invalid wallet object found in appWallets array')
+        throw new AdapterError('ADAPTER_008: Invalid wallet object found in appWallets array')
       }
       if (!wallet.address) {
-        throw new AdapterError(`Wallet is missing required address property: ${JSON.stringify(wallet)}`)
+        throw new AdapterError(`ADAPTER_001: Wallet is missing required address property: ${getSafeWalletInfo(wallet)}`)
       }
       if (!wallet.address_hashed) {
-        throw new AdapterError(`Wallet is missing required address_hashed property: ${JSON.stringify(wallet)}`)
+        throw new AdapterError(`ADAPTER_002: Wallet is missing required address_hashed property: ${getSafeWalletInfo(wallet)}`)
       }
 
       return createAppWalletConnector(
@@ -52,7 +81,12 @@ export class AppKitAdapterManager {
     })
 
     if (!CW_PROJECT_ID) {
-      throw new AdapterError('CW_PROJECT_ID is not defined')
+      throw new AdapterError('ADAPTER_003: CW_PROJECT_ID is not defined')
+    }
+    
+    // Validate CW_PROJECT_ID format (should be UUID-like)
+    if (typeof CW_PROJECT_ID !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(CW_PROJECT_ID)) {
+      throw new AdapterError(`ADAPTER_004: CW_PROJECT_ID has invalid format. Expected UUID format, got: ${CW_PROJECT_ID.substring(0, 8)}...`)
     }
 
     // Create adapter with all connectors
@@ -71,7 +105,7 @@ export class AppKitAdapterManager {
 
   shouldRecreateAdapter(newWallets: AppWallet[]): boolean {
     if (!Array.isArray(newWallets)) {
-      throw new AdapterError('newWallets must be an array')
+      throw new AdapterError('ADAPTER_009: newWallets must be an array')
     }
 
     if (!this.currentAdapter) return true
@@ -79,13 +113,13 @@ export class AppKitAdapterManager {
     
     const currentAddresses = new Set(this.currentWallets.map(w => {
       if (!w || !w.address) {
-        throw new AdapterError('Invalid wallet in currentWallets array')
+        throw new AdapterError('ADAPTER_010: Invalid wallet in currentWallets array')
       }
       return w.address
     }))
     const newAddresses = new Set(newWallets.map(w => {
       if (!w || !w.address) {
-        throw new AdapterError('Invalid wallet in newWallets array')
+        throw new AdapterError('ADAPTER_011: Invalid wallet in newWallets array')
       }
       return w.address
     }))
@@ -103,7 +137,7 @@ export class AppKitAdapterManager {
 
   createAdapterWithCache(appWallets: AppWallet[]): WagmiAdapter {
     if (!Array.isArray(appWallets)) {
-      throw new AdapterError('appWallets must be an array')
+      throw new AdapterError('ADAPTER_012: appWallets must be an array')
     }
 
     const cacheKey = this.getCacheKey(appWallets)
@@ -111,7 +145,7 @@ export class AppKitAdapterManager {
     if (this.adapterCache.has(cacheKey)) {
       const cachedAdapter = this.adapterCache.get(cacheKey)
       if (!cachedAdapter) {
-        throw new AdapterCacheError('Cached adapter is null or undefined')
+        throw new AdapterCacheError('CACHE_001: Cached adapter is null or undefined')
       }
       this.currentAdapter = cachedAdapter
       this.currentWallets = [...appWallets]
@@ -138,10 +172,10 @@ export class AppKitAdapterManager {
 
   private performAdapterCleanup(adapter: WagmiAdapter, cacheKey: string): void {
     if (!adapter) {
-      throw new AdapterCleanupError('Cannot cleanup null or undefined adapter')
+      throw new AdapterCleanupError('CLEANUP_001: Cannot cleanup null or undefined adapter')
     }
     if (!cacheKey) {
-      throw new AdapterCleanupError('Cannot cleanup adapter without cache key')
+      throw new AdapterCleanupError('CLEANUP_002: Cannot cleanup adapter without cache key')
     }
 
     try {
@@ -151,28 +185,26 @@ export class AppKitAdapterManager {
       
       // Verify the adapter is not currently active
       if (adapter === this.currentAdapter) {
-        throw new AdapterCleanupError(`Cannot cleanup currently active adapter for key: ${cacheKey}`)
+        throw new AdapterCleanupError(`CLEANUP_003: Cannot cleanup currently active adapter for key: ${cacheKey}`)
       }
 
-      // Log cleanup for monitoring purposes
-      console.log(`[AppKitAdapterManager] Cleaning up obsolete adapter: ${cacheKey}`)
       
       // The adapter will be removed from cache by caller
       // Memory cleanup will be handled by garbage collection
       
     } catch (error) {
-      throw new AdapterCleanupError(`Failed to cleanup adapter for key ${cacheKey}`, error)
+      throw new AdapterCleanupError(`CLEANUP_004: Failed to cleanup adapter for key ${cacheKey}`, error)
     }
   }
 
   private getCacheKey(wallets: AppWallet[]): string {
     if (!Array.isArray(wallets)) {
-      throw new AdapterError('Cannot generate cache key: wallets must be an array')
+      throw new AdapterError('ADAPTER_013: Cannot generate cache key: wallets must be an array')
     }
 
     const addresses = wallets.map(w => {
       if (!w || !w.address) {
-        throw new AdapterError('Cannot generate cache key: invalid wallet object')
+        throw new AdapterError('ADAPTER_014: Cannot generate cache key: invalid wallet object')
       }
       return w.address
     })
@@ -190,10 +222,10 @@ export class AppKitAdapterManager {
 
   getConnectionState(walletAddress: string): 'connecting' | 'connected' | 'disconnected' {
     if (!walletAddress) {
-      throw new AdapterError('walletAddress is required')
+      throw new AdapterError('ADAPTER_015: walletAddress is required')
     }
     if (typeof walletAddress !== 'string') {
-      throw new AdapterError('walletAddress must be a string')
+      throw new AdapterError('ADAPTER_016: walletAddress must be a string')
     }
 
     const state = this.connectionStates.get(walletAddress)
@@ -202,16 +234,16 @@ export class AppKitAdapterManager {
 
   setConnectionState(walletAddress: string, state: 'connecting' | 'connected' | 'disconnected'): void {
     if (!walletAddress) {
-      throw new AdapterError('walletAddress is required')
+      throw new AdapterError('ADAPTER_017: walletAddress is required')
     }
     if (typeof walletAddress !== 'string') {
-      throw new AdapterError('walletAddress must be a string')
+      throw new AdapterError('ADAPTER_018: walletAddress must be a string')
     }
     if (!state) {
-      throw new AdapterError('state is required')
+      throw new AdapterError('ADAPTER_019: state is required')
     }
     if (!['connecting', 'connected', 'disconnected'].includes(state)) {
-      throw new AdapterError(`Invalid state: ${state}. Must be 'connecting', 'connected', or 'disconnected'`)
+      throw new AdapterError(`ADAPTER_020: Invalid state: ${state}. Must be 'connecting', 'connected', or 'disconnected'`)
     }
 
     this.connectionStates.set(walletAddress, state)
@@ -247,7 +279,7 @@ export class AppKitAdapterManager {
           `Key: ${key}, Error: ${error instanceof Error ? error.message : String(error)}`
         )
         throw new AdapterCleanupError(
-          `Failed to cleanup ${cleanupErrors.length} adapter(s): ${errorMessages.join('; ')}`
+          `CLEANUP_005: Failed to cleanup ${cleanupErrors.length} adapter(s): ${errorMessages.join('; ')}`
         )
       }
 
@@ -255,7 +287,7 @@ export class AppKitAdapterManager {
       if (error instanceof AdapterCleanupError) {
         throw error
       }
-      throw new AdapterCleanupError('Unexpected error during cleanup', error)
+      throw new AdapterCleanupError('CLEANUP_006: Unexpected error during cleanup', error)
     }
   }
 }
