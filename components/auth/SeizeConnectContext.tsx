@@ -163,15 +163,25 @@ const logSecurityEvent = (eventType: string, details: Record<string, unknown>): 
   const timestamp = new Date().toISOString();
   const isProduction = process.env.NODE_ENV === 'production';
   
-  // Sanitize any addresses in details for production logging
+  // Enhanced sanitization for production logging
   const sanitizedDetails = isProduction ? {
     ...details,
-    address: details.address ? '0x***REDACTED***' : undefined,
-    // Keep other non-sensitive details as-is
+    // Remove any address fields completely in production for maximum privacy
+    address: undefined,
+    // Keep diagnostic data that's safe to log
     valid: details.valid,
     walletName: details.walletName,
-    source: details.source
-  } : details;
+    source: details.source,
+    addressLength: details.addressLength,
+    addressFormat: details.addressFormat,
+    timestamp: details.timestamp
+  } : {
+    // In development, show first 6 and last 4 characters for debugging
+    ...details,
+    address: typeof details.address === 'string' && details.address.length >= 10 ?
+      details.address.slice(0, 6) + '...' + details.address.slice(-4) :
+      details.address
+  };
   
   console.warn(`[SEIZE_SECURITY_EVENT] ${eventType}:`, {
     timestamp,
@@ -333,25 +343,37 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const seizeAcceptConnection = useCallback((address: string): void => {
-    if (!isValidAddress(address)) {
-      // Log invalid address attempt for security monitoring
+    // Pre-validate and sanitize address for logging
+    const isValidAddr = isValidAddress(address);
+    const sanitizedAddress = isValidAddr ? 
+      getAddress(address).slice(0, 6) + '...' + getAddress(address).slice(-4) :
+      'INVALID_FORMAT';
+
+    // Extract diagnostic data before validation check
+    const addressLength = address.length;
+    const addressFormat = address.startsWith('0x') ? 'hex_prefixed' : 'other';
+
+    if (!isValidAddr) {
+      // Log with sanitized address for security monitoring
       logSecurityEvent('invalid_address_attempt', {
-        address,
+        address: sanitizedAddress, // ✅ SANITIZED ADDRESS
         source: 'seizeAcceptConnection',
         valid: false,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        addressLength,
+        addressFormat
       });
       
       const error = new AuthenticationError(
-        `Invalid Ethereum address: ${address}. Address must be a valid EIP-55 checksummed format.`
+        'Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format.'
       );
       logError('seizeAcceptConnection', error);
       throw error;
     }
     
-    // Log successful address validation for security monitoring
+    // Log successful address validation with sanitized data
     logSecurityEvent('address_validation_success', {
-      address,
+      address: sanitizedAddress, // ✅ SANITIZED ADDRESS
       source: 'seizeAcceptConnection',
       valid: true,
       timestamp: new Date().toISOString()

@@ -269,7 +269,7 @@ describe('SeizeConnectContext Security Logging', () => {
       );
     });
 
-    it('logs invalid address attempts with sanitization in production', async () => {
+    it('logs invalid address attempts with complete address removal in production', async () => {
       process.env.NODE_ENV = 'production';
 
       render(
@@ -293,15 +293,17 @@ describe('SeizeConnectContext Security Logging', () => {
         expect.objectContaining({
           timestamp: expect.any(String),
           eventType: 'invalid_address_attempt',
-          address: '0x***REDACTED***', // Should be sanitized in production
+          address: undefined, // Completely removed in production
           source: 'seizeAcceptConnection',
           valid: false,
+          addressLength: 15, // Safe diagnostic data
+          addressFormat: 'other',
           userAgent: expect.any(String)
         })
       );
     });
 
-    it('logs valid address acceptance with sanitization in production', async () => {
+    it('logs valid address acceptance with complete address removal in production', async () => {
       process.env.NODE_ENV = 'production';
 
       render(
@@ -321,7 +323,7 @@ describe('SeizeConnectContext Security Logging', () => {
         expect.objectContaining({
           timestamp: expect.any(String),
           eventType: 'address_validation_success',
-          address: '0x***REDACTED***', // Should be sanitized in production
+          address: undefined, // Completely removed in production
           source: 'seizeAcceptConnection',
           valid: true,
           userAgent: expect.any(String)
@@ -329,7 +331,7 @@ describe('SeizeConnectContext Security Logging', () => {
       );
     });
 
-    it('preserves full address details in development mode', async () => {
+    it('shows truncated address in development mode', async () => {
       process.env.NODE_ENV = 'development';
 
       render(
@@ -349,10 +351,63 @@ describe('SeizeConnectContext Security Logging', () => {
         expect.objectContaining({
           timestamp: expect.any(String),
           eventType: 'address_validation_success',
-          address: '0x1234567890123456789012345678901234567890', // Full address in development
+          address: '0x1234...7890', // Truncated address in development
           source: 'seizeAcceptConnection',
           valid: true,
           userAgent: expect.any(String)
+        })
+      );
+    });
+
+    it('never logs raw addresses in production', async () => {
+      process.env.NODE_ENV = 'production';
+
+      render(
+        <SeizeConnectProvider>
+          <TestComponent />
+        </SeizeConnectProvider>
+      );
+
+      const acceptValidButton = screen.getByTestId('accept-valid');
+      
+      await act(async () => {
+        fireEvent.click(acceptValidButton);
+      });
+
+      // Check that no console call contains raw addresses
+      const allCalls = [...consoleWarnSpy.mock.calls, ...consoleErrorSpy.mock.calls];
+      const callsAsString = JSON.stringify(allCalls);
+      
+      expect(callsAsString).not.toContain('0x1234567890123456789012345678901234567890');
+      expect(callsAsString).not.toContain('invalid-address');
+    });
+
+    it('includes safe diagnostic data in production logs', async () => {
+      process.env.NODE_ENV = 'production';
+
+      render(
+        <SeizeConnectProvider>
+          <TestComponent />
+        </SeizeConnectProvider>
+      );
+
+      const acceptInvalidButton = screen.getByTestId('accept-invalid');
+      
+      await act(async () => {
+        try {
+          fireEvent.click(acceptInvalidButton);
+        } catch {
+          // Expected to throw
+        }
+      });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        '[SEIZE_SECURITY_EVENT] invalid_address_attempt:',
+        expect.objectContaining({
+          addressLength: expect.any(Number),
+          addressFormat: expect.stringMatching(/^(hex_prefixed|other|non_string)$/),
+          source: 'seizeAcceptConnection',
+          valid: false
         })
       );
     });
@@ -469,13 +524,15 @@ describe('SeizeConnectContext Security Logging', () => {
         }
       });
       
-      // Verify that the error was logged
+      // Verify that the error was logged with proper privacy protection
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         '[SEIZE_SECURITY_EVENT] invalid_address_attempt:',
         expect.objectContaining({
           eventType: 'invalid_address_attempt',
-          valid: false
+          valid: false,
+          // In any environment, raw address should not appear in logs
+          address: expect.not.stringMatching(/invalid-address/)
         })
       );
     });
