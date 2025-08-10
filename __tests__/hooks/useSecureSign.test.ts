@@ -812,6 +812,394 @@ describe('useSecureSign', () => {
     });
   });
 
+  describe('Security Tests - Malicious Provider Detection', () => {
+    beforeEach(() => {
+      mockUseAppKitAccount.mockReturnValue({
+        address: '0x1234567890123456789012345678901234567890',
+        isConnected: true,
+        caipAddress: '',
+        status: 'connected'
+      });
+    });
+
+    it('throws ProviderValidationError for provider with eval method', async () => {
+      const maliciousProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+        eval: () => 'malicious code',
+      };
+      maliciousProvider.eval.toString = () => 'function() { eval("malicious"); }';
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: maliciousProvider as any,
+      });
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Provider contains suspicious execution methods');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+
+    it('throws ProviderValidationError for provider with Function constructor', async () => {
+      const maliciousProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+        Function: () => 'malicious',
+      };
+      maliciousProvider.Function.toString = () => 'function() { Function("return this")(); }';
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: maliciousProvider as any,
+      });
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Provider contains suspicious execution methods');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+
+    it('throws ProviderValidationError for mock provider (jest indicator)', async () => {
+      const mockProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+        jest: true, // Mock indicator
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: mockProvider as any,
+      });
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Provider appears to be a mock or test provider');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+
+    it('throws ProviderValidationError for fake provider (fake indicator)', async () => {
+      const fakeProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+        fake: 'fake_wallet', // Mock indicator
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: fakeProvider as any,
+      });
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Provider appears to be a mock or test provider');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+
+    it('throws ProviderValidationError for spy provider (spy indicator)', async () => {
+      const spyProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+        spy: jest.fn(), // Mock indicator
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: spyProvider as any,
+      });
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Provider appears to be a mock or test provider');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+  });
+
+  describe('Security Tests - Invalid Provider Rejection', () => {
+    beforeEach(() => {
+      mockUseAppKitAccount.mockReturnValue({
+        address: '0x1234567890123456789012345678901234567890',
+        isConnected: true,
+        caipAddress: '',
+        status: 'connected'
+      });
+    });
+
+    it('throws ProviderValidationError for provider with non-function request method', async () => {
+      const invalidProvider = {
+        request: 'not-a-function',
+        isMetaMask: true,
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: invalidProvider as any,
+      });
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Provider request method is not a function');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+
+    it('throws ProviderValidationError for provider with broken request method', async () => {
+      const brokenProvider = {
+        request: null,
+        isMetaMask: true,
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: brokenProvider as any,
+      });
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Provider request method is not a function');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+  });
+
+  describe('Security Tests - Legitimate Provider Acceptance', () => {
+    it('accepts legitimate MetaMask provider', async () => {
+      const testAddress = '0x1234567890123456789012345678901234567890';
+      const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+      
+      mockUseAppKitAccount.mockReturnValue({
+        address: testAddress,
+        isConnected: true,
+        caipAddress: '',
+        status: 'connected'
+      });
+      
+      // Legitimate MetaMask provider
+      const legitimateProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+        enable: jest.fn(),
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: legitimateProvider as any,
+      });
+
+      const mockSigner = {
+        getAddress: jest.fn().mockResolvedValue(testAddress),
+        signMessage: jest.fn().mockResolvedValue(validSignature),
+      };
+      
+      const mockProvider = {
+        getSigner: jest.fn().mockResolvedValue(mockSigner),
+      };
+      
+      MockBrowserProvider.mockImplementation(() => mockProvider as any);
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.signature).toBe(validSignature);
+        expect(signResult.userRejected).toBe(false);
+        expect(signResult.error).toBeUndefined();
+      });
+    });
+
+    it('accepts legitimate Coinbase Wallet provider', async () => {
+      const testAddress = '0x1234567890123456789012345678901234567890';
+      const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+      
+      mockUseAppKitAccount.mockReturnValue({
+        address: testAddress,
+        isConnected: true,
+        caipAddress: '',
+        status: 'connected'
+      });
+      
+      // Legitimate Coinbase Wallet provider
+      const legitimateProvider = {
+        request: jest.fn(),
+        isCoinbaseWallet: true,
+        send: jest.fn(),
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: legitimateProvider as any,
+      });
+
+      const mockSigner = {
+        getAddress: jest.fn().mockResolvedValue(testAddress),
+        signMessage: jest.fn().mockResolvedValue(validSignature),
+      };
+      
+      const mockProvider = {
+        getSigner: jest.fn().mockResolvedValue(mockSigner),
+      };
+      
+      MockBrowserProvider.mockImplementation(() => mockProvider as any);
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.signature).toBe(validSignature);
+        expect(signResult.userRejected).toBe(false);
+        expect(signResult.error).toBeUndefined();
+      });
+    });
+
+    it('accepts legitimate WalletConnect provider', async () => {
+      const testAddress = '0x1234567890123456789012345678901234567890';
+      const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+      
+      mockUseAppKitAccount.mockReturnValue({
+        address: testAddress,
+        isConnected: true,
+        caipAddress: '',
+        status: 'connected'
+      });
+      
+      // Legitimate WalletConnect provider
+      const legitimateProvider = {
+        request: jest.fn(),
+        isWalletConnect: true,
+        enable: jest.fn(),
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: legitimateProvider as any,
+      });
+
+      const mockSigner = {
+        getAddress: jest.fn().mockResolvedValue(testAddress),
+        signMessage: jest.fn().mockResolvedValue(validSignature),
+      };
+      
+      const mockProvider = {
+        getSigner: jest.fn().mockResolvedValue(mockSigner),
+      };
+      
+      MockBrowserProvider.mockImplementation(() => mockProvider as any);
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.signature).toBe(validSignature);
+        expect(signResult.userRejected).toBe(false);
+        expect(signResult.error).toBeUndefined();
+      });
+    });
+  });
+
+  describe('Security Tests - Type Safety Verification', () => {
+    it('verifies no null signatures on successful signing', async () => {
+      const testAddress = '0x1234567890123456789012345678901234567890';
+      const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+      
+      mockUseAppKitAccount.mockReturnValue({
+        address: testAddress,
+        isConnected: true,
+        caipAddress: '',
+        status: 'connected'
+      });
+      
+      const legitimateProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: legitimateProvider as any,
+      });
+
+      const mockSigner = {
+        getAddress: jest.fn().mockResolvedValue(testAddress),
+        signMessage: jest.fn().mockResolvedValue(validSignature),
+      };
+      
+      const mockProvider = {
+        getSigner: jest.fn().mockResolvedValue(mockSigner),
+      };
+      
+      MockBrowserProvider.mockImplementation(() => mockProvider as any);
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        // SECURITY: Verify no null signature on success
+        expect(signResult.signature).not.toBeNull();
+        expect(signResult.signature).toBe(validSignature);
+        expect(signResult.userRejected).toBe(false);
+        expect(signResult.error).toBeUndefined();
+      });
+    });
+
+    it('throws ProviderValidationError when signer is null', async () => {
+      const testAddress = '0x1234567890123456789012345678901234567890';
+      
+      mockUseAppKitAccount.mockReturnValue({
+        address: testAddress,
+        isConnected: true,
+        caipAddress: '',
+        status: 'connected'
+      });
+      
+      const legitimateProvider = {
+        request: jest.fn(),
+        isMetaMask: true,
+      };
+      
+      mockUseAppKitProvider.mockReturnValue({
+        walletProvider: legitimateProvider as any,
+      });
+
+      const mockProvider = {
+        getSigner: jest.fn().mockResolvedValue(null), // Null signer
+      };
+      
+      MockBrowserProvider.mockImplementation(() => mockProvider as any);
+
+      const { result } = renderHook(() => useSecureSign());
+
+      await act(async () => {
+        const signResult = await result.current.signMessage('test message');
+        expect(signResult.error?.name).toBe('ProviderValidationError');
+        expect(signResult.error?.message).toBe('Failed to get signer from ethers provider');
+        expect(signResult.signature).toBeNull();
+        expect(signResult.userRejected).toBe(false);
+      });
+    });
+  });
+
   describe('Security Tests - Error Handling', () => {
     it('properly classifies ProviderValidationError', async () => {
       mockUseAppKitAccount.mockReturnValue({
