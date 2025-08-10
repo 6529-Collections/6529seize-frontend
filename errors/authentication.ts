@@ -54,3 +54,43 @@ export class TokenRefreshServerError extends TokenRefreshError {
     this.name = 'TokenRefreshServerError';
   }
 }
+
+/**
+ * Base class for authentication role errors
+ * All role validation operations should throw subclasses of this error
+ */
+export class AuthenticationRoleError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'AuthenticationRoleError';
+    Object.setPrototypeOf(this, AuthenticationRoleError.prototype);
+  }
+}
+
+/**
+ * Thrown when role validation fails due to role mismatch
+ * Indicates that expected role does not match actual role received
+ */
+export class RoleValidationError extends AuthenticationRoleError {
+  constructor(
+    expectedRole: string | null,
+    actualRole: string | null,
+    cause?: unknown
+  ) {
+    super(`Role validation failed: expected ${expectedRole}, got ${actualRole}`, cause);
+    this.name = 'RoleValidationError';
+    Object.setPrototypeOf(this, RoleValidationError.prototype);
+  }
+}
+
+/**
+ * Thrown when active profile proxy is required but is null/undefined
+ * This indicates a critical state inconsistency in role-based authentication
+ */
+export class MissingActiveProfileError extends AuthenticationRoleError {
+  constructor() {
+    super('Active profile proxy is required for role-based authentication but is null');
+    this.name = 'MissingActiveProfileError';
+    Object.setPrototypeOf(this, MissingActiveProfileError.prototype);
+  }
+}

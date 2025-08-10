@@ -42,7 +42,10 @@ import {
   TokenRefreshError,
   TokenRefreshCancelledError,
   TokenRefreshNetworkError,
-  TokenRefreshServerError 
+  TokenRefreshServerError,
+  AuthenticationRoleError,
+  RoleValidationError,
+  MissingActiveProfileError
 } from "../../errors/authentication";
 
 // Custom error classes for authentication failures
@@ -419,22 +422,34 @@ export default function Auth({
         // CRITICAL FIX: Get role from the NEW token, not the old one  
         const freshTokenRole = getRole({ jwt: redeemResponse.token });
 
-        // CORRECTED VALIDATION LOGIC: Server token is authoritative
+        // CRITICAL FIX: FAIL-FAST validation with NO optional chaining
         // The server is the source of truth for roles, not local storage
         if (role && freshTokenRole !== role) {
           // If we specifically requested a role, ensure server provided it
-          throw new Error(
-            `Server returned unexpected role: requested ${role}, received ${freshTokenRole}`
-          );
+          throw new RoleValidationError(role, freshTokenRole);
         }
 
         // ADDITIONAL VALIDATION: Ensure role consistency with what was requested
-        // This validates the actual request parameter against the response
-        const requestedRole = activeProfileProxy?.created_by.id ?? null;
-        if (requestedRole && freshTokenRole !== requestedRole) {
-          throw new Error(
-            `Role mismatch: requested role ${requestedRole} but server returned ${freshTokenRole}`
+        // FAIL-FAST: NO optional chaining - if activeProfileProxy is null, this MUST fail
+        if (activeProfileProxy === null || activeProfileProxy === undefined) {
+          // If we're doing role-based authentication but have no active profile proxy,
+          // this is a critical state inconsistency that must fail immediately
+          throw new MissingActiveProfileError();
+        }
+
+        // FAIL-FAST: Direct property access - will throw if structure is invalid
+        const requestedRole = activeProfileProxy.created_by.id;
+
+        // Validate that requestedRole is not null/undefined/empty
+        if (!requestedRole || typeof requestedRole !== 'string' || requestedRole.trim().length === 0) {
+          throw new AuthenticationRoleError(
+            'Active profile proxy has invalid created_by.id - role validation cannot proceed'
           );
+        }
+
+        // Now perform the role comparison with guaranteed non-null values
+        if (freshTokenRole !== requestedRole) {
+          throw new RoleValidationError(requestedRole, freshTokenRole);
         }
 
         // UPDATE LOCAL STORAGE: Sync local wallet role with server response
@@ -557,7 +572,21 @@ export default function Auth({
       } catch (error) {
         // Handle validation errors only if not cancelled and address hasn't changed
         if (!abortController.signal.aborted && currentAddress === address) {
-          logErrorSecurely('validateJwt', error);
+          // Handle specific authentication role errors
+          if (error instanceof MissingActiveProfileError || 
+              error instanceof RoleValidationError || 
+              error instanceof AuthenticationRoleError) {
+            // These are critical authentication failures - log and force re-authentication
+            logErrorSecurely('validateJwt_role_error', error);
+            // Force user to re-authenticate with proper role
+            removeAuthJwt();
+            invalidateAll();
+            setShowSignModal(true);
+          } else {
+            // Handle other validation errors
+            logErrorSecurely('validateJwt_general_error', error);
+          }
+          
           // Show sign modal on error if still connected
           if (isConnected) {
             setShowSignModal(true);
