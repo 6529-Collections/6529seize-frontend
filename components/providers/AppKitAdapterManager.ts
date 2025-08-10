@@ -8,6 +8,75 @@ import {
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter'
 import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
 
+// Security validation: Fail-fast wallet validation without exposing sensitive data
+function validateWalletSafely(wallet: AppWallet): void {
+  // FAIL-FAST: Never return on null/undefined wallet
+  if (!wallet) {
+    throw new WalletValidationError('Wallet object is null or undefined - cannot process');
+  }
+  
+  // FAIL-FAST: Validate required fields explicitly
+  if (!wallet.address) {
+    throw new WalletValidationError('Wallet missing required address field');
+  }
+  
+  if (typeof wallet.address !== 'string') {
+    throw new WalletValidationError('Wallet address must be a string');
+  }
+  
+  if (!wallet.address.match(/^0x[a-fA-F0-9]{40}$/)) {
+    throw new WalletValidationError('Wallet address has invalid Ethereum format');
+  }
+  
+  if (!wallet.address_hashed) {
+    throw new WalletValidationError('Wallet missing required address_hashed field');
+  }
+  
+  if (typeof wallet.address_hashed !== 'string') {
+    throw new WalletValidationError('Wallet address_hashed must be a string');
+  }
+  
+  if (wallet.address_hashed.length < 64) {
+    throw new WalletValidationError('Wallet address_hashed too short - potential security issue');
+  }
+  
+  if (!wallet.name) {
+    throw new WalletValidationError('Wallet missing required name field');
+  }
+  
+  if (typeof wallet.name !== 'string') {
+    throw new WalletValidationError('Wallet name must be a string');
+  }
+  
+  if (wallet.name.length === 0 || wallet.name.length > 100) {
+    throw new WalletValidationError('Wallet name length must be between 1 and 100 characters');
+  }
+
+  // Validate encrypted fields exist without exposing values
+  if (wallet.private_key) {
+    if (typeof wallet.private_key !== 'string') {
+      throw new WalletSecurityError('Private key must be a string');
+    }
+    if (wallet.private_key.length < 32) {
+      throw new WalletSecurityError('Private key too short - security violation detected');
+    }
+  }
+  
+  if (wallet.mnemonic) {
+    if (typeof wallet.mnemonic !== 'string') {
+      throw new WalletSecurityError('Mnemonic must be a string');
+    }
+    const words = wallet.mnemonic.trim().split(/\s+/);
+    if (words.length < 12 || words.length > 24) {
+      throw new WalletSecurityError('Mnemonic word count invalid - security violation detected');
+    }
+    // Validate all words are non-empty
+    if (words.some(word => !word || word.length === 0)) {
+      throw new WalletSecurityError('Mnemonic contains empty words - security violation detected');
+    }
+  }
+}
+
 // Security utility: Safe wallet info extraction without exposing sensitive data
 function getSafeWalletInfo(wallet: AppWallet): string {
   // FAIL-FAST: Never return on null/undefined wallet
@@ -120,16 +189,11 @@ export class AppKitAdapterManager {
       }
       
       try {
-        // getSafeWalletInfo will now throw on any validation failure
-        const safeInfo = getSafeWalletInfo(wallet); // Will throw on ANY failure
+        // FAIL-FAST: Validate wallet security before any processing
+        validateWalletSafely(wallet); // Will throw immediately on ANY failure
         
-        // These checks are redundant now but kept for backwards compatibility
-        if (!wallet.address) {
-          throw new AdapterError(`ADAPTER_001: Wallet is missing required address property: ${safeInfo}`)
-        }
-        if (!wallet.address_hashed) {
-          throw new AdapterError(`ADAPTER_002: Wallet is missing required address_hashed property: ${safeInfo}`)
-        }
+        // Extract safe info only after validation passes
+        const safeInfo = getSafeWalletInfo(wallet);
 
         return createAppWalletConnector(
           networks,

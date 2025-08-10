@@ -15,6 +15,7 @@ import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
 import { AppKitAdapterCapacitor } from './AppKitAdapterCapacitor';
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter';
+import { AppKitInitializationError, AppKitValidationError, AppKitTimeoutError, AppKitRetryError } from '@/src/errors/appkit-initialization';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../auth/Auth';
 import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
@@ -31,9 +32,55 @@ export default function WagmiSetup({
   const [appKitInitialized, setAppKitInitialized] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Retry tracking state for fail-fast behavior
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [lastFailureTime, setLastFailureTime] = useState<number | null>(null);
+  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = [1000, 2000, 4000]; // Exponential backoff
+  const INIT_TIMEOUT_MS = 10000; // 10 second timeout
 
   // Memoize platform detection to avoid repeated calls
   const isCapacitor = useMemo(() => Capacitor.isNativePlatform(), []);
+  
+  // Validate initialization preconditions - FAIL-FAST approach
+  const validateInitializationPreconditions = (wallets: AppWallet[]): void => {
+    // Validate project ID exists
+    if (!CW_PROJECT_ID) {
+      throw new AppKitValidationError('CW_PROJECT_ID is not defined - cannot initialize AppKit');
+    }
+    
+    if (typeof CW_PROJECT_ID !== 'string' || CW_PROJECT_ID.length === 0) {
+      throw new AppKitValidationError('CW_PROJECT_ID must be a non-empty string');
+    }
+    
+    // Validate base endpoint
+    if (!VALIDATED_BASE_ENDPOINT) {
+      throw new AppKitValidationError('VALIDATED_BASE_ENDPOINT is not defined');
+    }
+    
+    // Validate wallets array
+    if (!Array.isArray(wallets)) {
+      throw new AppKitValidationError('Wallets must be an array');
+    }
+    
+    // Validate adapter manager
+    if (!adapterManager) {
+      throw new AppKitValidationError('Adapter manager is not initialized');
+    }
+    
+    // Check if we're in a retry loop that should fail
+    if (retryCount >= MAX_RETRIES) {
+      throw new AppKitRetryError('Maximum retry attempts reached', retryCount);
+    }
+    
+    // Check for retry cooldown period
+    if (lastFailureTime && Date.now() - lastFailureTime < 5000) {
+      throw new AppKitValidationError('Retry attempt too soon after last failure');
+    }
+  };
 
   // Handle client-side mounting for App Router
   useEffect(() => {
@@ -47,9 +94,28 @@ export default function WagmiSetup({
     [appWalletPasswordModal.requestPassword, isCapacitor]
   );
 
-  // Initialize AppKit with wallets
+  // Initialize AppKit with wallets - FAIL-FAST implementation
   const initializeAppKit = (wallets: AppWallet[]) => {
+    // Clear any existing initialization timeout
+    if (initTimeoutRef.current) {
+      clearTimeout(initTimeoutRef.current);
+    }
+    
+    // Set timeout protection - FAIL-FAST after timeout
+    initTimeoutRef.current = setTimeout(() => {
+      const timeoutError = new AppKitTimeoutError(`AppKit initialization timed out after ${INIT_TIMEOUT_MS}ms`);
+      logErrorSecurely('[WagmiSetup] Initialization timeout', timeoutError);
+      setToast({
+        message: 'Wallet initialization timed out. Please refresh and try again.',
+        type: "error",
+      });
+      throw timeoutError;
+    }, INIT_TIMEOUT_MS);
+    
     try {
+      // FAIL-FAST: Validate all preconditions before proceeding
+      validateInitializationPreconditions(wallets);
+      
       // Initialize AppKit adapter for platform-specific wallet management
       if (process.env.NODE_ENV === 'development') {
         console.log(`[WagmiSetup] Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
@@ -142,10 +208,44 @@ export default function WagmiSetup({
             console.log('[WagmiSetup] AppKit initialized successfully');
           }
         } catch (appKitError) {
+          // Clear timeout since we're handling the error
+          if (initTimeoutRef.current) {
+            clearTimeout(initTimeoutRef.current);
+          }
+          
           console.error('[WagmiSetup] Failed to create AppKit:', appKitError);
-          // Set a flag to prevent infinite retry loops
-          setAppKitInitialized(true); // Prevent retries
-          throw new Error(`AppKit initialization failed: ${appKitError instanceof Error ? appKitError.message : String(appKitError)}`);
+          
+          // FAIL-FAST: Increment retry count and check limits
+          const newRetryCount = retryCount + 1;
+          setRetryCount(newRetryCount);
+          setLastFailureTime(Date.now());
+          
+          // If we've exceeded max retries, throw final error
+          if (newRetryCount >= MAX_RETRIES) {
+            const finalError = new AppKitRetryError(
+              `AppKit initialization permanently failed after ${newRetryCount} attempts`,
+              newRetryCount,
+              appKitError
+            );
+            logErrorSecurely('[WagmiSetup] AppKit initialization permanently failed', finalError);
+            throw finalError;
+          }
+          
+          // Schedule retry with exponential backoff
+          const retryDelay = RETRY_DELAY_MS[newRetryCount - 1] || RETRY_DELAY_MS[RETRY_DELAY_MS.length - 1];
+          setIsRetrying(true);
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`[WagmiSetup] Scheduling retry ${newRetryCount}/${MAX_RETRIES} in ${retryDelay}ms`);
+          }
+          
+          setTimeout(() => {
+            setIsRetrying(false);
+            initializeAppKit(wallets); // Retry initialization
+          }, retryDelay);
+          
+          // Don't throw here - let retry logic handle it
+          return;
         }
       } else {
         if (process.env.NODE_ENV === 'development') {
@@ -153,17 +253,59 @@ export default function WagmiSetup({
         }
       }
       
+      // Clear timeout on successful initialization
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+      
+      // Reset retry state on success
+      setRetryCount(0);
+      setLastFailureTime(null);
+      setIsRetrying(false);
+      
       setCurrentAdapter(newAdapter);
       setIsInitialized(true);
     } catch (error) {
-      logErrorSecurely('[WagmiSetup] Error initializing AppKit', error);
-      // Show user-friendly error message
+      // Clear timeout
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+      
+      // Handle specific error types
+      if (error instanceof AppKitValidationError || 
+          error instanceof AppKitTimeoutError || 
+          error instanceof AppKitRetryError) {
+        logErrorSecurely('[WagmiSetup] AppKit-specific error during initialization', error);
+        const userMessage = sanitizeErrorForUser(error);
+        setToast({
+          message: userMessage,
+          type: "error",
+        });
+        throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
+      }
+      
+      // Handle adapter errors
+      if (error instanceof AdapterError || error instanceof AdapterCacheError) {
+        logErrorSecurely('[WagmiSetup] Adapter error during initialization', error);
+        const userMessage = sanitizeErrorForUser(error);
+        setToast({
+          message: userMessage,
+          type: "error",
+        });
+        throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
+      }
+      
+      // Handle unexpected errors
+      logErrorSecurely('[WagmiSetup] Unexpected error initializing AppKit', error);
       const userMessage = sanitizeErrorForUser(error);
       setToast({
         message: userMessage,
         type: "error",
       });
-      throw error; // Re-throw to prevent app from continuing in broken state
+      throw new AppKitInitializationError(
+        `Unexpected error during AppKit initialization: ${error instanceof Error ? error.message : String(error)}`,
+        error
+      );
     }
   };
 
@@ -217,6 +359,11 @@ export default function WagmiSetup({
       }
       
       try {
+        // Clear initialization timeout
+        if (initTimeoutRef.current) {
+          clearTimeout(initTimeoutRef.current);
+        }
+        
         adapterManager.cleanup();
       } catch (error) {
         logErrorSecurely('[WagmiSetup] Error during cleanup', error);
