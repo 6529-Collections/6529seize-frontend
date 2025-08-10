@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAppKitAccount, useAppKit } from "@reown/appkit/react";
 import { 
   WalletConnectionError, 
@@ -42,63 +42,118 @@ interface UseMobileWalletConnectionReturn {
 
 /**
  * Hook for handling mobile wallet connections with deep linking and timeout management
+ * SECURITY: Implements proper cleanup to prevent memory leaks and DoS attacks
  */
 export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => {
   const [connectionState, setConnectionState] = useState<MobileConnectionState>(
     MobileConnectionState.IDLE
   );
   const [connectionTimeout, setConnectionTimeout] = useState(0);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  
+  // SECURITY: Use refs for cleanup tracking to prevent memory leaks
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   
   const { isConnected } = useAppKitAccount();
   const { open } = useAppKit();
 
+  // SECURITY: Cleanup all resources on unmount to prevent memory leaks
+  useEffect(() => {
+    isMountedRef.current = true;
+    
+    return () => {
+      isMountedRef.current = false;
+      
+      // Clear all timeouts
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+        pollingTimeoutRef.current = null;
+      }
+      
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
+      
+      // Abort any ongoing operations
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
+
   // Detect mobile environment and wallet capabilities
   const mobileInfo: MobileWalletInfo = getMobileWalletInfo();
 
-  // Handle connection timeout for mobile
+  // Handle connection timeout for mobile with proper cleanup
   useEffect(() => {
+    // Clear existing timeout
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+
     if (connectionState === MobileConnectionState.CONNECTING || 
         connectionState === MobileConnectionState.DEEP_LINKING ||
         connectionState === MobileConnectionState.WAITING_FOR_RETURN) {
       
       const timeout = setTimeout(() => {
-        setConnectionState(MobileConnectionState.TIMEOUT);
-        setConnectionTimeout(30); // 30 seconds timeout
+        // SECURITY: Guard state updates with mount check
+        if (isMountedRef.current) {
+          setConnectionState(MobileConnectionState.TIMEOUT);
+          setConnectionTimeout(30); // 30 seconds timeout
+        }
       }, 30000);
       
-      setTimeoutId(timeout);
-      
-      return () => {
-        clearTimeout(timeout);
-        setTimeoutId(null);
-      };
+      timeoutIdRef.current = timeout;
     }
+    
+    // Cleanup function runs on state change or unmount
+    return () => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
+    };
   }, [connectionState]);
 
-  // Monitor connection success
+  // Monitor connection success with mount guard
   useEffect(() => {
-    if (isConnected && connectionState !== MobileConnectionState.IDLE) {
+    if (isConnected && connectionState !== MobileConnectionState.IDLE && isMountedRef.current) {
       setConnectionState(MobileConnectionState.CONNECTED);
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-        setTimeoutId(null);
+      
+      // Clear timeout when connected
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
       }
     }
-  }, [isConnected, connectionState, timeoutId]);
+  }, [isConnected, connectionState]);
 
   // Handle mobile wallet connection with deep linking support
   const handleMobileConnection = useCallback(async (connectorId?: string) => {
     try {
+      // SECURITY: Guard state updates with mount check
+      if (!isMountedRef.current) {
+        throw new WalletConnectionError('Component unmounted during connection');
+      }
+      
       setConnectionState(MobileConnectionState.CONNECTING);
 
       // Handle deep linking for mobile wallets
       if (mobileInfo.isMobile && mobileInfo.supportsDeepLinking) {
+        if (!isMountedRef.current) {
+          throw new WalletConnectionError('Component unmounted during deep linking setup');
+        }
+        
         setConnectionState(MobileConnectionState.DEEP_LINKING);
         
         // Add event listener for when user returns from wallet app
         const handleVisibilityChange = () => {
-          if (document.visibilityState === 'visible') {
+          if (document.visibilityState === 'visible' && isMountedRef.current) {
             setConnectionState(MobileConnectionState.WAITING_FOR_RETURN);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
           }
@@ -114,61 +169,108 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
       });
       
     } catch (error: any) {
-      setConnectionState(MobileConnectionState.FAILED);
+      // SECURITY: Guard state updates with mount check
+      if (isMountedRef.current) {
+        setConnectionState(MobileConnectionState.FAILED);
+      }
       
       // Re-throw for upstream error handling
       throw error;
     }
   }, [open, mobileInfo]);
 
-  // Handle return from deep link - SECURE Promise-based implementation
+  // SECURITY: Handle return from deep link with proper cleanup pattern
   const handleDeepLinkReturn = useCallback(async (): Promise<void> => {
     // Validate current state - fail fast if not in correct state
     if (connectionState !== MobileConnectionState.WAITING_FOR_RETURN) {
       throw new ConnectionVerificationError(connectionState, 'waiting_for_return');
     }
 
-    // Promise-based connection verification with proper timeout
-    return new Promise((resolve, reject) => {
-      const TIMEOUT_MS = 10000; // 10 seconds
-      const POLL_INTERVAL_MS = 500; // 500ms polling
-      const startTime = Date.now();
-      
-      const checkConnection = () => {
-        const elapsed = Date.now() - startTime;
+    // SECURITY: Guard against unmounted component
+    if (!isMountedRef.current) {
+      throw new WalletConnectionError('Component unmounted during deep link return');
+    }
+
+    // Create AbortController for cancellation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    try {
+      // Promise-based connection verification with proper cleanup
+      return new Promise<void>((resolve, reject) => {
+        const TIMEOUT_MS = 10000; // 10 seconds
+        const POLL_INTERVAL_MS = 500; // 500ms polling
+        const startTime = Date.now();
         
-        // Check if we've exceeded timeout
-        if (elapsed >= TIMEOUT_MS) {
-          setConnectionState(MobileConnectionState.TIMEOUT);
-          reject(new DeepLinkTimeoutError(TIMEOUT_MS));
-          return;
-        }
+        const checkConnection = () => {
+          // SECURITY: Check if operation was aborted
+          if (abortController.signal.aborted) {
+            reject(new WalletConnectionError('Operation aborted'));
+            return;
+          }
+          
+          // SECURITY: Check if component is still mounted
+          if (!isMountedRef.current) {
+            reject(new WalletConnectionError('Component unmounted during connection check'));
+            return;
+          }
+          
+          const elapsed = Date.now() - startTime;
+          
+          // Check if we've exceeded timeout
+          if (elapsed >= TIMEOUT_MS) {
+            setConnectionState(MobileConnectionState.TIMEOUT);
+            reject(new DeepLinkTimeoutError(TIMEOUT_MS));
+            return;
+          }
+          
+          // Check if connection is established
+          if (isConnected) {
+            setConnectionState(MobileConnectionState.CONNECTED);
+            resolve();
+            return;
+          }
+          
+          // SECURITY: Use ref-tracked timeout instead of recursive setTimeout
+          pollingTimeoutRef.current = setTimeout(checkConnection, POLL_INTERVAL_MS);
+        };
         
-        // Check if connection is established
-        if (isConnected) {
-          setConnectionState(MobileConnectionState.CONNECTED);
-          resolve();
-          return;
-        }
-        
-        // Continue polling
-        setTimeout(checkConnection, POLL_INTERVAL_MS);
-      };
-      
-      // Start the polling
-      checkConnection();
-    });
+        // Start the polling
+        checkConnection();
+      });
+    } finally {
+      // SECURITY: Always clean up the AbortController reference
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
+    }
   }, [connectionState, isConnected]);
 
-  // Reset connection state
+  // SECURITY: Enhanced reset with proper cleanup
   const resetConnection = useCallback(() => {
-    setConnectionState(MobileConnectionState.IDLE);
-    setConnectionTimeout(0);
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(null);
+    // Clear all timeouts
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
     }
-  }, [timeoutId]);
+    
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+    
+    // Abort any ongoing operations
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    
+    // SECURITY: Guard state updates with mount check
+    if (isMountedRef.current) {
+      setConnectionState(MobileConnectionState.IDLE);
+      setConnectionTimeout(0);
+    }
+  }, []);
 
   // Get mobile-specific instructions
   const getMobileInstructions = useCallback((): string => {

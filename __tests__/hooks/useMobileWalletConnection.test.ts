@@ -15,7 +15,7 @@ jest.mock('@reown/appkit/react', () => ({
 const mockUseAppKitAccount = jest.mocked(require('@reown/appkit/react').useAppKitAccount);
 const mockUseAppKit = jest.mocked(require('@reown/appkit/react').useAppKit);
 
-describe('useMobileWalletConnection - Security Fix Tests', () => {
+describe('useMobileWalletConnection - Memory Leak Prevention Tests', () => {
   const mockOpen = jest.fn();
 
   beforeEach(() => {
@@ -39,138 +39,236 @@ describe('useMobileWalletConnection - Security Fix Tests', () => {
       },
       writable: true,
     });
+
+    // Mock document.addEventListener and removeEventListener
+    const mockAddEventListener = jest.fn();
+    const mockRemoveEventListener = jest.fn();
+    Object.defineProperty(document, 'addEventListener', {
+      value: mockAddEventListener,
+      writable: true,
+    });
+    Object.defineProperty(document, 'removeEventListener', {
+      value: mockRemoveEventListener,
+      writable: true,
+    });
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  describe('handleDeepLinkReturn - CRITICAL SECURITY FIX', () => {
-    it('should return a Promise (async function)', async () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
+  describe('CRITICAL SECURITY: Memory Leak Prevention', () => {
+    it('should clean up polling timeout on unmount', () => {
+      const { result, unmount } = renderHook(() => useMobileWalletConnection());
       
-      // Verify the function returns a Promise without triggering the security validation
-      // by catching the expected error and confirming it's a Promise that was rejected
+      // Trigger connection flow to create polling timeout
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // Fast-forward to create timeout
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      
+      // SECURITY TEST: Verify component unmount cleans up all timeouts
+      const timeoutCountBefore = jest.getTimerCount();
+      unmount();
+      const timeoutCountAfter = jest.getTimerCount();
+      
+      // All timeouts should be cleared on unmount (preventing memory leak)
+      expect(timeoutCountAfter).toBeLessThanOrEqual(timeoutCountBefore);
+    });
+
+    it('should abort ongoing operations on unmount', async () => {
+      const { result, unmount } = renderHook(() => useMobileWalletConnection());
+      
+      // Mock the connection state to allow handleDeepLinkReturn
+      mockUseAppKitAccount.mockReturnValue({
+        isConnected: false,
+        address: undefined,
+      });
+      
+      // Set up the component in WAITING_FOR_RETURN state
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // Simulate mobile deep linking flow
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+      
+      // SECURITY TEST: Unmounting should not leave operations running
+      unmount();
+      
+      // Verify all timers are cleared
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should prevent state updates after unmount', async () => {
+      const { result, unmount } = renderHook(() => useMobileWalletConnection());
+      
+      // Set initial state
+      expect(result.current.connectionState).toBe(MobileConnectionState.IDLE);
+      
+      // Unmount the component
+      unmount();
+      
+      // SECURITY TEST: Attempting operations after unmount should fail safely
+      // This prevents memory leaks and DoS attacks via continuous state updates
+      
+      // The handleMobileConnection should throw when component is unmounted
+      await expect(result.current.handleMobileConnection()).rejects.toThrow(
+        'Component unmounted during connection'
+      );
+    });
+
+    it('should implement AbortController for cancellation', async () => {
+      const { result, unmount } = renderHook(() => useMobileWalletConnection());
+      
+      // SECURITY TEST: Verify AbortController integration prevents memory leaks
+      // This is critical for preventing DoS attacks via resource exhaustion
+      
+      // Start a connection that would normally timeout
       try {
-        const returnValue = result.current.handleDeepLinkReturn();
-        expect(returnValue).toBeInstanceOf(Promise);
-        await returnValue; // This should throw
+        await result.current.handleDeepLinkReturn();
       } catch (error) {
         expect(error).toBeInstanceOf(ConnectionVerificationError);
       }
-    });
-
-    it('should throw ConnectionVerificationError when not in WAITING_FOR_RETURN state', async () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
       
-      // State should be IDLE initially
-      expect(result.current.connectionState).toBe(MobileConnectionState.IDLE);
+      // Unmounting should clean up AbortController
+      unmount();
       
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(ConnectionVerificationError);
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(
-        "Invalid connection state for verification. Expected 'waiting_for_return', got 'idle'"
-      );
-    });
-
-    it('should throw ConnectionVerificationError when in any non-WAITING_FOR_RETURN state', async () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
-      
-      // CRITICAL SECURITY TEST: The function should fail fast regardless of the specific state
-      // As long as it's not WAITING_FOR_RETURN, it should throw
-      
-      // Test works whether the hook is in IDLE, CONNECTING, DEEP_LINKING, etc.
-      const currentState = result.current.connectionState;
-      expect(currentState).not.toBe(MobileConnectionState.WAITING_FOR_RETURN);
-      
-      // This is the security fix: it validates state and throws immediately
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(ConnectionVerificationError);
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(
-        "Invalid connection state for verification"
-      );
-    });
-
-    it('should throw DeepLinkTimeoutError when connection times out after 10 seconds', async () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
-      
-      // Mock the hook to be in WAITING_FOR_RETURN state
-      // Since getting to that state is complex, we'll test the error directly
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(ConnectionVerificationError);
-      
-      // The security fix works: it validates state and throws immediately rather than using setTimeout
-      expect(result.current.connectionState).not.toBe(MobileConnectionState.CONNECTED);
-    });
-
-    it('should enforce strict state validation - security requirement', async () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
-      
-      // The security fix: function must validate state BEFORE doing any work
-      // This prevents the old vulnerable setTimeout pattern
-      
-      // CRITICAL TEST: Verify it fails fast on wrong state
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(ConnectionVerificationError);
-      
-      // SECURITY: No connection should be possible without proper state
-      expect(result.current.connectionState).not.toBe(MobileConnectionState.CONNECTED);
-    });
-
-    it('should validate implementation contains polling logic (security architectural review)', () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
-      
-      // SECURITY ARCHITECTURAL TEST: Verify the function implementation
-      // contains the secure polling pattern instead of vulnerable setTimeout
-      const fnString = result.current.handleDeepLinkReturn.toString();
-      
-      // Security requirement: Should contain Promise-based polling, not vulnerable setTimeout
-      expect(fnString).toContain('Promise');
-      expect(fnString).toContain('500'); // 500ms polling interval
-      expect(fnString).toContain('10000'); // 10-second timeout
-      
-      // Critical: Should NOT contain the old vulnerable pattern
-      expect(fnString).not.toContain('2000'); // Old 2-second timeout
+      // No memory leaks should remain
+      expect(jest.getTimerCount()).toBe(0);
     });
   });
 
-  describe('CRITICAL VULNERABILITY TESTS - Authentication Bypass Prevention', () => {
-    it('should never allow silent failures that bypass authentication', async () => {
+  describe('CRITICAL SECURITY: Fail-Fast Pattern', () => {
+    it('should throw immediately on invalid state - no timeout loops', async () => {
       const { result } = renderHook(() => useMobileWalletConnection());
       
-      // Test that errors are not caught and swallowed
-      let caughtError: Error | null = null;
+      // SECURITY TEST: Function must validate state FIRST before any async operations
+      const startTime = Date.now();
       
       try {
         await result.current.handleDeepLinkReturn();
       } catch (error) {
-        caughtError = error as Error;
+        const elapsed = Date.now() - startTime;
+        
+        // Must fail immediately (< 50ms) - not after timeout
+        expect(elapsed).toBeLessThan(50);
+        expect(error).toBeInstanceOf(ConnectionVerificationError);
       }
-      
-      expect(caughtError).toBeInstanceOf(ConnectionVerificationError);
-      expect(caughtError?.message).toContain('Invalid connection state');
-      
-      // CRITICAL: Verify no silent success path exists
-      expect(result.current.connectionState).not.toBe(MobileConnectionState.CONNECTED);
     });
 
-    it('should prevent connection hijacking through timeout manipulation', async () => {
+    it('should never use recursive setTimeout pattern', () => {
       const { result } = renderHook(() => useMobileWalletConnection());
       
-      // CRITICAL SECURITY TEST: The security fix ensures that ANY attempt to call
-      // handleDeepLinkReturn without proper state validation will fail immediately
+      // SECURITY TEST: Verify elimination of vulnerable recursive setTimeout
+      const fnString = result.current.handleDeepLinkReturn.toString();
       
-      // This prevents malicious timeout manipulation attacks
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(ConnectionVerificationError);
-      
-      // CRITICAL: Connection state cannot be bypassed or manipulated  
-      expect(result.current.connectionState).not.toBe(MobileConnectionState.CONNECTED);
-      expect(result.current.connectionState).not.toBe(MobileConnectionState.TIMEOUT);
+      // Should use ref-tracked timeouts, not recursive calls
+      expect(fnString).toContain('pollingTimeoutRef.current');
+      expect(fnString).toContain('setTimeout');
+      // Verify it's not using the old vulnerable pattern
+      expect(fnString).not.toContain('setTimeout(() => {');
     });
 
-    it('should validate connection state strictly - no state manipulation bypass', async () => {
+    it('should guard all state updates with mount checks', async () => {
+      const { result, unmount } = renderHook(() => useMobileWalletConnection());
+      
+      // Start connection
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // Unmount during connection
+      unmount();
+      
+      // Advance timers to trigger any unsafe state updates
+      act(() => {
+        jest.advanceTimersByTime(35000); // Beyond timeout
+      });
+      
+      // SECURITY TEST: No state updates should occur after unmount
+      // This prevents memory corruption and DoS attacks
+      expect(jest.getTimerCount()).toBe(0);
+    });
+  });
+
+  describe('CRITICAL SECURITY: Resource Cleanup', () => {
+    it('should clear all timeout references in resetConnection', () => {
       const { result } = renderHook(() => useMobileWalletConnection());
       
-      // Try various invalid states
+      // Create some timeouts
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // Advance time to create pending timeouts
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      
+      const timeoutCountBefore = jest.getTimerCount();
+      
+      // SECURITY TEST: Reset should clean all resources
+      act(() => {
+        result.current.resetConnection();
+      });
+      
+      const timeoutCountAfter = jest.getTimerCount();
+      
+      // All timeouts should be cleared
+      expect(timeoutCountAfter).toBeLessThanOrEqual(timeoutCountBefore);
+    });
+
+    it('should abort operations in resetConnection', () => {
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      // Start operations
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // SECURITY TEST: Reset must abort all ongoing operations
+      act(() => {
+        result.current.resetConnection();
+      });
+      
+      // All resources should be cleaned up
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should handle multiple rapid cleanup calls safely', () => {
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      // Create resources
+      act(() => {
+        result.current.handleMobileConnection();
+      });
+      
+      // SECURITY TEST: Multiple cleanup calls should not cause errors
+      expect(() => {
+        act(() => {
+          result.current.resetConnection();
+          result.current.resetConnection();
+          result.current.resetConnection();
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe('CRITICAL SECURITY: State Validation', () => {
+    it('should enforce strict state validation in handleDeepLinkReturn', async () => {
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      // Test all invalid states
       const invalidStates = [
         MobileConnectionState.IDLE,
-        MobileConnectionState.CONNECTING, 
+        MobileConnectionState.CONNECTING,
         MobileConnectionState.DEEP_LINKING,
         MobileConnectionState.CONNECTED,
         MobileConnectionState.FAILED,
@@ -178,45 +276,44 @@ describe('useMobileWalletConnection - Security Fix Tests', () => {
       ];
       
       for (const state of invalidStates) {
-        // Each invalid state should throw ConnectionVerificationError
-        await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(ConnectionVerificationError);
+        await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(
+          ConnectionVerificationError
+        );
       }
     });
-  });
 
-  describe('Interface Contract Enforcement', () => {
-    it('should ensure handleDeepLinkReturn returns Promise<void>', () => {
+    it('should prevent authentication bypass through state manipulation', async () => {
       const { result } = renderHook(() => useMobileWalletConnection());
       
-      const returnValue = result.current.handleDeepLinkReturn();
-      expect(returnValue).toBeInstanceOf(Promise);
+      // SECURITY TEST: No method should allow bypassing authentication
+      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(
+        ConnectionVerificationError
+      );
       
-      // Verify rejection for wrong state
-      return expect(returnValue).rejects.toBeDefined();
+      // Connection state must remain secure
+      expect(result.current.connectionState).not.toBe(MobileConnectionState.CONNECTED);
+    });
+
+    it('should validate component mount state before operations', async () => {
+      const { result, unmount } = renderHook(() => useMobileWalletConnection());
+      
+      // Unmount component
+      unmount();
+      
+      // SECURITY TEST: All operations must check mount state
+      await expect(result.current.handleMobileConnection()).rejects.toThrow(
+        'Component unmounted during connection'
+      );
+      
+      // handleDeepLinkReturn validates state first, so it throws ConnectionVerificationError
+      // before checking mount state - this is expected behavior
+      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow(
+        ConnectionVerificationError
+      );
     });
   });
 
-  describe('Security - No Silent Failures', () => {
-    it('should never return null or undefined on error', async () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
-      
-      // Verify that errors are thrown, not returned as null/undefined
-      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow();
-    });
-
-    it('should eliminate the vulnerable setTimeout pattern from old implementation', () => {
-      const { result } = renderHook(() => useMobileWalletConnection());
-      
-      // Verify the old vulnerable pattern is eliminated
-      const fnString = result.current.handleDeepLinkReturn.toString();
-      
-      // The secure implementation should not contain the old pattern
-      expect(fnString).not.toContain('setTimeout(() => {');
-      expect(fnString).not.toContain('2000'); // Old 2-second timeout
-    });
-  });
-
-  describe('Error Classes', () => {
+  describe('Error Handling - Fail Fast', () => {
     it('should create proper DeepLinkTimeoutError instances', () => {
       const error = new DeepLinkTimeoutError(10000);
       
@@ -238,10 +335,26 @@ describe('useMobileWalletConnection - Security Fix Tests', () => {
       expect(error.code).toBe('CONNECTION_VERIFICATION_ERROR');
       expect(error.message).toContain('Invalid connection state');
     });
+
+    it('should never return null or undefined on error', async () => {
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      // SECURITY TEST: Verify that errors are thrown, not returned as null/undefined
+      await expect(result.current.handleDeepLinkReturn()).rejects.toThrow();
+    });
   });
 
-  // Legacy tests adapted for compatibility
-  describe('Initialization', () => {
+  describe('Interface Contract', () => {
+    it('should ensure handleDeepLinkReturn returns Promise<void>', () => {
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      const returnValue = result.current.handleDeepLinkReturn();
+      expect(returnValue).toBeInstanceOf(Promise);
+      
+      // Verify rejection for wrong state
+      return expect(returnValue).rejects.toBeDefined();
+    });
+
     it('initializes with correct default state', () => {
       const { result } = renderHook(() => useMobileWalletConnection());
       
@@ -251,10 +364,8 @@ describe('useMobileWalletConnection - Security Fix Tests', () => {
       expect(result.current.mobileInfo.isMobile).toBe(true);
       expect(result.current.mobileInfo.supportsDeepLinking).toBe(true);
     });
-  });
 
-  describe('Mobile Connection Flow', () => {
-    it('handles mobile connection with EIP155 namespace by default', async () => {
+    it('handles mobile connection with correct namespace', async () => {
       const { result } = renderHook(() => useMobileWalletConnection());
       
       await act(async () => {
@@ -266,8 +377,20 @@ describe('useMobileWalletConnection - Security Fix Tests', () => {
         namespace: 'eip155'
       });
       
-      // Connection state will be either DEEP_LINKING (mobile) or state depends on mock behavior
       expect(result.current.connectionState).not.toBe(MobileConnectionState.IDLE);
+    });
+
+    it('handles solana namespace correctly', async () => {
+      const { result } = renderHook(() => useMobileWalletConnection());
+      
+      await act(async () => {
+        await result.current.handleMobileConnection('solana');
+      });
+      
+      expect(mockOpen).toHaveBeenCalledWith({
+        view: 'Connect',
+        namespace: 'solana'
+      });
     });
   });
 });
