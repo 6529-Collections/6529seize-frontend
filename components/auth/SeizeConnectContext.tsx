@@ -239,11 +239,27 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (isValidAddress(account.address)) {
           const checksummedAddress = getAddress(account.address);
           setConnectedAddress(checksummedAddress);
-          setConnectionState('connected');
+          
+          // Use functional state update to prevent unnecessary re-renders
+          setConnectionState(currentState => 
+            currentState !== 'connected' ? 'connected' : currentState
+          );
         } else {
-          // Invalid address from wallet - disconnect
+          // Invalid address from wallet - log security event and disconnect
+          const addressStr = account.address as string | undefined;
+          logSecurityEvent('invalid_address_from_wallet', {
+            address: 'INVALID_FORMAT',
+            source: 'wallet_provider',
+            valid: false,
+            timestamp: new Date().toISOString(),
+            addressLength: addressStr?.length || 0,
+            addressFormat: addressStr?.startsWith('0x') ? 'hex_prefixed' : 'other'
+          });
+          
           setConnectedAddress(undefined);
-          setConnectionState('disconnected');
+          setConnectionState(currentState => 
+            currentState !== 'disconnected' ? 'disconnected' : currentState
+          );
         }
       } else if (account.isConnected === false) {
         const storedAddress = getWalletAddress();
@@ -253,12 +269,19 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         } else {
           setConnectedAddress(undefined);
         }
-        setConnectionState('disconnected');
+        
+        setConnectionState(currentState => 
+          currentState !== 'disconnected' ? 'disconnected' : currentState
+        );
       } else if (account.status === 'connecting') {
-        setConnectionState('connecting');
+        setConnectionState(currentState => 
+          currentState !== 'connecting' ? 'connecting' : currentState
+        );
       } else {
         // Default fallback
-        setConnectionState('disconnected');
+        setConnectionState(currentState => 
+          currentState !== 'disconnected' ? 'disconnected' : currentState
+        );
       }
     }, 50); // Small delay to debounce rapid changes
 
@@ -268,7 +291,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [account.address, account.isConnected, account.status, connectionState]);
+  }, [account.address, account.isConnected, account.status]);
 
   const seizeConnect = useCallback((): void => {
     try {

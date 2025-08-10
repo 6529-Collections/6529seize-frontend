@@ -184,6 +184,157 @@ describe('SeizeConnectContext', () => {
     });
   });
 
+  // CRITICAL: Infinite loop prevention tests
+  describe('infinite loop prevention', () => {
+    it('does not cause infinite re-renders when connectionState changes', async () => {
+      const mockAccount = { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' };
+      (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
+      
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      // Let initial effects run
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      const initialConnectionState = result.current.connectionState;
+      
+      // Trigger multiple rapid account changes that would previously cause infinite loops
+      act(() => {
+        (useAppKitAccount as jest.Mock).mockReturnValue({
+          ...mockAccount,
+          address: '0x9876543210987654321098765432109876543210'
+        });
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      // Verify state stabilizes and doesn't keep changing
+      const finalConnectionState = result.current.connectionState;
+      expect(finalConnectionState).toBe('connected');
+      expect(finalConnectionState).toBe(initialConnectionState); // Should be stable
+    });
+
+    it('prevents memory leaks from uncleared timeouts', async () => {
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      
+      const { unmount } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      // Trigger timeout creation
+      act(() => {
+        (useAppKitAccount as jest.Mock).mockReturnValue({ 
+          address: '0x1234567890123456789012345678901234567890', 
+          isConnected: true, 
+          status: 'connected' 
+        });
+      });
+
+      // Unmount component before timeout completes
+      unmount();
+
+      // Verify timeout was properly cleared on unmount
+      expect(clearTimeoutSpy).toHaveBeenCalled();
+      
+      clearTimeoutSpy.mockRestore();
+    });
+
+    it('maintains stable connectionState when no actual state change occurs', async () => {
+      const mockAccount = { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' };
+      (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
+      
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      // Let initial effects run
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      const initialConnectionState = result.current.connectionState;
+      const initialAddress = result.current.address;
+
+      // Trigger same state multiple times (should not cause re-renders)
+      act(() => {
+        (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      // Verify state remains exactly the same (no unnecessary updates)
+      expect(result.current.connectionState).toBe(initialConnectionState);
+      expect(result.current.address).toBe(initialAddress);
+    });
+
+    it('handles rapid state changes without causing infinite loops', async () => {
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      // Simulate rapid state changes that previously caused infinite loops
+      const rapidChanges = [
+        { address: undefined, isConnected: false, status: 'disconnected' },
+        { address: '0x1234567890123456789012345678901234567890', isConnected: false, status: 'connecting' },
+        { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' },
+        { address: undefined, isConnected: false, status: 'disconnected' },
+        { address: '0x9876543210987654321098765432109876543210', isConnected: true, status: 'connected' }
+      ];
+
+      // Apply all changes rapidly
+      rapidChanges.forEach((change, index) => {
+        act(() => {
+          (useAppKitAccount as jest.Mock).mockReturnValue(change);
+          jest.advanceTimersByTime(10); // Small delays to simulate rapid changes
+        });
+      });
+
+      // Let final state settle
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      // Verify final state is correct and stable
+      expect(result.current.connectionState).toBe('connected');
+      expect(result.current.address).toBe('0x9876543210987654321098765432109876543210');
+      expect(result.current.isConnected).toBe(true);
+    });
+
+    it('functional state updates prevent unnecessary re-renders with same state', async () => {
+      const mockAccount = { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' };
+      (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
+      
+      const { result, rerender } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      // Let initial effects run
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      expect(result.current.connectionState).toBe('connected');
+
+      // Force multiple re-renders with same account state
+      for (let i = 0; i < 5; i++) {
+        act(() => {
+          rerender();
+          jest.advanceTimersByTime(60); // Let debounce complete
+        });
+      }
+
+      // State should remain stable throughout
+      expect(result.current.connectionState).toBe('connected');
+    });
+  });
+
   // Type safety verification tests
   describe('type safety', () => {
     it('throws AuthenticationError with proper type and cause', async () => {
