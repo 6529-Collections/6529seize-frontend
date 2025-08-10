@@ -311,6 +311,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeDisconnectAndLogout = useCallback(
     async (reconnect?: boolean): Promise<void> => {
+      // CRITICAL: Wallet disconnect MUST succeed before auth cleanup
       try {
         await disconnect();
       } catch (error: unknown) {
@@ -320,19 +321,28 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', walletError);
-        // Continue with cleanup even if disconnect fails
+        
+        // SECURITY: Throw AuthenticationError to prevent auth bypass
+        throw new AuthenticationError(
+          'Cannot complete logout: wallet disconnection failed. User may still have active wallet connection.',
+          walletError
+        );
       }
       
+      // Only proceed with auth cleanup after successful disconnect
       try {
         removeAuthJwt();
         setConnectedAddress(undefined);
         
+        // If reconnect requested, delay after successful logout
         if (reconnect) {
-          seizeConnect();
+          setTimeout(() => {
+            seizeConnect();
+          }, 100);
         }
       } catch (error: unknown) {
         const authError = new AuthenticationError(
-          'Failed to clear authentication state',
+          'Failed to clear authentication state after successful wallet disconnect',
           error
         );
         logError('seizeDisconnectAndLogout', authError);
