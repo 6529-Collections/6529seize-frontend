@@ -7,7 +7,7 @@ import { CreateDropType, CreateDropViewType } from '../../../../../components/dr
 
 // Mock the SeizeConnectContext
 const mockUseSeizeConnectContext = jest.fn();
-jest.mock('@/components/auth/SeizeConnectContext', () => ({
+jest.mock('../../../../../components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: () => mockUseSeizeConnectContext()
 }));
 
@@ -52,15 +52,30 @@ jest.mock('../../../../../components/utils/animation/CommonAnimationHeight', () 
   return ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 });
 
-describe('CreateDropWrapper Wallet Validation', () => {
+describe('CreateDropWrapper Authentication Validation', () => {
   let queryClient: QueryClient;
-  let component: React.RefObject<any>;
 
   const mockProfile = {
     id: 'test-profile',
     handle: 'testuser',
     pfp: null,
-    cic: 0
+    cic: 0,
+    rep: 0,
+    tdh: 0,
+    level: 1,
+    consolidation: {
+      id: '1',
+      classification: 'test',
+      balance_tdh: 0,
+      primary_wallet: '0x1234567890123456789012345678901234567890',
+      wallets: [],
+      tdh: 0,
+      rep: 0,
+      cic: 0,
+      level: 1,
+      consolidation_display: 'test',
+      consolidation_key: 'test',
+    }
   };
 
   const defaultProps = {
@@ -96,208 +111,125 @@ describe('CreateDropWrapper Wallet Validation', () => {
         mutations: { retry: false }
       }
     });
-    component = React.createRef();
     jest.clearAllMocks();
   });
 
   const renderComponent = (props = {}) => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <CreateDropWrapper ref={component} {...defaultProps} {...props} />
+        <CreateDropWrapper {...defaultProps} {...props} />
       </QueryClientProvider>
     );
   };
 
-  describe('Wallet validation with undefined address', () => {
-    beforeEach(() => {
+  describe('Authentication validation - fail-fast behavior', () => {
+    it('throws when wallet is not authenticated', () => {
       mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: false,
+        address: '0x1234567890123456789012345678901234567890',
+        isSafeWallet: false
+      });
+
+      // Mock console.error to suppress error output in test
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      expect(() => {
+        renderComponent();
+      }).toThrow('Wallet validation failed: Authentication required for drop creation. Please connect and authenticate your wallet.');
+
+      consoleSpy.mockRestore();
+    });
+
+    it('throws when authenticated wallet address is missing', () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
         address: undefined,
         isSafeWallet: false
       });
-    });
 
-    it('throws WalletValidationError when address is undefined', () => {
-      renderComponent();
-      
+      // Mock console.error to suppress error output in test
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
       expect(() => {
-        component.current?.requestDrop();
-      }).toThrow('Wallet validation failed: Wallet connection required for drop creation. Please connect your wallet first.');
-    });
-  });
+        renderComponent();
+      }).toThrow('Wallet validation failed: Authenticated wallet address is missing. Please reconnect your wallet.');
 
-  describe('Wallet validation with null address', () => {
-    beforeEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('throws when address is null', () => {
       mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
         address: null,
         isSafeWallet: false
       });
-    });
 
-    it('throws WalletValidationError when address is null', () => {
-      renderComponent();
-      
+      // Mock console.error to suppress error output in test
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
       expect(() => {
-        component.current?.requestDrop();
-      }).toThrow('Wallet validation failed: Wallet connection required for drop creation. Please connect your wallet first.');
-    });
-  });
+        renderComponent();
+      }).toThrow('Wallet validation failed: Authenticated wallet address is missing. Please reconnect your wallet.');
 
-  describe('Wallet validation with empty string address', () => {
-    beforeEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('throws when address is empty string', () => {
       mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
         address: '',
         isSafeWallet: false
       });
-    });
 
-    it('throws WalletValidationError when address is empty string', () => {
-      renderComponent();
-      
+      // Mock console.error to suppress error output in test
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
       expect(() => {
-        component.current?.requestDrop();
-      }).toThrow('Wallet validation failed: Wallet connection required for drop creation. Please connect your wallet first.');
-    });
-  });
+        renderComponent();
+      }).toThrow('Wallet validation failed: Authenticated wallet address is missing. Please reconnect your wallet.');
 
-  describe('Wallet validation with invalid address format', () => {
-    beforeEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('renders successfully when properly authenticated', () => {
       mockUseSeizeConnectContext.mockReturnValue({
-        address: 'invalid-address',
-        isSafeWallet: false
-      });
-    });
-
-    it('throws WalletValidationError when address format is invalid', () => {
-      renderComponent();
-      
-      expect(() => {
-        component.current?.requestDrop();
-      }).toThrow('Wallet validation failed: Invalid Ethereum address format. Expected 40-character hex string with 0x prefix.');
-    });
-  });
-
-  describe('Wallet validation with non-string address type', () => {
-    beforeEach(() => {
-      mockUseSeizeConnectContext.mockReturnValue({
-        address: 123, // number instead of string
-        isSafeWallet: false
-      });
-    });
-
-    it('throws WalletValidationError when address type is not string', () => {
-      renderComponent();
-      
-      expect(() => {
-        component.current?.requestDrop();
-      }).toThrow('Wallet validation failed: Invalid address type received from wallet connection');
-    });
-  });
-
-  describe('Safe wallet address validation', () => {
-    beforeEach(() => {
-      mockUseSeizeConnectContext.mockReturnValue({
-        address: '0x1234567890123456789012345678901234567890', // valid 42-char address
-        isSafeWallet: true
-      });
-    });
-
-    it('validates Safe wallet address length correctly', () => {
-      renderComponent();
-      
-      expect(() => {
-        component.current?.requestDrop();
-      }).not.toThrow();
-    });
-
-    it('throws WalletValidationError for Safe wallet with invalid length', () => {
-      mockUseSeizeConnectContext.mockReturnValue({
-        address: '0x123456789012345678901234567890123456789', // 41 chars, invalid
-        isSafeWallet: true
-      });
-
-      renderComponent();
-      
-      // This will fail on the hex format validation first since it's not 42 characters
-      expect(() => {
-        component.current?.requestDrop();
-      }).toThrow('Wallet validation failed: Invalid Ethereum address format. Expected 40-character hex string with 0x prefix.');
-    });
-  });
-
-  describe('Valid address success cases', () => {
-    beforeEach(() => {
-      mockUseSeizeConnectContext.mockReturnValue({
-        address: '0x1234567890123456789012345678901234567890',
-        isSafeWallet: false
-      });
-    });
-
-    it('successfully creates drop with valid address', () => {
-      renderComponent();
-      
-      const result = component.current?.requestDrop();
-      
-      expect(result).toBeDefined();
-      expect(result.signer_address).toBe('0x1234567890123456789012345678901234567890');
-      expect(result.is_safe_signature).toBe(false);
-    });
-
-    it('handles uppercase hex characters correctly', () => {
-      mockUseSeizeConnectContext.mockReturnValue({
-        address: '0x1234567890ABCDEF1234567890ABCDEF12345678',
-        isSafeWallet: false
-      });
-
-      renderComponent();
-      
-      const result = component.current?.requestDrop();
-      
-      expect(result).toBeDefined();
-      expect(result.signer_address).toBe('0x1234567890ABCDEF1234567890ABCDEF12345678');
-    });
-
-    it('handles mixed case hex characters correctly', () => {
-      mockUseSeizeConnectContext.mockReturnValue({
-        address: '0x1234567890aBcDeF1234567890AbCdEf12345678',
-        isSafeWallet: false
-      });
-
-      renderComponent();
-      
-      const result = component.current?.requestDrop();
-      
-      expect(result).toBeDefined();
-      expect(result.signer_address).toBe('0x1234567890aBcDeF1234567890AbCdEf12345678');
-    });
-  });
-
-  describe('Type safety validation', () => {
-    it('ensures address is treated as string type', () => {
-      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
         address: '0x1234567890123456789012345678901234567890',
         isSafeWallet: false
       });
 
-      renderComponent();
+      const { getByTestId } = renderComponent();
       
-      const result = component.current?.requestDrop();
+      expect(getByTestId('create-drop-compact')).toBeInTheDocument();
+    });
+
+    it('works with Safe wallets when properly authenticated', () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: '0x1234567890123456789012345678901234567890',
+        isSafeWallet: true
+      });
+
+      const { getByTestId } = renderComponent();
       
-      expect(typeof result.signer_address).toBe('string');
-      expect(result.signer_address.startsWith('0x')).toBe(true);
-      expect(result.signer_address.length).toBe(42);
+      expect(getByTestId('create-drop-compact')).toBeInTheDocument();
     });
   });
 
   describe('Integration with drop creation', () => {
-    beforeEach(() => {
+    it('uses address directly for signer_address when authenticated', () => {
       mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
         address: '0x1234567890123456789012345678901234567890',
         isSafeWallet: false
       });
-    });
 
-    it('includes validated address in drop configuration', () => {
-      renderComponent();
+      const component = React.createRef<any>();
+      render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper ref={component} {...defaultProps} />
+        </QueryClientProvider>
+      );
       
       const result = component.current?.requestDrop();
       
@@ -315,11 +247,17 @@ describe('CreateDropWrapper Wallet Validation', () => {
 
     it('maintains Safe wallet flag in drop configuration', () => {
       mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
         address: '0x1234567890123456789012345678901234567890',
         isSafeWallet: true
       });
 
-      renderComponent();
+      const component = React.createRef<any>();
+      render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper ref={component} {...defaultProps} />
+        </QueryClientProvider>
+      );
       
       const result = component.current?.requestDrop();
       
