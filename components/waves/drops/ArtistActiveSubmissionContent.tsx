@@ -42,10 +42,7 @@ export const ArtistActiveSubmissionContent: React.FC<
   const searchParams = useSearchParams();
   const isMobile = useIsMobileDevice();
 
-  if (!searchParams) {
-    return null;
-  }
-
+  // Memoize expensive operations - must be before any conditional returns
   const formatDate = useMemo(
     () => (timestamp: number) => {
       const date = new Date(timestamp);
@@ -61,6 +58,7 @@ export const ArtistActiveSubmissionContent: React.FC<
 
   const handleDropClick = useCallback(
     (dropId: string) => {
+      if (!searchParams) return;
       const params = new URLSearchParams(searchParams.toString());
       params.set("drop", dropId);
       router.push(`${pathname}?${params.toString()}`);
@@ -77,6 +75,10 @@ export const ArtistActiveSubmissionContent: React.FC<
       queryKey: [QueryKey.PROFILE_DROPS],
     });
   }, [queryClient]);
+
+  if (!searchParams) {
+    return null;
+  }
 
   return (
     <>
