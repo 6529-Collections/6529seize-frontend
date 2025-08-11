@@ -1,16 +1,16 @@
-import { RouteDynamicConfig } from "./breadcrumbs.types";
+import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Still needed by crumbBuilders
 import {
+  fetchCollectionName,
   fetchGradientName,
-  fetchProfileHandle,
-  fetchWaveName,
+  fetchMemeLabName,
   fetchMemeName,
   fetchNextgenName,
+  fetchProfileHandle,
   fetchRememeName,
-  fetchMemeLabName,
-  fetchCollectionName,
+  fetchWaveName,
 } from "./breadcrumbs.api";
+import { RouteDynamicConfig } from "./breadcrumbs.types";
 import { getDynamicParam } from "./breadcrumbs.utils";
-import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Still needed by crumbBuilders
 
 /**
  * Holds the configurations for all recognized dynamic route types.
@@ -111,10 +111,15 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
     pathPattern: /^nextgen$/,
     paramExtractor: (pathSegments, query) => {
       const id = getDynamicParam(pathSegments, "nextgen", 2, query.id);
-      return id ? { id } : undefined;
+      const isCollection = !pathSegments.includes("token");
+      return id ? { id, isCollection } : undefined;
     },
-    fetcher: async (params: { readonly id: string }) =>
-      fetchNextgenName(params.id),
+    fetcher: async (params: {
+      readonly id: string;
+      readonly isCollection: boolean;
+    }) => {
+      return fetchNextgenName(params.id, params.isCollection);
+    },
     queryKeyBuilder: (params: { readonly id: string }) =>
       ["breadcrumb", "nextgen", params.id] as const,
     crumbBuilder: (
