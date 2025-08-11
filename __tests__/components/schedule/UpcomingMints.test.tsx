@@ -30,6 +30,7 @@ describe('UpcomingMints', () => {
     render(<UpcomingMints />);
     expect(screen.getAllByText('#439').length).toBeGreaterThan(0);
     expect(screen.getAllByText('ICS').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Google').length).toBeGreaterThan(0);
     expect(screen.getByText('Subscribe to all (ICS)')).toHaveAttribute(
       'href',
       '/api/mints',

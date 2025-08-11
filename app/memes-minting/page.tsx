@@ -12,10 +12,10 @@ export default function MemesMintingPage() {
   return (
     <Container className="my-4">
       <Row className="g-4">
-        <Col md={6}>
+        <Col xs={12}>
           <NextMintCard />
         </Col>
-        <Col md={6}>
+        <Col xs={12}>
           <UpcomingMints />
         </Col>
       </Row>

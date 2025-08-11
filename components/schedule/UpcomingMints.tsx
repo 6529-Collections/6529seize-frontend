@@ -12,10 +12,12 @@ import { Card, Table, Button } from "react-bootstrap";
 export default function UpcomingMints() {
   const dates = nextOccurrences(6);
   return (
-    <Card className="mb-4">
-      <Card.Header>Upcoming Mints</Card.Header>
+    <Card className="mb-4 bg-dark text-white border-secondary">
+      <Card.Header className="bg-secondary text-white">
+        Upcoming Mints
+      </Card.Header>
       <Card.Body>
-        <Table hover responsive>
+        <Table hover responsive variant="dark" className="mb-0">
           <thead>
             <tr>
               <th>Mint</th>
@@ -28,26 +30,34 @@ export default function UpcomingMints() {
               const n = mintNumberForDate(dt, prologue)!;
               return (
                 <tr key={n}>
-                  <td>#{n}</td>
+                  <td className="text-white">#{n}</td>
                   <td title={dt.toUTC().toISO() || undefined}>
                     {dt.toLocal().toLocaleString(DateTime.DATETIME_MED)}
                   </td>
                   <td>
-                    <a
-                      className="me-2"
+                    <Button
                       href={`/api/mints/${n}.ics`}
+                      variant="outline-light"
+                      size="sm"
+                      className="me-2"
                     >
                       ICS
-                    </a>
-                    <a href={googleCalendarLink(dt)}>Google</a>
+                    </Button>
+                    <Button
+                      href={googleCalendarLink(dt)}
+                      variant="outline-light"
+                      size="sm"
+                    >
+                      Google
+                    </Button>
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </Table>
-        <div className="text-end">
-          <Button href="/api/mints" variant="outline-primary">
+        <div className="text-end mt-3">
+          <Button href="/api/mints" variant="outline-light">
             Subscribe to all (ICS)
           </Button>
         </div>

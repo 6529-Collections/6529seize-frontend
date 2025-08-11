@@ -17,8 +17,8 @@ export default function NextMintCard() {
   const coord = timeCoordinate(next);
 
   return (
-    <Card className="mb-4 text-center">
-      <Card.Header>Next Mint</Card.Header>
+    <Card className="mb-4 text-center bg-dark text-white border-secondary">
+      <Card.Header className="bg-secondary text-white">Next Mint</Card.Header>
       <Card.Body>
         <Card.Title>Mint #{mintNum}</Card.Title>
         <DateCountdown title={`Mint #${mintNum}`} date={next.toJSDate()} />
@@ -34,12 +34,12 @@ export default function NextMintCard() {
         </p>
         <Button
           href={`/api/mints/${mintNum}.ics`}
-          variant="outline-primary"
+          variant="outline-light"
           className="me-2"
         >
           ICS
         </Button>
-        <Button href={googleCalendarLink(next)} variant="outline-success">
+        <Button href={googleCalendarLink(next)} variant="outline-light">
           Google
         </Button>
       </Card.Body>
