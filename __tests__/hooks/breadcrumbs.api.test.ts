@@ -191,7 +191,7 @@ describe("breadcrumbs.api", () => {
     it("returns nextgen name when API call succeeds", async () => {
       mockCommonApiFetch.mockResolvedValueOnce({ name: "Test Nextgen" });
 
-      const result = await fetchNextgenName("123");
+      const result = await fetchNextgenName("123", true);
 
       expect(result).toEqual({ name: "Test Nextgen" });
       expect(mockCommonApiFetch).toHaveBeenCalledWith({

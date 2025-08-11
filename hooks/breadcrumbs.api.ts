@@ -69,12 +69,15 @@ export const fetchMemeName = async (
 };
 
 export const fetchNextgenName = async (
-  id: string
+  id: string,
+  isCollection: boolean = false
 ): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
     const response = await commonApiFetch<NextGenToken>({
-      endpoint: `nextgen/collections/${id}`,
+      endpoint: isCollection
+        ? `nextgen/collections/${id}`
+        : `nextgen/tokens/${id}`,
     });
     return response?.name ? { name: response.name } : null;
   } catch (error) {
