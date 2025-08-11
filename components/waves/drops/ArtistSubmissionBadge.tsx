@@ -38,7 +38,6 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Hide tooltip immediately on click
           setIsTooltipOpen(false);
           onBadgeClick?.();
         }}

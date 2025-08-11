@@ -4,8 +4,7 @@ import { ArtistActiveSubmissionContent } from "./ArtistActiveSubmissionContent";
 import { ArtistWinningArtworksContent } from "./ArtistWinningArtworksContent";
 import { ArtistPreviewModalHeader } from "./ArtistPreviewModalHeader";
 import { ArtistPreviewModalTabs } from "./ArtistPreviewModalTabs";
-import { useRouter } from "next/navigation";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ModalTab } from "./ArtistPreviewModal";
 
@@ -39,7 +38,16 @@ export const ArtistPreviewModalContent: React.FC<
   const hasActiveSubmissions = submissionCount > 0;
 
   const showTabs = hasActiveSubmissions && hasWinningArtworks;
-  const currentContentType = showTabs ? activeTab : hasWinningArtworks ? "winners" : "active";
+  
+  // Extract nested ternary for better readability
+  let currentContentType: "active" | "winners";
+  if (showTabs) {
+    currentContentType = activeTab;
+  } else if (hasWinningArtworks) {
+    currentContentType = "winners";
+  } else {
+    currentContentType = "active";
+  }
 
   const handleDropClick = (drop: ExtendedDrop) => {
     if (searchParams) {
@@ -80,17 +88,22 @@ export const ArtistPreviewModalContent: React.FC<
           />
         )}
 
-        {showTabs ? (
-          activeTab === "active" ? (
-            <ArtistActiveSubmissionContent user={user} isOpen={isOpen} onClose={onClose} isApp={isApp} />
-          ) : (
-            <ArtistWinningArtworksContent user={user} isOpen={isOpen} onDropClick={handleDropClick} />
-          )
-        ) : hasWinningArtworks ? (
-          <ArtistWinningArtworksContent user={user} isOpen={isOpen} onDropClick={handleDropClick} />
-        ) : (
-          <ArtistActiveSubmissionContent user={user} isOpen={isOpen} onClose={onClose} isApp={isApp} />
-        )}
+        {(() => {
+          // Extract nested ternary logic for better readability
+          if (showTabs) {
+            return activeTab === "active" ? (
+              <ArtistActiveSubmissionContent user={user} isOpen={isOpen} onClose={onClose} isApp={isApp} />
+            ) : (
+              <ArtistWinningArtworksContent user={user} isOpen={isOpen} onDropClick={handleDropClick} />
+            );
+          }
+          
+          if (hasWinningArtworks) {
+            return <ArtistWinningArtworksContent user={user} isOpen={isOpen} onDropClick={handleDropClick} />;
+          }
+          
+          return <ArtistActiveSubmissionContent user={user} isOpen={isOpen} onClose={onClose} isApp={isApp} />;
+        })()}
       </div>
     </div>
   );

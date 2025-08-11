@@ -107,13 +107,11 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               />
             )}
             {isWinner && (
-              <button
-                onClick={handleWinnerBadgeClick}
-                className="tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none focus:tw-outline-none focus:tw-ring-0"
-                title="View winning artworks"
-              >
-                <ProfileWinnerBadge winCount={1} />
-              </button>
+              <ProfileWinnerBadge 
+                winCount={1} 
+                onBadgeClick={handleWinnerBadgeClick}
+                tooltipId={`winner-badge-${drop.id}`}
+              />
             )}
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
             <WaveDropTime timestamp={drop.created_at} />

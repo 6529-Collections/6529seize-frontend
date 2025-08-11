@@ -44,7 +44,7 @@ export const ArtistWinningArtworksContent: React.FC<
           >
             Loading...
           </span>
-          <style jsx>{`
+          <style>{`
             @keyframes fadeInOut {
               0% {
                 opacity: 0.8;

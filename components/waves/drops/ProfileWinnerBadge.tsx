@@ -18,42 +18,36 @@ interface ProfileWinnerBadgeProps {
   readonly winCount: number;
   readonly title?: string;
   readonly tooltipId?: string;
+  readonly onBadgeClick?: () => void;
 }
 
 export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
   winCount,
   title = "View winning artworks",
   tooltipId = "winner-badge",
+  onBadgeClick,
 }) => {
   const isMobile = useIsMobileDevice();
   const id = useId();
   const uniqueTooltipId = `${tooltipId}-${id}`;
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      // Since this badge doesn't have its own click handler,
-      // we simulate a click on the parent element to trigger the wrapper button
-      const target = e.currentTarget as HTMLElement;
-      const parentButton = target.closest('button');
-      if (parentButton) {
-        parentButton.click();
-      }
-    }
-  }, []);
 
   if (winCount === 0) return null;
 
   return (
     <>
-      <div
-        tabIndex={0}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsTooltipOpen(false);
+          onBadgeClick?.();
+        }}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
-        onKeyDown={handleKeyDown}
         className="tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5 tw-outline-none tw-ring-0 tw-inline-flex tw-items-center tw-justify-center
-        tw-size-5 tw-rounded-md tw-border tw-border-solid tw-border-amber-400/20
+       tw-rounded-md tw-border tw-border-solid tw-border-amber-400/20
         tw-bg-amber-400/10 tw-text-amber-300 tw-text-xs
         tw-shadow-[inset_0_0_2px_rgba(255,255,255,0.08),0_1px_4px_rgba(0,0,0,0.25)]
         tw-transition-all tw-duration-200
@@ -62,7 +56,6 @@ export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
         desktop-hover:hover:tw-scale-[1.05]
         desktop-hover:hover:tw-shadow-[inset_0_0_3px_rgba(255,255,255,0.12),0_2px_6px_rgba(0,0,0,0.3)]
         focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-amber-400/50 focus-visible:tw-ring-offset-2"
-        role="button"
         aria-label={`View ${winCount} winning artwork${
           winCount === 1 ? "" : "s"
         }`}
@@ -73,9 +66,7 @@ export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
           className="tw-w-3.5 tw-h-3.5 md:tw-w-3 md:tw-h-3 tw-text-amber-400 tw-flex-shrink-0
         desktop-hover:hover:tw-text-amber-300/90"
         />
-      </div>
-
-      {/* Tooltip - only on non-touch devices */}
+      </button>
       {!isMobile && (
         <Tooltip
           id={uniqueTooltipId}
