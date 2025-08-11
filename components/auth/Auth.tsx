@@ -4,7 +4,6 @@ import styles from "./Auth.module.scss";
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useAppKit } from "@reown/appkit/react";
 import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "../../hooks/useSecureSign";
 import { useMobileWalletConnection } from "../../hooks/useMobileWalletConnection";
 import {
@@ -38,6 +37,7 @@ import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemR
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
+import { validateRoleForAuthentication } from "../../utils/role-validation";
 import { 
   TokenRefreshError,
   TokenRefreshCancelledError,
@@ -45,7 +45,8 @@ import {
   TokenRefreshServerError,
   AuthenticationRoleError,
   RoleValidationError,
-  MissingActiveProfileError
+  MissingActiveProfileError,
+  InvalidRoleStateError
 } from "../../errors/authentication";
 
 // Custom error classes for authentication failures
@@ -116,7 +117,6 @@ export default function Auth({
   const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet, connectionState } =
     useSeizeConnectContext();
 
-  const { open } = useAppKit();
   const { signMessage, isSigningPending, reset: resetSigning } = useSecureSign();
   const { mobileInfo, getMobileInstructions } = useMobileWalletConnection();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -126,7 +126,6 @@ export default function Auth({
   
   // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
-  const authTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [authLoadingState, setAuthLoadingState] = useState<'idle' | 'validating' | 'signing'>('idle');
   
   // Centralized abort mechanism for cancelling in-flight operations
@@ -547,7 +546,7 @@ export default function Auth({
         const { isValid, wasCancelled } = await validateJwt({
           jwt: getAuthJwt(),
           wallet: currentAddress, // Use captured address, not current state
-          role: activeProfileProxy?.created_by.id ?? null,
+          role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
           operationId,
           abortSignal: abortController.signal
         });
@@ -575,7 +574,8 @@ export default function Auth({
           // Handle specific authentication role errors
           if (error instanceof MissingActiveProfileError || 
               error instanceof RoleValidationError || 
-              error instanceof AuthenticationRoleError) {
+              error instanceof AuthenticationRoleError ||
+              error instanceof InvalidRoleStateError) {
             // These are critical authentication failures - log and force re-authentication
             logErrorSecurely('validateJwt_role_error', error);
             // Force user to re-authenticate with proper role
@@ -841,7 +841,7 @@ export default function Auth({
       const { isValid } = await validateJwt({
         jwt: getAuthJwt(),
         wallet: address,
-        role: activeProfileProxy?.created_by.id ?? null,
+        role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
         operationId,
         abortSignal: abortController.signal
       });
@@ -850,7 +850,7 @@ export default function Auth({
         removeAuthJwt();
         await requestSignIn({
           signerAddress: address,
-          role: activeProfileProxy?.created_by.id ?? null,
+          role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
         });
         invalidateAll();
       }
@@ -874,12 +874,40 @@ export default function Auth({
       return;
     }
 
-    const { success } = await requestSignIn({
-      signerAddress: address,
-      role: profileProxy?.created_by.id ?? null,
-    });
-    if (success) {
-      setActiveProfileProxy(profileProxy);
+    try {
+      const { success } = await requestSignIn({
+        signerAddress: address,
+        role: profileProxy ? validateRoleForAuthentication(profileProxy) : null,
+      });
+      if (success) {
+        setActiveProfileProxy(profileProxy);
+      }
+    } catch (error) {
+      // Handle InvalidRoleStateError specifically
+      if (error instanceof InvalidRoleStateError) {
+        logErrorSecurely('onActiveProfileProxy_invalid_role_state', error);
+        setToast({
+          message: "Invalid profile role state. Please select a valid profile.",
+          type: "error",
+        });
+        // Reset to null state to force user to select valid profile
+        setActiveProfileProxy(null);
+        return;
+      }
+      
+      // Handle MissingActiveProfileError
+      if (error instanceof MissingActiveProfileError) {
+        logErrorSecurely('onActiveProfileProxy_missing_profile', error);
+        setToast({
+          message: "Profile authentication failed. Please select a profile.",
+          type: "error",
+        });
+        setActiveProfileProxy(null);
+        return;
+      }
+
+      // Re-throw other errors to be handled by calling code
+      throw error;
     }
   };
 

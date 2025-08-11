@@ -94,3 +94,15 @@ export class MissingActiveProfileError extends AuthenticationRoleError {
     Object.setPrototypeOf(this, MissingActiveProfileError.prototype);
   }
 }
+
+/**
+ * InvalidRoleStateError - thrown when role authentication fails due to invalid role state
+ * This indicates a critical authentication vulnerability that must be addressed immediately
+ */
+export class InvalidRoleStateError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(`Invalid role state: ${message}`);
+    this.name = 'InvalidRoleStateError';
+    Object.setPrototypeOf(this, InvalidRoleStateError.prototype);
+  }
+}
