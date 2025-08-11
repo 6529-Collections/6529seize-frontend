@@ -7,6 +7,11 @@ import {
   DeepLinkTimeoutError, 
   ConnectionVerificationError 
 } from "./errors/WalletConnectionError";
+import { 
+  sanitizeUserAgent, 
+  SafeUserAgentInfo, 
+  UserAgentSecurityError 
+} from "./security/UserAgentSanitizer";
 
 /**
  * Mobile wallet connection states
@@ -24,9 +29,16 @@ export enum MobileConnectionState {
 export interface MobileWalletInfo {
   isMobile: boolean;
   isInAppBrowser: boolean;
-  userAgent: string;
+  userAgentHash: string; // SECURITY: Hash instead of raw user agent to prevent XSS
   supportsDeepLinking: boolean;
   detectedWallet?: string;
+  platformInfo: {
+    isAndroid: boolean;
+    isIOS: boolean;
+    isWindows: boolean;
+    isMac: boolean;
+    isLinux: boolean;
+  };
 }
 
 interface UseMobileWalletConnectionReturn {
@@ -351,49 +363,49 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
 };
 
 /**
- * Detect mobile environment and wallet capabilities
+ * Detect mobile environment and wallet capabilities with security sanitization
+ * SECURITY: This function now uses sanitizeUserAgent() to prevent XSS attacks
+ * and never exposes raw user agent strings
  */
 function getMobileWalletInfo(): MobileWalletInfo {
   if (typeof window === 'undefined') {
     return {
       isMobile: false,
       isInAppBrowser: false,
-      userAgent: '',
+      userAgentHash: '',
       supportsDeepLinking: false,
+      platformInfo: {
+        isAndroid: false,
+        isIOS: false,
+        isWindows: false,
+        isMac: false,
+        isLinux: false,
+      },
     };
   }
 
-  const userAgent = window.navigator.userAgent;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-  
-  // Detect in-app browsers
-  const isInAppBrowser = 
-    /FBAN|FBAV|Instagram|Twitter|Line|WeChat|MicroMessenger/i.test(userAgent) ||
-    // MetaMask in-app browser
-    /MetaMaskMobile/i.test(userAgent) ||
-    // Trust Wallet in-app browser
-    /Trust/i.test(userAgent) ||
-    // Coinbase Wallet in-app browser
-    /CoinbaseWallet/i.test(userAgent);
-
-  // Detect specific wallet apps
-  let detectedWallet: string | undefined;
-  if (/MetaMask/i.test(userAgent)) {
-    detectedWallet = 'MetaMask';
-  } else if (/Trust/i.test(userAgent)) {
-    detectedWallet = 'Trust Wallet';
-  } else if (/CoinbaseWallet/i.test(userAgent)) {
-    detectedWallet = 'Coinbase Wallet';
+  try {
+    // SECURITY: Use sanitizeUserAgent to prevent XSS and other attacks
+    const safeUserAgentInfo = sanitizeUserAgent(window.navigator.userAgent);
+    
+    // Return sanitized information with hash instead of raw user agent
+    return {
+      isMobile: safeUserAgentInfo.isMobile,
+      isInAppBrowser: safeUserAgentInfo.isInAppBrowser,
+      userAgentHash: safeUserAgentInfo.userAgentHash, // Hash instead of raw string
+      supportsDeepLinking: safeUserAgentInfo.supportsDeepLinking,
+      detectedWallet: safeUserAgentInfo.detectedWallet,
+      platformInfo: safeUserAgentInfo.platformInfo,
+    };
+  } catch (error) {
+    // SECURITY: Fail fast on security errors - do not provide fallbacks
+    if (error instanceof UserAgentSecurityError) {
+      throw new WalletConnectionError(
+        `Security violation in user agent processing: ${error.message}`
+      );
+    }
+    
+    // Re-throw unexpected errors for upstream handling
+    throw error;
   }
-
-  // Most mobile browsers support deep linking
-  const supportsDeepLinking = isMobile && !isInAppBrowser;
-
-  return {
-    isMobile,
-    isInAppBrowser,
-    userAgent,
-    supportsDeepLinking,
-    detectedWallet,
-  };
 }
