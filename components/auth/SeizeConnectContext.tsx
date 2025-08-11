@@ -436,6 +436,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeConnect = useCallback((): void => {
     try {
+      // Debug alert for mobile
+      if (typeof window !== 'undefined' && window.navigator.userAgent.includes('Mobile')) {
+        alert('[DEBUG SeizeConnect] Opening wallet modal');
+      }
+      
       // Log connection attempt for security monitoring
       logSecurityEvent(
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
@@ -443,6 +448,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       
       open({ view: "Connect" });
+      
+      // Debug alert for mobile after opening
+      if (typeof window !== 'undefined' && window.navigator.userAgent.includes('Mobile')) {
+        alert('[DEBUG SeizeConnect] Modal opened successfully');
+      }
       
       // Log successful modal opening
       logSecurityEvent(

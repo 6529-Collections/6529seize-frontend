@@ -158,6 +158,11 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
   // Handle mobile wallet connection with deep linking support
   const handleMobileConnection = useCallback(async (connectorId?: string) => {
     try {
+      // Debug alert 1: Starting connection
+      if (typeof window !== 'undefined' && mobileInfo.isMobile) {
+        alert(`[DEBUG 1] Starting mobile connection\nConnector: ${connectorId || 'default'}\nPlatform: ${mobileInfo.platformInfo.isIOS ? 'iOS' : mobileInfo.platformInfo.isAndroid ? 'Android' : 'Other'}\nIn-app browser: ${mobileInfo.isInAppBrowser}`);
+      }
+      
       // SECURITY: Guard state updates with mount check
       if (!isMountedRef.current) {
         throw new WalletConnectionError('Component unmounted during connection');
@@ -167,6 +172,11 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
 
       // Handle deep linking for mobile wallets
       if (mobileInfo.isMobile && mobileInfo.supportsDeepLinking) {
+        // Debug alert 2: Deep linking setup
+        if (typeof window !== 'undefined') {
+          alert(`[DEBUG 2] Setting up deep linking\nSupports deep linking: ${mobileInfo.supportsDeepLinking}\nDetected wallet: ${mobileInfo.detectedWallet || 'none'}`);
+        }
+        
         if (!isMountedRef.current) {
           throw new WalletConnectionError('Component unmounted during deep linking setup');
         }
@@ -198,13 +208,27 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         });
       }
 
+      // Debug alert 3: Before opening AppKit modal
+      if (typeof window !== 'undefined' && mobileInfo.isMobile) {
+        alert(`[DEBUG 3] About to open AppKit modal\nView: Connect\nNamespace: ${connectorId === 'solana' ? 'solana' : 'eip155'}`);
+      }
+
       // Use AppKit modal to handle connection with proper namespace
       await open({ 
         view: 'Connect', 
         namespace: connectorId === 'solana' ? 'solana' : 'eip155' 
       });
       
+      // Debug alert 4: After AppKit modal opened
+      if (typeof window !== 'undefined' && mobileInfo.isMobile) {
+        alert(`[DEBUG 4] AppKit modal opened successfully`);
+      }
+      
     } catch (error: any) {
+      // Debug alert 5: Error occurred
+      if (typeof window !== 'undefined' && mobileInfo.isMobile) {
+        alert(`[DEBUG 5] Error in connection: ${error?.message || 'Unknown error'}`);
+      }
       // SECURITY: Guard state updates with mount check
       if (isMountedRef.current) {
         setConnectionState(MobileConnectionState.FAILED);
