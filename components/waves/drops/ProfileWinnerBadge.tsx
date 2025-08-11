@@ -12,7 +12,7 @@ export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
   if (winCount === 0) return null;
 
   return (
-    <div className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-border tw-size-5 tw-text-xs tw-bg-amber-400/10 tw-border-amber-400/25 tw-text-amber-400">
+    <div className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-border tw-size-5 tw-text-xs tw-bg-amber-400/20 tw-border-amber-400/25 tw-text-amber-400">
       <FontAwesomeIcon 
         icon={faTrophy} 
         className="tw-size-2.5 tw-text-amber-400 tw-flex-shrink-0"

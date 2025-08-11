@@ -8,7 +8,7 @@ import {
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { motion, PanInfo, useDragControls } from "framer-motion";
 
-export default function ArtistActiveSubmissionAppWrapper({
+export default function ArtistPreviewAppWrapper({
   isOpen,
   onClose,
   children,

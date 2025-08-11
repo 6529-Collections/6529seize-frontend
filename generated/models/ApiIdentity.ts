@@ -33,6 +33,7 @@ export class ApiIdentity {
     'query'?: string | null;
     'wallets'?: Array<ApiWallet>;
     'active_main_stage_submission_ids': Array<string>;
+    'winner_main_stage_drop_ids': Array<string>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -142,6 +143,12 @@ export class ApiIdentity {
         {
             "name": "active_main_stage_submission_ids",
             "baseName": "active_main_stage_submission_ids",
+            "type": "Array<string>",
+            "format": ""
+        },
+        {
+            "name": "winner_main_stage_drop_ids",
+            "baseName": "winner_main_stage_drop_ids",
             "type": "Array<string>",
             "format": ""
         }    ];

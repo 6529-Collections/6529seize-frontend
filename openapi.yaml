@@ -4785,6 +4785,7 @@ components:
         - banner1
         - banner2
         - active_main_stage_submission_ids
+        - winner_main_stage_drop_ids
       properties:
         id:
           type: string
@@ -4835,6 +4836,10 @@ components:
           items:
             $ref: "#/components/schemas/ApiWallet"
         active_main_stage_submission_ids:
+          type: array
+          items:
+            type: string
+        winner_main_stage_drop_ids:
           type: array
           items:
             type: string
@@ -5475,6 +5480,7 @@ components:
         - subscribed_actions
         - archived
         - active_main_stage_submission_ids
+        - winner_main_stage_drop_ids
       properties:
         id:
           type: string
@@ -5512,6 +5518,10 @@ components:
         archived:
           type: boolean
         active_main_stage_submission_ids:
+          type: array
+          items:
+            type: string
+        winner_main_stage_drop_ids:
           type: array
           items:
             type: string

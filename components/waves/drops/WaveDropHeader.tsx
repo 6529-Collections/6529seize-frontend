@@ -10,7 +10,7 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
-import { ArtistSubmissionPreviewModal } from "./ArtistSubmissionPreviewModal";
+import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { ProfileWinnerBadge } from "./ProfileWinnerBadge";
 import { useState } from "react";
 
@@ -34,12 +34,16 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   const router = useRouter();
   const cicType = cicToType(drop.author.cic);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
+  const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
+
+  const submissionCount =
+    drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
-  // Check if this drop is a winner from real data
-  const isWinner = drop.winning_context && drop.winning_context.place === 1;
+  // Check if this drop author has any main stage winner drop IDs
+  const isWinner =
+    drop.author.winner_main_stage_drop_ids &&
+    drop.author.winner_main_stage_drop_ids.length > 0;
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -55,6 +59,14 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
     setIsModalOpen(false);
   };
 
+  const handleWinnerBadgeClick = () => {
+    setIsWinnerModalOpen(true);
+  };
+
+  const handleWinnerModalClose = () => {
+    setIsWinnerModalOpen(false);
+  };
+
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
@@ -68,26 +80,32 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
               <UserProfileTooltipWrapper
-                user={drop.author.handle ?? drop.author.id}>
+                user={drop.author.handle ?? drop.author.id}
+              >
                 <Link
                   onClick={(e) => handleNavigation(e, `/${drop.author.handle}`)}
                   href={`/${drop.author.handle}`}
-                  className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out">
+                  className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out"
+                >
                   {drop.author.handle}
                 </Link>
               </UserProfileTooltipWrapper>
             </p>
-            {isWinner && (
-              <ProfileWinnerBadge 
-                winCount={1}
-              />
-            )}
             {hasSubmissions && (
               <ArtistSubmissionBadge
                 submissionCount={submissionCount}
                 onBadgeClick={handleSubmissionBadgeClick}
                 tooltipId={`header-badge-${drop.id}`}
               />
+            )}
+            {isWinner && (
+              <button
+                onClick={handleWinnerBadgeClick}
+                className="tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer hover:tw-opacity-80 tw-transition-opacity"
+                title="View winning artworks"
+              >
+                <ProfileWinnerBadge winCount={1} />
+              </button>
             )}
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
             <WaveDropTime timestamp={drop.created_at} />
@@ -102,7 +120,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)
             }
             href={`/my-stream?wave=${drop.wave.id}`}
-            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
+            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+          >
             {drop.wave.name}
           </Link>
         )}
@@ -118,10 +137,18 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
       )}
 
       {/* Artist Submission Preview Modal */}
-      <ArtistSubmissionPreviewModal
+      <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
+      />
+
+      {/* Winner Artworks Modal */}
+      <ArtistPreviewModal
+        isOpen={isWinnerModalOpen}
+        onClose={handleWinnerModalClose}
+        user={drop.author}
+        initialTab="winners"
       />
     </>
   );

@@ -42,10 +42,10 @@ export const ArtistActiveSubmissionContent: React.FC<
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Check if user has any 1st place winner drops from real data
-  const hasFirstPlaceWins = submissions && submissionDrops.some((drop: any) => 
-    drop && drop.winning_context && drop.winning_context.place === 1
-  );
+  // Check if user has any main stage winner drop IDs
+  const hasFirstPlaceWins =
+    user.winner_main_stage_drop_ids &&
+    user.winner_main_stage_drop_ids.length > 0;
 
   if (!searchParams) {
     return null;
@@ -70,96 +70,6 @@ export const ArtistActiveSubmissionContent: React.FC<
 
   return (
     <>
-      {/* Header */}
-      <div
-        className={`tw-relative tw-z-[100] tw-flex tw-justify-between ${
-          isApp ? "tw-px-6 tw-pb-6" : "tw-p-6"
-        } tw-border-b tw-border-iron-800/60 tw-border-solid tw-border-t-0 tw-border-x-0`}
-      >
-        <div className="tw-flex-1">
-          <div className="tw-flex sm:tw-flex-row tw-flex-col sm:tw-items-center sm:tw-gap-4 tw-gap-3">
-            <div className="tw-relative">
-              {hasFirstPlaceWins ? (
-                <ProfileWinnerRing 
-                  winCount={1} 
-                  bestRank={1}
-                  size="medium"
-                >
-                  <div className="tw-h-12 tw-w-12 tw-bg-iron-900 tw-rounded-lg tw-overflow-hidden tw-shadow-lg">
-                    {user.pfp ? (
-                      <img
-                        src={user.pfp}
-                        alt="Profile"
-                        className="tw-w-full tw-h-full tw-object-contain tw-bg-transparent"
-                      />
-                    ) : (
-                      <div className="tw-w-full tw-h-full tw-bg-iron-900 tw-flex tw-items-center tw-justify-center">
-                        <FontAwesomeIcon
-                          icon={faPalette}
-                          className="tw-w-5 tw-h-5 tw-text-iron-600 tw-flex-shrink-0"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </ProfileWinnerRing>
-              ) : (
-                <div className="tw-h-12 tw-w-12 tw-bg-iron-900 tw-rounded-lg tw-overflow-hidden tw-shadow-lg">
-                  {user.pfp ? (
-                    <img
-                      src={user.pfp}
-                      alt="Profile"
-                      className="tw-w-full tw-h-full tw-object-contain tw-bg-transparent"
-                    />
-                  ) : (
-                    <div className="tw-w-full tw-h-full tw-bg-iron-900 tw-flex tw-items-center tw-justify-center">
-                      <FontAwesomeIcon
-                        icon={faPalette}
-                        className="tw-w-5 tw-h-5 tw-text-iron-600 tw-flex-shrink-0"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="tw-text-left">
-              <div className="tw-flex tw-items-center tw-gap-3 tw-mb-1">
-                <div className="tw-text-xl sm:tw-text-3xl tw-font-bold tw-text-iron-100">
-                  {user.handle || "Unknown Artist"}'s Submissions
-                </div>
-                {hasFirstPlaceWins && (
-                  <ProfileWinnerBadge 
-                    winCount={1}
-                  />
-                )}
-              </div>
-              <div className="tw-flex tw-items-center tw-justify-start tw-gap-2 tw-text-sm tw-text-iron-400">
-                {isLoading ? (
-                  <div className="tw-flex tw-items-center tw-gap-2">
-                    <div className="tw-w-4 tw-h-4 tw-border-2 tw-border-solid tw-border-iron-600 tw-border-t-iron-400 tw-rounded-full tw-animate-spin"></div>
-                  </div>
-                ) : (
-                  <span>
-                    {submissions.length} artwork
-                    {submissions.length === 1 ? "" : "s"}
-                  </span>
-                )}
-                <span className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></span>
-                <span>The Memes Collection</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        {!isApp && (
-          <button
-            onClick={onClose}
-            className="tw-flex tw-items-center tw-justify-center tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-950 tw-text-white tw-transition-all tw-duration-300 tw-border-solid tw-border-iron-800/80 desktop-hover:hover:tw-border-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-iron-600 focus:tw-ring-opacity-50 active:tw-bg-iron-700 active:tw-scale-95"
-            aria-label="Close Gallery"
-          >
-            <XMarkIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
-          </button>
-        )}
-      </div>
-
       {/* Content */}
       <div
         className={`tw-relative tw-z-[100] tw-p-6 ${
@@ -204,7 +114,7 @@ export const ArtistActiveSubmissionContent: React.FC<
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650  tw-transition-opacity tw-duration-500 tw-ease-out tw-mb-3"
+                    className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-900 desktop-hover:hover:tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-out tw-mb-3"
                     onClick={() => handleDropClick(submission.id)}
                   >
                     {/* Image container */}
