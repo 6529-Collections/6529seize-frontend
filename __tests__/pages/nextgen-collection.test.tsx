@@ -1,10 +1,10 @@
+import { useShallowRedirect } from "@/pages/nextgen/collection/[collection]/[[...view]]";
 import { render } from "@testing-library/react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
 }));
-import { useShallowRedirect } from "@/pages/nextgen/collection/[collection]/[[...view]]";
 
 describe("nextgen collection page helpers", () => {
   describe("getServerSideProps", () => {
@@ -68,7 +68,9 @@ describe("nextgen collection page helpers", () => {
         return null;
       }
       render(<Test />);
-      expect(replace).toHaveBeenCalledWith("/nextgen/collection/cool-name");
+      expect(replace).toHaveBeenCalledWith("/nextgen/collection/cool-name", {
+        scroll: false,
+      });
     });
   });
 });

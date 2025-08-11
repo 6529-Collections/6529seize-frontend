@@ -1,15 +1,15 @@
 import styles from "@/styles/Home.module.scss";
 
-import dynamic from "next/dynamic";
+import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
+import { useTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
 import { isEmptyObject } from "@/helpers/Helpers";
-import { commonApiFetch } from "@/services/api/common-api";
 import { getCommonHeaders } from "@/helpers/server.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import dynamic from "next/dynamic";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
-import { useTitle } from "@/contexts/TitleContext";
 
 const NextGenCollectionComponent = dynamic(
   () =>
@@ -34,14 +34,12 @@ export default function NextGenCollectionPage(props: {
   const [view, setView] = useState<ContentView>(props.view);
 
   useEffect(() => {
-    const viewFromUrl = getCollectionView(searchParams?.get("view") ?? "");
-    setView(viewFromUrl);
-    const viewTitle =
-      viewFromUrl !== ContentView.OVERVIEW ? ` | ${viewFromUrl}` : "";
+    const viewTitle = view !== ContentView.OVERVIEW ? ` | ${view}` : "";
     setTitle(`${collection.name}${viewTitle} | NextGen`);
   }, [searchParams, collection.name, setTitle]);
 
   const updateView = (newView: ContentView) => {
+    setView(newView);
     let path =
       newView === ContentView.OVERVIEW
         ? "/"
@@ -50,7 +48,7 @@ export default function NextGenCollectionPage(props: {
     const newPath = `/nextgen/collection/${formatNameForUrl(
       collection.name
     )}${path}`;
-    router.push(newPath);
+    router.push(newPath, { scroll: false });
   };
 
   return (
@@ -133,30 +131,27 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   };
 }
 
-export function useShallowRedirect(name: string, currentPath?: string) {
+export function useShallowRedirect(name: string) {
   const router = useRouter();
   const pathname = usePathname();
 
-  function getPath() {
-    let p = pathname ?? "";
-    if (currentPath) {
-      p = p.split(currentPath)[0];
-    }
-    const collectionId = p.split("/")[p.split("/").length - 1];
-    if (!isNaN(parseInt(collectionId))) {
-      p = p.replace(collectionId, formatNameForUrl(name));
-    }
-
-    if (currentPath) {
-      p = p + currentPath;
-    }
-
-    return p;
-  }
-
   useEffect(() => {
-    router.replace(getPath());
-  }, []);
+    if (!pathname) return;
+
+    const next = pathname.replace(
+      /^(\/nextgen\/collection\/)([^/]+)(\/?)/,
+      (_, prefix: string, slug: string, tailSlash: string) => {
+        if (/^\d+$/.test(slug)) {
+          return `${prefix}${formatNameForUrl(name)}${tailSlash}`;
+        }
+        return `${prefix}${slug}${tailSlash}`;
+      }
+    );
+
+    if (next !== pathname) {
+      router.replace(next, { scroll: false });
+    }
+  }, [pathname, name, router]);
 }
 
 function getContentViewKeyByValue(value: string): string {

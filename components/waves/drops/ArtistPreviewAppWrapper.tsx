@@ -92,16 +92,6 @@ export default function ArtistPreviewAppWrapper({
                   </div>
                 </TransitionChild>
                 
-                {/* Drag handle area - this triggers the drag for the whole modal */}
-                <div 
-                  onPointerDown={(e) => dragControls.start(e)}
-                  className="tw-w-full tw-py-4 tw-flex tw-justify-center tw-cursor-grab active:tw-cursor-grabbing"
-                  style={{ touchAction: 'none' }}
-                  data-testid="drag-handle-area"
-                >
-                  <div className="tw-w-10 tw-h-1 tw-bg-iron-700 tw-rounded-full" data-testid="drag-handle"></div>
-                </div>
-
                 <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800">
                   {children}
                 </div>

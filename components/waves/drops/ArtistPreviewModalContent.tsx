@@ -51,11 +51,15 @@ export const ArtistPreviewModalContent: React.FC<
   };
 
   return (
-    <div className="tailwind-scope tw-relative tw-rounded-2xl tw-overflow-hidden tw-bg-[#0E1012] tw-border tw-border-white/5 tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
-      {/* Top micro-gradient band for subtle luxe */}
-      <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-12 tw-pointer-events-none tw-bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0)_70%)]" />
-      {/* Faint glass film */}
-      <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-backdrop-blur-[1px]" />
+    <div className="tailwind-scope tw-relative tw-rounded-xl tw-overflow-hidden tw-bg-[#0E1012] tw-border tw-border-white/5 tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
+      {currentContentType === "winners" && (
+        <>
+          {/* Top micro-gradient band for subtle luxe */}
+          <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-12 tw-pointer-events-none tw-bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0)_70%)]" />
+          {/* Faint glass film */}
+          <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-backdrop-blur-[1px]" />
+        </>
+      )}
       
       {/* Header */}
       <ArtistPreviewModalHeader
@@ -68,7 +72,7 @@ export const ArtistPreviewModalContent: React.FC<
       />
 
       {/* Tabs + content */}
-      <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-relative">
         {showTabs && (
           <ArtistPreviewModalTabs
             activeTab={activeTab}

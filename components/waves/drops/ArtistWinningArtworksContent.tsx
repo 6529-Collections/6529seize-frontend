@@ -14,6 +14,8 @@ import { Time } from "../../../helpers/time";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
+import { sanitizeMediaUrl } from "../../../helpers/urlValidation";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface ArtistWinningArtworksContentProps {
   readonly user: ApiProfileMin;
@@ -24,7 +26,8 @@ interface ArtistWinningArtworksContentProps {
 export const ArtistWinningArtworksContent: React.FC<
   ArtistWinningArtworksContentProps
 > = ({ user, isOpen, onDropClick }) => {
-  const { winningDrops, isLoading, isError } = useUserWinningArtworks({
+  const isMobile = useIsMobileDevice();
+  const { winningDrops, isLoading } = useUserWinningArtworks({
     user,
     enabled: isOpen,
   });
@@ -34,26 +37,29 @@ export const ArtistWinningArtworksContent: React.FC<
       <div className="tw-flex tw-items-center tw-justify-center tw-h-96">
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
           <div className="tw-animate-spin tw-rounded-full tw-h-8 tw-w-8 tw-border-b-2 tw-border-amber-400"></div>
-          <span className="tw-text-iron-400 tw-text-sm">
-            Loading winning artworks...
+          <span 
+            className="tw-text-iron-400 tw-text-sm"
+            style={{
+              animation: "fadeInOut 2s ease-in-out infinite alternate"
+            }}
+          >
+            Loading...
           </span>
+          <style jsx>{`
+            @keyframes fadeInOut {
+              0% {
+                opacity: 0.8;
+              }
+              100% {
+                opacity: 0.4;
+              }
+            }
+          `}</style>
         </div>
       </div>
     );
   }
 
-  if (isError) {
-    return (
-      <div className="tw-flex tw-items-center tw-justify-center tw-h-96">
-        <div className="tw-text-center">
-          <p className="tw-text-red-400">Failed to load winning artworks</p>
-          <p className="tw-text-iron-500 tw-text-sm tw-mt-2">
-            Please try again later
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -67,9 +73,9 @@ export const ArtistWinningArtworksContent: React.FC<
           return (
             <div key={drop.id} className="tw-flex tw-flex-col tw-h-full">
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.1 }}
+                initial={isMobile ? undefined : { opacity: 0 }}
+                animate={isMobile ? undefined : { opacity: 1 }}
+                transition={isMobile ? undefined : { delay: index * 0.1 }}
                 className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-900 desktop-hover:hover:tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-out tw-mb-3"
                 onClick={() => onDropClick(extendedDrop)}
               >
@@ -83,7 +89,8 @@ export const ArtistWinningArtworksContent: React.FC<
                   <div className="tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
                     <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
                       {drop.parts?.[0]?.media &&
-                      drop.parts[0].media.length > 0 ? (
+                      drop.parts[0].media.length > 0 &&
+                      sanitizeMediaUrl(drop.parts[0].media[0].url) ? (
                         <MediaDisplay
                           media_url={drop.parts[0].media[0].url}
                           media_mime_type={drop.parts[0].media[0].mime_type}

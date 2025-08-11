@@ -12,7 +12,7 @@ import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWra
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { ProfileWinnerBadge } from "./ProfileWinnerBadge";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -32,40 +32,48 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   badge,
 }) => {
   const router = useRouter();
-  const cicType = cicToType(drop.author.cic);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
 
-  const submissionCount =
-    drop.author.active_main_stage_submission_ids?.length || 0;
+  // Memoize expensive computations
+  const cicType = useMemo(() => cicToType(drop.author.cic), [drop.author.cic]);
+  
+  const submissionCount = useMemo(() => 
+    drop.author.active_main_stage_submission_ids?.length || 0,
+    [drop.author.active_main_stage_submission_ids]
+  );
+  
   const hasSubmissions = submissionCount > 0;
 
   // Check if this drop author has any main stage winner drop IDs
-  const isWinner =
+  const isWinner = useMemo(() =>
     drop.author.winner_main_stage_drop_ids &&
-    drop.author.winner_main_stage_drop_ids.length > 0;
+    drop.author.winner_main_stage_drop_ids.length > 0,
+    [drop.author.winner_main_stage_drop_ids]
+  );
 
-  const handleNavigation = (e: React.MouseEvent, path: string) => {
+  // Memoize event handlers to prevent unnecessary re-renders
+  const handleNavigation = useCallback((e: React.MouseEvent, path: string) => {
     e.preventDefault();
     e.stopPropagation();
     router.push(path);
-  };
+  }, [router]);
 
-  const handleSubmissionBadgeClick = () => {
+  const handleSubmissionBadgeClick = useCallback(() => {
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
-  };
+  }, []);
 
-  const handleWinnerBadgeClick = () => {
+  const handleWinnerBadgeClick = useCallback(() => {
     setIsWinnerModalOpen(true);
-  };
+  }, []);
 
-  const handleWinnerModalClose = () => {
+  const handleWinnerModalClose = useCallback(() => {
     setIsWinnerModalOpen(false);
-  };
+  }, []);
 
   return (
     <>
@@ -101,7 +109,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             {isWinner && (
               <button
                 onClick={handleWinnerBadgeClick}
-                className="tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer hover:tw-opacity-80 tw-transition-opacity"
+                className="tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none focus:tw-outline-none focus:tw-ring-0"
                 title="View winning artworks"
               >
                 <ProfileWinnerBadge winCount={1} />

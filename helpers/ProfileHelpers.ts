@@ -29,6 +29,7 @@ export const profileAndConsolidationsToProfileMin = ({
     ? {
         id: profile.id,
         active_main_stage_submission_ids: profile.active_main_stage_submission_ids,
+        winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids ?? [],
         handle: profile.handle,
         pfp: profile.pfp ?? null,
         banner1_color: profile.banner1 ?? null,

@@ -9,7 +9,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
   // Check if this drop author has any main stage winner drop IDs
   const isFirstPlace = drop.author.winner_main_stage_drop_ids && 
                        drop.author.winner_main_stage_drop_ids.length > 0;
-  const shadowClass = isFirstPlace ? "tw-shadow-[0_2px_12px_rgba(251,191,36,0.25)]" : "";
+  const shadowClass = isFirstPlace ? "tw-shadow-[0_1px_4px_rgba(251,191,36,0.15)]" : "";
 
   return (
     <div className={`tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg ${shadowClass}`}>

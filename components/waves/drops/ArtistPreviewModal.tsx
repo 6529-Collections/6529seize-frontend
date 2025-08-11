@@ -112,7 +112,7 @@ export const ArtistPreviewModal: React.FC<
                 }
               }}
               open
-              aria-label="Artist submissions gallery"
+              aria-label="Artist artworks"
             >
               <ArtistPreviewModalContent
                 user={user}

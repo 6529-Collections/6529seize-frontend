@@ -1,12 +1,12 @@
 import styles from "@/styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { NextGenCollection } from "../../../../entities/INextgen";
-import { useShallowRedirect } from "./[[...view]]";
 import {
   NextGenCollectionHead,
   getServerSideCollection,
 } from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
+import { NextGenCollection } from "../../../../entities/INextgen";
+import { useShallowRedirect } from "./[[...view]]";
 
 const NextGenCollectionMintComponent = dynamic(
   () =>
@@ -22,7 +22,7 @@ export default function NextGenCollectionMintPage(props: {
   readonly collection: NextGenCollection;
 }) {
   const collection = props.collection;
-  useShallowRedirect(collection.name, "/mint");
+  useShallowRedirect(collection.name);
 
   return (
     <>

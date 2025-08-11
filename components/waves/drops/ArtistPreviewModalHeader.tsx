@@ -1,9 +1,6 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPalette } from "@fortawesome/free-solid-svg-icons";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { ModalTab } from "./ArtistPreviewModal";
 
 interface ArtistPreviewModalHeaderProps {
   readonly user: ApiProfileMin;
@@ -40,53 +37,31 @@ export const ArtistPreviewModalHeader: React.FC<
   const HeaderInner = (
     <div
       className={`tw-relative tw-z-[100] tw-flex tw-flex-col ${
-        isApp ? "tw-px-6 tw-pb-4" : "tw-p-6"
+        isApp ? "tw-px-6 tw-py-4" : "tw-p-6"
       } tw-border-b tw-border-iron-800/60 tw-border-solid tw-border-t-0 tw-border-x-0`}
     >
       <div className="tw-flex tw-gap-x-3 tw-justify-between">
         <div className="tw-flex sm:tw-flex-row tw-flex-col sm:tw-items-center sm:tw-gap-4 tw-gap-3">
           <div
-            className={`tw-h-12 tw-w-12 tw-rounded-lg tw-overflow-hidden ${
+            className={`tw-h-12 tw-w-12 tw-flex-shrink-0 tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-border tw-border-solid ${
               currentContentType === "winners"
-                ? "tw-border tw-border-[#E4CFA1]/35 tw-shadow-[0_0_3px_rgba(228,207,161,0.18)]"
-                : "tw-bg-iron-900"
+                ? "tw-shadow-[0_1px_4px_rgba(251,191,36,0.15)] tw-border-[#E4CFA1]/5"
+                : "tw-border-white/10"
             }`}
-            style={
-              currentContentType === "winners"
-                ? { backgroundColor: "#111" }
-                : undefined
-            }
           >
-            {user.pfp ? (
+            {user.pfp && (
               <img
                 src={user.pfp}
                 alt="Profile"
                 className="tw-w-full tw-h-full tw-object-contain tw-bg-transparent"
               />
-            ) : (
-              <div
-                className={`tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center ${
-                  currentContentType === "winners"
-                    ? "tw-bg-[#111]"
-                    : "tw-bg-iron-900"
-                }`}
-              >
-                <FontAwesomeIcon
-                  icon={faPalette}
-                  className={`tw-w-5 tw-h-5 tw-flex-shrink-0 ${
-                    currentContentType === "winners"
-                      ? "tw-text-[#E4CFA1]"
-                      : "tw-text-iron-600"
-                  }`}
-                />
-              </div>
             )}
           </div>
 
           <div className="tw-text-left tw-relative">
             {/* Title with subtle golden gradient for winners */}
             <div
-              className={`tw-text-xl sm:tw-text-3xl tw-font-semibold tw-mb-1 tw-tracking-tight tw-transition-all tw-duration-300 ${
+              className={`tw-text-xl sm:tw-text-2xl tw-font-semibold tw-mb-1 tw-tracking-tight tw-transition-all tw-duration-300 ${
                 currentContentType === "winners"
                   ? "tw-text-transparent tw-bg-clip-text tw-bg-gradient-to-r tw-from-amber-100 tw-via-yellow-50 tw-to-amber-100"
                   : "tw-text-iron-100"
@@ -95,21 +70,9 @@ export const ArtistPreviewModalHeader: React.FC<
               {getTitle()}
             </div>
 
-            <div
-              className={`tw-flex tw-items-center tw-gap-2 tw-text-sm tw-transition-colors tw-duration-300 ${
-                currentContentType === "winners"
-                  ? "tw-text-[#EADFBF]/70"
-                  : "tw-text-iron-400"
-              }`}
-            >
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-transition-colors tw-duration-300 tw-text-white/50">
               <span>{getCurrentCount()}</span>
-              <span
-                className={`tw-w-1 tw-h-1 tw-rounded-full ${
-                  currentContentType === "winners"
-                    ? "tw-bg-[#E4CFA1]/50"
-                    : "tw-bg-iron-600"
-                }`}
-              />
+              <span className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-white/40" />
               <span>The Memes Collection</span>
             </div>
           </div>
@@ -130,26 +93,30 @@ export const ArtistPreviewModalHeader: React.FC<
 
   return currentContentType === "winners" ? (
     <div className="tw-relative tw-overflow-hidden">
-    {/* warm-neutral depth band for winners */}
-    <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-14 tw-pointer-events-none 
-      tw-bg-[linear-gradient(180deg,rgba(232,218,184,0.07),rgba(0,0,0,0)_85%)]" />
-    
-    {/* ultra-subtle champagne sweep */}
-    <div className="tw-absolute tw-inset-0 tw-pointer-events-none 
-      tw-bg-[radial-gradient(120%_80%_at_20%_-20%,rgba(232,218,184,0.08),transparent_65%)]" />
-    
-    {/* faint inner edge */}
-    <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-[1px] tw-pointer-events-none tw-bg-white/5" />
-    
-    {HeaderInner}
-  </div>
-) : (
-  <div className="tw-relative tw-overflow-hidden">
-    {/* flat background, no gradient */}
-    <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-14 tw-pointer-events-none tw-bg-iron-950" />
-    {/* faint inner edge */}
-    <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-[1px] tw-pointer-events-none tw-bg-white/5" />
-    {HeaderInner}
-  </div>
+      {/* warm top band (softer, spreads less) */}
+      <div
+        className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-14 tw-pointer-events-none
+      tw-bg-[linear-gradient(180deg,rgba(234,223,191,0.045),rgba(0,0,0,0)_80%)]"
+      />
+
+      {/* diagonal gallery-light streak (barely there) */}
+      <div
+        className="tw-absolute tw-inset-0 tw-pointer-events-none
+      tw-bg-[linear-gradient(115deg,rgba(234,223,191,0.04)_0%,transparent_40%)]"
+      />
+
+      {/* bottom vignette to ease into content */}
+      <div
+        className="tw-absolute tw-inset-0 tw-pointer-events-none
+      tw-bg-[radial-gradient(120%_140%_at_50%_120%,rgba(0,0,0,0.22),transparent_45%)]"
+      />
+
+      {/* hairline */}
+      <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-pointer-events-none tw-bg-white/10" />
+
+      {HeaderInner}
+    </div>
+  ) : (
+    HeaderInner
   );
 };
