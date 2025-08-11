@@ -19,7 +19,6 @@ import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import { sanitizeMediaUrl } from "../../../helpers/urlValidation";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface ArtistActiveSubmissionContentProps {
@@ -135,19 +134,11 @@ export const ArtistActiveSubmissionContent: React.FC<
                     <div className="tw-w-full tw-max-w-full tw-relative">
                       <div className="tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
                         <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-                          {sanitizeMediaUrl(submission.imageUrl) ? (
-                            <MediaDisplay
-                              media_url={submission.imageUrl}
-                              media_mime_type={submission.mediaMimeType}
-                              disableMediaInteraction={true}
-                            />
-                          ) : (
-                            <div className="tw-w-full tw-h-full tw-bg-iron-950 tw-rounded-lg tw-flex tw-items-center tw-justify-center">
-                              <span className="tw-text-iron-400 tw-text-sm">
-                                Invalid media
-                              </span>
-                            </div>
-                          )}
+                          <MediaDisplay
+                            media_url={submission.imageUrl}
+                            media_mime_type={submission.mediaMimeType}
+                            disableMediaInteraction={true}
+                          />
                         </div>
                         <div className="tw-absolute tw-top-3 tw-right-3 tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300">
                           <div className="tw-w-8 tw-h-8 tw-bg-black/50 tw-backdrop-blur-sm tw-rounded-full tw-flex tw-items-center tw-justify-center">

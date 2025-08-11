@@ -14,7 +14,6 @@ import { Time } from "../../../helpers/time";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
-import { sanitizeMediaUrl } from "../../../helpers/urlValidation";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface ArtistWinningArtworksContentProps {
@@ -89,8 +88,7 @@ export const ArtistWinningArtworksContent: React.FC<
                   <div className="tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
                     <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
                       {drop.parts?.[0]?.media &&
-                      drop.parts[0].media.length > 0 &&
-                      sanitizeMediaUrl(drop.parts[0].media[0].url) ? (
+                      drop.parts[0].media.length > 0 ? (
                         <MediaDisplay
                           media_url={drop.parts[0].media[0].url}
                           media_mime_type={drop.parts[0].media[0].mime_type}

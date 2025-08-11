@@ -145,20 +145,8 @@ module.exports = {
     }),
     require("tailwind-scrollbar")({ nocompatible: true }),
     require("@tailwindcss/container-queries"),
-    function ({ addVariant, addUtilities }) {
+    function ({ addVariant }) {
       addVariant("desktop-hover", "@media (hover: hover) and (pointer: fine)");
-      
-      // Add winning artworks custom utilities
-      const customUtilities = {
-        '.text-stroke-winning': {
-          '-webkit-text-stroke': '0.15px rgba(255, 255, 255, 0.06)',
-        },
-        '.bg-gradient-winning-title': {
-          'background-image': 'linear-gradient(90deg, #EDEDED, rgba(240, 220, 180, 0.65), #EDEDED)',
-        },
-      };
-      
-      addUtilities(customUtilities);
     },
   ],
 };
