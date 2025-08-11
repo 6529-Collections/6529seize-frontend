@@ -8,12 +8,161 @@
 
 import { 
   sanitizeUserAgent, 
+  sanitizeUserAgentAsync,
+  generateAsyncSafeHash,
   SafeUserAgentInfo, 
   UserAgentSecurityError 
 } from '../../hooks/security/UserAgentSanitizer';
 
 describe('UserAgentSanitizer Security Tests', () => {
   
+  describe('Browser Compatibility Tests', () => {
+    test('sync sanitizeUserAgent works in all environments', () => {
+      const normalUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 Safari/604.1';
+      
+      expect(() => sanitizeUserAgent(normalUA)).not.toThrow();
+      const result = sanitizeUserAgent(normalUA);
+      expect(result.userAgentHash).toBeDefined();
+      expect(result.userAgentHash.length).toBeGreaterThan(0);
+    });
+    
+    test('async sanitizeUserAgentAsync provides enhanced security', async () => {
+      const normalUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 Safari/604.1';
+      
+      const result = await sanitizeUserAgentAsync(normalUA);
+      expect(result.userAgentHash).toBeDefined();
+      expect(result.userAgentHash.length).toBeGreaterThan(0);
+      expect(result.isMobile).toBe(true);
+      expect(result.platformInfo.isIOS).toBe(true);
+    });
+    
+    test('generateAsyncSafeHash creates consistent hashes', async () => {
+      const input = 'test user agent string';
+      
+      const hash1 = await generateAsyncSafeHash(input);
+      const hash2 = await generateAsyncSafeHash(input);
+      
+      // Should return same hash for same input (cached)
+      expect(hash1).toBe(hash2);
+      expect(hash1.length).toBeGreaterThan(0);
+    });
+    
+    test('async version fails fast on security violations', async () => {
+      const maliciousUA = 'Mozilla/5.0 <script>alert("XSS")</script> Safari';
+      
+      await expect(sanitizeUserAgentAsync(maliciousUA)).rejects.toThrow(UserAgentSecurityError);
+      await expect(sanitizeUserAgentAsync(maliciousUA)).rejects.toThrow('XSS attempt detected');
+    });
+    
+    test('async version validates input types', async () => {
+      await expect(sanitizeUserAgentAsync(null)).rejects.toThrow('cannot be null or undefined');
+      await expect(sanitizeUserAgentAsync(undefined)).rejects.toThrow('cannot be null or undefined');
+      await expect(sanitizeUserAgentAsync('')).rejects.toThrow('cannot be empty');
+      await expect(sanitizeUserAgentAsync(123)).rejects.toThrow('must be a string');
+    });
+    
+    test('async version enforces length limits', async () => {
+      const longUA = 'A'.repeat(1025);
+      const shortUA = 'A'.repeat(9);
+      
+      await expect(sanitizeUserAgentAsync(longUA)).rejects.toThrow('User agent too long');
+      await expect(sanitizeUserAgentAsync(shortUA)).rejects.toThrow('User agent too short');
+    });
+  });
+  
+  describe('Cross-Environment Crypto Tests', () => {
+    test('handles environments without crypto gracefully', () => {
+      // Mock environment without crypto
+      const originalWindow = global.window;
+      const originalGlobalThis = global.globalThis;
+      
+      // Remove crypto APIs
+      delete (global as any).window;
+      delete (global as any).globalThis;
+      
+      const normalUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
+      
+      // Should still work with fallback hash
+      expect(() => sanitizeUserAgent(normalUA)).not.toThrow();
+      const result = sanitizeUserAgent(normalUA);
+      expect(result.userAgentHash).toBeDefined();
+      expect(result.userAgentHash.length).toBeGreaterThan(0);
+      
+      // Restore globals
+      if (originalWindow) global.window = originalWindow;
+      if (originalGlobalThis) global.globalThis = originalGlobalThis;
+    });
+    
+    test('fallback hash is deterministic for same input', () => {
+      const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
+      
+      const result1 = sanitizeUserAgent(ua);
+      const result2 = sanitizeUserAgent(ua);
+      
+      // Should get same hash due to caching
+      expect(result1.userAgentHash).toBe(result2.userAgentHash);
+    });
+    
+    test('different inputs produce different hashes', () => {
+      const ua1 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
+      const ua2 = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome';
+      
+      const result1 = sanitizeUserAgent(ua1);
+      const result2 = sanitizeUserAgent(ua2);
+      
+      // Different inputs should produce different hashes
+      expect(result1.userAgentHash).not.toBe(result2.userAgentHash);
+    });
+  });
+  
+  describe('Node.js Import Safety Tests', () => {
+    test('does not import Node.js crypto module', () => {
+      // This test verifies the critical fix - no Node.js crypto import
+      const fs = require('fs');
+      const path = require('path');
+      const moduleCode = fs.readFileSync(
+        path.join(__dirname, '../../hooks/security/UserAgentSanitizer.ts'),
+        'utf8'
+      );
+      
+      // Should NOT contain Node.js crypto import
+      expect(moduleCode).not.toContain('import { createHash } from \'crypto\'');
+      expect(moduleCode).not.toContain('from \'crypto\'');
+      expect(moduleCode).not.toContain('require(\'crypto\')');
+      
+      // Should contain browser-compatible Web Crypto API usage
+      expect(moduleCode).toContain('window.crypto');
+      expect(moduleCode).toContain('globalThis.crypto');
+      expect(moduleCode).toContain('crypto.subtle');
+    });
+    
+    test('sanitizer works in simulated browser environment', () => {
+      // Mock browser environment
+      const mockCrypto = {
+        subtle: {
+          digest: jest.fn().mockRejectedValue(new Error('No crypto mock'))
+        }
+      };
+      
+      const originalWindow = global.window;
+      (global as any).window = { crypto: mockCrypto };
+      
+      const normalUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) Safari/604.1';
+      
+      // Should work even when Web Crypto API fails (uses fallback)
+      expect(() => sanitizeUserAgent(normalUA)).not.toThrow();
+      const result = sanitizeUserAgent(normalUA);
+      expect(result.userAgentHash).toBeDefined();
+      
+      // Restore original environment
+      if (originalWindow) {
+        global.window = originalWindow;
+      } else {
+        delete (global as any).window;
+      }
+    });
+  });
+
   describe('XSS Prevention Tests', () => {
     test('blocks script tag injection attacks', () => {
       const maliciousUA = 'Mozilla/5.0 <script>alert("XSS")</script> Safari';
