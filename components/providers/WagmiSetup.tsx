@@ -94,23 +94,24 @@ export default function WagmiSetup({
     [appWalletPasswordModal.requestPassword, isCapacitor]
   );
 
-  // Initialize AppKit with wallets - FAIL-FAST implementation
-  const initializeAppKit = (wallets: AppWallet[]) => {
-    // Clear any existing initialization timeout
-    if (initTimeoutRef.current) {
-      clearTimeout(initTimeoutRef.current);
-    }
-    
-    // Set timeout protection - FAIL-FAST after timeout
-    initTimeoutRef.current = setTimeout(() => {
-      const timeoutError = new AppKitTimeoutError(`AppKit initialization timed out after ${INIT_TIMEOUT_MS}ms`);
-      logErrorSecurely('[WagmiSetup] Initialization timeout', timeoutError);
-      setToast({
-        message: 'Wallet initialization timed out. Please refresh and try again.',
-        type: "error",
-      });
-      throw timeoutError;
-    }, INIT_TIMEOUT_MS);
+  // Initialize AppKit with wallets - FAIL-FAST implementation with Promise-based error handling
+  const initializeAppKit = (wallets: AppWallet[]): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // Clear any existing initialization timeout
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+      
+      // Set timeout protection - FAIL-FAST after timeout using Promise rejection
+      initTimeoutRef.current = setTimeout(() => {
+        const timeoutError = new AppKitTimeoutError(`AppKit initialization timed out after ${INIT_TIMEOUT_MS}ms`);
+        logErrorSecurely('[WagmiSetup] Initialization timeout', timeoutError);
+        setToast({
+          message: 'Wallet initialization timed out. Please refresh and try again.',
+          type: "error",
+        });
+        reject(timeoutError);
+      }, INIT_TIMEOUT_MS);
     
     try {
       // FAIL-FAST: Validate all preconditions before proceeding
@@ -241,10 +242,10 @@ export default function WagmiSetup({
           
           setTimeout(() => {
             setIsRetrying(false);
-            initializeAppKit(wallets); // Retry initialization
+            initializeAppKit(wallets).catch(reject); // Retry initialization and propagate errors
           }, retryDelay);
           
-          // Don't throw here - let retry logic handle it
+          // Don't resolve/reject here - let retry logic handle it
           return;
         }
       } else {
@@ -265,6 +266,9 @@ export default function WagmiSetup({
       
       setCurrentAdapter(newAdapter);
       setIsInitialized(true);
+      
+      // Resolve the Promise on successful initialization
+      resolve();
     } catch (error) {
       // Clear timeout
       if (initTimeoutRef.current) {
@@ -281,7 +285,8 @@ export default function WagmiSetup({
           message: userMessage,
           type: "error",
         });
-        throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
+        reject(error); // FAIL-FAST: Reject Promise to prevent app from continuing in broken state
+        return;
       }
       
       // Handle adapter errors
@@ -292,7 +297,8 @@ export default function WagmiSetup({
           message: userMessage,
           type: "error",
         });
-        throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
+        reject(error); // FAIL-FAST: Reject Promise to prevent app from continuing in broken state
+        return;
       }
       
       // Handle unexpected errors
@@ -302,11 +308,12 @@ export default function WagmiSetup({
         message: userMessage,
         type: "error",
       });
-      throw new AppKitInitializationError(
+      reject(new AppKitInitializationError(
         `Unexpected error during AppKit initialization: ${error instanceof Error ? error.message : String(error)}`,
         error
-      );
+      ));
     }
+    });
   };
 
   const handleAppWalletUpdate = (wallets: AppWallet[]) => {
@@ -323,7 +330,11 @@ export default function WagmiSetup({
           : (adapterManager as AppKitAdapterManager).shouldRecreateAdapter(wallets);
           
         if (shouldRecreate) {
-          initializeAppKit(wallets);
+          initializeAppKit(wallets).catch((error) => {
+            logErrorSecurely('[WagmiSetup] Failed to reinitialize AppKit during wallet update', error);
+            // Re-throw to ensure error propagates up
+            throw error;
+          });
         }
       } catch (error) {
         logErrorSecurely('[WagmiSetup] Error during wallet update', error);
@@ -344,7 +355,12 @@ export default function WagmiSetup({
       if (process.env.NODE_ENV === 'development') {
         console.log('[WagmiSetup] Client-side mounted, initializing AppKit');
       }
-      initializeAppKit([]);
+      initializeAppKit([]).catch((error) => {
+        logErrorSecurely('[WagmiSetup] Failed to initialize AppKit on mount', error);
+        // Error is already handled inside initializeAppKit (user toast shown)
+        // This catch prevents unhandled promise rejection
+        console.error('[WagmiSetup] AppKit initialization failed:', error);
+      });
     }
   }, [isMounted]);
 
