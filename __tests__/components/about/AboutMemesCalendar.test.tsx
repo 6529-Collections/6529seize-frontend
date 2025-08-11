@@ -1,45 +1,40 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
-import { DateTime } from 'luxon';
 import AboutMemesCalendar from '../../../components/about/AboutMemesCalendar';
 
 jest.mock('react-bootstrap', () => ({
-  Container: (p: any) => <div>{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-  Col: (p: any) => <div>{p.children}</div>,
+  Container: (p:any) => <div>{p.children}</div>,
+  Row: (p:any) => <div>{p.children}</div>,
+  Col: (p:any) => <div>{p.children}</div>,
+  Table: (p:any) => <table>{p.children}</table>,
 }));
 
-jest.mock('@\/components/date-countdown/DateCountdown', () =>
-  function MockCountdown(p: any) {
-    return <div>Countdown {p.title}</div>;
-  },
-);
-
-jest.mock('@\/lib/mint', () => {
-  const actual = jest.requireActual('../../../lib/mint');
+jest.mock('../../../helpers/time', () => {
+  const actualTime = jest.requireActual('../../../helpers/time');
   return {
-    ...actual,
-    nextOccurrences: jest.fn(() => [
-      DateTime.fromISO('2026-01-02T18:00:00Z'),
-      DateTime.fromISO('2026-01-05T18:00:00Z'),
-      DateTime.fromISO('2026-01-07T18:00:00Z'),
-      DateTime.fromISO('2026-01-09T18:00:00Z'),
-      DateTime.fromISO('2026-01-12T18:00:00Z'),
-      DateTime.fromISO('2026-01-14T18:00:00Z'),
-    ]),
+    Time: {
+      ...actualTime.Time,
+      now: jest.fn().mockReturnValue(actualTime.Time.fromString('2025-02-01')),
+    }
   };
 });
 
 describe('AboutMemesCalendar', () => {
-  it('renders next mint and upcoming list', () => {
+  it('renders calendar years and blocks', () => {
     render(<AboutMemesCalendar />);
-    expect(screen.getByText('Next Mint')).toBeInTheDocument();
-    expect(screen.getByText('Countdown Mint #439')).toBeInTheDocument();
-    expect(screen.getByText('#440')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Subscribe \(ICS\)/i })).toHaveAttribute(
-      'href',
-      '/api/mints',
-    );
+    expect(screen.getByRole('heading', { name: /Memes Seasonal Calendar/i })).toBeInTheDocument();
+    expect(screen.getByText(/2023: Year 1/)).toBeInTheDocument();
+    expect(screen.getByText('Winter SZN2')).toBeInTheDocument();
+  });
+
+  it('marks active section based on current time', () => {
+    const { Time: TimeMock } = require('../../../helpers/time');
+    const actualTime = jest.requireActual('../../../helpers/time');
+    TimeMock.now.mockReturnValue(actualTime.Time.fromString('2025-02-01'));
+    render(<AboutMemesCalendar />);
+    const active = document.querySelector('.activeSection');
+    expect(active).toBeTruthy();
+    expect(active?.textContent).toContain('Winter SZN10');
   });
 });

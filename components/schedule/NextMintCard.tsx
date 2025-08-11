@@ -9,6 +9,7 @@ import {
   googleCalendarLink,
 } from "@/lib/mint";
 import { DateTime } from "luxon";
+import { Card, Button } from "react-bootstrap";
 
 export default function NextMintCard() {
   const next = nextOccurrences(1)[0];
@@ -16,21 +17,32 @@ export default function NextMintCard() {
   const coord = timeCoordinate(next);
 
   return (
-    <div>
-      <h2>Next Mint</h2>
-      <DateCountdown title={`Mint #${mintNum}`} date={next.toJSDate()} />
-      <p>
-        {next.toLocal().toLocaleString(DateTime.DATETIME_MED)}
-        {" "}(
-        <span title={next.toUTC().toISO() || undefined}>UTC {next.toUTC().toFormat("HH:mm")}</span>)
-      </p>
-      <p>
-        Eon {coord.eon} · Era {coord.era} · Period {coord.period} · Epoch {coord.epoch}
-      </p>
-      <p>
-        <a href="/api/mints">Subscribe (ICS)</a>{" | "}
-        <a href={googleCalendarLink(next)}>Add to Google</a>
-      </p>
-    </div>
+    <Card className="mb-4 text-center">
+      <Card.Header>Next Mint</Card.Header>
+      <Card.Body>
+        <Card.Title>Mint #{mintNum}</Card.Title>
+        <DateCountdown title={`Mint #${mintNum}`} date={next.toJSDate()} />
+        <p className="mt-2">
+          {next.toLocal().toLocaleString(DateTime.DATETIME_MED)} (
+          <span title={next.toUTC().toISO() || undefined}>
+            {next.toUTC().toFormat("HH:mm")} UTC
+          </span>
+          )
+        </p>
+        <p className="mb-3">
+          Eon {coord.eon} · Era {coord.era} · Period {coord.period} · Epoch {coord.epoch}
+        </p>
+        <Button
+          href={`/api/mints/${mintNum}.ics`}
+          variant="outline-primary"
+          className="me-2"
+        >
+          ICS
+        </Button>
+        <Button href={googleCalendarLink(next)} variant="outline-success">
+          Google
+        </Button>
+      </Card.Body>
+    </Card>
   );
 }
