@@ -23,6 +23,8 @@ import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { MetaMaskMobileDebugger } from "../debug/MetaMaskMobileDebugger";
+import { WalletConnectDebugger } from "../debug/WalletConnectDebugger";
+import { ManualMetaMaskTrigger } from "../debug/ManualMetaMaskTrigger";
 
 export default function Providers({
   children,
@@ -35,6 +37,8 @@ export default function Providers({
         <CapacitorSetup />
         <IpfsImageSetup />
         <MetaMaskMobileDebugger />
+        <WalletConnectDebugger />
+        <ManualMetaMaskTrigger />
         <ReactQueryWrapper>
           <SeizeSettingsProvider>
             <EmojiProvider>
