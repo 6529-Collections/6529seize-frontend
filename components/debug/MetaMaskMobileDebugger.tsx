@@ -89,13 +89,15 @@ export const MetaMaskMobileDebugger = () => {
             if (element.textContent?.includes('Continue in MetaMask')) {
               alert('[DEBUG DOM] "Continue in MetaMask" detected in DOM');
               
-              // Find and auto-click the Open button if it exists
+              // Try to find any button with "Open" text
               setTimeout(() => {
-                const openButton = document.querySelector('button:has([text*="Open"]), button:contains("Open"), [role="button"]:has([text*="Open"])');
-                if (openButton) {
-                  alert('[DEBUG DOM] Found Open button, clicking it...');
-                  (openButton as HTMLElement).click();
-                }
+                const buttons = document.querySelectorAll('button');
+                buttons.forEach(button => {
+                  if (button.textContent?.includes('Open')) {
+                    alert('[DEBUG DOM] Found Open button, attempting click...');
+                    button.click();
+                  }
+                });
               }, 500);
             }
           }
