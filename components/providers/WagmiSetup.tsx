@@ -236,8 +236,16 @@ export default function WagmiSetup({
           let currentRetry = 0;
           while (currentRetry < MAX_RETRIES) {
             try {
-              createAppKit(appKitConfig);
+              const appKitModal = createAppKit(appKitConfig);
               setAppKitInitialized(true);
+              
+              // Add debug for mobile to track wallet selection
+              if (isCapacitor && typeof window !== 'undefined') {
+                // Listen for wallet selection events
+                (window as any).__DEBUG_APPKIT__ = appKitModal;
+                alert('[DEBUG] AppKit modal created. Debug object available as window.__DEBUG_APPKIT__');
+              }
+              
               if (process.env.NODE_ENV === 'development') {
                 console.log('[WagmiSetup] AppKit initialized successfully');
               }

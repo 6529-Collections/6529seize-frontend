@@ -28,6 +28,7 @@ import {
   createConnectionEventContext, 
   createValidationEventContext
 } from "../../src/utils/security-logger";
+import { useMetaMaskDeepLink } from "../../hooks/useMetaMaskDeepLink";
 
 // Custom error types for better error handling
 export class WalletConnectionError extends Error {
@@ -342,6 +343,33 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const account = useAppKitAccount();
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
+  const appKitState = useAppKitState();
+  
+  // Use MetaMask deep link hook for mobile
+  useMetaMaskDeepLink();
+  
+  // Debug: Monitor AppKit state changes on mobile
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.navigator.userAgent.includes('Mobile')) {
+      // Only alert on meaningful changes to reduce noise
+      if (appKitState.loading) {
+        alert(`[DEBUG AppKit Loading] Something is loading...`);
+      }
+    }
+  }, [appKitState.loading]);
+  
+  // Debug: Monitor account connection attempts
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.navigator.userAgent.includes('Mobile')) {
+      if (account.status === 'connecting') {
+        alert(`[DEBUG Account] Connecting to wallet...`);
+      } else if (account.status === 'connected') {
+        alert(`[DEBUG Account] Connected! Address: ${account.address?.slice(0, 10)}...`);
+      } else if (account.status === 'disconnected') {
+        alert(`[DEBUG Account] Disconnected`);
+      }
+    }
+  }, [account.status, account.address]);
   const state = useAppKitState();
   const { walletInfo } = useWalletInfo();
 

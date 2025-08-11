@@ -22,6 +22,7 @@ import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
+import { MetaMaskMobileDebugger } from "../debug/MetaMaskMobileDebugger";
 
 export default function Providers({
   children,
@@ -33,6 +34,7 @@ export default function Providers({
       <WagmiSetup>
         <CapacitorSetup />
         <IpfsImageSetup />
+        <MetaMaskMobileDebugger />
         <ReactQueryWrapper>
           <SeizeSettingsProvider>
             <EmojiProvider>

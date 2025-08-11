@@ -65,20 +65,7 @@ export class AppKitAdapterCapacitor {
             "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
           ],
         },
-        showQrModal: true, // Changed to true - needed for proper mobile wallet selection
-        qrModalOptions: {
-          enableExplorer: true, // Enable wallet discovery for mobile
-          mobileWallets: [
-            { 
-              id: 'metamask',
-              name: 'MetaMask',
-              links: {
-                native: 'metamask://',
-                universal: 'https://metamask.app.link'
-              }
-            }
-          ],
-        },
+        showQrModal: false, // Set back to false to let AppKit handle the modal
       }),
       // Coinbase Wallet with mobile wallet link enabled
       coinbaseWallet({
