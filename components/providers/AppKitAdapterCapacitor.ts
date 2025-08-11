@@ -5,7 +5,7 @@ import { AppWallet } from '../app-wallets/AppWalletsContext'
 import { 
   createAppWalletConnector 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
-import { walletConnect, coinbaseWallet, metaMask } from 'wagmi/connectors'
+import { walletConnect, coinbaseWallet } from 'wagmi/connectors'
 import { WalletConnectionError, ConnectionStateError } from '@/src/errors/wallet-connection'
 
 
@@ -54,14 +54,7 @@ export class AppKitAdapterCapacitor {
 
     // Create mobile-specific connectors
     const mobileConnectors = [
-      // MetaMask connector for mobile - critical for mobile MetaMask connections
-      metaMask({
-        dappMetadata: {
-          name: "6529.io",
-          url: VALIDATED_BASE_ENDPOINT,
-        },
-      }),
-      // WalletConnect for mobile with improved deep linking
+      // WalletConnect for mobile with improved deep linking - handles MetaMask and other wallets
       walletConnect({
         projectId: CW_PROJECT_ID,
         metadata: {
