@@ -78,21 +78,15 @@ export class AppKitAdapterCapacitor {
         enableMobileWalletLink: true, // Enable mobile deep linking
         version: "3",
       }),
-      // Injected connector for in-app browsers and desktop
+      // Injected connector for in-app browsers
       injected(),
-      // MetaMask connector for desktop browsers only (not mobile)
-      // On mobile, MetaMask connects via WalletConnect above
-      metaMask({
-        dappMetadata: {
-          name: "6529.io",
-          url: VALIDATED_BASE_ENDPOINT,
-        },
-      }),
+      // NO MetaMask connector on mobile - it must use WalletConnect
+      // The metaMask() connector doesn't work on mobile devices
     ]
     
     // DEBUG: Show which connectors are created (mobile only)
     if (typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      alert(`[DEBUG] Mobile Connectors Order:\n1. WalletConnect\n2. Coinbase\n3. Injected\n4. MetaMask\n\nTotal: ${mobileConnectors.length}`);
+      alert(`[DEBUG] Mobile Connectors Order:\n1. WalletConnect (for MetaMask)\n2. Coinbase\n3. Injected\n\nTotal: ${mobileConnectors.length}\n\nNOTE: MetaMask will use WalletConnect`);
     }
 
     // Create AppWallet connectors if any exist
@@ -106,6 +100,19 @@ export class AppKitAdapterCapacitor {
 
     // Combine all connectors
     const allConnectors = [...mobileConnectors, ...appWalletConnectors]
+    
+    // DEBUG: Log connector details for mobile
+    if (typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      const connectorInfo = allConnectors.map((c, i) => {
+        const connectorName = c.name || c.id || 'unknown';
+        // Special handling for WalletConnect connector
+        const isWC = connectorName.toLowerCase().includes('walletconnect') || c.id === 'walletConnect';
+        const isMM = connectorName.toLowerCase().includes('metamask');
+        return `${i+1}. ${connectorName}${isWC ? ' (WC)' : ''}${isMM ? ' (MM)' : ''}`;
+      }).join('\n');
+      
+      alert(`[DEBUG] Final Connectors List:\n${connectorInfo}`);
+    }
 
     // Create adapter with mobile-specific settings
     const wagmiAdapter = new WagmiAdapter({

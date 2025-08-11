@@ -179,8 +179,9 @@ export default function WagmiSetup({
             },
             // Mobile-specific settings
             enableWalletGuide: false,
-            featuredWalletIds: ['metamask', 'coinbaseWallet', 'walletConnect'], // Include MetaMask for mobile
-            allWallets: 'SHOW' as const, // Show "All Wallets" on mobile to ensure MetaMask is accessible
+            // CRITICAL: Don't feature MetaMask directly on mobile - it should connect via WalletConnect
+            featuredWalletIds: ['walletConnect', 'coinbaseWallet'], // Removed 'metamask' - it will connect via WalletConnect
+            allWallets: 'SHOW' as const, // MetaMask will still appear in "All Wallets" but use WalletConnect
             features: {
               analytics: true,
               email: false,
