@@ -13,7 +13,6 @@ import { Time } from "../../../helpers/time";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface ArtistWinningArtworksContentProps {
   readonly user: ApiProfileMin;
@@ -24,7 +23,6 @@ interface ArtistWinningArtworksContentProps {
 export const ArtistWinningArtworksContent: React.FC<
   ArtistWinningArtworksContentProps
 > = ({ user, isOpen, onDropClick }) => {
-  const isMobile = useIsMobileDevice();
   const { winningDrops, isLoading } = useUserWinningArtworks({
     user,
     enabled: isOpen,
@@ -63,7 +61,7 @@ export const ArtistWinningArtworksContent: React.FC<
       className={`tw-relative tw-z-[100] tw-p-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(75vh-120px)] sm:tw-max-h-[calc(80vh-120px)]`}
     >
       <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
-        {winningDrops.map((drop, index) => {
+        {winningDrops.map((drop) => {
           const extendedDrop = convertApiDropToExtendedDrop(drop);
           const decisionTime = drop.winning_context?.decision_time;
 

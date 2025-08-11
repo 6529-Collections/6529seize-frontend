@@ -18,7 +18,6 @@ import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;
@@ -39,7 +38,6 @@ export const ArtistActiveSubmissionContent: React.FC<
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isMobile = useIsMobileDevice();
 
   // Memoize expensive operations - must be before any conditional returns
   const formatDate = useMemo(
@@ -120,7 +118,7 @@ export const ArtistActiveSubmissionContent: React.FC<
 
           return (
             <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
-              {submissionsWithDrops.map((submission, index) => (
+              {submissionsWithDrops.map((submission) => (
                 <div
                   key={submission.id}
                   className="tw-flex tw-flex-col tw-h-full"
