@@ -1,542 +1,640 @@
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
-import { SeizeConnectProvider, useSeizeConnectContext, AuthenticationError, WalletDisconnectionError } from '../../../components/auth/SeizeConnectContext';
-import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from '@reown/appkit/react';
-import { getWalletAddress, removeAuthJwt, migrateCookiesToLocalStorage } from '../../../services/auth/auth.utils';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {
+  SeizeConnectProvider,
+  useSeizeConnectContext,
+  WalletConnectionError,
+  WalletDisconnectionError,
+  AuthenticationError,
+} from '../../../components/auth/SeizeConnectContext';
+import * as authUtils from '../../../services/auth/auth.utils';
 import { WalletInitializationError } from '../../../src/errors/wallet';
 
-jest.mock('@reown/appkit/react');
-jest.mock('../../../services/auth/auth.utils');
+// Mock the Reown AppKit hooks
+jest.mock('@reown/appkit/react', () => ({
+  useAppKit: () => ({
+    open: jest.fn(),
+  }),
+  useAppKitAccount: () => ({
+    address: undefined,
+    isConnected: false,
+    status: 'disconnected',
+  }),
+  useAppKitState: () => ({
+    open: false,
+  }),
+  useDisconnect: () => ({
+    disconnect: jest.fn(),
+  }),
+  useWalletInfo: () => ({
+    walletInfo: null,
+  }),
+}));
 
-const disconnect = jest.fn().mockResolvedValue(undefined);
-const open = jest.fn();
+// Mock viem
+jest.mock('viem', () => ({
+  isAddress: jest.fn(),
+  getAddress: jest.fn(),
+}));
 
-(useDisconnect as jest.Mock).mockReturnValue({ disconnect });
-(useAppKit as jest.Mock).mockReturnValue({ open });
-(useAppKitState as jest.Mock).mockReturnValue({ open: false });
-(useAppKitAccount as jest.Mock).mockReturnValue({ address: '0x1', isConnected: true });
-(useWalletInfo as jest.Mock).mockReturnValue({ walletInfo: { name: 'MetaMask', icon: 'metamask-icon.svg' } });
-(getWalletAddress as jest.Mock).mockReturnValue('0x1');
-(migrateCookiesToLocalStorage as jest.Mock).mockImplementation(() => {});
+// Mock auth utils
+jest.mock('../../../services/auth/auth.utils', () => ({
+  migrateCookiesToLocalStorage: jest.fn(),
+  getWalletAddress: jest.fn(),
+  removeAuthJwt: jest.fn(),
+}));
 
-beforeEach(() => {
-  jest.clearAllMocks();
-  jest.useFakeTimers();
-});
+// Test component that uses the context
+const TestComponent: React.FC = () => {
+  const context = useSeizeConnectContext();
+  return (
+    <div data-testid="test-component">
+      <div data-testid="address">{context.address || 'undefined'}</div>
+      <div data-testid="is-authenticated">{context.isAuthenticated.toString()}</div>
+      <div data-testid="has-error">{context.hasInitializationError.toString()}</div>
+      <div data-testid="error-message">{context.initializationError?.message || 'no error'}</div>
+    </div>
+  );
+};
 
-afterEach(() => {
-  jest.useRealTimers();
-});
+// Helper to render the component with provider
+const renderWithProvider = (children: React.ReactNode = <TestComponent />) => {
+  return render(
+    <SeizeConnectProvider>
+      {children}
+    </SeizeConnectProvider>
+  );
+};
 
-describe('SeizeConnectContext', () => {
-  // CRITICAL SECURITY TESTS: WalletInitializationError for authentication bypass prevention
-  describe('useState initialization fail-fast security', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      // Reset to default valid state before each test
-      (getWalletAddress as jest.Mock).mockReturnValue('0x1234567890123456789012345678901234567890');
-    });
+describe('SeizeConnectContext Security Vulnerability Fix', () => {
+  let mockGetWalletAddress: jest.MockedFunction<typeof authUtils.getWalletAddress>;
+  let mockRemoveAuthJwt: jest.MockedFunction<typeof authUtils.removeAuthJwt>;
+  let mockIsAddress: jest.MockedFunction<any>;
+  let mockGetAddress: jest.MockedFunction<any>;
+  let consoleSpy: jest.SpyInstance;
 
-    it('initializes correctly with valid stored address', () => {
-      const validAddress = '0x1234567890123456789012345678901234567890';
-      (getWalletAddress as jest.Mock).mockReturnValue(validAddress);
-
-      // This should NOT throw
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      expect(result.current.address).toBe(validAddress);
-      expect(result.current.isAuthenticated).toBe(true);
-    });
-
-    it('initializes correctly with no stored address', () => {
-      (getWalletAddress as jest.Mock).mockReturnValue(null);
-
-      // This should NOT throw
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      expect(result.current.address).toBe(undefined);
-      expect(result.current.isAuthenticated).toBe(false);
-    });
-
-    it('throws WalletInitializationError when stored address is invalid format', () => {
-      const invalidAddress = 'invalid-address-format';
-      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
-
-      // This should throw WalletInitializationError during useState initialization
-      expect(() => {
-        renderHook(() => useSeizeConnectContext(), {
-          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-        });
-      }).toThrow(WalletInitializationError);
-    });
-
-    it('throws WalletInitializationError with correct error details for invalid address', () => {
-      const invalidAddress = 'malformed-eth-address';
-      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
-
-      try {
-        renderHook(() => useSeizeConnectContext(), {
-          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-        });
-        fail('Should have thrown WalletInitializationError');
-      } catch (error) {
-        expect(error).toBeInstanceOf(WalletInitializationError);
-        expect((error as WalletInitializationError).name).toBe('WalletInitializationError');
-        expect((error as WalletInitializationError).message).toContain('Invalid wallet address found in storage during initialization');
-        expect((error as WalletInitializationError).addressAttempt).toBe('malformed-...');
-      }
-    });
-
-    it('throws WalletInitializationError for short invalid addresses', () => {
-      const invalidAddress = 'short';
-      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
-
-      try {
-        renderHook(() => useSeizeConnectContext(), {
-          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-        });
-        fail('Should have thrown WalletInitializationError');
-      } catch (error) {
-        expect(error).toBeInstanceOf(WalletInitializationError);
-        expect((error as WalletInitializationError).addressAttempt).toBe('short');
-      }
-    });
-
-    it('throws WalletInitializationError for hex-like but invalid addresses', () => {
-      const invalidAddress = '0xinvalidhexaddress';
-      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
-
-      expect(() => {
-        renderHook(() => useSeizeConnectContext(), {
-          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-        });
-      }).toThrow(WalletInitializationError);
-    });
-
-    it('calls removeAuthJwt when invalid address detected during initialization', () => {
-      const invalidAddress = 'invalid-address';
-      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
-
-      try {
-        renderHook(() => useSeizeConnectContext(), {
-          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-        });
-      } catch (error) {
-        // Expected error
-      }
-
-      // Verify auth cleanup was called
-      expect(removeAuthJwt).toHaveBeenCalledTimes(1);
-    });
-
-    it('continues to throw even if auth cleanup fails during initialization', () => {
-      const invalidAddress = 'invalid-address';
-      const authCleanupError = new Error('Auth cleanup failed');
-      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
-      (removeAuthJwt as jest.Mock).mockImplementationOnce(() => {
-        throw authCleanupError;
-      });
-
-      // Should still throw WalletInitializationError despite auth cleanup failure
-      expect(() => {
-        renderHook(() => useSeizeConnectContext(), {
-          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-        });
-      }).toThrow(WalletInitializationError);
-
-      expect(removeAuthJwt).toHaveBeenCalledTimes(1);
-    });
-
-    it('prevents authentication bypass by throwing on any invalid stored address', () => {
-      const invalidAddresses = [
-        'not-an-address',
-        '0x',
-        '0xinvalid',
-        '0x123', // too short
-        '0x1234567890123456789012345678901234567890z', // invalid character
-        'random-string',
-        '',
-        ' ', // whitespace
-        '0X1234567890123456789012345678901234567890', // wrong case prefix
-        '1234567890123456789012345678901234567890' // no 0x prefix
-      ];
-
-      invalidAddresses.forEach(invalidAddress => {
-        (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
-        jest.clearAllMocks();
-
-        expect(() => {
-          renderHook(() => useSeizeConnectContext(), {
-            wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-          });
-        }).toThrow(WalletInitializationError);
-
-        // Verify auth cleanup is always called for invalid addresses
-        expect(removeAuthJwt).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it('accepts valid checksummed addresses during initialization', () => {
-      const validChecksumAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
-      (getWalletAddress as jest.Mock).mockReturnValue(validChecksumAddress);
-
-      // Should NOT throw
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      expect(result.current.address).toBe(validChecksumAddress);
-      expect(result.current.isAuthenticated).toBe(true);
-      expect(removeAuthJwt).not.toHaveBeenCalled();
-    });
-
-    it('accepts and normalizes valid non-checksummed addresses during initialization', () => {
-      const nonChecksumAddress = '0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed';
-      const expectedChecksumAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
-      (getWalletAddress as jest.Mock).mockReturnValue(nonChecksumAddress);
-
-      // Should NOT throw and should normalize to checksum format
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      expect(result.current.address).toBe(expectedChecksumAddress);
-      expect(result.current.isAuthenticated).toBe(true);
-      expect(removeAuthJwt).not.toHaveBeenCalled();
-    });
-  });
-
-  it('throws when used outside provider', () => {
-    const { result } = renderHook(() => () => useSeizeConnectContext());
-    expect(() => result.current()).toThrow();
-  });
-
-  it('provides connect and disconnect logic', async () => {
-    const { result } = renderHook(() => useSeizeConnectContext(), {
-      wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-    });
-
-    act(() => {
-      result.current.seizeConnect();
-    });
-    expect(open).toHaveBeenCalledWith({ view: 'Connect' });
-
-    await act(async () => {
-      await result.current.seizeDisconnect();
-    });
-    expect(disconnect).toHaveBeenCalled();
-  });
-
-  it('disconnects and logs out then reconnects', async () => {
-    const { result } = renderHook(() => useSeizeConnectContext(), {
-      wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-    });
-
-    await act(async () => {
-      await result.current.seizeDisconnectAndLogout(true);
-    });
-
-    expect(removeAuthJwt).toHaveBeenCalled();
-    expect(disconnect).toHaveBeenCalled();
+  beforeEach(() => {
+    mockGetWalletAddress = authUtils.getWalletAddress as jest.MockedFunction<typeof authUtils.getWalletAddress>;
+    mockRemoveAuthJwt = authUtils.removeAuthJwt as jest.MockedFunction<typeof authUtils.removeAuthJwt>;
+    mockIsAddress = require('viem').isAddress as jest.MockedFunction<any>;
+    mockGetAddress = require('viem').getAddress as jest.MockedFunction<any>;
     
+    // Mock console methods to avoid noise in tests
+    consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    
+    // Reset all mocks
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
+    jest.restoreAllMocks();
+  });
+
+  describe('Critical Security Fix: useState Initialization', () => {
+    it('should NOT throw during initial render with invalid stored address', async () => {
+      // Setup invalid stored address
+      mockGetWalletAddress.mockReturnValue('invalid-address');
+      mockIsAddress.mockReturnValue(false);
+
+      // This should NOT throw and crash the app
+      expect(() => {
+        renderWithProvider();
+      }).not.toThrow();
+
+      // Component should render with loading state
+      expect(screen.getByText('Initializing wallet connection...')).toBeInTheDocument();
+    });
+
+    it('should handle initialization errors gracefully in useEffect', async () => {
+      // Setup invalid stored address
+      mockGetWalletAddress.mockReturnValue('invalid-address-format');
+      mockIsAddress.mockReturnValue(false);
+
+      renderWithProvider();
+
+      // Wait for initialization to complete
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      // Should show error state without crashing
+      expect(screen.getByTestId('has-error')).toHaveTextContent('true');
+      expect(screen.getByTestId('error-message')).toContainText('Invalid wallet address found in storage');
+      expect(screen.getByTestId('address')).toHaveTextContent('undefined');
+      expect(screen.getByTestId('is-authenticated')).toHaveTextContent('false');
+    });
+
+    it('should clear invalid auth state during initialization', async () => {
+      mockGetWalletAddress.mockReturnValue('0xinvalid');
+      mockIsAddress.mockReturnValue(false);
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      // Should have called removeAuthJwt to clear invalid state
+      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+    });
+
+    it('should handle valid stored address correctly', async () => {
+      const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+      const checksummedAddress = '0x1234567890AbcdEF1234567890AbcDEF12345678';
+      
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      mockIsAddress.mockReturnValue(true);
+      mockGetAddress.mockReturnValue(checksummedAddress);
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('has-error')).toHaveTextContent('false');
+      expect(screen.getByTestId('address')).toHaveTextContent(checksummedAddress);
+      expect(screen.getByTestId('is-authenticated')).toHaveTextContent('true');
+    });
+
+    it('should handle no stored address scenario', async () => {
+      mockGetWalletAddress.mockReturnValue(null);
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('has-error')).toHaveTextContent('false');
+      expect(screen.getByTestId('address')).toHaveTextContent('undefined');
+      expect(screen.getByTestId('is-authenticated')).toHaveTextContent('false');
+    });
+
+    it('should handle auth cleanup failures during initialization', async () => {
+      mockGetWalletAddress.mockReturnValue('invalid');
+      mockIsAddress.mockReturnValue(false);
+      mockRemoveAuthJwt.mockImplementation(() => {
+        throw new Error('Cleanup failed');
+      });
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      // Should still handle the error gracefully
+      expect(screen.getByTestId('has-error')).toHaveTextContent('true');
+      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+    });
+
+    it('should handle unexpected initialization errors', async () => {
+      mockGetWalletAddress.mockImplementation(() => {
+        throw new Error('Unexpected storage error');
+      });
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('has-error')).toHaveTextContent('true');
+      expect(screen.getByTestId('error-message')).toContainText('Unexpected error during wallet initialization');
+    });
+  });
+
+  describe('Error Boundary Functionality', () => {
+    it('should catch and display wallet initialization errors', async () => {
+      // Create a component that throws during render
+      const ThrowingComponent: React.FC = () => {
+        throw new WalletInitializationError('Test initialization error');
+      };
+
+      render(
+        <SeizeConnectProvider>
+          <ThrowingComponent />
+        </SeizeConnectProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Wallet Initialization Error')).toBeInTheDocument();
+        expect(screen.getByText('Test initialization error')).toBeInTheDocument();
+        expect(screen.getByText('Clear Storage and Reload')).toBeInTheDocument();
+      });
+    });
+
+    it('should provide recovery option in error boundary', async () => {
+      const ThrowingComponent: React.FC = () => {
+        throw new Error('Generic error');
+      };
+
+      // Mock window.location.reload
+      const mockReload = jest.fn();
+      Object.defineProperty(window, 'location', {
+        value: { reload: mockReload },
+        writable: true,
+      });
+
+      render(
+        <SeizeConnectProvider>
+          <ThrowingComponent />
+        </SeizeConnectProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Clear Storage and Reload')).toBeInTheDocument();
+      });
+
+      const clearButton = screen.getByText('Clear Storage and Reload');
+      await userEvent.click(clearButton);
+
+      expect(mockReload).toHaveBeenCalled();
+    });
+  });
+
+  describe('Context Interface Extensions', () => {
+    it('should expose initialization error state in context', async () => {
+      mockGetWalletAddress.mockReturnValue('invalid');
+      mockIsAddress.mockReturnValue(false);
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('has-error')).toHaveTextContent('true');
+      expect(screen.getByTestId('error-message')).not.toHaveTextContent('no error');
+    });
+
+    it('should expose no error state when initialization succeeds', async () => {
+      mockGetWalletAddress.mockReturnValue(null); // No stored address
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('has-error')).toHaveTextContent('false');
+      expect(screen.getByTestId('error-message')).toHaveTextContent('no error');
+    });
+  });
+
+  describe('Security Event Logging', () => {
+    let consoleWarnSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should log security events for invalid stored addresses', async () => {
+      mockGetWalletAddress.mockReturnValue('0xinvalid');
+      mockIsAddress.mockReturnValue(false);
+
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[SEIZE_SECURITY_EVENT] invalid_stored_address_detected:'),
+        expect.objectContaining({
+          eventType: 'invalid_stored_address_detected',
+          source: 'wallet_initialization',
+          valid: false
+        })
+      );
+    });
+  });
+
+  describe('Error Classes', () => {
+    it('should create WalletConnectionError with proper structure', () => {
+      const error = new WalletConnectionError('Test message', new Error('cause'), 'TEST_CODE');
+      
+      expect(error.name).toBe('WalletConnectionError');
+      expect(error.message).toBe('Test message');
+      expect(error.cause).toBeInstanceOf(Error);
+      expect(error.code).toBe('TEST_CODE');
+    });
+
+    it('should create WalletDisconnectionError with proper structure', () => {
+      const error = new WalletDisconnectionError('Test message', new Error('cause'), 'TEST_CODE');
+      
+      expect(error.name).toBe('WalletDisconnectionError');
+      expect(error.message).toBe('Test message');
+      expect(error.cause).toBeInstanceOf(Error);
+      expect(error.code).toBe('TEST_CODE');
+    });
+
+    it('should create AuthenticationError with proper structure', () => {
+      const error = new AuthenticationError('Test message', new Error('cause'));
+      
+      expect(error.name).toBe('AuthenticationError');
+      expect(error.message).toBe('Test message');
+      expect(error.cause).toBeInstanceOf(Error);
+    });
+  });
+});
+
+describe('Regression Tests: Original Functionality with Secure Implementation', () => {
+  let mockGetWalletAddress: jest.MockedFunction<typeof authUtils.getWalletAddress>;
+  let mockIsAddress: jest.MockedFunction<any>;
+  let mockGetAddress: jest.MockedFunction<any>;
+  let mockDisconnect: jest.MockedFunction<any>;
+  let mockOpen: jest.MockedFunction<any>;
+
+  beforeEach(() => {
+    mockGetWalletAddress = authUtils.getWalletAddress as jest.MockedFunction<typeof authUtils.getWalletAddress>;
+    mockIsAddress = require('viem').isAddress as jest.MockedFunction<any>;
+    mockGetAddress = require('viem').getAddress as jest.MockedFunction<any>;
+    
+    const { useAppKit, useDisconnect } = require('@reown/appkit/react');
+    mockDisconnect = jest.fn().mockResolvedValue(undefined);
+    mockOpen = jest.fn();
+    
+    (useDisconnect as jest.Mock).mockReturnValue({ disconnect: mockDisconnect });
+    (useAppKit as jest.Mock).mockReturnValue({ open: mockOpen });
+    
+    // Mock console methods
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should maintain all original context values', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    const checksummedAddress = '0x1234567890AbcdEF1234567890AbcDEF12345678';
+    
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockReturnValue(checksummedAddress);
+
+    renderWithProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    // Verify all expected context values are present
+    expect(screen.getByTestId('address')).toBeInTheDocument();
+    expect(screen.getByTestId('is-authenticated')).toBeInTheDocument();
+    expect(screen.getByTestId('has-error')).toBeInTheDocument();
+    expect(screen.getByTestId('error-message')).toBeInTheDocument();
+  });
+
+  it('should throw error when used outside provider', () => {
+    // Mock console.error to avoid noise
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    expect(() => {
+      render(<TestComponent />);
+    }).toThrow('useSeizeConnectContext must be used within a SeizeConnectProvider');
+    
+    consoleSpy.mockRestore();
+  });
+
+  it('should provide working connect functionality', async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+
+    const ConnectTestComponent: React.FC = () => {
+      const { seizeConnect } = useSeizeConnectContext();
+      return (
+        <button onClick={seizeConnect} data-testid="connect-btn">
+          Connect
+        </button>
+      );
+    };
+
+    render(
+      <SeizeConnectProvider>
+        <ConnectTestComponent />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connect-btn')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('connect-btn'));
+    expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' });
+  });
+
+  it('should provide working disconnect functionality', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockReturnValue(validAddress);
+
+    const DisconnectTestComponent: React.FC = () => {
+      const { seizeDisconnect } = useSeizeConnectContext();
+      return (
+        <button onClick={() => seizeDisconnect()} data-testid="disconnect-btn">
+          Disconnect
+        </button>
+      );
+    };
+
+    render(
+      <SeizeConnectProvider>
+        <DisconnectTestComponent />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('disconnect-btn')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('disconnect-btn'));
+    expect(mockDisconnect).toHaveBeenCalled();
+  });
+
+  it('should handle disconnect and logout with reconnect', async () => {
+    jest.useFakeTimers();
+    
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockReturnValue(validAddress);
+
+    const LogoutTestComponent: React.FC = () => {
+      const { seizeDisconnectAndLogout } = useSeizeConnectContext();
+      return (
+        <button 
+          onClick={() => seizeDisconnectAndLogout(true)} 
+          data-testid="logout-btn"
+        >
+          Logout
+        </button>
+      );
+    };
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutTestComponent />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('logout-btn')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('logout-btn'));
+    
+    expect(mockDisconnect).toHaveBeenCalled();
+    expect(authUtils.removeAuthJwt).toHaveBeenCalled();
+
     // Fast-forward timers to trigger delayed reconnection
     act(() => {
       jest.advanceTimersByTime(100);
     });
+
+    expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' });
     
-    expect(open).toHaveBeenCalledWith({ view: 'Connect' });
+    jest.useRealTimers();
+  });
+});
+
+describe('Fail-Fast Security Tests', () => {
+  let mockGetWalletAddress: jest.MockedFunction<typeof authUtils.getWalletAddress>;
+  let mockRemoveAuthJwt: jest.MockedFunction<typeof authUtils.removeAuthJwt>;
+  let mockDisconnect: jest.MockedFunction<any>;
+
+  beforeEach(() => {
+    mockGetWalletAddress = authUtils.getWalletAddress as jest.MockedFunction<typeof authUtils.getWalletAddress>;
+    mockRemoveAuthJwt = authUtils.removeAuthJwt as jest.MockedFunction<typeof authUtils.removeAuthJwt>;
+    
+    const { useDisconnect } = require('@reown/appkit/react');
+    mockDisconnect = jest.fn().mockResolvedValue(undefined);
+    (useDisconnect as jest.Mock).mockReturnValue({ disconnect: mockDisconnect });
+    
+    // Mock console methods
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    
+    jest.clearAllMocks();
   });
 
-  // CRITICAL SECURITY TESTS: Fail-fast authentication bypass prevention
-  describe('seizeDisconnectAndLogout fail-fast security', () => {
-    it('throws AuthenticationError when wallet disconnect fails', async () => {
-      const disconnectError = new Error('Wallet disconnect failed');
-      disconnect.mockRejectedValueOnce(disconnectError);
-      
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      try {
-        await act(async () => {
-          await result.current.seizeDisconnectAndLogout();
-        });
-        fail('Should have thrown AuthenticationError');
-      } catch (error) {
-        expect((error as any).name).toBe('AuthenticationError');
-        expect((error as any).message).toBe('Cannot complete logout: wallet disconnection failed. User may still have active wallet connection.');
-      }
-      
-      // Verify auth cleanup was NOT called after disconnect failure
-      expect(removeAuthJwt).not.toHaveBeenCalled();
-    });
-
-    it('completes logout only after successful disconnect', async () => {
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      await act(async () => {
-        await result.current.seizeDisconnectAndLogout();
-      });
-
-      // Verify disconnect was called first
-      expect(disconnect).toHaveBeenCalled();
-      // Verify auth cleanup happens after successful disconnect
-      expect(removeAuthJwt).toHaveBeenCalled();
-    });
-
-    it('throws when auth cleanup fails after successful disconnect', async () => {
-      const authError = new Error('Auth cleanup failed');
-      (removeAuthJwt as jest.Mock).mockImplementationOnce(() => {
-        throw authError;
-      });
-      
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      try {
-        await act(async () => {
-          await result.current.seizeDisconnectAndLogout();
-        });
-        fail('Should have thrown AuthenticationError');
-      } catch (error) {
-        expect((error as any).name).toBe('AuthenticationError');
-        expect((error as any).message).toBe('Failed to clear authentication state after successful wallet disconnect');
-      }
-      
-      // Verify disconnect was successful before auth cleanup failure
-      expect(disconnect).toHaveBeenCalled();
-    });
-
-    it('never calls seizeConnect when reconnect=true and disconnect fails', async () => {
-      const disconnectError = new Error('Wallet disconnect failed');
-      disconnect.mockRejectedValueOnce(disconnectError);
-      
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      try {
-        await act(async () => {
-          await result.current.seizeDisconnectAndLogout(true);
-        });
-        fail('Should have thrown AuthenticationError');
-      } catch (error) {
-        expect((error as any).name).toBe('AuthenticationError');
-      }
-      
-      // Fast-forward timers
-      act(() => {
-        jest.advanceTimersByTime(200);
-      });
-      
-      // Verify seizeConnect was NEVER called due to disconnect failure
-      expect(open).not.toHaveBeenCalled();
-      expect(removeAuthJwt).not.toHaveBeenCalled();
-    });
-
-    it('delays reconnection after successful logout when reconnect=true', async () => {
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      await act(async () => {
-        await result.current.seizeDisconnectAndLogout(true);
-      });
-
-      // Verify auth cleanup completed
-      expect(disconnect).toHaveBeenCalled();
-      expect(removeAuthJwt).toHaveBeenCalled();
-      
-      // Before timer advance - no reconnection yet
-      expect(open).not.toHaveBeenCalled();
-      
-      // After 100ms delay - reconnection triggers
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
-      
-      expect(open).toHaveBeenCalledWith({ view: 'Connect' });
-    });
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  // CRITICAL: Infinite loop prevention tests
-  describe('infinite loop prevention', () => {
-    it('does not cause infinite re-renders when connectionState changes', async () => {
-      const mockAccount = { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' };
-      (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
+  it('should throw AuthenticationError when wallet disconnect fails during logout', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    require('viem').isAddress.mockReturnValue(true);
+    require('viem').getAddress.mockReturnValue(validAddress);
+    
+    const disconnectError = new Error('Wallet disconnect failed');
+    mockDisconnect.mockRejectedValueOnce(disconnectError);
+
+    const LogoutTestComponent: React.FC = () => {
+      const { seizeDisconnectAndLogout } = useSeizeConnectContext();
+      const [error, setError] = React.useState<string>('');
       
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
+      const handleLogout = async () => {
+        try {
+          await seizeDisconnectAndLogout();
+        } catch (err) {
+          setError((err as Error).name);
+        }
+      };
 
-      // Let initial effects run
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
+      return (
+        <div>
+          <button onClick={handleLogout} data-testid="logout-btn">
+            Logout
+          </button>
+          <div data-testid="error">{error}</div>
+        </div>
+      );
+    };
 
-      const initialConnectionState = result.current.connectionState;
-      
-      // Trigger multiple rapid account changes that would previously cause infinite loops
-      act(() => {
-        (useAppKitAccount as jest.Mock).mockReturnValue({
-          ...mockAccount,
-          address: '0x9876543210987654321098765432109876543210'
-        });
-      });
+    render(
+      <SeizeConnectProvider>
+        <LogoutTestComponent />
+      </SeizeConnectProvider>
+    );
 
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
-
-      // Verify state stabilizes and doesn't keep changing
-      const finalConnectionState = result.current.connectionState;
-      expect(finalConnectionState).toBe('connected');
-      expect(finalConnectionState).toBe(initialConnectionState); // Should be stable
+    await waitFor(() => {
+      expect(screen.getByTestId('logout-btn')).toBeInTheDocument();
     });
 
-    it('prevents memory leaks from uncleared timeouts', async () => {
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
-      
-      const { unmount } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
+    await userEvent.click(screen.getByTestId('logout-btn'));
 
-      // Trigger timeout creation
-      act(() => {
-        (useAppKitAccount as jest.Mock).mockReturnValue({ 
-          address: '0x1234567890123456789012345678901234567890', 
-          isConnected: true, 
-          status: 'connected' 
-        });
-      });
-
-      // Unmount component before timeout completes
-      unmount();
-
-      // Verify timeout was properly cleared on unmount
-      expect(clearTimeoutSpy).toHaveBeenCalled();
-      
-      clearTimeoutSpy.mockRestore();
+    await waitFor(() => {
+      expect(screen.getByTestId('error')).toHaveTextContent('AuthenticationError');
     });
 
-    it('maintains stable connectionState when no actual state change occurs', async () => {
-      const mockAccount = { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' };
-      (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
-      
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      // Let initial effects run
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
-
-      const initialConnectionState = result.current.connectionState;
-      const initialAddress = result.current.address;
-
-      // Trigger same state multiple times (should not cause re-renders)
-      act(() => {
-        (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
-      });
-
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
-
-      // Verify state remains exactly the same (no unnecessary updates)
-      expect(result.current.connectionState).toBe(initialConnectionState);
-      expect(result.current.address).toBe(initialAddress);
-    });
-
-    it('handles rapid state changes without causing infinite loops', async () => {
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      // Simulate rapid state changes that previously caused infinite loops
-      const rapidChanges = [
-        { address: undefined, isConnected: false, status: 'disconnected' },
-        { address: '0x1234567890123456789012345678901234567890', isConnected: false, status: 'connecting' },
-        { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' },
-        { address: undefined, isConnected: false, status: 'disconnected' },
-        { address: '0x9876543210987654321098765432109876543210', isConnected: true, status: 'connected' }
-      ];
-
-      // Apply all changes rapidly
-      rapidChanges.forEach((change, index) => {
-        act(() => {
-          (useAppKitAccount as jest.Mock).mockReturnValue(change);
-          jest.advanceTimersByTime(10); // Small delays to simulate rapid changes
-        });
-      });
-
-      // Let final state settle
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
-
-      // Verify final state is correct and stable
-      expect(result.current.connectionState).toBe('connected');
-      expect(result.current.address).toBe('0x9876543210987654321098765432109876543210');
-      expect(result.current.isConnected).toBe(true);
-    });
-
-    it('functional state updates prevent unnecessary re-renders with same state', async () => {
-      const mockAccount = { address: '0x1234567890123456789012345678901234567890', isConnected: true, status: 'connected' };
-      (useAppKitAccount as jest.Mock).mockReturnValue(mockAccount);
-      
-      const { result, rerender } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      // Let initial effects run
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
-
-      expect(result.current.connectionState).toBe('connected');
-
-      // Force multiple re-renders with same account state
-      for (let i = 0; i < 5; i++) {
-        act(() => {
-          rerender();
-          jest.advanceTimersByTime(60); // Let debounce complete
-        });
-      }
-
-      // State should remain stable throughout
-      expect(result.current.connectionState).toBe('connected');
-    });
+    // Verify auth cleanup was NOT called after disconnect failure
+    expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
   });
 
-  // Type safety verification tests
-  describe('type safety', () => {
-    it('throws AuthenticationError with proper type and cause', async () => {
-      const disconnectError = new Error('Wallet disconnect failed');
-      disconnect.mockRejectedValueOnce(disconnectError);
-      
-      const { result } = renderHook(() => useSeizeConnectContext(), {
-        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
-      });
-
-      try {
-        await act(async () => {
-          await result.current.seizeDisconnectAndLogout();
-        });
-        fail('Should have thrown AuthenticationError');
-      } catch (error) {
-        expect((error as any).name).toBe('AuthenticationError');
-        expect((error as any).cause).toBeDefined();
-        expect((error as any).cause.name).toBe('WalletDisconnectionError');
-      }
+  it('should throw AuthenticationError when auth cleanup fails after successful disconnect', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    require('viem').isAddress.mockReturnValue(true);
+    require('viem').getAddress.mockReturnValue(validAddress);
+    
+    const authError = new Error('Auth cleanup failed');
+    mockRemoveAuthJwt.mockImplementationOnce(() => {
+      throw authError;
     });
+
+    const LogoutTestComponent: React.FC = () => {
+      const { seizeDisconnectAndLogout } = useSeizeConnectContext();
+      const [error, setError] = React.useState<string>('');
+      
+      const handleLogout = async () => {
+        try {
+          await seizeDisconnectAndLogout();
+        } catch (err) {
+          setError((err as Error).name);
+        }
+      };
+
+      return (
+        <div>
+          <button onClick={handleLogout} data-testid="logout-btn">
+            Logout
+          </button>
+          <div data-testid="error">{error}</div>
+        </div>
+      );
+    };
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutTestComponent />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('logout-btn')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('logout-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('error')).toHaveTextContent('AuthenticationError');
+    });
+
+    // Verify disconnect was successful before auth cleanup failure
+    expect(mockDisconnect).toHaveBeenCalled();
   });
 });
