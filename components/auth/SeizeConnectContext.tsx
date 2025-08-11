@@ -21,6 +21,13 @@ import {
 import { WalletInitializationError } from "../../src/errors/wallet";
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from "@reown/appkit/react";
 import { isAddress, getAddress } from "viem";
+import { SecurityEventType } from "../../src/types/security";
+import { 
+  logSecurityEvent, 
+  logError, 
+  createConnectionEventContext, 
+  createValidationEventContext
+} from "../../src/utils/security-logger";
 
 // Custom error types for better error handling
 export class WalletConnectionError extends Error {
@@ -131,75 +138,7 @@ const createWalletError = (
   );
 };
 
-// Production-safe error logging with data sanitization
-const logError = (context: string, error: Error): void => {
-  const timestamp = new Date().toISOString();
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  // Base error information that's safe to log in production
-  const errorInfo = {
-    timestamp,
-    context,
-    name: error.name,
-    message: error.message,
-    ...(error instanceof WalletConnectionError && { code: error.code }),
-    ...(error instanceof WalletDisconnectionError && { code: error.code })
-  };
-  
-  if (isProduction) {
-    // In production: sanitize sensitive data, log essential info
-    const sanitizedMessage = error.message
-      .replace(/0x[a-fA-F0-9]{40}/g, '0x***REDACTED***') // Hide wallet addresses
-      .replace(/\b[A-Za-z0-9]{32,}\b/g, '***TOKEN***'); // Hide potential tokens
-    
-    console.error(`[SEIZE_CONNECT_ERROR] ${context}:`, {
-      ...errorInfo,
-      message: sanitizedMessage,
-      userAgent: navigator.userAgent
-    });
-  } else {
-    // In development: include full details including stack trace
-    console.error(`[SEIZE_CONNECT_ERROR] ${context}:`, {
-      ...errorInfo,
-      stack: error.stack,
-      cause: error.cause,
-      userAgent: navigator.userAgent
-    });
-  }
-};
-
-// Security event logging for monitoring suspicious activity
-const logSecurityEvent = (eventType: string, details: Record<string, unknown>): void => {
-  const timestamp = new Date().toISOString();
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  // Enhanced sanitization for production logging
-  const sanitizedDetails = isProduction ? {
-    ...details,
-    // Remove any address fields completely in production for maximum privacy
-    address: undefined,
-    // Keep diagnostic data that's safe to log
-    valid: details.valid,
-    walletName: details.walletName,
-    source: details.source,
-    addressLength: details.addressLength,
-    addressFormat: details.addressFormat,
-    timestamp: details.timestamp
-  } : {
-    // In development, show first 6 and last 4 characters for debugging
-    ...details,
-    address: typeof details.address === 'string' && details.address.length >= 10 ?
-      details.address.slice(0, 6) + '...' + details.address.slice(-4) :
-      details.address
-  };
-  
-  console.warn(`[SEIZE_SECURITY_EVENT] ${eventType}:`, {
-    timestamp,
-    eventType,
-    ...sanitizedDetails,
-    userAgent: navigator.userAgent
-  });
-};
+// REMOVED: Old insecure logging functions replaced with secure logger from src/utils/security-logger.ts
 
 // Type guard for validating wallet addresses with EIP-55 checksum validation
 const isValidAddress = (address: unknown): address is string => {
@@ -255,14 +194,15 @@ const useSecureWalletInitialization = () => {
           invalidAddressString;
         
         // Log security event for monitoring
-        logSecurityEvent('invalid_stored_address_detected', {
-          address: 'INVALID_FORMAT',
-          source: 'wallet_initialization',
-          valid: false,
-          timestamp: new Date().toISOString(),
-          addressLength,
-          addressFormat
-        });
+        logSecurityEvent(
+          SecurityEventType.INVALID_ADDRESS_DETECTED,
+          createValidationEventContext(
+            'wallet_initialization',
+            false,
+            addressLength,
+            addressFormat
+          )
+        );
         
         // Clear the invalid stored address immediately
         try {
@@ -447,14 +387,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         } else {
           // Invalid address from wallet - log security event and disconnect
           const addressStr = account.address as string | undefined;
-          logSecurityEvent('invalid_address_from_wallet', {
-            address: 'INVALID_FORMAT',
-            source: 'wallet_provider',
-            valid: false,
-            timestamp: new Date().toISOString(),
-            addressLength: addressStr?.length || 0,
-            addressFormat: addressStr?.startsWith('0x') ? 'hex_prefixed' : 'other'
-          });
+          logSecurityEvent(
+            SecurityEventType.INVALID_ADDRESS_DETECTED,
+            createValidationEventContext(
+              'wallet_provider',
+              false,
+              addressStr?.length || 0,
+              addressStr?.startsWith('0x') ? 'hex_prefixed' : 'other'
+            )
+          );
           
           setConnectedAddress(undefined);
           setConnectionState(currentState => 
@@ -496,18 +437,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const seizeConnect = useCallback((): void => {
     try {
       // Log connection attempt for security monitoring
-      logSecurityEvent('wallet_connection_attempt', {
-        source: 'seizeConnect',
-        timestamp: new Date().toISOString()
-      });
+      logSecurityEvent(
+        SecurityEventType.WALLET_CONNECTION_ATTEMPT,
+        createConnectionEventContext('seizeConnect')
+      );
       
       open({ view: "Connect" });
       
       // Log successful modal opening
-      logSecurityEvent('wallet_modal_opened', {
-        source: 'seizeConnect',
-        timestamp: new Date().toISOString()
-      });
+      logSecurityEvent(
+        SecurityEventType.WALLET_MODAL_OPENED,
+        createConnectionEventContext('seizeConnect')
+      );
     } catch (error) {
       const connectionError = new WalletConnectionError(
         'Failed to open wallet connection modal',
@@ -576,26 +517,22 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const seizeAcceptConnection = useCallback((address: string): void => {
-    // Pre-validate and sanitize address for logging
-    const isValidAddr = isValidAddress(address);
-    const sanitizedAddress = isValidAddr ? 
-      getAddress(address).slice(0, 6) + '...' + getAddress(address).slice(-4) :
-      'INVALID_FORMAT';
-
     // Extract diagnostic data before validation check
     const addressLength = address.length;
     const addressFormat = address.startsWith('0x') ? 'hex_prefixed' : 'other';
+    const isValidAddr = isValidAddress(address);
 
     if (!isValidAddr) {
-      // Log with sanitized address for security monitoring
-      logSecurityEvent('invalid_address_attempt', {
-        address: sanitizedAddress, // ✅ SANITIZED ADDRESS
-        source: 'seizeAcceptConnection',
-        valid: false,
-        timestamp: new Date().toISOString(),
-        addressLength,
-        addressFormat
-      });
+      // Log security event with NO address data
+      logSecurityEvent(
+        SecurityEventType.INVALID_ADDRESS_DETECTED,
+        createValidationEventContext(
+          'seizeAcceptConnection',
+          false,
+          addressLength,
+          addressFormat
+        )
+      );
       
       const error = new AuthenticationError(
         'Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format.'
@@ -604,13 +541,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       throw error;
     }
     
-    // Log successful address validation with sanitized data
-    logSecurityEvent('address_validation_success', {
-      address: sanitizedAddress, // ✅ SANITIZED ADDRESS
-      source: 'seizeAcceptConnection',
-      valid: true,
-      timestamp: new Date().toISOString()
-    });
+    // Log successful address validation with NO address data
+    logSecurityEvent(
+      SecurityEventType.ADDRESS_VALIDATION_SUCCESS,
+      createValidationEventContext(
+        'seizeAcceptConnection',
+        true
+      )
+    );
     
     // Normalize address to checksummed format for consistency
     const checksummedAddress = getAddress(address);
