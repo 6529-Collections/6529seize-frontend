@@ -1,4 +1,4 @@
-import React, { useId, useCallback } from "react";
+import React, { useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";

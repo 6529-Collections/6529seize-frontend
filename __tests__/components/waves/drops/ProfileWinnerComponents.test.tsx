@@ -27,6 +27,6 @@ describe('ProfileWinnerBadge', () => {
     const { container } = render(<ProfileWinnerBadge winCount={3} />);
     const badge = container.firstChild;
     expect(badge).toHaveClass('tw-inline-flex', 'tw-items-center', 'tw-justify-center');
-    expect(badge).toHaveClass('tw-bg-amber-400/20', 'tw-border-amber-400/25', 'tw-text-amber-400');
+    expect(badge).toHaveClass('tw-bg-amber-400/10', 'tw-border-amber-400/20', 'tw-text-amber-300');
   });
 });

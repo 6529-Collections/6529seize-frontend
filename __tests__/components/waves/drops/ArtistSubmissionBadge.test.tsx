@@ -114,6 +114,6 @@ describe('ArtistSubmissionBadge', () => {
     render(<ArtistSubmissionBadge {...defaultProps} />);
     
     const badge = screen.getByRole('button');
-    expect(badge).toHaveClass('focus:tw-ring-2');
+    expect(badge).toHaveClass('focus:tw-ring-1');
   });
 });

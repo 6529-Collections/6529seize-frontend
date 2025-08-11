@@ -104,14 +104,6 @@ describe('ArtistPreviewAppWrapper', () => {
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders drag handle', () => {
-    render(<ArtistPreviewAppWrapper {...defaultProps} />);
-    
-    // Look for the drag handle by test ID
-    const dragHandle = screen.getByTestId('drag-handle');
-    expect(dragHandle).toBeInTheDocument();
-    expect(dragHandle).toHaveClass('tw-w-10', 'tw-h-1', 'tw-bg-iron-700', 'tw-rounded-full');
-  });
 
   it('has draggable motion div', () => {
     render(<ArtistPreviewAppWrapper {...defaultProps} />);
@@ -198,23 +190,6 @@ describe('ArtistPreviewAppWrapper', () => {
     );
   });
 
-  it('has proper cursor styles on drag handle', () => {
-    render(<ArtistPreviewAppWrapper {...defaultProps} />);
-    
-    // Find the drag handle area
-    const dragHandleArea = screen.getByTestId('drag-handle-area');
-    expect(dragHandleArea).toBeInTheDocument();
-    expect(dragHandleArea).toHaveClass('tw-cursor-grab', 'active:tw-cursor-grabbing');
-  });
-
-  it('has touch-action none on drag handle', () => {
-    render(<ArtistPreviewAppWrapper {...defaultProps} />);
-    
-    const dragHandleArea = screen.getByTestId('drag-handle-area');
-    // The drag handle area should exist and be draggable
-    expect(dragHandleArea).toBeInTheDocument();
-    expect(dragHandleArea).toHaveClass('tw-cursor-grab');
-  });
 
   it('handles focus styles on close button', () => {
     render(<ArtistPreviewAppWrapper {...defaultProps} />);

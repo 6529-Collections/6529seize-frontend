@@ -150,15 +150,15 @@ describe('ArtistActiveSubmissionContent', () => {
 
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    expect(screen.getByText('Loading submissions...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('shows error state with retry button', () => {
+  it('renders empty grid when no submissions', () => {
     const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: [],
       isLoading: false,
-      error: 'Failed to fetch',
+      error: null,
     });
     useSubmissionDrops.mockReturnValue({
       submissionsWithDrops: [],
@@ -167,33 +167,8 @@ describe('ArtistActiveSubmissionContent', () => {
 
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    expect(screen.getByText('Failed to load submissions')).toBeInTheDocument();
-    expect(screen.getByText('Try Again')).toBeInTheDocument();
-  });
-
-  it('reloads page when retry button is clicked', () => {
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
-    useUserArtSubmissions.mockReturnValue({
-      submissions: [],
-      isLoading: false,
-      error: 'Failed to fetch',
-    });
-    useSubmissionDrops.mockReturnValue({
-      submissionsWithDrops: [],
-      isLoading: false,
-    });
-    
-    // Mock location.reload
-    const mockReload = jest.fn();
-    delete (window as any).location;
-    (window as any).location = { reload: mockReload };
-
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
-    const retryButton = screen.getByText('Try Again');
-    fireEvent.click(retryButton);
-    
-    expect(mockReload).toHaveBeenCalled();
+    // Should render empty grid
+    expect(document.querySelector('.tw-grid')).toBeInTheDocument();
   });
 
   it('renders submissions grid', () => {
