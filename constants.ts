@@ -8,11 +8,11 @@ export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
  * Ensures proper URL format, HTTPS in production, and domain allowlist
  */
 function validateBaseEndpoint(): string {
-  const baseEndpoint = process.env.NEXT_PUBLIC_BASE_ENDPOINT;
+  const baseEndpoint = process.env.BASE_ENDPOINT;
   
   if (!baseEndpoint) {
     throw new Error(
-      'NEXT_PUBLIC_BASE_ENDPOINT environment variable is required. Please set it in your environment or .env.local file.'
+      'BASE_ENDPOINT environment variable is required. Please set it in your environment or .env.local file.'
     );
   }
   
@@ -22,7 +22,7 @@ function validateBaseEndpoint(): string {
     validatedUrl = new URL(baseEndpoint);
   } catch (error) {
     throw new Error(
-      `NEXT_PUBLIC_BASE_ENDPOINT contains invalid URL format: ${baseEndpoint}. Expected format: https://domain.com`
+      `BASE_ENDPOINT contains invalid URL format: ${baseEndpoint}. Expected format: https://domain.com`
     );
   }
   
@@ -30,7 +30,7 @@ function validateBaseEndpoint(): string {
   const isLocalhost = baseEndpoint.includes('localhost') || baseEndpoint.includes('127.0.0.1');
   if (validatedUrl.protocol !== 'https:' && !isLocalhost) {
     throw new Error(
-      `NEXT_PUBLIC_BASE_ENDPOINT must use HTTPS protocol in production. Got: ${validatedUrl.protocol}//. Only localhost can use HTTP.`
+      `BASE_ENDPOINT must use HTTPS protocol in production. Got: ${validatedUrl.protocol}//. Only localhost can use HTTP.`
     );
   }
   
@@ -50,7 +50,7 @@ function validateBaseEndpoint(): string {
   
   if (!isAllowedDomain) {
     throw new Error(
-      `NEXT_PUBLIC_BASE_ENDPOINT domain not in allowlist. Got: ${hostname}. Allowed domains: ${allowedDomains.join(', ')}`
+      `BASE_ENDPOINT domain not in allowlist. Got: ${hostname}. Allowed domains: ${allowedDomains.join(', ')}`
     );
   }
   

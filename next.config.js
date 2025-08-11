@@ -103,8 +103,8 @@ const nextConfig = {
     // Validate required environment variables at build time
     if (!dev && !isServer) {
       const requiredEnvVars = [
-        'NEXT_PUBLIC_BASE_ENDPOINT',
-        'NEXT_PUBLIC_CW_PROJECT_ID'
+        'BASE_ENDPOINT',
+        'CW_PROJECT_ID'
       ];
       
       const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
@@ -116,16 +116,16 @@ const nextConfig = {
         );
       }
       
-      // Validate NEXT_PUBLIC_BASE_ENDPOINT format
-      const baseEndpoint = process.env.NEXT_PUBLIC_BASE_ENDPOINT;
+      // Validate BASE_ENDPOINT format
+      const baseEndpoint = process.env.BASE_ENDPOINT;
       try {
         const url = new URL(baseEndpoint);
         if (url.protocol !== 'https:' && !baseEndpoint.includes('localhost') && !baseEndpoint.includes('127.0.0.1')) {
-          throw new Error(`NEXT_PUBLIC_BASE_ENDPOINT must use HTTPS in production: ${baseEndpoint}`);
+          throw new Error(`BASE_ENDPOINT must use HTTPS in production: ${baseEndpoint}`);
         }
       } catch (error) {
         if (error instanceof TypeError) {
-          throw new Error(`NEXT_PUBLIC_BASE_ENDPOINT is not a valid URL: ${baseEndpoint}`);
+          throw new Error(`BASE_ENDPOINT is not a valid URL: ${baseEndpoint}`);
         }
         throw error;
       }
