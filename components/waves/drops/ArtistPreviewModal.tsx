@@ -90,10 +90,12 @@ export const ArtistPreviewModal: React.FC<
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
           <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px]" onClick={onClose} />
         </Transition.Child>
 
         {/* Desktop modal */}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div className="tw-fixed tw-inset-0 tw-z-[100] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-hidden sm:tw-block" onClick={onClose}>
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
             <Transition.Child
