@@ -177,27 +177,34 @@ export default function WagmiSetup({
                 "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
               ],
             },
-            // Mobile-specific settings
+            // Mobile-specific settings - simplified configuration
             enableWalletGuide: false,
-            // MetaMask wallet configuration with proper deep linking
             featuredWalletIds: [
-              'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask - should be first for priority
-            ],
-            includeWalletIds: [
               'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-              '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
-              '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
-              'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase Wallet
             ],
-            allWallets: 'SHOW' as const, // Show "All Wallets" on mobile to ensure all wallets are accessible
+            // Removed includeWalletIds to avoid conflicts
+            allWallets: 'SHOW' as const,
             features: {
-              analytics: true,
+              analytics: false, // Disable analytics on mobile to reduce complexity
               email: false,
               socials: [],
-              connectMethodsOrder: ['wallet' as const]
             },
-            enableOnramp: false, // Disable for mobile
-            enableSwaps: false   // Disable for mobile
+            enableOnramp: false,
+            enableSwaps: false,
+            // Add custom wallet metadata for better mobile support
+            customWallets: [
+              {
+                id: 'metamask',
+                name: 'MetaMask',
+                homepage: 'https://metamask.io',
+                image_url: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
+                mobile_link: 'metamask://',
+                desktop_link: 'https://metamask.io',
+                webapp_link: 'https://metamask.io',
+                app_store: 'https://apps.apple.com/us/app/metamask/id1438144202',
+                play_store: 'https://play.google.com/store/apps/details?id=io.metamask',
+              }
+            ] as any
           } : {
             adapters: [newAdapter],
             networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],

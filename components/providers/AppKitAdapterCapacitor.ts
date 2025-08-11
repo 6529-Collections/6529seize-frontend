@@ -54,18 +54,18 @@ export class AppKitAdapterCapacitor {
 
     // Create mobile-specific connectors
     const mobileConnectors = [
-      // WalletConnect for mobile with improved deep linking - handles MetaMask and other wallets
+      // WalletConnect for mobile - REMOVED showQrModal entirely to use default behavior
       walletConnect({
         projectId: CW_PROJECT_ID,
         metadata: {
           name: "6529.io",
-          description: "6529.io",
+          description: "6529.io Mobile",
           url: VALIDATED_BASE_ENDPOINT,
           icons: [
             "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
           ],
         },
-        showQrModal: false, // Set back to false to let AppKit handle the modal
+        // Removed showQrModal - let WalletConnect handle it automatically
       }),
       // Coinbase Wallet with mobile wallet link enabled
       coinbaseWallet({
