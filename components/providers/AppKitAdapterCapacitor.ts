@@ -54,14 +54,8 @@ export class AppKitAdapterCapacitor {
 
     // Create mobile-specific connectors
     const mobileConnectors = [
-      // MetaMask connector for mobile - critical for mobile MetaMask connections
-      metaMask({
-        dappMetadata: {
-          name: "6529.io",
-          url: VALIDATED_BASE_ENDPOINT,
-        },
-      }),
-      // WalletConnect for mobile with improved deep linking
+      // WalletConnect MUST be first for mobile MetaMask to work properly
+      // MetaMask mobile uses WalletConnect protocol, not injected provider
       walletConnect({
         projectId: CW_PROJECT_ID,
         metadata: {
@@ -84,8 +78,16 @@ export class AppKitAdapterCapacitor {
         enableMobileWalletLink: true, // Enable mobile deep linking
         version: "3",
       }),
-      // Injected connector for browsers that have injected wallets
+      // Injected connector for in-app browsers and desktop
       injected(),
+      // MetaMask connector for desktop browsers only (not mobile)
+      // On mobile, MetaMask connects via WalletConnect above
+      metaMask({
+        dappMetadata: {
+          name: "6529.io",
+          url: VALIDATED_BASE_ENDPOINT,
+        },
+      }),
     ]
 
     // Create AppWallet connectors if any exist
