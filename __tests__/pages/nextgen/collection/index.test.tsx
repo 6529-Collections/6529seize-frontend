@@ -1,9 +1,9 @@
-import { render } from "@testing-library/react";
+import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import {
   getServerSideProps,
   useShallowRedirect,
 } from "@/pages/nextgen/collection/[collection]/[[...view]]/index";
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { render } from "@testing-library/react";
 
 jest.mock("@/helpers/server.helpers", () => ({
   getCommonHeaders: jest.fn(() => ({ h: "1" })),
@@ -51,6 +51,8 @@ describe("nextgen collection page", () => {
       return null;
     }
     render(<Comp />);
-    expect(replaceFn).toHaveBeenCalledWith("/nextgen/collection/cool");
+    expect(replaceFn).toHaveBeenCalledWith("/nextgen/collection/cool", {
+      scroll: false,
+    });
   });
 });
