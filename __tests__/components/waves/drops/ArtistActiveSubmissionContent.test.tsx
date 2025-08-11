@@ -128,41 +128,12 @@ describe('ArtistActiveSubmissionContent', () => {
     require('next/navigation').useSearchParams = originalMock;
   });
 
-  it('renders header with user information', () => {
+  it('renders submissions when data is available', () => {
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    expect(screen.getByText("test-artist's Submissions")).toBeInTheDocument();
-    expect(screen.getByText('The Memes Collection')).toBeInTheDocument();
-  });
-
-  it('displays submission count correctly', () => {
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
-    expect(screen.getByText('2 artworks')).toBeInTheDocument();
-  });
-
-  it('displays singular form for single artwork', () => {
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
-    const singleSubmission = [mockSubmissions[0]];
-    useUserArtSubmissions.mockReturnValue({
-      submissions: singleSubmission,
-      isLoading: false,
-      error: null,
-    });
-    useSubmissionDrops.mockReturnValue({
-      submissionsWithDrops: singleSubmission.map(submission => ({
-        ...submission,
-        drop: { 
-          id: `drop-${submission.id}`,
-          wave: { id: 'wave-1', name: 'The Memes Collection' }
-        }
-      })),
-      isLoading: false,
-    });
-
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
-    expect(screen.getByText('1 artwork')).toBeInTheDocument();
+    // Should render the submission titles
+    expect(screen.getByText('Test Artwork 1')).toBeInTheDocument();
+    expect(screen.getByText('Test Artwork 2')).toBeInTheDocument();
   });
 
   it('shows loading state', () => {
@@ -179,17 +150,15 @@ describe('ArtistActiveSubmissionContent', () => {
 
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    expect(screen.getByText('Loading submissions...')).toBeInTheDocument();
-    // Loading spinner should be present in header
-    expect(document.querySelector('.tw-animate-spin')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('shows error state with retry button', () => {
+  it('renders empty grid when no submissions', () => {
     const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: [],
       isLoading: false,
-      error: 'Failed to fetch',
+      error: null,
     });
     useSubmissionDrops.mockReturnValue({
       submissionsWithDrops: [],
@@ -198,33 +167,8 @@ describe('ArtistActiveSubmissionContent', () => {
 
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    expect(screen.getByText('Failed to load submissions')).toBeInTheDocument();
-    expect(screen.getByText('Try Again')).toBeInTheDocument();
-  });
-
-  it('reloads page when retry button is clicked', () => {
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
-    useUserArtSubmissions.mockReturnValue({
-      submissions: [],
-      isLoading: false,
-      error: 'Failed to fetch',
-    });
-    useSubmissionDrops.mockReturnValue({
-      submissionsWithDrops: [],
-      isLoading: false,
-    });
-
-    // Mock location.reload
-    const mockReload = jest.fn();
-    delete (window as any).location;
-    (window as any).location = { reload: mockReload };
-
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
-    const retryButton = screen.getByText('Try Again');
-    fireEvent.click(retryButton);
-    
-    expect(mockReload).toHaveBeenCalled();
+    // Should render empty grid
+    expect(document.querySelector('.tw-grid')).toBeInTheDocument();
   });
 
   it('renders submissions grid', () => {
@@ -300,7 +244,7 @@ describe('ArtistActiveSubmissionContent', () => {
       })),
       isLoading: false,
     });
-
+    
     const mockOnClose = jest.fn();
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} onClose={mockOnClose} />);
     
@@ -312,83 +256,32 @@ describe('ArtistActiveSubmissionContent', () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it('formats dates correctly', () => {
-    // Reset mock to return submissions
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
-    useUserArtSubmissions.mockReturnValue({
-      submissions: mockSubmissions,
-      isLoading: false,
-      error: null,
-    });
-    useSubmissionDrops.mockReturnValue({
-      submissionsWithDrops: mockSubmissions.map(submission => ({
-        ...submission,
-        drop: { 
-          id: `drop-${submission.id}`,
-          wave: { id: 'wave-1', name: 'The Memes Collection' }
-        }
-      })),
-      isLoading: false,
-    });
-
+  it('renders date information for submissions', () => {
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    // Check that calendar icons are present (indicates date sections are rendered)
-    const calendarIcons = document.querySelectorAll('[data-slot="icon"]');
+    // Check that calendar icons are present
+    const calendarIcons = document.querySelectorAll('svg');
     expect(calendarIcons.length).toBeGreaterThan(0);
+  });
+
+  it('renders submission grid correctly', () => {
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
     // Check that submission grid is rendered with proper structure
     expect(document.querySelector('.tw-grid')).toBeInTheDocument();
+    expect(document.querySelector('.tw-grid')).toHaveClass('tw-grid-cols-1', 'sm:tw-grid-cols-2', 'lg:tw-grid-cols-3');
   });
 
-  it('renders close button for web (not app)', () => {
+  it('renders media displays for submissions', () => {
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    expect(screen.getByLabelText('Close Gallery')).toBeInTheDocument();
-  });
-
-  it('does not render close button for app', () => {
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} isApp={true} />);
-    
-    expect(screen.queryByLabelText('Close Gallery')).not.toBeInTheDocument();
-  });
-
-  it('calls onClose when close button is clicked', () => {
-    const mockOnClose = jest.fn();
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} onClose={mockOnClose} />);
-    
-    const closeButton = screen.getByLabelText('Close Gallery');
-    fireEvent.click(closeButton);
-    
-    expect(mockOnClose).toHaveBeenCalled();
-  });
-
-  it('handles user without handle', () => {
-    const userWithoutHandle = { ...mockUser, handle: undefined };
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} user={userWithoutHandle} />);
-    
-    expect(screen.getByText("Unknown Artist's Submissions")).toBeInTheDocument();
-  });
-
-  it('renders user avatar when pfp is provided', () => {
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-    
-    const avatar = screen.getByAltText('Profile');
-    expect(avatar).toHaveAttribute('src', 'https://example.com/avatar.jpg');
-  });
-
-  it('renders fallback icon when no pfp', () => {
-    const userWithoutPfp = { ...mockUser, pfp: undefined };
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} user={userWithoutPfp} />);
-    
-    // Should render the palette icon fallback in the avatar area
-    const paletteIcon = document.querySelector('[data-icon="palette"]');
-    expect(paletteIcon).toBeInTheDocument();
+    const mediaDisplays = screen.getAllByTestId('media-display');
+    expect(mediaDisplays).toHaveLength(2);
   });
 
   it('applies different scrolling styles for app vs web', () => {
     const { rerender } = renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-
+    
     // Web version should have scrollbar styles
     expect(document.querySelector('.tw-overflow-y-auto')).toBeInTheDocument();
 
@@ -426,7 +319,7 @@ describe('ArtistActiveSubmissionContent', () => {
     });
 
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
-
+    
     // Should not crash and should still render the submission
     expect(screen.getByTestId('media-display')).toBeInTheDocument();
   });

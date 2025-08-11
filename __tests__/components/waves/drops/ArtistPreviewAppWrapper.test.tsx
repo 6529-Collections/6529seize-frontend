@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ArtistActiveSubmissionAppWrapper from '../../../../components/waves/drops/ArtistActiveSubmissionAppWrapper';
+import ArtistPreviewAppWrapper from '../../../../components/waves/drops/ArtistPreviewAppWrapper';
 
 // Mock Headless UI components
 jest.mock('@headlessui/react', () => ({
@@ -52,7 +52,7 @@ jest.mock('@heroicons/react/24/outline', () => ({
   XMarkIcon: (props: any) => <svg data-testid="x-mark-icon" {...props} />,
 }));
 
-describe('ArtistActiveSubmissionAppWrapper', () => {
+describe('ArtistPreviewAppWrapper', () => {
   const defaultProps = {
     isOpen: true,
     onClose: jest.fn(),
@@ -64,20 +64,20 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
   });
 
   it('renders when isOpen is true', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     expect(screen.getByTestId('dialog')).toBeInTheDocument();
     expect(screen.getByTestId('test-content')).toBeInTheDocument();
   });
 
   it('does not render when isOpen is false', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} isOpen={false} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} isOpen={false} />);
     
     expect(screen.queryByTestId('dialog')).not.toBeInTheDocument();
   });
 
   it('renders close button', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     const closeButton = screen.getByLabelText('Close panel');
     expect(closeButton).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
 
   it('calls onClose when close button is clicked', () => {
     const mockOnClose = jest.fn();
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} onClose={mockOnClose} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} onClose={mockOnClose} />);
     
     const closeButton = screen.getByLabelText('Close panel');
     fireEvent.click(closeButton);
@@ -96,7 +96,7 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
 
   it('calls onClose when dialog backdrop is clicked', () => {
     const mockOnClose = jest.fn();
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} onClose={mockOnClose} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} onClose={mockOnClose} />);
     
     const dialog = screen.getByTestId('dialog');
     fireEvent.click(dialog);
@@ -104,17 +104,9 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders drag handle', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
-    
-    // Look for the drag handle by test ID
-    const dragHandle = screen.getByTestId('drag-handle');
-    expect(dragHandle).toBeInTheDocument();
-    expect(dragHandle).toHaveClass('tw-w-10', 'tw-h-1', 'tw-bg-iron-700', 'tw-rounded-full');
-  });
 
   it('has draggable motion div', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     const motionDiv = screen.getByTestId('motion-div');
     expect(motionDiv).toHaveAttribute('data-drag', 'y');
@@ -122,7 +114,7 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
 
   it('handles drag end with small offset (no close)', () => {
     const mockOnClose = jest.fn();
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} onClose={mockOnClose} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} onClose={mockOnClose} />);
     
     const motionDiv = screen.getByTestId('motion-div');
     
@@ -138,7 +130,7 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
     render(
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
       <div onClick={mockParentClick}>
-        <ArtistActiveSubmissionAppWrapper {...defaultProps} />
+        <ArtistPreviewAppWrapper {...defaultProps} />
       </div>
     );
     
@@ -161,9 +153,9 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
     );
     
     render(
-      <ArtistActiveSubmissionAppWrapper {...defaultProps}>
+      <ArtistPreviewAppWrapper {...defaultProps}>
         {customChildren}
-      </ArtistActiveSubmissionAppWrapper>
+      </ArtistPreviewAppWrapper>
     );
     
     expect(screen.getByText('Custom Header')).toBeInTheDocument();
@@ -171,7 +163,7 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
   });
 
   it('has proper ARIA attributes', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     const closeButton = screen.getByLabelText('Close panel');
     expect(closeButton).toHaveAttribute('aria-label', 'Close panel');
@@ -179,14 +171,14 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
   });
 
   it('has safe area padding', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     const dialogPanel = screen.getByTestId('dialog-panel');
     expect(dialogPanel).toHaveClass('tw-pb-[env(safe-area-inset-bottom,0px)]');
   });
 
   it('has proper styling classes', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     const dialogPanel = screen.getByTestId('dialog-panel');
     expect(dialogPanel).toHaveClass(
@@ -198,33 +190,16 @@ describe('ArtistActiveSubmissionAppWrapper', () => {
     );
   });
 
-  it('has proper cursor styles on drag handle', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
-    
-    // Find the drag handle area
-    const dragHandleArea = screen.getByTestId('drag-handle-area');
-    expect(dragHandleArea).toBeInTheDocument();
-    expect(dragHandleArea).toHaveClass('tw-cursor-grab', 'active:tw-cursor-grabbing');
-  });
-
-  it('has touch-action none on drag handle', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
-    
-    const dragHandleArea = screen.getByTestId('drag-handle-area');
-    // The drag handle area should exist and be draggable
-    expect(dragHandleArea).toBeInTheDocument();
-    expect(dragHandleArea).toHaveClass('tw-cursor-grab');
-  });
 
   it('handles focus styles on close button', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     const closeButton = screen.getByLabelText('Close panel');
     expect(closeButton).toHaveClass('focus:tw-ring-2', 'focus:tw-ring-white');
   });
 
   it('has proper z-index for overlay', () => {
-    render(<ArtistActiveSubmissionAppWrapper {...defaultProps} />);
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
     
     const dialog = screen.getByTestId('dialog');
     expect(dialog).toHaveClass('tw-z-[1010]');

@@ -51,7 +51,9 @@ describe('profileAndConsolidationsToProfileMin', () => {
       tdh: 3,
       level: 4,
       archived: false,
-      primary_address: '0x1'
+      primary_address: '0x1',
+      active_main_stage_submission_ids: undefined,
+      winner_main_stage_drop_ids: []
     });
   });
 });

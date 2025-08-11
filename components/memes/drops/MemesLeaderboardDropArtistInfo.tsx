@@ -10,7 +10,7 @@ import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "../../waves/drops/ArtistSubmissionBadge";
-import { ArtistSubmissionPreviewModal } from "../../waves/drops/ArtistSubmissionPreviewModal";
+import { ArtistPreviewModal } from "../../waves/drops/ArtistPreviewModal";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -88,7 +88,7 @@ const MemesLeaderboardDropArtistInfo: React.FC<
       </div>
       
       {/* Artist Submission Preview Modal */}
-      <ArtistSubmissionPreviewModal
+      <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}

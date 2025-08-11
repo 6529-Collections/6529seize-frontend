@@ -1,23 +1,38 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { ArtistActiveSubmissionContent } from "./ArtistActiveSubmissionContent";
-import ArtistActiveSubmissionAppWrapper from "./ArtistActiveSubmissionAppWrapper";
+import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
+import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 
-interface ArtistSubmissionPreviewModalProps {
+export type ModalTab = "active" | "winners";
+
+interface ArtistPreviewModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly user: ApiProfileMin;
+  readonly initialTab?: ModalTab;
 }
 
-export const ArtistSubmissionPreviewModal: React.FC<
-  ArtistSubmissionPreviewModalProps
-> = ({ isOpen, onClose, user }) => {
+export const ArtistPreviewModal: React.FC<
+  ArtistPreviewModalProps
+> = ({ isOpen, onClose, user, initialTab = "active" }) => {
   const { isApp } = useDeviceInfo();
   const modalRef = useRef<HTMLDialogElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [activeTab, setActiveTab] = useState<ModalTab>(initialTab);
+  
+  // Check if user has winning artworks
+  const hasWinningArtworks = user.winner_main_stage_drop_ids && 
+                             user.winner_main_stage_drop_ids.length > 0;
+  
+  // Reset tab when modal opens with different initial tab
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
 
   // Cleanup body overflow and manage focus
   useEffect(() => {
@@ -46,14 +61,17 @@ export const ArtistSubmissionPreviewModal: React.FC<
   // Use app wrapper for mobile apps
   if (isApp) {
     return (
-      <ArtistActiveSubmissionAppWrapper isOpen={isOpen} onClose={onClose}>
-        <ArtistActiveSubmissionContent
+      <ArtistPreviewAppWrapper isOpen={isOpen} onClose={onClose}>
+        <ArtistPreviewModalContent
           user={user}
           isOpen={isOpen}
           onClose={onClose}
           isApp={true}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          hasWinningArtworks={hasWinningArtworks}
         />
-      </ArtistActiveSubmissionAppWrapper>
+      </ArtistPreviewAppWrapper>
     );
   }
 
@@ -94,13 +112,16 @@ export const ArtistSubmissionPreviewModal: React.FC<
                 }
               }}
               open
-              aria-label="Artist submissions gallery"
+              aria-label="Artist artworks"
             >
-              <ArtistActiveSubmissionContent
+              <ArtistPreviewModalContent
                 user={user}
                 isOpen={isOpen}
                 onClose={onClose}
                 isApp={false}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                hasWinningArtworks={hasWinningArtworks}
               />
             </motion.dialog>
           </div>

@@ -10,7 +10,8 @@ import WinnerDropBadge from "../../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../../waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "../../../waves/drops/ArtistSubmissionBadge";
-import { ArtistSubmissionPreviewModal } from "../../../waves/drops/ArtistSubmissionPreviewModal";
+import { ArtistPreviewModal } from "../../../waves/drops/ArtistPreviewModal";
+import { ProfileWinnerBadge } from "../../../waves/drops/ProfileWinnerBadge";
 
 interface MemeDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -21,6 +22,10 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
   
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
+
+  // Check if this drop author has any main stage winner drop IDs
+  const isWinner = drop.author.winner_main_stage_drop_ids && 
+                   drop.author.winner_main_stage_drop_ids.length > 0;
 
   const handleSubmissionBadgeClick = () => {
     setIsModalOpen(true);
@@ -59,6 +64,11 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
               </span>
             )}
           </Link>
+          {isWinner && (
+            <ProfileWinnerBadge 
+              winCount={1}
+            />
+          )}
           {hasSubmissions && (
             <ArtistSubmissionBadge
               submissionCount={submissionCount}
@@ -87,7 +97,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
       </div>
       
       {/* Artist Submission Preview Modal */}
-      <ArtistSubmissionPreviewModal
+      <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
