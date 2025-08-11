@@ -203,7 +203,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     <>
       <div className="tw-flex tw-mt-2">
         {isLoading && ( 
-          <div className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl tw-h-80"></div>
+          <div className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl tw-h-64"></div>
         )}
         <img
           ref={imgRef}
@@ -211,7 +211,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
           alt={alt}
           onLoad={handleImageLoad}
           onClick={handleImageClick}
-          className={`tw-object-center tw-object-contain tw-max-w-full tw-h-80 tw-cursor-pointer ${
+          className={`tw-object-center tw-object-contain tw-max-w-full tw-h-64 tw-cursor-pointer ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           }`}
           {...props}
