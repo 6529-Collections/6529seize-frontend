@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { useUserWinningArtworks } from "../../../hooks/useUserWinningArtworks";
 import {
@@ -36,10 +35,10 @@ export const ArtistWinningArtworksContent: React.FC<
       <div className="tw-flex tw-items-center tw-justify-center tw-h-96">
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
           <div className="tw-animate-spin tw-rounded-full tw-h-8 tw-w-8 tw-border-b-2 tw-border-amber-400"></div>
-          <span 
+          <span
             className="tw-text-iron-400 tw-text-sm"
             style={{
-              animation: "fadeInOut 2s ease-in-out infinite alternate"
+              animation: "fadeInOut 2s ease-in-out infinite alternate",
             }}
           >
             Loading...
@@ -59,7 +58,6 @@ export const ArtistWinningArtworksContent: React.FC<
     );
   }
 
-
   return (
     <div
       className={`tw-relative tw-z-[100] tw-p-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(75vh-120px)] sm:tw-max-h-[calc(80vh-120px)]`}
@@ -71,18 +69,11 @@ export const ArtistWinningArtworksContent: React.FC<
 
           return (
             <div key={drop.id} className="tw-flex tw-flex-col tw-h-full">
-              <motion.div
-                initial={isMobile ? undefined : { opacity: 0 }}
-                animate={isMobile ? undefined : { opacity: 1 }}
-                transition={isMobile ? undefined : { delay: index * 0.1 }}
+              <div
                 className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-900 desktop-hover:hover:tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-out tw-mb-3"
                 onClick={() => onDropClick(extendedDrop)}
               >
-                {/* Faint top highlight */}
-                <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-xl tw-bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_35%)]" />
-
-                {/* Subtle champagne accent for winners */}
-                <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-xl tw-bg-[linear-gradient(135deg,rgba(234,223,191,0.04),transparent_60%)]" />
+          
                 {/* Image container */}
                 <div className="tw-w-full tw-max-w-full tw-relative">
                   <div className="tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
@@ -209,7 +200,7 @@ export const ArtistWinningArtworksContent: React.FC<
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           );
         })}

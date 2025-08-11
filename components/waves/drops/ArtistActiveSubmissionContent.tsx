@@ -1,5 +1,4 @@
 import React, { useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
@@ -126,10 +125,7 @@ export const ArtistActiveSubmissionContent: React.FC<
                   key={submission.id}
                   className="tw-flex tw-flex-col tw-h-full"
                 >
-                  <motion.div
-                    initial={isMobile ? undefined : { opacity: 0 }}
-                    animate={isMobile ? undefined : { opacity: 1 }}
-                    transition={isMobile ? undefined : { delay: index * 0.1 }}
+                  <div
                     className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-900 desktop-hover:hover:tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-out tw-mb-3"
                     onClick={() => handleDropClick(submission.id)}
                   >
@@ -195,7 +191,7 @@ export const ArtistActiveSubmissionContent: React.FC<
                         <span>{formatDate(submission.createdAt)}</span>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                   {submission.drop && (
                     <SingleWaveDropVote
                       drop={submission.drop}
