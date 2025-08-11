@@ -15,6 +15,7 @@ import {
   getWalletAddress,
   removeAuthJwt,
 } from "../../services/auth/auth.utils";
+import { WalletInitializationError } from "../../src/errors/wallet";
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from "@reown/appkit/react";
 import { isAddress, getAddress } from "viem";
 
@@ -213,11 +214,59 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
 
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(() => {
-    const storedAddress = getWalletAddress();
-    if (storedAddress && isValidAddress(storedAddress)) {
+    const storedAddress: string | null = getWalletAddress();
+    
+    // If no stored address, return undefined (legitimate case)
+    if (!storedAddress) {
+      return undefined;
+    }
+    
+    // At this point, storedAddress is definitely a string (not null)
+    // Check if stored address is valid
+    if (isValidAddress(storedAddress)) {
+      // Valid address - return checksummed format
       return getAddress(storedAddress);
     }
-    return undefined;
+    
+    // If stored address exists but is invalid, this is a critical security issue
+    // Store the address string before validation for error handling
+    // TypeScript type assertion needed due to complex type narrowing with viem isAddress
+    const invalidAddressString = storedAddress as string;
+    
+    // Extract diagnostic data for logging
+    const addressLength = invalidAddressString.length;
+    const addressFormat = invalidAddressString.startsWith('0x') ? 'hex_prefixed' : 'other';
+    const debugAddress = invalidAddressString.length >= 10 ? 
+      invalidAddressString.slice(0, 10) + '...' : 
+      invalidAddressString;
+    
+    // Log security event for monitoring
+    logSecurityEvent('invalid_stored_address_detected', {
+      address: 'INVALID_FORMAT',
+      source: 'wallet_initialization',
+      valid: false,
+      timestamp: new Date().toISOString(),
+      addressLength,
+      addressFormat
+    });
+    
+    // Clear the invalid stored address immediately
+    try {
+      removeAuthJwt();
+    } catch (cleanupError) {
+      // Log cleanup failure but continue with error throwing
+      logError('auth_cleanup_during_init', new Error('Failed to clear invalid auth state', { cause: cleanupError }));
+    }
+    
+    // Throw initialization error to prevent silent authentication bypass
+    const initError = new WalletInitializationError(
+      'Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.',
+      undefined,
+      debugAddress
+    );
+    
+    logError('wallet_initialization', initError);
+    throw initError;
   });
   const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);

@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import { SeizeConnectProvider, useSeizeConnectContext, AuthenticationError, WalletDisconnectionError } from '../../../components/auth/SeizeConnectContext';
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from '@reown/appkit/react';
 import { getWalletAddress, removeAuthJwt, migrateCookiesToLocalStorage } from '../../../services/auth/auth.utils';
+import { WalletInitializationError } from '../../../src/errors/wallet';
 
 jest.mock('@reown/appkit/react');
 jest.mock('../../../services/auth/auth.utils');
@@ -28,6 +29,187 @@ afterEach(() => {
 });
 
 describe('SeizeConnectContext', () => {
+  // CRITICAL SECURITY TESTS: WalletInitializationError for authentication bypass prevention
+  describe('useState initialization fail-fast security', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Reset to default valid state before each test
+      (getWalletAddress as jest.Mock).mockReturnValue('0x1234567890123456789012345678901234567890');
+    });
+
+    it('initializes correctly with valid stored address', () => {
+      const validAddress = '0x1234567890123456789012345678901234567890';
+      (getWalletAddress as jest.Mock).mockReturnValue(validAddress);
+
+      // This should NOT throw
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      expect(result.current.address).toBe(validAddress);
+      expect(result.current.isAuthenticated).toBe(true);
+    });
+
+    it('initializes correctly with no stored address', () => {
+      (getWalletAddress as jest.Mock).mockReturnValue(null);
+
+      // This should NOT throw
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      expect(result.current.address).toBe(undefined);
+      expect(result.current.isAuthenticated).toBe(false);
+    });
+
+    it('throws WalletInitializationError when stored address is invalid format', () => {
+      const invalidAddress = 'invalid-address-format';
+      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
+
+      // This should throw WalletInitializationError during useState initialization
+      expect(() => {
+        renderHook(() => useSeizeConnectContext(), {
+          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+        });
+      }).toThrow(WalletInitializationError);
+    });
+
+    it('throws WalletInitializationError with correct error details for invalid address', () => {
+      const invalidAddress = 'malformed-eth-address';
+      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
+
+      try {
+        renderHook(() => useSeizeConnectContext(), {
+          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+        });
+        fail('Should have thrown WalletInitializationError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(WalletInitializationError);
+        expect((error as WalletInitializationError).name).toBe('WalletInitializationError');
+        expect((error as WalletInitializationError).message).toContain('Invalid wallet address found in storage during initialization');
+        expect((error as WalletInitializationError).addressAttempt).toBe('malformed-...');
+      }
+    });
+
+    it('throws WalletInitializationError for short invalid addresses', () => {
+      const invalidAddress = 'short';
+      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
+
+      try {
+        renderHook(() => useSeizeConnectContext(), {
+          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+        });
+        fail('Should have thrown WalletInitializationError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(WalletInitializationError);
+        expect((error as WalletInitializationError).addressAttempt).toBe('short');
+      }
+    });
+
+    it('throws WalletInitializationError for hex-like but invalid addresses', () => {
+      const invalidAddress = '0xinvalidhexaddress';
+      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
+
+      expect(() => {
+        renderHook(() => useSeizeConnectContext(), {
+          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+        });
+      }).toThrow(WalletInitializationError);
+    });
+
+    it('calls removeAuthJwt when invalid address detected during initialization', () => {
+      const invalidAddress = 'invalid-address';
+      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
+
+      try {
+        renderHook(() => useSeizeConnectContext(), {
+          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+        });
+      } catch (error) {
+        // Expected error
+      }
+
+      // Verify auth cleanup was called
+      expect(removeAuthJwt).toHaveBeenCalledTimes(1);
+    });
+
+    it('continues to throw even if auth cleanup fails during initialization', () => {
+      const invalidAddress = 'invalid-address';
+      const authCleanupError = new Error('Auth cleanup failed');
+      (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
+      (removeAuthJwt as jest.Mock).mockImplementationOnce(() => {
+        throw authCleanupError;
+      });
+
+      // Should still throw WalletInitializationError despite auth cleanup failure
+      expect(() => {
+        renderHook(() => useSeizeConnectContext(), {
+          wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+        });
+      }).toThrow(WalletInitializationError);
+
+      expect(removeAuthJwt).toHaveBeenCalledTimes(1);
+    });
+
+    it('prevents authentication bypass by throwing on any invalid stored address', () => {
+      const invalidAddresses = [
+        'not-an-address',
+        '0x',
+        '0xinvalid',
+        '0x123', // too short
+        '0x1234567890123456789012345678901234567890z', // invalid character
+        'random-string',
+        '',
+        ' ', // whitespace
+        '0X1234567890123456789012345678901234567890', // wrong case prefix
+        '1234567890123456789012345678901234567890' // no 0x prefix
+      ];
+
+      invalidAddresses.forEach(invalidAddress => {
+        (getWalletAddress as jest.Mock).mockReturnValue(invalidAddress);
+        jest.clearAllMocks();
+
+        expect(() => {
+          renderHook(() => useSeizeConnectContext(), {
+            wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+          });
+        }).toThrow(WalletInitializationError);
+
+        // Verify auth cleanup is always called for invalid addresses
+        expect(removeAuthJwt).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('accepts valid checksummed addresses during initialization', () => {
+      const validChecksumAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+      (getWalletAddress as jest.Mock).mockReturnValue(validChecksumAddress);
+
+      // Should NOT throw
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      expect(result.current.address).toBe(validChecksumAddress);
+      expect(result.current.isAuthenticated).toBe(true);
+      expect(removeAuthJwt).not.toHaveBeenCalled();
+    });
+
+    it('accepts and normalizes valid non-checksummed addresses during initialization', () => {
+      const nonChecksumAddress = '0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed';
+      const expectedChecksumAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+      (getWalletAddress as jest.Mock).mockReturnValue(nonChecksumAddress);
+
+      // Should NOT throw and should normalize to checksum format
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => <SeizeConnectProvider>{children}</SeizeConnectProvider>,
+      });
+
+      expect(result.current.address).toBe(expectedChecksumAddress);
+      expect(result.current.isAuthenticated).toBe(true);
+      expect(removeAuthJwt).not.toHaveBeenCalled();
+    });
+  });
+
   it('throws when used outside provider', () => {
     const { result } = renderHook(() => () => useSeizeConnectContext());
     expect(() => result.current()).toThrow();
