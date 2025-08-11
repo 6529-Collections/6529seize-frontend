@@ -436,6 +436,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeConnect = useCallback((): void => {
     try {
+      // DEBUG: Alert when connection starts (mobile only)
+      if (typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        alert(`[DEBUG] seizeConnect Called\nOpening wallet selection modal...`);
+      }
+      
       // Log connection attempt for security monitoring
       logSecurityEvent(
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,

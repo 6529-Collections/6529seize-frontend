@@ -89,6 +89,11 @@ export class AppKitAdapterCapacitor {
         },
       }),
     ]
+    
+    // DEBUG: Show which connectors are created (mobile only)
+    if (typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      alert(`[DEBUG] Mobile Connectors Order:\n1. WalletConnect\n2. Coinbase\n3. Injected\n4. MetaMask\n\nTotal: ${mobileConnectors.length}`);
+    }
 
     // Create AppWallet connectors if any exist
     const appWalletConnectors = appWallets.map(wallet => 

@@ -158,6 +158,11 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
   // Handle mobile wallet connection with deep linking support
   const handleMobileConnection = useCallback(async (connectorId?: string) => {
     try {
+      // DEBUG: Alert which wallet is being connected
+      if (mobileInfo.isMobile) {
+        alert(`[DEBUG] Mobile Connection Started\nConnector: ${connectorId || 'unknown'}\nDetected Wallet: ${mobileInfo.detectedWallet || 'none'}\nSupports Deep Link: ${mobileInfo.supportsDeepLinking}`);
+      }
+      
       // SECURITY: Guard state updates with mount check
       if (!isMountedRef.current) {
         throw new WalletConnectionError('Component unmounted during connection');
@@ -171,6 +176,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
           throw new WalletConnectionError('Component unmounted during deep linking setup');
         }
         
+        alert(`[DEBUG] Deep Linking Stage\nState: DEEP_LINKING\nSetting up visibility listener...`);
         setConnectionState(MobileConnectionState.DEEP_LINKING);
         
         // SECURITY: Create AbortController for visibility listener cleanup
@@ -185,6 +191,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         // Add event listener for when user returns from wallet app with guaranteed cleanup
         const handleVisibilityChange = () => {
           if (document.visibilityState === 'visible' && isMountedRef.current) {
+            alert(`[DEBUG] App Regained Focus\nPrevious State: ${connectionState}\nNew State: WAITING_FOR_RETURN`);
             setConnectionState(MobileConnectionState.WAITING_FOR_RETURN);
             // SECURITY: Immediately abort to ensure cleanup
             visibilityController.abort();
@@ -199,10 +206,18 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
       }
 
       // Use AppKit modal to handle connection with proper namespace
+      if (mobileInfo.isMobile) {
+        alert(`[DEBUG] Opening AppKit Modal\nView: Connect\nNamespace: ${connectorId === 'solana' ? 'solana' : 'eip155'}`);
+      }
+      
       await open({ 
         view: 'Connect', 
         namespace: connectorId === 'solana' ? 'solana' : 'eip155' 
       });
+      
+      if (mobileInfo.isMobile) {
+        alert(`[DEBUG] AppKit Modal Opened Successfully`);
+      }
       
     } catch (error: any) {
       // SECURITY: Guard state updates with mount check
