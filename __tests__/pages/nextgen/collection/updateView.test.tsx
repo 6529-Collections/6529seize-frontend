@@ -1,8 +1,8 @@
-import React from "react";
-import { render } from "@testing-library/react";
-import NextGenCollectionPage from "@/pages/nextgen/collection/[collection]/[[...view]]/index";
 import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import NextGenCollectionPage from "@/pages/nextgen/collection/[collection]/[[...view]]/index";
+import { render } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -14,8 +14,6 @@ const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({
   push,
   replace: jest.fn(),
-  asPath: "/",
-  query: {},
 });
 
 let setViewFn: any;
@@ -23,10 +21,6 @@ jest.mock("next/dynamic", () => () => (props: any) => {
   setViewFn = props.setView;
   return <div data-testid="collection" />;
 });
-
-jest.mock("@/components/auth/Auth", () => ({
-  AuthContext: React.createContext({ setTitle: jest.fn() }),
-}));
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -54,6 +48,8 @@ describe("NextGenCollectionPage updateView", () => {
       />
     );
     setViewFn(ContentView.PROVENANCE);
-    expect(push).toHaveBeenCalledWith("/nextgen/collection/cool/provenance");
+    expect(push).toHaveBeenCalledWith("/nextgen/collection/cool/provenance", {
+      scroll: false,
+    });
   });
 });

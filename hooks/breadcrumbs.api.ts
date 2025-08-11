@@ -1,6 +1,6 @@
-import { commonApiFetch } from "../services/api/common-api";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../constants";
 import { NextGenToken } from "../entities/INextgen";
+import { commonApiFetch } from "../services/api/common-api";
 
 export const fetchGradientName = async (
   id: string
@@ -74,7 +74,7 @@ export const fetchNextgenName = async (
   if (!id || typeof id !== "string") return null;
   try {
     const response = await commonApiFetch<NextGenToken>({
-      endpoint: `nextgen/tokens/${id}`,
+      endpoint: `nextgen/collections/${id}`,
     });
     return response?.name ? { name: response.name } : null;
   } catch (error) {
