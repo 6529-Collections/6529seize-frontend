@@ -179,7 +179,7 @@ export default function WagmiSetup({
             },
             // Mobile-specific settings
             enableWalletGuide: false,
-            featuredWalletIds: ['metamask', 'coinbaseWallet', 'walletConnect'], // Include MetaMask for mobile
+            featuredWalletIds: ['c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96'], // MetaMask wallet ID for mobile
             allWallets: 'SHOW' as const, // Show "All Wallets" on mobile to ensure MetaMask is accessible
             features: {
               analytics: true,
@@ -203,7 +203,7 @@ export default function WagmiSetup({
             },
             // Web-specific settings
             enableWalletGuide: false,
-            featuredWalletIds: ['metamask', 'walletConnect'],
+            featuredWalletIds: ['c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96'], // MetaMask wallet ID
             allWallets: 'SHOW' as const,
             features: {
               analytics: true,

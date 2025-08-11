@@ -5,7 +5,7 @@ import { AppWallet } from '../app-wallets/AppWalletsContext'
 import { 
   createAppWalletConnector 
 } from '@/wagmiConfig/wagmiAppWalletConnector'
-import { walletConnect, coinbaseWallet, injected, metaMask } from 'wagmi/connectors'
+import { walletConnect, coinbaseWallet, metaMask } from 'wagmi/connectors'
 import { WalletConnectionError, ConnectionStateError } from '@/src/errors/wallet-connection'
 
 
@@ -84,8 +84,6 @@ export class AppKitAdapterCapacitor {
         enableMobileWalletLink: true, // Enable mobile deep linking
         version: "3",
       }),
-      // Injected connector for browsers that have injected wallets
-      injected(),
     ]
 
     // Create AppWallet connectors if any exist
