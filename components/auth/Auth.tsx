@@ -5,7 +5,6 @@ import { createContext, useContext, useEffect, useState, useMemo, useCallback, u
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "../../hooks/useSecureSign";
-import { useMobileWalletConnection } from "../../hooks/useMobileWalletConnection";
 import {
   getAuthJwt,
   getRefreshToken,
@@ -118,7 +117,6 @@ export default function Auth({
     useSeizeConnectContext();
 
   const { signMessage, isSigningPending, reset: resetSigning } = useSecureSign();
-  const { mobileInfo, getMobileInstructions } = useMobileWalletConnection();
   const [showSignModal, setShowSignModal] = useState(false);
 
   const [connectedProfile, setConnectedProfile] = useState<ApiIdentity>();
