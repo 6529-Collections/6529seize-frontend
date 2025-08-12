@@ -1,5 +1,4 @@
 import React, { useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
@@ -19,7 +18,6 @@ import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;
@@ -40,7 +38,6 @@ export const ArtistActiveSubmissionContent: React.FC<
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isMobile = useIsMobileDevice();
 
   // Memoize expensive operations - must be before any conditional returns
   const formatDate = useMemo(
@@ -95,14 +92,14 @@ export const ArtistActiveSubmissionContent: React.FC<
             return (
               <div className="tw-flex tw-items-center tw-justify-center tw-h-96">
                 <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
-                  <div className="tw-animate-spin tw-rounded-full tw-h-8 tw-w-8 tw-border-b-2 tw-border-amber-400"></div>
+                  <div className="tw-animate-spin tw-rounded-full tw-h-8 tw-w-8 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0 tw-border-iron-400"></div>
                   <span
                     className="tw-text-iron-400 tw-text-sm"
                     style={{
                       animation: "fadeInOut 2s ease-in-out infinite alternate",
                     }}
                   >
-                    Loading...
+                    Loading submissions...
                   </span>
                   <style>{`
                     @keyframes fadeInOut {
@@ -121,15 +118,13 @@ export const ArtistActiveSubmissionContent: React.FC<
 
           return (
             <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
-              {submissionsWithDrops.map((submission, index) => (
+              {submissionsWithDrops.map((submission) => (
                 <div
                   key={submission.id}
                   className="tw-flex tw-flex-col tw-h-full"
                 >
-                  <motion.div
-                    initial={isMobile ? undefined : { opacity: 0 }}
-                    animate={isMobile ? undefined : { opacity: 1 }}
-                    transition={isMobile ? undefined : { delay: index * 0.1 }}
+                  {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                  <div
                     className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-900 desktop-hover:hover:tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-out tw-mb-3"
                     onClick={() => handleDropClick(submission.id)}
                   >
@@ -195,7 +190,7 @@ export const ArtistActiveSubmissionContent: React.FC<
                         <span>{formatDate(submission.createdAt)}</span>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                   {submission.drop && (
                     <SingleWaveDropVote
                       drop={submission.drop}
