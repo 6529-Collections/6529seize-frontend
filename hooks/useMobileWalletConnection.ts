@@ -160,6 +160,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
     try {
       // SECURITY: Guard state updates with mount check
       if (!isMountedRef.current) {
+        alert('Component unmounted during connection')
         throw new WalletConnectionError('Component unmounted during connection');
       }
       
@@ -168,6 +169,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
       // Handle deep linking for mobile wallets
       if (mobileInfo.isMobile && mobileInfo.supportsDeepLinking) {
         if (!isMountedRef.current) {
+          alert('Component unmounted during deep linking setup')
           throw new WalletConnectionError('Component unmounted during deep linking setup');
         }
         
@@ -207,6 +209,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
     } catch (error: any) {
       // SECURITY: Guard state updates with mount check
       if (isMountedRef.current) {
+        alert('Connection failed')
         setConnectionState(MobileConnectionState.FAILED);
       }
       
@@ -219,11 +222,13 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
   const handleDeepLinkReturn = useCallback(async (): Promise<void> => {
     // Validate current state - fail fast if not in correct state
     if (connectionState !== MobileConnectionState.WAITING_FOR_RETURN) {
+      alert('Connection state is not waiting for return')
       throw new ConnectionVerificationError(connectionState, 'waiting_for_return');
     }
 
     // SECURITY: Guard against unmounted component
     if (!isMountedRef.current) {
+      alert('Component unmounted during deep link return')
       throw new WalletConnectionError('Component unmounted during deep link return');
     }
 
@@ -241,12 +246,14 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         const checkConnection = () => {
           // SECURITY: Check if operation was aborted
           if (abortController.signal.aborted) {
+            alert('Operation aborted')
             reject(new WalletConnectionError('Operation aborted'));
             return;
           }
           
           // SECURITY: Check if component is still mounted
           if (!isMountedRef.current) {
+            alert('Component unmounted during connection check')
             reject(new WalletConnectionError('Component unmounted during connection check'));
             return;
           }
@@ -255,6 +262,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
           
           // Check if we've exceeded timeout
           if (elapsed >= TIMEOUT_MS) {
+            alert('Connection timed out')
             setConnectionState(MobileConnectionState.TIMEOUT);
             reject(new DeepLinkTimeoutError(TIMEOUT_MS));
             return;
@@ -262,6 +270,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
           
           // Check if connection is established
           if (isConnected) {
+            alert('Connection established')
             setConnectionState(MobileConnectionState.CONNECTED);
             resolve();
             return;
@@ -400,6 +409,7 @@ function getMobileWalletInfo(): MobileWalletInfo {
   } catch (error) {
     // SECURITY: Fail fast on security errors - do not provide fallbacks
     if (error instanceof UserAgentSecurityError) {
+      alert('Security violation in user agent processing')
       throw new WalletConnectionError(
         `Security violation in user agent processing: ${error.message}`
       );

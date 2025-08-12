@@ -5,7 +5,7 @@ import { AppWallet } from '../app-wallets/AppWalletsContext'
 import {
   createAppWalletConnector
 } from '@/wagmiConfig/wagmiAppWalletConnector'
-import { walletConnect, coinbaseWallet, injected, metaMask } from 'wagmi/connectors'
+import { walletConnect, coinbaseWallet, injected } from 'wagmi/connectors'
 import { WalletConnectionError, ConnectionStateError } from '@/src/errors/wallet-connection'
 
 
@@ -72,9 +72,20 @@ export class AppKitAdapterCapacitor {
             "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
           ],
         },
-        showQrModal: false, // Critical for mobile - don't show QR modal
+        showQrModal: true, // Enable QR modal for MetaMask and other wallets
         qrModalOptions: {
           enableExplorer: true, // Enable wallet discovery for mobile
+          mobileWallets: [
+            {
+              id: 'metamask',
+              name: 'MetaMask',
+              links: {
+                universal: 'https://metamask.app.link',
+                native: 'metamask://',
+              },
+            },
+          ],
+          desktopWallets: [],
         },
       }),
       // Coinbase Wallet with mobile wallet link enabled
@@ -84,7 +95,7 @@ export class AppKitAdapterCapacitor {
         enableMobileWalletLink: true, // Enable mobile deep linking
         version: "3",
       }),
-      // Injected connector for browsers that have injected wallets
+      // Injected connector for in-app browsers
       injected(),
     ]
 
