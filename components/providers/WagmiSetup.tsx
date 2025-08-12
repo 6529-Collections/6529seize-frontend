@@ -188,7 +188,8 @@ export default function WagmiSetup({
               connectMethodsOrder: ['wallet' as const]
             },
             enableOnramp: false, // Disable for mobile
-            enableSwaps: false   // Disable for mobile
+            enableSwaps: false,   // Disable for mobile
+            debug: true,
           } : {
             adapters: [newAdapter],
             networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],

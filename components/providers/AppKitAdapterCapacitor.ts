@@ -53,12 +53,6 @@ export class AppKitAdapterCapacitor {
 
     const networks = [mainnet]
 
-    // Alert before creating mobile connectors
-    alert(`Creating Mobile Connectors:
-      - MetaMask will use: ${VALIDATED_BASE_ENDPOINT}
-      - WalletConnect Project ID: ${CW_PROJECT_ID}
-      - Network: ${networks[0].name} (Chain ID: ${networks[0].id})`)
-
     // Create mobile-specific connectors
     const mobileConnectors = [
       // MetaMask connector for mobile - critical for mobile MetaMask connections
@@ -68,6 +62,8 @@ export class AppKitAdapterCapacitor {
           url: VALIDATED_BASE_ENDPOINT,
           iconUrl: "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
         },
+        useDeeplink: true,
+        preferDesktop: false,
       }),
       // WalletConnect for mobile with improved deep linking
       walletConnect({
