@@ -199,7 +199,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
           signal: visibilityController.signal
         });
       }
-
+      alert('Opening AppKit modal 1')
       // Use AppKit modal to handle connection with proper namespace
       await open({ 
         view: 'Connect', 

@@ -61,6 +61,11 @@ export class AppKitAdapterCapacitor {
 
     // Create mobile-specific connectors
     const mobileConnectors = [
+      // Injected connector FIRST for in-app browsers (including MetaMask mobile browser)
+      injected({
+        target: 'metaMask', // Explicitly target MetaMask
+        shimDisconnect: true,
+      }),
       // WalletConnect for mobile with improved deep linking
       walletConnect({
         projectId: CW_PROJECT_ID,
@@ -72,21 +77,7 @@ export class AppKitAdapterCapacitor {
             "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
           ],
         },
-        showQrModal: true, // Enable QR modal for MetaMask and other wallets
-        qrModalOptions: {
-          enableExplorer: true, // Enable wallet discovery for mobile
-          mobileWallets: [
-            {
-              id: 'metamask',
-              name: 'MetaMask',
-              links: {
-                universal: 'https://metamask.app.link',
-                native: 'metamask://',
-              },
-            },
-          ],
-          desktopWallets: [],
-        },
+        showQrModal: true, // Enable modal for wallet selection
       }),
       // Coinbase Wallet with mobile wallet link enabled
       coinbaseWallet({
@@ -95,8 +86,6 @@ export class AppKitAdapterCapacitor {
         enableMobileWalletLink: true, // Enable mobile deep linking
         version: "3",
       }),
-      // Injected connector for in-app browsers
-      injected(),
     ]
 
     // Create AppWallet connectors if any exist

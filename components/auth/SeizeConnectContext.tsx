@@ -441,7 +441,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
         createConnectionEventContext('seizeConnect')
       );
-      
+      alert('Opening AppKit modal 2')
       open({ view: "Connect" });
       
       // Log successful modal opening
