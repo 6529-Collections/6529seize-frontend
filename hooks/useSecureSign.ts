@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useSignMessage } from "wagmi";
-import { UserRejectedRequestError } from "viem";
+import { type Address, UserRejectedRequestError } from "viem";
 
 /**
  * Enhanced mobile-compatible signing errors
@@ -267,12 +267,12 @@ function validateSignature(signature: string): void {
 export const useSecureSign = (): UseSecureSignReturn => {
   const [isSigningPending, setIsSigningPending] = useState(false);
   const { address: connectedAddress, isConnected } = useAppKitAccount();
-  const wagmiSignMessage = useSignMessage();
+  const { signMessageAsync, reset: resetWagmi } = useSignMessage();
 
   const reset = useCallback(() => {
     setIsSigningPending(false);
-    wagmiSignMessage.reset();
-  }, [wagmiSignMessage]);
+    resetWagmi();
+  }, [resetWagmi]);
 
   const signMessage = useCallback(async (
     message: string
@@ -301,9 +301,11 @@ export const useSecureSign = (): UseSecureSignReturn => {
       // SECURITY: Validate connected address format
       validateEthereumAddress(connectedAddress);
 
-      // Use wagmi's signMessage which handles WalletConnect deep linking properly
-      const signature = await wagmiSignMessage.signMessageAsync({
+      // Sign the message using wagmi's signMessageAsync
+      // This properly handles WalletConnect deep linking for mobile
+      const signature = await signMessageAsync({
         message,
+        account: connectedAddress as Address,
       });
       
       // SECURITY: Validate signature format before returning
@@ -364,7 +366,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
     } finally {
       setIsSigningPending(false);
     }
-  }, [connectedAddress, isConnected, wagmiSignMessage]);
+  }, [connectedAddress, isConnected, signMessageAsync]);
 
   return {
     signMessage,
