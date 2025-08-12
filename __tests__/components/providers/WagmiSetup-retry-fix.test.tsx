@@ -35,13 +35,7 @@ jest.mock('../../../components/providers/AppKitAdapterManager', () => ({
   })),
 }));
 
-jest.mock('../../../components/providers/AppKitAdapterCapacitor', () => ({
-  AppKitAdapterCapacitor: jest.fn().mockImplementation(() => ({
-    createAdapter: jest.fn(),
-    shouldRecreateAdapter: jest.fn(),
-    cleanup: jest.fn(),
-  })),
-}));
+// AppKitAdapterCapacitor has been removed - using AppKitAdapterManager for both mobile and desktop
 
 // Mock error utilities
 jest.mock('@/utils/error-sanitizer', () => ({
