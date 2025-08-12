@@ -199,7 +199,7 @@ export default function WagmiSetup({
             debug: false, // Disable debug mode to prevent modal issues
             defaultChain: mainnet, // Set default chain explicitly
             themeVariables: {
-              '--w3m-z-index': '9999' // Ensure modal appears on top
+              '--w3m-z-index': 9999 // Ensure modal appears on top
             }
           } : {
             adapters: [newAdapter],
