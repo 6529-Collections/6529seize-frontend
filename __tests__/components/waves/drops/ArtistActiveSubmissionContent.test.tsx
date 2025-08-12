@@ -150,7 +150,7 @@ describe('ArtistActiveSubmissionContent', () => {
 
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
     
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading submissions...')).toBeInTheDocument();
   });
 
   it('renders empty grid when no submissions', () => {

@@ -56,6 +56,6 @@ describe("UserPageIdentityDeleteStatementButton", () => {
       <UserPageIdentityDeleteStatementButton statement={statement} profile={profile} />
     );
     const button = screen.getByRole("button", { name: /delete statement/i });
-    expect(button.className).toContain("tw-block");
+    expect(button.className).toContain("tw-opacity-100");
   });
 });
