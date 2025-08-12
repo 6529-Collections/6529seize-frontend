@@ -37,6 +37,7 @@ export default function UserPageIdentityStatementsNFTAccounts({
           NFT Accounts
         </span>
       </div>
+      <div className="tw-mt-3 tw-h-px tw-bg-white/5 tw-w-full"></div>
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
