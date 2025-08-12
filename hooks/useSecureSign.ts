@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useAppKitAccount } from "@reown/appkit/react";
-import { useSignMessage } from "wagmi";
-import { type Address, UserRejectedRequestError } from "viem";
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
+import { BrowserProvider } from "ethers";
+import { UserRejectedRequestError } from "viem";
 
 /**
  * Enhanced mobile-compatible signing errors
@@ -267,12 +267,11 @@ function validateSignature(signature: string): void {
 export const useSecureSign = (): UseSecureSignReturn => {
   const [isSigningPending, setIsSigningPending] = useState(false);
   const { address: connectedAddress, isConnected } = useAppKitAccount();
-  const { signMessageAsync, reset: resetWagmi } = useSignMessage();
+  const { walletProvider } = useAppKitProvider('eip155');
 
   const reset = useCallback(() => {
     setIsSigningPending(false);
-    resetWagmi();
-  }, [resetWagmi]);
+  }, []);
 
   const signMessage = useCallback(async (
     message: string
@@ -301,12 +300,34 @@ export const useSecureSign = (): UseSecureSignReturn => {
       // SECURITY: Validate connected address format
       validateEthereumAddress(connectedAddress);
 
-      // Sign the message using wagmi's signMessageAsync
-      // This properly handles WalletConnect deep linking for mobile
-      const signature = await signMessageAsync({
-        message,
-        account: connectedAddress as Address,
-      });
+      // Get the provider from AppKit which handles WalletConnect properly
+      if (!walletProvider) {
+        throw new MobileSigningError(
+          "No wallet provider available. Please ensure your wallet is connected.",
+          "NO_PROVIDER"
+        );
+      }
+
+      // Check if we're in Capacitor environment (mobile app)
+      const isCapacitor = typeof window !== 'undefined' && 
+                         window.Capacitor?.isNativePlatform?.();
+
+      // Use the walletProvider directly for signing
+      // AppKit's provider already handles WalletConnect deep linking
+      // Cast to any to bypass TypeScript issue with provider type
+      const ethersProvider = new BrowserProvider(walletProvider as any);
+      const signer = await ethersProvider.getSigner();
+      
+      // Verify signer address matches connected address
+      const signerAddress = await signer.getAddress();
+      validateEthereumAddress(signerAddress);
+      
+      if (signerAddress.toLowerCase() !== connectedAddress.toLowerCase()) {
+        throw new ConnectionMismatchError(connectedAddress, signerAddress);
+      }
+      
+      // Sign the message - this will trigger WalletConnect deep link on mobile
+      const signature = await signer.signMessage(message);
       
       // SECURITY: Validate signature format before returning
       validateSignature(signature);
@@ -366,7 +387,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
     } finally {
       setIsSigningPending(false);
     }
-  }, [connectedAddress, isConnected, signMessageAsync]);
+  }, [connectedAddress, isConnected, walletProvider]);
 
   return {
     signMessage,
