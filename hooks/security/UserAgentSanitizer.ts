@@ -33,14 +33,14 @@ export interface SafeUserAgentInfo {
  */
 export class UserAgentSecurityError extends Error {
   public readonly name = 'UserAgentSecurityError';
-  
+
   constructor(
     message: string,
     public readonly code: string,
     public readonly details?: any
   ) {
     super(message);
-    
+
     // Maintain proper prototype chain in TypeScript/Jest
     Object.setPrototypeOf(this, UserAgentSecurityError.prototype);
   }
@@ -91,9 +91,9 @@ const hashCache = new Map<string, string>();
 async function generateCryptoHash(sanitizedUserAgent: string): Promise<string> {
   const timestamp = Date.now().toString();
   const hashInput = `${sanitizedUserAgent}:${timestamp}`;
-  
+
   // Try Web Crypto API first (available in modern browsers and Node.js)
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+  if (typeof window !== 'undefined' && window.crypto?.subtle) {
     try {
       const encoder = new TextEncoder();
       const data = encoder.encode(hashInput);
@@ -101,14 +101,12 @@ async function generateCryptoHash(sanitizedUserAgent: string): Promise<string> {
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     } catch (error) {
-      // Fall through to fallback
+      throw new Error('No crypto API available');
     }
   }
-  
+
   // Node.js environment fallback
-  if (typeof globalThis !== 'undefined' && 
-      typeof globalThis.crypto !== 'undefined' && 
-      globalThis.crypto.subtle) {
+  if (globalThis?.crypto?.subtle) {
     try {
       const encoder = new TextEncoder();
       const data = encoder.encode(hashInput);
@@ -116,10 +114,10 @@ async function generateCryptoHash(sanitizedUserAgent: string): Promise<string> {
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     } catch (error) {
-      // Fall through to fallback
+      throw new Error('No crypto API available');
     }
   }
-  
+
   // Fallback hash implementation for environments without crypto
   throw new Error('No crypto API available');
 }
@@ -131,23 +129,23 @@ async function generateCryptoHash(sanitizedUserAgent: string): Promise<string> {
 function generateFallbackHash(sanitizedUserAgent: string): string {
   const timestamp = Date.now().toString();
   const combined = sanitizedUserAgent + timestamp;
-  
+
   // Use multiple hash functions for better security
   let hash1 = 0;
   let hash2 = 5381; // djb2 hash
-  
+
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
-    
+
     // Hash function 1: Standard hash with bit rotation
     hash1 = ((hash1 << 5) - hash1) + char;
     hash1 = hash1 & hash1; // Convert to 32bit integer
-    
+
     // Hash function 2: djb2 hash
     hash2 = ((hash2 << 5) + hash2) + char;
     hash2 = hash2 & hash2; // Convert to 32bit integer
   }
-  
+
   // Combine hashes and add timestamp for uniqueness
   const combinedHash = Math.abs(hash1) ^ Math.abs(hash2);
   return combinedHash.toString(16).padStart(8, '0') + timestamp;
@@ -169,19 +167,19 @@ function generateSafeHash(sanitizedUserAgent: string): string {
   }
 
   let hash: string;
-  
+
   try {
     // Attempt to use crypto API asynchronously if possible
     // For synchronous operation, use fallback immediately
     hash = generateFallbackHash(sanitizedUserAgent);
-  } catch (error) {
-    // Final fallback if all crypto methods fail
+  } catch {
+    // Fall back to synchronous hash
     hash = generateFallbackHash(sanitizedUserAgent);
   }
-  
+
   // Cache the result
   hashCache.set(sanitizedUserAgent, hash);
-  
+
   return hash;
 }
 
@@ -201,17 +199,17 @@ export async function generateAsyncSafeHash(sanitizedUserAgent: string): Promise
   }
 
   let hash: string;
-  
+
   try {
     hash = await generateCryptoHash(sanitizedUserAgent);
-  } catch (error) {
+  } catch {
     // Fall back to synchronous hash
     hash = generateFallbackHash(sanitizedUserAgent);
   }
-  
+
   // Cache the result
   hashCache.set(sanitizedUserAgent, hash);
-  
+
   return hash;
 }
 
@@ -259,9 +257,9 @@ export function sanitizeUserAgent(userAgent: unknown): SafeUserAgentInfo {
     throw new UserAgentSecurityError(
       `User agent too long: ${userAgent.length} chars (max ${SECURITY_LIMITS.MAX_USER_AGENT_LENGTH})`,
       'LENGTH_EXCEEDED',
-      { 
-        actualLength: userAgent.length, 
-        maxLength: SECURITY_LIMITS.MAX_USER_AGENT_LENGTH 
+      {
+        actualLength: userAgent.length,
+        maxLength: SECURITY_LIMITS.MAX_USER_AGENT_LENGTH
       }
     );
   }
@@ -270,9 +268,9 @@ export function sanitizeUserAgent(userAgent: unknown): SafeUserAgentInfo {
     throw new UserAgentSecurityError(
       `User agent too short: ${userAgent.length} chars (min ${SECURITY_LIMITS.MIN_USER_AGENT_LENGTH})`,
       'LENGTH_TOO_SHORT',
-      { 
-        actualLength: userAgent.length, 
-        minLength: SECURITY_LIMITS.MIN_USER_AGENT_LENGTH 
+      {
+        actualLength: userAgent.length,
+        minLength: SECURITY_LIMITS.MIN_USER_AGENT_LENGTH
       }
     );
   }
@@ -290,7 +288,7 @@ export function sanitizeUserAgent(userAgent: unknown): SafeUserAgentInfo {
 
   // SECURITY: Remove control characters that could cause injection
   const sanitized = userAgent.replace(CONTROL_CHAR_PATTERN, '');
-  
+
   // SECURITY: Verify sanitization didn't change length unexpectedly
   const removedChars = userAgent.length - sanitized.length;
   if (removedChars > 0) {
@@ -302,9 +300,9 @@ export function sanitizeUserAgent(userAgent: unknown): SafeUserAgentInfo {
 
   // Extract safe platform and browser information
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(sanitized);
-  
+
   // Detect in-app browsers with fail-fast validation
-  const isInAppBrowser = 
+  const isInAppBrowser =
     /FBAN|FBAV|Instagram|Twitter|Line|WeChat|MicroMessenger/i.test(sanitized) ||
     /MetaMaskMobile/i.test(sanitized) ||
     /Trust/i.test(sanitized) ||
@@ -375,9 +373,9 @@ export async function sanitizeUserAgentAsync(userAgent: unknown): Promise<SafeUs
     throw new UserAgentSecurityError(
       `User agent too long: ${userAgent.length} chars (max ${SECURITY_LIMITS.MAX_USER_AGENT_LENGTH})`,
       'LENGTH_EXCEEDED',
-      { 
-        actualLength: userAgent.length, 
-        maxLength: SECURITY_LIMITS.MAX_USER_AGENT_LENGTH 
+      {
+        actualLength: userAgent.length,
+        maxLength: SECURITY_LIMITS.MAX_USER_AGENT_LENGTH
       }
     );
   }
@@ -386,9 +384,9 @@ export async function sanitizeUserAgentAsync(userAgent: unknown): Promise<SafeUs
     throw new UserAgentSecurityError(
       `User agent too short: ${userAgent.length} chars (min ${SECURITY_LIMITS.MIN_USER_AGENT_LENGTH})`,
       'LENGTH_TOO_SHORT',
-      { 
-        actualLength: userAgent.length, 
-        minLength: SECURITY_LIMITS.MIN_USER_AGENT_LENGTH 
+      {
+        actualLength: userAgent.length,
+        minLength: SECURITY_LIMITS.MIN_USER_AGENT_LENGTH
       }
     );
   }
@@ -406,7 +404,7 @@ export async function sanitizeUserAgentAsync(userAgent: unknown): Promise<SafeUs
 
   // Remove control characters
   const sanitized = userAgent.replace(CONTROL_CHAR_PATTERN, '');
-  
+
   const removedChars = userAgent.length - sanitized.length;
   if (removedChars > 0) {
     console.warn(`Removed ${removedChars} control characters from user agent`);
@@ -417,8 +415,8 @@ export async function sanitizeUserAgentAsync(userAgent: unknown): Promise<SafeUs
 
   // Extract information (same as sync version)
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(sanitized);
-  
-  const isInAppBrowser = 
+
+  const isInAppBrowser =
     /FBAN|FBAV|Instagram|Twitter|Line|WeChat|MicroMessenger/i.test(sanitized) ||
     /MetaMaskMobile/i.test(sanitized) ||
     /Trust/i.test(sanitized) ||

@@ -225,10 +225,6 @@ export default function WagmiSetup({
               await new Promise(resolve => setTimeout(resolve, retryDelay));
             }
           }
-        } else {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[WagmiSetup] AppKit already initialized, only updating adapter');
-          }
         }
 
         // Reset retry state on success
