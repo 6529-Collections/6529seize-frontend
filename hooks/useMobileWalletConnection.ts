@@ -12,7 +12,6 @@ import {
   SafeUserAgentInfo, 
   UserAgentSecurityError 
 } from "./security/UserAgentSanitizer";
-import { debugAlert } from "../src/utils/debug-capacitor";
 
 /**
  * Mobile wallet connection states
@@ -159,14 +158,6 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
   // Handle mobile wallet connection with deep linking support
   const handleMobileConnection = useCallback(async (connectorId?: string) => {
     try {
-      // DEBUG POINT 14: Mobile connection handler
-      debugAlert('MobileConn.START', 'Mobile connection initiated', {
-        connectorId,
-        isMobile: mobileInfo.isMobile,
-        supportsDeepLinking: mobileInfo.supportsDeepLinking,
-        detectedWallet: mobileInfo.detectedWallet
-      });
-      
       // SECURITY: Guard state updates with mount check
       if (!isMountedRef.current) {
         throw new WalletConnectionError('Component unmounted during connection');
@@ -176,9 +167,6 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
 
       // Handle deep linking for mobile wallets
       if (mobileInfo.isMobile && mobileInfo.supportsDeepLinking) {
-        // DEBUG POINT 15: Deep linking activated
-        debugAlert('MobileConn.DEEPLINK', 'Deep linking flow started - THIS SHOULD NOT HAPPEN IN CAPACITOR');
-        
         if (!isMountedRef.current) {
           throw new WalletConnectionError('Component unmounted during deep linking setup');
         }
@@ -196,11 +184,6 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         
         // Add event listener for when user returns from wallet app with guaranteed cleanup
         const handleVisibilityChange = () => {
-          // DEBUG POINT 16: App return detected
-          debugAlert('MobileConn.RETURN', 'App visibility changed', {
-            visibilityState: document.visibilityState
-          });
-          
           if (document.visibilityState === 'visible' && isMountedRef.current) {
             setConnectionState(MobileConnectionState.WAITING_FOR_RETURN);
             // SECURITY: Immediately abort to ensure cleanup
@@ -221,16 +204,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
         namespace: connectorId === 'solana' ? 'solana' : 'eip155' 
       });
       
-      // DEBUG POINT 17: Modal opened via mobile handler
-      debugAlert('MobileConn.OPENED', 'Modal opened successfully via mobile handler');
-      
     } catch (error: any) {
-      // DEBUG POINT 18: Mobile connection error
-      debugAlert('MobileConn.ERROR', 'Connection failed', {
-        error: error?.message,
-        state: connectionState
-      });
-      
       // SECURITY: Guard state updates with mount check
       if (isMountedRef.current) {
         setConnectionState(MobileConnectionState.FAILED);
@@ -394,13 +368,6 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
  * and never exposes raw user agent strings
  */
 function getMobileWalletInfo(): MobileWalletInfo {
-  // DEBUG POINT 5: Environment detection start
-  debugAlert('MobileDetect.START', 'Checking mobile environment', {
-    hasWindow: typeof window !== 'undefined',
-    userAgent: typeof window !== 'undefined' ? 
-               window.navigator?.userAgent?.slice(0, 50) : 'no-window'
-  });
-  
   if (typeof window === 'undefined') {
     return {
       isMobile: false,
@@ -417,25 +384,11 @@ function getMobileWalletInfo(): MobileWalletInfo {
     };
   }
 
-  // DEBUG POINT 6: Capacitor check
   const isCapacitor = window.Capacitor?.isNativePlatform?.();
-  debugAlert('MobileDetect.CAPACITOR', 'Capacitor detection', {
-    isCapacitor,
-    platform: window.Capacitor?.getPlatform?.(),
-    hasEthereum: !!window.ethereum,
-    ethereumIsMetaMask: !!window.ethereum?.isMetaMask
-  });
 
   // CHECK FOR CAPACITOR FIRST - Mobile app-to-app connection
   if (isCapacitor) {
     const platform = window.Capacitor?.getPlatform?.();
-    
-    // DEBUG POINT 7: Capacitor flow chosen
-    debugAlert('MobileDetect.RESULT', 'Using Capacitor mobile config', {
-      willUseMobileFlow: true, // Mobile flow for app-to-app connection
-      platform,
-      note: 'Will use WalletConnect for MetaMask app connection'
-    });
     
     return {
       isMobile: true, // IMPORTANT: Use mobile flow for app-to-app connection
@@ -457,13 +410,6 @@ function getMobileWalletInfo(): MobileWalletInfo {
     // SECURITY: Use sanitizeUserAgent to prevent XSS and other attacks
     const safeUserAgentInfo = sanitizeUserAgent(window.navigator.userAgent);
     
-    // DEBUG POINT 8: Browser mobile detection
-    debugAlert('MobileDetect.BROWSER', 'Browser detection result', {
-      isMobile: safeUserAgentInfo.isMobile,
-      isInAppBrowser: safeUserAgentInfo.isInAppBrowser,
-      supportsDeepLinking: safeUserAgentInfo.supportsDeepLinking
-    });
-    
     // Return sanitized information with hash instead of raw user agent
     return {
       isMobile: safeUserAgentInfo.isMobile,
@@ -474,12 +420,6 @@ function getMobileWalletInfo(): MobileWalletInfo {
       platformInfo: safeUserAgentInfo.platformInfo,
     };
   } catch (error) {
-    // DEBUG POINT 9: Detection error
-    debugAlert('MobileDetect.ERROR', 'Detection failed', {
-      error: (error as any)?.message,
-      type: (error as any)?.constructor?.name
-    });
-    
     // SECURITY: Fail fast on security errors - do not provide fallbacks
     if (error instanceof UserAgentSecurityError) {
       throw new WalletConnectionError(

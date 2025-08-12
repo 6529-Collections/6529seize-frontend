@@ -6,7 +6,6 @@ import type { AppWallet } from "../components/app-wallets/AppWalletsContext";
 import { decryptData } from "../components/app-wallets/app-wallet-helpers";
 import { areEqualAddresses } from "../helpers/Helpers";
 import { WalletAuthenticationError, InvalidPasswordError, PrivateKeyDecryptionError } from "../src/errors/wallet-auth";
-import { debugAlert } from "../src/utils/debug-capacitor";
 
 export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";
 
@@ -77,11 +76,6 @@ export function createAppWalletConnector(
     type: APP_WALLET_CONNECTOR_TYPE,
 
     async setPassword(password: string): Promise<void> { // VOID RETURN - NO SILENT FAILURES
-      // DEBUG: App wallet password attempt
-      debugAlert('AppWallet.PASSWORD', 'Setting app wallet password', {
-        walletAddress: options.appWallet.address?.slice(0, 10)
-      });
-      
       // Input validation - fail fast
       if (!password || typeof password !== 'string') {
         throw new InvalidPasswordError('Password is required and must be a string');
@@ -112,10 +106,6 @@ export function createAppWalletConnector(
           const match = decryptedAddress.toLowerCase() === 
                        options.appWallet.address.toLowerCase();
           if (!match) {
-            debugAlert('AppWallet.MISMATCH', 'Address mismatch in Capacitor', {
-              decrypted: decryptedAddress?.slice(0, 10),
-              expected: options.appWallet.address?.slice(0, 10)
-            });
             throw new InvalidPasswordError('Password does not match wallet');
           }
         } else if (!areEqualAddresses(decryptedAddress, options.appWallet.address)) {
@@ -141,15 +131,7 @@ export function createAppWalletConnector(
         // Only set after all validations pass
         decryptedPrivateKey = privateKey;
         
-        // DEBUG: Success
-        debugAlert('AppWallet.SUCCESS', 'App wallet unlocked successfully');
-        
       } catch (error) {
-        // DEBUG: Error
-        debugAlert('AppWallet.ERROR', 'Failed to unlock app wallet', {
-          error: (error as any)?.message
-        });
-        
         // Clear any potentially set private key on error
         decryptedPrivateKey = null;
         
