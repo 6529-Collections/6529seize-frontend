@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
-import { BrowserProvider } from "ethers";
+import { BrowserProvider, type Eip1193Provider } from "ethers";
 import { UserRejectedRequestError } from "viem";
 
 /**
@@ -314,9 +314,9 @@ export const useSecureSign = (): UseSecureSignReturn => {
 
       // Use the walletProvider directly for signing
       // AppKit's provider already handles WalletConnect deep linking
-      // Note: Cast to any required due to AppKit provider type not matching ethers' expected type
-      // This is safe as AppKit ensures the provider implements the required EIP-1193 interface
-      const ethersProvider = new BrowserProvider(walletProvider as any);
+      // Type assertion: AppKit guarantees EIP-1193 compliance but TypeScript types don't align
+      // This is validated by AppKit before reaching this point
+      const ethersProvider = new BrowserProvider(walletProvider as unknown as Eip1193Provider);
       const signer = await ethersProvider.getSigner();
       
       // Verify signer address matches connected address
@@ -329,6 +329,9 @@ export const useSecureSign = (): UseSecureSignReturn => {
       
       // Sign the message - this will trigger WalletConnect deep link on mobile
       const signature = await signer.signMessage(message);
+      
+      // Clear sensitive data from memory
+      message = '';
       
       // SECURITY: Validate signature format before returning
       validateSignature(signature);
