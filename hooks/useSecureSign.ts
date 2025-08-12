@@ -415,26 +415,7 @@ const getMobileErrorMessage = (error: unknown): string => {
     message = 'Unknown error';
   }
   
-  // Sanitize message to prevent any potential injection
-  message = message.substring(0, 1000); // Limit length
-  
-  // Common mobile wallet error patterns
-  if (message.includes('connection') || message.includes('provider')) {
-    return 'Connection issue with your wallet. Please check your connection and try again.';
-  }
-  
-  if (message.includes('network') || message.includes('chain')) {
-    return 'Network issue detected. Please check your wallet network settings.';
-  }
-  
-  if (message.includes('timeout') || message.includes('time out')) {
-    return 'Request timed out. Please try again with a stable connection.';
-  }
-  
-  if (message.includes('unsupported') || message.includes('not supported')) {
-    return 'This operation is not supported by your current wallet app.';
-  }
-
-  // Default fallback for mobile
-  return 'Signing failed. Please try again or switch to a different wallet app if the issue persists.';
+  // RETURN THE ACTUAL ERROR MESSAGE FOR DEBUGGING
+  // TODO: Re-enable user-friendly messages after fixing mobile signing
+  return `[DEBUG] Mobile signing error: ${message}`;
 };
