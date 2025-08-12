@@ -72,7 +72,7 @@ export class AppKitAdapterCapacitor {
     // CRITICAL: Different connector order for Capacitor vs web
     const mobileConnectors = isCapacitor ? [
       // For Capacitor: WalletConnect FIRST for app-to-app connections
-      // WalletConnect for mobile with improved deep linking
+      // WalletConnect handles ALL mobile wallets including MetaMask
       walletConnect({
         projectId: CW_PROJECT_ID,
         metadata: {
@@ -89,13 +89,8 @@ export class AppKitAdapterCapacitor {
         },
       }),
       
-      // MetaMask SDK connector for mobile app connections
-      metaMask({
-        dappMetadata: {
-          name: "6529.io",
-          url: VALIDATED_BASE_ENDPOINT,
-        },
-      }),
+      // Note: MetaMask mobile app connection happens through WalletConnect
+      // DO NOT add metaMask() connector for Capacitor - it causes conflicts
       
       // Coinbase Wallet for mobile
       coinbaseWallet({
@@ -160,7 +155,8 @@ export class AppKitAdapterCapacitor {
       mobileConnectorCount: mobileConnectors.length,
       appWalletCount: appWalletConnectors.length,
       firstConnector: mobileConnectors[0]?.name || 'none',
-      connectorOrder: isCapacitor ? 'WalletConnect first' : 'Injected first'
+      connectorOrder: isCapacitor ? 'WalletConnect only (no MetaMask SDK)' : 'Injected + MetaMask SDK',
+      note: isCapacitor ? 'MetaMask connects via WalletConnect' : 'Desktop uses native connectors'
     });
 
     // Create adapter with mobile-specific settings
