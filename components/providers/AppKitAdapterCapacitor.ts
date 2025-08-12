@@ -23,6 +23,11 @@ export class AppKitAdapterCapacitor {
       throw new WalletConnectionError('requestPassword must be a function')
     }
     this.requestPassword = requestPassword
+    
+    // Alert to show configuration values
+    alert(`AppKitAdapterCapacitor Configuration:
+      - VALIDATED_BASE_ENDPOINT: ${VALIDATED_BASE_ENDPOINT}
+      - CW_PROJECT_ID: ${CW_PROJECT_ID}`)
   }
 
   private initializeWalletConnectionState(walletAddress: string): void {
@@ -51,6 +56,12 @@ export class AppKitAdapterCapacitor {
     }
     
     const networks = [mainnet]
+    
+    // Alert before creating mobile connectors
+    alert(`Creating Mobile Connectors:
+      - MetaMask will use: ${VALIDATED_BASE_ENDPOINT}
+      - WalletConnect Project ID: ${CW_PROJECT_ID}
+      - Network: ${networks[0].name} (Chain ID: ${networks[0].id})`)
 
     // Create mobile-specific connectors
     const mobileConnectors = [
