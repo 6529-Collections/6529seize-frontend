@@ -13,7 +13,6 @@ import type { AppKitNetwork } from '@reown/appkit-common'
 import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
 import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
-import { AppKitAdapterCapacitor } from './AppKitAdapterCapacitor';
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter';
 import { AppKitInitializationError, AppKitValidationError, AppKitTimeoutError, AppKitRetryError } from '@/src/errors/appkit-initialization';
 import { Capacitor } from '@capacitor/core';
@@ -87,11 +86,11 @@ export default function WagmiSetup({
     setIsMounted(true);
   }, []);
   
+  // Use the same adapter manager for both mobile and web
+  // AppKit will automatically handle the appropriate connectors
   const adapterManager = useMemo(
-    () => isCapacitor 
-      ? new AppKitAdapterCapacitor(appWalletPasswordModal.requestPassword)
-      : new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
-    [appWalletPasswordModal.requestPassword, isCapacitor]
+    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
+    [appWalletPasswordModal.requestPassword]
   );
 
   // Prevent concurrent initialization attempts
@@ -137,9 +136,8 @@ export default function WagmiSetup({
         
         let newAdapter: WagmiAdapter;
         try {
-          newAdapter = isCapacitor 
-            ? (adapterManager as AppKitAdapterCapacitor).createAdapter(wallets)
-            : (adapterManager as AppKitAdapterManager).createAdapterWithCache(wallets);
+          // Use the same adapter creation for both mobile and web
+          newAdapter = (adapterManager as AppKitAdapterManager).createAdapterWithCache(wallets);
         } catch (error) {
           if (error instanceof AdapterError || error instanceof AdapterCacheError) {
             logErrorSecurely('[WagmiSetup] Adapter creation failed', error);
@@ -179,8 +177,8 @@ export default function WagmiSetup({
             },
             // Mobile-specific settings
             enableWalletGuide: false,
-            featuredWalletIds: ['metamask', 'coinbaseWallet', 'walletConnect'], // Include MetaMask for mobile
-            allWallets: 'SHOW' as const, // Show "All Wallets" on mobile to ensure MetaMask is accessible
+            featuredWalletIds: ['metamask', 'walletConnect'], // MetaMask and WalletConnect for mobile
+            allWallets: 'SHOW' as const, // Show "All Wallets" on mobile to ensure all wallets are accessible
             features: {
               analytics: true,
               email: false,
@@ -328,9 +326,7 @@ export default function WagmiSetup({
     // Debounce updates
     timeoutRef.current = setTimeout(async () => {
       try {
-        const shouldRecreate = isCapacitor 
-          ? (adapterManager as AppKitAdapterCapacitor).shouldRecreateAdapter(wallets)
-          : (adapterManager as AppKitAdapterManager).shouldRecreateAdapter(wallets);
+        const shouldRecreate = (adapterManager as AppKitAdapterManager).shouldRecreateAdapter(wallets);
           
         if (shouldRecreate) {
           // Use async/await instead of .catch() to prevent Promise chain issues
