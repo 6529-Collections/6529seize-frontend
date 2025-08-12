@@ -65,18 +65,13 @@ export class AppKitAdapterCapacitor {
     
     const networks = [mainnet]
 
-    // CRITICAL: Order matters for Capacitor - injected MUST be first
-    const mobileConnectors = [
-      // Injected connector FIRST for Capacitor MetaMask
-      injected(),
-      
-      // MetaMask connector for mobile - critical for mobile MetaMask connections
-      metaMask({
-        dappMetadata: {
-          name: "6529.io",
-          url: VALIDATED_BASE_ENDPOINT,
-        },
-      }),
+    // Check if we're in Capacitor environment
+    const isCapacitor = typeof window !== 'undefined' && 
+                       window.Capacitor?.isNativePlatform?.();
+    
+    // CRITICAL: Different connector order for Capacitor vs web
+    const mobileConnectors = isCapacitor ? [
+      // For Capacitor: WalletConnect FIRST for app-to-app connections
       // WalletConnect for mobile with improved deep linking
       walletConnect({
         projectId: CW_PROJECT_ID,
@@ -93,14 +88,58 @@ export class AppKitAdapterCapacitor {
           enableExplorer: true, // Enable wallet discovery for mobile
         },
       }),
-      // Coinbase Wallet with mobile wallet link enabled
+      
+      // MetaMask SDK connector for mobile app connections
+      metaMask({
+        dappMetadata: {
+          name: "6529.io",
+          url: VALIDATED_BASE_ENDPOINT,
+        },
+      }),
+      
+      // Coinbase Wallet for mobile
       coinbaseWallet({
         appName: "6529 CORE",
         appLogoUrl: "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
         enableMobileWalletLink: true, // Enable mobile deep linking
         version: "3",
       }),
-    ]
+    ] : [
+      // For web: injected connector first
+      injected(),
+      
+      // MetaMask connector for web
+      metaMask({
+        dappMetadata: {
+          name: "6529.io",
+          url: VALIDATED_BASE_ENDPOINT,
+        },
+      }),
+      // WalletConnect for web
+      walletConnect({
+        projectId: CW_PROJECT_ID,
+        metadata: {
+          name: "6529.io",
+          description: "6529.io",
+          url: VALIDATED_BASE_ENDPOINT,
+          icons: [
+            "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+          ],
+        },
+        showQrModal: true, // Show QR for desktop
+        qrModalOptions: {
+          enableExplorer: true,
+        },
+      }),
+      
+      // Coinbase Wallet for web
+      coinbaseWallet({
+        appName: "6529 CORE",
+        appLogoUrl: "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+        enableMobileWalletLink: true,
+        version: "3",
+      }),
+    ];
 
     // Create AppWallet connectors if any exist
     const appWalletConnectors = appWallets.map(wallet => 
@@ -116,11 +155,12 @@ export class AppKitAdapterCapacitor {
 
     // DEBUG POINT 12: Connectors created
     debugAlert('Adapter.CONNECTORS', 'Connectors configured', {
+      isCapacitor,
       connectorCount: allConnectors.length,
       mobileConnectorCount: mobileConnectors.length,
       appWalletCount: appWalletConnectors.length,
-      hasInjected: true,
-      hasMetaMask: true
+      firstConnector: mobileConnectors[0]?.name || 'none',
+      connectorOrder: isCapacitor ? 'WalletConnect first' : 'Injected first'
     });
 
     // Create adapter with mobile-specific settings

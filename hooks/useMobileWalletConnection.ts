@@ -426,24 +426,23 @@ function getMobileWalletInfo(): MobileWalletInfo {
     ethereumIsMetaMask: !!window.ethereum?.isMetaMask
   });
 
-  // CHECK FOR CAPACITOR FIRST - Use standard web flow for Capacitor
+  // CHECK FOR CAPACITOR FIRST - Mobile app-to-app connection
   if (isCapacitor) {
     const platform = window.Capacitor?.getPlatform?.();
     
     // DEBUG POINT 7: Capacitor flow chosen
-    debugAlert('MobileDetect.RESULT', 'Using Capacitor config', {
-      willUseMobileFlow: false, // We force desktop flow
-      detectedWallet: window.ethereum?.isMetaMask ? 'MetaMask' : 
-                     window.ethereum ? 'Generic Web3' : 'none',
-      platform
+    debugAlert('MobileDetect.RESULT', 'Using Capacitor mobile config', {
+      willUseMobileFlow: true, // Mobile flow for app-to-app connection
+      platform,
+      note: 'Will use WalletConnect for MetaMask app connection'
     });
     
     return {
-      isMobile: false, // IMPORTANT: Force non-mobile flow for Capacitor
-      isInAppBrowser: false,
+      isMobile: true, // IMPORTANT: Use mobile flow for app-to-app connection
+      isInAppBrowser: false, // Not in a browser, it's a native app
       userAgentHash: 'capacitor-native-app',
-      supportsDeepLinking: false, // Capacitor uses injected provider, not deep links
-      detectedWallet: window.ethereum?.isMetaMask ? 'MetaMask' : undefined,
+      supportsDeepLinking: true, // Capacitor apps support deep linking for wallet apps
+      detectedWallet: undefined, // No injected wallet in Capacitor
       platformInfo: {
         isAndroid: platform === 'android',
         isIOS: platform === 'ios',
