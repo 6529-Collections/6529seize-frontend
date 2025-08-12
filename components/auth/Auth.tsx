@@ -38,7 +38,7 @@ import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
 import { validateRoleForAuthentication } from "../../utils/role-validation";
-import { 
+import {
   TokenRefreshError,
   TokenRefreshCancelledError,
   TokenRefreshNetworkError,
@@ -99,8 +99,8 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
-  setToast: () => {},
-  setActiveProfileProxy: async () => {},
+  setToast: () => { },
+  setActiveProfileProxy: async () => { },
 });
 
 export const useAuth = () => {
@@ -123,11 +123,11 @@ export default function Auth({
 
   const [connectedProfile, setConnectedProfile] = useState<ApiIdentity>();
   const [fetchingProfile, setFetchingProfile] = useState(false);
-  
+
   // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
   const [authLoadingState, setAuthLoadingState] = useState<'idle' | 'validating' | 'signing'>('idle');
-  
+
   // Centralized abort mechanism for cancelling in-flight operations
   const abortCurrentAuthOperation = useCallback(() => {
     if (abortControllerRef.current) {
@@ -249,12 +249,12 @@ export default function Auth({
 
     while (attempt < retryCount) {
       attempt++;
-      
+
       // Check for cancellation before each attempt
       if (abortSignal?.aborted) {
         throw new TokenRefreshCancelledError(`Operation cancelled on attempt ${attempt}`);
       }
-      
+
       try {
         const redeemResponse = await commonApiPost<
           ApiRedeemRefreshTokenRequest,
@@ -269,7 +269,7 @@ export default function Auth({
           // TODO: Pass abortSignal when API layer supports it
           // abortSignal
         });
-        
+
         // Response validation - fail fast on invalid response
         if (!redeemResponse) {
           throw new TokenRefreshServerError(
@@ -278,7 +278,7 @@ export default function Auth({
             redeemResponse
           );
         }
-        
+
         if (!redeemResponse.token || typeof redeemResponse.token !== 'string') {
           throw new TokenRefreshServerError(
             'Server returned invalid token',
@@ -286,7 +286,7 @@ export default function Auth({
             redeemResponse
           );
         }
-        
+
         if (!redeemResponse.address || typeof redeemResponse.address !== 'string') {
           throw new TokenRefreshServerError(
             'Server returned invalid address',
@@ -294,7 +294,7 @@ export default function Auth({
             redeemResponse
           );
         }
-        
+
         // Success - return valid response
         return redeemResponse;
       } catch (err: any) {
@@ -304,16 +304,16 @@ export default function Auth({
             `Operation cancelled during attempt ${attempt}`
           );
         }
-        
+
         // If this is already one of our error types, just track it
         if (err instanceof TokenRefreshError) {
           lastError = err;
         } else {
           // Classify the error based on its characteristics
-          if (err?.code === 'NETWORK_ERROR' || 
-              err?.code === 'ENOTFOUND' || 
-              err?.code === 'ECONNREFUSED' ||
-              err?.code === 'ETIMEDOUT') {
+          if (err?.code === 'NETWORK_ERROR' ||
+            err?.code === 'ENOTFOUND' ||
+            err?.code === 'ECONNREFUSED' ||
+            err?.code === 'ETIMEDOUT') {
             lastError = new TokenRefreshNetworkError(
               `Network error on attempt ${attempt}: ${err.message}`,
               err
@@ -332,12 +332,12 @@ export default function Auth({
             );
           }
         }
-        
+
         // If this was the last attempt, throw the error
         if (attempt >= retryCount) {
           throw lastError;
         }
-        
+
         // Otherwise continue to next attempt
       }
     }
@@ -368,7 +368,7 @@ export default function Auth({
     if (!operationId || typeof operationId !== 'string') {
       throw new Error('Invalid operationId: must be non-empty string');
     }
-    
+
     // Check if already aborted
     if (abortSignal.aborted) {
       return { isValid: false, wasCancelled: true };
@@ -379,23 +379,23 @@ export default function Auth({
     if (!isValid) {
       const refreshToken = getRefreshToken();
       const walletAddress = getWalletAddress();
-      
+
       // If there's no refresh token, this is a first-time sign-in scenario
       // Return false to trigger the sign modal, don't throw an error
       if (!refreshToken) {
         return { isValid: false, wasCancelled: false };
       }
-      
+
       // If we have a refresh token but no wallet address, that's an error
       if (!walletAddress) {
         throw new Error('No wallet address available for JWT renewal');
       }
-      
+
       // Check for cancellation before proceeding
       if (abortSignal.aborted) {
         return { isValid: false, wasCancelled: true };
       }
-      
+
       try {
         const redeemResponse = await redeemRefreshTokenWithRetries(
           walletAddress,
@@ -404,19 +404,19 @@ export default function Auth({
           3,
           abortSignal
         );
-        
+
         // Check if operation was cancelled during token refresh
         if (abortSignal.aborted) {
           return { isValid: false, wasCancelled: true };
         }
-        
+
         // Validate response data - fail fast on invalid response
         if (!areEqualAddresses(redeemResponse.address, wallet)) {
           throw new Error(
             `Address mismatch in token response: expected ${wallet}, got ${redeemResponse.address}`
           );
         }
-        
+
         const walletRole = getWalletRole();
         // CRITICAL FIX: Get role from the NEW token, not the old one  
         const freshTokenRole = getRole({ jwt: redeemResponse.token });
@@ -462,7 +462,7 @@ export default function Auth({
             address: redeemResponse.address
           });
         }
-        
+
         // Success - store the new JWT with the SERVER-PROVIDED role (not local role)
         setAuthJwt(
           redeemResponse.address,
@@ -470,7 +470,7 @@ export default function Auth({
           refreshToken,
           freshTokenRole ?? undefined  // ✅ USE SERVER ROLE, NOT LOCAL ROLE
         );
-        
+
         // Sync local wallet role with server role
         syncWalletRoleWithServer(freshTokenRole, redeemResponse.address);
         return { isValid: true, wasCancelled: false };
@@ -508,23 +508,23 @@ export default function Auth({
   useEffect(() => {
     // Clear previous operations when dependencies change
     abortCurrentAuthOperation();
-    
+
     // Don't start validation during transitional states
     if (connectionState === 'connecting') {
       return;
     }
-    
+
     if (!address || connectionState !== 'connected') {
       setShowSignModal(false);
       return;
     }
-    
+
     // Capture current address at validation time to prevent race conditions
     const currentAddress = address;
-    
+
     // Generate unique operation ID for this validation attempt
     const operationId = `auth-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    
+
     // IMMEDIATE validation - no setTimeout to prevent timing window vulnerability
     const validateImmediately = async () => {
       // Address consistency check - ensure address hasn't changed since effect start
@@ -532,17 +532,17 @@ export default function Auth({
         // Address changed during setup - abort this operation
         return;
       }
-      
+
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
       setAuthLoadingState('validating');
-      
+
       try {
         // Pre-validation address check - fail fast if address changed
         if (abortController.signal.aborted || currentAddress !== address) {
           return;
         }
-        
+
         const { isValid, wasCancelled } = await validateJwt({
           jwt: getAuthJwt(),
           wallet: currentAddress, // Use captured address, not current state
@@ -550,12 +550,12 @@ export default function Auth({
           operationId,
           abortSignal: abortController.signal
         });
-        
+
         // Post-validation address check - ensure address is still consistent
         if (abortController.signal.aborted || currentAddress !== address) {
           return;
         }
-        
+
         // Only process result if operation wasn't cancelled and address is still valid
         if (!wasCancelled) {
           if (!isValid) {
@@ -572,10 +572,10 @@ export default function Auth({
         // Handle validation errors only if not cancelled and address hasn't changed
         if (!abortController.signal.aborted && currentAddress === address) {
           // Handle specific authentication role errors
-          if (error instanceof MissingActiveProfileError || 
-              error instanceof RoleValidationError || 
-              error instanceof AuthenticationRoleError ||
-              error instanceof InvalidRoleStateError) {
+          if (error instanceof MissingActiveProfileError ||
+            error instanceof RoleValidationError ||
+            error instanceof AuthenticationRoleError ||
+            error instanceof InvalidRoleStateError) {
             // These are critical authentication failures - log and force re-authentication
             logErrorSecurely('validateJwt_role_error', error);
             // Force user to re-authenticate with proper role
@@ -586,7 +586,7 @@ export default function Auth({
             // Handle other validation errors
             logErrorSecurely('validateJwt_general_error', error);
           }
-          
+
           // Show sign modal on error if still connected
           if (isConnected) {
             setShowSignModal(true);
@@ -600,9 +600,9 @@ export default function Auth({
         }
       }
     };
-    
+
     validateImmediately();
-    
+
     // No cleanup needed - immediate execution prevents stale timeouts
   }, [address, activeProfileProxy, connectionState, isConnected, abortCurrentAuthOperation, invalidateAll, reset]);
 
@@ -615,7 +615,7 @@ export default function Auth({
     if (!signerAddress || typeof signerAddress !== 'string') {
       throw new InvalidSignerAddressError(signerAddress);
     }
-    
+
     // Validate address format (basic Ethereum address check)
     const addressRegex = /^0x[a-fA-F0-9]{40}$/;
     if (!addressRegex.test(signerAddress)) {
@@ -650,7 +650,7 @@ export default function Auth({
       if (error instanceof NonceResponseValidationError || error instanceof InvalidSignerAddressError) {
         throw error;
       }
-      
+
       // Wrap API/network errors in our custom error type
       throw new AuthenticationNonceError(
         'Failed to obtain authentication nonce from server',
@@ -688,7 +688,7 @@ export default function Auth({
   }> => {
     try {
       const result = await signMessage(message);
-      
+
       // Handle specific mobile signing errors
       if (result.error) {
         if (result.error instanceof ConnectionMismatchError) {
@@ -709,7 +709,7 @@ export default function Auth({
           });
         }
       }
-      
+
       return {
         signature: result.signature,
         userRejected: result.userRejected,
@@ -738,7 +738,7 @@ export default function Auth({
     try {
       const nonceResponse = await getNonce({ signerAddress });
       const { nonce, server_signature } = nonceResponse;
-      
+
       const clientSignature = await getSignature({ message: nonce });
       if (clientSignature.userRejected) {
         setToast({
@@ -755,7 +755,7 @@ export default function Auth({
         });
         return { success: false };
       }
-      
+
       const tokenResponse = await commonApiPost<
         ApiLoginRequest,
         ApiLoginResponse
@@ -829,15 +829,15 @@ export default function Auth({
       invalidateAll();
       return { success: false };
     }
-    
+
     // Set loading state for signing
     setAuthLoadingState('signing');
-    
+
     try {
       // Create a new abort controller for this auth request
       const abortController = new AbortController();
       const operationId = `manual-auth-${Date.now()}`;
-      
+
       const { isValid } = await validateJwt({
         jwt: getAuthJwt(),
         wallet: address,
@@ -845,7 +845,7 @@ export default function Auth({
         operationId,
         abortSignal: abortController.signal
       });
-      
+
       if (!isValid) {
         removeAuthJwt();
         await requestSignIn({
@@ -854,7 +854,7 @@ export default function Auth({
         });
         invalidateAll();
       }
-      
+
       const isSuccess = !!getAuthJwt();
       if (isSuccess) {
         setShowSignModal(false);
@@ -894,7 +894,7 @@ export default function Auth({
         setActiveProfileProxy(null);
         return;
       }
-      
+
       // Handle MissingActiveProfileError
       if (error instanceof MissingActiveProfileError) {
         logErrorSecurely('onActiveProfileProxy_missing_profile', error);
@@ -931,12 +931,12 @@ export default function Auth({
   useEffect(() => {
     setShowWaves(getShowWaves());
   }, [connectedProfile, activeProfileProxy, address]);
-  
+
   // Computed modal visibility to prevent flickering during rapid state changes
   const shouldShowSignModal = useMemo(() => {
-    return showSignModal && 
-           authLoadingState !== 'validating' && 
-           connectionState === 'connected';
+    return showSignModal &&
+      authLoadingState !== 'validating' &&
+      connectionState === 'connected';
   }, [showSignModal, authLoadingState, connectionState]);
 
   return (
@@ -978,19 +978,8 @@ export default function Auth({
             To connect your wallet, you will need to sign a message to confirm
             your identity.
           </p>
-          
-          {mobileInfo.isMobile && (
-            <div className="mb-3 p-2 bg-info text-dark rounded">
-              <small>
-                <strong>Mobile Instructions:</strong><br />
-                {getMobileInstructions()}
-                {mobileInfo.isInAppBrowser && (
-                  <><br /><em>Note: You're using an in-app browser. For best results, open this page in your device's default browser.</em></>
-                )}
-              </small>
-            </div>
-          )}
-          
+
+
           <ul className="font-lighter">
             <li className="mt-1 mb-1">
               This signature will be used to generate a secure token (JWT) to
@@ -1000,11 +989,6 @@ export default function Auth({
               Your signature will not cost any gas and is purely for
               authentication purposes.
             </li>
-            {mobileInfo.isMobile && (
-              <li className="mt-1 mb-1">
-                <em>The signing request will open in your wallet app. Please approve it and return to this page.</em>
-              </li>
-            )}
           </ul>
         </Modal.Body>
         <Modal.Footer className={styles.signModalContent}>
@@ -1024,10 +1008,10 @@ export default function Auth({
           >
             {isSigningPending ? (
               <>
-                {mobileInfo.isMobile ? "Check your wallet app" : "Confirm in your wallet"} <DotLoader />
+                Confirm in your wallet <DotLoader />
               </>
             ) : (
-              mobileInfo.isMobile ? "Sign in Wallet App" : "Sign"
+              "Sign"
             )}
           </Button>
         </Modal.Footer>
