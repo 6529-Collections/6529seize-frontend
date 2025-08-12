@@ -61,23 +61,35 @@ export class AppKitAdapterCapacitor {
 
     // Create mobile-specific connectors
     const mobileConnectors = [
-      // Injected connector FIRST for in-app browsers (including MetaMask mobile browser)
-      injected({
-        target: 'metaMask', // Explicitly target MetaMask
-        shimDisconnect: true,
-      }),
-      // WalletConnect for mobile with improved deep linking
+      // WalletConnect MUST be first for mobile to handle MetaMask properly
       walletConnect({
         projectId: CW_PROJECT_ID,
         metadata: {
-          name: "6529.io",
-          description: "6529.io",
-          url: VALIDATED_BASE_ENDPOINT,
+          name: "6529 CORE",
+          description: "The 6529 community platform",
+          url: "https://6529.io",
           icons: [
             "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
           ],
         },
-        showQrModal: true, // Enable modal for wallet selection
+        showQrModal: false, // Disable QR modal on mobile
+        qrModalOptions: {
+          mobileWallets: [
+            {
+              id: 'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+              name: 'MetaMask',
+              links: {
+                native: 'metamask://',
+                universal: 'https://metamask.app.link',
+              },
+            },
+          ],
+          desktopWallets: [],
+        },
+      }),
+      // Injected connector for in-app browsers
+      injected({
+        shimDisconnect: true,
       }),
       // Coinbase Wallet with mobile wallet link enabled
       coinbaseWallet({

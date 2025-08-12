@@ -454,6 +454,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         'Failed to open wallet connection modal',
         error
       );
+      alert('Connection error: ' + JSON.stringify(error))
       logError('seizeConnect', connectionError);
       throw connectionError;
     }

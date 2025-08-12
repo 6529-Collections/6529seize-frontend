@@ -181,23 +181,26 @@ export default function WagmiSetup({
             enableWalletGuide: false,
             featuredWalletIds: [
               'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-              '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // WalletConnect
-              'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa'  // Coinbase Wallet
             ],
-            allWallets: 'SHOW' as const, // Show "All Wallets" on mobile to ensure MetaMask is accessible
             includeWalletIds: [
-              'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask explicitly included
+              'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+              '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+              'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
             ],
+            allWallets: 'HIDE' as const, // Hide "All Wallets" to simplify mobile UX
             features: {
-              analytics: true,
+              analytics: false, // Disable analytics to prevent tracking issues
               email: false,
               socials: [],
               connectMethodsOrder: ['wallet' as const]
             },
             enableOnramp: false, // Disable for mobile
             enableSwaps: false,   // Disable for mobile
-            debug: true,
+            debug: false, // Disable debug mode to prevent modal issues
             defaultChain: mainnet, // Set default chain explicitly
+            themeVariables: {
+              '--w3m-z-index': '9999' // Ensure modal appears on top
+            }
           } : {
             adapters: [newAdapter],
             networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],

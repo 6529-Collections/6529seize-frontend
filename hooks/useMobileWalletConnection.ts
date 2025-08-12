@@ -203,7 +203,7 @@ export const useMobileWalletConnection = (): UseMobileWalletConnectionReturn => 
       // Use AppKit modal to handle connection with proper namespace
       await open({ 
         view: 'Connect', 
-        namespace: connectorId === 'solana' ? 'solana' : 'eip155' 
+        namespace: connectorId === 'solana' ? 'solana' : 'eip155',
       });
       
     } catch (error: any) {
