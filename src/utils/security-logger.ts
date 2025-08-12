@@ -121,6 +121,25 @@ export const logError = (context: string, error: Error): void => {
     ...(error && typeof error === 'object' && 'code' in error && { code: error.code })
   };
   
+  // Helper to safely stringify error causes
+  const stringifyCause = (cause: unknown): string => {
+    if (typeof cause === 'string') {
+      return cause;
+    } else if (cause && typeof cause === 'object') {
+      // Check for Error instances or objects with message property
+      if ('message' in cause && typeof cause.message === 'string') {
+        return cause.message;
+      }
+      // Try JSON stringification for plain objects
+      try {
+        return JSON.stringify(cause);
+      } catch {
+        return 'Complex error cause';
+      }
+    }
+    return String(cause);
+  };
+
   // Production: Minimal sanitized logging
   if (process.env.NODE_ENV === 'production') {
     console.error('[SEIZE_CONNECT_ERROR]', {
@@ -132,7 +151,7 @@ export const logError = (context: string, error: Error): void => {
     console.error('[SEIZE_CONNECT_ERROR]', {
       ...errorInfo,
       stack: error.stack ? sanitizeErrorMessage(error.stack) : undefined,
-      cause: error.cause ? sanitizeErrorMessage(String(error.cause)) : undefined,
+      cause: error.cause ? sanitizeErrorMessage(stringifyCause(error.cause)) : undefined,
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server-side'
     });
   }

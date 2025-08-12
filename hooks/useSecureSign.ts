@@ -79,7 +79,7 @@ interface UseSecureSignReturn {
  */
 const ALLOWED_RPC_METHODS = [
   'eth_accounts',
-  'eth_requestAccounts', 
+  'eth_requestAccounts',
   'personal_sign',
   'eth_signTypedData',
   'eth_signTypedData_v4',
@@ -104,7 +104,7 @@ function isEIP1193Provider(provider: unknown): provider is EIP1193Provider {
   if (!provider || typeof provider !== 'object') {
     return false;
   }
-  
+
   const providerObj = provider as Record<string, unknown>;
   return typeof providerObj.request === 'function';
 }
@@ -128,11 +128,11 @@ function validateWalletProvider(provider: unknown): ValidatedWalletProvider {
 
   // Additional security checks for provider legitimacy
   const providerObj = provider as unknown as Record<string, unknown>;
-  
+
   // Check if we're in Capacitor environment (mobile app)
-  const isCapacitor = typeof window !== 'undefined' && 
-                     window.Capacitor?.isNativePlatform?.();
-  
+  const isCapacitor = typeof window !== 'undefined' &&
+    window.Capacitor?.isNativePlatform?.();
+
   // Check if provider has basic wallet characteristics
   // For Capacitor/mobile, we're more lenient since WalletConnect providers might not have these flags
   const hasWalletFeatures = (
@@ -144,7 +144,7 @@ function validateWalletProvider(provider: unknown): ValidatedWalletProvider {
     // For WalletConnect/mobile providers, just check for request method
     (isCapacitor && typeof providerObj.request === 'function')
   );
-  
+
   if (!hasWalletFeatures) {
     throw new ProviderValidationError('Provider does not appear to be a legitimate wallet provider');
   }
@@ -174,19 +174,6 @@ function validateWalletProvider(provider: unknown): ValidatedWalletProvider {
     }
   }
 
-  // SECURITY: Test provider.request method with safe eth_chainId call
-  const testProvider = async (): Promise<void> => {
-    try {
-      await (providerObj.request as Function)({ method: 'eth_chainId' });
-    } catch (error) {
-      // If the call fails, the provider might be broken or malicious
-      throw new ProviderValidationError('Provider request method failed validation test', error);
-    }
-  };
-
-  // For synchronous validation, we'll skip the async test but keep the structure for future enhancement
-  // testProvider().catch(() => { throw new ProviderValidationError('Provider request test failed'); });
-
   // SECURITY: Build validated provider object with proper type safety
   const validatedProvider: ValidatedWalletProvider = {
     request: providerObj.request as (args: { method: string; params?: unknown[] }) => Promise<unknown>,
@@ -206,7 +193,7 @@ function validateEthereumAddress(address: string): void {
   if (typeof address !== 'string') {
     throw new ProviderValidationError('Address must be a string');
   }
-  
+
   if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
     throw new ProviderValidationError('Invalid Ethereum address format');
   }
@@ -220,15 +207,15 @@ function validateMessage(message: string): void {
   if (typeof message !== 'string') {
     throw new ProviderValidationError('Message must be a string');
   }
-  
+
   if (message.length === 0) {
     throw new ProviderValidationError('Message cannot be empty');
   }
-  
+
   if (message.length > 10000) {
     throw new ProviderValidationError('Message too long (max 10000 characters)');
   }
-  
+
   // Check for suspicious patterns that might indicate injection attempts
   const suspiciousPatterns = [
     /<script/i,
@@ -237,7 +224,7 @@ function validateMessage(message: string): void {
     /\x00/, // null bytes
     /\uffff/, // invalid unicode
   ];
-  
+
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(message)) {
       throw new ProviderValidationError('Message contains suspicious content');
@@ -253,7 +240,7 @@ function validateSignature(signature: string): void {
   if (typeof signature !== 'string') {
     throw new ProviderValidationError('Signature must be a string');
   }
-  
+
   // Ethereum signatures should be 65 bytes (130 hex chars + 0x prefix)
   if (!/^0x[a-fA-F0-9]{130}$/.test(signature)) {
     throw new ProviderValidationError('Invalid signature format');
@@ -281,7 +268,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
     try {
       // SECURITY: Input validation - validate message before any processing
       validateMessage(message);
-      
+
       // Validate connection state before attempting to sign
       if (!isConnected) {
         throw new MobileSigningError(
@@ -296,7 +283,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
           "NO_ADDRESS"
         );
       }
-      
+
       // SECURITY: Validate connected address format
       validateEthereumAddress(connectedAddress);
 
@@ -308,31 +295,27 @@ export const useSecureSign = (): UseSecureSignReturn => {
         );
       }
 
-      // Check if we're in Capacitor environment (mobile app)
-      const isCapacitor = typeof window !== 'undefined' && 
-                         window.Capacitor?.isNativePlatform?.();
-
       // Use the walletProvider directly for signing
       // AppKit's provider already handles WalletConnect deep linking
       // Type assertion: AppKit guarantees EIP-1193 compliance but TypeScript types don't align
       // This is validated by AppKit before reaching this point
       const ethersProvider = new BrowserProvider(walletProvider as unknown as Eip1193Provider);
       const signer = await ethersProvider.getSigner();
-      
+
       // Verify signer address matches connected address
       const signerAddress = await signer.getAddress();
       validateEthereumAddress(signerAddress);
-      
+
       if (signerAddress.toLowerCase() !== connectedAddress.toLowerCase()) {
         throw new ConnectionMismatchError(connectedAddress, signerAddress);
       }
-      
+
       // Sign the message - this will trigger WalletConnect deep link on mobile
       const signature = await signer.signMessage(message);
-      
+
       // Clear sensitive data from memory
       message = '';
-      
+
       // SECURITY: Validate signature format before returning
       validateSignature(signature);
 
@@ -343,7 +326,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
 
     } catch (error: unknown) {
       // SECURITY: Proper error handling without unsafe type casting
-      
+
       // Handle user rejection (most common case)
       if (error instanceof UserRejectedRequestError) {
         return {
@@ -355,10 +338,10 @@ export const useSecureSign = (): UseSecureSignReturn => {
       // Handle custom errors we've defined (use name check for Jest compatibility)
       if (error && typeof error === 'object' && 'name' in error) {
         const errorName = (error as Error).name;
-        if (errorName === 'MobileSigningError' || 
-            errorName === 'ConnectionMismatchError' || 
-            errorName === 'SigningProviderError' ||
-            errorName === 'ProviderValidationError') {
+        if (errorName === 'MobileSigningError' ||
+          errorName === 'ConnectionMismatchError' ||
+          errorName === 'SigningProviderError' ||
+          errorName === 'ProviderValidationError') {
           return {
             signature: null,
             userRejected: false,
@@ -424,38 +407,45 @@ const extractErrorCode = (error: unknown): string | number | undefined => {
  */
 const getMobileErrorMessage = (error: unknown): string => {
   let message: string;
-  
+
   // SECURITY: Safe message extraction without unsafe casting
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
     message = error.message;
   } else if (typeof error === 'string') {
     message = error;
-  } else if (error && typeof error.toString === 'function') {
+  } else if (error && typeof error === 'object') {
+    // For plain objects, try to get a meaningful representation
     try {
-      message = error.toString();
+      // Check if it has a custom toString that's not Object.prototype.toString
+      if (error.toString !== Object.prototype.toString) {
+        message = error.toString();
+      } else {
+        // Fallback to JSON stringification for plain objects
+        message = JSON.stringify(error);
+      }
     } catch {
       message = 'Unknown error';
     }
   } else {
     message = 'Unknown error';
   }
-  
+
   // Sanitize message to prevent any potential injection
   message = message.substring(0, 1000); // Limit length
-  
+
   // Common mobile wallet error patterns
   if (message.includes('connection') || message.includes('provider')) {
     return 'Connection issue with your wallet. Please check your connection and try again.';
   }
-  
+
   if (message.includes('network') || message.includes('chain')) {
     return 'Network issue detected. Please check your wallet network settings.';
   }
-  
+
   if (message.includes('timeout') || message.includes('time out')) {
     return 'Request timed out. Please try again with a stable connection.';
   }
-  
+
   if (message.includes('unsupported') || message.includes('not supported')) {
     return 'This operation is not supported by your current wallet app.';
   }

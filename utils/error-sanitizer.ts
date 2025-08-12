@@ -175,15 +175,6 @@ export const logErrorSecurely = (context: string, error: unknown): void => {
   // Instead, log a sanitized version
   const sanitizedMessage = sanitizeErrorForUser(error);
   
-  // Create a safe log entry
-  const logEntry = {
-    timestamp,
-    context,
-    message: sanitizedMessage,
-    // Add non-sensitive metadata
-    userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
-    url: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
-  };
 
   // TODO: Integrate with secure logging service (e.g., Sentry, DataDog, CloudWatch)
   // For now, we'll use console.error with sanitized data only
