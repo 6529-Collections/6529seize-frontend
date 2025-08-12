@@ -59,7 +59,6 @@ declare global {
       isNativePlatform?: () => boolean;
       getPlatform?: () => string;
     };
-    ethereum?: any;
     web3?: any;
   }
 }

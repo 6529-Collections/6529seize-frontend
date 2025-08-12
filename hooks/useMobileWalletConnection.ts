@@ -428,7 +428,7 @@ function getMobileWalletInfo(): MobileWalletInfo {
 
   // CHECK FOR CAPACITOR FIRST - Use standard web flow for Capacitor
   if (isCapacitor) {
-    const platform = window.Capacitor?.getPlatform();
+    const platform = window.Capacitor?.getPlatform?.();
     
     // DEBUG POINT 7: Capacitor flow chosen
     debugAlert('MobileDetect.RESULT', 'Using Capacitor config', {
@@ -477,8 +477,8 @@ function getMobileWalletInfo(): MobileWalletInfo {
   } catch (error) {
     // DEBUG POINT 9: Detection error
     debugAlert('MobileDetect.ERROR', 'Detection failed', {
-      error: error?.message,
-      type: error?.constructor?.name
+      error: (error as any)?.message,
+      type: (error as any)?.constructor?.name
     });
     
     // SECURITY: Fail fast on security errors - do not provide fallbacks

@@ -215,8 +215,8 @@ const useSecureWalletInitialization = () => {
         
         // DEBUG POINT 23: Invalid address
         debugAlert('WalletInit.INVALID', 'Address validation failed', {
-          address: storedAddress?.slice(0, 10),
-          length: storedAddress?.length
+          address: (storedAddress as string).slice(0, 10),
+          length: (storedAddress as string).length
         });
         
         // If stored address exists but is invalid, this is a critical security issue
@@ -266,8 +266,8 @@ const useSecureWalletInitialization = () => {
       } catch (error) {
         // DEBUG POINT 24: Init error
         debugAlert('WalletInit.ERROR', 'Initialization failed', {
-          error: error?.message,
-          type: error?.constructor?.name
+          error: (error as any)?.message,
+          type: (error as any)?.constructor?.name
         });
         
         // Catch any unexpected errors during initialization
@@ -509,9 +509,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       // DEBUG POINT 4: Connection error
       debugAlert('SeizeConnect.ERROR', 'Failed to open modal', {
-        errorMessage: error?.message,
-        errorName: error?.name,
-        errorStack: error?.stack?.slice(0, 200)
+        errorMessage: (error as any)?.message,
+        errorName: (error as any)?.name,
+        errorStack: (error as any)?.stack?.slice(0, 200)
       });
       
       const connectionError = new WalletConnectionError(

@@ -147,7 +147,7 @@ export function createAppWalletConnector(
       } catch (error) {
         // DEBUG: Error
         debugAlert('AppWallet.ERROR', 'Failed to unlock app wallet', {
-          error: error?.message
+          error: (error as any)?.message
         });
         
         // Clear any potentially set private key on error
