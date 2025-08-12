@@ -7,6 +7,7 @@ import {
 } from '@/wagmiConfig/wagmiAppWalletConnector'
 import { walletConnect, coinbaseWallet, injected, metaMask } from 'wagmi/connectors'
 import { WalletConnectionError, ConnectionStateError } from '@/src/errors/wallet-connection'
+import { debugAlert } from '@/src/utils/debug-capacitor'
 
 
 export class AppKitAdapterCapacitor {
@@ -43,17 +44,32 @@ export class AppKitAdapterCapacitor {
   }
 
   createAdapter(appWallets: AppWallet[]): WagmiAdapter {
+    // DEBUG POINT 10: Adapter creation start
+    debugAlert('Adapter.CREATE', 'Creating wagmi adapter', {
+      appWalletsCount: appWallets.length,
+      hasEthereum: typeof window !== 'undefined' ? !!window?.ethereum : false,
+      isMetaMask: typeof window !== 'undefined' ? !!window?.ethereum?.isMetaMask : false,
+      platform: typeof window !== 'undefined' ? window?.Capacitor?.getPlatform?.() : 'unknown'
+    });
+    
     // Validate wallets FIRST before creating anything
     for (const wallet of appWallets) {
       if (!wallet?.address) {
+        // DEBUG POINT 11: Invalid wallet
+        debugAlert('Adapter.INVALID', 'Invalid wallet found', {
+          wallet: JSON.stringify(wallet).slice(0, 100)
+        });
         throw new WalletConnectionError(`Invalid wallet in appWallets: missing address. Wallet: ${JSON.stringify(wallet)}`)
       }
     }
     
     const networks = [mainnet]
 
-    // Create mobile-specific connectors
+    // CRITICAL: Order matters for Capacitor - injected MUST be first
     const mobileConnectors = [
+      // Injected connector FIRST for Capacitor MetaMask
+      injected(),
+      
       // MetaMask connector for mobile - critical for mobile MetaMask connections
       metaMask({
         dappMetadata: {
@@ -84,8 +100,6 @@ export class AppKitAdapterCapacitor {
         enableMobileWalletLink: true, // Enable mobile deep linking
         version: "3",
       }),
-      // Injected connector for browsers that have injected wallets
-      injected(),
     ]
 
     // Create AppWallet connectors if any exist
@@ -100,6 +114,15 @@ export class AppKitAdapterCapacitor {
     // Combine all connectors
     const allConnectors = [...mobileConnectors, ...appWalletConnectors]
 
+    // DEBUG POINT 12: Connectors created
+    debugAlert('Adapter.CONNECTORS', 'Connectors configured', {
+      connectorCount: allConnectors.length,
+      mobileConnectorCount: mobileConnectors.length,
+      appWalletCount: appWalletConnectors.length,
+      hasInjected: true,
+      hasMetaMask: true
+    });
+
     // Create adapter with mobile-specific settings
     const wagmiAdapter = new WagmiAdapter({
       networks,
@@ -107,6 +130,11 @@ export class AppKitAdapterCapacitor {
       ssr: false, // Mobile apps are not SSR and App Router needs this false
       connectors: allConnectors
     })
+
+    // DEBUG POINT 13: Adapter ready
+    debugAlert('Adapter.READY', 'Adapter created successfully', {
+      adapterCreated: !!wagmiAdapter
+    });
 
     // Only set state after everything succeeds
     this.currentAdapter = wagmiAdapter

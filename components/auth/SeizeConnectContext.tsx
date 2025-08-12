@@ -21,6 +21,7 @@ import {
 import { WalletInitializationError } from "../../src/errors/wallet";
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from "@reown/appkit/react";
 import { isAddress, getAddress } from "viem";
+import { debugAlert, checkCapacitorEnvironment } from "../../src/utils/debug-capacitor";
 import { SecurityEventType } from "../../src/types/security";
 import { 
   logSecurityEvent, 
@@ -162,7 +163,16 @@ const useSecureWalletInitialization = () => {
     // Perform secure initialization in useEffect to prevent application crashes
     const initializeWallet = async () => {
       try {
+        // DEBUG POINT 19: Init start
+        debugAlert('WalletInit.START', 'Initializing wallet');
+        
         const storedAddress: string | null = getWalletAddress();
+        
+        // DEBUG POINT 20: Stored address check
+        debugAlert('WalletInit.STORED', 'Checking stored address', {
+          hasAddress: !!storedAddress,
+          addressPrefix: storedAddress?.slice(0, 10)
+        });
         
         // If no stored address, return undefined (legitimate case)
         if (!storedAddress) {
@@ -171,15 +181,43 @@ const useSecureWalletInitialization = () => {
           return;
         }
         
+        // Check if we're in Capacitor for more lenient validation
+        const isCapacitor = typeof window !== 'undefined' && 
+                           window.Capacitor?.isNativePlatform?.();
+        
+        if (isCapacitor) {
+          // DEBUG POINT 21: Capacitor validation
+          debugAlert('WalletInit.CAPACITOR', 'Using Capacitor validation', {
+            address: storedAddress?.slice(0, 10)
+          });
+          
+          // Simplified validation for Capacitor
+          if (storedAddress.startsWith('0x') && storedAddress.length === 42) {
+            setConnectedAddress(storedAddress.toLowerCase());
+            setIsInitialized(true);
+            debugAlert('WalletInit.VALID', 'Capacitor address validated');
+            return;
+          }
+        }
+        
         // At this point, storedAddress is definitely a string (not null)
         // Check if stored address is valid
         if (isValidAddress(storedAddress)) {
+          // DEBUG POINT 22: Valid address
+          debugAlert('WalletInit.VALID', 'Address validated successfully');
+          
           // Valid address - return checksummed format
           const checksummedAddress = getAddress(storedAddress);
           setConnectedAddress(checksummedAddress);
           setIsInitialized(true);
           return;
         }
+        
+        // DEBUG POINT 23: Invalid address
+        debugAlert('WalletInit.INVALID', 'Address validation failed', {
+          address: storedAddress?.slice(0, 10),
+          length: storedAddress?.length
+        });
         
         // If stored address exists but is invalid, this is a critical security issue
         // Store the address string before validation for error handling
@@ -226,6 +264,12 @@ const useSecureWalletInitialization = () => {
         setIsInitialized(true);
         
       } catch (error) {
+        // DEBUG POINT 24: Init error
+        debugAlert('WalletInit.ERROR', 'Initialization failed', {
+          error: error?.message,
+          type: error?.constructor?.name
+        });
+        
         // Catch any unexpected errors during initialization
         const initError = new WalletInitializationError(
           'Unexpected error during wallet initialization',
@@ -436,13 +480,26 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeConnect = useCallback((): void => {
     try {
+      // DEBUG POINT 1: Connection attempt initiated
+      debugAlert('SeizeConnect.START', 'User clicked connect', {
+        env: checkCapacitorEnvironment(),
+        stateOpen: state?.open,
+        hasAccount: !!account?.address
+      });
+      
       // Log connection attempt for security monitoring
       logSecurityEvent(
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
         createConnectionEventContext('seizeConnect')
       );
       
+      // DEBUG POINT 2: Before opening modal
+      debugAlert('SeizeConnect.MODAL', 'About to open AppKit modal');
+      
       open({ view: "Connect" });
+      
+      // DEBUG POINT 3: After modal open call
+      debugAlert('SeizeConnect.OPENED', 'Modal open called successfully');
       
       // Log successful modal opening
       logSecurityEvent(
@@ -450,6 +507,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         createConnectionEventContext('seizeConnect')
       );
     } catch (error) {
+      // DEBUG POINT 4: Connection error
+      debugAlert('SeizeConnect.ERROR', 'Failed to open modal', {
+        errorMessage: error?.message,
+        errorName: error?.name,
+        errorStack: error?.stack?.slice(0, 200)
+      });
+      
       const connectionError = new WalletConnectionError(
         'Failed to open wallet connection modal',
         error
@@ -457,7 +521,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       logError('seizeConnect', connectionError);
       throw connectionError;
     }
-  }, [open]);
+  }, [open, account, state]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
     try {
