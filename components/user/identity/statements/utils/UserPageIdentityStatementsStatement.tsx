@@ -52,7 +52,6 @@ export default function UserPageIdentityStatementsStatement({
             </span>
           </div>
 
-          {/* Hover action icons - right aligned on top line */}
           <div className="tw-flex tw-items-center tw-gap-2">
             {canOpen && (
               <>
@@ -116,7 +115,6 @@ export default function UserPageIdentityStatementsStatement({
           </div>
         </div>
 
-        {/* Second line: Full URL - indented to align with label text */}
         <div className="tw-ml-7">
           <span className="tw-text-sm tw-text-iron-300 tw-break-all tw-tracking-wide group-hover:tw-text-iron-200 tw-cursor-text tw-select-all tw-transition-colors tw-duration-150 tw-ease-out">
             {title === "Copied!" ? <span className="tw-text-primary-400">{title}</span> : statement.statement_value}
