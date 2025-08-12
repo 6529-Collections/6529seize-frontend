@@ -1,15 +1,15 @@
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ReactElement } from "react";
-import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
+import UserPageWavesWrapper from "../../components/user/waves/UserPageWavesWrapper";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 import {
   getCommonHeaders,
   getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import UserPageWavesWrapper from "../../components/user/waves/UserPageWavesWrapper";
 import { UserPageProps } from "../../helpers/Types";
-import { getMetadataForUserPage } from "../../helpers/Helpers";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { NextPageWithLayout } from "../_app";
 
 const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => (
   <UserPageWavesWrapper profile={profile} />

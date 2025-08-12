@@ -129,7 +129,8 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           Consolidated Addresses
         </span>
       </div>
-      <ul className="tw-mb-0 tw-mt-4 md:tw-mt-6 tw-list-none tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
+      <div className="tw-mt-3 tw-h-px tw-bg-white/5 tw-w-full"></div>
+      <ul className="tw-mb-0 tw-mt-3 md:tw-mt-4 lg:tw-mt-6 tw-list-none tw-space-y-2 md:tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet}

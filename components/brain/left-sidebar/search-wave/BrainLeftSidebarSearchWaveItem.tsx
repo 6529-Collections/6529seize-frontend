@@ -48,12 +48,12 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
     }
   };
   return (
-    <li className="tw-px-2 tw-h-full tw-flex tw-items-center tw-justify-between tw-gap-x-2 hover:tw-bg-iron-800 tw-rounded-lg">
+    <li className="tw-px-2 tw-h-full tw-flex tw-items-center tw-justify-between tw-gap-x-2 desktop-hover:hover:tw-bg-iron-800 tw-rounded-lg">
       <Link
         href={getHref(wave.id)}
         onClick={onLinkClick}
         onMouseEnter={() => onWaveHover(wave.id)}
-        className="tw-no-underline md:hover:tw-bg-iron-800 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-1 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400">
+        className="tw-no-underline tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-1 desktop-hover:hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400">
         <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
           <div className="tw-flex tw-space-x-3 tw-items-center">
             <div className="tw-relative">

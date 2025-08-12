@@ -1,12 +1,12 @@
 import styles from "@/styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { NextGenCollection } from "../../../../entities/INextgen";
-import { useShallowRedirect } from "./[[...view]]";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
 import {
   NextGenCollectionHead,
   getServerSideCollection,
 } from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
+import { NextGenCollection } from "../../../../entities/INextgen";
+import { useShallowRedirect } from "./[[...view]]";
 
 const NextGenCollectionMintingPlanComponent = dynamic(
   () =>
@@ -20,7 +20,7 @@ export default function NextGenCollectionTokensPage(props: {
   readonly collection: NextGenCollection;
 }) {
   const collection = props.collection;
-  useShallowRedirect(collection.name, "/distribution-plan");
+  useShallowRedirect(collection.name);
 
   return (
     <>

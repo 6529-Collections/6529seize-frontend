@@ -3,7 +3,7 @@ export default function ArtBlocksIcon() {
     <img
       src="/Art-Blocks-icon.jpg"
       alt="Art Blocks"
-      className="tw-rounded-full tw-object-contain tw-flex-shrink-0 tw-h-5 tw-w-5"
+      className="tw-rounded-full tw-object-contain tw-flex-shrink-0 tw-h-5 tw-w-5 tw-align-top"
     />
   );
 }

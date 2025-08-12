@@ -158,6 +158,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           <Tooltip
             id={`opensea-tooltip-${address.wallet}`}
             place="top"
+            positionStrategy="fixed"
             style={{
               backgroundColor: "#1F2937",
               color: "white",
@@ -179,6 +180,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           <Tooltip
             id={`etherscan-tooltip-${address.wallet}`}
             place="top"
+            positionStrategy="fixed"
             style={{
               backgroundColor: "#1F2937",
               color: "white",
@@ -188,7 +190,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         )}
         <div className="tw-space-x-3 tw-inline-flex tw-items-center">
           <div className="tw-truncate md:tw-max-w-[8rem] lg:tw-max-w-[11rem] tw-text-iron-200">
-            <span>{title}</span>
+            <span>{title === "Copied!" ? <span className="tw-text-primary-400">{title}</span> : title}</span>
             {address.display && (
               <span className="tw-ml-3">{address.display}</span>
             )}
@@ -218,8 +220,8 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             <button
               aria-label="Copy address"
               className={`${
-                isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-              } tw-ml-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+                isTouchScreen ? "tw-opacity-100" : "tw-opacity-0 group-hover:tw-opacity-100"
+              } tw-ml-2 tw-p-1.5 tw-bg-transparent tw-cursor-pointer tw-text-xs tw-font-semibold tw-text-iron-400 hover:tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
               onClick={handleCopy}
               data-tooltip-id={`copy-tooltip-${address.wallet}`}
               data-tooltip-content={isTouchScreen ? undefined : "Copy"}>
@@ -229,6 +231,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               <Tooltip
                 id={`copy-tooltip-${address.wallet}`}
                 place="top"
+                positionStrategy="fixed"
                 style={{
                   backgroundColor: "#1F2937",
                   color: "white",

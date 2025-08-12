@@ -86,3 +86,4 @@ jest-results.json
 claude.md
 .claude/commands/
 test.html
+.claude/

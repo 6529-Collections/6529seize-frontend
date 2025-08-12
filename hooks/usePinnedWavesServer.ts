@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../components/auth/Auth";
 import { pinnedWavesApi } from "../services/api/pinned-waves-api";
@@ -37,7 +37,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const queryClient = useQueryClient();
   
   // Track ongoing operations to prevent concurrent pins
-  const [ongoingOperations, setOngoingOperations] = useState<Set<string>>(new Set());
+  const ongoingOperations = useRef<Set<string>>(new Set());
   
   // Only fetch if user is authenticated
   const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
@@ -185,13 +185,13 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
 
   const pinWave = useCallback(async (waveId: string) => {
     // Prevent concurrent operations on same wave
-    if (ongoingOperations.has(waveId)) {
+    if (ongoingOperations.current.has(waveId)) {
       throw new Error('Operation already in progress for this wave');
     }
     
     // Check limit including ongoing pin operations
     let ongoingPinCount = 0;
-    ongoingOperations.forEach(id => {
+    ongoingOperations.current.forEach(id => {
       if (!pinnedIds.includes(id)) {
         ongoingPinCount++;
       }
@@ -202,47 +202,32 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       throw new Error(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
     }
     
-    // Mark operation as ongoing
-    setOngoingOperations(prev => {
-      const next = new Set(prev);
-      next.add(waveId);
-      return next;
-    });
+    // Mark operation as ongoing (synchronous)
+    ongoingOperations.current.add(waveId);
     
     try {
       await pinMutation.mutateAsync(waveId);
     } finally {
       // Always clean up the operation tracking
-      setOngoingOperations(prev => {
-        const next = new Set(prev);
-        next.delete(waveId);
-        return next;
-      });
+      ongoingOperations.current.delete(waveId);
     }
-  }, [pinnedIds, ongoingOperations, pinMutation]);
+  }, [pinnedIds, pinMutation]);
 
   const unpinWave = useCallback(async (waveId: string) => {
     // Prevent concurrent operations on same wave
-    if (ongoingOperations.has(waveId)) {
+    if (ongoingOperations.current.has(waveId)) {
       throw new Error('Operation already in progress for this wave');
     }
     
-    setOngoingOperations(prev => {
-      const next = new Set(prev);
-      next.add(waveId);
-      return next;
-    });
+    // Mark operation as ongoing (synchronous)
+    ongoingOperations.current.add(waveId);
     
     try {
       await unpinMutation.mutateAsync(waveId);
     } finally {
-      setOngoingOperations(prev => {
-        const next = new Set(prev);
-        next.delete(waveId);
-        return next;
-      });
+      ongoingOperations.current.delete(waveId);
     }
-  }, [ongoingOperations, unpinMutation]);
+  }, [unpinMutation]);
 
   return {
     pinnedWaves,
@@ -253,6 +238,6 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     pinWave,
     unpinWave,
     refetch,
-    isOperationInProgress: (waveId: string) => ongoingOperations.has(waveId),
+    isOperationInProgress: (waveId: string) => ongoingOperations.current.has(waveId),
   };
 }

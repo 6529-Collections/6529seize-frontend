@@ -1,16 +1,22 @@
-import PrimaryButton from "../../utils/button/PrimaryButton";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import {
+  CREATE_DIRECT_MESSAGE_SEARCH_PATH,
+  CREATE_WAVE_SEARCH_PATH,
+} from "@/components/waves/Waves";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
 
 export default function UserPageWavesSearch({
   waveName,
   showCreateNewWaveButton,
   setWaveName,
-  onCreateNewWave,
 }: {
   readonly waveName: string | null;
   readonly showCreateNewWaveButton: boolean;
   readonly setWaveName: (value: string | null) => void;
-  readonly onCreateNewWave: () => void;
 }) {
+  const router = useRouter();
   const onWaveNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setWaveName(event.target.value);
   };
@@ -32,13 +38,11 @@ export default function UserPageWavesSearch({
             className={`tw-top-3 tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
             viewBox="0 0 20 20"
             fill="currentColor"
-            aria-hidden="true"
-          >
+            aria-hidden="true">
             <path
               fillRule="evenodd"
               d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-              clipRule="evenodd"
-            ></path>
+              clipRule="evenodd"></path>
           </svg>
           {!!waveName?.length && (
             <svg
@@ -49,8 +53,7 @@ export default function UserPageWavesSearch({
               role="button"
               tabIndex={0}
               aria-label="Clear wave name"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M17 7L7 17M7 7L17 17"
                 stroke="currentColor"
@@ -62,35 +65,44 @@ export default function UserPageWavesSearch({
           )}
           <label
             htmlFor="identity-page-wave-search"
-            className="tw-text-sm peer-focus:tw-text-primary-400 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 tw-absolute tw-rounded-lg tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900  peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2  peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1"
-          >
+            className="tw-text-sm peer-focus:tw-text-primary-400 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 tw-absolute tw-rounded-lg tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900  peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2  peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1">
             By Wave Name
           </label>
         </div>
       </div>
       {showCreateNewWaveButton && (
-        <PrimaryButton
-          onClicked={onCreateNewWave}
-          loading={false}
-          disabled={false}
-        >
-          <svg
-            className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        <div className="tw-flex tw-gap-2">
+          <PrimaryButton
+            onClicked={() => router.push(CREATE_WAVE_SEARCH_PATH)}
+            loading={false}
+            disabled={false}>
+            <svg
+              className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 5V19M5 12H19"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Create Wave</span>
+          </PrimaryButton>
+          <PrimaryButton
+            onClicked={() => router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH)}
+            loading={false}
+            disabled={false}>
+            <FontAwesomeIcon
+              icon={faPaperPlane}
+              className="tw-size-4 tw-mr-1.5 -tw-ml-1.5 tw-flex-shrink-0"
             />
-          </svg>
-          <span>Create new</span>
-        </PrimaryButton>
+            <span>Create DM</span>
+          </PrimaryButton>
+        </div>
       )}
     </div>
   );

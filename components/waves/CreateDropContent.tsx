@@ -330,6 +330,7 @@ const getOptimisticDrop = (
       id: connectedProfile.id,
       handle: connectedProfile.handle,
       active_main_stage_submission_ids: connectedProfile.active_main_stage_submission_ids,
+      winner_main_stage_drop_ids: connectedProfile.winner_main_stage_drop_ids ?? [],
       pfp: connectedProfile.pfp ?? null,
       banner1_color: connectedProfile.banner1 ?? null,
       banner2_color: connectedProfile.banner2 ?? null,
@@ -737,6 +738,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         activeDrop,
         isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
+      
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
         setTimeout(
@@ -761,6 +763,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
       setFiles([]);
       refreshState();
+      
       submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
