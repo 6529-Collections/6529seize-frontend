@@ -129,13 +129,20 @@ function validateWalletProvider(provider: unknown): ValidatedWalletProvider {
   // Additional security checks for provider legitimacy
   const providerObj = provider as unknown as Record<string, unknown>;
   
+  // Check if we're in Capacitor environment (mobile app)
+  const isCapacitor = typeof window !== 'undefined' && 
+                     window.Capacitor?.isNativePlatform?.();
+  
   // Check if provider has basic wallet characteristics
+  // For Capacitor/mobile, we're more lenient since WalletConnect providers might not have these flags
   const hasWalletFeatures = (
     typeof providerObj.isMetaMask === 'boolean' ||
     typeof providerObj.isCoinbaseWallet === 'boolean' ||
     typeof providerObj.isWalletConnect === 'boolean' ||
     typeof providerObj.enable === 'function' ||
-    typeof providerObj.send === 'function'
+    typeof providerObj.send === 'function' ||
+    // For WalletConnect/mobile providers, just check for request method
+    (isCapacitor && typeof providerObj.request === 'function')
   );
   
   if (!hasWalletFeatures) {
@@ -293,8 +300,13 @@ export const useSecureSign = (): UseSecureSignReturn => {
       // SECURITY: Validate connected address format
       validateEthereumAddress(connectedAddress);
 
+      // Check if we're in Capacitor environment (mobile app)
+      const isCapacitor = typeof window !== 'undefined' && 
+                         window.Capacitor?.isNativePlatform?.();
+      
       // SECURITY: Comprehensive provider validation with proper type checking
-      if (typeof window !== 'undefined' && window.ethereum) {
+      // Skip window.ethereum check for Capacitor since it uses WalletConnect
+      if (!isCapacitor && typeof window !== 'undefined' && window.ethereum) {
         try {
           // SECURITY FIX: Replace unsafe 'as any' cast with proper validation
           const validatedProvider = validateWalletProvider(window.ethereum);
@@ -358,11 +370,26 @@ export const useSecureSign = (): UseSecureSignReturn => {
       }
 
       // SECURITY: Comprehensive wallet provider validation with error handling
+      // Check if walletProvider is available (might not be for some connection types)
+      if (!walletProvider) {
+        throw new ProviderValidationError(
+          'No wallet provider available. Please ensure your wallet is properly connected.'
+        );
+      }
+      
       // SECURITY FIX: Wrap validateWalletProvider call in try-catch
       let validatedWalletProvider: ValidatedWalletProvider;
       try {
         validatedWalletProvider = validateWalletProvider(walletProvider);
       } catch (validationError: unknown) {
+        // For Capacitor/mobile, provide more helpful error message
+        if (isCapacitor) {
+          throw new MobileSigningError(
+            'Unable to connect to your wallet app. Please ensure the wallet app is open and try again.',
+            'PROVIDER_VALIDATION_FAILED',
+            validationError
+          );
+        }
         // SECURITY: Throw ProviderValidationError on any validation failure
         if (validationError instanceof ProviderValidationError) {
           throw validationError;
