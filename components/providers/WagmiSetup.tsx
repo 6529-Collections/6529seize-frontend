@@ -7,11 +7,10 @@ import {
   appWalletsEventEmitter,
 } from "../app-wallets/AppWalletsContext";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { createAppKit } from '@reown/appkit/react'
+import { CreateAppKit, createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import type { AppKitNetwork } from '@reown/appkit-common'
+import { mainnet, arbitrum } from '@reown/appkit/networks'
 import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
-import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
 import { AppKitAdapterCapacitor } from './AppKitAdapterCapacitor';
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter';
@@ -19,6 +18,7 @@ import { AppKitInitializationError, AppKitValidationError, AppKitTimeoutError, A
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../auth/Auth';
 import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
+import type { AppKitNetwork } from '@reown/appkit/networks'
 
 export default function WagmiSetup({
   children,
@@ -49,35 +49,42 @@ export default function WagmiSetup({
   const validateInitializationPreconditions = (wallets: AppWallet[]): void => {
     // Validate project ID exists
     if (!CW_PROJECT_ID) {
+      alert('CW_PROJECT_ID is not defined - cannot initialize AppKit')
       throw new AppKitValidationError('CW_PROJECT_ID is not defined - cannot initialize AppKit');
     }
     
     if (typeof CW_PROJECT_ID !== 'string' || CW_PROJECT_ID.length === 0) {
+      alert('CW_PROJECT_ID must be a non-empty string')
       throw new AppKitValidationError('CW_PROJECT_ID must be a non-empty string');
     }
     
     // Validate base endpoint
     if (!VALIDATED_BASE_ENDPOINT) {
+      alert('VALIDATED_BASE_ENDPOINT is not defined')
       throw new AppKitValidationError('VALIDATED_BASE_ENDPOINT is not defined');
     }
     
     // Validate wallets array
     if (!Array.isArray(wallets)) {
+      alert('Wallets must be an array')
       throw new AppKitValidationError('Wallets must be an array');
     }
     
     // Validate adapter manager
     if (!adapterManager) {
+      alert('Adapter manager is not initialized')
       throw new AppKitValidationError('Adapter manager is not initialized');
     }
     
     // Check if we're in a retry loop that should fail
     if (retryCount >= MAX_RETRIES) {
+      alert('Maximum retry attempts reached')
       throw new AppKitRetryError('Maximum retry attempts reached', retryCount);
     }
     
     // Check for retry cooldown period
     if (lastFailureTime && Date.now() - lastFailureTime < 5000) {
+      alert('Retry attempt too soon after last failure')
       throw new AppKitValidationError('Retry attempt too soon after last failure');
     }
   };
@@ -101,6 +108,7 @@ export default function WagmiSetup({
   const initializeAppKit = async (wallets: AppWallet[]): Promise<void> => {
     // Prevent concurrent initialization
     if (isInitializing) {
+      alert('AppKit initialization already in progress')
       throw new AppKitValidationError('AppKit initialization already in progress');
     }
     
@@ -121,6 +129,7 @@ export default function WagmiSetup({
             message: 'Wallet initialization timed out. Please refresh and try again.',
             type: "error",
           });
+          alert('AppKit initialization timed out')
           reject(timeoutError);
         }, INIT_TIMEOUT_MS);
       });
@@ -164,67 +173,25 @@ export default function WagmiSetup({
           if (process.env.NODE_ENV === 'development') {
             console.log('[WagmiSetup] Creating AppKit instance for the first time');
           }
+
+          const metadata = {
+            name: "6529 CORE",
+            description: "The 6529 community platform",
+            url: VALIDATED_BASE_ENDPOINT,
+            icons: [
+              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+            ],
+          }
+
           // Mobile-specific AppKit configuration
-          const appKitConfig = isCapacitor ? {
+          const appKitConfig: CreateAppKit = {
             adapters: [newAdapter],
-            networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
             projectId: CW_PROJECT_ID,
-            metadata: {
-              name: "6529.io",
-              description: "6529.io",
-              url: VALIDATED_BASE_ENDPOINT,
-              icons: [
-                "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-              ],
-            },
-            // Mobile-specific settings
-            enableWalletGuide: false,
-            featuredWalletIds: [
-              'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-            ],
-            includeWalletIds: [
-              'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-              '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
-              'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
-            ],
-            allWallets: 'HIDE' as const, // Hide "All Wallets" to simplify mobile UX
+            networks: [mainnet, arbitrum] as [AppKitNetwork, ...AppKitNetwork[]],
+            metadata: metadata,
             features: {
-              analytics: false, // Disable analytics to prevent tracking issues
-              email: false,
-              socials: [],
-              connectMethodsOrder: ['wallet' as const]
-            },
-            enableOnramp: false, // Disable for mobile
-            enableSwaps: false,   // Disable for mobile
-            debug: false, // Disable debug mode to prevent modal issues
-            defaultChain: mainnet, // Set default chain explicitly
-            themeVariables: {
-              '--w3m-z-index': 9999 // Ensure modal appears on top
+              analytics: true // Optional - defaults to your Cloud configuration
             }
-          } : {
-            adapters: [newAdapter],
-            networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
-            projectId: CW_PROJECT_ID,
-            metadata: {
-              name: "6529.io",
-              description: "6529.io",
-              url: VALIDATED_BASE_ENDPOINT,
-              icons: [
-                "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-              ],
-            },
-            // Web-specific settings
-            enableWalletGuide: false,
-            featuredWalletIds: ['metamask', 'walletConnect'],
-            allWallets: 'SHOW' as const,
-            features: {
-              analytics: true,
-              email: false,
-              socials: [],
-              connectMethodsOrder: ['wallet' as const]
-            },
-            enableOnramp: false, // Keep disabled for now
-            enableSwaps: false   // Keep disabled for now
           };
           
           // Iterative retry loop - NO RECURSION
@@ -241,7 +208,7 @@ export default function WagmiSetup({
               currentRetry++;
               setRetryCount(currentRetry);
               setLastFailureTime(Date.now());
-              
+              alert('Failed to create AppKit: ' + JSON.stringify(appKitError))
               console.error('[WagmiSetup] Failed to create AppKit:', appKitError);
               
               // If we've exceeded max retries, throw final error
@@ -252,6 +219,7 @@ export default function WagmiSetup({
                   appKitError
                 );
                 logErrorSecurely('[WagmiSetup] AppKit initialization permanently failed', finalError);
+                alert('AppKit initialization permanently failed: ' + JSON.stringify(finalError))
                 throw finalError;
               }
               
@@ -375,6 +343,7 @@ export default function WagmiSetup({
           logErrorSecurely('[WagmiSetup] Failed to initialize AppKit on mount', error);
           // Error is already handled inside initializeAppKit (user toast shown)
           // This catch prevents unhandled promise rejection
+          alert('AppKit initialization failed: ' + JSON.stringify(error))
           console.error('[WagmiSetup] AppKit initialization failed:', error);
         }
       })();
@@ -399,6 +368,7 @@ export default function WagmiSetup({
         
         adapterManager.cleanup();
       } catch (error) {
+        alert('Error during cleanup: ' + JSON.stringify(error))
         logErrorSecurely('[WagmiSetup] Error during cleanup', error);
         if (error instanceof AdapterCleanupError) {
           logErrorSecurely('[WagmiSetup] Adapter cleanup failed', error);
