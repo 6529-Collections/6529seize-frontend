@@ -419,34 +419,32 @@ export default function Auth({
         // CRITICAL FIX: Get role from the NEW token, not the old one  
         const freshTokenRole = getRole({ jwt: redeemResponse.token });
 
-        // CRITICAL FIX: FAIL-FAST validation with NO optional chaining
-        // The server is the source of truth for roles, not local storage
-        if (role && freshTokenRole !== role) {
-          // If we specifically requested a role, ensure server provided it
-          throw new RoleValidationError(role, freshTokenRole);
-        }
+        // Role validation: Only validate when doing role-based authentication (proxy users)
+        if (role) {
+          // Ensure we have an active profile proxy for role-based auth
+          if (!activeProfileProxy) {
+            throw new MissingActiveProfileError();
+          }
 
-        // ADDITIONAL VALIDATION: Ensure role consistency with what was requested
-        // FAIL-FAST: NO optional chaining - if activeProfileProxy is null, this MUST fail
-        if (activeProfileProxy === null || activeProfileProxy === undefined) {
-          // If we're doing role-based authentication but have no active profile proxy,
-          // this is a critical state inconsistency that must fail immediately
-          throw new MissingActiveProfileError();
-        }
+          // Validate proxy structure
+          const proxyCreatorId = activeProfileProxy.created_by?.id;
+          if (!proxyCreatorId || typeof proxyCreatorId !== 'string' || proxyCreatorId.trim().length === 0) {
+            throw new AuthenticationRoleError(
+              'Active profile proxy has invalid created_by.id - role validation cannot proceed'
+            );
+          }
 
-        // FAIL-FAST: Direct property access - will throw if structure is invalid
-        const requestedRole = activeProfileProxy.created_by.id;
+          // The requested role should match the proxy creator's ID
+          if (role !== proxyCreatorId) {
+            throw new InvalidRoleStateError(
+              `Role mismatch: requested role ${role} does not match proxy creator ${proxyCreatorId}`
+            );
+          }
 
-        // Validate that requestedRole is not null/undefined/empty
-        if (!requestedRole || typeof requestedRole !== 'string' || requestedRole.trim().length === 0) {
-          throw new AuthenticationRoleError(
-            'Active profile proxy has invalid created_by.id - role validation cannot proceed'
-          );
-        }
-
-        // Now perform the role comparison with guaranteed non-null values
-        if (freshTokenRole !== requestedRole) {
-          throw new RoleValidationError(requestedRole, freshTokenRole);
+          // Ensure server provided the correct role in the token
+          if (freshTokenRole !== role) {
+            throw new RoleValidationError(role, freshTokenRole);
+          }
         }
 
         // UPDATE LOCAL STORAGE: Sync local wallet role with server response
