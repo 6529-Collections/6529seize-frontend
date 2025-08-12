@@ -167,6 +167,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   body: T;
   headers?: Record<string, string>;
   params?: Z;
+  signal?: AbortSignal;
 }): Promise<U> => {
   let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
   if (param.params) {
@@ -177,6 +178,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
     method: "POST",
     headers: getHeaders(param.headers),
     body: JSON.stringify(param.body),
+    signal: param.signal,
   });
   if (!res.ok) {
     const body: any = await res.json();

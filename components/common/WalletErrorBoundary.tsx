@@ -80,7 +80,7 @@ export class WalletErrorBoundary extends Component<Props, State> {
     }
   }
 
-  private handleRetry = () => {
+  private readonly handleRetry = () => {
     // Clear the error state to allow retry
     this.setState({
       hasError: false,

@@ -264,8 +264,7 @@ export default function Auth({
             token: refreshToken,
             role: role ?? undefined,
           },
-          // TODO: Pass abortSignal when API layer supports it
-          // abortSignal
+          signal: abortSignal,
         });
 
         // Response validation - fail fast on invalid response
@@ -306,29 +305,27 @@ export default function Auth({
         // If this is already one of our error types, just track it
         if (err instanceof TokenRefreshError) {
           lastError = err;
-        } else {
           // Classify the error based on its characteristics
-          if (err?.code === 'NETWORK_ERROR' ||
-            err?.code === 'ENOTFOUND' ||
-            err?.code === 'ECONNREFUSED' ||
-            err?.code === 'ETIMEDOUT') {
-            lastError = new TokenRefreshNetworkError(
-              `Network error on attempt ${attempt}: ${err.message}`,
-              err
-            );
-          } else if (err?.status >= 400 && err?.status < 600) {
-            lastError = new TokenRefreshServerError(
-              `Server error ${err.status} on attempt ${attempt}: ${err.message}`,
-              err.status,
-              err.response,
-              err
-            );
-          } else {
-            lastError = new TokenRefreshError(
-              `Unknown error on attempt ${attempt}: ${err.message}`,
-              err
-            );
-          }
+        } else if (err?.code === 'NETWORK_ERROR' ||
+          err?.code === 'ENOTFOUND' ||
+          err?.code === 'ECONNREFUSED' ||
+          err?.code === 'ETIMEDOUT') {
+          lastError = new TokenRefreshNetworkError(
+            `Network error on attempt ${attempt}: ${err.message}`,
+            err
+          );
+        } else if (err?.status >= 400 && err?.status < 600) {
+          lastError = new TokenRefreshServerError(
+            `Server error ${err.status} on attempt ${attempt}: ${err.message}`,
+            err.status,
+            err.response,
+            err
+          );
+        } else {
+          lastError = new TokenRefreshError(
+            `Unknown error on attempt ${attempt}: ${err.message}`,
+            err
+          );
         }
 
         // If this was the last attempt, throw the error
