@@ -68,7 +68,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-text-iron-300 desktop-hover:group-hover:tw-text-iron-100"
+            : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
         }`}>
         <div className="tw-relative">
           <div
@@ -102,7 +102,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
         </div>
         <div className="tw-flex-1">
-          <div className={`tw-text-sm ${isActive ? "tw-font-medium" : "tw-font-normal"}`}>{wave.name}</div>
+          <div className="tw-text-sm tw-font-medium">{wave.name}</div>
           {!!wave.newDropsCount.latestDropTimestamp && (
             <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>
