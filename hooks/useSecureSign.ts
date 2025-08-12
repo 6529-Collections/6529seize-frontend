@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
-import { BrowserProvider } from "ethers";
+import { useAppKitAccount } from "@reown/appkit/react";
+import { useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from "viem";
 
 /**
@@ -267,11 +267,12 @@ function validateSignature(signature: string): void {
 export const useSecureSign = (): UseSecureSignReturn => {
   const [isSigningPending, setIsSigningPending] = useState(false);
   const { address: connectedAddress, isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider('eip155');
+  const wagmiSignMessage = useSignMessage();
 
   const reset = useCallback(() => {
     setIsSigningPending(false);
-  }, []);
+    wagmiSignMessage.reset();
+  }, [wagmiSignMessage]);
 
   const signMessage = useCallback(async (
     message: string
@@ -300,125 +301,10 @@ export const useSecureSign = (): UseSecureSignReturn => {
       // SECURITY: Validate connected address format
       validateEthereumAddress(connectedAddress);
 
-      // Check if we're in Capacitor environment (mobile app)
-      const isCapacitor = typeof window !== 'undefined' && 
-                         window.Capacitor?.isNativePlatform?.();
-      
-      // SECURITY: Comprehensive provider validation with proper type checking
-      // Skip window.ethereum check for Capacitor since it uses WalletConnect
-      if (!isCapacitor && typeof window !== 'undefined' && window.ethereum) {
-        try {
-          // SECURITY FIX: Replace unsafe 'as any' cast with proper validation
-          const validatedProvider = validateWalletProvider(window.ethereum);
-          
-          // SECURITY: Validate RPC method before calling
-          if (!isAllowedRPCMethod('eth_accounts')) {
-            throw new ProviderValidationError('eth_accounts method not allowed');
-          }
-          
-          // Verify the provider is still available (important for mobile apps)
-          const accountsResult = await validatedProvider.request({ 
-            method: 'eth_accounts' 
-          });
-          
-          // SECURITY: Validate response structure
-          if (!Array.isArray(accountsResult)) {
-            throw new ProviderValidationError('Invalid accounts response format');
-          }
-          
-          const accounts = accountsResult as string[];
-          
-          if (accounts.length === 0) {
-            throw new MobileSigningError(
-              "Wallet connection lost. Please reconnect and try again.",
-              "CONNECTION_LOST"
-            );
-          }
-
-          // SECURITY: Validate each returned address
-          const providerAddress = accounts[0];
-          if (typeof providerAddress !== 'string') {
-            throw new ProviderValidationError('Provider returned invalid address type');
-          }
-          
-          validateEthereumAddress(providerAddress);
-          
-          // Verify the connected address matches
-          const normalizedProviderAddress = providerAddress.toLowerCase();
-          const normalizedExpectedAddress = connectedAddress.toLowerCase();
-          
-          if (normalizedProviderAddress !== normalizedExpectedAddress) {
-            throw new ConnectionMismatchError(normalizedExpectedAddress, normalizedProviderAddress);
-          }
-        } catch (providerError: unknown) {
-          // SECURITY: Proper error handling without unsafe casting (use name check for Jest compatibility)
-          if (providerError && typeof providerError === 'object' && 'name' in providerError) {
-            const errorName = (providerError as Error).name;
-            if (errorName === 'ConnectionMismatchError' ||
-                errorName === 'MobileSigningError' ||
-                errorName === 'ProviderValidationError') {
-              throw providerError;
-            }
-          }
-          
-          // Any other provider validation failure - fail immediately
-          throw new ProviderValidationError(
-            "Wallet provider validation failed. Please disconnect and reconnect your wallet.",
-            providerError
-          );
-        }
-      }
-
-      // SECURITY: Comprehensive wallet provider validation with error handling
-      // Check if walletProvider is available (might not be for some connection types)
-      if (!walletProvider) {
-        throw new ProviderValidationError(
-          'No wallet provider available. Please ensure your wallet is properly connected.'
-        );
-      }
-      
-      // SECURITY FIX: Wrap validateWalletProvider call in try-catch
-      let validatedWalletProvider: ValidatedWalletProvider;
-      try {
-        validatedWalletProvider = validateWalletProvider(walletProvider);
-      } catch (validationError: unknown) {
-        // For Capacitor/mobile, provide more helpful error message
-        if (isCapacitor) {
-          throw new MobileSigningError(
-            'Unable to connect to your wallet app. Please ensure the wallet app is open and try again.',
-            'PROVIDER_VALIDATION_FAILED',
-            validationError
-          );
-        }
-        // SECURITY: Throw ProviderValidationError on any validation failure
-        if (validationError instanceof ProviderValidationError) {
-          throw validationError;
-        }
-        throw new ProviderValidationError(
-          'Wallet provider validation failed unexpectedly',
-          validationError
-        );
-      }
-
-      // Use ethers BrowserProvider with validated provider
-      const ethersProvider = new BrowserProvider(validatedWalletProvider);
-      const signer = await ethersProvider.getSigner();
-      
-      // SECURITY: Add signer validation after getting it from ethersProvider
-      if (!signer) {
-        throw new ProviderValidationError('Failed to get signer from ethers provider');
-      }
-      
-      // SECURITY: Verify signer address matches connected address
-      const signerAddress = await signer.getAddress();
-      validateEthereumAddress(signerAddress);
-      
-      if (signerAddress.toLowerCase() !== connectedAddress.toLowerCase()) {
-        throw new ConnectionMismatchError(connectedAddress, signerAddress);
-      }
-      
-      // Sign the message
-      const signature = await signer.signMessage(message);
+      // Use wagmi's signMessage which handles WalletConnect deep linking properly
+      const signature = await wagmiSignMessage.signMessageAsync({
+        message,
+      });
       
       // SECURITY: Validate signature format before returning
       validateSignature(signature);
@@ -478,7 +364,7 @@ export const useSecureSign = (): UseSecureSignReturn => {
     } finally {
       setIsSigningPending(false);
     }
-  }, [walletProvider, connectedAddress, isConnected]);
+  }, [connectedAddress, isConnected, wagmiSignMessage]);
 
   return {
     signMessage,
