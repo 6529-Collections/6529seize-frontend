@@ -14,6 +14,7 @@ export class TokenRefreshError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
     super(message);
     this.name = 'TokenRefreshError';
+    Object.setPrototypeOf(this, TokenRefreshError.prototype);
   }
 }
 
@@ -25,6 +26,7 @@ export class TokenRefreshCancelledError extends TokenRefreshError {
   constructor(message: string = 'Token refresh operation was cancelled') {
     super(message);
     this.name = 'TokenRefreshCancelledError';
+    Object.setPrototypeOf(this, TokenRefreshCancelledError.prototype);
   }
 }
 
@@ -36,6 +38,7 @@ export class TokenRefreshNetworkError extends TokenRefreshError {
   constructor(message: string, cause?: unknown) {
     super(message, cause);
     this.name = 'TokenRefreshNetworkError';
+    Object.setPrototypeOf(this, TokenRefreshNetworkError.prototype);
   }
 }
 
@@ -52,6 +55,7 @@ export class TokenRefreshServerError extends TokenRefreshError {
   ) {
     super(message, cause);
     this.name = 'TokenRefreshServerError';
+    Object.setPrototypeOf(this, TokenRefreshServerError.prototype);
   }
 }
 

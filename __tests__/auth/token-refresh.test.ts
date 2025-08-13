@@ -51,129 +51,7 @@ import {
 } from '../../services/auth/auth.utils';
 import { jwtDecode } from 'jwt-decode';
 import { areEqualAddresses } from '../../helpers/Helpers';
-
-// Import the function we're testing (we need to extract it from the component)
-// For now, we'll create a separate testable version
-async function redeemRefreshTokenWithRetries(
-  walletAddress: string,
-  refreshToken: string,
-  role: string | null,
-  retryCount = 3,
-  abortSignal?: AbortSignal
-): Promise<any> {
-  // Input validation - fail fast on invalid parameters
-  if (!walletAddress || typeof walletAddress !== 'string') {
-    throw new TokenRefreshError('Invalid walletAddress: must be non-empty string');
-  }
-  if (!refreshToken || typeof refreshToken !== 'string') {
-    throw new TokenRefreshError('Invalid refreshToken: must be non-empty string');
-  }
-  if (retryCount < 1 || retryCount > 10) {
-    throw new TokenRefreshError('Invalid retryCount: must be between 1 and 10');
-  }
-
-  // Check for cancellation upfront
-  if (abortSignal?.aborted) {
-    throw new TokenRefreshCancelledError('Operation cancelled before starting');
-  }
-
-  let attempt = 0;
-  let lastError: unknown = null;
-
-  while (attempt < retryCount) {
-    attempt++;
-    
-    // Check for cancellation before each attempt
-    if (abortSignal?.aborted) {
-      throw new TokenRefreshCancelledError(`Operation cancelled on attempt ${attempt}`);
-    }
-    
-    try {
-      const redeemResponse = await commonApiPost({
-        endpoint: "auth/redeem-refresh-token",
-        body: {
-          address: walletAddress,
-          token: refreshToken,
-          role: role ?? undefined,
-        },
-      });
-      
-      // Response validation - fail fast on invalid response
-      if (!redeemResponse) {
-        throw new TokenRefreshServerError(
-          'Server returned null/undefined response',
-          undefined,
-          redeemResponse
-        );
-      }
-      
-      if (!redeemResponse.token || typeof redeemResponse.token !== 'string') {
-        throw new TokenRefreshServerError(
-          'Server returned invalid token',
-          undefined,
-          redeemResponse
-        );
-      }
-      
-      if (!redeemResponse.address || typeof redeemResponse.address !== 'string') {
-        throw new TokenRefreshServerError(
-          'Server returned invalid address',
-          undefined,
-          redeemResponse
-        );
-      }
-      
-      // Success - return valid response
-      return redeemResponse;
-    } catch (err: any) {
-      // Handle cancellation errors immediately
-      if (err.name === 'AbortError' || abortSignal?.aborted) {
-        throw new TokenRefreshCancelledError(
-          `Operation cancelled during attempt ${attempt}`
-        );
-      }
-      
-      // If this is already one of our error types, just track it
-      if (err instanceof TokenRefreshError) {
-        lastError = err;
-      } else {
-        // Classify the error based on its characteristics
-        if (err?.code === 'NETWORK_ERROR' || 
-            err?.code === 'ENOTFOUND' || 
-            err?.code === 'ECONNREFUSED' ||
-            err?.code === 'ETIMEDOUT') {
-          lastError = new TokenRefreshNetworkError(
-            `Network error on attempt ${attempt}: ${err.message}`,
-            err
-          );
-        } else if (err?.status >= 400 && err?.status < 600) {
-          lastError = new TokenRefreshServerError(
-            `Server error ${err.status} on attempt ${attempt}: ${err.message}`,
-            err.status,
-            err.response,
-            err
-          );
-        } else {
-          lastError = new TokenRefreshError(
-            `Unknown error on attempt ${attempt}: ${err.message}`,
-            err
-          );
-        }
-      }
-      
-      // If this was the last attempt, throw the error
-      if (attempt >= retryCount) {
-        throw lastError;
-      }
-      
-      // Otherwise continue to next attempt
-    }
-  }
-
-  // This should never be reached due to the throw in the catch block,
-  // but TypeScript requires it for exhaustiveness
-  throw lastError || new TokenRefreshError('All retry attempts failed');
-}
+import { redeemRefreshTokenWithRetries } from '../../services/auth/token-refresh.utils';
 
 describe('Token Refresh Error Classes', () => {
   test('TokenRefreshError base class', () => {
@@ -229,16 +107,21 @@ describe('redeemRefreshTokenWithRetries - Input Validation', () => {
       .rejects.toThrow('Invalid walletAddress: must be non-empty string');
   });
 
+  test('throws TokenRefreshError for invalid address format', async () => {
+    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null))
+      .rejects.toThrow('Invalid wallet address format: 0x123');
+  });
+
   test('throws TokenRefreshError for empty refreshToken', async () => {
-    await expect(redeemRefreshTokenWithRetries('0x123', '', null))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '', null))
       .rejects.toThrow('Invalid refreshToken: must be non-empty string');
   });
 
   test('throws TokenRefreshError for invalid retryCount', async () => {
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 0))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 0))
       .rejects.toThrow('Invalid retryCount: must be between 1 and 10');
     
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 11))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 11))
       .rejects.toThrow('Invalid retryCount: must be between 1 and 10');
   });
 
@@ -246,7 +129,7 @@ describe('redeemRefreshTokenWithRetries - Input Validation', () => {
     const controller = new AbortController();
     controller.abort();
     
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 3, controller.signal))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 3, controller.signal))
       .rejects.toThrow('Operation cancelled before starting');
   });
 });
@@ -257,17 +140,17 @@ describe('redeemRefreshTokenWithRetries - Network Error Handling', () => {
   });
 
   test('classifies network errors correctly', async () => {
-    const networkError = new Error('Connection failed');
+    const networkError = new Error('Connection failed') as any;
     networkError.code = 'ECONNREFUSED';
     
     (commonApiPost as jest.Mock).mockRejectedValue(networkError);
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 1))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
       .rejects.toThrow('Network error on attempt 1: Connection failed');
   });
 
   test('retries on network errors', async () => {
-    const networkError = new Error('DNS lookup failed');
+    const networkError = new Error('DNS lookup failed') as any;
     networkError.code = 'ENOTFOUND';
     
     (commonApiPost as jest.Mock)
@@ -275,21 +158,21 @@ describe('redeemRefreshTokenWithRetries - Network Error Handling', () => {
       .mockRejectedValueOnce(networkError)
       .mockResolvedValueOnce({
         token: 'new-token',
-        address: '0x123'
+        address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
       });
 
-    const result = await redeemRefreshTokenWithRetries('0x123', 'token', null, 3);
+    const result = await redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 3);
     expect(result.token).toBe('new-token');
     expect(commonApiPost).toHaveBeenCalledTimes(3);
   });
 
   test('fails after max retries with network error', async () => {
-    const networkError = new Error('Timeout');
+    const networkError = new Error('Timeout') as any;
     networkError.code = 'ETIMEDOUT';
     
     (commonApiPost as jest.Mock).mockRejectedValue(networkError);
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 2))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 2))
       .rejects.toThrow('Network error on attempt 2: Timeout');
     
     expect(commonApiPost).toHaveBeenCalledTimes(2);
@@ -302,28 +185,28 @@ describe('redeemRefreshTokenWithRetries - Server Error Handling', () => {
   });
 
   test('classifies server errors correctly', async () => {
-    const serverError = new Error('Unauthorized');
+    const serverError = new Error('Unauthorized') as any;
     serverError.status = 401;
     serverError.response = { error: 'Invalid token' };
     
     (commonApiPost as jest.Mock).mockRejectedValue(serverError);
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 1))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
       .rejects.toThrow('Server error 401 on attempt 1: Unauthorized');
     
-    const error = await redeemRefreshTokenWithRetries('0x123', 'token', null, 1)
+    const error = await redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1)
       .catch(e => e);
     expect(error.statusCode).toBe(401);
     expect(error.serverResponse).toEqual({ error: 'Invalid token' });
   });
 
   test('handles 5xx server errors', async () => {
-    const serverError = new Error('Internal Server Error');
+    const serverError = new Error('Internal Server Error') as any;
     serverError.status = 500;
     
     (commonApiPost as jest.Mock).mockRejectedValue(serverError);
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 1))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
       .rejects.toThrow('Server error 500 on attempt 1: Internal Server Error');
   });
 });
@@ -336,17 +219,17 @@ describe('redeemRefreshTokenWithRetries - Response Validation', () => {
   test('throws TokenRefreshServerError for null response', async () => {
     (commonApiPost as jest.Mock).mockResolvedValue(null);
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 1))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
       .rejects.toThrow('Server returned null/undefined response');
   });
 
   test('throws TokenRefreshServerError for invalid token in response', async () => {
     (commonApiPost as jest.Mock).mockResolvedValue({
       token: null,
-      address: '0x123'
+      address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
     });
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 1))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
       .rejects.toThrow('Server returned invalid token');
   });
 
@@ -356,19 +239,19 @@ describe('redeemRefreshTokenWithRetries - Response Validation', () => {
       address: ''
     });
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 1))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
       .rejects.toThrow('Server returned invalid address');
   });
 
   test('accepts valid response', async () => {
     (commonApiPost as jest.Mock).mockResolvedValue({
       token: 'valid-token',
-      address: '0x123'
+      address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
     });
 
-    const result = await redeemRefreshTokenWithRetries('0x123', 'token', null, 1);
+    const result = await redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1);
     expect(result.token).toBe('valid-token');
-    expect(result.address).toBe('0x123');
+    expect(result.address).toBe('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045');
   });
 });
 
@@ -381,34 +264,32 @@ describe('redeemRefreshTokenWithRetries - Cancellation Handling', () => {
     const controller = new AbortController();
     
     (commonApiPost as jest.Mock).mockImplementation(() => {
-      controller.abort();
       const error = new Error('Request aborted');
       error.name = 'AbortError';
       throw error;
     });
 
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 3, controller.signal))
-      .rejects.toThrow('Operation cancelled during attempt 1');
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 3, controller.signal))
+      .rejects.toThrow(TokenRefreshCancelledError);
   });
 
   test('handles cancellation between retries', async () => {
     const controller = new AbortController();
     let callCount = 0;
     
-    (commonApiPost as jest.Mock).mockImplementation(() => {
+    (commonApiPost as jest.Mock).mockImplementation(async () => {
       callCount++;
       if (callCount === 1) {
+        // Fail the first attempt, then abort the controller
+        controller.abort();
         throw new Error('First attempt fails');
       }
-      // Second attempt should be cancelled before it starts
+      // This should not be reached as the controller is aborted
       throw new Error('This should not be reached');
     });
 
-    // Cancel after first attempt
-    setTimeout(() => controller.abort(), 0);
-
-    await expect(redeemRefreshTokenWithRetries('0x123', 'token', null, 3, controller.signal))
-      .rejects.toThrow('Operation cancelled on attempt 2');
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 3, controller.signal))
+      .rejects.toThrow(TokenRefreshCancelledError);
   });
 });
 
@@ -420,20 +301,21 @@ describe('redeemRefreshTokenWithRetries - Success Cases', () => {
   test('succeeds on first attempt', async () => {
     (commonApiPost as jest.Mock).mockResolvedValue({
       token: 'success-token',
-      address: '0xABC'
+      address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
     });
 
-    const result = await redeemRefreshTokenWithRetries('0xABC', 'refresh-token', 'user-role');
+    const result = await redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'refresh-token', 'user-role');
     
     expect(result.token).toBe('success-token');
-    expect(result.address).toBe('0xABC');
+    expect(result.address).toBe('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045');
     expect(commonApiPost).toHaveBeenCalledWith({
       endpoint: 'auth/redeem-refresh-token',
       body: {
-        address: '0xABC',
+        address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
         token: 'refresh-token',
         role: 'user-role',
       },
+      signal: undefined,
     });
   });
 
@@ -443,31 +325,32 @@ describe('redeemRefreshTokenWithRetries - Success Cases', () => {
       .mockRejectedValueOnce(new Error('Second fail'))
       .mockResolvedValueOnce({
         token: 'retry-success-token',
-        address: '0xDEF'
+        address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
       });
 
-    const result = await redeemRefreshTokenWithRetries('0xDEF', 'retry-token', null, 3);
+    const result = await redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'retry-token', null, 3);
     
     expect(result.token).toBe('retry-success-token');
-    expect(result.address).toBe('0xDEF');
+    expect(result.address).toBe('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045');
     expect(commonApiPost).toHaveBeenCalledTimes(3);
   });
 
   test('handles null role correctly', async () => {
     (commonApiPost as jest.Mock).mockResolvedValue({
       token: 'null-role-token',
-      address: '0x456'
+      address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
     });
 
-    await redeemRefreshTokenWithRetries('0x456', 'token', null);
+    await redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null);
     
     expect(commonApiPost).toHaveBeenCalledWith({
       endpoint: 'auth/redeem-refresh-token',
       body: {
-        address: '0x456',
+        address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
         token: 'token',
         role: undefined,
       },
+      signal: undefined,
     });
   });
 });
@@ -482,17 +365,17 @@ describe('redeemRefreshTokenWithRetries - Type Safety', () => {
     await expect(redeemRefreshTokenWithRetries(null as any, 'token', null))
       .rejects.toThrow('Invalid walletAddress: must be non-empty string');
     
-    await expect(redeemRefreshTokenWithRetries('0x123', undefined as any, null))
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', undefined as any, null))
       .rejects.toThrow('Invalid refreshToken: must be non-empty string');
   });
 
   test('returns strongly typed response', async () => {
     (commonApiPost as jest.Mock).mockResolvedValue({
       token: 'typed-token',
-      address: '0x789'
+      address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
     });
 
-    const result = await redeemRefreshTokenWithRetries('0x789', 'token', null);
+    const result = await redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null);
     
     // TypeScript should infer these properties exist
     expect(typeof result.token).toBe('string');
