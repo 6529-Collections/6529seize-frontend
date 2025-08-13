@@ -56,18 +56,82 @@ const isAuthenticationRoleError = (error: unknown): boolean => {
     error instanceof InvalidRoleStateError;
 };
 
-// Helper function to handle invalid JWT
-const handleInvalidJwt = (
-  isConnected: boolean,
+// Helper function to handle invalid JWT when user is disconnected
+const handleInvalidJwtWhenDisconnected = (
   callbacks: ImmediateValidationCallbacks
 ): void => {
-  if (!isConnected) {
-    callbacks.onReset();
+  callbacks.onReset();
+};
+
+// Helper function to handle invalid JWT when user is connected
+const handleInvalidJwtWhenConnected = (
+  callbacks: ImmediateValidationCallbacks
+): void => {
+  callbacks.onRemoveJwt();
+  callbacks.onInvalidateCache();
+  callbacks.onShowSignModal(true);
+};
+
+// Helper function to create validation result
+const createValidationResult = (
+  validationCompleted: boolean,
+  wasCancelled: boolean,
+  shouldShowModal: boolean
+): ImmediateValidationResult => ({
+  validationCompleted,
+  wasCancelled,
+  shouldShowModal
+});
+
+// Helper function to handle JWT validation results
+const handleJwtValidationResult = (
+  isValid: boolean,
+  wasCancelled: boolean,
+  isConnected: boolean,
+  callbacks: ImmediateValidationCallbacks
+): ImmediateValidationResult => {
+  if (wasCancelled) {
+    return createValidationResult(true, true, false);
+  }
+
+  if (isValid) {
+    return createValidationResult(true, false, false);
+  }
+
+  // Handle invalid JWT
+  if (isConnected) {
+    handleInvalidJwtWhenConnected(callbacks);
   } else {
+    handleInvalidJwtWhenDisconnected(callbacks);
+  }
+  
+  return createValidationResult(true, false, isConnected);
+};
+
+// Helper function to handle validation errors
+const handleValidationError = (
+  error: unknown,
+  isConnected: boolean,
+  abortSignal: AbortSignal,
+  callbacks: ImmediateValidationCallbacks
+): ImmediateValidationResult => {
+  if (isAuthenticationRoleError(error)) {
+    callbacks.onLogError('validateJwt_role_error', error);
     callbacks.onRemoveJwt();
     callbacks.onInvalidateCache();
     callbacks.onShowSignModal(true);
+  } else {
+    callbacks.onLogError('validateJwt_general_error', error);
+    if (isConnected) {
+      callbacks.onShowSignModal(true);
+    }
   }
+
+  return createValidationResult(
+    false,
+    abortSignal.aborted,
+    isConnected && !abortSignal.aborted
+  );
 };
 
 export const validateAuthImmediate = async ({
@@ -86,17 +150,9 @@ export const validateAuthImmediate = async ({
     operationId,
     abortSignal
   } = params;
-  
-  const {
-    onShowSignModal,
-    onInvalidateCache,
-    onReset: _onReset,
-    onRemoveJwt,
-    onLogError
-  } = callbacks;
 
   try {
-    // Early validation checks - return immediately if operation is invalid
+    // Early validation check
     if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
       return createCancelledResult();
     }
@@ -110,59 +166,20 @@ export const validateAuthImmediate = async ({
       activeProfileProxy
     });
 
-    // Post-validation check - ensure operation is still valid
+    // Post-validation check
     if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
       return createCancelledResult();
     }
 
-    // Handle cancelled operation
-    if (wasCancelled) {
-      return {
-        validationCompleted: true,
-        wasCancelled: true,
-        shouldShowModal: false
-      };
-    }
-
-    // Handle valid JWT
-    if (isValid) {
-      return {
-        validationCompleted: true,
-        wasCancelled: false,
-        shouldShowModal: false
-      };
-    }
-
-    // Handle invalid JWT
-    handleInvalidJwt(isConnected, callbacks);
-    return {
-      validationCompleted: true,
-      wasCancelled: false,
-      shouldShowModal: isConnected
-    };
+    return handleJwtValidationResult(isValid, wasCancelled, isConnected, callbacks);
 
   } catch (error) {
-    // Handle validation errors only if operation is still valid
-    if (isOperationValid(currentAddress, connectionAddress, abortSignal)) {
-      // Handle authentication role errors
-      if (isAuthenticationRoleError(error)) {
-        onLogError('validateJwt_role_error', error);
-        onRemoveJwt();
-        onInvalidateCache();
-        onShowSignModal(true);
-      } else {
-        onLogError('validateJwt_general_error', error);
-        if (isConnected) {
-          onShowSignModal(true);
-        }
-      }
+    // Only handle errors if operation is still valid
+    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+      return createCancelledResult();
     }
 
-    return {
-      validationCompleted: false,
-      wasCancelled: abortSignal.aborted,
-      shouldShowModal: isConnected && !abortSignal.aborted
-    };
+    return handleValidationError(error, isConnected, abortSignal, callbacks);
   }
 };
 
