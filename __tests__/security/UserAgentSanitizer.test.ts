@@ -171,6 +171,25 @@ describe('UserAgentSanitizer Security Tests', () => {
       expect(() => sanitizeUserAgent(maliciousUA)).toThrow('XSS attempt detected');
     });
 
+    test('blocks script tags with whitespace in closing tags', () => {
+      const scriptWithSpace = 'Mozilla/5.0 <script>alert("XSS")</script > Safari';
+      const scriptWithTab = 'Mozilla/5.0 <script>alert("XSS")</script\t> Safari';
+      const scriptWithNewline = 'Mozilla/5.0 <script>alert("XSS")</script\n> Safari';
+      const scriptWithMultipleSpaces = 'Mozilla/5.0 <script>alert("XSS")</script   > Safari';
+      
+      expect(() => sanitizeUserAgent(scriptWithSpace)).toThrow(UserAgentSecurityError);
+      expect(() => sanitizeUserAgent(scriptWithSpace)).toThrow('XSS attempt detected');
+      
+      expect(() => sanitizeUserAgent(scriptWithTab)).toThrow(UserAgentSecurityError);
+      expect(() => sanitizeUserAgent(scriptWithTab)).toThrow('XSS attempt detected');
+      
+      expect(() => sanitizeUserAgent(scriptWithNewline)).toThrow(UserAgentSecurityError);
+      expect(() => sanitizeUserAgent(scriptWithNewline)).toThrow('XSS attempt detected');
+      
+      expect(() => sanitizeUserAgent(scriptWithMultipleSpaces)).toThrow(UserAgentSecurityError);
+      expect(() => sanitizeUserAgent(scriptWithMultipleSpaces)).toThrow('XSS attempt detected');
+    });
+
     test('blocks javascript: URL injection', () => {
       const maliciousUA = 'Mozilla/5.0 javascript:alert("XSS") Safari';
       

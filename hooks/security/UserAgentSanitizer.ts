@@ -59,7 +59,7 @@ const SECURITY_LIMITS = {
  * XSS patterns that must be blocked
  */
 const XSS_PATTERNS = [
-  /<script\b[^>]*>[^<]*(?:<(?!\/script>)[^<]*)*<\/script>/gi,
+  /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,
   /javascript:/gi,
   /data:text\/html/gi,
   /data:application\/javascript/gi,
