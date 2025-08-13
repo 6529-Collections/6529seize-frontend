@@ -1,35 +1,36 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import { NftPageStats } from "@/components/nftAttributes/NftStats";
+import MemeCalendarOverview from "@/components/schedule/MemeCalendarOverview";
+import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NextGenCollection } from "@/entities/INextgen";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NftOwner } from "@/entities/IOwner";
 import {
-  numberWithCommas,
-  fromGWEI,
-  printMintDate,
-  isEmptyObject,
   capitalizeEveryWord,
+  fromGWEI,
+  isEmptyObject,
+  numberWithCommas,
+  printMintDate,
 } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
-import { ManifoldClaim } from "@/hooks/useManifoldClaim";
-import { fetchUrl } from "@/services/6529api";
-import dynamic from "next/dynamic";
-import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import Link from "next/link";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
-import { NftPageStats } from "@/components/nftAttributes/NftStats";
-import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
-import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
+import useCapacitor from "@/hooks/useCapacitor";
+import { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import { fetchUrl } from "@/services/6529api";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
 
 const NFTImage = dynamic(() => import("@/components/nft-image/NFTImage"), {
   ssr: false,
@@ -297,6 +298,13 @@ export default function Home({
                 </Row>
               )}
             </Container>
+          </Col>
+        </Row>
+      </Container>
+      <Container className="py-5">
+        <Row>
+          <Col>
+            <MemeCalendarOverview displayTz="local" />
           </Col>
         </Row>
       </Container>

@@ -1,41 +1,54 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { DisplayTz } from "./meme-calendar.helpers";
 import {
   addMonths,
+  displayedSeasonNumberFromIndex,
   formatFullDate,
   formatFullDateTime,
   formatToFullDivision,
   getMintNumberForMintDate,
   getSeasonIndexForDate,
   getSeasonStartDate,
-  immediatelyNextMintDate,
-  isMintDayDate,
+  immediatelyNextMintInstantUTC,
+  isMintEligibleUtcDay,
+  mintStartInstantUtcForMintDay,
   printCalendarInvites,
   ymd,
 } from "./meme-calendar.helpers";
 
 /**
- * Layout wrapper: two equal-height cards side-by-side on md+,
- * stacked on small screens.
+ * Layout wrapper: global Local/UTC toggle + two cards
  */
-export default function MemeCalendarOverview() {
+export default function MemeCalendarOverview({
+  displayTz,
+}: {
+  displayTz: DisplayTz;
+}) {
   return (
-    <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
-      <div className="tw-h-full">
-        <MemeCalendarOverviewNextMint />
-      </div>
-      <div className="tw-h-full">
-        <MemeCalendarOverviewUpcomingMints />
+    <div className="tw-flex tw-flex-col tw-gap-3">
+      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+        <div className="tw-h-full">
+          <MemeCalendarOverviewNextMint displayTz={displayTz} />
+        </div>
+        <div className="tw-h-full">
+          <MemeCalendarOverviewUpcomingMints displayTz={displayTz} />
+        </div>
       </div>
     </div>
   );
 }
 
 /**
- * Card 1 — Next mint: big number, date, live countdown, calendar links.
+ * Card 1 — Next mint: big number, date (single line governed by global toggle),
+ * live countdown, calendar links.
  */
-export function MemeCalendarOverviewNextMint() {
+export function MemeCalendarOverviewNextMint({
+  displayTz,
+}: {
+  displayTz: DisplayTz;
+}) {
   const [now, setNow] = useState(new Date());
 
   // tick every second for countdown
@@ -44,24 +57,34 @@ export function MemeCalendarOverviewNextMint() {
     return () => clearInterval(t);
   }, []);
 
-  const nextMint = useMemo(() => immediatelyNextMintDate(now), [now]);
-  const memeNo = useMemo(() => getMintNumberForMintDate(nextMint), [nextMint]);
+  const nextMintInstantUtc = useMemo(
+    () => immediatelyNextMintInstantUTC(now),
+    [now]
+  );
 
-  const diffMs = nextMint.getTime() - now.getTime();
+  // Mint number is based on the UTC *day* of that instant
+  const nextMintUtcDay = useMemo(
+    () =>
+      new Date(
+        Date.UTC(
+          nextMintInstantUtc.getUTCFullYear(),
+          nextMintInstantUtc.getUTCMonth(),
+          nextMintInstantUtc.getUTCDate()
+        )
+      ),
+    [nextMintInstantUtc]
+  );
+  const memeNo = useMemo(
+    () => getMintNumberForMintDate(nextMintUtcDay),
+    [nextMintUtcDay]
+  );
+
+  const diffMs = nextMintInstantUtc.getTime() - now.getTime();
   const diff = diffMs > 0 ? msToParts(diffMs) : { d: 0, h: 0, m: 0, s: 0 };
 
-  // All-day event on the mint date (end-exclusive next day)
-  const start = new Date(
-    nextMint.getFullYear(),
-    nextMint.getMonth(),
-    nextMint.getDate()
-  );
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-
   const invitesHtml = useMemo(
-    () => printCalendarInvites(start, memeNo),
-    [start, memeNo]
+    () => printCalendarInvites(nextMintInstantUtc, memeNo),
+    [nextMintInstantUtc, memeNo]
   );
 
   return (
@@ -72,10 +95,10 @@ export function MemeCalendarOverviewNextMint() {
           #{memeNo.toLocaleString()}
         </div>
         <div className="tw-text-lg tw-text-gray-200">
-          {formatFullDateTime(nextMint)}
+          {formatFullDateTime(nextMintInstantUtc, displayTz)}
         </div>
-        <div className="tw-text-sm tw-text-gray-300">
-          {formatToFullDivision(nextMint)}
+        <div className="tw-text-sm tw-text-gray-400">
+          {formatToFullDivision(nextMintInstantUtc)}
         </div>
 
         <div className="tw-pt-4 tw-text-sm tw-text-gray-400">Minting in</div>
@@ -83,17 +106,16 @@ export function MemeCalendarOverviewNextMint() {
           {(() => {
             const parts: string[] = [];
             if (diff.d > 0) {
-              parts.push(`${diff.d}d`);
-              parts.push(`${diff.h}h`);
-              parts.push(`${diff.m}m`);
-              parts.push(`${diff.s}s`);
+              parts.push(
+                `${diff.d}d`,
+                `${diff.h}h`,
+                `${diff.m}m`,
+                `${diff.s}s`
+              );
             } else if (diff.h > 0) {
-              parts.push(`${diff.h}h`);
-              parts.push(`${diff.m}m`);
-              parts.push(`${diff.s}s`);
+              parts.push(`${diff.h}h`, `${diff.m}m`, `${diff.s}s`);
             } else if (diff.m > 0) {
-              parts.push(`${diff.m}m`);
-              parts.push(`${diff.s}s`);
+              parts.push(`${diff.m}m`, `${diff.s}s`);
             } else {
               parts.push(`${diff.s}s`);
             }
@@ -104,9 +126,7 @@ export function MemeCalendarOverviewNextMint() {
 
       <div
         className="tw-pt-4"
-        dangerouslySetInnerHTML={{
-          __html: invitesHtml,
-        }}
+        dangerouslySetInnerHTML={{ __html: invitesHtml }}
       />
     </div>
   );
@@ -114,9 +134,13 @@ export function MemeCalendarOverviewNextMint() {
 
 /**
  * Card 2 — Upcoming mints for the current SZN.
- * Shows a simple table of remaining Mon/Wed/Fri dates in this season.
+ * Shows a table of remaining Mon/Wed/Fri date-times (timed, not all-day).
  */
-export function MemeCalendarOverviewUpcomingMints() {
+export function MemeCalendarOverviewUpcomingMints({
+  displayTz,
+}: {
+  displayTz: DisplayTz;
+}) {
   const [now] = useState(new Date());
 
   const { seasonStart, seasonEndInclusive } = useMemo(() => {
@@ -127,41 +151,55 @@ export function MemeCalendarOverviewUpcomingMints() {
   }, [now]);
 
   const rows = useMemo(() => {
-    // Start from today (or next day) but don’t go before seasonStart
-    const startScan = new Date(
-      Math.max(
-        new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(),
-        new Date(seasonStart.getFullYear(), seasonStart.getMonth(), 1).getTime()
+    // UTC versions of today and season bounds
+    const todayUtcDay = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    );
+
+    const seasonStartUtcDay = new Date(
+      Date.UTC(seasonStart.getUTCFullYear(), seasonStart.getUTCMonth(), 1)
+    );
+    const seasonEndLastUtcDay = new Date(
+      Date.UTC(
+        seasonEndInclusive.getUTCFullYear(),
+        seasonEndInclusive.getUTCMonth() + 1,
+        0
       )
     );
-    // Walk day-by-day and pick mint days (Mon/Wed/Fri) within the season
-    const out: { date: Date; meme: number }[] = [];
-    const cursor = new Date(startScan);
-    const seasonEndLastDay = new Date(
-      seasonEndInclusive.getFullYear(),
-      seasonEndInclusive.getMonth() + 1,
-      0
+
+    // Start scanning from max(today, seasonStart)
+    const scanStart = new Date(
+      Math.max(todayUtcDay.getTime(), seasonStartUtcDay.getTime())
     );
-    while (cursor <= seasonEndLastDay) {
-      if (isMintDayDate(cursor)) {
-        const d = new Date(cursor);
-        out.push({ date: d, meme: getMintNumberForMintDate(d) });
+    const out: { utcDay: Date; instantUtc: Date; meme: number }[] = [];
+
+    const cursor = new Date(scanStart);
+    while (cursor <= seasonEndLastUtcDay) {
+      if (isMintEligibleUtcDay(cursor)) {
+        const mintInstant = mintStartInstantUtcForMintDay(cursor);
+        out.push({
+          utcDay: new Date(cursor),
+          instantUtc: mintInstant,
+          meme: getMintNumberForMintDate(cursor),
+        });
       }
-      cursor.setDate(cursor.getDate() + 1);
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
-    // Remove past mints earlier today
-    const todayYmd = ymd(now);
-    return out.filter((x) => ymd(x.date) > todayYmd);
+
+    // Only future mints (instant must be after 'now')
+    return out.filter((x) => x.instantUtc.getTime() > now.getTime());
   }, [now, seasonStart, seasonEndInclusive]);
 
   return (
     <div className="tw-h-full tw-min-h-[220px] tw-p-4 tw-flex tw-flex-col tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#181818]">
       <div className="tw-flex tw-items-baseline tw-justify-between tw-mb-3">
         <div className="tw-text-sm tw-text-gray-400">
-          Upcoming Mints for SZN {getSeasonIndexForDate(now) + 1}
+          Upcoming Mints for SZN{" "}
+          {displayedSeasonNumberFromIndex(getSeasonIndexForDate(now))}
         </div>
         <div className="tw-text-xs tw-text-gray-500">
-          {formatFullDate(seasonStart)} - {formatFullDate(seasonEndInclusive)}
+          {formatFullDate(seasonStart, displayTz)} -{" "}
+          {formatFullDate(seasonEndInclusive, displayTz)}
         </div>
       </div>
 
@@ -176,31 +214,26 @@ export function MemeCalendarOverviewUpcomingMints() {
                 </td>
               </tr>
             ) : (
-              rows.map(({ date, meme }) => {
-                const title = `Meme #${meme}`;
-                // All-day event for that calendar day
-                const start = new Date(
-                  date.getFullYear(),
-                  date.getMonth(),
-                  date.getDate()
-                );
-                const end = new Date(start);
-                end.setDate(end.getDate() + 1);
-
-                return (
-                  <tr key={ymd(date)}>
-                    <td className="tw-py-2 tw-pr-4 tw-font-semibold">
-                      #{meme.toLocaleString()}
-                    </td>
-                    <td className="tw-py-2 tw-pr-4">{formatFullDate(date)}</td>
-                    <td
-                      className="tw-py-2 tw-text-right"
-                      dangerouslySetInnerHTML={{
-                        __html: printCalendarInvites(date, meme, "#fff", 18),
-                      }}></td>
-                  </tr>
-                );
-              })
+              rows.map(({ utcDay, instantUtc, meme }) => (
+                <tr key={ymd(utcDay)}>
+                  <td className="tw-py-2 tw-pr-4 tw-font-semibold">
+                    #{meme.toLocaleString()}
+                  </td>
+                  <td className="tw-py-2 tw-pr-4">
+                    {formatFullDateTime(instantUtc, displayTz)}
+                  </td>
+                  <td
+                    className="tw-py-2 tw-text-right"
+                    dangerouslySetInnerHTML={{
+                      __html: printCalendarInvites(
+                        instantUtc,
+                        meme,
+                        "#fff",
+                        18
+                      ),
+                    }}></td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>

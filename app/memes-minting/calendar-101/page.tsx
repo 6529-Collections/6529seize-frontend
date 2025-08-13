@@ -1,15 +1,15 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import MemesMintingCalendar from "@/components/schedule/MemesMintingCalendar"; // + add
+import MemeCalendarDetails from "@/components/schedule/MemeCalendarDetails";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Memes Minting Calendar" });
+  return getAppMetadata({ title: "Memes Minting Calendar 101" });
 }
 
-export default function MemesMintingCalendarPage() {
+export default function MemesMintingPage() {
   return (
     <div className="tw-container tw-mx-auto tw-my-6">
-      <MemesMintingCalendar />
+      <MemeCalendarDetails />
     </div>
   );
 }

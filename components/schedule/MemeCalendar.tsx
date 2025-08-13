@@ -1,11 +1,16 @@
 "use client";
 
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCaretLeft,
+  faCaretRight,
+  faChevronDown,
+  faChevronUp,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import type { DisplayTz } from "./meme-calendar.helpers";
 import {
-  SEASONS_PER_EON,
   SEASONS_PER_EPOCH,
   SEASONS_PER_ERA,
   SEASONS_PER_PERIOD,
@@ -13,18 +18,28 @@ import {
   ZoomLevel,
   addMonths,
   dateFromMintNumber,
+  displayedEonNumberFromIndex,
+  displayedEpochNumberFromIndex,
+  displayedEraNumberFromIndex,
+  displayedPeriodNumberFromIndex,
+  displayedSeasonNumberFromIndex,
+  displayedYearNumberFromIndex,
   formatFullDate,
+  formatFullDateTime,
   formatMint,
   getMintNumberForMintDate,
   getMonthWeeks,
   getRangeLabel,
   getSeasonIndexForDate,
   getSeasonStartDate,
-  isMintDayDate,
+  isMintEligibleUtcDay,
+  isSznOneIndex,
+  mintStartInstantUtcForMintDay,
   printCalendarInvites,
   toISO,
   ymd,
 } from "./meme-calendar.helpers";
+import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";
 
 /*
  * MemeCalendar (TypeScript version)
@@ -34,7 +49,7 @@ import {
  * Epoch, Period, Era, Eon) accumulate from a fixed starting date
  * of 1 January 2026. Users can zoom between divisions and
  * navigate forwards/backwards. Tailwind classes are prefixed with
- * `tw-` – configure your Tailwind setup accordingly.
+ * `tw-` - configure your Tailwind setup accordingly.
  */
 
 function getRangeDatesByZoom(
@@ -43,6 +58,11 @@ function getRangeDatesByZoom(
 ): { start: Date; end: Date } {
   switch (zoom) {
     case "season": {
+      if (isSznOneIndex(seasonIndex)) {
+        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        return { start, end };
+      }
       const start = getSeasonStartDate(seasonIndex);
       const end = addMonths(start, 2); // inclusive 3 months
       return { start, end };
@@ -55,6 +75,20 @@ function getRangeDatesByZoom(
       return { start, end };
     }
     case "epoch": {
+      const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
+      if (epochNumber === 0) {
+        // special: SZN1 epoch
+        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        return { start, end };
+      } else if (epochNumber >= 1) {
+        // start = Jan 1 of 2023 + 4*(epochNumber-1)
+        const startYear = 2023 + 4 * (epochNumber - 1);
+        const start = new Date(Date.UTC(startYear, 0, 1));
+        const end = new Date(Date.UTC(startYear + 4, 0, 0)); // Dec 31, 4 years later
+        return { start, end };
+      }
+      // fallback
       const start = getSeasonStartDate(
         Math.floor(seasonIndex / SEASONS_PER_EPOCH) * SEASONS_PER_EPOCH
       );
@@ -62,6 +96,19 @@ function getRangeDatesByZoom(
       return { start, end };
     }
     case "period": {
+      const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
+      if (periodNumber === 0) {
+        // special: SZN1 period
+        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        return { start, end };
+      } else if (periodNumber >= 1) {
+        // start = Jan 1 of 2023 + 20*(periodNumber-1)
+        const startYear = 2023 + 20 * (periodNumber - 1);
+        const start = new Date(Date.UTC(startYear, 0, 1));
+        const end = new Date(Date.UTC(startYear + 20, 0, 0)); // Dec 31, 19 years later
+        return { start, end };
+      }
       const start = getSeasonStartDate(
         Math.floor(seasonIndex / SEASONS_PER_PERIOD) * SEASONS_PER_PERIOD
       );
@@ -69,17 +116,29 @@ function getRangeDatesByZoom(
       return { start, end };
     }
     case "era": {
-      const start = getSeasonStartDate(
-        Math.floor(seasonIndex / SEASONS_PER_ERA) * SEASONS_PER_ERA
-      );
-      const end = addMonths(start, 12 * 100 - 1);
+      // Era 0: SZN1 only (Jun–Dec 2022). Era 1 starts Jan 2023 and spans 100 years.
+      const eraNumber = displayedEraNumberFromIndex(seasonIndex);
+      if (eraNumber === 0) {
+        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        return { start, end };
+      }
+      const startYear = 2023 + 100 * (eraNumber - 1);
+      const start = new Date(Date.UTC(startYear, 0, 1));
+      const end = new Date(Date.UTC(startYear + 100, 0, 0)); // Dec 31 (startYear+99)
       return { start, end };
     }
     case "eon": {
-      const start = getSeasonStartDate(
-        Math.floor(seasonIndex / SEASONS_PER_EON) * SEASONS_PER_EON
-      );
-      const end = addMonths(start, 12 * 1000 - 1);
+      // Eon 0: SZN1 only (Jun–Dec 2022). Eon 1 starts Jan 2023 and spans 1000 years.
+      const eonNumber = displayedEonNumberFromIndex(seasonIndex);
+      if (eonNumber === 0) {
+        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        return { start, end };
+      }
+      const startYear = 2023 + 1000 * (eonNumber - 1);
+      const start = new Date(Date.UTC(startYear, 0, 1));
+      const end = new Date(Date.UTC(startYear + 1000, 0, 0)); // Dec 31 (startYear+999)
       return { start, end };
     }
   }
@@ -88,16 +147,16 @@ function getRangeDatesByZoom(
 function formatMonthYearShort(d: Date): string {
   return `${d.toLocaleString("default", {
     month: "short",
-  })} ${d.getFullYear()}`;
+  })} ${d.getUTCFullYear()}`;
 }
 
 function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
-  const seasonNumber = seasonIndex + 1;
-  const yearNumber = Math.floor(seasonIndex / SEASONS_PER_YEAR) + 1;
-  const epochNumber = Math.floor(seasonIndex / SEASONS_PER_EPOCH) + 1;
-  const periodNumber = Math.floor(seasonIndex / SEASONS_PER_PERIOD) + 1;
-  const eraNumber = Math.floor(seasonIndex / SEASONS_PER_ERA) + 1;
-  const eonNumber = Math.floor(seasonIndex / SEASONS_PER_EON) + 1;
+  const seasonNumber = displayedSeasonNumberFromIndex(seasonIndex);
+  const yearNumber = displayedYearNumberFromIndex(seasonIndex);
+  const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
+  const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
+  const eraNumber = displayedEraNumberFromIndex(seasonIndex);
+  const eonNumber = displayedEonNumberFromIndex(seasonIndex);
 
   switch (zoom) {
     case "season":
@@ -120,11 +179,13 @@ interface MonthProps {
   date: Date;
   onSelectDay?: (date: Date) => void;
   autoOpenYmd?: string;
+  displayTz: DisplayTz;
 }
 interface SeasonViewProps {
   seasonIndex: number;
   onSelectDay?: (date: Date) => void;
   autoOpenYmd?: string;
+  displayTz: DisplayTz;
 }
 interface YearViewProps {
   seasonIndex: number;
@@ -163,12 +224,15 @@ interface EonViewProps {
 }
 
 /**
- * Month component – renders a month grid with weekday headers.
+ * Month component - renders a month grid with weekday headers.
  */
-function Month({ date, onSelectDay, autoOpenYmd }: MonthProps) {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const monthName = date.toLocaleString("default", { month: "long" });
+function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const monthName = new Date(Date.UTC(year, month, 1)).toLocaleString(
+    "default",
+    { month: "long" }
+  );
   const weeks = getMonthWeeks(year, month);
   useEffect(() => {
     if (!autoOpenYmd) return;
@@ -201,7 +265,7 @@ function Month({ date, onSelectDay, autoOpenYmd }: MonthProps) {
       </div>
       {/* Weekday header */}
       <div className="tw-grid tw-grid-cols-7 tw-text-xs tw-text-center tw-font-medium tw-mt-1">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((wd) => (
+        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((wd) => (
           <div
             key={wd}
             className="tw-p-1 tw-border-b-2"
@@ -221,29 +285,47 @@ function Month({ date, onSelectDay, autoOpenYmd }: MonthProps) {
                 className="tw-invisible tw-pointer-events-none"></div>
             );
           }
-          const cellDate = new Date(year, month, day);
-          const isMintDay = isMintDayDate(cellDate);
-          const mintNumber = isMintDay
-            ? getMintNumberForMintDate(cellDate)
-            : undefined;
-          const mintLabel =
-            mintNumber !== undefined ? formatMint(mintNumber) : undefined;
 
-          const isToday = ymd(cellDate) === ymd(new Date());
+          const cellDateUtcDay = new Date(Date.UTC(year, month, day));
+          const historical = getHistoricalMintsOnUtcDay(cellDateUtcDay);
+          const isHistoricalMintDay = historical.length > 0;
+
+          const isScheduledMintDay = isMintEligibleUtcDay(cellDateUtcDay);
+
+          const isMintDay = isHistoricalMintDay || isScheduledMintDay;
+
+          // For label: if multiple historical mints, show a range (#1-#3). Otherwise single #.
+          let mintLabel: string | undefined = undefined;
+          let mintInstantUtc: Date | undefined = undefined;
+          let mintNumber: number | undefined = undefined;
+
+          if (isHistoricalMintDay) {
+            const first = historical[0];
+            const last = historical[historical.length - 1];
+            mintNumber = first.id; // anchor for invites (unused for past)
+            mintInstantUtc = first.instantUtc;
+            mintLabel =
+              historical.length === 1
+                ? `#${first.id}`
+                : `#${first.id}-#${last.id}`;
+          } else if (isScheduledMintDay) {
+            mintNumber = getMintNumberForMintDate(cellDateUtcDay);
+            mintLabel = formatMint(mintNumber);
+            mintInstantUtc = mintStartInstantUtcForMintDay(cellDateUtcDay);
+          }
+
+          const isToday = ymd(cellDateUtcDay) === ymd(new Date());
 
           if (!isMintDay) {
             return (
               <div
                 key={idx}
                 className="tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-text-gray-400"
-                style={{
-                  borderColor: "#222222",
-                  borderBottomStyle: "solid",
-                }}>
+                style={{ borderColor: "#222222", borderBottomStyle: "solid" }}>
                 <span
                   className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
                     isToday
-                      ? "tw-bg-[#eb534e] tw-text-black"
+                      ? "tw-bg-[#eb534e] tw-text-black tw-font-semibold"
                       : "tw-text-gray-400"
                   }`}>
                   {day}
@@ -252,17 +334,50 @@ function Month({ date, onSelectDay, autoOpenYmd }: MonthProps) {
             );
           }
 
-          const fullDate = formatFullDate(cellDate);
-          const tooltipHtml = `
-            <div style="min-width:200px">
-              <div style="font-weight:600; margin-bottom:3px; font-size:larger">Meme ${mintLabel}</div>
-              <div style="margin-bottom:12px">${fullDate}</div>
-              ${printCalendarInvites(cellDate, mintNumber!, "#000")}
+          // Tooltip HTML:
+          let tooltipHtml = "";
+          let tooltipClassName = "!tw-bg-[#dcc]";
+
+          if (isHistoricalMintDay) {
+            // list each historical mint with exact timestamps
+            const items = historical
+              .map((h) => {
+                return `#${h.id}`;
+              })
+              .join(", ");
+            tooltipHtml = `<div style="min-width:220px">
+              <div style="font-weight:600; margin-bottom:3px; font-size:larger">
+                Meme${historical.length > 1 ? "s" : ""} ${items}
+              </div>
+              <div style="margin-bottom:12px">${formatFullDate(
+                historical[0].instantUtc,
+                displayTz
+              )}</div>
             </div>`;
+          } else if (mintInstantUtc) {
+            const now = new Date();
+            const oneLine =
+              mintInstantUtc.getTime() > now.getTime()
+                ? formatFullDateTime(mintInstantUtc, displayTz)
+                : formatFullDate(mintInstantUtc, displayTz);
+            const invites =
+              mintInstantUtc.getTime() > now.getTime()
+                ? printCalendarInvites(mintInstantUtc, mintNumber!, "#000")
+                : "";
+            tooltipHtml = `
+              <div style="min-width:220px">
+                <div style="font-weight:600; margin-bottom:3px; font-size:larger">Meme ${mintLabel}</div>
+                <div style="margin-bottom:12px">${oneLine}</div>
+                ${invites}
+              </div>`;
+            if (mintInstantUtc && mintInstantUtc.getTime() > now.getTime()) {
+              tooltipClassName = "!tw-bg-[#eee]";
+            }
+          }
 
           return (
             <div
-              id={`meme-cell-${ymd(cellDate)}`}
+              id={`meme-cell-${ymd(cellDateUtcDay)}`}
               key={idx}
               className="tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-cursor-pointer hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
@@ -271,14 +386,17 @@ function Month({ date, onSelectDay, autoOpenYmd }: MonthProps) {
               }}
               data-tooltip-id="meme-tooltip"
               data-tooltip-html={tooltipHtml}
-              onClick={() => onSelectDay && onSelectDay(cellDate)}>
+              data-tooltip-class-name={tooltipClassName}
+              onClick={() => onSelectDay && onSelectDay(cellDateUtcDay)}>
               <span
                 className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
-                  isToday ? "tw-bg-[#eb534e] tw-text-black" : ""
+                  isToday
+                    ? "tw-bg-[#eb534e] tw-text-black tw-font-semibold"
+                    : ""
                 }`}>
                 {day}
               </span>
-              {mintNumber !== undefined && (
+              {mintLabel && (
                 <span className="tw-text-xs tw-font-medium tw-text-blue-600 tw-mt-0.5">
                   {mintLabel}
                 </span>
@@ -292,19 +410,32 @@ function Month({ date, onSelectDay, autoOpenYmd }: MonthProps) {
 }
 
 /**
- * SeasonView – displays three consecutive months (a quarter).
+ * SeasonView - displays three consecutive months (a quarter).
  */
 function SeasonView({
   seasonIndex,
   onSelectDay,
   autoOpenYmd,
+  displayTz,
 }: SeasonViewProps) {
   const seasonStart = getSeasonStartDate(seasonIndex);
-  const months: Date[] = [0, 1, 2].map((offset) => {
-    const d = new Date(seasonStart);
-    d.setMonth(seasonStart.getMonth() + offset);
-    return d;
-  });
+
+  const months: Date[] = isSznOneIndex(seasonIndex)
+    ? (() => {
+        const arr: Date[] = [];
+        for (let m = 5; m <= 11; m++) {
+          // Jun .. Dec 2022
+          arr.push(new Date(Date.UTC(2022, m, 1)));
+        }
+        return arr;
+      })()
+    : [0, 1, 2].map((offset) => {
+        const d = new Date(seasonStart);
+        d.setUTCMonth(seasonStart.getUTCMonth() + offset, 1);
+        d.setUTCHours(0, 0, 0, 0);
+        return d;
+      });
+
   return (
     <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-3 tw-gap-4 tw-mt-4">
       {months.map((m) => (
@@ -313,6 +444,7 @@ function SeasonView({
           date={m}
           onSelectDay={onSelectDay}
           autoOpenYmd={autoOpenYmd}
+          displayTz={displayTz}
         />
       ))}
     </div>
@@ -320,7 +452,7 @@ function SeasonView({
 }
 
 /**
- * YearView – displays only seasons with range labels and drills down to SZN view.
+ * YearView - displays only seasons with range labels and drills down to SZN view.
  */
 function YearView({
   seasonIndex,
@@ -329,7 +461,39 @@ function YearView({
 }: YearViewProps) {
   const yearIndex = Math.floor(seasonIndex / SEASONS_PER_YEAR);
   const firstSeasonIndexOfYear = yearIndex * SEASONS_PER_YEAR;
+  const currentIdx = getSeasonIndexForDate(new Date());
 
+  // ⭐ Special case: Year 0 (2022) shows a single SZN1 card (Jun–Dec 2022)
+  const displayedYear = displayedYearNumberFromIndex(seasonIndex);
+  if (displayedYear === 0) {
+    const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+    const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+    const sIdx = -13; // our SZN1 bucket
+    const isCurrent = currentIdx === sIdx;
+
+    return (
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+        <div
+          key={sIdx}
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-text-black"
+          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          onClick={() => {
+            onSelectSeason(sIdx);
+            onZoomToSeason();
+          }}>
+          <div className="tw-font-semibold">SZN #1</div>
+          <div className="tw-text-xs tw-text-gray-500">
+            {start.toLocaleString("default", { month: "short" })}{" "}
+            {start.getUTCFullYear()} -{" "}
+            {end.toLocaleString("default", { month: "short" })}{" "}
+            {end.getUTCFullYear()}
+          </div>
+          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+        </div>
+      </div>
+    );
+  }
+  // 👇 existing code for other years stays the same
   const seasons = Array.from({ length: 4 }, (_, s) => {
     const sIdx = firstSeasonIndexOfYear + s;
     const start = getSeasonStartDate(sIdx);
@@ -339,30 +503,36 @@ function YearView({
 
   return (
     <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
-      {seasons.map((s) => (
-        <div
-          key={s.sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-          onClick={() => {
-            onSelectSeason(s.sIdx);
-            onZoomToSeason();
-          }}>
-          <div className="tw-font-semibold">SZN #{s.sIdx + 1}</div>
-          <div className="tw-text-xs tw-text-gray-500">
-            {s.start.toLocaleString("default", { month: "short" })}{" "}
-            {s.start.getFullYear()} –{" "}
-            {s.end.toLocaleString("default", { month: "short" })}{" "}
-            {s.end.getFullYear()}
+      {seasons.map((s) => {
+        const isCurrent = currentIdx === s.sIdx;
+        return (
+          <div
+            key={s.sIdx}
+            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+            style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+            onClick={() => {
+              onSelectSeason(s.sIdx);
+              onZoomToSeason();
+            }}>
+            <div className="tw-font-semibold">
+              SZN #{displayedSeasonNumberFromIndex(s.sIdx)}
+            </div>
+            <div className="tw-text-xs tw-text-gray-500">
+              {s.start.toLocaleString("default", { month: "short" })}{" "}
+              {s.start.getUTCFullYear()} -{" "}
+              {s.end.toLocaleString("default", { month: "short" })}{" "}
+              {s.end.getUTCFullYear()}
+            </div>
+            <div className="tw-text-sm tw-mt-1">{s.label}</div>
           </div>
-          <div className="tw-text-sm tw-mt-1">{s.label}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
 /**
- * EpochView – years only, one per row, with mint ranges. Click drills into Year view.
+ * EpochView - years only, one per row, with mint ranges. Click drills into Year view.
  */
 function EpochView({
   seasonIndex,
@@ -370,191 +540,330 @@ function EpochView({
   onSelectSeason,
   onZoomToYear,
 }: EpochViewProps) {
-  const epochIndex = Math.floor(seasonIndex / SEASONS_PER_EPOCH);
-  const firstSeasonIndexOfEpoch = epochIndex * SEASONS_PER_EPOCH;
+  const currentIdx = getSeasonIndexForDate(new Date());
+  const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
 
-  const years = Array.from({ length: 4 }, (_, yearOffset) => {
-    const yearSeasonIndex =
-      firstSeasonIndexOfEpoch + yearOffset * SEASONS_PER_YEAR;
-    const start = getSeasonStartDate(yearSeasonIndex);
-    const end = addMonths(start, 11);
-    const yearNumber = yearSeasonIndex / SEASONS_PER_YEAR + 1;
-    return {
-      yearNumber,
-      start,
-      end,
-      seasonIndex: yearSeasonIndex,
-      label: getRangeLabel(start, end),
-    };
-  });
-
-  return (
-    <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
-      {years.map((y) => (
+  if (epochNumber === 0) {
+    // Special case: SZN1 epoch, single card for Year #0 (SZN1)
+    const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+    const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+    const sIdx = -13; // SZN1
+    // Highlight if currentIdx is within SZN1 range
+    const isCurrent = currentIdx === sIdx;
+    return (
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
         <div
-          key={toISO(y.start)}
+          key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
           onClick={() => {
-            onSelectYear(y.yearNumber);
+            onSelectSeason(sIdx);
+            onSelectYear(0);
             onZoomToYear();
           }}>
-          <div className="tw-font-semibold">
-            Year #{y.yearNumber} ({y.start.getFullYear()})
-          </div>
-          <div className="tw-text-xs tw-text-gray-500">
-            {y.start.toLocaleString("default", { month: "short" })}{" "}
-            {y.start.getFullYear()} –{" "}
-            {y.end.toLocaleString("default", { month: "short" })}{" "}
-            {y.end.getFullYear()}
-          </div>
-          <div className="tw-text-sm tw-mt-1">{y.label}</div>
+          <div className="tw-font-semibold">Year #0 (2022)</div>
+          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
+          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
         </div>
-      ))}
-    </div>
-  );
+      </div>
+    );
+  } else {
+    // For epochNumber >= 1, show 4 years, starting with Jan 1 of year 2023 + 4*(epochNumber-1)
+    const startYear = 2023 + 4 * (epochNumber - 1);
+    const years = Array.from({ length: 4 }, (_, yearOffset) => {
+      const year = startYear + yearOffset;
+      const yearSeasonIndex = getSeasonIndexForDate(
+        new Date(Date.UTC(year, 0, 1))
+      );
+      const start = new Date(Date.UTC(year, 0, 1));
+      const end = new Date(Date.UTC(year, 11, 31));
+      const yearNumber = displayedYearNumberFromIndex(yearSeasonIndex);
+      return {
+        yearNumber,
+        start,
+        end,
+        seasonIndex: yearSeasonIndex,
+        label: getRangeLabel(start, end),
+      };
+    });
+    return (
+      <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
+        {years.map((y) => {
+          const isCurrent =
+            currentIdx >= y.seasonIndex &&
+            currentIdx < y.seasonIndex + SEASONS_PER_YEAR;
+          return (
+            <div
+              key={toISO(y.start)}
+              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+              style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+              onClick={() => {
+                onSelectYear(y.yearNumber);
+                onZoomToYear();
+              }}>
+              <div className="tw-font-semibold">
+                Year #{y.yearNumber} ({y.start.getUTCFullYear()})
+              </div>
+              <div className="tw-text-xs tw-text-gray-500">
+                {y.start.toLocaleString("default", { month: "short" })}{" "}
+                {y.start.getUTCFullYear()} -{" "}
+                {y.end.toLocaleString("default", { month: "short" })}{" "}
+                {y.end.getUTCFullYear()}
+              </div>
+              <div className="tw-text-sm tw-mt-1">{y.label}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 }
 
 /**
- * PeriodView – epochs only, one per row, with ranges; drill into Epoch view.
+ * PeriodView - epochs only, one per row, with ranges; drill into Epoch view.
  */
 function PeriodView({
   seasonIndex,
   onSelectEpoch,
   onZoomToEpoch,
 }: PeriodViewProps) {
-  const periodIndex = Math.floor(seasonIndex / SEASONS_PER_PERIOD);
-  const firstSeasonIndexOfPeriod = periodIndex * SEASONS_PER_PERIOD;
-  const epochs = Array.from({ length: 5 }, (_, epochOffset) => {
-    const epochSeasonIndex =
-      firstSeasonIndexOfPeriod + epochOffset * SEASONS_PER_EPOCH;
-    const start = getSeasonStartDate(epochSeasonIndex);
-    const end = addMonths(start, 12 * 4 - 1);
-    const epochNumber = epochSeasonIndex / SEASONS_PER_EPOCH + 1;
-    return {
-      epochNumber,
-      start,
-      end,
-      seasonIndex: epochSeasonIndex,
-      label: getRangeLabel(start, end),
-    };
-  });
-  return (
-    <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
-      {epochs.map((ep) => (
+  const currentIdx = getSeasonIndexForDate(new Date());
+  const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
+
+  if (periodNumber === 0) {
+    // Special case: SZN1 period, single card for Epoch #0
+    const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
+    const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+    const sIdx = -13; // SZN1
+    const isCurrent = currentIdx === sIdx;
+    return (
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
         <div
-          key={toISO(ep.start)}
+          key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
           onClick={() => {
-            onSelectEpoch(ep.epochNumber);
+            onSelectEpoch(0);
             onZoomToEpoch();
           }}>
-          <div className="tw-font-semibold">
-            Epoch #{ep.epochNumber} ({ep.start.getFullYear()})
-          </div>
-          <div className="tw-text-xs tw-text-gray-500">
-            {ep.start.toLocaleString("default", { month: "short" })}{" "}
-            {ep.start.getFullYear()} –{" "}
-            {ep.end.toLocaleString("default", { month: "short" })}{" "}
-            {ep.end.getFullYear()}
-          </div>
-          <div className="tw-text-sm tw-mt-1">{ep.label}</div>
+          <div className="tw-font-semibold">Epoch #0 (2022)</div>
+          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
+          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
         </div>
-      ))}
-    </div>
-  );
+      </div>
+    );
+  } else {
+    // For periodNumber >= 1, show 5 epochs, starting with epochNumber = 1 + 5*(periodNumber-1)
+    const firstEpochNumber = 1 + 5 * (periodNumber - 1);
+    const epochs = Array.from({ length: 5 }, (_, k) => {
+      const epochNumber = firstEpochNumber + k;
+      const startYear = 2023 + 4 * (epochNumber - 1);
+      const start = new Date(Date.UTC(startYear, 0, 1));
+      const end = new Date(Date.UTC(startYear + 4, 0, 0)); // Dec 31, 4 years later
+      const seasonIndexForEpoch = getSeasonIndexForDate(
+        new Date(Date.UTC(startYear, 0, 1))
+      );
+      return {
+        epochNumber,
+        start,
+        end,
+        seasonIndex: seasonIndexForEpoch,
+        label: getRangeLabel(start, end),
+      };
+    });
+    return (
+      <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
+        {epochs.map((ep) => {
+          const isCurrent =
+            currentIdx >= ep.seasonIndex &&
+            currentIdx < ep.seasonIndex + SEASONS_PER_EPOCH;
+          return (
+            <div
+              key={toISO(ep.start)}
+              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+              style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+              onClick={() => {
+                onSelectEpoch(ep.epochNumber);
+                onZoomToEpoch();
+              }}>
+              <div className="tw-font-semibold">
+                Epoch #{ep.epochNumber} ({ep.start.getUTCFullYear()})
+              </div>
+              <div className="tw-text-xs tw-text-gray-500">
+                {ep.start.toLocaleString("default", { month: "short" })}{" "}
+                {ep.start.getUTCFullYear()} -{" "}
+                {ep.end.toLocaleString("default", { month: "short" })}{" "}
+                {ep.end.getUTCFullYear()}
+              </div>
+              <div className="tw-text-sm tw-mt-1">{ep.label}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 }
 
 /**
- * EraView – periods only, one per row, with ranges; drill into Period view.
+ * EraView - periods only, one per row, with ranges; drill into Period view.
  */
 function EraView({
   seasonIndex,
   onSelectPeriod,
   onZoomToPeriod,
 }: EraViewProps) {
-  const eraIndex = Math.floor(seasonIndex / SEASONS_PER_ERA);
-  const firstSeasonIndexOfEra = eraIndex * SEASONS_PER_ERA;
-  const periods = Array.from({ length: 5 }, (_, periodOffset) => {
-    const periodSeasonIndex =
-      firstSeasonIndexOfEra + periodOffset * SEASONS_PER_PERIOD;
-    const start = getSeasonStartDate(periodSeasonIndex);
-    const end = addMonths(start, 12 * 20 - 1);
-    const periodNumber = periodSeasonIndex / SEASONS_PER_PERIOD + 1;
+  const currentIdx = getSeasonIndexForDate(new Date());
+  const eraNumber = displayedEraNumberFromIndex(seasonIndex);
+
+  // Era #0 – special (SZN1 only)
+  if (eraNumber === 0) {
+    const start = new Date(Date.UTC(2022, 5, 1));
+    const end = new Date(Date.UTC(2022, 11, 31));
+    const sIdx = -13; // SZN1 bucket
+    const isCurrent = currentIdx === sIdx;
+    return (
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+        <div
+          key={sIdx}
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          onClick={() => {
+            onSelectPeriod(0);
+            onZoomToPeriod();
+          }}>
+          <div className="tw-font-semibold">Period #0 (2022)</div>
+          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
+          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Era >= 1 – five 20-year periods; Era 1 starts Jan 2023
+  const startYear = 2023 + 100 * (eraNumber - 1);
+  const firstPeriodNumber = 1 + 5 * (eraNumber - 1);
+  const periods = Array.from({ length: 5 }, (_, k) => {
+    const py = startYear + 20 * k;
+    const start = new Date(Date.UTC(py, 0, 1));
+    const end = new Date(Date.UTC(py + 20, 0, 0));
+    const seasonIndexForPeriod = getSeasonIndexForDate(start);
     return {
-      periodNumber,
+      periodNumber: firstPeriodNumber + k,
       start,
       end,
-      seasonIndex: periodSeasonIndex,
+      seasonIndex: seasonIndexForPeriod,
       label: getRangeLabel(start, end),
     };
   });
+
   return (
     <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
-      {periods.map((p) => (
-        <div
-          key={toISO(p.start)}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-          onClick={() => {
-            onSelectPeriod(p.periodNumber);
-            onZoomToPeriod();
-          }}>
-          <div className="tw-font-semibold">
-            Period #{p.periodNumber} ({p.start.getFullYear()})
+      {periods.map((p) => {
+        const isCurrent =
+          currentIdx >= p.seasonIndex &&
+          currentIdx < p.seasonIndex + SEASONS_PER_PERIOD;
+        return (
+          <div
+            key={toISO(p.start)}
+            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+            style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+            onClick={() => {
+              onSelectPeriod(p.periodNumber);
+              onZoomToPeriod();
+            }}>
+            <div className="tw-font-semibold">
+              Period #{p.periodNumber} ({p.start.getUTCFullYear()})
+            </div>
+            <div className="tw-text-xs tw-text-gray-500">
+              {p.start.toLocaleString("default", { month: "short" })}{" "}
+              {p.start.getUTCFullYear()} -{" "}
+              {p.end.toLocaleString("default", { month: "short" })}{" "}
+              {p.end.getUTCFullYear()}
+            </div>
+            <div className="tw-text-sm tw-mt-1">{p.label}</div>
           </div>
-          <div className="tw-text-xs tw-text-gray-500">
-            {p.start.toLocaleString("default", { month: "short" })}{" "}
-            {p.start.getFullYear()} –{" "}
-            {p.end.toLocaleString("default", { month: "short" })}{" "}
-            {p.end.getFullYear()}
-          </div>
-          <div className="tw-text-sm tw-mt-1">{p.label}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
 /**
- * EonView – eras only, one per row, with ranges; drill into Era view.
+ * EonView - eras only, one per row, with ranges; drill into Era view.
  */
 function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
-  const eonIndex = Math.floor(seasonIndex / SEASONS_PER_EON);
-  const firstSeasonIndexOfEon = eonIndex * SEASONS_PER_EON;
-  const eras = Array.from({ length: 10 }, (_, eraOffset) => {
-    const eraSeasonIndex = firstSeasonIndexOfEon + eraOffset * SEASONS_PER_ERA;
-    const start = getSeasonStartDate(eraSeasonIndex);
-    const end = addMonths(start, 12 * 100 - 1);
-    const eraNumber = eraSeasonIndex / SEASONS_PER_ERA + 1;
+  const currentIdx = getSeasonIndexForDate(new Date());
+  const eonNumber = displayedEonNumberFromIndex(seasonIndex);
+
+  // Eon #0 – special (SZN1 only)
+  if (eonNumber === 0) {
+    const start = new Date(Date.UTC(2022, 5, 1));
+    const end = new Date(Date.UTC(2022, 11, 31));
+    const sIdx = -13;
+    const isCurrent = currentIdx === sIdx;
+    return (
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+        <div
+          key={sIdx}
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          onClick={() => {
+            onSelectEra(0);
+            onZoomToEra();
+          }}>
+          <div className="tw-font-semibold">Era #0 (2022)</div>
+          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
+          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Eon >= 1 – ten 100-year eras; Eon 1 starts Jan 2023
+  const startYear = 2023 + 1000 * (eonNumber - 1);
+  const firstEraNumber = 1 + 10 * (eonNumber - 1);
+  const eras = Array.from({ length: 10 }, (_, k) => {
+    const ey = startYear + 100 * k;
+    const start = new Date(Date.UTC(ey, 0, 1));
+    const end = new Date(Date.UTC(ey + 100, 0, 0));
+    const seasonIndexForEra = getSeasonIndexForDate(start);
     return {
-      eraNumber,
+      eraNumber: firstEraNumber + k,
       start,
       end,
-      seasonIndex: eraSeasonIndex,
+      seasonIndex: seasonIndexForEra,
       label: getRangeLabel(start, end),
     };
   });
+
   return (
     <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
-      {eras.map((er) => (
-        <div
-          key={toISO(er.start)}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-          onClick={() => {
-            onSelectEra(er.eraNumber);
-            onZoomToEra();
-          }}>
-          <div className="tw-font-semibold">
-            Era #{er.eraNumber} ({er.start.getFullYear()})
+      {eras.map((er) => {
+        const isCurrent =
+          currentIdx >= er.seasonIndex &&
+          currentIdx < er.seasonIndex + SEASONS_PER_ERA;
+        return (
+          <div
+            key={toISO(er.start)}
+            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+            style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+            onClick={() => {
+              onSelectEra(er.eraNumber);
+              onZoomToEra();
+            }}>
+            <div className="tw-font-semibold">
+              Era #{er.eraNumber} ({er.start.getUTCFullYear()})
+            </div>
+            <div className="tw-text-xs tw-text-gray-500">
+              {er.start.toLocaleString("default", { month: "short" })}{" "}
+              {er.start.getUTCFullYear()} -{" "}
+              {er.end.toLocaleString("default", { month: "short" })}{" "}
+              {er.end.getUTCFullYear()}
+            </div>
+            <div className="tw-text-sm tw-mt-1">{er.label}</div>
           </div>
-          <div className="tw-text-xs tw-text-gray-500">
-            {er.start.toLocaleString("default", { month: "short" })}{" "}
-            {er.start.getFullYear()} –{" "}
-            {er.end.toLocaleString("default", { month: "short" })}{" "}
-            {er.end.getFullYear()}
-          </div>
-          <div className="tw-text-sm tw-mt-1">{er.label}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -563,7 +872,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
  * Main MemeCalendar component (TypeScript). Manages state and renders
  * appropriate views based on zoom level.
  */
-export default function MemeCalendar() {
+export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
       return getSeasonIndexForDate(new Date());
@@ -576,21 +885,22 @@ export default function MemeCalendar() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [jumpMint, setJumpMint] = useState<string>("");
   const [autoOpenYmd, setAutoOpenYmd] = useState<string | null>(null);
-  const seasonNumber = seasonIndex + 1;
-  const yearNumber = Math.floor(seasonIndex / SEASONS_PER_YEAR) + 1;
-  const epochNumber = Math.floor(seasonIndex / SEASONS_PER_EPOCH) + 1;
-  const periodNumber = Math.floor(seasonIndex / SEASONS_PER_PERIOD) + 1;
-  const eraNumber = Math.floor(seasonIndex / SEASONS_PER_ERA) + 1;
-  const eonNumber = Math.floor(seasonIndex / SEASONS_PER_EON) + 1;
+  const seasonNumber = displayedSeasonNumberFromIndex(seasonIndex);
+  const yearNumber = displayedYearNumberFromIndex(seasonIndex);
+  const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
+  const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
+  const eraNumber = displayedEraNumberFromIndex(seasonIndex);
+  const eonNumber = displayedEonNumberFromIndex(seasonIndex);
 
   // Jump to specific numbers (1‑based)
-  const selectYear = (n: number) => setSeasonIndex((n - 1) * SEASONS_PER_YEAR);
+  const selectYear = (n: number) =>
+    setSeasonIndex(clampIndex((n - 4) * SEASONS_PER_YEAR));
   const selectEpoch = (n: number) =>
-    setSeasonIndex((n - 1) * SEASONS_PER_EPOCH);
+    setSeasonIndex(clampIndex((4 * n - 7) * SEASONS_PER_YEAR));
   const selectPeriod = (n: number) =>
-    setSeasonIndex((n - 1) * SEASONS_PER_PERIOD);
-  const selectEra = (n: number) => setSeasonIndex((n - 1) * SEASONS_PER_ERA);
-  const selectEon = (n: number) => setSeasonIndex((n - 1) * SEASONS_PER_EON);
+    setSeasonIndex(clampIndex(80 * (n - 1) - 12));
+  const selectEra = (n: number) =>
+    setSeasonIndex(clampIndex(400 * (n - 1) - 12));
 
   const renderView = () => {
     switch (zoomLevel) {
@@ -600,6 +910,7 @@ export default function MemeCalendar() {
             seasonIndex={seasonIndex}
             onSelectDay={() => {}}
             autoOpenYmd={autoOpenYmd ?? undefined}
+            displayTz={displayTz}
           />
         );
       case "year":
@@ -657,6 +968,33 @@ export default function MemeCalendar() {
     }
   };
 
+  //  The first ever season (Year 0, SZN 1) == internal seasonIndex -16.
+  const MIN_SEASON_INDEX = -13;
+
+  // If you want to limit how far forward users can go, set this; otherwise Infinity.
+  const MAX_SEASON_INDEX = Number.POSITIVE_INFINITY;
+
+  const clampIndex = (i: number) =>
+    Math.max(MIN_SEASON_INDEX, Math.min(MAX_SEASON_INDEX, i));
+
+  // Navigation helpers for epoch/period
+  const epochStartIndex = (n: number) =>
+    n === 0
+      ? -13
+      : getSeasonIndexForDate(new Date(Date.UTC(2023 + 4 * (n - 1), 0, 1)));
+  const periodStartIndex = (n: number) =>
+    n === 0
+      ? -13
+      : getSeasonIndexForDate(new Date(Date.UTC(2023 + 20 * (n - 1), 0, 1)));
+  const eraStartIndex = (n: number) =>
+    n === 0
+      ? -13
+      : getSeasonIndexForDate(new Date(Date.UTC(2023 + 100 * (n - 1), 0, 1)));
+
+  const eonStartIndex = (n: number) =>
+    n === 0
+      ? -13
+      : getSeasonIndexForDate(new Date(Date.UTC(2023 + 1000 * (n - 1), 0, 1)));
   return (
     <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#181818]">
       {/* Division (zoom) selector buttons */}
@@ -688,11 +1026,31 @@ export default function MemeCalendar() {
       {/* Unified navigation based on selected division */}
       <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-mt-2">
         {/* Left half: Prev | Title+Range | Next */}
-        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0 md:tw-basis-1/2 md:tw-max-w-[50%]">
+        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0 md:tw-basis-1/3 md:tw-max-w-[35%]">
           <button
-            className="tw-inline-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-md tw-border tw-border-gray-600 tw-bg-gray-800 tw-text-white hover:tw-bg-gray-700"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-1.5 tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
             onClick={() => {
               let delta = 0;
+              if (zoomLevel === "epoch") {
+                const en = displayedEpochNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(epochStartIndex(en - 1)));
+                return;
+              }
+              if (zoomLevel === "period") {
+                const pn = displayedPeriodNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(periodStartIndex(pn - 1)));
+                return;
+              }
+              if (zoomLevel === "era") {
+                const rn = displayedEraNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(eraStartIndex(rn - 1)));
+                return;
+              }
+              if (zoomLevel === "eon") {
+                const en = displayedEonNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(eonStartIndex(en - 1)));
+                return;
+              }
               switch (zoomLevel) {
                 case "season":
                   delta = -1;
@@ -700,22 +1058,10 @@ export default function MemeCalendar() {
                 case "year":
                   delta = -SEASONS_PER_YEAR;
                   break;
-                case "epoch":
-                  delta = -SEASONS_PER_EPOCH;
-                  break;
-                case "period":
-                  delta = -SEASONS_PER_PERIOD;
-                  break;
-                case "era":
-                  delta = -SEASONS_PER_ERA;
-                  break;
-                case "eon":
-                  delta = -SEASONS_PER_EON;
-                  break;
               }
-              setSeasonIndex((s) => Math.max(0, s + delta));
+              setSeasonIndex((s) => clampIndex(s + delta));
             }}>
-            Prev
+            <FontAwesomeIcon icon={faCaretLeft} />
           </button>
 
           {/* Label block: title and date range; wraps if needed */}
@@ -730,19 +1076,42 @@ export default function MemeCalendar() {
               );
               const range = `${formatMonthYearShort(
                 start
-              )} – ${formatMonthYearShort(end)}`;
+              )} - ${formatMonthYearShort(end)}`;
+              const mintRange = isSznOneIndex(seasonIndex)
+                ? "Memes #1 - #47"
+                : getRangeLabel(start, end);
               return (
                 <div className="tw-text-xs tw-text-gray-400 tw-whitespace-normal tw-break-words">
-                  {range}
+                  {range} / {mintRange}
                 </div>
               );
             })()}
           </div>
 
           <button
-            className="tw-inline-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-md tw-border tw-border-gray-600 tw-bg-gray-800 tw-text-white hover:tw-bg-gray-700"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-1.5 tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
             onClick={() => {
               let delta = 0;
+              if (zoomLevel === "epoch") {
+                const en = displayedEpochNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(epochStartIndex(en + 1)));
+                return;
+              }
+              if (zoomLevel === "period") {
+                const pn = displayedPeriodNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(periodStartIndex(pn + 1)));
+                return;
+              }
+              if (zoomLevel === "era") {
+                const rn = displayedEraNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(eraStartIndex(rn + 1)));
+                return;
+              }
+              if (zoomLevel === "eon") {
+                const en = displayedEonNumberFromIndex(seasonIndex);
+                setSeasonIndex(clampIndex(eonStartIndex(en + 1)));
+                return;
+              }
               switch (zoomLevel) {
                 case "season":
                   delta = 1;
@@ -750,22 +1119,10 @@ export default function MemeCalendar() {
                 case "year":
                   delta = SEASONS_PER_YEAR;
                   break;
-                case "epoch":
-                  delta = SEASONS_PER_EPOCH;
-                  break;
-                case "period":
-                  delta = SEASONS_PER_PERIOD;
-                  break;
-                case "era":
-                  delta = SEASONS_PER_ERA;
-                  break;
-                case "eon":
-                  delta = SEASONS_PER_EON;
-                  break;
               }
-              setSeasonIndex((s) => s + delta);
+              setSeasonIndex((s) => clampIndex(s + delta));
             }}>
-            Next
+            <FontAwesomeIcon icon={faCaretRight} />
           </button>
         </div>
 
@@ -774,13 +1131,14 @@ export default function MemeCalendar() {
           {/* Today */}
           <button
             className="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
-            aria-label="Jump to today"
-            title="Jump to today"
+            aria-label="Jump to Today"
+            title="Jump to Today"
             onClick={() => {
               const now = new Date();
               const idx = getSeasonIndexForDate(now);
-              setSeasonIndex(Math.max(0, idx));
-              setZoomLevel("season");
+              setSeasonIndex(clampIndex(idx));
+              // TODO: should we change to season or keep current view
+              // setZoomLevel("season");
             }}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -834,7 +1192,7 @@ export default function MemeCalendar() {
                   if (!y || !m) return;
                   const d = new Date(y, m - 1, 1);
                   const idx = getSeasonIndexForDate(d);
-                  setSeasonIndex(Math.max(0, idx));
+                  setSeasonIndex(clampIndex(idx));
                   setZoomLevel("season");
                 }}
                 onKeyDown={(e) => {
@@ -846,7 +1204,7 @@ export default function MemeCalendar() {
                     if (!y || !m) return;
                     const d = new Date(y, m - 1, 1);
                     const idx = getSeasonIndexForDate(d);
-                    setSeasonIndex(Math.max(0, idx));
+                    setSeasonIndex(clampIndex(idx));
                     setZoomLevel("season");
                   }
                 }}
@@ -862,7 +1220,7 @@ export default function MemeCalendar() {
                   if (!y || !m) return;
                   const d = new Date(y, m - 1, 1);
                   const idx = getSeasonIndexForDate(d);
-                  setSeasonIndex(Math.max(0, idx));
+                  setSeasonIndex(clampIndex(idx));
                   setZoomLevel("season");
                 }}>
                 Jump
@@ -887,7 +1245,7 @@ export default function MemeCalendar() {
                     if (!n || n < 1) return;
                     const d = dateFromMintNumber(n);
                     const idx = getSeasonIndexForDate(d);
-                    setSeasonIndex(Math.max(0, idx));
+                    setSeasonIndex(clampIndex(idx));
                     setZoomLevel("season");
                     setAutoOpenYmd(ymd(d));
                     setTimeout(() => setAutoOpenYmd(null), 1200);
@@ -902,7 +1260,7 @@ export default function MemeCalendar() {
                   if (!n || n < 1) return;
                   const d = dateFromMintNumber(n);
                   const idx = getSeasonIndexForDate(d);
-                  setSeasonIndex(Math.max(0, idx));
+                  setSeasonIndex(clampIndex(idx));
                   setZoomLevel("season");
                   setAutoOpenYmd(ymd(d));
                   setTimeout(() => setAutoOpenYmd(null), 1200);
@@ -922,7 +1280,7 @@ export default function MemeCalendar() {
         id="meme-tooltip"
         clickable
         openOnClick
-        className="tw-max-w-sm !tw-opacity-[0.975] !tw-bg-[#eee] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#181818]"
+        className="tw-max-w-sm !tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#181818]"
       />
     </div>
   );
