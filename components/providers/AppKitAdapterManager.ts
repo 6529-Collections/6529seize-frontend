@@ -192,7 +192,8 @@ export class AppKitAdapterManager {
       return 'empty-wallets'
     }
 
-    return addresses.sort((a, b) => a.localeCompare(b)).join(',')
+    const sortedAddresses = addresses.sort((a, b) => a.localeCompare(b))
+    return sortedAddresses.join(',')
   }
 
   getCurrentAdapter(): WagmiAdapter | null {
