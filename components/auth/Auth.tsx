@@ -7,14 +7,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "../../hooks/useSecureSign";
 import {
   getAuthJwt,
-  getRefreshToken,
-  getWalletAddress,
-  getWalletRole,
   removeAuthJwt,
   setAuthJwt,
-  syncWalletRoleWithServer,
 } from "../../services/auth/auth.utils";
-import { redeemRefreshTokenWithRetries } from "../../services/auth/token-refresh.utils";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import { isAddress } from "viem";
 import { ProfileConnectedStatus } from "../../entities/IProfile";
@@ -33,17 +28,14 @@ import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
-import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
 import { validateRoleForAuthentication } from "../../utils/role-validation";
 import {
-  TokenRefreshCancelledError,
-  AuthenticationRoleError,
-  RoleValidationError,
   MissingActiveProfileError,
   InvalidRoleStateError
 } from "../../errors/authentication";
+import { validateAuthImmediate } from "../../services/auth/immediate-validation.utils";
 
 // Custom error classes for authentication failures
 class AuthenticationNonceError extends Error {
@@ -242,60 +234,28 @@ export default function Auth({
       setAuthLoadingState('validating');
 
       try {
-        // Pre-validation address check - fail fast if address changed
-        if (abortController.signal.aborted || currentAddress !== address) {
-          return;
-        }
-
-        const { isValid, wasCancelled } = await validateJwt({
-          jwt: getAuthJwt(),
-          wallet: currentAddress, // Use captured address, not current state
-          role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
-          operationId,
-          abortSignal: abortController.signal,
-          activeProfileProxy
+        const result = await validateAuthImmediate({
+          params: {
+            currentAddress,
+            connectionAddress: address,
+            jwt: getAuthJwt(),
+            activeProfileProxy,
+            isConnected,
+            operationId,
+            abortSignal: abortController.signal
+          },
+          callbacks: {
+            onShowSignModal: setShowSignModal,
+            onInvalidateCache: invalidateAll,
+            onReset: reset,
+            onRemoveJwt: removeAuthJwt,
+            onLogError: logErrorSecurely
+          }
         });
 
-        // Post-validation address check - ensure address is still consistent
-        if (abortController.signal.aborted || currentAddress !== address) {
+        // If operation was cancelled or address changed, no further action needed
+        if (result.wasCancelled || currentAddress !== address) {
           return;
-        }
-
-        // Only process result if operation wasn't cancelled and address is still valid
-        if (!wasCancelled) {
-          if (!isValid) {
-            if (!isConnected) {
-              reset();
-            } else {
-              removeAuthJwt();
-              invalidateAll();
-              setShowSignModal(true);
-            }
-          }
-        }
-      } catch (error) {
-        // Handle validation errors only if not cancelled and address hasn't changed
-        if (!abortController.signal.aborted && currentAddress === address) {
-          // Handle specific authentication role errors
-          if (error instanceof MissingActiveProfileError ||
-            error instanceof RoleValidationError ||
-            error instanceof AuthenticationRoleError ||
-            error instanceof InvalidRoleStateError) {
-            // These are critical authentication failures - log and force re-authentication
-            logErrorSecurely('validateJwt_role_error', error);
-            // Force user to re-authenticate with proper role
-            removeAuthJwt();
-            invalidateAll();
-            setShowSignModal(true);
-          } else {
-            // Handle other validation errors
-            logErrorSecurely('validateJwt_general_error', error);
-          }
-
-          // Show sign modal on error if still connected
-          if (isConnected) {
-            setShowSignModal(true);
-          }
         }
       } finally {
         // Clean up only if this is still the current operation
