@@ -59,16 +59,16 @@ const SECURITY_LIMITS = {
  * XSS patterns that must be blocked
  */
 const XSS_PATTERNS = [
-  /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
+  /<script\b[^>]*>[^<]*(?:<(?!\/script>)[^<]*)*<\/script>/gi,
   /javascript:/gi,
   /data:text\/html/gi,
   /data:application\/javascript/gi,
   /on\w+\s*=/gi, // Event handlers like onclick, onload, etc.
-  /<iframe[\s\S]*?>/gi,
-  /<object[\s\S]*?>/gi,
-  /<embed[\s\S]*?>/gi,
-  /<link[\s\S]*?>/gi,
-  /<style[\s\S]*?>/gi,
+  /<iframe\b[^>]*>/gi,
+  /<object\b[^>]*>/gi,
+  /<embed\b[^>]*>/gi,
+  /<link\b[^>]*>/gi,
+  /<style\b[^>]*>/gi,
   /expression\s*\(/gi,
   /url\s*\(/gi,
   /@import/gi,

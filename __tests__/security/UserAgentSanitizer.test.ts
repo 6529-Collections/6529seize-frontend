@@ -496,4 +496,111 @@ describe('UserAgentSanitizer Security Tests', () => {
       }
     });
   });
+
+  describe('ReDoS Prevention Tests', () => {
+    test('patterns should not be vulnerable to ReDoS attacks', () => {
+      const startTime = performance.now();
+      
+      // Test malicious script tag with excessive content that could cause backtracking
+      const maliciousScript = 'Mozilla <script' + ' '.repeat(1000) + '>' + 'A'.repeat(1000) + '</script> Safari';
+      
+      expect(() => sanitizeUserAgent(maliciousScript)).toThrow('XSS attempt detected');
+      
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      // Should complete in reasonable time (< 100ms even on slow systems)
+      expect(duration).toBeLessThan(100);
+    });
+
+    test('iframe pattern should not be vulnerable to ReDoS', () => {
+      const startTime = performance.now();
+      
+      // Test malicious iframe with excessive attributes
+      const maliciousIframe = 'Mozilla <iframe' + ' class="test"'.repeat(500) + '> Safari';
+      
+      expect(() => sanitizeUserAgent(maliciousIframe)).toThrow('XSS attempt detected');
+      
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      expect(duration).toBeLessThan(100);
+    });
+
+    test('object/embed/link patterns should not be vulnerable to ReDoS', () => {
+      const testCases = [
+        'Mozilla <object' + ' data="test"'.repeat(300) + '> Safari',
+        'Mozilla <embed' + ' src="test"'.repeat(300) + '> Safari', 
+        'Mozilla <link' + ' rel="test"'.repeat(300) + '> Safari'
+      ];
+
+      for (const testCase of testCases) {
+        const startTime = performance.now();
+        
+        expect(() => sanitizeUserAgent(testCase)).toThrow('XSS attempt detected');
+        
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        
+        expect(duration).toBeLessThan(100);
+      }
+    });
+
+    test('style pattern should not be vulnerable to ReDoS', () => {
+      const startTime = performance.now();
+      
+      const maliciousStyle = 'Mozilla <style' + ' type="text/css"'.repeat(400) + '> Safari';
+      
+      expect(() => sanitizeUserAgent(maliciousStyle)).toThrow('XSS attempt detected');
+      
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      expect(duration).toBeLessThan(100);
+    });
+
+    test('patterns should still detect normal XSS attempts efficiently', () => {
+      const normalXSSCases = [
+        'Mozilla <script>alert(1)</script> Safari',
+        'Mozilla <iframe src="evil.com"> Safari',
+        'Mozilla <object data="evil.com"> Safari',
+        'Mozilla <embed src="evil.com"> Safari',
+        'Mozilla <link rel="stylesheet" href="evil.com"> Safari',
+        'Mozilla <style>body{background:url(evil.com)}</style> Safari'
+      ];
+
+      for (const testCase of normalXSSCases) {
+        const startTime = performance.now();
+        
+        expect(() => sanitizeUserAgent(testCase)).toThrow('XSS attempt detected');
+        
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        
+        // Normal cases should be extremely fast (< 5ms)
+        expect(duration).toBeLessThan(5);
+      }
+    });
+
+    test('non-malicious user agents should not match XSS patterns', () => {
+      const normalUserAgents = [
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/91.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Edge/91.0'
+      ];
+
+      for (const ua of normalUserAgents) {
+        const startTime = performance.now();
+        
+        // Should not throw - these are legitimate user agents
+        expect(() => sanitizeUserAgent(ua)).not.toThrow();
+        
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        
+        // Should be processed very quickly
+        expect(duration).toBeLessThan(5);
+      }
+    });
+  });
 });
