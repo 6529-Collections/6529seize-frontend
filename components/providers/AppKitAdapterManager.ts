@@ -9,6 +9,7 @@ import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/erro
 import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
 import { validateWalletSafely } from '@/utils/wallet-validation.utils'
 
+type ConnectionState = 'connecting' | 'connected' | 'disconnected'
 
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null
@@ -16,7 +17,7 @@ export class AppKitAdapterManager {
   private readonly requestPassword: (address: string, addressHashed: string) => Promise<string>
   private readonly adapterCache = new Map<string, WagmiAdapter>()
   private readonly maxCacheSize = 5
-  private readonly connectionStates = new Map<string, 'connecting' | 'connected' | 'disconnected'>()
+  private readonly connectionStates = new Map<string, ConnectionState>()
 
   constructor(requestPassword: (address: string, addressHashed: string) => Promise<string>) {
     if (!requestPassword) {
@@ -198,7 +199,7 @@ export class AppKitAdapterManager {
     return this.currentAdapter
   }
 
-  getConnectionState(walletAddress: string): 'connecting' | 'connected' | 'disconnected' {
+  getConnectionState(walletAddress: string): ConnectionState {
     if (!walletAddress) {
       throw new AdapterError('ADAPTER_015: walletAddress is required')
     }
@@ -210,7 +211,7 @@ export class AppKitAdapterManager {
     return state || 'disconnected'
   }
 
-  setConnectionState(walletAddress: string, state: 'connecting' | 'connected' | 'disconnected'): void {
+  setConnectionState(walletAddress: string, state: ConnectionState): void {
     if (!walletAddress) {
       throw new AdapterError('ADAPTER_017: walletAddress is required')
     }
