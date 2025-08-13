@@ -43,25 +43,6 @@ export class ProviderValidationError extends Error {
   }
 }
 
-/**
- * SECURITY: EIP-1193 provider interface for proper type validation
- */
-interface EIP1193Provider {
-  request(args: { method: string; params?: unknown[] }): Promise<unknown>;
-  on?(eventName: string, listener: (...args: unknown[]) => void): void;
-  removeListener?(eventName: string, listener: (...args: unknown[]) => void): void;
-}
-
-/**
- * SECURITY: Validated wallet provider interface
- */
-interface ValidatedWalletProvider {
-  request(args: { method: string; params?: unknown[] }): Promise<unknown>;
-  isMetaMask?: boolean;
-  isCoinbaseWallet?: boolean;
-  isWalletConnect?: boolean;
-}
-
 interface SignatureResult {
   signature: string | null;
   userRejected: boolean;
@@ -73,118 +54,6 @@ interface UseSecureSignReturn {
   isSigningPending: boolean;
   reset: () => void;
 }
-
-/**
- * SECURITY: Allowed RPC methods whitelist - prevents malicious method injection
- */
-const ALLOWED_RPC_METHODS = [
-  'eth_accounts',
-  'eth_requestAccounts',
-  'personal_sign',
-  'eth_signTypedData',
-  'eth_signTypedData_v4',
-  'eth_chainId',
-  'eth_getBlockByNumber',
-  'eth_getBalance',
-  'eth_getTransactionCount',
-  'eth_estimateGas',
-  'eth_sendTransaction',
-  'eth_getTransactionReceipt',
-  'wallet_switchEthereumChain',
-  'wallet_addEthereumChain'
-] as const;
-
-type AllowedRPCMethod = typeof ALLOWED_RPC_METHODS[number];
-
-/**
- * SECURITY: Type guard for EIP-1193 provider
- * Prevents provider injection attacks by validating provider structure
- */
-function isEIP1193Provider(provider: unknown): provider is EIP1193Provider {
-  if (!provider || typeof provider !== 'object') {
-    return false;
-  }
-
-  const providerObj = provider as Record<string, unknown>;
-  return typeof providerObj.request === 'function';
-}
-
-/**
- * SECURITY: Validate RPC method against whitelist
- * Prevents execution of unauthorized RPC methods
- */
-function isAllowedRPCMethod(method: string): method is AllowedRPCMethod {
-  return ALLOWED_RPC_METHODS.includes(method as AllowedRPCMethod);
-}
-
-/**
- * SECURITY: Comprehensive wallet provider validation
- * Validates provider structure and ensures it's a legitimate wallet provider
- */
-function validateWalletProvider(provider: unknown): ValidatedWalletProvider {
-  if (!isEIP1193Provider(provider)) {
-    throw new ProviderValidationError('Invalid provider: does not implement EIP-1193 interface');
-  }
-
-  // Additional security checks for provider legitimacy
-  const providerObj = provider as unknown as Record<string, unknown>;
-
-  // Check if we're in Capacitor environment (mobile app)
-  const isCapacitor = typeof window !== 'undefined' &&
-    window.Capacitor?.isNativePlatform?.();
-
-  // Check if provider has basic wallet characteristics
-  // For Capacitor/mobile, we're more lenient since WalletConnect providers might not have these flags
-  const hasWalletFeatures = (
-    typeof providerObj.isMetaMask === 'boolean' ||
-    typeof providerObj.isCoinbaseWallet === 'boolean' ||
-    typeof providerObj.isWalletConnect === 'boolean' ||
-    typeof providerObj.enable === 'function' ||
-    typeof providerObj.send === 'function' ||
-    // For WalletConnect/mobile providers, just check for request method
-    (isCapacitor && typeof providerObj.request === 'function')
-  );
-
-  if (!hasWalletFeatures) {
-    throw new ProviderValidationError('Provider does not appear to be a legitimate wallet provider');
-  }
-
-  // SECURITY FIX: Runtime validation of provider methods instead of unsafe type assertion
-  // Test the provider.request method with a safe call to verify it's functional
-  if (typeof providerObj.request !== 'function') {
-    throw new ProviderValidationError('Provider request method is not a function');
-  }
-
-  // SECURITY: Check for malicious patterns that indicate a compromised provider
-  const suspiciousKeys = ['eval', 'Function', '__proto__', 'constructor'];
-  for (const key of suspiciousKeys) {
-    if (key in providerObj && typeof providerObj[key] === 'function') {
-      const fnString = providerObj[key].toString();
-      if (fnString.includes('eval') || fnString.includes('Function(')) {
-        throw new ProviderValidationError('Provider contains suspicious execution methods');
-      }
-    }
-  }
-
-  // SECURITY: Check for mock indicators that suggest a test/malicious provider
-  const mockIndicators = ['jest', 'mock', 'fake', 'test', 'spy'];
-  for (const indicator of mockIndicators) {
-    if (typeof providerObj[indicator] !== 'undefined') {
-      throw new ProviderValidationError('Provider appears to be a mock or test provider');
-    }
-  }
-
-  // SECURITY: Build validated provider object with proper type safety
-  const validatedProvider: ValidatedWalletProvider = {
-    request: providerObj.request as (args: { method: string; params?: unknown[] }) => Promise<unknown>,
-    isMetaMask: typeof providerObj.isMetaMask === 'boolean' ? providerObj.isMetaMask : undefined,
-    isCoinbaseWallet: typeof providerObj.isCoinbaseWallet === 'boolean' ? providerObj.isCoinbaseWallet : undefined,
-    isWalletConnect: typeof providerObj.isWalletConnect === 'boolean' ? providerObj.isWalletConnect : undefined,
-  };
-
-  return validatedProvider;
-}
-
 /**
  * SECURITY: Validate Ethereum address format
  * Ensures address follows proper format and prevents injection
@@ -270,107 +139,16 @@ export const useSecureSign = (): UseSecureSignReturn => {
       validateMessage(message);
 
       // Validate connection state before attempting to sign
-      if (!isConnected) {
-        throw new MobileSigningError(
-          "Wallet not connected. Please connect your wallet and try again.",
-          "WALLET_NOT_CONNECTED"
-        );
-      }
+      validateSigningContext(isConnected, connectedAddress, walletProvider);
 
-      if (!connectedAddress) {
-        throw new MobileSigningError(
-          "No wallet address detected. Please reconnect your wallet.",
-          "NO_ADDRESS"
-        );
-      }
+      // Set up the signing provider and verify signer address
+      const signer = await setupSigningProvider(walletProvider, connectedAddress!);
 
-      // SECURITY: Validate connected address format
-      validateEthereumAddress(connectedAddress);
-
-      // Get the provider from AppKit which handles WalletConnect properly
-      if (!walletProvider) {
-        throw new MobileSigningError(
-          "No wallet provider available. Please ensure your wallet is connected.",
-          "NO_PROVIDER"
-        );
-      }
-
-      // Use the walletProvider directly for signing
-      // AppKit's provider already handles WalletConnect deep linking
-      // Type assertion: AppKit guarantees EIP-1193 compliance but TypeScript types don't align
-      // This is validated by AppKit before reaching this point
-      const ethersProvider = new BrowserProvider(walletProvider as unknown as Eip1193Provider);
-      const signer = await ethersProvider.getSigner();
-
-      // Verify signer address matches connected address
-      const signerAddress = await signer.getAddress();
-      validateEthereumAddress(signerAddress);
-
-      if (signerAddress.toLowerCase() !== connectedAddress.toLowerCase()) {
-        throw new ConnectionMismatchError(connectedAddress, signerAddress);
-      }
-
-      // Sign the message - this will trigger WalletConnect deep link on mobile
-      const signature = await signer.signMessage(message);
-
-      // Clear sensitive data from memory
-      message = '';
-
-      // SECURITY: Validate signature format before returning
-      validateSignature(signature);
-
-      return {
-        signature,
-        userRejected: false,
-      };
+      // Execute the signature operation
+      return await executeSignature(signer, message);
 
     } catch (error: unknown) {
-      // SECURITY: Proper error handling without unsafe type casting
-
-      // Handle user rejection (most common case)
-      if (error instanceof UserRejectedRequestError) {
-        return {
-          signature: null,
-          userRejected: true,
-        };
-      }
-
-      // Handle custom errors we've defined (use name check for Jest compatibility)
-      if (error && typeof error === 'object' && 'name' in error) {
-        const errorName = (error as Error).name;
-        if (errorName === 'MobileSigningError' ||
-          errorName === 'ConnectionMismatchError' ||
-          errorName === 'SigningProviderError' ||
-          errorName === 'ProviderValidationError') {
-          return {
-            signature: null,
-            userRejected: false,
-            error: error as MobileSigningError | ConnectionMismatchError | SigningProviderError | ProviderValidationError,
-          };
-        }
-      }
-
-      // Handle mobile-specific wallet errors with proper type checking
-      if (error && typeof error === 'object' && 'code' in error && error.code === 4001) {
-        return {
-          signature: null,
-          userRejected: true,
-        };
-      }
-
-      // Handle common mobile wallet errors
-      const mobileSigningError = new MobileSigningError(
-        getMobileErrorMessage(error),
-        extractErrorCode(error),
-        error
-      );
-
-      return {
-        signature: null,
-        userRejected: false,
-        error: mobileSigningError,
-      };
-
+      return classifySigningError(error);
     } finally {
       setIsSigningPending(false);
     }
@@ -400,6 +178,128 @@ const extractErrorCode = (error: unknown): string | number | undefined => {
     }
   }
   return undefined;
+};
+
+/**
+ * Validates the signing context (connection state, address, provider)
+ */
+const validateSigningContext = (
+  isConnected: boolean,
+  connectedAddress: string | undefined,
+  walletProvider: unknown
+): void => {
+  if (!isConnected) {
+    throw new MobileSigningError(
+      "Wallet not connected. Please connect your wallet and try again.",
+      "WALLET_NOT_CONNECTED"
+    );
+  }
+
+  if (!connectedAddress) {
+    throw new MobileSigningError(
+      "No wallet address detected. Please reconnect your wallet.",
+      "NO_ADDRESS"
+    );
+  }
+
+  validateEthereumAddress(connectedAddress);
+
+  if (!walletProvider) {
+    throw new MobileSigningError(
+      "No wallet provider available. Please ensure your wallet is connected.",
+      "NO_PROVIDER"
+    );
+  }
+};
+
+/**
+ * Sets up the signing provider and verifies signer address
+ */
+const setupSigningProvider = async (
+  walletProvider: unknown,
+  connectedAddress: string
+) => {
+  const ethersProvider = new BrowserProvider(walletProvider as unknown as Eip1193Provider);
+  const signer = await ethersProvider.getSigner();
+
+  const signerAddress = await signer.getAddress();
+  validateEthereumAddress(signerAddress);
+
+  if (signerAddress.toLowerCase() !== connectedAddress.toLowerCase()) {
+    throw new ConnectionMismatchError(connectedAddress, signerAddress);
+  }
+
+  return signer;
+};
+
+/**
+ * Classifies and handles different types of signing errors
+ */
+const classifySigningError = (error: unknown): SignatureResult => {
+  // Handle user rejection (most common case)
+  if (error instanceof UserRejectedRequestError) {
+    return {
+      signature: null,
+      userRejected: true,
+    };
+  }
+
+  // Handle custom errors we've defined (use name check for Jest compatibility)
+  if (error && typeof error === 'object' && 'name' in error) {
+    const errorName = (error as Error).name;
+    if (errorName === 'MobileSigningError' ||
+        errorName === 'ConnectionMismatchError' ||
+        errorName === 'SigningProviderError' ||
+        errorName === 'ProviderValidationError') {
+      return {
+        signature: null,
+        userRejected: false,
+        error: error as MobileSigningError | ConnectionMismatchError | SigningProviderError | ProviderValidationError,
+      };
+    }
+  }
+
+  // Handle mobile-specific wallet errors with proper type checking
+  if (error && typeof error === 'object' && 'code' in error && error.code === 4001) {
+    return {
+      signature: null,
+      userRejected: true,
+    };
+  }
+
+  // Handle common mobile wallet errors
+  const mobileSigningError = new MobileSigningError(
+    getMobileErrorMessage(error),
+    extractErrorCode(error),
+    error
+  );
+
+  return {
+    signature: null,
+    userRejected: false,
+    error: mobileSigningError,
+  };
+};
+
+/**
+ * Executes the actual signature operation
+ */
+const executeSignature = async (
+  signer: any,
+  message: string
+): Promise<SignatureResult> => {
+  const signature = await signer.signMessage(message);
+  
+  // Clear sensitive data from memory
+  message = '';
+  
+  // SECURITY: Validate signature format before returning
+  validateSignature(signature);
+
+  return {
+    signature,
+    userRejected: false,
+  };
 };
 
 /**
