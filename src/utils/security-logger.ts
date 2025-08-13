@@ -91,9 +91,8 @@ export const logSecurityEvent = (
     return;
   }
   
-  // Use console.debug for development-only diagnostic logging
-  // This is less likely to appear in production logs if accidentally enabled
-  console.debug('[SEIZE_SECURITY_EVENT]', {
+  // Use console.warn for security event logging - these are important for monitoring
+  console.warn('[SEIZE_SECURITY_EVENT]', {
     eventType,
     ...context,
     // Always include user agent for browser compatibility analysis
