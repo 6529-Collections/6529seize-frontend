@@ -192,7 +192,7 @@ export class AppKitAdapterManager {
       return 'empty-wallets'
     }
 
-    const sortedAddresses = addresses.sort((a, b) => a.localeCompare(b))
+    const sortedAddresses = addresses.toSorted((a, b) => a.localeCompare(b))
     return sortedAddresses.join(',')
   }
 

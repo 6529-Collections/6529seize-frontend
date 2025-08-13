@@ -139,10 +139,10 @@ export const useSecureSign = (): UseSecureSignReturn => {
       validateMessage(message);
 
       // Validate connection state before attempting to sign
-      validateSigningContext(isConnected, connectedAddress, walletProvider);
+      const { address, provider } = validateSigningContext(isConnected, connectedAddress, walletProvider);
 
       // Set up the signing provider and verify signer address
-      const signer = await setupSigningProvider(walletProvider, connectedAddress!);
+      const signer = await setupSigningProvider(provider, address);
 
       // Execute the signature operation
       return await executeSignature(signer, message);
@@ -182,12 +182,13 @@ const extractErrorCode = (error: unknown): string | number | undefined => {
 
 /**
  * Validates the signing context (connection state, address, provider)
+ * Returns validated values to ensure type safety
  */
 const validateSigningContext = (
   isConnected: boolean,
   connectedAddress: string | undefined,
   walletProvider: unknown
-): void => {
+): { address: string; provider: unknown } => {
   if (!isConnected) {
     throw new MobileSigningError(
       "Wallet not connected. Please connect your wallet and try again.",
@@ -210,6 +211,8 @@ const validateSigningContext = (
       "NO_PROVIDER"
     );
   }
+
+  return { address: connectedAddress, provider: walletProvider };
 };
 
 /**
