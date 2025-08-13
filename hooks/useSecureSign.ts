@@ -123,7 +123,7 @@ function validateSignature(signature: string): void {
 export const useSecureSign = (): UseSecureSignReturn => {
   const [isSigningPending, setIsSigningPending] = useState(false);
   const { address: connectedAddress, isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider('eip155');
+  const { walletProvider } = useAppKitProvider<Eip1193Provider>('eip155');
 
   const reset = useCallback(() => {
     setIsSigningPending(false);
@@ -187,8 +187,8 @@ const extractErrorCode = (error: unknown): string | number | undefined => {
 const validateSigningContext = (
   isConnected: boolean,
   connectedAddress: string | undefined,
-  walletProvider: unknown
-): { address: string; provider: unknown } => {
+  walletProvider: Eip1193Provider | undefined
+): { address: string; provider: Eip1193Provider } => {
   if (!isConnected) {
     throw new MobileSigningError(
       "Wallet not connected. Please connect your wallet and try again.",
@@ -219,10 +219,10 @@ const validateSigningContext = (
  * Sets up the signing provider and verifies signer address
  */
 const setupSigningProvider = async (
-  walletProvider: unknown,
+  walletProvider: Eip1193Provider,
   connectedAddress: string
 ) => {
-  const ethersProvider = new BrowserProvider(walletProvider as unknown as Eip1193Provider);
+  const ethersProvider = new BrowserProvider(walletProvider);
   const signer = await ethersProvider.getSigner();
 
   const signerAddress = await signer.getAddress();
