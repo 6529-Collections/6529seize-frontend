@@ -39,6 +39,98 @@ export const DEFAULT_RETRY_DELAY_MS = [1000, 2000, 4000]; // Exponential backoff
 export const DEFAULT_INIT_TIMEOUT_MS = 10000; // 10 second timeout
 
 /**
+ * Debug logger helper to reduce conditional complexity
+ */
+function debugLog(message: string, ...args: any[]): void {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[AppKitInitialization] ${message}`, ...args);
+  }
+}
+
+/**
+ * Creates adapter with proper error handling
+ */
+function createAdapter(
+  wallets: AppWallet[],
+  adapterManager: AppKitAdapterManager,
+  isCapacitor: boolean,
+  onToast: (toast: { message: string; type: 'error' | 'success' | 'info' }) => void
+): WagmiAdapter {
+  debugLog(`Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
+
+  try {
+    return adapterManager.createAdapterWithCache(wallets);
+  } catch (error) {
+    if (error instanceof AdapterError || error instanceof AdapterCacheError) {
+      logErrorSecurely('[AppKitInitialization] Adapter creation failed', error);
+      const userMessage = sanitizeErrorForUser(error);
+      onToast({
+        message: userMessage,
+        type: "error",
+      });
+      throw new Error(`Wallet adapter setup failed: ${error.message}. Please refresh the page and try again.`);
+    }
+    
+    logErrorSecurely('[AppKitInitialization] Adapter creation failed with unexpected error', error);
+    const userMessage = sanitizeErrorForUser(error);
+    onToast({
+      message: userMessage,
+      type: "error",
+    });
+    throw new Error('Failed to initialize wallet connection. Please refresh the page and try again.');
+  }
+}
+
+/**
+ * Creates AppKit with retry logic
+ */
+async function createAppKitWithRetry(
+  adapter: WagmiAdapter,
+  maxRetries: number,
+  retryDelayMs: number[],
+  onRetryUpdate: (count: number, lastFailure: number | null) => void,
+  onAppKitInitialized: () => void
+): Promise<void> {
+  debugLog('Creating AppKit instance for the first time');
+  
+  const appKitConfig = buildAppKitConfig(adapter);
+
+  // Iterative retry loop - NO RECURSION
+  let currentRetry = 0;
+  while (currentRetry < maxRetries) {
+    try {
+      createAppKit(appKitConfig);
+      onAppKitInitialized();
+      debugLog('AppKit initialized successfully');
+      return; // Exit function on success
+    } catch (appKitError) {
+      currentRetry++;
+      onRetryUpdate(currentRetry, Date.now());
+
+      console.error('[AppKitInitialization] Failed to create AppKit:', appKitError);
+
+      // If we've exceeded max retries, throw final error
+      if (currentRetry >= maxRetries) {
+        const finalError = new AppKitRetryError(
+          `AppKit initialization permanently failed after ${currentRetry} attempts`,
+          currentRetry,
+          appKitError
+        );
+        logErrorSecurely('[AppKitInitialization] AppKit initialization permanently failed', finalError);
+        throw finalError;
+      }
+
+      // Wait for retry with exponential backoff
+      const retryDelay = retryDelayMs[currentRetry - 1] || retryDelayMs[retryDelayMs.length - 1];
+      debugLog(`Retry attempt ${currentRetry}/${maxRetries} in ${retryDelay}ms`);
+
+      // Use atomic sleep instead of setTimeout to avoid Promise recursion
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
+}
+
+/**
  * Initializes AppKit with wallets using a fail-fast approach with retry logic
  * Extracted from WagmiSetup component for better maintainability and testability
  */
@@ -84,80 +176,18 @@ export async function initializeAppKit(
     // FAIL-FAST: Validate all preconditions before proceeding
     validatePreconditions(wallets);
 
-    // Initialize AppKit adapter for platform-specific wallet management
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[AppKitInitialization] Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
-    }
-
-    let newAdapter: WagmiAdapter;
-    try {
-      // Use the same adapter creation for both mobile and web
-      newAdapter = adapterManager.createAdapterWithCache(wallets);
-    } catch (error) {
-      if (error instanceof AdapterError || error instanceof AdapterCacheError) {
-        logErrorSecurely('[AppKitInitialization] Adapter creation failed', error);
-        const userMessage = sanitizeErrorForUser(error);
-        onToast({
-          message: userMessage,
-          type: "error",
-        });
-        throw new Error(`Wallet adapter setup failed: ${error.message}. Please refresh the page and try again.`);
-      }
-      logErrorSecurely('[AppKitInitialization] Adapter creation failed with unexpected error', error);
-      const userMessage = sanitizeErrorForUser(error);
-      onToast({
-        message: userMessage,
-        type: "error",
-      });
-      throw new Error('Failed to initialize wallet connection. Please refresh the page and try again.');
-    }
+    // Create adapter with error handling
+    const newAdapter = createAdapter(wallets, adapterManager, isCapacitor, onToast);
 
     // Only create AppKit once
     if (!appKitInitialized) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[AppKitInitialization] Creating AppKit instance for the first time');
-      }
-      
-      const appKitConfig = buildAppKitConfig(newAdapter);
-
-      // Iterative retry loop - NO RECURSION
-      let currentRetry = 0;
-      while (currentRetry < maxRetries) {
-        try {
-          createAppKit(appKitConfig);
-          onAppKitInitialized();
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[AppKitInitialization] AppKit initialized successfully');
-          }
-          break; // Exit retry loop on success
-        } catch (appKitError) {
-          currentRetry++;
-          onRetryUpdate(currentRetry, Date.now());
-
-          console.error('[AppKitInitialization] Failed to create AppKit:', appKitError);
-
-          // If we've exceeded max retries, throw final error
-          if (currentRetry >= maxRetries) {
-            const finalError = new AppKitRetryError(
-              `AppKit initialization permanently failed after ${currentRetry} attempts`,
-              currentRetry,
-              appKitError
-            );
-            logErrorSecurely('[AppKitInitialization] AppKit initialization permanently failed', finalError);
-            throw finalError;
-          }
-
-          // Wait for retry with exponential backoff
-          const retryDelay = retryDelayMs[currentRetry - 1] || retryDelayMs[retryDelayMs.length - 1];
-
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[AppKitInitialization] Retry attempt ${currentRetry}/${maxRetries} in ${retryDelay}ms`);
-          }
-
-          // Use atomic sleep instead of setTimeout to avoid Promise recursion
-          await new Promise(resolve => setTimeout(resolve, retryDelay));
-        }
-      }
+      await createAppKitWithRetry(
+        newAdapter,
+        maxRetries,
+        retryDelayMs,
+        onRetryUpdate,
+        onAppKitInitialized
+      );
     }
 
     // Reset retry state on success
