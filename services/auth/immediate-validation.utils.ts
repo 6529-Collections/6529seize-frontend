@@ -32,6 +32,44 @@ interface ImmediateValidationResult {
   shouldShowModal: boolean;
 }
 
+// Helper function to check if address is consistent and operation not cancelled
+const isOperationValid = (
+  currentAddress: string,
+  connectionAddress: string,
+  abortSignal: AbortSignal
+): boolean => {
+  return !abortSignal.aborted && currentAddress === connectionAddress;
+};
+
+// Helper function to create a cancelled result
+const createCancelledResult = (): ImmediateValidationResult => ({
+  validationCompleted: false,
+  wasCancelled: true,
+  shouldShowModal: false
+});
+
+// Helper function to check if error is an authentication role error
+const isAuthenticationRoleError = (error: unknown): boolean => {
+  return error instanceof MissingActiveProfileError ||
+    error instanceof RoleValidationError ||
+    error instanceof AuthenticationRoleError ||
+    error instanceof InvalidRoleStateError;
+};
+
+// Helper function to handle invalid JWT
+const handleInvalidJwt = (
+  isConnected: boolean,
+  callbacks: ImmediateValidationCallbacks
+): void => {
+  if (!isConnected) {
+    callbacks.onReset();
+  } else {
+    callbacks.onRemoveJwt();
+    callbacks.onInvalidateCache();
+    callbacks.onShowSignModal(true);
+  }
+};
+
 export const validateAuthImmediate = async ({
   params,
   callbacks
@@ -52,50 +90,32 @@ export const validateAuthImmediate = async ({
   const {
     onShowSignModal,
     onInvalidateCache,
-    onReset,
+    onReset: _onReset,
     onRemoveJwt,
     onLogError
   } = callbacks;
 
   try {
-    // Address consistency check - ensure address hasn't changed since effect start
-    if (currentAddress !== connectionAddress) {
-      // Address changed during setup - abort this operation
-      return {
-        validationCompleted: false,
-        wasCancelled: true,
-        shouldShowModal: false
-      };
-    }
-
-    // Pre-validation address check - fail fast if address changed
-    if (abortSignal.aborted || currentAddress !== connectionAddress) {
-      return {
-        validationCompleted: false,
-        wasCancelled: true,
-        shouldShowModal: false
-      };
+    // Early validation checks - return immediately if operation is invalid
+    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+      return createCancelledResult();
     }
 
     const { isValid, wasCancelled } = await validateJwt({
       jwt,
-      wallet: currentAddress, // Use captured address, not current state
+      wallet: currentAddress,
       role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
       operationId,
       abortSignal,
       activeProfileProxy
     });
 
-    // Post-validation address check - ensure address is still consistent
-    if (abortSignal.aborted || currentAddress !== connectionAddress) {
-      return {
-        validationCompleted: false,
-        wasCancelled: true,
-        shouldShowModal: false
-      };
+    // Post-validation check - ensure operation is still valid
+    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+      return createCancelledResult();
     }
 
-    // Skip processing if operation was cancelled
+    // Handle cancelled operation
     if (wasCancelled) {
       return {
         validationCompleted: true,
@@ -104,7 +124,7 @@ export const validateAuthImmediate = async ({
       };
     }
 
-    // Skip processing if JWT is valid
+    // Handle valid JWT
     if (isValid) {
       return {
         validationCompleted: true,
@@ -113,15 +133,8 @@ export const validateAuthImmediate = async ({
       };
     }
 
-    // Handle invalid JWT based on connection status
-    if (!isConnected) {
-      onReset();
-    } else {
-      onRemoveJwt();
-      onInvalidateCache();
-      onShowSignModal(true);
-    }
-
+    // Handle invalid JWT
+    handleInvalidJwt(isConnected, callbacks);
     return {
       validationCompleted: true,
       wasCancelled: false,
@@ -129,27 +142,19 @@ export const validateAuthImmediate = async ({
     };
 
   } catch (error) {
-    // Handle validation errors only if not cancelled and address hasn't changed
-    if (!abortSignal.aborted && currentAddress === connectionAddress) {
-      // Handle specific authentication role errors
-      if (error instanceof MissingActiveProfileError ||
-        error instanceof RoleValidationError ||
-        error instanceof AuthenticationRoleError ||
-        error instanceof InvalidRoleStateError) {
-        // These are critical authentication failures - log and force re-authentication
+    // Handle validation errors only if operation is still valid
+    if (isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+      // Handle authentication role errors
+      if (isAuthenticationRoleError(error)) {
         onLogError('validateJwt_role_error', error);
-        // Force user to re-authenticate with proper role
         onRemoveJwt();
         onInvalidateCache();
         onShowSignModal(true);
       } else {
-        // Handle other validation errors
         onLogError('validateJwt_general_error', error);
-      }
-
-      // Show sign modal on error if still connected
-      if (isConnected) {
-        onShowSignModal(true);
+        if (isConnected) {
+          onShowSignModal(true);
+        }
       }
     }
 
