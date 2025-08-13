@@ -1,5 +1,4 @@
 import { validateJwt } from "./jwt-validation.utils";
-import { getAuthJwt } from "./auth.utils";
 import { validateRoleForAuthentication } from "../../utils/role-validation";
 import {
   AuthenticationRoleError,

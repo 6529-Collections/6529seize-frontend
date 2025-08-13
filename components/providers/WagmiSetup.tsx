@@ -7,17 +7,19 @@ import {
   appWalletsEventEmitter,
 } from "../app-wallets/AppWalletsContext";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import type { AppKitNetwork } from '@reown/appkit-common'
-import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
-import { mainnet } from "viem/chains";
 import { AppKitAdapterManager } from './AppKitAdapterManager';
+import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter';
 import { AppKitInitializationError, AppKitValidationError, AppKitTimeoutError, AppKitRetryError } from '@/src/errors/appkit-initialization';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../auth/Auth';
 import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
+import { 
+  initializeAppKit as initializeAppKitUtil,
+  AppKitInitializationConfig,
+  AppKitInitializationCallbacks
+} from '@/utils/appkit-initialization.utils';
 
 export default function WagmiSetup({
   children,
@@ -110,133 +112,30 @@ export default function WagmiSetup({
         clearTimeout(initTimeoutRef.current);
       }
 
-      // Set timeout protection - FAIL-FAST after timeout
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        initTimeoutRef.current = setTimeout(() => {
-          const timeoutError = new AppKitTimeoutError(`AppKit initialization timed out after ${INIT_TIMEOUT_MS}ms`);
-          logErrorSecurely('[WagmiSetup] Initialization timeout', timeoutError);
-          setToast({
-            message: 'Wallet initialization timed out. Please refresh and try again.',
-            type: "error",
-          });
-          reject(timeoutError);
-        }, INIT_TIMEOUT_MS);
-      });
+      const config: AppKitInitializationConfig = {
+        wallets,
+        adapterManager: adapterManager as AppKitAdapterManager,
+        isCapacitor,
+        appKitInitialized,
+        maxRetries: MAX_RETRIES,
+        retryDelayMs: RETRY_DELAY_MS,
+        initTimeoutMs: INIT_TIMEOUT_MS
+      };
 
-      // Main initialization logic
-      const initializationPromise = (async () => {
-        // FAIL-FAST: Validate all preconditions before proceeding
-        validateInitializationPreconditions(wallets);
+      const callbacks: AppKitInitializationCallbacks = {
+        onToast: setToast,
+        onRetryUpdate: (count, lastFailure) => {
+          setRetryCount(count);
+          setLastFailureTime(lastFailure);
+        },
+        onAppKitInitialized: () => setAppKitInitialized(true),
+        validatePreconditions: validateInitializationPreconditions
+      };
 
-        // Initialize AppKit adapter for platform-specific wallet management
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[WagmiSetup] Initializing AppKit adapter (${isCapacitor ? 'mobile' : 'web'}) with`, wallets.length, 'AppWallets');
-        }
-
-        let newAdapter: WagmiAdapter;
-        try {
-          // Use the same adapter creation for both mobile and web
-          newAdapter = (adapterManager as AppKitAdapterManager).createAdapterWithCache(wallets);
-        } catch (error) {
-          if (error instanceof AdapterError || error instanceof AdapterCacheError) {
-            logErrorSecurely('[WagmiSetup] Adapter creation failed', error);
-            const userMessage = sanitizeErrorForUser(error);
-            setToast({
-              message: userMessage,
-              type: "error",
-            });
-            throw new Error(`Wallet adapter setup failed: ${error.message}. Please refresh the page and try again.`);
-          }
-          logErrorSecurely('[WagmiSetup] Adapter creation failed with unexpected error', error);
-          const userMessage = sanitizeErrorForUser(error);
-          setToast({
-            message: userMessage,
-            type: "error",
-          });
-          throw new Error('Failed to initialize wallet connection. Please refresh the page and try again.');
-        }
-
-        // Only create AppKit once
-        if (!appKitInitialized) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[WagmiSetup] Creating AppKit instance for the first time');
-          }
-          const appKitConfig = {
-            adapters: [newAdapter],
-            networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
-            projectId: CW_PROJECT_ID,
-            metadata: {
-              name: "6529.io",
-              description: "6529.io",
-              url: VALIDATED_BASE_ENDPOINT,
-              icons: [
-                "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-              ],
-            },
-            enableWalletGuide: false,
-            featuredWalletIds: ['metamask', 'walletConnect'],
-            allWallets: 'SHOW' as const,
-            features: {
-              analytics: true,
-              email: false,
-              socials: [],
-              connectMethodsOrder: ['wallet' as const]
-            },
-            enableOnramp: false,
-            enableSwaps: false
-          }
-
-          // Iterative retry loop - NO RECURSION
-          let currentRetry = 0;
-          while (currentRetry < MAX_RETRIES) {
-            try {
-              createAppKit(appKitConfig);
-              setAppKitInitialized(true);
-              if (process.env.NODE_ENV === 'development') {
-                console.log('[WagmiSetup] AppKit initialized successfully');
-              }
-              break; // Exit retry loop on success
-            } catch (appKitError) {
-              currentRetry++;
-              setRetryCount(currentRetry);
-              setLastFailureTime(Date.now());
-
-              console.error('[WagmiSetup] Failed to create AppKit:', appKitError);
-
-              // If we've exceeded max retries, throw final error
-              if (currentRetry >= MAX_RETRIES) {
-                const finalError = new AppKitRetryError(
-                  `AppKit initialization permanently failed after ${currentRetry} attempts`,
-                  currentRetry,
-                  appKitError
-                );
-                logErrorSecurely('[WagmiSetup] AppKit initialization permanently failed', finalError);
-                throw finalError;
-              }
-
-              // Wait for retry with exponential backoff
-              const retryDelay = RETRY_DELAY_MS[currentRetry - 1] || RETRY_DELAY_MS[RETRY_DELAY_MS.length - 1];
-
-              if (process.env.NODE_ENV === 'development') {
-                console.log(`[WagmiSetup] Retry attempt ${currentRetry}/${MAX_RETRIES} in ${retryDelay}ms`);
-              }
-
-              // Use atomic sleep instead of setTimeout to avoid Promise recursion
-              await new Promise(resolve => setTimeout(resolve, retryDelay));
-            }
-          }
-        }
-
-        // Reset retry state on success
-        setRetryCount(0);
-        setLastFailureTime(null);
-
-        setCurrentAdapter(newAdapter);
-        setIsInitialized(true);
-      })();
-
-      // Race between timeout and initialization
-      await Promise.race([initializationPromise, timeoutPromise]);
+      const result = await initializeAppKitUtil(config, callbacks);
+      
+      setCurrentAdapter(result.adapter);
+      setIsInitialized(true);
 
     } catch (error) {
       // Handle specific error types

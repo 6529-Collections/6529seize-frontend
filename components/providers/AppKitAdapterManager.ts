@@ -7,75 +7,8 @@ import {
 } from '@/wagmiConfig/wagmiAppWalletConnector'
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter'
 import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
+import { validateWalletSafely } from '@/utils/wallet-validation.utils'
 
-// Security validation: Fail-fast wallet validation without exposing sensitive data
-function validateWalletSafely(wallet: AppWallet): void {
-  // FAIL-FAST: Never return on null/undefined wallet
-  if (!wallet) {
-    throw new WalletValidationError('Wallet object is null or undefined - cannot process');
-  }
-  
-  // FAIL-FAST: Validate required fields explicitly
-  if (!wallet.address) {
-    throw new WalletValidationError('Wallet missing required address field');
-  }
-  
-  if (typeof wallet.address !== 'string') {
-    throw new WalletValidationError('Wallet address must be a string');
-  }
-  
-  if (!wallet.address.match(/^0x[a-fA-F0-9]{40}$/)) {
-    throw new WalletValidationError('Wallet address has invalid Ethereum format');
-  }
-  
-  if (!wallet.address_hashed) {
-    throw new WalletValidationError('Wallet missing required address_hashed field');
-  }
-  
-  if (typeof wallet.address_hashed !== 'string') {
-    throw new WalletValidationError('Wallet address_hashed must be a string');
-  }
-  
-  if (wallet.address_hashed.length < 64) {
-    throw new WalletValidationError('Wallet address_hashed too short - potential security issue');
-  }
-  
-  if (!wallet.name) {
-    throw new WalletValidationError('Wallet missing required name field');
-  }
-  
-  if (typeof wallet.name !== 'string') {
-    throw new WalletValidationError('Wallet name must be a string');
-  }
-  
-  if (wallet.name.length === 0 || wallet.name.length > 100) {
-    throw new WalletValidationError('Wallet name length must be between 1 and 100 characters');
-  }
-
-  // Validate encrypted fields exist without exposing values
-  if (wallet.private_key) {
-    if (typeof wallet.private_key !== 'string') {
-      throw new WalletSecurityError('Private key must be a string');
-    }
-    if (wallet.private_key.length < 32) {
-      throw new WalletSecurityError('Private key too short - security violation detected');
-    }
-  }
-  
-  if (wallet.mnemonic) {
-    if (typeof wallet.mnemonic !== 'string') {
-      throw new WalletSecurityError('Mnemonic must be a string');
-    }
-    const words = wallet.mnemonic.trim().split(/\s+/);
-    if (words.length < 12 || words.length > 24) {
-      throw new WalletSecurityError('Mnemonic word count invalid - security violation detected');
-    }
-    // Validate all words are non-empty
-    if (words.some(word => !word || word.length === 0)) {
-      throw new WalletSecurityError('Mnemonic contains empty words - security violation detected');
-    }
-  }
-}
 
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null
