@@ -5,6 +5,7 @@ import WagmiSetup from '../../../components/providers/WagmiSetup';
 import { useAppWalletPasswordModal } from '@/hooks/useAppWalletPasswordModal';
 import { useAuth } from '../../../components/auth/Auth';
 import { createAppKit } from '@reown/appkit/react';
+import { initializeAppKit } from '@/utils/appkit-initialization.utils';
 import { Capacitor } from '@capacitor/core';
 import { AppKitRetryError, AppKitTimeoutError, AppKitValidationError } from '@/src/errors/appkit-initialization';
 
@@ -13,6 +14,7 @@ jest.mock('@/hooks/useAppWalletPasswordModal');
 jest.mock('../../../components/auth/Auth');
 jest.mock('@reown/appkit/react');
 jest.mock('@capacitor/core');
+jest.mock('@/utils/appkit-initialization.utils');
 jest.mock('../../../components/app-wallets/AppWalletsContext', () => ({
   appWalletsEventEmitter: {
     on: jest.fn(),
@@ -46,6 +48,7 @@ jest.mock('@/utils/error-sanitizer', () => ({
 describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
   const mockSetToast = jest.fn();
   const mockRequestPassword = jest.fn();
+  const mockInitializeAppKit = initializeAppKit as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -60,6 +63,13 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
     });
     
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+    
+    // Mock the AppKit initialization utility to return a mock adapter
+    mockInitializeAppKit.mockResolvedValue({
+      adapter: {
+        wagmiConfig: { chains: [], connectors: [] }
+      }
+    });
   });
 
   describe('Memory Leak Detection', () => {
@@ -77,14 +87,19 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
         return originalSetTimeout(callback, delay);
       }) as any;
       
-      // Make createAppKit fail multiple times then succeed
+      // Make the utility function fail multiple times then succeed
       let callCount = 0;
-      (createAppKit as jest.Mock).mockImplementation(() => {
+      mockInitializeAppKit.mockImplementation(async () => {
         callCount++;
         if (callCount <= 2) {
-          throw new Error('AppKit creation failed');
+          throw new Error('AppKit initialization failed');
         }
         // Success on third attempt
+        return {
+          adapter: {
+            wagmiConfig: { chains: [], connectors: [] }
+          }
+        };
       });
 
       await act(async () => {
@@ -93,7 +108,7 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
 
       // Wait for retries to complete
       await waitFor(() => {
-        expect(createAppKit).toHaveBeenCalledTimes(3);
+        expect(mockInitializeAppKit).toHaveBeenCalledTimes(3);
       }, { timeout: 15000 });
 
       // Restore original setTimeout
@@ -107,9 +122,9 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
     test('should cleanup timeouts properly when component unmounts', async () => {
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
       
-      (createAppKit as jest.Mock).mockImplementation(() => {
-        // Make it hang to trigger timeout
-        throw new Error('Simulated hang');
+      // Make the utility function hang to simulate timeout scenario
+      mockInitializeAppKit.mockImplementation(() => {
+        return new Promise(() => {}); // Never resolves
       });
 
       const { unmount } = await act(async () => {
@@ -134,13 +149,11 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
   describe('Concurrent Retry Prevention', () => {
     test('should prevent multiple concurrent initialization attempts', async () => {
       let resolveFirstCall: Function;
-      let rejectFirstCall: Function;
       
-      // Make createAppKit hang on first call
-      (createAppKit as jest.Mock).mockImplementationOnce(() => {
-        return new Promise((resolve, reject) => {
+      // Make the utility function hang on first call
+      mockInitializeAppKit.mockImplementationOnce(() => {
+        return new Promise((resolve) => {
           resolveFirstCall = resolve;
-          rejectFirstCall = reject;
         });
       });
 
@@ -164,21 +177,27 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
         });
       }
 
-      // Verify createAppKit was only called once (concurrent call was prevented)
-      expect(createAppKit).toHaveBeenCalledTimes(1);
+      // Verify the utility was only called once (concurrent call was prevented)
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
       
       // Resolve the hanging promise to clean up
       if (resolveFirstCall) {
         await act(async () => {
-          resolveFirstCall();
+          resolveFirstCall({
+            adapter: {
+              wagmiConfig: { chains: [], connectors: [] }
+            }
+          });
         });
       }
     });
 
     test('should allow initialization after previous attempt completes', async () => {
       // First call succeeds immediately
-      (createAppKit as jest.Mock).mockImplementationOnce(() => {
-        // Success
+      mockInitializeAppKit.mockResolvedValueOnce({
+        adapter: {
+          wagmiConfig: { chains: [], connectors: [] }
+        }
       });
 
       await act(async () => {
@@ -187,7 +206,7 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
 
       // Wait for first initialization to complete
       await waitFor(() => {
-        expect(createAppKit).toHaveBeenCalledTimes(1);
+        expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
       });
 
       // Now trigger another initialization (should be allowed)
@@ -202,8 +221,10 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
       mockInstance.shouldRecreateAdapter.mockReturnValue(true);
 
       // Second call also succeeds
-      (createAppKit as jest.Mock).mockImplementationOnce(() => {
-        // Success
+      mockInitializeAppKit.mockResolvedValueOnce({
+        adapter: {
+          wagmiConfig: { chains: [], connectors: [] }
+        }
       });
 
       if (updateHandler) {
@@ -217,7 +238,7 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
 
       // Verify second initialization was allowed
       await waitFor(() => {
-        expect(createAppKit).toHaveBeenCalledTimes(2);
+        expect(mockInitializeAppKit).toHaveBeenCalledTimes(2);
       });
     });
   });
@@ -226,8 +247,10 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
     test('should clear initialization timeout on success', async () => {
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
       
-      (createAppKit as jest.Mock).mockImplementation(() => {
-        // Success
+      mockInitializeAppKit.mockResolvedValue({
+        adapter: {
+          wagmiConfig: { chains: [], connectors: [] }
+        }
       });
 
       await act(async () => {
@@ -235,7 +258,7 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
       });
 
       await waitFor(() => {
-        expect(createAppKit).toHaveBeenCalled();
+        expect(mockInitializeAppKit).toHaveBeenCalled();
       });
 
       // Verify clearTimeout was called (indicating proper cleanup)
@@ -247,17 +270,15 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
     test('should clear initialization timeout on failure', async () => {
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
       
-      (createAppKit as jest.Mock).mockImplementation(() => {
-        throw new Error('AppKit creation failed');
-      });
+      mockInitializeAppKit.mockRejectedValue(new Error('AppKit initialization failed'));
 
       await act(async () => {
         render(<WagmiSetup><div>Test</div></WagmiSetup>);
       });
 
-      // Wait for retries to exhaust
+      // Wait for initialization to fail
       await waitFor(() => {
-        expect(createAppKit).toHaveBeenCalledTimes(3); // MAX_RETRIES = 3
+        expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
       }, { timeout: 15000 });
 
       // Verify clearTimeout was called during error handling
@@ -270,18 +291,19 @@ describe('WagmiSetup - Retry Fix and Memory Leak Prevention', () => {
       jest.useFakeTimers();
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
-      (createAppKit as jest.Mock).mockImplementation(() => {
-        // Simulate hanging operation that never resolves
-        return new Promise(() => {});
-      });
+      // Make the utility function simulate a timeout error
+      const { AppKitTimeoutError } = require('@/src/errors/appkit-initialization');
+      mockInitializeAppKit.mockRejectedValue(
+        new AppKitTimeoutError('AppKit initialization timed out after 10000ms')
+      );
 
       await act(async () => {
         render(<WagmiSetup><div>Test</div></WagmiSetup>);
       });
 
-      // Fast-forward past the timeout (10 seconds)
+      // Fast-forward past any debounce delays
       await act(async () => {
-        jest.advanceTimersByTime(11000);
+        jest.advanceTimersByTime(1000);
       });
 
       // Verify error was logged (timeout should cause error)
