@@ -14,8 +14,10 @@ import {
   setAuthJwt,
   syncWalletRoleWithServer,
 } from "../../services/auth/auth.utils";
+import { redeemRefreshTokenWithRetries } from "../../services/auth/token-refresh.utils";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import { jwtDecode } from "jwt-decode";
+import { isAddress } from "viem";
 import { ProfileConnectedStatus } from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -31,17 +33,12 @@ import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
-import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRefreshTokenRequest";
-import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
 import { validateRoleForAuthentication } from "../../utils/role-validation";
 import {
-  TokenRefreshError,
   TokenRefreshCancelledError,
-  TokenRefreshNetworkError,
-  TokenRefreshServerError,
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
@@ -218,129 +215,6 @@ export default function Auth({
     );
   };
 
-  // Helper function for redeeming refresh token with retries - FAIL-FAST VERSION
-  async function redeemRefreshTokenWithRetries(
-    walletAddress: string,
-    refreshToken: string,
-    role: string | null,
-    retryCount = 3,
-    abortSignal?: AbortSignal
-  ): Promise<ApiRedeemRefreshTokenResponse> {
-    // Input validation - fail fast on invalid parameters
-    if (!walletAddress || typeof walletAddress !== 'string') {
-      throw new TokenRefreshError('Invalid walletAddress: must be non-empty string');
-    }
-    if (!refreshToken || typeof refreshToken !== 'string') {
-      throw new TokenRefreshError('Invalid refreshToken: must be non-empty string');
-    }
-    if (retryCount < 1 || retryCount > 10) {
-      throw new TokenRefreshError('Invalid retryCount: must be between 1 and 10');
-    }
-
-    // Check for cancellation upfront
-    if (abortSignal?.aborted) {
-      throw new TokenRefreshCancelledError('Operation cancelled before starting');
-    }
-
-    let attempt = 0;
-    let lastError: unknown = null;
-
-    while (attempt < retryCount) {
-      attempt++;
-
-      // Check for cancellation before each attempt
-      if (abortSignal?.aborted) {
-        throw new TokenRefreshCancelledError(`Operation cancelled on attempt ${attempt}`);
-      }
-
-      try {
-        const redeemResponse = await commonApiPost<
-          ApiRedeemRefreshTokenRequest,
-          ApiRedeemRefreshTokenResponse
-        >({
-          endpoint: "auth/redeem-refresh-token",
-          body: {
-            address: walletAddress,
-            token: refreshToken,
-            role: role ?? undefined,
-          },
-          signal: abortSignal,
-        });
-
-        // Response validation - fail fast on invalid response
-        if (!redeemResponse) {
-          throw new TokenRefreshServerError(
-            'Server returned null/undefined response',
-            undefined,
-            redeemResponse
-          );
-        }
-
-        if (!redeemResponse.token || typeof redeemResponse.token !== 'string') {
-          throw new TokenRefreshServerError(
-            'Server returned invalid token',
-            undefined,
-            redeemResponse
-          );
-        }
-
-        if (!redeemResponse.address || typeof redeemResponse.address !== 'string') {
-          throw new TokenRefreshServerError(
-            'Server returned invalid address',
-            undefined,
-            redeemResponse
-          );
-        }
-
-        // Success - return valid response
-        return redeemResponse;
-      } catch (err: any) {
-        // Handle cancellation errors immediately
-        if (err.name === 'AbortError' || abortSignal?.aborted) {
-          throw new TokenRefreshCancelledError(
-            `Operation cancelled during attempt ${attempt}`
-          );
-        }
-
-        // If this is already one of our error types, just track it
-        if (err instanceof TokenRefreshError) {
-          lastError = err;
-          // Classify the error based on its characteristics
-        } else if (err?.code === 'NETWORK_ERROR' ||
-          err?.code === 'ENOTFOUND' ||
-          err?.code === 'ECONNREFUSED' ||
-          err?.code === 'ETIMEDOUT') {
-          lastError = new TokenRefreshNetworkError(
-            `Network error on attempt ${attempt}: ${err.message}`,
-            err
-          );
-        } else if (err?.status >= 400 && err?.status < 600) {
-          lastError = new TokenRefreshServerError(
-            `Server error ${err.status} on attempt ${attempt}: ${err.message}`,
-            err.status,
-            err.response,
-            err
-          );
-        } else {
-          lastError = new TokenRefreshError(
-            `Unknown error on attempt ${attempt}: ${err.message}`,
-            err
-          );
-        }
-
-        // If this was the last attempt, throw the error
-        if (attempt >= retryCount) {
-          throw lastError;
-        }
-
-        // Otherwise continue to next attempt
-      }
-    }
-
-    // This should never be reached due to the throw in the catch block,
-    // but TypeScript requires it for exhaustiveness
-    throw lastError || new TokenRefreshError('All retry attempts failed');
-  }
 
   // Main JWT validation function with cancellation support - FAIL-FAST VERSION
   const validateJwt = async ({
@@ -609,9 +483,9 @@ export default function Auth({
       throw new InvalidSignerAddressError(signerAddress);
     }
 
-    // Validate address format (basic Ethereum address check)
-    const addressRegex = /^0x[a-fA-F0-9]{40}$/;
-    if (!addressRegex.test(signerAddress)) {
+    // Use viem's comprehensive address validation
+    // This includes EIP-55 checksum validation and format checking
+    if (!isAddress(signerAddress)) {
       throw new InvalidSignerAddressError(signerAddress);
     }
 
