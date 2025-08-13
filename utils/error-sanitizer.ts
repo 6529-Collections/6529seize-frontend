@@ -57,6 +57,78 @@ const containsSensitiveData = (text: string): boolean => {
 };
 
 /**
+ * Handles adapter-specific error messages
+ */
+const getAdapterErrorMessage = (error: Error): string | null => {
+  const errorName = (error as any)?.constructor?.name;
+  
+  if (!['AdapterError', 'AdapterCacheError', 'AdapterCleanupError'].includes(errorName)) {
+    return null;
+  }
+
+  // Map adapter-specific errors to user-friendly messages
+  if (error.message.includes('CACHE_')) {
+    return 'Wallet connection data needs to be refreshed. Please try connecting again.';
+  }
+  if (error.message.includes('CLEANUP_')) {
+    return 'Wallet disconnection in progress. Please wait a moment before reconnecting.';
+  }
+  if (error.message.includes('Adapter creation failed')) {
+    return 'Unable to initialize wallet connection. Please refresh the page and try again.';
+  }
+  if (errorName === 'AdapterCacheError') {
+    return 'Wallet connection cache needs to be cleared. Please refresh the page.';
+  }
+  if (errorName === 'AdapterCleanupError') {
+    return 'Previous wallet connection is still being cleaned up. Please wait and try again.';
+  }
+  
+  // Default for unknown adapter errors
+  return 'Wallet connection service is temporarily unavailable. Please try again.';
+};
+
+/**
+ * Extracts error message and string representation from unknown error
+ */
+const extractErrorMessage = (error: unknown): { message: string; errorString: string } => {
+  if (error instanceof Error) {
+    return { message: error.message, errorString: error.toString() };
+  }
+  
+  if (typeof error === 'string') {
+    return { message: error, errorString: error };
+  }
+  
+  if (typeof error === 'object') {
+    try {
+      const errorString = JSON.stringify(error);
+      const message = (error as any).message || (error as any).error || "";
+      return { message, errorString };
+    } catch {
+      return { message: "", errorString: "Complex error object" };
+    }
+  }
+  
+  return { message: "", errorString: "" };
+};
+
+/**
+ * Error pattern mappings for common error types
+ */
+const ERROR_PATTERNS = [
+  { pattern: /network/i, message: "Network error. Please check your connection and try again." },
+  { pattern: /timeout/i, message: "Request timed out. Please try again." },
+  { pattern: /unauthorized|forbidden/i, message: "Authorization failed. Please reconnect your wallet." },
+  { pattern: /invalid/i, message: "Invalid request. Please check your input and try again." },
+  { pattern: /not found/i, message: "Requested resource not found." },
+  { pattern: /rate limit/i, message: "Too many requests. Please wait a moment and try again." },
+  { pattern: /wallet|metamask/i, message: "Wallet error. Please check your wallet connection." },
+  { pattern: /signature|sign/i, message: "Signature request failed. Please try again." },
+  { pattern: /rejected|denied/i, message: "Request was rejected." },
+  { pattern: /balance|insufficient/i, message: "Insufficient balance for this operation." }
+];
+
+/**
  * Sanitizes an error object for safe display to users
  * Removes any sensitive data and returns a user-friendly message
  */
@@ -65,87 +137,30 @@ export const sanitizeErrorForUser = (error: unknown): string => {
     return "An unexpected error occurred. Please try again.";
   }
 
-  // Handle adapter-specific errors first (imported from @/src/errors/adapter)
-  const errorName = (error as any)?.constructor?.name;
-  if (errorName === 'AdapterError' || errorName === 'AdapterCacheError' || errorName === 'AdapterCleanupError') {
-    const adapterError = error as Error;
-    // Map adapter-specific errors to user-friendly messages
-    if (adapterError.message.includes('CACHE_')) {
-      return 'Wallet connection data needs to be refreshed. Please try connecting again.';
+  // Handle adapter-specific errors first
+  if (error instanceof Error) {
+    const adapterMessage = getAdapterErrorMessage(error);
+    if (adapterMessage) {
+      return adapterMessage;
     }
-    if (adapterError.message.includes('CLEANUP_')) {
-      return 'Wallet disconnection in progress. Please wait a moment before reconnecting.';
-    }
-    if (adapterError.message.includes('Adapter creation failed')) {
-      return 'Unable to initialize wallet connection. Please refresh the page and try again.';
-    }
-    if (errorName === 'AdapterCacheError') {
-      return 'Wallet connection cache needs to be cleared. Please refresh the page.';
-    }
-    if (errorName === 'AdapterCleanupError') {
-      return 'Previous wallet connection is still being cleaned up. Please wait and try again.';
-    }
-    // Default for unknown adapter errors
-    return 'Wallet connection service is temporarily unavailable. Please try again.';
   }
 
-  // Handle different error types
-  let message = "";
-  let errorString = "";
-
-  if (error instanceof Error) {
-    message = error.message;
-    errorString = error.toString();
-  } else if (typeof error === 'string') {
-    message = error;
-    errorString = error;
-  } else if (typeof error === 'object') {
-    try {
-      errorString = JSON.stringify(error);
-      message = (error as any).message || (error as any).error || "";
-    } catch {
-      errorString = "Complex error object";
-    }
-  } else {
+  const { message, errorString } = extractErrorMessage(error);
+  
+  if (!message && !errorString) {
     return "An unexpected error occurred. Please try again.";
   }
 
   // Check if the error contains sensitive data
   if (containsSensitiveData(errorString) || containsSensitiveData(message)) {
-    // Return generic message for errors containing sensitive data
     return "Authentication error occurred. Please try again.";
   }
 
-  // For known error types, provide helpful messages
-  if (message.toLowerCase().includes('network')) {
-    return "Network error. Please check your connection and try again.";
-  }
-  if (message.toLowerCase().includes('timeout')) {
-    return "Request timed out. Please try again.";
-  }
-  if (message.toLowerCase().includes('unauthorized') || message.toLowerCase().includes('forbidden')) {
-    return "Authorization failed. Please reconnect your wallet.";
-  }
-  if (message.toLowerCase().includes('invalid')) {
-    return "Invalid request. Please check your input and try again.";
-  }
-  if (message.toLowerCase().includes('not found')) {
-    return "Requested resource not found.";
-  }
-  if (message.toLowerCase().includes('rate limit')) {
-    return "Too many requests. Please wait a moment and try again.";
-  }
-  if (message.toLowerCase().includes('wallet') || message.toLowerCase().includes('metamask')) {
-    return "Wallet error. Please check your wallet connection.";
-  }
-  if (message.toLowerCase().includes('signature') || message.toLowerCase().includes('sign')) {
-    return "Signature request failed. Please try again.";
-  }
-  if (message.toLowerCase().includes('rejected') || message.toLowerCase().includes('denied')) {
-    return "Request was rejected.";
-  }
-  if (message.toLowerCase().includes('balance') || message.toLowerCase().includes('insufficient')) {
-    return "Insufficient balance for this operation.";
+  // Check against known error patterns
+  for (const { pattern, message: patternMessage } of ERROR_PATTERNS) {
+    if (pattern.test(message.toLowerCase())) {
+      return patternMessage;
+    }
   }
 
   // If message is safe and informative, return it (but truncate if too long)

@@ -319,12 +319,13 @@ const getMobileErrorMessage = (error: unknown): string => {
   } else if (error && typeof error === 'object') {
     // For plain objects, try to get a meaningful representation
     try {
-      // Check if it has a custom toString that's not Object.prototype.toString
-      if (error.toString !== Object.prototype.toString) {
-        message = error.toString();
-      } else {
-        // Fallback to JSON stringification for plain objects
+      // Check if it has Object.prototype.toString (plain object)
+      if (error.toString === Object.prototype.toString) {
+        // Use JSON stringification for plain objects
         message = JSON.stringify(error);
+      } else {
+        // Use custom toString method
+        message = error.toString();
       }
     } catch {
       message = 'Unknown error';
