@@ -1,150 +1,134 @@
 /**
- * Tests for the getSafeWalletInfo function security validation
- * These tests ensure fail-fast behavior and prevent authentication bypass
+ * Tests for wallet sanitization utilities
+ * These tests ensure fail-fast behavior and prevent sensitive data exposure
  */
 
-import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
-import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
+import { WalletValidationError } from '../../src/errors/wallet-validation'
+import { AppWallet } from '../../components/app-wallets/AppWalletsContext'
+import { 
+  sanitizeWalletForLogging, 
+  validateAppWallet, 
+  validateAppWallets 
+} from '../../src/utils/wallet-sanitization'
 
-// Import the function we're testing from the manager
-// We need to expose it for testing or create a test-specific export
-// For now, we'll create a mock of the function based on the implementation
-
-function getSafeWalletInfo(wallet: AppWallet): string {
-  // FAIL-FAST: Never return on null/undefined wallet
-  if (!wallet) {
-    throw new WalletValidationError('Wallet object is null or undefined - cannot process');
-  }
-  
-  // FAIL-FAST: Validate required fields explicitly
-  if (wallet.address === undefined || wallet.address === null) {
-    throw new WalletValidationError('Wallet missing required address field');
-  }
-  
-  if (typeof wallet.address !== 'string') {
-    throw new WalletValidationError('Wallet address must be a string');
-  }
-  
-  if (!wallet.address.match(/^0x[a-fA-F0-9]{40}$/)) {
-    throw new WalletValidationError('Wallet address has invalid Ethereum format');
-  }
-  
-  if (wallet.address_hashed === undefined || wallet.address_hashed === null) {
-    throw new WalletValidationError('Wallet missing required address_hashed field');
-  }
-  
-  if (typeof wallet.address_hashed !== 'string') {
-    throw new WalletValidationError('Wallet address_hashed must be a string');
-  }
-  
-  if (wallet.address_hashed.length < 64) {
-    throw new WalletValidationError('Wallet address_hashed too short - potential security issue');
-  }
-  
-  if (wallet.name === undefined || wallet.name === null) {
-    throw new WalletValidationError('Wallet missing required name field');
-  }
-  
-  if (typeof wallet.name !== 'string') {
-    throw new WalletValidationError('Wallet name must be a string');
-  }
-  
-  if (wallet.name.length === 0 || wallet.name.length > 100) {
-    throw new WalletValidationError('Wallet name length must be between 1 and 100 characters');
-  }
-
-  const safeInfo: Record<string, unknown> = {
-    address: wallet.address, // ✅ GUARANTEED VALID
-    address_hashed: wallet.address_hashed, // ✅ GUARANTEED VALID  
-    name: wallet.name, // ✅ GUARANTEED VALID
-    type: 'AppWallet'
-  }
-  
-  // Validate encrypted fields exist without exposing values
-  if (wallet.private_key) {
-    if (typeof wallet.private_key !== 'string') {
-      throw new WalletSecurityError('Private key must be a string');
-    }
-    if (wallet.private_key.length < 32) {
-      throw new WalletSecurityError('Private key too short - security violation detected');
-    }
-    safeInfo.has_private_key = true
-  }
-  
-  if (wallet.mnemonic) {
-    if (typeof wallet.mnemonic !== 'string') {
-      throw new WalletSecurityError('Mnemonic must be a string');
-    }
-    const words = wallet.mnemonic.trim().split(/\s+/);
-    if (words.length < 12 || words.length > 24) {
-      throw new WalletSecurityError('Mnemonic word count invalid - security violation detected');
-    }
-    // Validate all words are non-empty
-    if (words.some(word => !word || word.length === 0)) {
-      throw new WalletSecurityError('Mnemonic contains empty words - security violation detected');
-    }
-    safeInfo.has_mnemonic = true
-  }
-  
-  return JSON.stringify(safeInfo)
-}
-
-describe('getSafeWalletInfo Security Tests', () => {
-  describe('Null/Undefined Validation - FAIL FAST', () => {
-    it('throws WalletValidationError when wallet is null', () => {
-      expect(() => getSafeWalletInfo(null as any)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(null as any)).toThrow('Wallet object is null or undefined - cannot process')
+describe('Wallet Sanitization Utilities', () => {
+  describe('sanitizeWalletForLogging - Secure Data Redaction', () => {
+    it('returns safe object when wallet is null', () => {
+      const result = sanitizeWalletForLogging(null)
+      expect(result).toEqual({ status: 'null_or_undefined' })
     })
 
-    it('throws WalletValidationError when wallet is undefined', () => {
-      expect(() => getSafeWalletInfo(undefined as any)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(undefined as any)).toThrow('Wallet object is null or undefined - cannot process')
+    it('returns safe object when wallet is undefined', () => {
+      const result = sanitizeWalletForLogging(undefined)
+      expect(result).toEqual({ status: 'null_or_undefined' })
     })
 
-    it('CRITICAL: NEVER returns "null wallet" string', () => {
-      // This was the original security vulnerability
-      // Verify these functions throw instead of returning a string
-      expect(() => getSafeWalletInfo(null as any)).toThrow()
-      expect(() => getSafeWalletInfo(undefined as any)).toThrow()
-      
-      // Verify no function call could possibly return "null wallet" 
-      try {
-        getSafeWalletInfo(null as any)
-      } catch (error) {
-        expect(error).toBeInstanceOf(WalletValidationError)
+    it('CRITICAL: redacts private_key field', () => {
+      const wallet = {
+        address: '0x1234567890123456789012345678901234567890',
+        name: 'Test Wallet',
+        private_key: 'ULTRA_SECRET_PRIVATE_KEY_MUST_NOT_LEAK'
       }
       
-      try {
-        getSafeWalletInfo(undefined as any)
-      } catch (error) {
-        expect(error).toBeInstanceOf(WalletValidationError)
+      const result = sanitizeWalletForLogging(wallet)
+      const resultStr = JSON.stringify(result)
+      
+      expect(resultStr).not.toContain('ULTRA_SECRET_PRIVATE_KEY_MUST_NOT_LEAK')
+      expect(result).toHaveProperty('private_key', '[REDACTED]')
+      expect(result).toHaveProperty('__sanitized', true)
+      expect(result).toHaveProperty('__sanitizedAt')
+    })
+
+    it('CRITICAL: redacts mnemonic field', () => {
+      const wallet = {
+        address: '0x1234567890123456789012345678901234567890',
+        name: 'Test Wallet',
+        mnemonic: 'ULTRA_SECRET_MNEMONIC abandon abandon abandon'
       }
+      
+      const result = sanitizeWalletForLogging(wallet)
+      const resultStr = JSON.stringify(result)
+      
+      expect(resultStr).not.toContain('ULTRA_SECRET_MNEMONIC')
+      expect(result).toHaveProperty('mnemonic', '[REDACTED]')
+      expect(result).toHaveProperty('__sanitized', true)
+    })
+
+    it('preserves safe fields like address and name', () => {
+      const wallet = {
+        address: '0x1234567890123456789012345678901234567890',
+        name: 'My Test Wallet',
+        created_at: 1234567890
+      }
+      
+      const result = sanitizeWalletForLogging(wallet)
+      
+      expect(result).toHaveProperty('address', wallet.address)
+      expect(result).toHaveProperty('name', wallet.name)
+      expect(result).toHaveProperty('created_at', wallet.created_at)
+      expect(result).toHaveProperty('__sanitized', true)
+    })
+
+    it('handles nested objects with sensitive data', () => {
+      const walletWithNested = {
+        address: '0x1234567890123456789012345678901234567890',
+        config: {
+          private_key: 'SECRET_NESTED_KEY',
+          name: 'Safe Config Name'
+        }
+      }
+      
+      const result = sanitizeWalletForLogging(walletWithNested)
+      const resultStr = JSON.stringify(result)
+      
+      expect(resultStr).not.toContain('SECRET_NESTED_KEY')
+      expect((result as any).config).toHaveProperty('private_key', '[REDACTED]')
+      expect((result as any).config).toHaveProperty('name', 'Safe Config Name')
+    })
+
+    it('prevents infinite recursion with max depth limit', () => {
+      const circular: any = { address: '0x123' }
+      circular.self = circular
+      
+      const result = sanitizeWalletForLogging(circular)
+      expect(result).toHaveProperty('__sanitized', true)
+      // Should not throw or hang due to circular reference
     })
   })
 
-  describe('Address Validation - FAIL FAST', () => {
+  describe('validateAppWallet - FAIL FAST Validation', () => {
+    it('throws WalletValidationError when wallet is null', () => {
+      expect(() => validateAppWallet(null as any)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(null as any)).toThrow('Wallet is null or undefined during validation')
+    })
+
+    it('throws WalletValidationError when wallet is undefined', () => {
+      expect(() => validateAppWallet(undefined as any)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(undefined as any)).toThrow('Wallet is null or undefined during validation')
+    })
+
     it('throws WalletValidationError when address is missing', () => {
       const wallet = {} as AppWallet
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet missing required address field')
+      expect(() => validateAppWallet(wallet)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(wallet)).toThrow('Wallet missing required \'address\' field during validation')
     })
 
     it('throws WalletValidationError when address is not a string', () => {
       const wallet = { address: 123 } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet address must be a string')
+      expect(() => validateAppWallet(wallet)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(wallet)).toThrow('Wallet address must be a string during validation')
     })
 
     it('throws WalletValidationError for empty address string', () => {
       const wallet = { address: '' } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet address has invalid Ethereum format')
+      expect(() => validateAppWallet(wallet)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(wallet)).toThrow('Wallet missing required \'address\' field during validation')
     })
 
     it('throws WalletValidationError for whitespace-only address', () => {
       const wallet = { address: '   ' } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet address has invalid Ethereum format')
+      expect(() => validateAppWallet(wallet)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(wallet)).toThrow('Wallet address cannot be empty during validation')
     })
 
     it('throws WalletValidationError for invalid Ethereum address format', () => {
@@ -157,13 +141,9 @@ describe('getSafeWalletInfo Security Tests', () => {
       ]
 
       for (const address of invalidAddresses) {
-        const wallet = {
-          address,
-          address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-          name: 'Test Wallet'
-        } as any
-        expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-        expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet address has invalid Ethereum format')
+        const wallet = { address } as AppWallet
+        expect(() => validateAppWallet(wallet)).toThrow(WalletValidationError)
+        expect(() => validateAppWallet(wallet)).toThrow('Invalid Ethereum address format during validation')
       }
     })
 
@@ -176,273 +156,169 @@ describe('getSafeWalletInfo Security Tests', () => {
       ]
 
       for (const address of validAddresses) {
-        const wallet = {
-          address,
-          address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-          name: 'Test Wallet'
-        } as AppWallet
-        expect(() => getSafeWalletInfo(wallet)).not.toThrow()
+        const wallet = { address } as AppWallet
+        expect(() => validateAppWallet(wallet)).not.toThrow()
       }
     })
-  })
 
-  describe('Address Hash Validation - FAIL FAST', () => {
-    const baseWallet = {
-      address: '0x1234567890123456789012345678901234567890',
-      name: 'Test Wallet'
-    }
-
-    it('throws WalletValidationError when address_hashed is missing', () => {
-      const wallet = baseWallet as AppWallet
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet missing required address_hashed field')
+    it('includes context in error messages', () => {
+      expect(() => validateAppWallet(null as any, 'during adapter creation')).toThrow(
+        'Wallet is null or undefined during during adapter creation'
+      )
     })
 
-    it('throws WalletValidationError when address_hashed is not a string', () => {
-      const wallet = { ...baseWallet, address_hashed: 123 } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet address_hashed must be a string')
-    })
-
-    it('throws WalletValidationError when address_hashed is too short', () => {
-      const wallet = { ...baseWallet, address_hashed: 'short' } as AppWallet
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet address_hashed too short - potential security issue')
-    })
-
-    it('accepts valid address_hashed values', () => {
-      const validHashes = [
-        '0123456789012345678901234567890123456789012345678901234567890123456789', // exactly 64 chars
-        '01234567890123456789012345678901234567890123456789012345678901234567890123456789', // longer than 64
-      ]
-
-      for (const hash of validHashes) {
-        const wallet = { ...baseWallet, address_hashed: hash } as AppWallet
-        expect(() => getSafeWalletInfo(wallet)).not.toThrow()
-      }
-    })
-  })
-
-  describe('Name Validation - FAIL FAST', () => {
-    const baseWallet = {
-      address: '0x1234567890123456789012345678901234567890',
-      address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789'
-    }
-
-    it('throws WalletValidationError when name is missing', () => {
-      const wallet = baseWallet as AppWallet
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet missing required name field')
-    })
-
-    it('throws WalletValidationError when name is not a string', () => {
-      const wallet = { ...baseWallet, name: 123 } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet name must be a string')
-    })
-
-    it('throws WalletValidationError when name is empty', () => {
+    it('validates address_hashed when provided', () => {
       const wallet = {
         address: '0x1234567890123456789012345678901234567890',
-        address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-        name: ''
-      } as AppWallet
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet name length must be between 1 and 100 characters')
-    })
-
-    it('throws WalletValidationError when name is too long', () => {
-      const wallet = {
-        address: '0x1234567890123456789012345678901234567890',
-        address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-        name: 'a'.repeat(101)
-      } as AppWallet
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet name length must be between 1 and 100 characters')
-    })
-
-    it('accepts valid name values', () => {
-      const validNames = [
-        'A', // single character
-        'Test Wallet',
-        'My Long Wallet Name With Spaces',
-        'a'.repeat(100) // exactly 100 characters
-      ]
-
-      for (const name of validNames) {
-        const wallet = {
-          address: '0x1234567890123456789012345678901234567890',
-          address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-          name
-        } as AppWallet
-        expect(() => getSafeWalletInfo(wallet)).not.toThrow()
-      }
-    })
-  })
-
-  describe('Private Key Validation - SECURITY FAIL FAST', () => {
-    const baseWallet = {
-      address: '0x1234567890123456789012345678901234567890',
-      address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-      name: 'Test Wallet'
-    }
-
-    it('throws WalletSecurityError when private_key is not a string', () => {
-      const wallet = { ...baseWallet, private_key: 123 } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletSecurityError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet security violation: Private key must be a string')
-    })
-
-    it('throws WalletSecurityError when private_key is too short', () => {
-      const wallet = { ...baseWallet, private_key: 'short' } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletSecurityError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet security violation: Private key too short - security violation detected')
-    })
-
-    it('accepts valid private keys and includes has_private_key flag', () => {
-      const wallet = { ...baseWallet, private_key: 'a'.repeat(64) } as any
-      const result = getSafeWalletInfo(wallet)
-      const parsed = JSON.parse(result)
-      expect(parsed.has_private_key).toBe(true)
-      expect(result).not.toContain('aaa') // Verify private key value not exposed
-    })
-  })
-
-  describe('Mnemonic Validation - SECURITY FAIL FAST', () => {
-    const baseWallet = {
-      address: '0x1234567890123456789012345678901234567890',
-      address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-      name: 'Test Wallet'
-    }
-
-    it('throws WalletSecurityError when mnemonic is not a string', () => {
-      const wallet = { ...baseWallet, mnemonic: 123 } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletSecurityError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet security violation: Mnemonic must be a string')
-    })
-
-    it('throws WalletSecurityError when mnemonic has too few words', () => {
-      const wallet = { ...baseWallet, mnemonic: 'word1 word2 word3' } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletSecurityError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet security violation: Mnemonic word count invalid - security violation detected')
-    })
-
-    it('throws WalletSecurityError when mnemonic has too many words', () => {
-      const words = Array.from({ length: 25 }, (_, i) => `word${i + 1}`).join(' ')
-      const wallet = { ...baseWallet, mnemonic: words } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletSecurityError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet security violation: Mnemonic word count invalid - security violation detected')
-    })
-
-    it('throws WalletSecurityError when mnemonic contains empty words', () => {
-      const wallet = { ...baseWallet, mnemonic: 'word1  word3 word4 word5 word6 word7 word8 word9 word10 word11 word12' } as any
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletSecurityError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow('Wallet security violation: Mnemonic contains empty words - security violation detected')
-    })
-
-    it('accepts valid mnemonics and includes has_mnemonic flag', () => {
-      const validMnemonics = [
-        'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12', // 12 words
-        'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12 word13 word14 word15 word16 word17 word18 word19 word20 word21 word22 word23 word24' // 24 words
-      ]
-
-      for (const mnemonic of validMnemonics) {
-        const wallet = { ...baseWallet, mnemonic } as any
-        const result = getSafeWalletInfo(wallet)
-        const parsed = JSON.parse(result)
-        expect(parsed.has_mnemonic).toBe(true)
-        expect(result).not.toContain('word1') // Verify mnemonic value not exposed
-      }
-    })
-  })
-
-  describe('Valid Return Type', () => {
-    it('returns valid JSON string for completely valid wallet', () => {
-      const wallet = {
-        address: '0x1234567890123456789012345678901234567890',
-        address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-        name: 'Test Wallet'
-      } as AppWallet
-
-      const result = getSafeWalletInfo(wallet)
-      expect(() => JSON.parse(result)).not.toThrow()
-      
-      const parsed = JSON.parse(result)
-      expect(parsed.address).toBe(wallet.address)
-      expect(parsed.address_hashed).toBe(wallet.address_hashed)
-      expect(parsed.name).toBe(wallet.name)
-      expect(parsed.type).toBe('AppWallet')
-    })
-
-    it('returns valid JSON with security flags when sensitive data present', () => {
-      const wallet = {
-        address: '0x1234567890123456789012345678901234567890',
-        address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-        name: 'Test Wallet',
-        private_key: 'a'.repeat(64),
-        mnemonic: 'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12'
-      } as any
-
-      const result = getSafeWalletInfo(wallet)
-      const parsed = JSON.parse(result)
-      
-      expect(parsed.has_private_key).toBe(true)
-      expect(parsed.has_mnemonic).toBe(true)
-      expect(result).not.toContain('aaaa') // Private key not exposed
-      expect(result).not.toContain('word1') // Mnemonic not exposed
-    })
-
-    it('CRITICAL: never exposes sensitive values in return string', () => {
-      const sensitiveData = 'ULTRA_SECRET_DATA_MUST_NOT_LEAK'
-      const wallet = {
-        address: '0x1234567890123456789012345678901234567890',
-        address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-        name: 'Test Wallet',
-        private_key: sensitiveData,
-        mnemonic: `${sensitiveData} word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12`
-      } as any
-
-      const result = getSafeWalletInfo(wallet)
-      
-      // Verify sensitive data is never exposed
-      expect(result).not.toContain('ULTRA_SECRET_DATA_MUST_NOT_LEAK')
-      expect(result).toContain('"has_private_key":true')
-      expect(result).toContain('"has_mnemonic":true')
-    })
-  })
-
-  describe('Error Type Verification', () => {
-    it('throws correct error types for validation vs security issues', () => {
-      // Validation errors (basic structure issues)
-      expect(() => getSafeWalletInfo(null as any)).toThrow(WalletValidationError)
-      expect(() => getSafeWalletInfo(null as any)).not.toThrow(WalletSecurityError)
-      
-      // Security errors (sensitive data issues)
-      const wallet = {
-        address: '0x1234567890123456789012345678901234567890',
-        address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
-        name: 'Test Wallet',
-        private_key: 'too-short'
+        address_hashed: 123
       } as any
       
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletSecurityError)
-      expect(() => getSafeWalletInfo(wallet)).toThrow(WalletValidationError) // WalletSecurityError extends WalletValidationError
+      expect(() => validateAppWallet(wallet)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(wallet)).toThrow('Wallet address_hashed must be a string when provided')
     })
 
-    it('provides clear error inheritance', () => {
+    it('throws for empty address_hashed when provided', () => {
       const wallet = {
         address: '0x1234567890123456789012345678901234567890',
-        address_hashed: '0123456789012345678901234567890123456789012345678901234567890123456789',
+        address_hashed: '   '
+      } as any
+      
+      expect(() => validateAppWallet(wallet)).toThrow(WalletValidationError)
+      expect(() => validateAppWallet(wallet)).toThrow('Wallet address_hashed cannot be empty when provided')
+    })
+
+    it('accepts valid address_hashed when provided', () => {
+      const wallet = {
+        address: '0x1234567890123456789012345678901234567890',
+        address_hashed: 'valid_hash_string'
+      } as any
+      
+      expect(() => validateAppWallet(wallet)).not.toThrow()
+    })
+  })
+
+  describe('validateAppWallets - Array Validation', () => {
+    const validWallet: AppWallet = {
+      address: '0x1234567890123456789012345678901234567890',
+      name: 'Test Wallet',
+      created_at: 1234567890,
+      address_hashed: 'hash123',
+      mnemonic: 'test mnemonic',
+      private_key: 'test_key',
+      imported: false
+    }
+
+    it('throws WalletValidationError when wallets is not an array', () => {
+      expect(() => validateAppWallets('not an array' as any)).toThrow(WalletValidationError)
+      expect(() => validateAppWallets('not an array' as any)).toThrow('Expected array of wallets during validation')
+    })
+
+    it('throws WalletValidationError when array is empty', () => {
+      expect(() => validateAppWallets([])).toThrow(WalletValidationError)
+      expect(() => validateAppWallets([])).toThrow('No wallets provided during validation')
+    })
+
+    it('validates each wallet in the array', () => {
+      const invalidWallet = { address: 'invalid' } as AppWallet
+      const wallets = [validWallet, invalidWallet]
+      
+      expect(() => validateAppWallets(wallets)).toThrow(WalletValidationError)
+      expect(() => validateAppWallets(wallets)).toThrow('Invalid Ethereum address format during validation at index 1')
+    })
+
+    it('detects duplicate addresses', () => {
+      const wallet2 = { ...validWallet }
+      const wallets = [validWallet, wallet2]
+      
+      expect(() => validateAppWallets(wallets)).toThrow(WalletValidationError)
+      expect(() => validateAppWallets(wallets)).toThrow('Duplicate wallet address found during validation at index 1')
+    })
+
+    it('passes validation with array of unique valid wallets', () => {
+      const wallet2: AppWallet = {
+        ...validWallet,
+        address: '0x9876543210987654321098765432109876543210'
+      }
+      const wallets = [validWallet, wallet2]
+      
+      expect(() => validateAppWallets(wallets)).not.toThrow()
+    })
+
+    it('includes context in error messages', () => {
+      expect(() => validateAppWallets([], 'during bulk import')).toThrow(
+        'No wallets provided during during bulk import'
+      )
+    })
+
+    it('handles errors gracefully during individual wallet validation', () => {
+      const invalidWallet = {
+        address: null // This will cause validation to fail with missing address error
+      } as any
+      
+      expect(() => validateAppWallets([invalidWallet])).toThrow(WalletValidationError)
+      expect(() => validateAppWallets([invalidWallet])).toThrow('Wallet missing required \'address\' field during validation at index 0')
+    })
+  })
+
+  describe('Integration Tests - Security Focused', () => {
+    it('sanitizeWalletForLogging never exposes data that validateAppWallet handles', () => {
+      const walletWithSensitiveData = {
+        address: '0x1234567890123456789012345678901234567890',
         name: 'Test Wallet',
-        private_key: 'short'
+        private_key: 'CRITICAL_SECRET_KEY_MUST_NOT_LEAK',
+        mnemonic: 'CRITICAL_SECRET_PHRASE abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon',
+        keystore: 'ENCRYPTED_KEYSTORE_DATA',
+        password: 'USER_PASSWORD'
+      }
+      
+      const sanitized = sanitizeWalletForLogging(walletWithSensitiveData)
+      const sanitizedStr = JSON.stringify(sanitized)
+      
+      // Verify no sensitive data leaks
+      expect(sanitizedStr).not.toContain('CRITICAL_SECRET_KEY_MUST_NOT_LEAK')
+      expect(sanitizedStr).not.toContain('CRITICAL_SECRET_PHRASE')
+      expect(sanitizedStr).not.toContain('ENCRYPTED_KEYSTORE_DATA')
+      expect(sanitizedStr).not.toContain('USER_PASSWORD')
+      
+      // But safe data should be preserved
+      expect(sanitized).toHaveProperty('address', walletWithSensitiveData.address)
+      expect(sanitized).toHaveProperty('name', walletWithSensitiveData.name)
+      expect(sanitized).toHaveProperty('__sanitized', true)
+    })
+
+    it('validateAppWallet works with minimal valid wallet structure', () => {
+      const minimalWallet: AppWallet = {
+        address: '0x1234567890123456789012345678901234567890',
+        name: 'Minimal',
+        created_at: 123,
+        address_hashed: 'hash',
+        mnemonic: 'mnemonic',
+        private_key: 'key',
+        imported: false
+      }
+      
+      expect(() => validateAppWallet(minimalWallet)).not.toThrow()
+      
+      // And it can be safely logged
+      const sanitized = sanitizeWalletForLogging(minimalWallet)
+      expect(sanitized).toHaveProperty('address', minimalWallet.address)
+      expect(sanitized).toHaveProperty('mnemonic', '[REDACTED]')
+      expect(sanitized).toHaveProperty('private_key', '[REDACTED]')
+    })
+
+    it('error messages never expose wallet contents when validation fails', () => {
+      const walletWithSecrets = {
+        address: 'invalid_format',
+        name: 'Test',
+        private_key: 'SECRET_THAT_SHOULD_NOT_APPEAR_IN_ERROR'
       } as any
       
       try {
-        getSafeWalletInfo(wallet)
+        validateAppWallet(walletWithSecrets)
       } catch (error) {
-        expect(error).toBeInstanceOf(WalletSecurityError)
-        expect(error).toBeInstanceOf(WalletValidationError)
-        expect((error as WalletSecurityError).name).toBe('WalletSecurityError')
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        expect(errorMessage).not.toContain('SECRET_THAT_SHOULD_NOT_APPEAR_IN_ERROR')
+        expect(errorMessage).toContain('Invalid Ethereum address format')
       }
     })
   })
