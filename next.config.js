@@ -104,7 +104,6 @@ const nextConfig = {
     if (!dev && !isServer) {
       const requiredEnvVars = [
         'BASE_ENDPOINT',
-        'CW_PROJECT_ID'
       ];
       
       const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
