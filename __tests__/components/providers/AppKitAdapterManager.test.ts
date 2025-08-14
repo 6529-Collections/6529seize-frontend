@@ -1,7 +1,7 @@
-import { AppKitAdapterManager } from '@/components/providers/AppKitAdapterManager'
-import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter'
-import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
-import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
+import { AppKitAdapterManager } from '../../../components/providers/AppKitAdapterManager'
+import { AdapterError } from '../../../src/errors/adapter'
+import { WalletValidationError } from '../../../src/errors/wallet-validation'
+import { AppWallet } from '../../../components/app-wallets/AppWalletsContext'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 
 // Jest helper
@@ -11,16 +11,17 @@ const fail = (message?: string): never => {
 
 // Mock dependencies
 jest.mock('@reown/appkit-adapter-wagmi')
-jest.mock('@/wagmiConfig/wagmiAppWalletConnector', () => ({
+jest.mock('../../../wagmiConfig/wagmiAppWalletConnector', () => ({
   createAppWalletConnector: jest.fn(() => ({ id: 'mock-connector' }))
 }))
-jest.mock('@/constants', () => ({
+jest.mock('../../../constants', () => ({
   CW_PROJECT_ID: '12345678-1234-1234-1234-123456789abc' // Valid UUID format
 }))
 
 describe('AppKitAdapterManager', () => {
   let manager: AppKitAdapterManager
   let mockRequestPassword: jest.Mock
+  let consoleSpy: jest.SpyInstance
 
   const mockWallet: AppWallet = {
     address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
@@ -56,10 +57,17 @@ describe('AppKitAdapterManager', () => {
     jest.clearAllMocks()
     mockRequestPassword = jest.fn().mockResolvedValue('password123')
     
+    // Suppress console.error for expected error cases
+    consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    
     // Mock WagmiAdapter constructor
     ;(WagmiAdapter as jest.MockedClass<typeof WagmiAdapter>).mockImplementation(() => ({
       wagmiConfig: { id: 'mock-config' }
     } as any))
+  })
+
+  afterEach(() => {
+    consoleSpy?.mockRestore()
   })
 
   describe('Security Tests - Critical', () => {
@@ -443,7 +451,7 @@ describe('AppKitAdapterManager', () => {
       it('should throw indexed AdapterError when state is invalid', () => {
         expect(() => manager.setConnectionState('0x123', 'invalid' as any)).toThrow(AdapterError)
         expect(() => manager.setConnectionState('0x123', 'invalid' as any))
-          .toThrow('ADAPTER_020: Invalid state: invalid')
+          .toThrow('ADAPTER_020: Invalid state: invalid. Must be \'connecting\', \'connected\', or \'disconnected\'')
       })
     })
   })
@@ -473,7 +481,7 @@ describe('AppKitAdapterManager', () => {
 
       it('should cleanup non-current adapter successfully', () => {
         const adapter1 = manager.createAdapter([mockWallet])
-        const adapter2 = manager.createAdapter([mockWallet2])
+        const _adapter2 = manager.createAdapter([mockWallet2])
         
         expect(() => manager['performAdapterCleanup'](adapter1, 'test-key')).not.toThrow()
       })

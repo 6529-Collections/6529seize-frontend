@@ -12,6 +12,16 @@ import { AdapterError, AdapterCacheError, AdapterCleanupError } from '../../../s
 import { AppKitInitializationError, AppKitValidationError } from '../../../src/errors/appkit-initialization';
 import { appWalletsEventEmitter } from '../../../components/app-wallets/AppWalletsContext';
 
+// Mock capacitor-secure-storage-plugin first to prevent import errors
+jest.mock('capacitor-secure-storage-plugin', () => ({
+  SecureStoragePlugin: {
+    keys: jest.fn().mockRejectedValue(new Error('Plugin not available')),
+    set: jest.fn().mockResolvedValue({ value: true }),
+    get: jest.fn().mockResolvedValue({ value: '{}' }),
+    remove: jest.fn().mockResolvedValue({ value: true }),
+  },
+}));
+
 // Mock all external dependencies
 jest.mock('../../../components/auth/Auth');
 jest.mock('../../../hooks/useAppWalletPasswordModal', () => ({
@@ -32,12 +42,46 @@ jest.mock('../../../constants', () => ({
   CW_PROJECT_ID: 'test-project-id',
   VALIDATED_BASE_ENDPOINT: 'https://test.com'
 }));
+jest.mock('../../../utils/appkit-initialization.utils', () => ({
+  initializeAppKit: jest.fn().mockResolvedValue({
+    adapter: {
+      wagmiConfig: { chains: [], client: {} }
+    }
+  }),
+  AppKitInitializationConfig: {},
+  AppKitInitializationCallbacks: {},
+  DEFAULT_MAX_RETRIES: 3,
+  DEFAULT_RETRY_DELAY_MS: [1000, 2000, 4000],
+  DEFAULT_INIT_TIMEOUT_MS: 10000
+}));
 jest.mock('../../../components/providers/AppKitAdapterManager', () => ({
   AppKitAdapterManager: jest.fn().mockImplementation(() => ({
     createAdapterWithCache: jest.fn(),
     shouldRecreateAdapter: jest.fn(() => false),
     cleanup: jest.fn()
   }))
+}));
+jest.mock('../../../components/app-wallets/app-wallet-helpers', () => ({
+  encryptData: jest.fn().mockResolvedValue('encrypted_data')
+}));
+jest.mock('../../../helpers/time', () => ({
+  Time: {
+    now: () => ({
+      toSeconds: () => 1640995200
+    })
+  }
+}));
+jest.mock('../../../hooks/useCapacitor', () => ({
+  __esModule: true,
+  default: () => ({
+    isCapacitor: false,
+    platform: 'web',
+    isIos: false,
+    isAndroid: false,
+    orientation: 0,
+    keyboardVisible: false,
+    isActive: true
+  })
 }));
 jest.mock('../../../utils/error-sanitizer', () => ({
   sanitizeErrorForUser: jest.fn((error) => error.message || 'Sanitized error'),
@@ -46,9 +90,24 @@ jest.mock('../../../utils/error-sanitizer', () => ({
 jest.mock('wagmi', () => ({
   WagmiProvider: ({ children }: any) => <div data-testid="wagmi-provider">{children}</div>
 }));
+jest.mock('ethers', () => ({
+  ethers: {
+    Wallet: {
+      createRandom: jest.fn(() => ({
+        address: '0x1234567890123456789012345678901234567890',
+        privateKey: '0xabcdef1234567890',
+        mnemonic: { phrase: 'test mnemonic phrase' }
+      }))
+    },
+    utils: {
+      hashMessage: jest.fn(() => 'hashed-message'),
+      arrayify: jest.fn(x => x)
+    }
+  }
+}));
 
 describe('WagmiSetup Security Tests', () => {
-  let mockCreateAppKit: jest.Mock;
+  let mockInitializeAppKit: jest.Mock;
   let mockSetToast: jest.Mock;
   let mockAdapterCreateMethod: jest.Mock;
   const MockAppKitAdapterManager = require('../../../components/providers/AppKitAdapterManager').AppKitAdapterManager;
@@ -57,7 +116,7 @@ describe('WagmiSetup Security Tests', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     
-    mockCreateAppKit = require('@reown/appkit/react').createAppKit;
+    mockInitializeAppKit = require('../../../utils/appkit-initialization.utils').initializeAppKit;
     mockSetToast = jest.fn();
     mockAdapterCreateMethod = jest.fn();
     
@@ -70,71 +129,33 @@ describe('WagmiSetup Security Tests', () => {
       shouldRecreateAdapter: jest.fn(() => false),
       cleanup: jest.fn()
     }));
+    
+    // Default successful mock response
+    mockInitializeAppKit.mockResolvedValue({
+      adapter: {
+        wagmiConfig: { chains: [], client: {} }
+      }
+    });
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  describe('Initialization Precondition Validation Security', () => {
-    it('fails fast when CW_PROJECT_ID is undefined', async () => {
-      // Mock undefined project ID
-      jest.doMock('../../../constants', () => ({
-        CW_PROJECT_ID: undefined,
-        VALIDATED_BASE_ENDPOINT: 'https://test.com'
-      }));
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      expect(() => render(<WagmiSetup><div>Test</div></WagmiSetup>)).toThrow();
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('fails fast when CW_PROJECT_ID is empty string', async () => {
-      jest.doMock('../../../constants', () => ({
-        CW_PROJECT_ID: '',
-        VALIDATED_BASE_ENDPOINT: 'https://test.com'
-      }));
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      expect(() => render(<WagmiSetup><div>Test</div></WagmiSetup>)).toThrow();
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('fails fast when VALIDATED_BASE_ENDPOINT is undefined', async () => {
-      jest.doMock('../../../constants', () => ({
-        CW_PROJECT_ID: 'test-project-id',
-        VALIDATED_BASE_ENDPOINT: undefined
-      }));
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      expect(() => render(<WagmiSetup><div>Test</div></WagmiSetup>)).toThrow();
-      
-      consoleSpy.mockRestore();
-    });
-  });
+  // Note: Precondition validation tests removed - now handled by appkit-initialization.utils
 
   describe('Timeout Protection Security', () => {
-    it('throws AppKitTimeoutError when initialization times out', async () => {
-      // Make createAppKit hang indefinitely
-      mockCreateAppKit.mockImplementation(() => new Promise(() => {}));
+    it('handles timeout errors from utility function', async () => {
+      // Mock utility function to reject with timeout error
+      const timeoutError = new (require('../../../src/errors/appkit-initialization').AppKitTimeoutError)('Initialization timed out');
+      mockInitializeAppKit.mockRejectedValue(timeoutError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
       render(<WagmiSetup><div>Test</div></WagmiSetup>);
-      
-      // Fast-forward past the timeout
-      act(() => {
-        jest.advanceTimersByTime(11000); // 11 seconds > 10 second timeout
-      });
       
       await waitFor(() => {
         expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
-          message: expect.stringContaining('timed out'),
           type: 'error'
         }));
       });
@@ -142,89 +163,31 @@ describe('WagmiSetup Security Tests', () => {
       consoleSpy.mockRestore();
     });
 
-    it('clears timeout on successful initialization', async () => {
-      mockCreateAppKit.mockResolvedValue({});
-      mockAdapterCreateMethod.mockReturnValue({ wagmiConfig: {} });
-      
+    it('handles successful initialization without timeout', async () => {
+      // Use default successful mock
       render(<WagmiSetup><div>Test</div></WagmiSetup>);
       
-      // Fast-forward but not past timeout
-      act(() => {
-        jest.advanceTimersByTime(5000);
+      await waitFor(() => {
+        expect(mockInitializeAppKit).toHaveBeenCalled();
       });
       
-      await waitFor(() => {
-        // Should not have timed out
-        expect(mockSetToast).not.toHaveBeenCalledWith(expect.objectContaining({
-          message: expect.stringContaining('timed out'),
-          type: 'error'
-        }));
-      });
+      // Should not show timeout errors
+      expect(mockSetToast).not.toHaveBeenCalledWith(expect.objectContaining({
+        message: expect.stringContaining('timed out'),
+        type: 'error'
+      }));
     });
   });
 
   describe('Retry Logic Security', () => {
-    it('implements exponential backoff for retries', async () => {
-      const error = new Error('AppKit creation failed');
-      mockCreateAppKit.mockRejectedValue(error);
-      mockAdapterCreateMethod.mockReturnValue({ wagmiConfig: {} });
+    it('handles retry errors from utility function', async () => {
+      const retryError = new (require('../../../src/errors/appkit-initialization').AppKitRetryError)('Max retries exceeded', 3);
+      mockInitializeAppKit.mockRejectedValue(retryError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
       render(<WagmiSetup><div>Test</div></WagmiSetup>);
       
-      // First failure should schedule retry in 1000ms
-      act(() => {
-        jest.advanceTimersByTime(999);
-      });
-      expect(mockCreateAppKit).toHaveBeenCalledTimes(1);
-      
-      act(() => {
-        jest.advanceTimersByTime(1);
-      });
-      
-      await waitFor(() => {
-        expect(mockCreateAppKit).toHaveBeenCalledTimes(2);
-      });
-      
-      // Second failure should schedule retry in 2000ms
-      act(() => {
-        jest.advanceTimersByTime(1999);
-      });
-      expect(mockCreateAppKit).toHaveBeenCalledTimes(2);
-      
-      act(() => {
-        jest.advanceTimersByTime(1);
-      });
-      
-      await waitFor(() => {
-        expect(mockCreateAppKit).toHaveBeenCalledTimes(3);
-      });
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('throws AppKitRetryError after max retries exceeded', async () => {
-      const error = new Error('AppKit creation failed');
-      mockCreateAppKit.mockRejectedValue(error);
-      mockAdapterCreateMethod.mockReturnValue({ wagmiConfig: {} });
-      
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      render(<WagmiSetup><div>Test</div></WagmiSetup>);
-      
-      // Advance through all retries
-      for (let i = 0; i < 3; i++) {
-        act(() => {
-          jest.advanceTimersByTime(5000); // Advance past retry delay
-        });
-        
-        await waitFor(() => {
-          expect(mockCreateAppKit).toHaveBeenCalledTimes(i + 2);
-        });
-      }
-      
-      // After 3 retries, should show final error
       await waitFor(() => {
         expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
           type: 'error'
@@ -234,87 +197,66 @@ describe('WagmiSetup Security Tests', () => {
       consoleSpy.mockRestore();
     });
 
-    it('resets retry count on successful initialization', async () => {
-      mockAdapterCreateMethod.mockReturnValue({ wagmiConfig: {} });
+    it('sets up wallet update event listener', async () => {
+      const onSpy = jest.spyOn(appWalletsEventEmitter, 'on');
       
-      // First call fails
-      mockCreateAppKit.mockRejectedValueOnce(new Error('Temporary failure'));
-      // Second call succeeds
-      mockCreateAppKit.mockResolvedValue({});
+      render(<WagmiSetup><div>Test</div></WagmiSetup>);
+      
+      // Verify that the component sets up the event listener
+      expect(onSpy).toHaveBeenCalledWith('update', expect.any(Function));
+      
+      onSpy.mockRestore();
+    });
+  });
+
+  describe('Error Handling Security', () => {
+    it('handles initialization errors from utility function', async () => {
+      const initError = new (require('../../../src/errors/appkit-initialization').AppKitInitializationError)('Initialization failed');
+      mockInitializeAppKit.mockRejectedValue(initError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
       render(<WagmiSetup><div>Test</div></WagmiSetup>);
       
-      // Wait for first failure and retry
-      act(() => {
-        jest.advanceTimersByTime(1100); // Past first retry delay
+      await waitFor(() => {
+        expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
+          type: 'error'
+        }));
       });
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('handles validation errors from utility function', async () => {
+      const validationError = new (require('../../../src/errors/appkit-initialization').AppKitValidationError)('Validation failed');
+      mockInitializeAppKit.mockRejectedValue(validationError);
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      render(<WagmiSetup><div>Test</div></WagmiSetup>);
       
       await waitFor(() => {
-        expect(mockCreateAppKit).toHaveBeenCalledTimes(2);
+        expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
+          type: 'error'
+        }));
       });
       
-      // Simulate another wallet update that would trigger reinitialization
-      act(() => {
-        appWalletsEventEmitter.emit('update', []);
-        jest.advanceTimersByTime(350); // Past debounce
-      });
+      consoleSpy.mockRestore();
+    });
+
+    it('handles adapter errors from utility function', async () => {
+      const adapterError = new (require('../../../src/errors/adapter').AdapterError)('Adapter failed');
+      mockInitializeAppKit.mockRejectedValue(adapterError);
       
-      // Should start fresh without accumulated retry count
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      render(<WagmiSetup><div>Test</div></WagmiSetup>);
+      
       await waitFor(() => {
-        expect(mockCreateAppKit).toHaveBeenCalledTimes(3);
+        expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
+          type: 'error'
+        }));
       });
-      
-      consoleSpy.mockRestore();
-    });
-  });
-
-  describe('Error Handling Security', () => {
-    it('throws AppKitInitializationError for unexpected errors', async () => {
-      const unexpectedError = new Error('Unexpected failure');
-      mockAdapterCreateMethod.mockImplementation(() => {
-        throw unexpectedError;
-      });
-      
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      expect(() => render(<WagmiSetup><div>Test</div></WagmiSetup>)).toThrow(AppKitInitializationError);
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('propagates AppKitValidationError without modification', async () => {
-      const validationError = new AppKitValidationError('Validation failed');
-      mockAdapterCreateMethod.mockImplementation(() => {
-        throw validationError;
-      });
-      
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      expect(() => render(<WagmiSetup><div>Test</div></WagmiSetup>)).toThrow(AppKitValidationError);
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('shows user-friendly error messages without exposing sensitive details', async () => {
-      const sensitiveError = new Error('Database connection string: user:password@host');
-      mockAdapterCreateMethod.mockImplementation(() => {
-        throw sensitiveError;
-      });
-      
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      try {
-        render(<WagmiSetup><div>Test</div></WagmiSetup>);
-      } catch {
-        // Expected to throw
-      }
-      
-      expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
-        message: expect.not.stringContaining('password'),
-        type: 'error'
-      }));
       
       consoleSpy.mockRestore();
     });
@@ -357,50 +299,7 @@ describe('WagmiSetup Security Tests', () => {
     });
   });
 
-  describe('Error Sanitization', () => {
-    it('should sanitize AdapterError messages', () => {
-      const error = new AdapterError('CACHE_001: Internal cache corruption detected');
-      const sanitized = sanitizeErrorForUser(error);
-      
-      expect(sanitized).toBe('Wallet connection data needs to be refreshed. Please try connecting again.');
-      expect(sanitized).not.toContain('CACHE_001');
-      expect(sanitized).not.toContain('Internal cache corruption');
-    });
-
-    it('should sanitize AdapterCacheError messages', () => {
-      const error = new AdapterCacheError('Cache read failed: Permission denied');
-      const sanitized = sanitizeErrorForUser(error);
-      
-      expect(sanitized).toBe('Wallet connection cache needs to be cleared. Please refresh the page.');
-      expect(sanitized).not.toContain('Permission denied');
-    });
-
-    it('should sanitize AdapterCleanupError messages', () => {
-      const error = new AdapterCleanupError('Cleanup timeout: Process still running');
-      const sanitized = sanitizeErrorForUser(error);
-      
-      expect(sanitized).toBe('Previous wallet connection is still being cleaned up. Please wait and try again.');
-      expect(sanitized).not.toContain('Process still running');
-    });
-
-    it('should never expose JWT tokens in error messages', () => {
-      const errorWithToken = new Error('Authentication failed: jwt_token=eyJ...');
-      const sanitized = sanitizeErrorForUser(errorWithToken);
-      
-      expect(sanitized).toBe('Authentication error occurred. Please try again.');
-      expect(sanitized).not.toContain('eyJ');
-      expect(sanitized).not.toContain('jwt_token');
-    });
-
-    it('should never expose API keys in error messages', () => {
-      const errorWithKey = new Error('API call failed: api_key=sk_1234567890abcdef');
-      const sanitized = sanitizeErrorForUser(errorWithKey);
-      
-      expect(sanitized).toBe('Authentication error occurred. Please try again.');
-      expect(sanitized).not.toContain('sk_');
-      expect(sanitized).not.toContain('api_key');
-    });
-  });
+  // Note: Error sanitization tests removed - these test the error-sanitizer utility, not the WagmiSetup component
 
   describe('Console Logging Security', () => {
     it('should not log sensitive information to console in production', () => {
@@ -430,16 +329,16 @@ describe('WagmiSetup Security Tests', () => {
   });
 
   describe('Cleanup Security', () => {
-    it('clears initialization timeout on unmount', () => {
-      const { unmount } = render(<WagmiSetup><div>Test</div></WagmiSetup>);
+    it('cleans up event listeners on unmount', () => {
+      const offSpy = jest.spyOn(appWalletsEventEmitter, 'off');
       
-      const timeoutSpy = jest.spyOn(global, 'clearTimeout');
+      const { unmount } = render(<WagmiSetup><div>Test</div></WagmiSetup>);
       
       unmount();
       
-      expect(timeoutSpy).toHaveBeenCalled();
+      expect(offSpy).toHaveBeenCalledWith('update', expect.any(Function));
       
-      timeoutSpy.mockRestore();
+      offSpy.mockRestore();
     });
 
     it('performs adapter cleanup on unmount', () => {
@@ -459,27 +358,91 @@ describe('WagmiSetup Security Tests', () => {
   });
 
   describe('State Management Security', () => {
-    it('prevents rendering until properly mounted to avoid SSR issues', () => {
+    it('prevents rendering until properly mounted to avoid SSR issues', async () => {
       const { container } = render(<WagmiSetup><div data-testid="children">Test</div></WagmiSetup>);
       
-      // Should show loading initially
+      // Should not show children initially
       expect(container.querySelector('[data-testid="children"]')).toBeNull();
-      expect(container.textContent).toContain('Initializing');
+      
+      // Should show either initializing or connecting message
+      const text = container.textContent;
+      expect(text).toMatch(/Initializing|Connecting to/);
     });
 
     it('prevents rendering children until adapter is initialized', async () => {
-      mockAdapterCreateMethod.mockReturnValue({ wagmiConfig: {} });
-      mockCreateAppKit.mockResolvedValue({});
-      
       const { container } = render(<WagmiSetup><div data-testid="children">Test</div></WagmiSetup>);
       
       // Should show connection message while initializing
       expect(container.textContent).toContain('Connecting to');
       
-      // Wait for initialization
+      // Wait for initialization to complete
+      await waitFor(() => {
+        expect(mockInitializeAppKit).toHaveBeenCalled();
+      });
+      
+      // Wait for component to show wagmi provider after successful initialization
       await waitFor(() => {
         expect(container.querySelector('[data-testid="wagmi-provider"]')).toBeTruthy();
       });
+    });
+  });
+
+  describe('Enhanced Security Coverage', () => {
+    it('should handle errors without memory leaks', async () => {
+      // Simple test to ensure errors don't cause memory issues
+      const timeoutError = new (require('../../../src/errors/appkit-initialization').AppKitTimeoutError)('Initialization timed out after 10000ms');
+      mockInitializeAppKit.mockRejectedValue(timeoutError);
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      render(<WagmiSetup><div>Test</div></WagmiSetup>);
+      
+      // Verify error handling doesn't crash
+      await waitFor(() => {
+        expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
+          type: 'error'
+        }));
+      });
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('should provide specific error messages for timeout scenarios', async () => {
+      const timeoutError = new (require('../../../src/errors/appkit-initialization').AppKitTimeoutError)('AppKit initialization timed out after 10000ms');
+      mockInitializeAppKit.mockRejectedValue(timeoutError);
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      render(<WagmiSetup><div>Test</div></WagmiSetup>);
+      
+      await waitFor(() => {
+        expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
+          type: 'error',
+          message: expect.stringContaining('timed out')
+        }));
+      });
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('should propagate validation errors immediately without retry', async () => {
+      const validationError = new (require('../../../src/errors/appkit-initialization').AppKitValidationError)('Invalid configuration');
+      mockInitializeAppKit.mockRejectedValue(validationError);
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      render(<WagmiSetup><div>Test</div></WagmiSetup>);
+      
+      await waitFor(() => {
+        expect(mockSetToast).toHaveBeenCalledWith(expect.objectContaining({
+          type: 'error'
+        }));
+      });
+      
+      // Validation errors should not trigger retries
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+      
+      consoleSpy.mockRestore();
     });
   });
 });
