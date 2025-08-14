@@ -7,6 +7,13 @@ export const SEASONS_PER_PERIOD = SEASONS_PER_EPOCH * 5; // 80 seasons per perio
 export const SEASONS_PER_ERA = SEASONS_PER_PERIOD * 5; // 400 seasons per era (100 years)
 export const SEASONS_PER_EON = SEASONS_PER_ERA * 10; // 4000 seasons per eon (1000 years)
 
+// Historical SZN1 details
+export const SZN1_RANGE = {
+  start: new Date(Date.UTC(2022, 5, 1)), // Jun 1, 2022
+  end: new Date(Date.UTC(2022, 11, 31)), // Dec 31, 2022
+} as const;
+export const SZN1_SEASON_INDEX = -13;
+
 // ---- UTC/DST-aware mint schedule ----
 const SUMMER_UTC_HOUR = 14; // 14:40 UTC in summer time
 const WINTER_UTC_HOUR = 15; // 15:40 UTC in winter time

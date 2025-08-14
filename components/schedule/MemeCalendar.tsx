@@ -36,6 +36,8 @@ import {
   isSznOneIndex,
   mintStartInstantUtcForMintDay,
   printCalendarInvites,
+  SZN1_RANGE,
+  SZN1_SEASON_INDEX,
   toISO,
   ymd,
 } from "./meme-calendar.helpers";
@@ -59,8 +61,8 @@ function getRangeDatesByZoom(
   switch (zoom) {
     case "season": {
       if (isSznOneIndex(seasonIndex)) {
-        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        const start = new Date(SZN1_RANGE.start);
+        const end = new Date(SZN1_RANGE.end);
         return { start, end };
       }
       const start = getSeasonStartDate(seasonIndex);
@@ -78,8 +80,8 @@ function getRangeDatesByZoom(
       const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
       if (epochNumber === 0) {
         // special: SZN1 epoch
-        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
+        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
         return { start, end };
       } else if (epochNumber >= 1) {
         // start = Jan 1 of 2023 + 4*(epochNumber-1)
@@ -99,8 +101,8 @@ function getRangeDatesByZoom(
       const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
       if (periodNumber === 0) {
         // special: SZN1 period
-        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
+        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
         return { start, end };
       } else if (periodNumber >= 1) {
         // start = Jan 1 of 2023 + 20*(periodNumber-1)
@@ -119,8 +121,8 @@ function getRangeDatesByZoom(
       // Era 0: SZN1 only (Jun–Dec 2022). Era 1 starts Jan 2023 and spans 100 years.
       const eraNumber = displayedEraNumberFromIndex(seasonIndex);
       if (eraNumber === 0) {
-        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
+        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
         return { start, end };
       }
       const startYear = 2023 + 100 * (eraNumber - 1);
@@ -132,8 +134,8 @@ function getRangeDatesByZoom(
       // Eon 0: SZN1 only (Jun–Dec 2022). Eon 1 starts Jan 2023 and spans 1000 years.
       const eonNumber = displayedEonNumberFromIndex(seasonIndex);
       if (eonNumber === 0) {
-        const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-        const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
+        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
+        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
         return { start, end };
       }
       const startYear = 2023 + 1000 * (eonNumber - 1);
@@ -466,9 +468,9 @@ function YearView({
   // ⭐ Special case: Year 0 (2022) shows a single SZN1 card (Jun–Dec 2022)
   const displayedYear = displayedYearNumberFromIndex(seasonIndex);
   if (displayedYear === 0) {
-    const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-    const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
-    const sIdx = -13; // our SZN1 bucket
+    const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
+    const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
+    const sIdx = SZN1_SEASON_INDEX; // our SZN1 bucket
     const isCurrent = currentIdx === sIdx;
 
     return (
@@ -545,9 +547,9 @@ function EpochView({
 
   if (epochNumber === 0) {
     // Special case: SZN1 epoch, single card for Year #0 (SZN1)
-    const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-    const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
-    const sIdx = -13; // SZN1
+    const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
+    const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
+    const sIdx = SZN1_SEASON_INDEX; // SZN1
     // Highlight if currentIdx is within SZN1 range
     const isCurrent = currentIdx === sIdx;
     return (
@@ -632,9 +634,9 @@ function PeriodView({
 
   if (periodNumber === 0) {
     // Special case: SZN1 period, single card for Epoch #0
-    const start = new Date(Date.UTC(2022, 5, 1)); // Jun 1, 2022
-    const end = new Date(Date.UTC(2022, 11, 31)); // Dec 31, 2022
-    const sIdx = -13; // SZN1
+    const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
+    const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
+    const sIdx = SZN1_SEASON_INDEX; // SZN1
     const isCurrent = currentIdx === sIdx;
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
@@ -717,9 +719,7 @@ function EraView({
 
   // Era #0 – special (SZN1 only)
   if (eraNumber === 0) {
-    const start = new Date(Date.UTC(2022, 5, 1));
-    const end = new Date(Date.UTC(2022, 11, 31));
-    const sIdx = -13; // SZN1 bucket
+    const sIdx = SZN1_SEASON_INDEX; // SZN1 bucket
     const isCurrent = currentIdx === sIdx;
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
@@ -797,9 +797,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
 
   // Eon #0 – special (SZN1 only)
   if (eonNumber === 0) {
-    const start = new Date(Date.UTC(2022, 5, 1));
-    const end = new Date(Date.UTC(2022, 11, 31));
-    const sIdx = -13;
+    const sIdx = SZN1_SEASON_INDEX;
     const isCurrent = currentIdx === sIdx;
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
@@ -969,7 +967,7 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
   };
 
   //  The first ever season (Year 0, SZN 1) == internal seasonIndex -16.
-  const MIN_SEASON_INDEX = -13;
+  const MIN_SEASON_INDEX = SZN1_SEASON_INDEX;
 
   // If you want to limit how far forward users can go, set this; otherwise Infinity.
   const MAX_SEASON_INDEX = Number.POSITIVE_INFINITY;
@@ -980,20 +978,20 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
   // Navigation helpers for epoch/period
   const epochStartIndex = (n: number) =>
     n === 0
-      ? -13
+      ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 4 * (n - 1), 0, 1)));
   const periodStartIndex = (n: number) =>
     n === 0
-      ? -13
+      ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 20 * (n - 1), 0, 1)));
   const eraStartIndex = (n: number) =>
     n === 0
-      ? -13
+      ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 100 * (n - 1), 0, 1)));
 
   const eonStartIndex = (n: number) =>
     n === 0
-      ? -13
+      ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 1000 * (n - 1), 0, 1)));
   return (
     <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#181818]">
