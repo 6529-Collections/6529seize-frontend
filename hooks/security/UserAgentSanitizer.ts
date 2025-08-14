@@ -59,7 +59,7 @@ const SECURITY_LIMITS = {
  * XSS pattern sources (strings, not regex objects) to prevent global flag state issues
  */
 const XSS_PATTERN_SOURCES = [
-  '<script\\b[^>]*>[\\s\\S]*?<\\/\\s*script\\s*>',
+  '<script\\b[^>]*>[\\s\\S]*?<\\s*\\/\\s*script\\b[^>]*>',
   'javascript:',
   'data:text\\/html',
   'data:application\\/javascript',
