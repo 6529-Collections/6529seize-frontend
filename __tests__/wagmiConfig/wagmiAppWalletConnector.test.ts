@@ -2,7 +2,7 @@ import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals
 
 // Set up environment variable before imports
 const originalEnv = process.env;
-process.env.NEXT_PUBLIC_BASE_ENDPOINT = 'https://6529.io';
+process.env.BASE_ENDPOINT = 'https://6529.io';
 import { createAppWalletConnector } from '../../wagmiConfig/wagmiAppWalletConnector';
 import { InvalidPasswordError, PrivateKeyDecryptionError, WalletAuthenticationError } from '../../src/errors/wallet-auth';
 import { decryptData } from '../../components/app-wallets/app-wallet-helpers';
