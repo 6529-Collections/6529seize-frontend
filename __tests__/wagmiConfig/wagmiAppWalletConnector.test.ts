@@ -1,433 +1,218 @@
-// @ts-nocheck
-import {
-  createAppWalletConnector,
-  APP_WALLET_CONNECTOR_TYPE,
-} from "../../wagmiConfig/wagmiAppWalletConnector";
-import type { AppWallet } from "../../components/app-wallets/AppWalletsContext";
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+
+// Set up environment variable before imports
+const originalEnv = process.env;
+process.env.NEXT_PUBLIC_BASE_ENDPOINT = 'https://6529.io';
+import { createAppWalletConnector } from '../../wagmiConfig/wagmiAppWalletConnector';
+import { InvalidPasswordError, PrivateKeyDecryptionError, WalletAuthenticationError } from '../../src/errors/wallet-auth';
+import { decryptData } from '../../components/app-wallets/app-wallet-helpers';
+import { areEqualAddresses } from '../../helpers/Helpers';
 
 // Mock dependencies
-jest.mock("wagmi", () => ({
-  createConnector: jest.fn((factory) =>
-    factory({ emitter: { emit: jest.fn() } })
-  ),
+jest.mock('../../components/app-wallets/app-wallet-helpers');
+jest.mock('../../helpers/Helpers');
+jest.mock('viem/accounts', () => ({
+  privateKeyToAccount: jest.fn().mockReturnValue({ address: '0x1234567890123456789012345678901234567890' })
 }));
+// Mock createWalletClient to return a proper wallet client
+const mockWalletClient = {
+  account: { address: '0x1234567890123456789012345678901234567890' }
+};
 
-jest.mock("viem/accounts", () => ({
-  privateKeyToAccount: jest.fn(),
-}));
-
-jest.mock("viem", () => ({
-  createWalletClient: jest.fn(),
+jest.mock('viem', () => ({
+  createWalletClient: jest.fn().mockReturnValue(mockWalletClient),
   fallback: jest.fn(),
-  http: jest.fn(),
+  http: jest.fn()
 }));
 
-jest.mock("../../components/app-wallets/app-wallet-helpers", () => ({
-  decryptData: jest.fn(),
-}));
-
-jest.mock("../../wagmiConfig/wagmiConfig", () => ({
-  getChains: jest.fn(),
-}));
-
-jest.mock("../../helpers/Helpers", () => ({
-  areEqualAddresses: jest.fn(),
-}));
-
-// Import mocked modules
-import { createConnector } from "wagmi";
-import { privateKeyToAccount } from "viem/accounts";
-import { createWalletClient, fallback, http } from "viem";
-import { decryptData } from "../../components/app-wallets/app-wallet-helpers";
-import { getChains } from "../../wagmiConfig/wagmiConfig";
-import { areEqualAddresses } from "../../helpers/Helpers";
-import { mainnet, polygon } from "viem/chains";
-
-const mockCreateConnector = createConnector as jest.MockedFunction<
-  typeof createConnector
->;
-const mockPrivateKeyToAccount = privateKeyToAccount as jest.MockedFunction<
-  typeof privateKeyToAccount
->;
-const mockCreateWalletClient = createWalletClient as jest.MockedFunction<
-  typeof createWalletClient
->;
-const mockFallback = fallback as jest.MockedFunction<typeof fallback>;
-const mockHttp = http as jest.MockedFunction<typeof http>;
 const mockDecryptData = decryptData as jest.MockedFunction<typeof decryptData>;
-const mockGetChains = getChains as jest.MockedFunction<typeof getChains>;
-const mockAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
-  typeof areEqualAddresses
->;
+const mockAreEqualAddresses = areEqualAddresses as jest.MockedFunction<typeof areEqualAddresses>;
 
-describe("wagmiAppWalletConnector", () => {
-  const mockAppWallet: AppWallet = {
-    address: "0x123456789abcdef",
-    name: "Test Wallet",
-    address_hashed: "hashed_address",
-    private_key: "encrypted_private_key",
-    created_at: Date.now(),
-    mnemonic: "mnemonic",
-    imported: false,
+describe('wagmiAppWalletConnector', () => {
+  const mockChains = [
+    { id: 1, name: 'Ethereum' },
+    { id: 137, name: 'Polygon' }
+  ] as any[];
+
+  const mockAppWallet = {
+    address: '0x1234567890123456789012345678901234567890',
+    address_hashed: 'hashed_address_data',
+    private_key: 'encrypted_private_key_data',
+    name: 'Test Wallet'
   };
-
-  const mockChains = [mainnet, polygon];
 
   const mockRequestPasswordModal = jest.fn();
-  const mockEmitter = {
-    emit: jest.fn(),
-  };
+  let connector: any;
+  let connectorInstance: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockGetChains.mockReturnValue(mockChains);
-    mockCreateConnector.mockImplementation((factory) =>
-      (factory as any)({ emitter: mockEmitter } as any) as any
+    connector = createAppWalletConnector(
+      mockChains,
+      { appWallet: mockAppWallet },
+      mockRequestPasswordModal
     );
-    mockFallback.mockReturnValue({} as any);
-    mockHttp.mockReturnValue({} as any);
-    mockAreEqualAddresses.mockReturnValue(true);
-    mockDecryptData.mockResolvedValue("decrypted_value");
-
-    const mockAccount = { address: mockAppWallet.address };
-    mockPrivateKeyToAccount.mockReturnValue(mockAccount as any);
-
-    const mockWalletClient = { account: mockAccount };
-    mockCreateWalletClient.mockReturnValue(mockWalletClient as any);
+    // Create connector instance with mock emitter
+    const mockEmitter = {
+      emit: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn()
+    };
+    connectorInstance = connector({ emitter: mockEmitter });
   });
 
-  describe("createAppWalletConnector", () => {
-    it("creates connector with correct properties", () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      expect(connector.icon).toBe(
-        `https://robohash.org/${mockAppWallet.address}.png`
-      );
-      expect(connector.id).toBe(mockAppWallet.address);
-      expect(connector.name).toBe(mockAppWallet.name);
-      expect(connector.type).toBe(APP_WALLET_CONNECTOR_TYPE);
-      expect(connector.supportsSimulation).toBe(false);
+  afterAll(() => {
+    // Restore original environment
+    process.env = originalEnv;
+  });
+
+  describe('setPassword', () => {
+    it('throws InvalidPasswordError when password is empty', async () => {
+      await expect(connectorInstance.setPassword('')).rejects.toThrow('Password is required and must be a string');
     });
 
-    it("sets password successfully with valid credentials", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address) // First call for address verification
-        .mockResolvedValueOnce("private_key_decrypted"); // Second call for private key
-
-      const result = await connector.setPassword("correct_password");
-
-      expect(result).toBe(true);
-      expect(mockDecryptData).toHaveBeenCalledTimes(2);
-      expect(mockDecryptData).toHaveBeenNthCalledWith(
-        1,
-        mockAppWallet.address,
-        mockAppWallet.address_hashed,
-        "correct_password"
-      );
-      expect(mockDecryptData).toHaveBeenNthCalledWith(
-        2,
-        mockAppWallet.address,
-        mockAppWallet.private_key,
-        "correct_password"
-      );
+    it('throws InvalidPasswordError when password is null', async () => {
+      await expect(connectorInstance.setPassword(null as any)).rejects.toThrow('Password is required and must be a string');
     });
 
-    it("fails password validation with invalid credentials", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
+    it('throws InvalidPasswordError when password is not a string', async () => {
+      await expect(connectorInstance.setPassword(123 as any)).rejects.toThrow('Password is required and must be a string');
+    });
 
+    it('throws InvalidPasswordError when password is too short', async () => {
+      await expect(connectorInstance.setPassword('short')).rejects.toThrow('Password must be at least 8 characters long');
+    });
+
+    it('throws InvalidPasswordError when address decryption returns empty data', async () => {
+      mockDecryptData.mockResolvedValueOnce(''); // Empty decrypted address
+      
+      await expect(connectorInstance.setPassword('validpass123')).rejects.toThrow('Password decryption resulted in empty data');
+    });
+
+    it('throws InvalidPasswordError when decrypted address does not match', async () => {
+      mockDecryptData.mockResolvedValueOnce('0xdifferentaddress123456789012345678901234567890'); // Wrong address
       mockAreEqualAddresses.mockReturnValue(false);
-
-      const result = await connector.setPassword("wrong_password");
-
-      expect(result).toBe(false);
+      
+      await expect(connectorInstance.setPassword('validpass123')).rejects.toThrow('Password does not match wallet - address verification failed');
     });
 
-    it("handles decryption errors gracefully", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      mockDecryptData.mockRejectedValue(new Error("Decryption failed"));
-
-      const result = await connector.setPassword("any_password");
-
-      expect(result).toBe(false);
+    it('throws PrivateKeyDecryptionError when private key decryption returns empty result', async () => {
+      mockDecryptData
+        .mockResolvedValueOnce(mockAppWallet.address) // Address decryption succeeds
+        .mockResolvedValueOnce(''); // Private key decryption returns empty
+      mockAreEqualAddresses.mockReturnValue(true);
+      
+      await expect(connectorInstance.setPassword('validpass123')).rejects.toThrow('Private key decryption returned empty result');
     });
 
-    it("connects successfully with valid password", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
+    it('throws PrivateKeyDecryptionError when private key has invalid format', async () => {
+      mockDecryptData
+        .mockResolvedValueOnce(mockAppWallet.address) // Address decryption succeeds
+        .mockResolvedValueOnce('invalid_private_key_format'); // Invalid private key format
+      mockAreEqualAddresses.mockReturnValue(true);
+      
+      await expect(connectorInstance.setPassword('validpass123')).rejects.toThrow('Decrypted private key has invalid format');
+    });
 
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
+    it('wraps unexpected errors in PrivateKeyDecryptionError', async () => {
+      const unexpectedError = new Error('Network timeout');
+      mockDecryptData.mockRejectedValueOnce(unexpectedError);
+      
+      await expect(connectorInstance.setPassword('validpass123')).rejects.toThrow('Unexpected error during password validation');
+    });
+
+    it('re-throws custom wallet authentication errors unchanged', async () => {
+      const customError = new InvalidPasswordError('Custom error message');
+      mockDecryptData.mockRejectedValueOnce(customError);
+      
+      await expect(connectorInstance.setPassword('validpass123')).rejects.toThrow('Custom error message');
+    });
+
+    it('succeeds with valid password and private key', async () => {
+      const validPrivateKey = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
+      mockDecryptData
+        .mockResolvedValueOnce(mockAppWallet.address) // Address decryption succeeds
+        .mockResolvedValueOnce(validPrivateKey); // Valid private key
+      mockAreEqualAddresses.mockReturnValue(true);
+      
+      await expect(connectorInstance.setPassword('validpass123')).resolves.toBeUndefined();
+    });
+
+    it('returns Promise<void>, not Promise<boolean>', () => {
+      // This test ensures the method signature is correct
       mockDecryptData
         .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("private_key_decrypted");
+        .mockResolvedValueOnce('abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890');
+      mockAreEqualAddresses.mockReturnValue(true);
+      
+      const result = connectorInstance.setPassword('validpass123');
+      expect(result).toBeInstanceOf(Promise);
+      // The result should be a Promise<void>, which resolves to undefined
+      return expect(result).resolves.toBeUndefined();
+    });
+  });
 
-      const result = await connector.connect({ chainId: 1 });
-
-      expect(result).toEqual({
-        accounts: [mockAppWallet.address],
-        chainId: 1,
-      });
-      expect(mockEmitter.emit).toHaveBeenCalledWith("connect", {
-        accounts: [mockAppWallet.address],
-        chainId: 1,
-      });
+  describe('connect', () => {
+    it('throws error for unsupported chainId', async () => {
+      const unsupportedChainId = 999;
+      
+      await expect(connectorInstance.connect({ chainId: unsupportedChainId }))
+        .rejects.toThrow(`Chain ID ${unsupportedChainId} is not supported. Supported chains: 1, 137`);
     });
 
-    it("uses default chain ID when none provided", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
+    it('throws InvalidPasswordError when password modal returns empty password', async () => {
+      mockRequestPasswordModal.mockResolvedValue(''); // Empty password from modal
+      
+      await expect(connectorInstance.connect()).rejects.toThrow('Password is required for wallet connection');
+    });
 
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
+    it('throws InvalidPasswordError when password modal returns null', async () => {
+      mockRequestPasswordModal.mockResolvedValue(null); // Null password from modal
+      
+      await expect(connectorInstance.connect()).rejects.toThrow('Password is required for wallet connection');
+    });
+
+    it('propagates setPassword errors during connect', async () => {
+      mockRequestPasswordModal.mockResolvedValue('short'); // Too short password
+      
+      await expect(connectorInstance.connect()).rejects.toThrow('Password must be at least 8 characters long');
+    });
+
+    it('throws PrivateKeyDecryptionError when private key is not available after password validation', async () => {
+      // Mock scenario where setPassword doesn't throw but somehow private key is still null
+      mockRequestPasswordModal.mockResolvedValue('validpass123');
       mockDecryptData
         .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("private_key_decrypted");
+        .mockResolvedValueOnce(null as any); // This should trigger the private key validation error first
+      mockAreEqualAddresses.mockReturnValue(true);
+      
+      await expect(connectorInstance.connect()).rejects.toThrow('Private key decryption returned empty result');
+    });
+  });
 
-      const result = await connector.connect();
-
-      expect(result.chainId).toBe(mockChains[0].id);
+  describe('error inheritance', () => {
+    it('InvalidPasswordError is instance of WalletAuthenticationError', () => {
+      const error = new InvalidPasswordError('test message');
+      expect(error).toBeInstanceOf(WalletAuthenticationError);
+      expect(error).toBeInstanceOf(Error);
+      expect(error.name).toBe('InvalidPasswordError');
     });
 
-    it("throws error when no val  id account found after decryption", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("private_key_decrypted");
-
-      mockCreateWalletClient.mockReturnValue({ account: null } as any);
-
-      await expect(connector.connect()).rejects.toThrow(
-        "No valid local account found after decryption."
-      );
+    it('PrivateKeyDecryptionError is instance of WalletAuthenticationError', () => {
+      const error = new PrivateKeyDecryptionError('test message');
+      expect(error).toBeInstanceOf(WalletAuthenticationError);
+      expect(error).toBeInstanceOf(Error);
+      expect(error.name).toBe('PrivateKeyDecryptionError');
     });
 
-    it("disconnects properly", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      await connector.disconnect();
-
-      expect(mockEmitter.emit).toHaveBeenCalledWith("disconnect");
-    });
-
-    it("gets accounts after connection", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      // First connect
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("private_key_decrypted");
-
-      await connector.connect();
-
-      const accounts = await connector.getAccounts();
-      expect(accounts).toEqual([mockAppWallet.address]);
-    });
-
-    it("returns empty accounts when no decrypted key", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      // Try to get accounts without setting password first
-      try {
-        await connector.getAccounts();
-        fail("Should have thrown an error");
-      } catch (err: any) {
-        expect(err.message).toBe(
-          "No decrypted key found. Call connect() first."
-        );
-      }
-    });
-
-    it("gets current chain ID", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      const chainId = await connector.getChainId();
-      expect(chainId).toBe(mockChains[0].id);
-    });
-
-    it("checks authorization status", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      // Initially not authorized
-      let isAuthorized = await connector.isAuthorized();
-      expect(isAuthorized).toBe(false);
-
-      // After setting password
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("private_key_decrypted");
-
-      await connector.setPassword("correct_password");
-      isAuthorized = await connector.isAuthorized();
-      expect(isAuthorized).toBe(true);
-    });
-
-    it("switches chain successfully", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      // First connect
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("private_key_decrypted");
-
-      await connector.connect();
-
-      const newChain = await connector.switchChain({ chainId: 137 });
-
-      expect(newChain).toEqual(mockChains[1]);
-      expect(mockEmitter.emit).toHaveBeenCalledWith("change", { chainId: 137 });
-    });
-
-    it("throws error when switching to unknown chain", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      await expect(connector.switchChain({ chainId: 999 })).rejects.toThrow(
-        "Chain with id 999 not found!"
-      );
-    });
-
-    it("handles ensureHexPrefix correctly", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("123456"); // Without 0x prefix
-
-      await connector.connect();
-
-      expect(mockPrivateKeyToAccount).toHaveBeenCalledWith("0x123456");
-    });
-
-    it("preserves hex prefix when already present", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("0x123456"); // With 0x prefix
-
-      await connector.connect();
-
-      expect(mockPrivateKeyToAccount).toHaveBeenCalledWith("0x123456");
-    });
-
-    it("handles event listeners correctly", () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      const accounts = ["0xnew_account"];
-      connector.onAccountsChanged(accounts);
-      expect(mockEmitter.emit).toHaveBeenCalledWith("change", { accounts });
-
-      const hexChainId = "0x89"; // 137 in hex
-      connector.onChainChanged(hexChainId);
-      expect(mockEmitter.emit).toHaveBeenCalledWith("change", { chainId: 137 });
-
-      connector.onConnect({});
-      expect(mockEmitter.emit).toHaveBeenCalledWith("connect", {
-        accounts: [],
-        chainId: mockChains[0].id,
-      });
-
-      connector.onDisconnect(new Error("test"));
-      expect(mockEmitter.emit).toHaveBeenCalledWith("disconnect");
-
-      const message = { type: "test" };
-      connector.onMessage(message);
-      expect(mockEmitter.emit).toHaveBeenCalledWith("message", message);
-    });
-
-    it("gets provider and client", async () => {
-      const connector: any = createAppWalletConnector(
-        mockChains,
-        { appWallet: mockAppWallet },
-        mockRequestPasswordModal
-      );
-
-      mockRequestPasswordModal.mockResolvedValue("correct_password");
-      mockDecryptData
-        .mockResolvedValueOnce(mockAppWallet.address)
-        .mockResolvedValueOnce("private_key_decrypted");
-
-      await connector.connect();
-
-      const provider = await connector.getProvider();
-      const client = await connector.getClient();
-
-      expect(provider).toBeDefined();
-      expect(client).toBeDefined();
-      expect(provider).toBe(client);
+    it('WalletAuthenticationError has correct prototype chain', () => {
+      const error = new WalletAuthenticationError('test message');
+      expect(error).toBeInstanceOf(Error);
+      expect(error.name).toBe('WalletAuthenticationError');
     });
   });
 });

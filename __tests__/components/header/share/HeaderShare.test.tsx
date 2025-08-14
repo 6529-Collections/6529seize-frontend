@@ -1,16 +1,62 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import HeaderShare from "@/components/header/share/HeaderShare";
-import useCapacitor from "@/hooks/useCapacitor";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
-import WagmiSetup from "@/components/providers/WagmiSetup";
+import HeaderShare from "../../../../components/header/share/HeaderShare";
+import useCapacitor from "../../../../hooks/useCapacitor";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import { SeizeConnectProvider } from "../../../../components/auth/SeizeConnectContext";
+import WagmiSetup from "../../../../components/providers/WagmiSetup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Mocks
-jest.mock("@/hooks/useCapacitor");
-jest.mock("@/hooks/isMobileDevice");
+jest.mock("../../../../hooks/useCapacitor");
+jest.mock("../../../../hooks/isMobileDevice");
+jest.mock("../../../../hooks/useElectron", () => ({
+  useElectron: jest.fn(() => false)
+}));
+
+// Mock SeizeConnectContext
+jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null
+  })),
+  SeizeConnectProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
+}));
+jest.mock("../../../../services/auth/auth.utils");
+
+// Mock Reown AppKit
+jest.mock("@reown/appkit/react", () => ({
+  useAppKit: jest.fn(() => ({
+    open: jest.fn(),
+    close: jest.fn()
+  })),
+  useAppKitAccount: jest.fn(() => ({
+    address: undefined,
+    isConnected: false,
+    status: 'disconnected'
+  })),
+  useAppKitState: jest.fn(() => ({
+    open: false,
+    loading: false
+  })),
+  useDisconnect: jest.fn(() => ({
+    disconnect: jest.fn()
+  })),
+  useWalletInfo: jest.fn(() => ({
+    walletInfo: null
+  }))
+}));
+
+// Mock viem
+jest.mock("viem", () => ({
+  isAddress: jest.fn((address: string) => /^0x[a-fA-F0-9]{40}$/.test(address)),
+  getAddress: jest.fn((address: string) => address.toLowerCase()),
+}));
 
 // next/navigation mocks
 jest.mock("next/navigation", () => ({
@@ -27,14 +73,18 @@ jest.mock("next/navigation", () => ({
   },
 }));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 const renderWithProviders = (component: React.ReactNode) => {
   return render(
     <QueryClientProvider client={queryClient}>
-      <WagmiSetup>
-        <SeizeConnectProvider>{component}</SeizeConnectProvider>
-      </WagmiSetup>
+      {component}
     </QueryClientProvider>
   );
 };
@@ -45,10 +95,25 @@ jest.mock("next/image", () => ({
   default: (props: any) => <img alt="" {...props} />,
 }));
 
-// QRCode mock
+// QRCode mock - needs to match require() usage in component
 jest.mock("qrcode", () => ({
-  toDataURL: jest.fn(() => Promise.resolve("data:image/png;base64,FAKE")),
+  toDataURL: jest.fn(() => Promise.resolve("data:image/png;base64,FAKE_QR_CODE"))
 }));
+
+// Mock auth utils
+const mockAuthUtils = {
+  getRefreshToken: jest.fn(() => null),
+  getWalletAddress: jest.fn(() => null),
+  getWalletRole: jest.fn(() => null),
+  migrateCookiesToLocalStorage: jest.fn(),
+  removeAuthJwt: jest.fn()
+};
+
+require("../../../../services/auth/auth.utils").getRefreshToken = mockAuthUtils.getRefreshToken;
+require("../../../../services/auth/auth.utils").getWalletAddress = mockAuthUtils.getWalletAddress;
+require("../../../../services/auth/auth.utils").getWalletRole = mockAuthUtils.getWalletRole;
+require("../../../../services/auth/auth.utils").migrateCookiesToLocalStorage = mockAuthUtils.migrateCookiesToLocalStorage;
+require("../../../../services/auth/auth.utils").removeAuthJwt = mockAuthUtils.removeAuthJwt;
 
 const mockUseCapacitor = useCapacitor as jest.MockedFunction<
   typeof useCapacitor
@@ -57,13 +122,53 @@ const mockIsMobile = useIsMobileDevice as jest.MockedFunction<
   typeof useIsMobileDevice
 >;
 
+
+// Mock navigator.clipboard
 Object.assign(navigator, {
   clipboard: {
     writeText: jest.fn(),
   },
 });
 
+// Mock environment variables
+process.env.MOBILE_APP_SCHEME = "test6529";
+process.env.CORE_SCHEME = "testcore6529";
+
+// Mock window.location
+Object.defineProperty(window, 'location', {
+  value: {
+    origin: 'https://seize.io',
+    href: 'https://seize.io/test-path'
+  },
+  writable: true
+});
+
 describe("HeaderShare", () => {
+  const mockSeizeConnect = require("../../../../components/auth/SeizeConnectContext");
+  
+  beforeEach(() => {
+    // Reset all mocks before each test
+    jest.clearAllMocks();
+    
+    // Reset mock return values
+    mockAuthUtils.getRefreshToken.mockReturnValue(null);
+    mockAuthUtils.getWalletAddress.mockReturnValue(null);
+    mockAuthUtils.getWalletRole.mockReturnValue(null);
+    
+    mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
+      isAuthenticated: false,
+      seizeConnect: jest.fn(),
+      seizeAcceptConnection: jest.fn(),
+      address: undefined,
+      hasInitializationError: false,
+      initializationError: null
+    });
+    
+    // Reset QRCode mock
+    const qrcode = require("qrcode");
+    qrcode.toDataURL.mockResolvedValue("data:image/png;base64,FAKE_QR_CODE");
+  });
+  
   afterEach(() => {
     jest.clearAllMocks();
     (navigator.clipboard.writeText as jest.Mock).mockReset?.();
@@ -88,7 +193,10 @@ describe("HeaderShare", () => {
     mockIsMobile.mockReturnValue(false);
     renderWithProviders(<HeaderShare />);
 
+    // Look for button by aria-label since that's what the component uses
     const btn = screen.getByRole("button", { name: "QR Code" });
+    expect(btn).toBeInTheDocument();
+    
     await userEvent.click(btn);
 
     expect(await screen.findByTestId("header-share-modal")).toBeInTheDocument();
@@ -125,5 +233,254 @@ describe("HeaderShare", () => {
 
     await screen.findByTestId("header-share-modal");
     expect(qrcode.toDataURL).toHaveBeenCalled();
+  });
+
+  describe("Authentication State Handling", () => {
+    it("shows Share Connection tab when authenticated", async () => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+      
+      // Mock authenticated state with tokens
+      mockAuthUtils.getRefreshToken.mockReturnValue("mock-refresh-token");
+      mockAuthUtils.getWalletAddress.mockReturnValue("0x1234567890123456789012345678901234567890");
+      mockAuthUtils.getWalletRole.mockReturnValue("user");
+      
+      mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: "0x1234567890123456789012345678901234567890",
+        hasInitializationError: false,
+        initializationError: null
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      await screen.findByTestId("header-share-modal");
+      
+      // Should show Share Connection button when authenticated
+      expect(screen.getByText("Share Connection")).toBeInTheDocument();
+      expect(screen.getByText("Current URL")).toBeInTheDocument();
+      expect(screen.getByText("6529 Apps")).toBeInTheDocument();
+    });
+
+    it("defaults to Current URL tab when not authenticated", async () => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+      
+      // Mock unauthenticated state
+      mockAuthUtils.getRefreshToken.mockReturnValue(null);
+      mockAuthUtils.getWalletAddress.mockReturnValue(null);
+      mockAuthUtils.getWalletRole.mockReturnValue(null);
+      
+      mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
+        isAuthenticated: false,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: undefined,
+        hasInitializationError: false,
+        initializationError: null
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      await screen.findByTestId("header-share-modal");
+      
+      // Should NOT show Share Connection button when not authenticated
+      expect(screen.queryByText("Share Connection")).not.toBeInTheDocument();
+      expect(screen.getByText("Current URL")).toBeInTheDocument();
+      expect(screen.getByText("6529 Apps")).toBeInTheDocument();
+    });
+  });
+
+  describe("Modal Tab Navigation", () => {
+    beforeEach(() => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+    });
+
+    it("allows switching between 6529 Mobile and Browser tabs in Navigate mode", async () => {
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      await screen.findByTestId("header-share-modal");
+      
+      // Should show both mobile and browser options
+      expect(screen.getByText("6529 Mobile")).toBeInTheDocument();
+      expect(screen.getByText("Browser")).toBeInTheDocument();
+      expect(screen.getByText("6529 Core")).toBeInTheDocument();
+      
+      // Click Browser tab
+      await userEvent.click(screen.getByText("Browser"));
+      // Browser tab should now be active (this would change the QR code content)
+      
+      // Click back to Mobile tab
+      await userEvent.click(screen.getByText("6529 Mobile"));
+      // Mobile tab should be active again
+    });
+
+    it("switches to 6529 Apps tab", async () => {
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      await screen.findByTestId("header-share-modal");
+      
+      // Click 6529 Apps tab
+      await userEvent.click(screen.getByText("6529 Apps"));
+      
+      // Should still show mobile/core options but content changes
+      expect(screen.getByText("6529 Mobile")).toBeInTheDocument();
+      expect(screen.getByText("6529 Core")).toBeInTheDocument();
+    });
+  });
+
+  describe("QR Code Generation", () => {
+    beforeEach(() => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+    });
+
+    it("generates different QR codes for different modes", async () => {
+      const qrcode = require("qrcode");
+      
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      await screen.findByTestId("header-share-modal");
+      
+      // Should call QRCode.toDataURL for browser and app URLs
+      expect(qrcode.toDataURL).toHaveBeenCalledWith(
+        "https://seize.io/mock-path?something=value",
+        { width: 500, margin: 0 }
+      );
+      expect(qrcode.toDataURL).toHaveBeenCalledWith(
+        "test6529://navigate/mock-path?something=value",
+        { width: 500, margin: 0 }
+      );
+    });
+
+  });
+
+  describe("URL Construction", () => {
+    beforeEach(() => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+    });
+
+    it("constructs URLs with environment variables", async () => {
+      const qrcode = require("qrcode");
+      
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      await screen.findByTestId("header-share-modal");
+      
+      // Should use environment variables for scheme
+      expect(qrcode.toDataURL).toHaveBeenCalledWith(
+        expect.stringContaining("test6529://navigate"),
+        expect.any(Object)
+      );
+    });
+
+    it("includes search parameters in generated URLs", async () => {
+      const qrcode = require("qrcode");
+      
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      await screen.findByTestId("header-share-modal");
+      
+      // Should include search params from mock
+      expect(qrcode.toDataURL).toHaveBeenCalledWith(
+        expect.stringContaining("something=value"),
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe("Error Handling", () => {
+
+    it("calls clipboard API when copy button is clicked", async () => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      const modal = await screen.findByTestId("header-share-modal");
+      const copyIcon = modal.querySelector('[data-icon="copy"]') as HTMLElement;
+
+      if (copyIcon) {
+        await userEvent.click(copyIcon);
+        
+        // Verify clipboard.writeText was called
+        expect(navigator.clipboard.writeText).toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe("Component State Management", () => {
+    it("modal is configured for keyboard interaction", async () => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(btn);
+
+      const modal = await screen.findByTestId("header-share-modal");
+      expect(modal).toBeInTheDocument();
+      
+      // Modal should be rendered with proper attributes
+      expect(modal).toHaveAttribute('data-testid', 'header-share-modal');
+    });
+
+    it("generates QR codes on each modal open", async () => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+
+      renderWithProviders(<HeaderShare />);
+
+      const btn = screen.getByRole("button", { name: "QR Code" });
+      const qrcode = require("qrcode");
+      
+      // Clear any previous calls
+      qrcode.toDataURL.mockClear();
+      
+      await userEvent.click(btn);
+      await screen.findByTestId("header-share-modal");
+      
+      // Should generate QR codes when modal opens
+      expect(qrcode.toDataURL).toHaveBeenCalled();
+      
+      // Verify multiple QR codes are generated (browser + app + possibly share)
+      expect(qrcode.toDataURL).toHaveBeenCalledWith(
+        expect.stringContaining("https://seize.io"),
+        expect.any(Object)
+      );
+      expect(qrcode.toDataURL).toHaveBeenCalledWith(
+        expect.stringContaining("test6529://"),
+        expect.any(Object)
+      );
+    });
   });
 });

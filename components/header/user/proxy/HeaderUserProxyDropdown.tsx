@@ -13,7 +13,6 @@ import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import { AuthContext } from "../../../auth/Auth";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
-import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
 export default function HeaderUserProxyDropdown({
@@ -133,7 +132,6 @@ export default function HeaderUserProxyDropdown({
                       />
                     ))}
                   </div>
-                  <HeaderUserProxyDropdownChains onSwitchChain={onClose} />
                   <div className="tw-h-full tw-px-2 tw-pt-2">
                     {isConnected ? (
                       <button
