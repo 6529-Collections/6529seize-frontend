@@ -13,7 +13,11 @@ import {
   TokenRefreshError,
   TokenRefreshCancelledError,
   TokenRefreshNetworkError,
-  TokenRefreshServerError 
+  TokenRefreshServerError,
+  AuthenticationRoleError,
+  RoleValidationError,
+  MissingActiveProfileError,
+  InvalidRoleStateError 
 } from '../../errors/authentication';
 
 // Mock the API functions
@@ -21,36 +25,7 @@ jest.mock('../../services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 
-// Mock auth utilities
-jest.mock('../../services/auth/auth.utils', () => ({
-  getAuthJwt: jest.fn(),
-  getRefreshToken: jest.fn(),
-  getWalletAddress: jest.fn(),
-  getWalletRole: jest.fn(),
-  setAuthJwt: jest.fn(),
-  removeAuthJwt: jest.fn(),
-}));
-
-// Mock jwt-decode
-jest.mock('jwt-decode', () => ({
-  jwtDecode: jest.fn(),
-}));
-
-// Mock helpers
-jest.mock('../../helpers/Helpers', () => ({
-  areEqualAddresses: jest.fn(),
-}));
-
 import { commonApiPost } from '../../services/api/common-api';
-import { 
-  getAuthJwt, 
-  getRefreshToken, 
-  getWalletAddress, 
-  getWalletRole,
-  setAuthJwt 
-} from '../../services/auth/auth.utils';
-import { jwtDecode } from 'jwt-decode';
-import { areEqualAddresses } from '../../helpers/Helpers';
 import { redeemRefreshTokenWithRetries } from '../../services/auth/token-refresh.utils';
 
 describe('Token Refresh Error Classes', () => {
@@ -62,9 +37,18 @@ describe('Token Refresh Error Classes', () => {
     expect(error.cause).toBe('cause');
   });
 
-  test('TokenRefreshCancelledError', () => {
+  test('TokenRefreshCancelledError with default message', () => {
+    const error = new TokenRefreshCancelledError();
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(TokenRefreshError);
+    expect(error.name).toBe('TokenRefreshCancelledError');
+    expect(error.message).toBe('Token refresh operation was cancelled');
+  });
+
+  test('TokenRefreshCancelledError with custom message', () => {
     const error = new TokenRefreshCancelledError('Custom message');
     expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(TokenRefreshError);
     expect(error.name).toBe('TokenRefreshCancelledError');
     expect(error.message).toBe('Custom message');
   });
@@ -73,6 +57,7 @@ describe('Token Refresh Error Classes', () => {
     const cause = new Error('Network failure');
     const error = new TokenRefreshNetworkError('Network error', cause);
     expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(TokenRefreshError);
     expect(error.name).toBe('TokenRefreshNetworkError');
     expect(error.cause).toBe(cause);
   });
@@ -86,9 +71,63 @@ describe('Token Refresh Error Classes', () => {
       'cause'
     );
     expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(TokenRefreshError);
     expect(error.name).toBe('TokenRefreshServerError');
     expect(error.statusCode).toBe(401);
     expect(error.serverResponse).toBe(serverResponse);
+  });
+
+  test('TokenRefreshServerError without optional parameters', () => {
+    const error = new TokenRefreshServerError('Server error');
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(TokenRefreshError);
+    expect(error.name).toBe('TokenRefreshServerError');
+    expect(error.statusCode).toBeUndefined();
+    expect(error.serverResponse).toBeUndefined();
+    expect(error.cause).toBeUndefined();
+  });
+});
+
+describe('Authentication Role Error Classes', () => {
+  test('AuthenticationRoleError base class', () => {
+    const error = new AuthenticationRoleError('Role error', 'cause');
+    expect(error).toBeInstanceOf(Error);
+    expect(error.name).toBe('AuthenticationRoleError');
+    expect(error.message).toBe('Role error');
+    expect(error.cause).toBe('cause');
+  });
+
+  test('RoleValidationError with role mismatch', () => {
+    const error = new RoleValidationError('admin', 'user', 'cause');
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(AuthenticationRoleError);
+    expect(error.name).toBe('RoleValidationError');
+    expect(error.message).toBe('Role validation failed: expected admin, got user');
+    expect(error.cause).toBe('cause');
+  });
+
+  test('RoleValidationError with null roles', () => {
+    const error = new RoleValidationError(null, null);
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(AuthenticationRoleError);
+    expect(error.name).toBe('RoleValidationError');
+    expect(error.message).toBe('Role validation failed: expected null, got null');
+  });
+
+  test('MissingActiveProfileError', () => {
+    const error = new MissingActiveProfileError();
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(AuthenticationRoleError);
+    expect(error.name).toBe('MissingActiveProfileError');
+    expect(error.message).toBe('Active profile proxy is required for role-based authentication but is null');
+  });
+
+  test('InvalidRoleStateError', () => {
+    const error = new InvalidRoleStateError('user role is corrupted', 'cause');
+    expect(error).toBeInstanceOf(Error);
+    expect(error.name).toBe('InvalidRoleStateError');
+    expect(error.message).toBe('Invalid role state: user role is corrupted');
+    expect(error.cause).toBe('cause');
   });
 });
 
@@ -123,6 +162,29 @@ describe('redeemRefreshTokenWithRetries - Input Validation', () => {
     
     await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 11))
       .rejects.toThrow('Invalid retryCount: must be between 1 and 10');
+  });
+
+  test('throws TokenRefreshError for non-number retryCount', async () => {
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 'invalid' as any))
+      .rejects.toThrow('Invalid retryCount: must be a number');
+  });
+
+  test('throws TokenRefreshError for NaN retryCount', async () => {
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, NaN))
+      .rejects.toThrow('Invalid retryCount: NaN is not allowed');
+  });
+
+  test('throws TokenRefreshError for Infinity retryCount', async () => {
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, Infinity))
+      .rejects.toThrow('Invalid retryCount: Infinity is not allowed');
+    
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, -Infinity))
+      .rejects.toThrow('Invalid retryCount: Infinity is not allowed');
+  });
+
+  test('throws TokenRefreshError for non-integer retryCount', async () => {
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 2.5))
+      .rejects.toThrow('Invalid retryCount: must be an integer');
   });
 
   test('throws TokenRefreshCancelledError when aborted before starting', async () => {
@@ -352,6 +414,28 @@ describe('redeemRefreshTokenWithRetries - Success Cases', () => {
       },
       signal: undefined,
     });
+  });
+});
+
+describe('redeemRefreshTokenWithRetries - Edge Cases and Error Paths', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('handles generic error classification', async () => {
+    const unknownError = new Error('Unknown error type');
+    (commonApiPost as jest.Mock).mockRejectedValue(unknownError);
+
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
+      .rejects.toThrow('Unknown error on attempt 1: Unknown error type');
+  });
+
+  test('handles error without message property', async () => {
+    const errorWithoutMessage = { someProperty: 'value' };
+    (commonApiPost as jest.Mock).mockRejectedValue(errorWithoutMessage);
+
+    await expect(redeemRefreshTokenWithRetries('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'token', null, 1))
+      .rejects.toThrow('Unknown error on attempt 1: undefined');
   });
 });
 

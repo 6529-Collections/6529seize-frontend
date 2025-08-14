@@ -13,13 +13,10 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
 }));
 
-// Mock the fetchUrl function at the top level
+const mockFetchUrl = jest.fn();
 jest.mock("../../../services/6529api", () => ({
-  fetchUrl: jest.fn().mockResolvedValue([]),
+  fetchUrl: mockFetchUrl,
 }));
-
-// Get reference to the mocked function for test setup
-const { fetchUrl: mockFetchUrl } = jest.requireMock("../../../services/6529api");
 
 jest.mock("../../../components/dotLoader/DotLoader", () => () => (
   <span data-testid="loader" />
@@ -489,46 +486,37 @@ describe("Error Handling and Edge Cases", () => {
     ).not.toThrow();
   });
 
-  it("handles API fetch completion gracefully", async () => {
-    // Mock successful API call
-    (mockFetchUrl as jest.Mock).mockResolvedValueOnce([
-      { name: "Artist 1" },
-      { name: "Artist 2" }
-    ]);
+  it("handles API fetch failure in header component", async () => {
+    mockFetchUrl.mockRejectedValueOnce(new Error("API Error"));
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (usePathname as jest.Mock).mockReturnValue("/test");
 
-    await act(async () => {
-      render(
-        <GasRoyaltiesHeader
-          title="Gas"
-          fetching={false}
-          results_count={1}
-          date_selection={DateIntervalsSelection.TODAY}
-          selected_artist=""
-          is_primary={false}
-          is_custom_blocks={false}
-          focus={GasRoyaltiesCollectionFocus.MEMES}
-          getUrl={() => "test-url"}
-          setSelectedArtist={jest.fn()}
-          setIsPrimary={jest.fn()}
-          setIsCustomBlocks={jest.fn()}
-          setDateSelection={jest.fn()}
-          setDates={jest.fn()}
-          setBlocks={jest.fn()}
-        />
-      );
-      
-      // Wait for the API call to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
-    // Component should render successfully with API data
-    expect(screen.getByText("Meme")).toBeInTheDocument();
-    expect(screen.getByText("Gas")).toBeInTheDocument();
-    expect(mockFetchUrl).toHaveBeenCalledWith(
-      "https://api.6529.io/api/memes/artists_names"
+    render(
+      <GasRoyaltiesHeader
+        title="Gas"
+        fetching={false}
+        results_count={1}
+        date_selection={DateIntervalsSelection.TODAY}
+        selected_artist=""
+        is_primary={false}
+        is_custom_blocks={false}
+        focus={GasRoyaltiesCollectionFocus.MEMES}
+        getUrl={() => "test-url"}
+        setSelectedArtist={jest.fn()}
+        setIsPrimary={jest.fn()}
+        setIsCustomBlocks={jest.fn()}
+        setDateSelection={jest.fn()}
+        setDates={jest.fn()}
+        setBlocks={jest.fn()}
+      />
     );
+
+    // Component should still render despite API error
+    expect(screen.getByText("Meme Gas")).toBeInTheDocument();
+    
+    consoleSpy.mockRestore();
   });
 
   it("handles token image with invalid props", () => {
@@ -544,7 +532,7 @@ describe("Error Handling and Edge Cases", () => {
     ).not.toThrow();
     
     const link = screen.getByRole("link");
-    expect(link).toHaveAttribute("href", "//0"); // Empty path results in double slash
+    expect(link).toHaveAttribute("href", "/0");
     expect(screen.getByText("0 -")).toBeInTheDocument();
   });
 
