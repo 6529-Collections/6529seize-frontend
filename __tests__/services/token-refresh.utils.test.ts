@@ -226,8 +226,7 @@ describe('token-refresh.utils', () => {
         });
 
         it('should throw for NaN retry count', async () => {
-          // BUG: Implementation doesn't properly validate NaN
-          // NaN comparison always returns false, so validation passes incorrectly
+          // FIXED: Implementation now properly validates NaN
           await expect(
             redeemRefreshTokenWithRetries(
               '0x1234567890123456789012345678901234567890',
@@ -235,7 +234,7 @@ describe('token-refresh.utils', () => {
               null,
               NaN
             )
-          ).rejects.toThrow('All retry attempts failed');
+          ).rejects.toThrow('Invalid retryCount: NaN is not allowed');
         });
 
         it('should throw for Infinity retry count', async () => {
@@ -246,7 +245,7 @@ describe('token-refresh.utils', () => {
               null,
               Infinity
             )
-          ).rejects.toThrow('Invalid retryCount: must be between 1 and 10');
+          ).rejects.toThrow('Invalid retryCount: Infinity is not allowed');
         });
       });
     });

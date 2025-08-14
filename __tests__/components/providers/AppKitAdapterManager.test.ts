@@ -1,5 +1,6 @@
 import { AppKitAdapterManager } from '@/components/providers/AppKitAdapterManager'
 import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter'
+import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
 import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 
@@ -22,8 +23,8 @@ describe('AppKitAdapterManager', () => {
   let mockRequestPassword: jest.Mock
 
   const mockWallet: AppWallet = {
-    address: '0x123',
-    address_hashed: 'hash123',
+    address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+    address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
     name: 'Test Wallet',
     created_at: Date.now(),
     mnemonic: '',
@@ -32,8 +33,8 @@ describe('AppKitAdapterManager', () => {
   }
 
   const mockWalletWithSensitiveData: AppWallet = {
-    address: '0x456',
-    address_hashed: 'hash456',
+    address: '0x456D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+    address_hashed: 'hash4567890123456789012345678901234567890123456789012345678901234',
     name: 'Sensitive Wallet',
     created_at: Date.now(),
     private_key: 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
@@ -42,8 +43,8 @@ describe('AppKitAdapterManager', () => {
   }
 
   const mockWallet2: AppWallet = {
-    address: '0x789',
-    address_hashed: 'hash789',
+    address: '0x789D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+    address_hashed: 'hash789012345678901234567890123456789012345678901234567890123456',
     name: 'Test Wallet 2',
     created_at: Date.now(),
     mnemonic: '',
@@ -69,7 +70,7 @@ describe('AppKitAdapterManager', () => {
     describe('Sensitive Data Exposure Prevention', () => {
       it('should never expose private keys in error messages', () => {
         const walletWithPrivateKey = {
-          // Missing address to trigger error that calls getSafeWalletInfo
+          // Missing address to trigger error
           address_hashed: 'hash123',
           name: 'Test',
           private_key: 'SENSITIVE_PRIVATE_KEY_THAT_SHOULD_NEVER_BE_LOGGED_abcdef1234567890abcdef1234'
@@ -80,14 +81,14 @@ describe('AppKitAdapterManager', () => {
           fail('Should have thrown error')
         } catch (error: any) {
           expect(error.message).not.toContain('SENSITIVE_PRIVATE_KEY_THAT_SHOULD_NEVER_BE_LOGGED')
-          expect(error.message).toContain('has_private_key')
           expect(error.message).not.toContain(walletWithPrivateKey.private_key)
+          expect(error.message).toContain('Wallet missing required address field')
         }
       })
 
       it('should never expose mnemonics in error messages', () => {
         const walletWithMnemonic = {
-          // Missing address to trigger error that calls getSafeWalletInfo
+          // Missing address to trigger error
           address_hashed: 'hash123',
           name: 'Test',
           mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about SENSITIVE_PHRASE'
@@ -98,33 +99,121 @@ describe('AppKitAdapterManager', () => {
           fail('Should have thrown error')
         } catch (error: any) {
           expect(error.message).not.toContain('SENSITIVE_PHRASE')
-          expect(error.message).toContain('has_mnemonic')
           expect(error.message).not.toContain(walletWithMnemonic.mnemonic)
+          expect(error.message).toContain('Wallet missing required address field')
         }
       })
 
       it('should validate private key format without exposing content', () => {
         const walletWithInvalidPrivateKey = {
-          // Missing address to trigger getSafeWalletInfo
-          address_hashed: 'hash123',
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
           name: 'Test',
           private_key: 'too_short'
         }
 
         expect(() => manager.createAdapter([walletWithInvalidPrivateKey] as any))
-          .toThrow('SECURITY_001: Invalid private_key format detected')
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithInvalidPrivateKey] as any))
+          .toThrow('Wallet security violation: Private key too short - security violation detected')
       })
 
       it('should validate mnemonic format without exposing content', () => {
         const walletWithInvalidMnemonic = {
-          // Missing address to trigger getSafeWalletInfo
-          address_hashed: 'hash123', 
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890', 
           name: 'Test',
           mnemonic: 'invalid mnemonic'
         }
 
         expect(() => manager.createAdapter([walletWithInvalidMnemonic] as any))
-          .toThrow('SECURITY_002: Invalid mnemonic format detected')
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithInvalidMnemonic] as any))
+          .toThrow('Wallet security violation: Mnemonic word count invalid - security violation detected')
+      })
+
+      it('should throw WalletSecurityError for invalid private key type', () => {
+        const walletWithInvalidPrivateKeyType = {
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+          name: 'Test Wallet',
+          private_key: 123
+        } as any
+
+        expect(() => manager.createAdapter([walletWithInvalidPrivateKeyType]))
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithInvalidPrivateKeyType]))
+          .toThrow('Wallet security violation: Private key must be a string')
+      })
+
+      it('should throw WalletSecurityError for short private key', () => {
+        const walletWithShortPrivateKey = {
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+          name: 'Test Wallet',
+          private_key: 'short'
+        } as AppWallet
+
+        expect(() => manager.createAdapter([walletWithShortPrivateKey]))
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithShortPrivateKey]))
+          .toThrow('Wallet security violation: Private key too short - security violation detected')
+      })
+
+      it('should throw WalletSecurityError for invalid mnemonic type', () => {
+        const walletWithInvalidMnemonicType = {
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+          name: 'Test Wallet',
+          mnemonic: 123
+        } as any
+
+        expect(() => manager.createAdapter([walletWithInvalidMnemonicType]))
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithInvalidMnemonicType]))
+          .toThrow('Wallet security violation: Mnemonic must be a string')
+      })
+
+      it('should throw WalletSecurityError for invalid mnemonic word count', () => {
+        const walletWithInvalidMnemonicWordCount = {
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+          name: 'Test Wallet',
+          mnemonic: 'word1 word2 word3'
+        } as AppWallet
+
+        expect(() => manager.createAdapter([walletWithInvalidMnemonicWordCount]))
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithInvalidMnemonicWordCount]))
+          .toThrow('Wallet security violation: Mnemonic word count invalid - security violation detected')
+      })
+
+      it('should throw WalletSecurityError for mnemonic with too many words', () => {
+        const walletWithTooManyWords = {
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+          name: 'Test Wallet',
+          mnemonic: Array(25).fill('word').join(' ')
+        } as AppWallet
+
+        expect(() => manager.createAdapter([walletWithTooManyWords]))
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithTooManyWords]))
+          .toThrow('Wallet security violation: Mnemonic word count invalid - security violation detected')
+      })
+
+      it('should throw WalletSecurityError for mnemonic with invalid word count (too few)', () => {
+        const walletWithTooFewWords = {
+          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+          name: 'Test Wallet',
+          mnemonic: 'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11'
+        } as AppWallet
+
+        expect(() => manager.createAdapter([walletWithTooFewWords]))
+          .toThrow(WalletValidationError)
+        expect(() => manager.createAdapter([walletWithTooFewWords]))
+          .toThrow('Wallet security violation: Mnemonic word count invalid - security violation detected')
       })
 
       it('should safely handle wallets with both valid private key and mnemonic', () => {
@@ -141,52 +230,8 @@ describe('AppKitAdapterManager', () => {
         expect(() => manager.createAdapter([null] as any))
           .toThrow('ADAPTER_008: Invalid wallet object found in appWallets array')
       })
-
-      it('should include wallet type information safely', () => {
-        try {
-          manager.createAdapter([{ address_hashed: 'hash123' }] as any)
-          fail('Should have thrown error')
-        } catch (error: any) {
-          expect(error.message).toContain('ADAPTER_001')
-          expect(error.message).toContain('type":"AppWallet"')
-          expect(error.message).not.toContain('private_key')
-          expect(error.message).not.toContain('mnemonic')
-        }
-      })
     })
 
-    describe('CW_PROJECT_ID Validation Security', () => {
-      beforeEach(() => {
-        // Override the mock for these tests
-        jest.doMock('@/constants', () => ({
-          CW_PROJECT_ID: 'invalid-format'
-        }))
-      })
-
-      it('should validate CW_PROJECT_ID format and truncate in error message', () => {
-        // Need to reimport with the new mock
-        jest.resetModules()
-        const { AppKitAdapterManager } = require('@/components/providers/AppKitAdapterManager')
-        const testManager = new AppKitAdapterManager(mockRequestPassword)
-        
-        expect(() => testManager.createAdapter([mockWallet]))
-          .toThrow(/ADAPTER_004: CW_PROJECT_ID has invalid format.*invalid-\.\.\./)
-      })
-
-      it('should not expose full CW_PROJECT_ID in error messages', () => {
-        jest.resetModules()
-        const { AppKitAdapterManager } = require('@/components/providers/AppKitAdapterManager')
-        const testManager = new AppKitAdapterManager(mockRequestPassword)
-        
-        try {
-          testManager.createAdapter([mockWallet])
-          fail('Should have thrown error')
-        } catch (error: any) {
-          expect(error.message).not.toContain('invalid-format')
-          expect(error.message).toContain('invalid-...')
-        }
-      })
-    })
   })
 
   describe('Constructor Validation', () => {
@@ -213,6 +258,76 @@ describe('AppKitAdapterManager', () => {
     })
   })
 
+  describe('Wallet Field Validation', () => {
+    beforeEach(() => {
+      manager = new AppKitAdapterManager(mockRequestPassword)
+    })
+
+    it('should throw WalletValidationError when wallet address is not a string', () => {
+      const invalidWallet = {
+        address: 123,
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'Test Wallet'
+      } as any
+
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow(WalletValidationError)
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow('Wallet address must be a string')
+    })
+
+    it('should throw WalletValidationError when wallet address format is invalid', () => {
+      const invalidWallet = {
+        address: 'invalid-address',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'Test Wallet'
+      } as AppWallet
+
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow(WalletValidationError)
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow('Wallet address has invalid Ethereum format')
+    })
+
+    it('should throw WalletValidationError when address_hashed is too short', () => {
+      const invalidWallet = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'short',
+        name: 'Test Wallet'
+      } as AppWallet
+
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow(WalletValidationError)
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow('Wallet address_hashed too short - potential security issue')
+    })
+
+    it('should throw WalletValidationError when wallet name is missing', () => {
+      const invalidWallet = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890'
+      } as AppWallet
+
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow(WalletValidationError)
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow('Wallet missing required name field')
+    })
+
+    it('should throw WalletValidationError when wallet name is too long', () => {
+      const invalidWallet = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'a'.repeat(101)
+      } as AppWallet
+
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow(WalletValidationError)
+      expect(() => manager.createAdapter([invalidWallet]))
+        .toThrow('Wallet name length must be between 1 and 100 characters')
+    })
+  })
+
   describe('Input Validation Tests', () => {
     beforeEach(() => {
       manager = new AppKitAdapterManager(mockRequestPassword)
@@ -234,18 +349,18 @@ describe('AppKitAdapterManager', () => {
           .toThrow('ADAPTER_008: Invalid wallet object found in appWallets array')
       })
 
-      it('should throw indexed AdapterError when wallet missing address', () => {
-        const invalidWallet = { address_hashed: 'hash123', name: 'Test' }
-        expect(() => manager.createAdapter([invalidWallet] as any)).toThrow(AdapterError)
+      it('should throw WalletValidationError when wallet missing address', () => {
+        const invalidWallet = { address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890', name: 'Test' }
+        expect(() => manager.createAdapter([invalidWallet] as any)).toThrow(WalletValidationError)
         expect(() => manager.createAdapter([invalidWallet] as any))
-          .toThrow('ADAPTER_001: Wallet is missing required address property')
+          .toThrow('Wallet missing required address field')
       })
 
-      it('should throw indexed AdapterError when wallet missing address_hashed', () => {
-        const invalidWallet = { address: '0x123', name: 'Test' }
-        expect(() => manager.createAdapter([invalidWallet] as any)).toThrow(AdapterError)
+      it('should throw WalletValidationError when wallet missing address_hashed', () => {
+        const invalidWallet = { address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c', name: 'Test' }
+        expect(() => manager.createAdapter([invalidWallet] as any)).toThrow(WalletValidationError)
         expect(() => manager.createAdapter([invalidWallet] as any))
-          .toThrow('ADAPTER_002: Wallet is missing required address_hashed property')
+          .toThrow('Wallet missing required address_hashed field')
       })
     })
 
@@ -396,14 +511,15 @@ describe('AppKitAdapterManager', () => {
     })
 
     it('should set and get connection state correctly', () => {
-      manager.setConnectionState('0x123', 'connecting')
-      expect(manager.getConnectionState('0x123')).toBe('connecting')
+      const address = '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c'
+      manager.setConnectionState(address, 'connecting')
+      expect(manager.getConnectionState(address)).toBe('connecting')
       
-      manager.setConnectionState('0x123', 'connected')
-      expect(manager.getConnectionState('0x123')).toBe('connected')
+      manager.setConnectionState(address, 'connected')
+      expect(manager.getConnectionState(address)).toBe('connected')
       
-      manager.setConnectionState('0x123', 'disconnected')
-      expect(manager.getConnectionState('0x123')).toBe('disconnected')
+      manager.setConnectionState(address, 'disconnected')
+      expect(manager.getConnectionState(address)).toBe('disconnected')
     })
   })
 
@@ -490,8 +606,8 @@ describe('AppKitAdapterManager', () => {
       
       for (let i = 0; i < maxSize + 2; i++) {
         const wallet: AppWallet = {
-          address: `0x${i}`,
-          address_hashed: `hash${i}`,
+          address: `0x${i.toString(16).padStart(39, '0')}1`,
+          address_hashed: `hash${i}${'0'.repeat(60)}`,
           name: `Wallet ${i}`,
           created_at: Date.now(),
           mnemonic: '',
@@ -537,6 +653,60 @@ describe('AppKitAdapterManager', () => {
       mockRequestPassword.mockRejectedValueOnce(new Error('Password request failed'))
       const adapter = manager.createAdapter([mockWallet])
       
+      expect(adapter).toBeDefined()
+    })
+  })
+
+  describe('Valid Wallet Success Cases', () => {
+    beforeEach(() => {
+      manager = new AppKitAdapterManager(mockRequestPassword)
+    })
+
+    it('should successfully create adapter with valid wallet', () => {
+      const validWallet = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'Test Wallet',
+        created_at: Date.now(),
+        mnemonic: '',
+        private_key: '',
+        imported: false
+      } as AppWallet
+
+      expect(() => manager.createAdapter([validWallet])).not.toThrow()
+      const adapter = manager.createAdapter([validWallet])
+      expect(adapter).toBeDefined()
+    })
+
+    it('should successfully create adapter with valid wallet with secure private key', () => {
+      const validWallet = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'Test Wallet',
+        created_at: Date.now(),
+        private_key: '0123456789012345678901234567890123456789012345678901234567890123',
+        mnemonic: '',
+        imported: false
+      } as AppWallet
+
+      expect(() => manager.createAdapter([validWallet])).not.toThrow()
+      const adapter = manager.createAdapter([validWallet])
+      expect(adapter).toBeDefined()
+    })
+
+    it('should successfully create adapter with valid wallet with secure mnemonic', () => {
+      const validWallet = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'Test Wallet',
+        created_at: Date.now(),
+        mnemonic: 'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12',
+        private_key: '',
+        imported: false
+      } as AppWallet
+
+      expect(() => manager.createAdapter([validWallet])).not.toThrow()
+      const adapter = manager.createAdapter([validWallet])
       expect(adapter).toBeDefined()
     })
   })

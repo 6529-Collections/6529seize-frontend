@@ -34,9 +34,25 @@ function validateRefreshTokenInputs(
     throw new TokenRefreshError('Invalid refreshToken: must be non-empty string');
   }
   
-  // Validate retry count
+  // Validate retry count - First check type and NaN, then range
+  if (typeof retryCount !== 'number') {
+    throw new TokenRefreshError('Invalid retryCount: must be a number');
+  }
+
+  if (Number.isNaN(retryCount)) {
+    throw new TokenRefreshError('Invalid retryCount: NaN is not allowed');
+  }
+
+  if (!Number.isFinite(retryCount)) {
+    throw new TokenRefreshError('Invalid retryCount: Infinity is not allowed');
+  }
+
   if (retryCount < 1 || retryCount > 10) {
     throw new TokenRefreshError('Invalid retryCount: must be between 1 and 10');
+  }
+
+  if (!Number.isInteger(retryCount)) {
+    throw new TokenRefreshError('Invalid retryCount: must be an integer');
   }
 }
 

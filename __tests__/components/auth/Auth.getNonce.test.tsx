@@ -8,7 +8,6 @@ import { ApiNonceResponse } from '../../../generated/models/ApiNonceResponse';
 // Mock the external dependencies
 jest.mock('../../../services/api/common-api');
 jest.mock('../../../hooks/useSecureSign');
-jest.mock('../../../hooks/useMobileWalletConnection');
 jest.mock('../../../components/react-query-wrapper/ReactQueryWrapper');
 jest.mock('../../../components/auth/SeizeConnectContext');
 jest.mock('@reown/appkit/react');
@@ -42,13 +41,6 @@ jest.mock('../../../hooks/useSecureSign', () => ({
   })
 }));
 
-// Mock useMobileWalletConnection hook
-jest.mock('../../../hooks/useMobileWalletConnection', () => ({
-  useMobileWalletConnection: () => ({
-    mobileInfo: { isMobile: false, isInAppBrowser: false },
-    getMobileInstructions: () => 'Test instructions'
-  })
-}));
 
 // Mock @reown/appkit/react
 jest.mock('@reown/appkit/react', () => ({

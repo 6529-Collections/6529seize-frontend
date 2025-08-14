@@ -63,15 +63,6 @@ jest.mock('../../../hooks/useSecureSign', () => ({
   ConnectionMismatchError: class ConnectionMismatchError extends Error {},
 }));
 
-jest.mock('../../../hooks/useMobileWalletConnection', () => ({
-  useMobileWalletConnection: jest.fn(() => ({
-    mobileInfo: {
-      isMobile: false,
-      isInAppBrowser: false,
-    },
-    getMobileInstructions: jest.fn(() => "Test instructions"),
-  })),
-}));
 
 jest.mock('react-bootstrap', () => ({
   Modal: Object.assign(

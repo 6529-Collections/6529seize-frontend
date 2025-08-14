@@ -56,23 +56,31 @@ const SECURITY_LIMITS = {
 } as const;
 
 /**
- * XSS patterns that must be blocked
+ * XSS pattern sources (strings, not regex objects) to prevent global flag state issues
  */
-const XSS_PATTERNS = [
-  /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,
-  /javascript:/gi,
-  /data:text\/html/gi,
-  /data:application\/javascript/gi,
-  /on\w+\s*=/gi, // Event handlers like onclick, onload, etc.
-  /<iframe\b[^>]*>/gi,
-  /<object\b[^>]*>/gi,
-  /<embed\b[^>]*>/gi,
-  /<link\b[^>]*>/gi,
-  /<style\b[^>]*>/gi,
-  /expression\s*\(/gi,
-  /url\s*\(/gi,
-  /@import/gi,
+const XSS_PATTERN_SOURCES = [
+  '<script\\b[^>]*>[\\s\\S]*?<\\/script\\s*>',
+  'javascript:',
+  'data:text\\/html',
+  'data:application\\/javascript',
+  'on\\w+\\s*=', // Event handlers like onclick, onload, etc.
+  '<iframe\\b[^>]*>',
+  '<object\\b[^>]*>',
+  '<embed\\b[^>]*>',
+  '<link\\b[^>]*>',
+  '<style\\b[^>]*>',
+  'expression\\s*\\(',
+  'url\\s*\\(',
+  '@import',
 ] as const;
+
+/**
+ * Creates fresh XSS detection patterns to prevent global flag state issues
+ * SECURITY: Each call returns new RegExp objects with fresh lastIndex state
+ */
+function createXSSPatterns(): RegExp[] {
+  return XSS_PATTERN_SOURCES.map(source => new RegExp(source, 'gi'));
+}
 
 /**
  * Control characters that must be removed (0x00-0x1F except whitespace)
@@ -230,18 +238,18 @@ export async function generateAsyncSafeHash(sanitizedUserAgent: string): Promise
  */
 export function sanitizeUserAgent(userAgent: unknown): SafeUserAgentInfo {
   // SECURITY: Input validation - fail fast on invalid inputs
+  if (userAgent === null || userAgent === undefined) {
+    throw new UserAgentSecurityError(
+      'Invalid user agent: cannot be null or undefined',
+      'NULL_INPUT'
+    );
+  }
+
   if (typeof userAgent !== 'string') {
     throw new UserAgentSecurityError(
       'Invalid user agent: must be a string',
       'INVALID_TYPE',
       { receivedType: typeof userAgent }
-    );
-  }
-
-  if (userAgent === null || userAgent === undefined) {
-    throw new UserAgentSecurityError(
-      'Invalid user agent: cannot be null or undefined',
-      'NULL_INPUT'
     );
   }
 
@@ -276,7 +284,8 @@ export function sanitizeUserAgent(userAgent: unknown): SafeUserAgentInfo {
   }
 
   // SECURITY: XSS prevention - detect and reject malicious patterns
-  for (const pattern of XSS_PATTERNS) {
+  const xssPatterns = createXSSPatterns();
+  for (const pattern of xssPatterns) {
     if (pattern.test(userAgent)) {
       throw new UserAgentSecurityError(
         'XSS attempt detected in user agent',
@@ -347,18 +356,18 @@ export function sanitizeUserAgent(userAgent: unknown): SafeUserAgentInfo {
  */
 export async function sanitizeUserAgentAsync(userAgent: unknown): Promise<SafeUserAgentInfo> {
   // Perform same validation as sync version
+  if (userAgent === null || userAgent === undefined) {
+    throw new UserAgentSecurityError(
+      'Invalid user agent: cannot be null or undefined',
+      'NULL_INPUT'
+    );
+  }
+
   if (typeof userAgent !== 'string') {
     throw new UserAgentSecurityError(
       'Invalid user agent: must be a string',
       'INVALID_TYPE',
       { receivedType: typeof userAgent }
-    );
-  }
-
-  if (userAgent === null || userAgent === undefined) {
-    throw new UserAgentSecurityError(
-      'Invalid user agent: cannot be null or undefined',
-      'NULL_INPUT'
     );
   }
 
@@ -392,7 +401,8 @@ export async function sanitizeUserAgentAsync(userAgent: unknown): Promise<SafeUs
   }
 
   // XSS prevention
-  for (const pattern of XSS_PATTERNS) {
+  const xssPatterns = createXSSPatterns();
+  for (const pattern of xssPatterns) {
     if (pattern.test(userAgent)) {
       throw new UserAgentSecurityError(
         'XSS attempt detected in user agent',
