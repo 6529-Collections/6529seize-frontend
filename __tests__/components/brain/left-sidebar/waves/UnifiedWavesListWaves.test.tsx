@@ -56,10 +56,11 @@ it('renders pinned and regular waves with headers and switch', () => {
   render(
     <UnifiedWavesListWaves waves={baseWaves} onHover={jest.fn()} scrollContainerRef={scrollRef} ref={ref} />
   );
-  // Component shows "All Waves" header instead of separate "Pinned" header
-  // expect(screen.getByTestId('header-Pinned')).toBeInTheDocument();
+  // Component only renders "All Waves" header, pinned waves don't get their own header
   expect(screen.getByTestId('header-All Waves')).toBeInTheDocument();
   expect(screen.getByTestId('switch')).toBeInTheDocument();
+  // Verify pinned waves section exists by aria-label
+  expect(screen.getByLabelText('Pinned waves')).toBeInTheDocument();
   expect(screen.getByTestId('wave-p1')).toHaveAttribute('data-pin', 'true');
   expect(screen.getByTestId('wave-r1')).toHaveAttribute('data-pin', 'true');
   expect(ref.current?.containerRef.current).toBe(container);

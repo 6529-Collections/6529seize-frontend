@@ -32,8 +32,10 @@ const transformToApiRequest = (data: {
   traits: TraitsData;
   mediaUrl: string;
   mimeType: string;
+  signerAddress: string;
+  isSafeSignature: boolean;
 }): ApiCreateDropRequest => {
-  const { waveId, traits, mediaUrl, mimeType } = data;
+  const { waveId, traits, mediaUrl, mimeType, signerAddress, isSafeSignature } = data;
 
   // Create metadata array from trait data
   const metadata: ApiDropMetadata[] = Object.entries(traits)
@@ -66,6 +68,8 @@ const transformToApiRequest = (data: {
     mentioned_users: [],
     metadata,
     signature: null,
+    is_safe_signature: isSafeSignature,
+    signer_address: signerAddress,
   };
 
   return request;
@@ -189,11 +193,14 @@ export function useArtworkSubmissionMutation() {
    */
   const submitArtwork = async (
     data: ArtworkSubmissionData,
+    signerAddress: string,
+    isSafeSignature: boolean,
     options?: {
       onSuccess?: (data: ApiDrop) => void;
       onError?: (error: Error) => void;
       onPhaseChange?: (phase: SubmissionPhase, error?: string) => void;
-    }
+    },
+ 
   ) => {
     try {
       // Reset state for a new submission
@@ -239,6 +246,8 @@ export function useArtworkSubmissionMutation() {
         traits: data.traits,
         mediaUrl: media.url,
         mimeType: media.mime_type,
+        signerAddress,
+        isSafeSignature,
       });
 
       // Step 3: Sign the drop

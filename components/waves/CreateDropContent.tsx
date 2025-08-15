@@ -70,6 +70,7 @@ import { useWebSocket } from "../../services/websocket";
 import { WsMessageType } from "../../helpers/Types";
 import { ApiIdentity } from "../../generated/models/ObjectSerializer";
 import { MAX_DROP_UPLOAD_FILES } from "../../helpers/Helpers";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
@@ -392,6 +393,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   submitDrop,
   privileges,
 }) => {
+  const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const breakpoint = useBreakpoint();
   const { isApp } = useDeviceInfo();
@@ -511,6 +513,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         metadata: convertMetadataToDropMetadata(metadata),
         signature: null,
         drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
+        is_safe_signature: isSafeWallet,
+        signer_address: address ?? "",
       };
     }
     return null;
@@ -539,6 +543,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       referenced_nfts: [],
       metadata: [],
       signature: null,
+      is_safe_signature: isSafeWallet,
+      signer_address: address ?? "",
     };
   };
 
@@ -569,6 +575,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       referenced_nfts: allNfts,
       metadata: convertMetadataToDropMetadata(metadata),
       signature: null,
+      is_safe_signature: isSafeWallet,
+      signer_address: address ?? "",
     };
   };
 

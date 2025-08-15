@@ -1,4 +1,8 @@
 import { TextEncoder, TextDecoder } from "util";
+import { config } from "dotenv";
+
+// Load environment variables for tests
+config({ path: ".env.development" });
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
