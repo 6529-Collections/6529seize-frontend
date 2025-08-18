@@ -203,6 +203,14 @@ create_env_file() {
   local ALCHEMY_API_KEY
   prompt_input_required ALCHEMY_API_KEY "Enter ALCHEMY_API_KEY"
 
+  local CW_PROJECT_ID
+  prompt_input_required CW_PROJECT_ID "Enter CW_PROJECT_ID"
+
+  local TENOR_API_KEY
+  exec 3</dev/tty || true
+  read -u 3 -r -p "Enter TENOR_API_KEY (optional, can be empty): " TENOR_API_KEY || true
+  exec 3<&- || true
+
   local NEXTGEN_CHAIN_ID
   prompt_choice NEXTGEN_CHAIN_ID \
     "NEXTGEN CHAIN ID" "1" \
