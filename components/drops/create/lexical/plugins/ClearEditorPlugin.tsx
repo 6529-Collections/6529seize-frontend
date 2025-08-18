@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getRoot } from "lexical";
+import { $getRoot, $createParagraphNode } from "lexical";
 import { forwardRef, useImperativeHandle } from "react";
 
 export interface ClearEditorPluginHandles {
@@ -9,7 +9,13 @@ export interface ClearEditorPluginHandles {
 const ClearEditorPlugin = forwardRef<ClearEditorPluginHandles, {}>((_, ref) => {
   const [editor] = useLexicalComposerContext();
   const clearEditorState = () => {
-    editor.update(() => $getRoot().clear());
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+      const paragraph = $createParagraphNode();
+      root.append(paragraph);
+      paragraph.select();
+    });
   };
 
   useImperativeHandle(ref, () => ({
