@@ -7,7 +7,8 @@
 #   Bootstraps a host to build & run 6529seize-frontend for staging/dev.
 #   - Accepts Node >= 20; installs Node 20 only if Node missing or < 20.
 #   - Ensures npm >= 10 (upgrades if < 10; leaves 10+ unchanged).
-#   - Installs PM2, prompts for .env if missing, builds, starts via PM2.
+#   - Installs PM2, *creates/replaces* .env by prompting (no .env.sample used),
+#     builds, and starts via PM2.
 #
 # Usage:
 #   bash scripts/dev-ec2-setup.sh
@@ -43,33 +44,33 @@ require_sudo_if_linux() {
 }
 
 ensure_node_ge20_and_npm_ge10() {
-  # Accept Node >= 20 (20, 21, 22, …). Install Node 20 only if Node missing or < 20.
+  # Accept Node >= 20; install Node 20 only if missing or < 20.
   local os="$(uname -s)"
-  local have_node=false
-  local have_ver=""
+  local need_major=20
+  local have_major=0
 
   if command -v node >/dev/null 2>&1; then
-    have_node=true
+    local have_ver
     have_ver="$(node -v | sed 's/^v//')"
-    local have_major="${have_ver%%.*}"
-    if [[ "$have_major" -ge 20 ]]; then
+    have_major="${have_ver%%.*}"
+    if [[ "$have_major" -ge "$need_major" ]]; then
       color green "Node v$have_ver detected (>= 20). OK."
     else
       color yellow "Node v$have_ver detected (< 20). Installing Node 20…"
-      have_node=false  # force install path below
+      have_major=0
     fi
   else
     color yellow "Node not found. Installing Node 20…"
   fi
 
-  if [[ "$have_node" == false ]]; then
+  if [[ "$have_major" -lt "$need_major" ]]; then
     if [[ "$os" == "Darwin" ]]; then
       if command -v brew >/dev/null 2>&1; then
         brew install node@20
         brew unlink node >/dev/null 2>&1 || true
         brew link --overwrite --force node@20
       else
-        color red "Homebrew not found. Please install Node 20 via Homebrew or nvm, then re-run."
+        color red "Homebrew not found. Install Node 20 via Homebrew or nvm, then re-run."
         exit 1
       fi
     else
@@ -79,24 +80,20 @@ ensure_node_ge20_and_npm_ge10() {
     fi
   fi
 
-  # Final Node check
-  local final_node="$(node -v | sed 's/^v//')"
+  local final_node
+  final_node="$(node -v | sed 's/^v//')"
   local final_major="${final_node%%.*}"
   if [[ "$final_major" -lt 20 ]]; then
     color red "Node $(node -v) < 20 after installation. Please install Node >= 20 and re-run."
     exit 1
   fi
 
-  # Ensure npm >= 10 (upgrade only if below 10; do NOT downgrade if npm is 11+)
   local npm_major
   npm_major="$(npm -v | cut -d. -f1 || echo 0)"
   if [[ "$npm_major" -lt 10 ]]; then
     color yellow "Upgrading npm to >=10…"
-    if [[ "$os" == "Darwin" ]]; then npm i -g npm@^10; else sudo npm i -g npm@^10; fi
-  else
-    color green "npm $(npm -v) detected (>= 10). OK."
+    if [[ "$(uname -s)" == "Darwin" ]]; then npm i -g npm@^10; else sudo npm i -g npm@^10; fi
   fi
-
   color green "Using Node $(node -v), npm $(npm -v)"
 }
 
@@ -112,94 +109,150 @@ install_pm2() {
   color green "PM2: $(pm2 -v)"
 }
 
-create_env_file() {
-  local env_file="$REPO_ROOT/.env"
-  local sample_file="$REPO_ROOT/.env.sample"
+# ------- ENV CREATION (NO .env.sample) -------
 
-  if [[ ! -f "$sample_file" ]]; then
-    color red "Error: .env.sample not found at repo root ($REPO_ROOT)."
-    exit 1
-  fi
+prompt_choice() {
+  # args: var_name question default_value option1_label option1_value option2_label option2_value ...
+  local __varname="$1"; shift
+  local question="$1"; shift
+  local default="$1"; shift
 
-  declare -A EXISTING
-  if [[ -f "$env_file" ]]; then
-    if grep -Eq '^[A-Za-z_][A-Za-z0-9_]*=' "$env_file"; then
-      while IFS= read -r line; do
-        [[ -z "${line//[[:space:]]/}" || "$line" =~ ^[[:space:]]*# ]] && continue
-        line="${line%%#*}"
-        IFS='=' read -r k v <<< "$line"
-        k="${k//[[:space:]]/}"
-        v="${v%%[[:space:]]}"
-        v="${v%\"}"; v="${v#\"}"; v="${v%\'}"; v="${v#\'}"
-        [[ -n "$k" ]] && EXISTING["$k"]="$v"
-      done < "$env_file"
-      color yellow ".env exists; will prefill prompts from it and rewrite cleanly."
+  # open tty for reliable prompts even inside while loops
+  exec 3</dev/tty || true
+
+  color cyan "$question"
+  local idx=1
+  declare -a labels
+  declare -a values
+  while (( "$#" )); do
+    local label="$1"; local val="$2"
+    labels+=("$label"); values+=("$val")
+    shift 2
+  done
+
+  for i in "${!labels[@]}"; do
+    local n=$((i+1))
+    if [[ "${values[$i]}" == "$default" ]]; then
+      echo "  $n) ${labels[$i]} [default]"
     else
-      color yellow ".env exists but is empty; will recreate from .env.sample."
+      echo "  $n) ${labels[$i]}"
     fi
+  done
+
+  local choice=""
+  read -u 3 -r -p "Choose [1-${#labels[@]}] (default shown above): " choice || true
+
+  if [[ -z "$choice" ]]; then
+    printf -v "$__varname" '%s' "$default"
   else
-    color yellow ".env not found. Creating from .env.sample…"
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#labels[@]} )); then
+      color yellow "Invalid choice. Using default."
+      printf -v "$__varname" '%s' "$default"
+    else
+      local idx=$((choice-1))
+      printf -v "$__varname" '%s' "${values[$idx]}"
+    fi
   fi
 
-  local tmp_env
-  tmp_env="$(mktemp)"
-  echo "# Autogenerated .env $(date -u +'%Y-%m-%dT%H:%M:%SZ')" > "$tmp_env"
-
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    if [[ -z "${line//[[:space:]]/}" || "$line" =~ ^[[:space:]]*# ]]; then
-      echo "$line" >> "$tmp_env"
-      continue
-    fi
-    local raw="${line%%#*}"
-    if ! [[ "$raw" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*=(.*)$ ]]; then
-      echo "$line" >> "$tmp_env"
-      continue
-    fi
-    local key="${BASH_REMATCH[1]}"
-    local def="${BASH_REMATCH[2]}"
-    key="${key//[[:space:]]/}"
-    def="${def%%[[:space:]]*}"
-    def="${def%\"}"; def="${def#\"}"; def="${def%\'}"; def="${def#\'}"
-
-    local current="${EXISTING[$key]:-$def}"
-    if [[ -n "$current" ]]; then
-      read -r -p "Enter value for $key [default: $current]: " val
-      val="${val:-$current}"
-    else
-      read -r -p "Enter value for $key: " val
-    fi
-
-    if [[ "$val" =~ [[:space:]#] || "$val" =~ ^[[:space:]] || "$val" =~ [[:space:]]$ ]]; then
-      echo "$key=\"${val//\"/\\\"}\"" >> "$tmp_env"
-    else
-      echo "$key=$val" >> "$tmp_env"
-    fi
-  done < "$sample_file"
-
-  mv "$tmp_env" "$env_file"
-  color green "Wrote $env_file"
+  exec 3<&- || true
 }
 
-assert_env_ready() {
-  local env_file="$REPO_ROOT/.env"
-  local sample_file="$REPO_ROOT/.env.sample"
-  [[ -f "$env_file" ]] || { color red ".env missing after creation."; exit 1; }
+prompt_input_required() {
+  # args: var_name prompt [default]
+  local __varname="$1"; shift
+  local prompt="$1"; shift
+  local default="${1:-}"
 
-  # Ensure every KEY in .env.sample has a non-empty value in .env
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    [[ -z "${line//[[:space:]]/}" || "$line" =~ ^[[:space:]]*# ]] && continue
-    local raw="${line%%#*}"
-    if [[ "$raw" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*= ]]; then
-      local key="${BASH_REMATCH[1]}"
-      key="${key//[[:space:]]/}"
-      local val="$(grep -E "^$key=" "$env_file" | tail -n1 | cut -d= -f2-)"
-      val="${val%\"}"; val="${val#\"}"; val="${val%\'}"; val="${val#\'}"
-      if [[ -z "$val" ]]; then
-        color red "Required env var '$key' is empty or missing in .env. Re-run create_env_file()."
-        exit 1
-      fi
+  exec 3</dev/tty || true
+  local val=""
+  while true; do
+    if [[ -n "$default" ]]; then
+      read -u 3 -r -p "$prompt [default: $default]: " val || true
+      val="${val:-$default}"
+    else
+      read -u 3 -r -p "$prompt: " val || true
     fi
-  done < "$sample_file"
+    [[ -n "$val" ]] && break
+    color red "This value is required."
+  done
+  printf -v "$__varname" '%s' "$val"
+  exec 3<&- || true
+}
+
+create_env_file() {
+  local env_file="$REPO_ROOT/.env"
+  color yellow "Creating/replacing $env_file …"
+
+  # Choices
+  local API_ENDPOINT
+  prompt_choice API_ENDPOINT \
+    "SEIZE API ENDPOINT" "https://api.staging.6529.io" \
+    "Staging (https://api.staging.6529.io)" "https://api.staging.6529.io" \
+    "Production (https://api.6529.io)" "https://api.6529.io"
+
+  local ALLOWLIST_API_ENDPOINT
+  prompt_choice ALLOWLIST_API_ENDPOINT \
+    "ALLOWLIST API ENDPOINT" "https://allowlist-api.staging.6529.io" \
+    "Staging (https://allowlist-api.staging.6529.io)" "https://allowlist-api.staging.6529.io" \
+    "Production (https://allowlist-api.6529.io)" "https://allowlist-api.6529.io"
+
+  local BASE_ENDPOINT
+  prompt_choice BASE_ENDPOINT \
+    "BASE ENDPOINT" "https://staging.6529.io" \
+    "Staging (https://staging.6529.io)" "https://staging.6529.io" \
+    "Production (https://6529.io)" "https://6529.io"
+
+  local ALCHEMY_API_KEY
+  prompt_input_required ALCHEMY_API_KEY "Enter ALCHEMY_API_KEY"
+
+  local NEXTGEN_CHAIN_ID
+  prompt_choice NEXTGEN_CHAIN_ID \
+    "NEXTGEN CHAIN ID" "1" \
+    "Mainnet (1)" "1" \
+    "Sepolia (11155111)" "11155111"
+
+  local MOBILE_APP_SCHEME
+  prompt_choice MOBILE_APP_SCHEME \
+    "MOBILE APP SCHEME" "mobileStaging6529" \
+    "Staging (mobileStaging6529)" "mobileStaging6529" \
+    "Production (mobile6529)" "mobile6529"
+
+  # Fixed values
+  local CORE_SCHEME="core6529"
+  local IPFS_API_ENDPOINT="https://api-ipfs.6529.io"
+  local IPFS_GATEWAY_ENDPOINT="https://ipfs.6529.io"
+
+  # Write .env (replace unconditionally)
+  cat > "$env_file" <<EOF
+# Autogenerated .env $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
+# SEIZE API ENDPOINT
+API_ENDPOINT=$API_ENDPOINT
+
+# ALLOWLIST API ENDPOINT
+ALLOWLIST_API_ENDPOINT=$ALLOWLIST_API_ENDPOINT
+
+# BASE ENDPOINT
+BASE_ENDPOINT=$BASE_ENDPOINT
+
+# API KEYS
+ALCHEMY_API_KEY=$ALCHEMY_API_KEY
+
+# NEXTGEN CHAIN ID: 1 (mainnet) or 11155111 (sepolia)
+NEXTGEN_CHAIN_ID=$NEXTGEN_CHAIN_ID
+
+# MOBILE APP SCHEME
+MOBILE_APP_SCHEME=$MOBILE_APP_SCHEME
+
+# 6529 CORE SCHEME
+CORE_SCHEME=$CORE_SCHEME
+
+# IPFS ENDPOINTS
+IPFS_API_ENDPOINT=$IPFS_API_ENDPOINT
+IPFS_GATEWAY_ENDPOINT=$IPFS_GATEWAY_ENDPOINT
+EOF
+
+  color green "Wrote $env_file"
 }
 
 install_dependencies() {
@@ -233,8 +286,10 @@ main() {
   require_sudo_if_linux
   ensure_node_ge20_and_npm_ge10
   install_pm2
+
+  # IMPORTANT: .env BEFORE any npm step
   create_env_file
-  assert_env_ready
+
   install_dependencies
   build_project
   start_pm2
