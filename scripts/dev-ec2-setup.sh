@@ -4,17 +4,13 @@
 # Script: dev-ec2-setup.sh
 #
 # Description:
-#   Bootstraps a host with everything needed to build & run 6529seize-frontend
-#   for a staging/dev environment. Installs Node 20.x + npm 10, PM2, prompts
-#   for .env (based on .env.sample) if missing, builds, and starts via PM2.
+#   Bootstraps a host to build & run 6529seize-frontend for staging/dev.
+#   - Accepts Node >= 20; installs Node 20 only if Node missing or < 20.
+#   - Ensures npm >= 10 (upgrades if < 10; leaves 10+ unchanged).
+#   - Installs PM2, prompts for .env if missing, builds, starts via PM2.
 #
 # Usage:
 #   bash scripts/dev-ec2-setup.sh
-#
-# Notes:
-#   - Designed for Ubuntu/Debian EC2, but supports macOS (brew) too.
-#   - Expects .env.sample in the repo root (one level above scripts/).
-#   - App listens on port defined by package.json (currently 3001).
 # ----------------------------------------------------------------------------
 
 set -Eeuo pipefail
@@ -39,52 +35,41 @@ color() {
 
 require_sudo_if_linux() {
   if [[ "$(uname -s)" != "Darwin" ]]; then
-    if [[ "$EUID" -ne 0 ]]; then
-      if ! command -v sudo >/dev/null 2>&1; then
-        color red "This script needs root or sudo privileges on Linux. Aborting."
-        exit 1
-      fi
+    if [[ "$EUID" -ne 0 ]] && ! command -v sudo >/dev/null 2>&1; then
+      color red "This script needs root or sudo privileges on Linux. Aborting."
+      exit 1
     fi
   fi
 }
 
-ensure_node20_and_npm10() {
-  # We enforce Node 20.x specifically (not just >= 18.18).
-  # @mojs/core requires node ^20 and npm ^10 to avoid EBADENGINE.
+ensure_node_ge20_and_npm_ge10() {
+  # Accept Node >= 20 (20, 21, 22, …). Install Node 20 only if Node missing or < 20.
   local os="$(uname -s)"
-  local need_major=20
+  local have_node=false
+  local have_ver=""
 
   if command -v node >/dev/null 2>&1; then
-    local have="$(node -v | sed 's/^v//')"
-    local have_major="${have%%.*}"
-    if [[ "$have_major" -ne "$need_major" ]]; then
-      color yellow "Detected Node v$have (major $have_major). Need Node 20.x."
-      if [[ "$os" == "Darwin" ]]; then
-        if command -v brew >/dev/null 2>&1; then
-          color yellow "Installing and linking node@20 via Homebrew..."
-          brew list node@20 >/dev/null 2>&1 || brew install node@20
-          brew unlink node >/dev/null 2>&1 || true
-          brew link --overwrite --force node@20
-        else
-          color red "Homebrew not found. Please install Node 20 via nvm or Homebrew, then re-run."
-          exit 1
-        fi
-      else
-        color yellow "Installing Node 20.x via NodeSource..."
-        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-        sudo apt-get update -y
-        sudo apt-get install -y nodejs build-essential
-      fi
+    have_node=true
+    have_ver="$(node -v | sed 's/^v//')"
+    local have_major="${have_ver%%.*}"
+    if [[ "$have_major" -ge 20 ]]; then
+      color green "Node v$have_ver detected (>= 20). OK."
+    else
+      color yellow "Node v$have_ver detected (< 20). Installing Node 20…"
+      have_node=false  # force install path below
     fi
   else
-    color yellow "Node not found. Installing Node 20.x..."
+    color yellow "Node not found. Installing Node 20…"
+  fi
+
+  if [[ "$have_node" == false ]]; then
     if [[ "$os" == "Darwin" ]]; then
       if command -v brew >/dev/null 2>&1; then
         brew install node@20
         brew unlink node >/dev/null 2>&1 || true
         brew link --overwrite --force node@20
       else
-        color red "Homebrew not found. Please install Homebrew or use nvm to get Node 20."
+        color red "Homebrew not found. Please install Node 20 via Homebrew or nvm, then re-run."
         exit 1
       fi
     else
@@ -94,24 +79,22 @@ ensure_node20_and_npm10() {
     fi
   fi
 
-  # Verify final Node major == 20
+  # Final Node check
   local final_node="$(node -v | sed 's/^v//')"
   local final_major="${final_node%%.*}"
-  if [[ "$final_major" -ne "$need_major" ]]; then
-    color red "Node $(node -v) still not 20.x. Please switch to Node 20 and re-run."
+  if [[ "$final_major" -lt 20 ]]; then
+    color red "Node $(node -v) < 20 after installation. Please install Node >= 20 and re-run."
     exit 1
   fi
 
-  # Ensure npm major is 10
+  # Ensure npm >= 10 (upgrade only if below 10; do NOT downgrade if npm is 11+)
   local npm_major
   npm_major="$(npm -v | cut -d. -f1 || echo 0)"
-  if [[ "$npm_major" -ne 10 ]]; then
-    color yellow "Installing npm@^10 globally..."
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-      npm i -g npm@^10
-    else
-      sudo npm i -g npm@^10
-    fi
+  if [[ "$npm_major" -lt 10 ]]; then
+    color yellow "Upgrading npm to >=10…"
+    if [[ "$os" == "Darwin" ]]; then npm i -g npm@^10; else sudo npm i -g npm@^10; fi
+  else
+    color green "npm $(npm -v) detected (>= 10). OK."
   fi
 
   color green "Using Node $(node -v), npm $(npm -v)"
@@ -119,7 +102,7 @@ ensure_node20_and_npm10() {
 
 install_pm2() {
   if ! command -v pm2 >/dev/null 2>&1; then
-    color yellow "Installing PM2 globally..."
+    color yellow "Installing PM2 globally…"
     if [[ "$(uname -s)" == "Darwin" ]]; then
       npm i -g pm2
     else
@@ -134,27 +117,24 @@ create_env_file() {
   local sample_file="$REPO_ROOT/.env.sample"
 
   if [[ -f "$env_file" ]]; then
-    color green ".env file already exists. Skipping creation."
+    color green ".env already exists. Skipping creation."
     return 0
   fi
-
   if [[ ! -f "$sample_file" ]]; then
     color red "Error: .env.sample not found at repo root ($REPO_ROOT)."
     exit 1
   fi
 
-  color yellow ".env not found. Creating one from .env.sample…"
+  color yellow "Creating .env from .env.sample…"
   echo "# Autogenerated .env file" > "$env_file"
 
   while IFS= read -r line || [[ -n "$line" ]]; do
-    # copy comments/blank lines verbatim
     if [[ -z "${line//[[:space:]]/}" || "$line" =~ ^[[:space:]]*# ]]; then
       echo "$line" >> "$env_file"
       continue
     fi
     IFS='=' read -r var default <<< "$line"
     var="${var//[[:space:]]/}"
-    # Do not trim value aggressively—preserve spaces if any (rare)
     if [[ -n "${default:-}" ]]; then
       read -r -p "Enter value for $var [default: $default]: " value
       value="${value:-$default}"
@@ -168,11 +148,10 @@ create_env_file() {
 }
 
 install_dependencies() {
-  color yellow "Installing project dependencies (this may take a while)…"
-  # If node_modules was created under a different Node version, clean it up
-  # to avoid engine/platform mismatches.
+  color yellow "Installing project dependencies…"
+  # Clean if previously installed under a different Node version
   if [[ -d "$REPO_ROOT/node_modules" ]]; then
-    color yellow "Removing existing node_modules and lockfile to ensure clean install…"
+    color yellow "Removing existing node_modules and lockfile for a clean install…"
     rm -rf "$REPO_ROOT/node_modules" "$REPO_ROOT/package-lock.json"
   fi
   ( cd "$REPO_ROOT" && npm install )
@@ -197,7 +176,7 @@ start_pm2() {
 
 main() {
   require_sudo_if_linux
-  ensure_node20_and_npm10
+  ensure_node_ge20_and_npm_ge10
   install_pm2
   create_env_file
   install_dependencies
