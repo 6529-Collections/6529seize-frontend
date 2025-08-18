@@ -4,101 +4,158 @@
 # Script: dev-ec2-setup.sh
 #
 # Description:
-#   This script bootstraps a fresh EC2 host with all the prerequisites needed
-#   to run the 6529seize-frontend project in a staging environment. It is
-#   intended to be run after cloning the repository onto a clean Ubuntu or
-#   Debian instance. The script will install Node.js (>=18.18), the PM2
-#   process manager, and all project dependencies. It will also check for a
-#   `.env` file and, if one does not exist, prompt the user to provide the
-#   necessary environment variables based off of `.env.sample`. Finally it
-#   builds the Next.js project and launches it under PM2.
+#   Bootstraps a host with everything needed to build & run 6529seize-frontend
+#   for a staging/dev environment. Installs Node 20.x + npm 10, PM2, prompts
+#   for .env (based on .env.sample) if missing, builds, and starts via PM2.
 #
 # Usage:
-#   ./setup-staging.sh
+#   bash scripts/dev-ec2-setup.sh
 #
 # Notes:
-#   - This script requires sudo privileges for installing system packages.
-#   - It assumes the repository root contains a `.env.sample` file.
-#   - The application will listen on the port specified in `package.json`
-#     (currently 3001) once started by PM2.
-#
-set -euo pipefail
+#   - Designed for Ubuntu/Debian EC2, but supports macOS (brew) too.
+#   - Expects .env.sample in the repo root (one level above scripts/).
+#   - App listens on port defined by package.json (currently 3001).
+# ----------------------------------------------------------------------------
+
+set -Eeuo pipefail
+trap 'echo -e "\033[31m[ERROR]\033[0m line $LINENO: \"$BASH_COMMAND\" failed. Exiting." >&2' ERR
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 color() {
-  # Helper function to output colored text
-  # usage: color <code> "your text"
-  # where <code> is one of: red, green, yellow, blue, magenta, cyan
-  local code="$1"
-  shift
+  local code="$1"; shift
   local text="$*"
   case "$code" in
-    red)    echo -e "\033[31m${text}\033[0m";;
-    green)  echo -e "\033[32m${text}\033[0m";;
-    yellow) echo -e "\033[33m${text}\033[0m";;
-    blue)   echo -e "\033[34m${text}\033[0m";;
-    magenta)echo -e "\033[35m${text}\033[0m";;
-    cyan)   echo -e "\033[36m${text}\033[0m";;
-    *)      echo "$text";;
+    red)     echo -e "\033[31m${text}\033[0m";;
+    green)   echo -e "\033[32m${text}\033[0m";;
+    yellow)  echo -e "\033[33m${text}\033[0m";;
+    blue)    echo -e "\033[34m${text}\033[0m";;
+    magenta) echo -e "\033[35m${text}\033[0m";;
+    cyan)    echo -e "\033[36m${text}\033[0m";;
+    *)       echo "$text";;
   esac
 }
 
-install_node() {
-  # Install Node.js 20 via the NodeSource repository if Node is missing or outdated
+require_sudo_if_linux() {
+  if [[ "$(uname -s)" != "Darwin" ]]; then
+    if [[ "$EUID" -ne 0 ]]; then
+      if ! command -v sudo >/dev/null 2>&1; then
+        color red "This script needs root or sudo privileges on Linux. Aborting."
+        exit 1
+      fi
+    fi
+  fi
+}
+
+ensure_node20_and_npm10() {
+  # We enforce Node 20.x specifically (not just >= 18.18).
+  # @mojs/core requires node ^20 and npm ^10 to avoid EBADENGINE.
+  local os="$(uname -s)"
+  local need_major=20
+
   if command -v node >/dev/null 2>&1; then
-    local current_ver="$(node -v | sed 's/v//')"
-    # Compare against minimum required version 18.18.0
-    if node -e "require('semver'); const semver=require('semver'); process.exit(semver.lt('$current_ver','18.18.0')?0:1)"; then
-      color yellow "Existing Node.js version ($current_ver) is older than 18.18.0; upgrading to latest LTS."
-    else
-      # Node version is sufficient; no need to reinstall.
-      return 0
+    local have="$(node -v | sed 's/^v//')"
+    local have_major="${have%%.*}"
+    if [[ "$have_major" -ne "$need_major" ]]; then
+      color yellow "Detected Node v$have (major $have_major). Need Node 20.x."
+      if [[ "$os" == "Darwin" ]]; then
+        if command -v brew >/dev/null 2>&1; then
+          color yellow "Installing and linking node@20 via Homebrew..."
+          brew list node@20 >/dev/null 2>&1 || brew install node@20
+          brew unlink node >/dev/null 2>&1 || true
+          brew link --overwrite --force node@20
+        else
+          color red "Homebrew not found. Please install Node 20 via nvm or Homebrew, then re-run."
+          exit 1
+        fi
+      else
+        color yellow "Installing Node 20.x via NodeSource..."
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+        sudo apt-get update -y
+        sudo apt-get install -y nodejs build-essential
+      fi
     fi
   else
-    color yellow "Node.js is not installed. Installing Node.js LTS (20.x)..."
+    color yellow "Node not found. Installing Node 20.x..."
+    if [[ "$os" == "Darwin" ]]; then
+      if command -v brew >/dev/null 2>&1; then
+        brew install node@20
+        brew unlink node >/dev/null 2>&1 || true
+        brew link --overwrite --force node@20
+      else
+        color red "Homebrew not found. Please install Homebrew or use nvm to get Node 20."
+        exit 1
+      fi
+    else
+      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+      sudo apt-get update -y
+      sudo apt-get install -y nodejs build-essential
+    fi
   fi
-  # Add NodeSource repository and install
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-  sudo apt-get update -y
-  sudo apt-get install -y nodejs build-essential
+
+  # Verify final Node major == 20
+  local final_node="$(node -v | sed 's/^v//')"
+  local final_major="${final_node%%.*}"
+  if [[ "$final_major" -ne "$need_major" ]]; then
+    color red "Node $(node -v) still not 20.x. Please switch to Node 20 and re-run."
+    exit 1
+  fi
+
+  # Ensure npm major is 10
+  local npm_major
+  npm_major="$(npm -v | cut -d. -f1 || echo 0)"
+  if [[ "$npm_major" -ne 10 ]]; then
+    color yellow "Installing npm@^10 globally..."
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+      npm i -g npm@^10
+    else
+      sudo npm i -g npm@^10
+    fi
+  fi
+
+  color green "Using Node $(node -v), npm $(npm -v)"
 }
 
 install_pm2() {
-  # Install PM2 globally via npm if not already installed
   if ! command -v pm2 >/dev/null 2>&1; then
     color yellow "Installing PM2 globally..."
-    sudo npm install -g pm2
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+      npm i -g pm2
+    else
+      sudo npm i -g pm2
+    fi
   fi
+  color green "PM2: $(pm2 -v)"
 }
 
 create_env_file() {
-  # Create a .env file based on .env.sample if it doesn't exist
-  local env_file="$SCRIPT_DIR/../.env"
-  local sample_file="$SCRIPT_DIR/../.env.sample"
-  if [ -f "$env_file" ]; then
+  local env_file="$REPO_ROOT/.env"
+  local sample_file="$REPO_ROOT/.env.sample"
+
+  if [[ -f "$env_file" ]]; then
     color green ".env file already exists. Skipping creation."
     return 0
   fi
-  if [ ! -f "$sample_file" ]; then
-    color red "Error: .env.sample file not found. Cannot determine which variables to prompt for."
+
+  if [[ ! -f "$sample_file" ]]; then
+    color red "Error: .env.sample not found at repo root ($REPO_ROOT)."
     exit 1
   fi
-  color yellow ".env file not found. Creating a new one based on .env.sample."
+
+  color yellow ".env not found. Creating one from .env.sample…"
   echo "# Autogenerated .env file" > "$env_file"
-  while IFS= read -r line || [ -n "$line" ]; do
-    # If the line is a comment or blank, copy it directly
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    # copy comments/blank lines verbatim
     if [[ -z "${line//[[:space:]]/}" || "$line" =~ ^[[:space:]]*# ]]; then
       echo "$line" >> "$env_file"
       continue
     fi
-    # Extract variable name and default value
     IFS='=' read -r var default <<< "$line"
-    # Trim whitespace
     var="${var//[[:space:]]/}"
-    default="${default//[[:space:]]/}"
-    # Prompt user for the value; show the default if present
-    if [ -n "$default" ]; then
+    # Do not trim value aggressively—preserve spaces if any (rare)
+    if [[ -n "${default:-}" ]]; then
       read -r -p "Enter value for $var [default: $default]: " value
       value="${value:-$default}"
     else
@@ -106,44 +163,41 @@ create_env_file() {
     fi
     echo "$var=$value" >> "$env_file"
   done < "$sample_file"
-  color green "Created .env file."
+
+  color green "Created $env_file"
 }
 
 install_dependencies() {
-  # Install Node dependencies using npm
-  color yellow "Installing project dependencies (this may take a while)..."
-  npm install
+  color yellow "Installing project dependencies (this may take a while)…"
+  # If node_modules was created under a different Node version, clean it up
+  # to avoid engine/platform mismatches.
+  if [[ -d "$REPO_ROOT/node_modules" ]]; then
+    color yellow "Removing existing node_modules and lockfile to ensure clean install…"
+    rm -rf "$REPO_ROOT/node_modules" "$REPO_ROOT/package-lock.json"
+  fi
+  ( cd "$REPO_ROOT" && npm install )
   color green "Dependencies installed."
 }
 
 build_project() {
-  # Build the Next.js project
-  color yellow "Building the Next.js project..."
-  npm run build
+  color yellow "Building the Next.js project…"
+  ( cd "$REPO_ROOT" && npm run build )
   color green "Build completed."
 }
 
 start_pm2() {
-  # Start the app via PM2 and save the configuration
   local pm2_name="6529seize"
-  color yellow "Starting the application using PM2..."
-  pm2 start npm --name="$pm2_name" -- run start
+  color yellow "Starting the application with PM2…"
+  ( cd "$REPO_ROOT" && pm2 start npm --name="$pm2_name" -- run start )
   pm2 save
-  color green "Application started under PM2 as '$pm2_name'."
-  color blue "You can view logs with: pm2 logs $pm2_name"
-  color blue "The app should be reachable on the port specified in package.json (currently 3001)."
+  color green "App started under PM2 as '$pm2_name'."
+  color blue  "Logs: pm2 logs $pm2_name"
+  color blue  "Port: see package.json (currently 3001)."
 }
 
 main() {
-  # Check for sudo privileges early
-  if [ "$EUID" -ne 0 ]; then
-    # Ensure that 'sudo' is available; if not, abort
-    if ! command -v sudo >/dev/null 2>&1; then
-      color red "This script requires either root privileges or sudo access. Exiting."
-      exit 1
-    fi
-  fi
-  install_node
+  require_sudo_if_linux
+  ensure_node20_and_npm10
   install_pm2
   create_env_file
   install_dependencies
