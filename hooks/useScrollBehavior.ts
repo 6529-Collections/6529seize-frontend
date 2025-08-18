@@ -2,10 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+type ScrollIntent = 'pinned' | 'reading' | 'auto';
+
 export const useScrollBehavior = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isAtTop, setIsAtTop] = useState(false);
+  const [scrollIntent, setScrollIntent] = useState<ScrollIntent>('pinned');
+  
+  const lastScrollTopRef = useRef(0);
+  const bottomAnchorRef = useRef<HTMLDivElement>(null);
 
   // scrollToVisualBottom scrolls to the newest messages (visually at the bottom)
   const scrollToVisualBottom = useCallback(() => {
@@ -15,8 +21,10 @@ export const useScrollBehavior = () => {
         top: 0,
         behavior: "smooth",
       });
+      // Reset to pinned when user manually scrolls to bottom
+      setScrollIntent('pinned');
     }
-  }, [scrollContainerRef]);
+  }, []);
 
   // scrollToVisualTop scrolls to the oldest messages (visually at the top)
   const scrollToVisualTop = useCallback(() => {
@@ -33,24 +41,64 @@ export const useScrollBehavior = () => {
         behavior: "smooth",
       });
     }
-  }, [scrollContainerRef]);
+  }, []);
 
+  // Robust scroll detection with intent-based pinning
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (container) {
-      const { scrollTop, scrollHeight, clientHeight } = container;
+    if (!container) return;
 
-      // In a flex-reversed container:
-      const newIsAtBottom = scrollTop < 5; // Visual bottom is at scrollTop near 0
+    const { scrollTop, scrollHeight, clientHeight } = container;
 
-      // For flex-col-reverse, we may need to check large negative values
-      // Visual top is at the most negative scrollTop value
-      const maxNegativeScroll = -(scrollHeight - clientHeight);
-      const newIsAtTop = Math.abs(scrollTop - maxNegativeScroll) < 5;
+    // In a flex-reversed container, check if we're near bottom with larger threshold
+    const distanceFromBottom = Math.abs(scrollTop); // In flex-col-reverse, bottom is near 0
+    const newIsAtBottom = distanceFromBottom < 50; // Increased threshold for layout shifts
 
-      setIsAtBottom(newIsAtBottom);
-      setIsAtTop(newIsAtTop);
+    // For flex-col-reverse, visual top detection
+    const maxNegativeScroll = -(scrollHeight - clientHeight);
+    const newIsAtTop = Math.abs(scrollTop - maxNegativeScroll) < 50;
+
+    setIsAtBottom(newIsAtBottom);
+    setIsAtTop(newIsAtTop);
+
+    // Intent detection - filter out small/accidental scrolls
+    const scrollDelta = Math.abs(scrollTop - lastScrollTopRef.current);
+    
+    if (scrollDelta > 20 && !newIsAtBottom) {
+      // Significant scroll away from bottom = user is reading
+      setScrollIntent('reading');
+    } else if (newIsAtBottom) {
+      // User scrolled back to bottom
+      setScrollIntent('pinned');
     }
+
+    lastScrollTopRef.current = scrollTop;
+  }, []);
+
+
+  // Intersection Observer for robust bottom detection
+  useEffect(() => {
+    if (!bottomAnchorRef.current || !scrollContainerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const isIntersecting = entry.isIntersecting;
+        setIsAtBottom(isIntersecting);
+        
+        // If anchor comes into view, we're definitely at bottom
+        if (isIntersecting) {
+          setScrollIntent('pinned');
+        }
+      },
+      {
+        root: scrollContainerRef.current,
+        threshold: 0,
+        rootMargin: '50px' // Handle layout shifts
+      }
+    );
+
+    observer.observe(bottomAnchorRef.current);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -61,10 +109,16 @@ export const useScrollBehavior = () => {
     }
   }, [handleScroll]);
 
+  // Should pin when user intends to stay at bottom AND is actually at bottom
+  const shouldPinToBottom = scrollIntent === 'pinned' && isAtBottom;
+
   return {
     scrollContainerRef,
+    bottomAnchorRef,
     isAtBottom,
     isAtTop,
+    shouldPinToBottom,
+    scrollIntent,
     scrollToVisualBottom,
     scrollToVisualTop,
     handleScroll,
