@@ -74,8 +74,8 @@ install_pm2() {
 
 create_env_file() {
   # Create a .env file based on .env.sample if it doesn't exist
-  local env_file="$SCRIPT_DIR/.env"
-  local sample_file="$SCRIPT_DIR/.env.sample"
+  local env_file="$SCRIPT_DIR/../.env"
+  local sample_file="$SCRIPT_DIR/../.env.sample"
   if [ -f "$env_file" ]; then
     color green ".env file already exists. Skipping creation."
     return 0
