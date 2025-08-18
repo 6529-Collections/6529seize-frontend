@@ -190,7 +190,7 @@ assert_env_ready() {
     [[ -z "${line//[[:space:]]/}" || "$line" =~ ^[[:space:]]*# ]] && continue
     local raw="${line%%#*}"
     if [[ "$raw" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*= ]]; then
-      local key="${BASHREMATCH[1]}"
+      local key="${BASH_REMATCH[1]}"
       key="${key//[[:space:]]/}"
       local val="$(grep -E "^$key=" "$env_file" | tail -n1 | cut -d= -f2-)"
       val="${val%\"}"; val="${val#\"}"; val="${val%\'}"; val="${val#\'}"
