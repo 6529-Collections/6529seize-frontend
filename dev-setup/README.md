@@ -23,7 +23,7 @@ This repo includes `dev-setup/run-setup.sh` to bootstrap a fresh EC2 host for a 
 - **AMI:** Ubuntu 22.04 LTS
 - **Instance type:** t3.large (2 vCPU / 8 GB RAM)
 - **Disk:** 30 GB gp3
-- **Security Group (inbound):** 22/tcp (SSH), 80/tcp (HTTP), 443/tcp (HTTPS)
+- **Security Group (inbound):** 22/tcp (SSH), 80/tcp (HTTP), 443/tcp (HTTPS) - best to use ec2-rds-1 + launch-wizard-1
 
 ---
 
