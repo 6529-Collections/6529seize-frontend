@@ -467,6 +467,8 @@ export default function Header(props: Readonly<Props>) {
                   `/about/${AboutSection.GRADIENTS}`
                 )}
                 {printMobileHr()}
+                {printMobileRow("API", `/about/${AboutSection.API}`)}
+                {printMobileHr()}
                 {printMobileRow("GDRC1", `/about/${AboutSection.GDRC1}`)}
                 {printMobileHr()}
                 {printMobileSubheader("NFT Delegation")}
@@ -868,6 +870,12 @@ export default function Header(props: Readonly<Props>) {
                                   />
                                 </div>
                               </div>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "API",
+                                  path: `/about/${AboutSection.API}`,
+                                }}
+                              />
                               <HeaderDesktopLink
                                 link={{
                                   name: "GDRC1",

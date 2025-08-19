@@ -1,10 +1,9 @@
 "use client";
 
-import { AboutSection } from "@/enums";
-import { useRouter } from "next/navigation";
-import { useSetTitle } from "@/contexts/TitleContext";
-import { capitalizeEveryWord } from "@/helpers/Helpers";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
+import {AboutSection} from "@/enums";
+import {useRouter} from "next/navigation";
+import {useSetTitle} from "@/contexts/TitleContext";
+import {useCookieConsent} from "../cookies/CookieConsentContext";
 import useCapacitor from "@/hooks/useCapacitor";
 
 // Section components
@@ -28,11 +27,13 @@ import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTermsOfService from "./AboutTermsOfService";
-import { Container, Row, Col } from "react-bootstrap";
+import {Col, Container, Row} from "react-bootstrap";
+import AboutApi from "@/components/about/AboutApi";
+import {capitalizeEveryWord} from "@/helpers/Helpers";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const router = useRouter();
-  const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
+  const sectionTitle = section === AboutSection.API ? 'API' : capitalizeEveryWord(section.replaceAll("-", " "));
   useSetTitle(`${sectionTitle} | About`);
 
   const setNewSection = (newSection: AboutSection) => {
@@ -83,6 +84,8 @@ export default function About({ section }: { readonly section: AboutSection }) {
         return <AboutHTML path="faq" title="FAQ" />;
       case AboutSection.ENS:
         return <AboutHTML path="ens" title="ENS" />;
+      case AboutSection.API:
+        return <AboutApi />
       default:
         return null;
     }
@@ -177,6 +180,12 @@ function AboutMenu({
 
       <hr className="tw-my-2" />
 
+    <MenuItem
+        section={AboutSection.API}
+        title="API"
+        setSection={setSection}
+        currentSection={currentSection}
+    />
       <MenuItem
         section={AboutSection.FAQ}
         title="FAQ"
