@@ -31,7 +31,6 @@ export default function WagmiSetup({
   const { setToast } = useAuth();
   const { appWallets, fetchingAppWallets, appWalletsSupported } = useAppWallets();
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
   const [appKitInitialized, setAppKitInitialized] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -136,7 +135,6 @@ export default function WagmiSetup({
       const result = await initializeAppKitUtil(config, callbacks);
 
       setCurrentAdapter(result.adapter);
-      setIsInitialized(true);
 
     } catch (error) {
       // Handle specific error types
@@ -185,10 +183,9 @@ export default function WagmiSetup({
 
   // Initialize only after mounting and when AppWallets are ready
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[WagmiSetup] useEffect triggered:', { isMounted, fetchingAppWallets, appWalletsLength: appWallets.length });
-    }
-    
+
+    alert(`[DEBUG 1] isMounted: ${isMounted}, fetchingAppWallets: ${fetchingAppWallets}, appWalletsLength: ${appWallets.length}`);
+
     if (isMounted && !fetchingAppWallets) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
@@ -215,15 +212,7 @@ export default function WagmiSetup({
     );
   }
 
-  if (!currentAdapter || !isInitialized) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[WagmiSetup] Waiting for AppKit initialization...', {
-        hasAdapter: !!currentAdapter,
-        isInitialized,
-        isCapacitor,
-        isMounted
-      });
-    }
+  if (!currentAdapter ) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
         <div className="text-center">
