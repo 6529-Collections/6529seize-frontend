@@ -60,6 +60,7 @@ const MENU = [
       { label: "Company Portfolio", path: "/capital/company-portfolio" },
       { label: "NFT Fund", path: "/capital/fund" },
       { label: "Support", section: true },
+      { label: "API", path: "/about/api" },
       { label: "FAQ", path: "/about/faq" },
       { label: "Apply", path: "/about/apply" },
       { label: "Contact Us", path: "/about/contact-us" },
