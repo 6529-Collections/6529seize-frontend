@@ -1,23 +1,23 @@
 "use client";
 
-import styles from "./LatestActivity.module.scss";
-import homeStyles from "@/styles/Home.module.scss";
-import { useState, useEffect } from "react";
-import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { Transaction } from "../../entities/ITransaction";
-import Pagination from "../pagination/Pagination";
-import LatestActivityRow from "./LatestActivityRow";
-import { NFT } from "../../entities/INFT";
-import { areEqualAddresses, isNextgenContract } from "../../helpers/Helpers";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import DotLoader from "../dotLoader/DotLoader";
-import { commonApiFetch } from "../../services/api/common-api";
-import { NextGenCollection } from "../../entities/INextgen";
-import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../constants";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../nextGen/nextgen_contracts";
+import { DBResponse } from "../../entities/IDBResponse";
+import { NextGenCollection } from "../../entities/INextgen";
+import { NFT } from "../../entities/INFT";
+import { Transaction } from "../../entities/ITransaction";
+import { areEqualAddresses, isNextgenContract } from "../../helpers/Helpers";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
+import { commonApiFetch } from "../../services/api/common-api";
+import DotLoader from "../dotLoader/DotLoader";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
+import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
+import Pagination from "../pagination/Pagination";
+import styles from "./LatestActivity.module.scss";
+import LatestActivityRow from "./LatestActivityRow";
 
 interface Props {
   page: number;
@@ -139,9 +139,11 @@ export default function LatestActivity(props: Readonly<Props>) {
               <span className="font-lightest">NFT</span> Activity{" "}
             </h1>
             {showViewAll ? (
-              <a href="/nft-activity" className={homeStyles.viewAllLink}>
-                <span>View All</span>
-              </a>
+              <Link href={`/nft-activity`} className="tw-no-underline">
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+                  View All
+                </span>
+              </Link>
             ) : (
               fetching && <DotLoader />
             )}
