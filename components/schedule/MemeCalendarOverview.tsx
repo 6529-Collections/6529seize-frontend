@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import {
@@ -23,11 +24,25 @@ import {
  */
 export default function MemeCalendarOverview({
   displayTz,
+  showViewAll = false,
 }: {
   displayTz: DisplayTz;
+  showViewAll?: boolean;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
+      <div className="tw-h-full tw-flex tw-items-center tw-gap-3">
+        <h1>
+          <span className="font-lightest">The Memes</span> Minting Calendar
+        </h1>
+        {showViewAll && (
+          <Link href={`/memes-minting`} className="tw-no-underline">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+              View Full Calendar
+            </span>
+          </Link>
+        )}
+      </div>
       <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
         <div className="tw-h-full">
           <MemeCalendarOverviewNextMint displayTz={displayTz} />

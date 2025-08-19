@@ -25,8 +25,11 @@ export default function MemeCalendarDetails() {
           Here's the vibe: we launched with a one-off season in 2022, had a few
           human-era quirks in 2023-2025, and from 2026 the rhythm is clean and
           continuous. The views (SZN / Year / Epoch / Period / Era / Eon) follow
-          that story, and the card you're currently in gets a{" "}
-          <span className="tw-font-semibold tw-text-[#eb534e]">border</span>.
+          that story, and the card you're currently in is{" "}
+          <span className="tw-font-semibold tw-text-[#20fa59]">
+            highlighted
+          </span>
+          .
         </p>
 
         <div className="tw-space-y-5">
@@ -135,24 +138,6 @@ export default function MemeCalendarDetails() {
               <li>
                 <span className="tw-font-medium">Eons:</span> Eon 0 = SZN1 only.
                 Eon 1 starts Jan 2023 and spans 1,000 years (Eras 1-10).
-              </li>
-            </ul>
-          </div>
-
-          {/* UI notes */}
-          <div>
-            <p className="tw-text-lg tw-font-semibold tw-mb-3">UI Notes</p>
-            <ul className="tw-text-sm tw-text-gray-300 tw-list-disc tw-ml-5 tw-space-y-1">
-              <li>
-                The card you're in is outlined with{" "}
-                <span className="tw-font-medium tw-text-[#eb534e]">
-                  #eb534e
-                </span>
-                .
-              </li>
-              <li>
-                Future mints show time + quick-add buttons; past mints show date
-                only.
               </li>
             </ul>
           </div>

@@ -31,15 +31,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
-
-const NFTImage = dynamic(() => import("@/components/nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const LatestActivity = dynamic(
-  () => import("@/components/latest-activity/LatestActivity"),
-  { ssr: false }
-);
+import LatestActivity from "../latest-activity/LatestActivity";
+import NFTImage from "../nft-image/NFTImage";
 
 const MemePageMintCountdown = dynamic(
   () => import("@/components/the-memes/MemePageMintCountdown"),
@@ -138,7 +131,7 @@ export default function Home({
                   <span className={connectedProfile ? "tw-pb-[35px]" : ""}>
                     <NFTImage
                       nft={featuredNft}
-                      animation={true}
+                      animation
                       height={650}
                       balance={nftBalance}
                       showUnseized={!!connectedProfile}
@@ -150,7 +143,7 @@ export default function Home({
                     className={connectedProfile ? "tw-pb-[35px]" : ""}>
                     <NFTImage
                       nft={featuredNft}
-                      animation={true}
+                      animation
                       height={650}
                       balance={nftBalance}
                       showUnseized={!!connectedProfile}
@@ -250,7 +243,7 @@ export default function Home({
                   <MemePageMintCountdown
                     nft_id={featuredNft.id}
                     setClaim={setManifoldClaim}
-                    is_full_width={true}
+                    is_full_width
                   />
                 </Col>
               </Row>
@@ -282,8 +275,8 @@ export default function Home({
                   </tr>
                   <NftPageStats
                     nft={featuredNft}
-                    hide_mint_price={true}
-                    hide_hodl_rate={true}
+                    hide_mint_price
+                    hide_hodl_rate
                   />
                 </tbody>
               </Table>
@@ -304,7 +297,7 @@ export default function Home({
       <Container className="py-5">
         <Row>
           <Col>
-            <MemeCalendarOverview displayTz="local" />
+            <MemeCalendarOverview displayTz="local" showViewAll />
           </Col>
         </Row>
       </Container>
@@ -321,7 +314,7 @@ export default function Home({
                   featuredNextgen.name
                 )}`}
                 className="tw-no-underline">
-                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#222] hover:tw-border-[#222]max-[800px]:tw-text-[12px]">
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
                   View Collection
                 </span>
               </Link>

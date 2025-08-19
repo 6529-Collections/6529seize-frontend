@@ -11,11 +11,6 @@ import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import {
-  SEASONS_PER_EPOCH,
-  SEASONS_PER_ERA,
-  SEASONS_PER_PERIOD,
-  SEASONS_PER_YEAR,
-  ZoomLevel,
   addMonths,
   dateFromMintNumber,
   displayedEonNumberFromIndex,
@@ -36,10 +31,15 @@ import {
   isSznOneIndex,
   mintStartInstantUtcForMintDay,
   printCalendarInvites,
+  SEASONS_PER_EPOCH,
+  SEASONS_PER_ERA,
+  SEASONS_PER_PERIOD,
+  SEASONS_PER_YEAR,
   SZN1_RANGE,
   SZN1_SEASON_INDEX,
   toISO,
   ymd,
+  ZoomLevel,
 } from "./meme-calendar.helpers";
 import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";
 
@@ -327,7 +327,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
                 <span
                   className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
                     isToday
-                      ? "tw-bg-[#eb534e] tw-text-black tw-font-semibold"
+                      ? "tw-bg-[#20fa59] tw-text-black tw-font-semibold"
                       : "tw-text-gray-400"
                   }`}>
                   {day}
@@ -393,7 +393,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               <span
                 className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
                   isToday
-                    ? "tw-bg-[#eb534e] tw-text-black tw-font-semibold"
+                    ? "tw-bg-[#20fa59] tw-text-black tw-font-semibold"
                     : ""
                 }`}>
                 {day}
@@ -478,7 +478,10 @@ function YearView({
         <div
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-text-black"
-          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          style={{
+            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderWidth: isCurrent ? "2px" : "1px",
+          }}
           onClick={() => {
             onSelectSeason(sIdx);
             onZoomToSeason();
@@ -511,7 +514,10 @@ function YearView({
           <div
             key={s.sIdx}
             className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-            style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+            style={{
+              borderColor: isCurrent ? "#20fa59" : "#181818",
+              borderWidth: isCurrent ? "2px" : "1px",
+            }}
             onClick={() => {
               onSelectSeason(s.sIdx);
               onZoomToSeason();
@@ -557,7 +563,10 @@ function EpochView({
         <div
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          style={{
+            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderWidth: isCurrent ? "2px" : "1px",
+          }}
           onClick={() => {
             onSelectSeason(sIdx);
             onSelectYear(0);
@@ -598,7 +607,10 @@ function EpochView({
             <div
               key={toISO(y.start)}
               className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-              style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+              style={{
+                borderColor: isCurrent ? "#20fa59" : "#181818",
+                borderWidth: isCurrent ? "2px" : "1px",
+              }}
               onClick={() => {
                 onSelectYear(y.yearNumber);
                 onZoomToYear();
@@ -643,7 +655,10 @@ function PeriodView({
         <div
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          style={{
+            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderWidth: isCurrent ? "2px" : "1px",
+          }}
           onClick={() => {
             onSelectEpoch(0);
             onZoomToEpoch();
@@ -683,7 +698,10 @@ function PeriodView({
             <div
               key={toISO(ep.start)}
               className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-              style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+              style={{
+                borderColor: isCurrent ? "#20fa59" : "#181818",
+                borderWidth: isCurrent ? "2px" : "1px",
+              }}
               onClick={() => {
                 onSelectEpoch(ep.epochNumber);
                 onZoomToEpoch();
@@ -726,7 +744,10 @@ function EraView({
         <div
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          style={{
+            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderWidth: isCurrent ? "2px" : "1px",
+          }}
           onClick={() => {
             onSelectPeriod(0);
             onZoomToPeriod();
@@ -766,7 +787,10 @@ function EraView({
           <div
             key={toISO(p.start)}
             className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-            style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+            style={{
+              borderColor: isCurrent ? "#20fa59" : "#181818",
+              borderWidth: isCurrent ? "2px" : "1px",
+            }}
             onClick={() => {
               onSelectPeriod(p.periodNumber);
               onZoomToPeriod();
@@ -804,7 +828,10 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
         <div
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+          style={{
+            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderWidth: isCurrent ? "2px" : "1px",
+          }}
           onClick={() => {
             onSelectEra(0);
             onZoomToEra();
@@ -844,7 +871,10 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
           <div
             key={toISO(er.start)}
             className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
-            style={{ borderColor: isCurrent ? "#eb534e" : "#181818" }}
+            style={{
+              borderColor: isCurrent ? "#20fa59" : "#181818",
+              borderWidth: isCurrent ? "2px" : "1px",
+            }}
             onClick={() => {
               onSelectEra(er.eraNumber);
               onZoomToEra();
