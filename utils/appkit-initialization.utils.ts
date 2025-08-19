@@ -179,16 +179,13 @@ export async function initializeAppKit(
     // Create adapter with error handling
     const newAdapter = createAdapter(wallets, adapterManager, isCapacitor, onToast);
 
-    // Only create AppKit once
-    if (!appKitInitialized) {
-      await createAppKitWithRetry(
-        newAdapter,
-        maxRetries,
-        retryDelayMs,
-        onRetryUpdate,
-        onAppKitInitialized
-      );
-    }
+    await createAppKitWithRetry(
+      newAdapter,
+      maxRetries,
+      retryDelayMs,
+      onRetryUpdate,
+      onAppKitInitialized
+    );
 
     // Reset retry state on success
     onRetryUpdate(0, null);
