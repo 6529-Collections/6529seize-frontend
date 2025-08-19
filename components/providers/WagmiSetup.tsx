@@ -100,6 +100,7 @@ export default function WagmiSetup({
   // Initialize AppKit with wallets - FAIL-FAST implementation with async/await and iterative retry
   const initializeAppKit = async (wallets: AppWallet[]): Promise<void> => {
     // Prevent concurrent initialization
+    alert(`[DEBUG 2] isInitializing: ${isInitializing}, wallets: ${wallets.length}`);
     if (isInitializing) {
       throw new AppKitValidationError('AppKit initialization already in progress');
     }
@@ -137,6 +138,7 @@ export default function WagmiSetup({
       setCurrentAdapter(result.adapter);
 
     } catch (error) {
+      alert(`[DEBUG 3] error: ${error}`);
       // Handle specific error types
       if (error instanceof AppKitValidationError ||
         error instanceof AppKitTimeoutError ||
