@@ -297,6 +297,15 @@ const useSecureWalletInitialization = () => {
 interface WalletInitializationErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  errorDetails?: {
+    name: string;
+    message: string;
+    stack?: string;
+    toString: string;
+    isMinified: boolean;
+    timestamp: string;
+    componentStack?: string;
+  };
 }
 
 interface WalletInitializationErrorBoundaryProps {
@@ -309,48 +318,47 @@ class WalletInitializationErrorBoundary extends Component<
 > {
   constructor(props: WalletInitializationErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorDetails: undefined };
   }
 
   static getDerivedStateFromError(error: Error): WalletInitializationErrorBoundaryState {
     // Capture detailed error info before React minifies it
-    const errorInfo = {
+    const errorDetails = {
       name: error.name,
       message: error.message,
-      stack: error.stack?.substring(0, 500), // First 500 chars of stack
+      stack: error.stack,
       toString: error.toString(),
-      isMinified: error.message && error.message.includes('Minified React error'),
+      isMinified: !!(error.message && error.message.includes('Minified React error')),
       timestamp: new Date().toISOString()
     };
     
-    // Show comprehensive error alert for mobile debugging
+    // Brief alert to indicate error captured, details will be in UI
     alert(
-      `🚨 WALLET INIT ERROR\n\n` +
-      `Type: ${errorInfo.name}\n` +
-      `Message: ${errorInfo.message}\n\n` +
-      `Is Minified: ${errorInfo.isMinified}\n` +
-      `Time: ${errorInfo.timestamp}\n\n` +
-      `Stack (first 200 chars):\n${errorInfo.stack?.substring(0, 200) || 'No stack'}...\n\n` +
-      `Full toString: ${errorInfo.toString}`
+      `🚨 WALLET INIT ERROR DETECTED\n\n` +
+      `Error: ${errorDetails.name}\n` +
+      `Minified: ${errorDetails.isMinified}\n\n` +
+      `Full details will be displayed in the error UI.`
     );
     
-    return { hasError: true, error };
+    return { hasError: true, error, errorDetails };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Show detailed component stack info via alert for mobile debugging
-    const componentInfo = {
-      componentStack: errorInfo.componentStack?.substring(0, 300),
-      errorBoundaryLocation: 'WalletInitializationErrorBoundary in SeizeConnectContext',
-      timestamp: new Date().toISOString()
-    };
+    // Update state with component stack information
+    this.setState(prevState => ({
+      ...prevState,
+      errorDetails: prevState.errorDetails ? {
+        ...prevState.errorDetails,
+        componentStack: errorInfo.componentStack || undefined
+      } : undefined
+    }));
     
+    // Brief alert to indicate component context captured
     alert(
-      `📍 COMPONENT ERROR CONTEXT\n\n` +
-      `Location: ${componentInfo.errorBoundaryLocation}\n` +
-      `Time: ${componentInfo.timestamp}\n\n` +
-      `Component Stack (first 300 chars):\n${componentInfo.componentStack || 'No component stack'}\n\n` +
-      `This alert shows WHERE the error occurred in your component tree.`
+      `📍 COMPONENT CONTEXT CAPTURED\n\n` +
+      `Location: WalletInitializationErrorBoundary\n` +
+      `Component stack added to error details.\n\n` +
+      `View full details in the error UI below.`
     );
     
     // Still log for any server-side monitoring
@@ -359,7 +367,7 @@ class WalletInitializationErrorBoundary extends Component<
 
   render() {
     if (this.state.hasError) {
-      // Fallback UI for initialization errors
+      // Fallback UI for initialization errors with comprehensive debugging
       return (
         <div style={{
           padding: '20px',
@@ -368,39 +376,185 @@ class WalletInitializationErrorBoundary extends Component<
           backgroundColor: '#fff5f5',
           color: '#cc0000',
           margin: '20px',
-          textAlign: 'center' as const
+          textAlign: 'left' as const,
+          maxHeight: '90vh',
+          overflow: 'auto'
         }}>
-          <h3>Wallet Initialization Error</h3>
-          <p>
+          <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>🚨 Wallet Initialization Error</h3>
+          <p style={{ textAlign: 'center', marginBottom: '20px' }}>
             There was an error initializing the wallet connection. 
             This may be due to corrupted storage data or a security issue.
           </p>
-          <p>
-            <strong>Error:</strong> {this.state.error?.message}
-          </p>
-          <button
-            onClick={() => {
-              // Clear local storage and reload
-              try {
-                removeAuthJwt();
-                localStorage.clear();
-                window.location.reload();
-              } catch (error) {
-                console.error('Failed to clear storage:', error);
-              }
-            }}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#cc0000',
-              color: 'white',
-              border: 'none',
+          
+          {/* Error Summary */}
+          <div style={{
+            backgroundColor: '#ffebee',
+            padding: '15px',
+            borderRadius: '6px',
+            marginBottom: '15px',
+            border: '1px solid #ffcdd2'
+          }}>
+            <h4 style={{ margin: '0 0 10px 0', color: '#d32f2f' }}>Error Summary</h4>
+            <p><strong>Type:</strong> {this.state.errorDetails?.name || this.state.error?.name || 'Unknown'}</p>
+            <p><strong>Time:</strong> {this.state.errorDetails?.timestamp || new Date().toISOString()}</p>
+            <p><strong>Is Minified React Error:</strong> {this.state.errorDetails?.isMinified ? 'Yes' : 'No'}</p>
+            <p><strong>Message:</strong></p>
+            <div style={{
+              backgroundColor: '#ffffff',
+              padding: '10px',
               borderRadius: '4px',
-              cursor: 'pointer',
-              marginTop: '10px'
-            }}
-          >
-            Clear Storage and Reload
-          </button>
+              fontFamily: 'monospace',
+              fontSize: '12px',
+              border: '1px solid #ddd',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
+            }}>
+              {this.state.errorDetails?.message || this.state.error?.message || 'No message available'}
+            </div>
+          </div>
+
+          {/* Stack Trace */}
+          {this.state.errorDetails?.stack && (
+            <div style={{
+              backgroundColor: '#fff3e0',
+              padding: '15px',
+              borderRadius: '6px',
+              marginBottom: '15px',
+              border: '1px solid #ffcc02'
+            }}>
+              <h4 style={{ margin: '0 0 10px 0', color: '#ef6c00' }}>Stack Trace</h4>
+              <div style={{
+                backgroundColor: '#ffffff',
+                padding: '10px',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '11px',
+                border: '1px solid #ddd',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                maxHeight: '200px',
+                overflow: 'auto'
+              }}>
+                {this.state.errorDetails.stack}
+              </div>
+            </div>
+          )}
+
+          {/* Component Stack */}
+          {this.state.errorDetails?.componentStack && (
+            <div style={{
+              backgroundColor: '#e8f5e8',
+              padding: '15px',
+              borderRadius: '6px',
+              marginBottom: '15px',
+              border: '1px solid #c8e6c9'
+            }}>
+              <h4 style={{ margin: '0 0 10px 0', color: '#2e7d32' }}>Component Stack</h4>
+              <div style={{
+                backgroundColor: '#ffffff',
+                padding: '10px',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '11px',
+                border: '1px solid #ddd',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                maxHeight: '150px',
+                overflow: 'auto'
+              }}>
+                {this.state.errorDetails.componentStack}
+              </div>
+            </div>
+          )}
+
+          {/* Error String Representation */}
+          {this.state.errorDetails?.toString && (
+            <div style={{
+              backgroundColor: '#f3e5f5',
+              padding: '15px',
+              borderRadius: '6px',
+              marginBottom: '20px',
+              border: '1px solid #e1bee7'
+            }}>
+              <h4 style={{ margin: '0 0 10px 0', color: '#7b1fa2' }}>Error toString()</h4>
+              <div style={{
+                backgroundColor: '#ffffff',
+                padding: '10px',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                border: '1px solid #ddd',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word'
+              }}>
+                {this.state.errorDetails.toString}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <button
+              onClick={() => {
+                // Copy error details to clipboard if available
+                const errorInfo = {
+                  timestamp: this.state.errorDetails?.timestamp,
+                  type: this.state.errorDetails?.name,
+                  message: this.state.errorDetails?.message,
+                  isMinified: this.state.errorDetails?.isMinified,
+                  stack: this.state.errorDetails?.stack,
+                  componentStack: this.state.errorDetails?.componentStack,
+                  toString: this.state.errorDetails?.toString
+                };
+                
+                const errorText = JSON.stringify(errorInfo, null, 2);
+                
+                // Try to copy to clipboard, fallback to alert
+                if (navigator.clipboard) {
+                  navigator.clipboard.writeText(errorText).then(() => {
+                    alert('Error details copied to clipboard!');
+                  }).catch(() => {
+                    alert(`Error details:\n\n${errorText}`);
+                  });
+                } else {
+                  alert(`Error details:\n\n${errorText}`);
+                }
+              }}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#1976d2',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                marginRight: '10px'
+              }}
+            >
+              Copy Error Details
+            </button>
+            <button
+              onClick={() => {
+                // Clear local storage and reload
+                try {
+                  removeAuthJwt();
+                  localStorage.clear();
+                  window.location.reload();
+                } catch (error) {
+                  alert(`Failed to clear storage: ${error}`);
+                }
+              }}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#cc0000',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Clear Storage and Reload
+            </button>
+          </div>
         </div>
       );
     }
