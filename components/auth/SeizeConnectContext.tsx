@@ -601,6 +601,27 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Use debounced state update to prevent race conditions
     debounceTimeoutRef.current = setTimeout(() => {
+      // Add debugging for AppWallet infinite loop issue
+      const debugInfo = {
+        address: account.address,
+        isConnected: account.isConnected,
+        status: account.status,
+        walletName: walletInfo?.name,
+        currentConnectionState: connectionState
+      };
+      
+      // Only alert for AppWallet to avoid spam
+      if (walletInfo?.name && walletInfo.name.toLowerCase().includes('app')) {
+        alert(
+          `🔍 APPWALLET STATE CHECK\\n\\n` +
+          `Address: ${debugInfo.address ? 'Present' : 'None'}\\n` +
+          `IsConnected: ${debugInfo.isConnected}\\n` +
+          `Status: ${debugInfo.status}\\n` +
+          `Current State: ${debugInfo.currentConnectionState}\\n\\n` +
+          `This might reveal the infinite loop pattern.`
+        );
+      }
+      
       if (account.address && account.isConnected) {
         // Validate and normalize address to checksummed format
         if (isValidAddress(account.address)) {
@@ -659,7 +680,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [account.address, account.isConnected, account.status, isInitialized, setConnectedAddress]);
+  }, [account.address, account.isConnected, account.status, isInitialized]);
 
   const seizeConnect = useCallback((): void => {
     try {
