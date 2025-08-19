@@ -125,12 +125,6 @@ export function createAppWalletConnector(
           throw new PrivateKeyDecryptionError('Private key decryption returned empty result');
         }
 
-        // Validate private key format
-        if (!privateKey.match(/^[0-9a-fA-F]{64}$/)) {
-          alert(`[DEBUG 8] Decrypted private key has invalid format`);
-          throw new PrivateKeyDecryptionError('Decrypted private key has invalid format');
-        }
-
         // Only set after all validations pass
         decryptedPrivateKey = privateKey;
         
