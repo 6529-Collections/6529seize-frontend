@@ -82,11 +82,6 @@ export function createAppWalletConnector(
         alert(`[DEBUG 2] Password is required and must be a string`);
         throw new InvalidPasswordError('Password is required and must be a string');
       }
-      
-      if (password.length < 8) {
-        alert(`[DEBUG 3] Password must be at least 8 characters long`);
-        throw new InvalidPasswordError('Password must be at least 8 characters long');
-      }
 
       try {
         // Check if we're in Capacitor for more lenient validation
