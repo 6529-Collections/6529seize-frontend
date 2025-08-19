@@ -287,6 +287,7 @@ class WalletInitializationErrorBoundary extends Component<
 
   static getDerivedStateFromError(error: Error): WalletInitializationErrorBoundaryState {
     // Update state so the next render will show the fallback UI
+    alert(`[DEBUG 1] error: ${error}`);
     return { hasError: true, error };
   }
 
@@ -300,7 +301,6 @@ class WalletInitializationErrorBoundary extends Component<
 
   render() {
     if (this.state.hasError) {
-      alert(`[DEBUG 1] hasError: ${JSON.stringify(this.state)}`);
       // Fallback UI for initialization errors
       return (
         <div style={{

@@ -32,6 +32,7 @@ export class WalletErrorBoundary extends Component<Props, State> {
 
   public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI
+    alert(`[DEBUG 1] error: ${error}`);
     return {
       hasError: true,
       error,
