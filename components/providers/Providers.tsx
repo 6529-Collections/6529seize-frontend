@@ -30,14 +30,14 @@ export default function Providers({
 }) {
   return (
     <QueryClientSetup>
-      <WagmiSetup>
-        <CapacitorSetup />
-        <IpfsImageSetup />
-        <ReactQueryWrapper>
-          <SeizeSettingsProvider>
-            <EmojiProvider>
-              <IpfsProvider>
-                <AppWalletsProvider>
+      <AppWalletsProvider>
+        <WagmiSetup>
+          <CapacitorSetup />
+          <IpfsImageSetup />
+          <ReactQueryWrapper>
+            <SeizeSettingsProvider>
+              <EmojiProvider>
+                <IpfsProvider>
                   <SeizeConnectProvider>
                     <Auth>
                       <WaveEligibilityProvider>
@@ -68,12 +68,12 @@ export default function Providers({
                       </WaveEligibilityProvider>
                     </Auth>
                   </SeizeConnectProvider>
-                </AppWalletsProvider>
-              </IpfsProvider>
-            </EmojiProvider>
-          </SeizeSettingsProvider>
-        </ReactQueryWrapper>
-      </WagmiSetup>
+                </IpfsProvider>
+              </EmojiProvider>
+            </SeizeSettingsProvider>
+          </ReactQueryWrapper>
+        </WagmiSetup>
+      </AppWalletsProvider>
     </QueryClientSetup>
   );
 }

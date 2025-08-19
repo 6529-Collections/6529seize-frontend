@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import {
   AppWallet,
   appWalletsEventEmitter,
+  useAppWallets,
 } from "../app-wallets/AppWalletsContext";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
@@ -28,6 +29,7 @@ export default function WagmiSetup({
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
+  const { appWallets, fetchingAppWallets } = useAppWallets();
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [appKitInitialized, setAppKitInitialized] = useState(false);
@@ -210,16 +212,17 @@ export default function WagmiSetup({
     }, 300);
   };
 
-  // Initialize only after mounting to avoid SSR issues
+  // Initialize only after mounting and when AppWallets are ready
   useEffect(() => {
-    if (isMounted) {
+    if (isMounted && !fetchingAppWallets) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
           if (process.env.NODE_ENV === 'development') {
-            console.log('[WagmiSetup] Client-side mounted, initializing AppKit');
+            console.log('[WagmiSetup] Client-side mounted, initializing AppKit with wallets:', appWallets.length);
           }
-          await initializeAppKit([]);
+          // Pass actual appWallets instead of empty array
+          await initializeAppKit(appWallets);
         } catch (error) {
           logErrorSecurely('[WagmiSetup] Failed to initialize AppKit on mount', error);
           // Error is already handled inside initializeAppKit (user toast shown)
@@ -228,7 +231,7 @@ export default function WagmiSetup({
         }
       })();
     }
-  }, [isMounted]);
+  }, [isMounted, fetchingAppWallets, appWallets]);
 
   // Listen for AppWallet changes
   useEffect(() => {
