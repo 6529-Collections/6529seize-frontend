@@ -89,9 +89,8 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const initialize = async () => {
       await checkUnsupported();
-      if (appWalletsSupported) {
-        await fetchAppWallets();
-      }
+      // Always call fetchAppWallets - it handles the unsupported case internally
+      await fetchAppWallets();
     };
 
     initialize();

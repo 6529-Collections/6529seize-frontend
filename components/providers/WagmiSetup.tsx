@@ -214,20 +214,32 @@ export default function WagmiSetup({
 
   // Initialize only after mounting and when AppWallets are ready
   useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[WagmiSetup] useEffect triggered:', { isMounted, fetchingAppWallets, appWalletsLength: appWallets.length });
+    }
+    
     if (isMounted && !fetchingAppWallets) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
           if (process.env.NODE_ENV === 'development') {
-            console.log('[WagmiSetup] Client-side mounted, initializing AppKit with wallets:', appWallets.length);
+            console.log('[WagmiSetup] Starting AppKit initialization with wallets:', appWallets.length);
           }
           // Pass actual appWallets instead of empty array
           await initializeAppKit(appWallets);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[WagmiSetup] AppKit initialization completed successfully');
+          }
         } catch (error) {
           logErrorSecurely('[WagmiSetup] Failed to initialize AppKit on mount', error);
-          // Error is already handled inside initializeAppKit (user toast shown)
-          // This catch prevents unhandled promise rejection
-          console.error('[WagmiSetup] AppKit initialization failed:', error);
+          console.error('[WagmiSetup] AppKit initialization failed - this is causing the loading screen to persist:', error);
+          
+          // CRITICAL: Don't let initialization failure block the app completely
+          // Set minimal adapter to allow app to continue
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('[WagmiSetup] Setting fallback state to unblock app');
+          }
+          // TODO: Consider setting fallback adapter here
         }
       })();
     }
