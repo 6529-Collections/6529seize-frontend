@@ -232,7 +232,7 @@ const useSecureWalletInitialization = () => {
           undefined,
           debugAddress
         );
-        
+        alert(`[DEBUG 2] initError: ${initError}`);
         logError('wallet_initialization', initError);
         setHasInitializationError(true);
         setInitializationError(initError);
@@ -245,7 +245,7 @@ const useSecureWalletInitialization = () => {
           'Unexpected error during wallet initialization',
           error
         );
-        
+        alert(`[DEBUG 2] initError: ${initError}`);
         logError('wallet_initialization', initError);
         setHasInitializationError(true);
         setInitializationError(initError);
