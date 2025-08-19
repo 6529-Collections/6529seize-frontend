@@ -306,10 +306,10 @@ collect_all_inputs() {
   exec 3</dev/tty || true
 
   # Dev slug & port
-  read -u 3 -r -p "Enter developer slug (e.g., prxt): " DEV_SLUG
+  read -u 3 -r -p "Enter developer slug (e.g. punk6529): " DEV_SLUG
   while [[ -z "${DEV_SLUG:-}" ]]; do
     color red "Slug is required."
-    read -u 3 -r -p "Enter developer slug (e.g., prxt): " DEV_SLUG
+    read -u 3 -r -p "Enter developer slug (e.g. punk6529): " DEV_SLUG
   done
   read -u 3 -r -p "Proxy to local port [default: 3001]: " DEV_PORT
   DEV_PORT="${DEV_PORT:-3001}"
