@@ -135,21 +135,13 @@ sudo certbot renew --dry-run
 
 ---
 
-## 8) Re-run for another dev
-
-You can run the script again to configure another slug on the **same** box (pick a different port), or create a new EC2 and repeat:
-
-1. Add Route 53 A record: `<newslug>staging.6529.io → <EC2_PUBLIC_IP>`
-2. SSH and run `bash scripts/dev-ec2-setup.sh`
-3. Choose the new slug and port when prompted
-
----
-
 ## 9) Troubleshooting
 
 - If build fails due to memory, ensure you used an instance with **≥ 8 GB RAM**.
 - If HTTPS fails, confirm the A record resolves (`dig <slug>staging.6529.io +short`) and re-run the Certbot step printed by the script.
 - Ensure security group has 80/443 open to the world for public access.
+
+---
 
 ## 🔄 Resetting an Environment
 
