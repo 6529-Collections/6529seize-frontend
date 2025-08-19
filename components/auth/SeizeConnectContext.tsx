@@ -300,6 +300,7 @@ class WalletInitializationErrorBoundary extends Component<
 
   render() {
     if (this.state.hasError) {
+      alert(`[DEBUG 1] hasError: ${JSON.stringify(this.state)}`);
       // Fallback UI for initialization errors
       return (
         <div style={{
