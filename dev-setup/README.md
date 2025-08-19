@@ -150,3 +150,45 @@ You can run the script again to configure another slug on the **same** box (pick
 - If build fails due to memory, ensure you used an instance with **≥ 8 GB RAM**.
 - If HTTPS fails, confirm the A record resolves (`dig <slug>staging.6529.io +short`) and re-run the Certbot step printed by the script.
 - Ensure security group has 80/443 open to the world for public access.
+
+## 🔄 Resetting an Environment
+
+If you need to reset your staging/dev box (e.g., wipe the repo, stop PM2, remove the Nginx vhost), use the provided reset script.  
+This does **not uninstall Node, PM2, or Nginx** — it just clears the running app and config so you can re-run setup from scratch.
+
+### Steps
+
+1. SSH into your EC2 instance:
+
+```bash
+ssh -i ~/.ssh/your-key.pem ubuntu@<your-ec2-ip>
+```
+
+2. Run the reset script:
+
+```bash
+bash scripts/reset-staging.sh
+```
+
+3. You’ll be asked for:
+
+   - **Repo path** (defaults to `~/6529seize-frontend`)
+   - **Port** (defaults to `3001`)
+   - **Developer slug** (used to remove the Nginx vhost for `<slug>staging.6529.io`)
+
+4. The script will:
+
+   - Stop & delete the PM2 app (`6529seize`)
+   - Kill anything running on the given port
+   - Remove the repo directory
+   - Remove the Nginx site config for your staging domain and reload Nginx
+
+5. After reset, re-run the setup script:
+
+```bash
+bash scripts/dev-ec2-setup.sh
+```
+
+---
+
+✅ Your environment is now reset or deployed clean.
