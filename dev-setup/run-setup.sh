@@ -472,18 +472,17 @@ setup_nginx_and_certbot_flow() {
 # ---------- Main ----------
 
 main() {
+  # 0) Get dev slug/port first so BASE_ENDPOINT can be fixed to the dev domain
+  prompt_dev_slug_and_port
+  create_env_file
+
+  # 1) Prerequisites
   require_sudo_if_linux
   ensure_node_ge20_and_npm_ge10
   install_pm2
-
-  # 0) Get dev slug/port first so BASE_ENDPOINT can be fixed to the dev domain
-  prompt_dev_slug_and_port
-
-  # 1) Make .env first (BASE_ENDPOINT is fixed to https://<slug>staging.6529.io)
-  create_env_file
+  ensure_java_for_openapi
 
   # 2) Build & run app
-  ensure_java_for_openapi
   install_dependencies
   build_project
   start_pm2
