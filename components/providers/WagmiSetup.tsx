@@ -29,7 +29,7 @@ export default function WagmiSetup({
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
-  const { appWallets, fetchingAppWallets } = useAppWallets();
+  const { appWallets, fetchingAppWallets, appWalletsSupported } = useAppWallets();
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [appKitInitialized, setAppKitInitialized] = useState(false);
@@ -185,9 +185,10 @@ export default function WagmiSetup({
 
   // Initialize only after mounting and when AppWallets are ready
   useEffect(() => {
-
-    alert(`[DEBUG 2] isMounted: ${isMounted}, fetchingAppWallets: ${fetchingAppWallets}, appWalletsLength: ${appWallets.length}`);
-
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[WagmiSetup] useEffect triggered:', { isMounted, fetchingAppWallets, appWalletsLength: appWallets.length });
+    }
+    
     if (isMounted && !fetchingAppWallets) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
