@@ -1,4 +1,4 @@
-import { Container, Row, Col } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function NextGenAbout() {
   return (
@@ -109,8 +109,8 @@ export default function NextGenAbout() {
             smart contracts.
           </p>
           <p>
-            To support this objective, we launched NFTDelegation.com in Spring
-            2023 and have been using it within the community to support address
+            To support this objective, we launched NFTDelegation in Spring 2023
+            and have been using it within the community to support address
             consolidation and delegation.
           </p>
           <p>

@@ -58,7 +58,7 @@ export default function DelegationMappingToolPage() {
                   lg={{ span: 8, offset: 2 }}>
                   The Delegation Mapping tool allows anyone to easily upload a
                   CSV file with addresses to receive delegated addresses in
-                  return (from the NFTDelegation.com contract).{" "}
+                  return (from the NFTDelegation contract).{" "}
                   <a href="#how-to-use">How to use this tool?</a>
                 </Col>
               </Row>
