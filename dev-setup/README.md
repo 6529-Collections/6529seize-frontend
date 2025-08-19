@@ -60,7 +60,7 @@ ssh -i /path/to/key.pem ubuntu@<EC2_PUBLIC_IP>
 sudo apt-get update -y && sudo apt-get install -y git
 git clone https://github.com/6529-Collections/6529seize-frontend.git
 cd 6529seize-frontend
-bash scripts/dev-ec2-setup.sh
+bash dev-setup/run-setup.sh
 ```
 
 ### You’ll be prompted for
@@ -148,39 +148,15 @@ sudo certbot renew --dry-run
 If you need to reset your staging/dev box (e.g., wipe the repo, stop PM2, remove the Nginx vhost), use the provided reset script.  
 This does **not uninstall Node, PM2, or Nginx** — it just clears the running app and config so you can re-run setup from scratch.
 
-### Steps
-
-1. SSH into your EC2 instance:
-
 ```bash
-ssh -i ~/.ssh/your-key.pem ubuntu@<your-ec2-ip>
+bash dev-setup/run-reset.sh
 ```
 
-2. Run the reset script:
+This will:
 
-```bash
-bash scripts/reset-staging.sh
-```
+- Stop and remove the PM2 process `6529seize`
+- Delete the `~/6529seize-frontend` repo
+- Remove Nginx config for `6529seize-staging`
+- Reload Nginx
 
-3. You’ll be asked for:
-
-   - **Repo path** (defaults to `~/6529seize-frontend`)
-   - **Port** (defaults to `3001`)
-   - **Developer slug** (used to remove the Nginx vhost for `<slug>staging.6529.io`)
-
-4. The script will:
-
-   - Stop & delete the PM2 app (`6529seize`)
-   - Kill anything running on the given port
-   - Remove the repo directory
-   - Remove the Nginx site config for your staging domain and reload Nginx
-
-5. After reset, re-run the setup script:
-
-```bash
-bash scripts/dev-ec2-setup.sh
-```
-
----
-
-✅ Your environment is now reset or deployed clean.
+It runs safely even on a new EC2 — missing files/services are skipped automatically.
