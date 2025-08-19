@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
-import { BrowserProvider, type Eip1193Provider } from "ethers";
+import { useAppKitAccount } from "@reown/appkit/react";
+import { useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from "viem";
 
 /**
@@ -119,11 +119,12 @@ function validateSignature(signature: string): void {
 /**
  * Secure message signing hook with mobile wallet compatibility
  * Uses Wagmi's useSignMessage for proper provider management and security
+ * This approach works with all connector types including custom AppWallet connectors
  */
 export const useSecureSign = (): UseSecureSignReturn => {
   const [isSigningPending, setIsSigningPending] = useState(false);
   const { address: connectedAddress, isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider<Eip1193Provider>('eip155');
+  const wagmiSignMessage = useSignMessage();
 
   const reset = useCallback(() => {
     setIsSigningPending(false);
@@ -139,20 +140,17 @@ export const useSecureSign = (): UseSecureSignReturn => {
       validateMessage(message);
 
       // Validate connection state before attempting to sign
-      const { address, provider } = validateSigningContext(isConnected, connectedAddress, walletProvider);
+      validateSigningContext(isConnected, connectedAddress);
 
-      // Set up the signing provider and verify signer address
-      const signer = await setupSigningProvider(provider, address);
-
-      // Execute the signature operation
-      return await executeSignature(signer, message);
+      // Execute the signature operation using Wagmi
+      return await executeWagmiSignature(wagmiSignMessage, message);
 
     } catch (error: unknown) {
       return classifySigningError(error);
     } finally {
       setIsSigningPending(false);
     }
-  }, [connectedAddress, isConnected, walletProvider]);
+  }, [connectedAddress, isConnected, wagmiSignMessage]);
 
   return {
     signMessage,
@@ -181,14 +179,13 @@ const extractErrorCode = (error: unknown): string | number | undefined => {
 };
 
 /**
- * Validates the signing context (connection state, address, provider)
- * Returns validated values to ensure type safety
+ * Validates the signing context (connection state and address)
+ * Wagmi handles provider management internally
  */
 const validateSigningContext = (
   isConnected: boolean,
-  connectedAddress: string | undefined,
-  walletProvider: Eip1193Provider | undefined
-): { address: string; provider: Eip1193Provider } => {
+  connectedAddress: string | undefined
+): void => {
   if (!isConnected) {
     throw new MobileSigningError(
       "Wallet not connected. Please connect your wallet and try again.",
@@ -204,35 +201,39 @@ const validateSigningContext = (
   }
 
   validateEthereumAddress(connectedAddress);
-
-  if (!walletProvider) {
-    throw new MobileSigningError(
-      "No wallet provider available. Please ensure your wallet is connected.",
-      "NO_PROVIDER"
-    );
-  }
-
-  return { address: connectedAddress, provider: walletProvider };
 };
 
 /**
- * Sets up the signing provider and verifies signer address
+ * Executes the signature operation using Wagmi's useSignMessage
+ * This approach works with all connector types including custom AppWallet connectors
  */
-const setupSigningProvider = async (
-  walletProvider: Eip1193Provider,
-  connectedAddress: string
-) => {
-  const ethersProvider = new BrowserProvider(walletProvider);
-  const signer = await ethersProvider.getSigner();
+const executeWagmiSignature = async (
+  wagmiSignMessage: ReturnType<typeof useSignMessage>,
+  message: string
+): Promise<SignatureResult> => {
+  try {
+    const signature = await wagmiSignMessage.signMessageAsync({ message });
+    
+    // Clear sensitive data from memory
+    message = '';
+    
+    // SECURITY: Validate signature format before returning
+    validateSignature(signature);
 
-  const signerAddress = await signer.getAddress();
-  validateEthereumAddress(signerAddress);
-
-  if (signerAddress.toLowerCase() !== connectedAddress.toLowerCase()) {
-    throw new ConnectionMismatchError(connectedAddress, signerAddress);
+    return {
+      signature,
+      userRejected: false,
+    };
+  } catch (error) {
+    // Handle user rejection specifically
+    if (error instanceof UserRejectedRequestError) {
+      return {
+        signature: null,
+        userRejected: true,
+      };
+    }
+    throw error; // Re-throw for general error handling
   }
-
-  return signer;
 };
 
 /**
@@ -284,26 +285,6 @@ const classifySigningError = (error: unknown): SignatureResult => {
   };
 };
 
-/**
- * Executes the actual signature operation
- */
-const executeSignature = async (
-  signer: any,
-  message: string
-): Promise<SignatureResult> => {
-  const signature = await signer.signMessage(message);
-  
-  // Clear sensitive data from memory
-  message = '';
-  
-  // SECURITY: Validate signature format before returning
-  validateSignature(signature);
-
-  return {
-    signature,
-    userRejected: false,
-  };
-};
 
 /**
  * SECURITY: Get user-friendly error messages with proper type checking
@@ -353,8 +334,6 @@ const getMobileErrorMessage = (error: unknown): string => {
   if (message.includes('unsupported') || message.includes('not supported')) {
     return 'This operation is not supported by your current wallet app.';
   }
-
-  alert(`[DEBUG 1] message: ${message}`);
 
   // Default fallback for mobile
   return 'Signing failed. Please try again or switch to a different wallet app if the issue persists.';
