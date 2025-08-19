@@ -221,6 +221,7 @@ const useSecureWalletInitialization = () => {
         try {
           removeAuthJwt();
         } catch (cleanupError) {
+          alert(`[DEBUG 1] cleanupError: ${cleanupError}`);
           // Log cleanup failure but continue with error throwing
           logError('auth_cleanup_during_init', new Error('Failed to clear invalid auth state', { cause: cleanupError }));
         }
@@ -467,6 +468,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         'Failed to open wallet connection modal',
         error
       );
+      alert(`[DEBUG 1] connectionError: ${connectionError}`);
       logError('seizeConnect', connectionError);
       throw connectionError;
     }
@@ -482,6 +484,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         error
       );
       logError('seizeDisconnect', walletError);
+      alert(`[DEBUG 1] walletError: ${walletError}`);
       throw walletError;
     }
   }, [disconnect]);
@@ -498,6 +501,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', walletError);
+        alert(`[DEBUG 2] walletError: ${walletError}`);
         
         // SECURITY: Throw AuthenticationError to prevent auth bypass
         throw new AuthenticationError(
@@ -523,6 +527,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', authError);
+        alert(`[DEBUG 3] authError: ${authError}`);
         throw authError;
       }
     },
@@ -551,6 +556,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         'Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format.'
       );
       logError('seizeAcceptConnection', error);
+      alert(`[DEBUG 2] error: ${error}`);
       throw error;
     }
     
@@ -618,6 +624,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useSeizeConnectContext = (): SeizeConnectContextType => {
   const context = useContext(SeizeConnectContext);
   if (!context) {
+    alert(`[DEBUG 1] context: ${context}`);
     throw new Error(
       "useSeizeConnectContext must be used within a SeizeConnectProvider"
     );

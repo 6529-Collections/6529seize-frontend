@@ -142,10 +142,8 @@ export async function initializeAppKit(
     wallets,
     adapterManager,
     isCapacitor,
-    appKitInitialized,
     maxRetries = DEFAULT_MAX_RETRIES,
     retryDelayMs = DEFAULT_RETRY_DELAY_MS,
-    initTimeoutMs = DEFAULT_INIT_TIMEOUT_MS
   } = config;
 
   const {
@@ -155,21 +153,7 @@ export async function initializeAppKit(
     validatePreconditions
   } = callbacks;
 
-  // Set timeout protection - FAIL-FAST after timeout
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    const timeoutId = setTimeout(() => {
-      const timeoutError = new AppKitTimeoutError(`AppKit initialization timed out after ${initTimeoutMs}ms`);
-      logErrorSecurely('[AppKitInitialization] Initialization timeout', timeoutError);
-      onToast({
-        message: 'Wallet initialization timed out. Please refresh and try again.',
-        type: "error",
-      });
-      reject(timeoutError);
-    }, initTimeoutMs);
 
-    // Return cleanup function
-    return () => clearTimeout(timeoutId);
-  });
 
   // Main initialization logic
   const initializationPromise = (async (): Promise<AppKitInitializationResult> => {
@@ -193,8 +177,7 @@ export async function initializeAppKit(
     return { adapter: newAdapter };
   })();
 
-  // Race between timeout and initialization
-  return await Promise.race([initializationPromise, timeoutPromise]);
+  return await initializationPromise;
 }
 
 /**
