@@ -221,7 +221,16 @@ const useSecureWalletInitialization = () => {
         try {
           removeAuthJwt();
         } catch (cleanupError) {
-          alert(`[DEBUG 1] cleanupError: ${cleanupError}`);
+          // Enhanced mobile debugging for cleanup errors during init
+          alert(
+            `🧹 CLEANUP ERROR DURING INIT\n\n` +
+            `Action: Remove invalid auth state\n` +
+            `Problem: Cleanup failed\n` +
+            `Cleanup Error: ${cleanupError instanceof Error ? cleanupError.message : cleanupError}\n\n` +
+            `Impact: Invalid auth may persist\n` +
+            `Time: ${new Date().toISOString()}\n\n` +
+            `Continuing with error creation...`
+          );
           // Log cleanup failure but continue with error throwing
           logError('auth_cleanup_during_init', new Error('Failed to clear invalid auth state', { cause: cleanupError }));
         }
@@ -232,7 +241,17 @@ const useSecureWalletInitialization = () => {
           undefined,
           debugAddress
         );
-        alert(`[DEBUG 2] initError: ${initError}`);
+        // Enhanced mobile debugging for initialization errors
+        alert(
+          `🔧 WALLET INIT VALIDATION ERROR\n\n` +
+          `Problem: Invalid address in storage\n` +
+          `Address Length: ${addressLength}\n` +
+          `Address Format: ${addressFormat}\n` +
+          `Debug Preview: ${debugAddress}\n\n` +
+          `Action: Cleared invalid auth state\n` +
+          `Next: User needs to reconnect wallet\n\n` +
+          `Full Error: ${initError.message}`
+        );
         logError('wallet_initialization', initError);
         setHasInitializationError(true);
         setInitializationError(initError);
@@ -245,7 +264,15 @@ const useSecureWalletInitialization = () => {
           'Unexpected error during wallet initialization',
           error
         );
-        alert(`[DEBUG 2] initError: ${initError}`);
+        // Enhanced mobile debugging for unexpected initialization errors
+        alert(
+          `⚠️ UNEXPECTED WALLET INIT ERROR\n\n` +
+          `Type: ${initError.name}\n` +
+          `Message: ${initError.message}\n\n` +
+          `Cause: ${error instanceof Error ? error.message : 'Unknown cause'}\n` +
+          `Time: ${new Date().toISOString()}\n\n` +
+          `This was an unexpected error during wallet initialization.`
+        );
         logError('wallet_initialization', initError);
         setHasInitializationError(true);
         setInitializationError(initError);
@@ -286,17 +313,48 @@ class WalletInitializationErrorBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): WalletInitializationErrorBoundaryState {
-    // Update state so the next render will show the fallback UI
-    alert(`[DEBUG 1] error: ${error}`);
+    // Capture detailed error info before React minifies it
+    const errorInfo = {
+      name: error.name,
+      message: error.message,
+      stack: error.stack?.substring(0, 500), // First 500 chars of stack
+      toString: error.toString(),
+      isMinified: error.message && error.message.includes('Minified React error'),
+      timestamp: new Date().toISOString()
+    };
+    
+    // Show comprehensive error alert for mobile debugging
+    alert(
+      `🚨 WALLET INIT ERROR\n\n` +
+      `Type: ${errorInfo.name}\n` +
+      `Message: ${errorInfo.message}\n\n` +
+      `Is Minified: ${errorInfo.isMinified}\n` +
+      `Time: ${errorInfo.timestamp}\n\n` +
+      `Stack (first 200 chars):\n${errorInfo.stack?.substring(0, 200) || 'No stack'}...\n\n` +
+      `Full toString: ${errorInfo.toString}`
+    );
+    
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error for monitoring
-    logError('wallet_initialization_boundary', error);
+    // Show detailed component stack info via alert for mobile debugging
+    const componentInfo = {
+      componentStack: errorInfo.componentStack?.substring(0, 300),
+      errorBoundaryLocation: 'WalletInitializationErrorBoundary in SeizeConnectContext',
+      timestamp: new Date().toISOString()
+    };
     
-    // Log additional context for debugging
-    console.error('WalletInitializationErrorBoundary caught an error:', error, errorInfo);
+    alert(
+      `📍 COMPONENT ERROR CONTEXT\n\n` +
+      `Location: ${componentInfo.errorBoundaryLocation}\n` +
+      `Time: ${componentInfo.timestamp}\n\n` +
+      `Component Stack (first 300 chars):\n${componentInfo.componentStack || 'No component stack'}\n\n` +
+      `This alert shows WHERE the error occurred in your component tree.`
+    );
+    
+    // Still log for any server-side monitoring
+    logError('wallet_initialization_boundary', error);
   }
 
   render() {
@@ -469,7 +527,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         'Failed to open wallet connection modal',
         error
       );
-      alert(`[DEBUG 1] connectionError: ${connectionError}`);
+      // Enhanced mobile debugging for connection errors
+      alert(
+        `🔌 WALLET CONNECTION ERROR\n\n` +
+        `Action: Opening wallet modal\n` +
+        `Error Type: ${connectionError.name}\n` +
+        `Message: ${connectionError.message}\n\n` +
+        `Cause: ${error instanceof Error ? error.message : 'Unknown'}\n` +
+        `Time: ${new Date().toISOString()}\n\n` +
+        `The wallet connection modal failed to open.`
+      );
       logError('seizeConnect', connectionError);
       throw connectionError;
     }
@@ -485,7 +552,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         error
       );
       logError('seizeDisconnect', walletError);
-      alert(`[DEBUG 1] walletError: ${walletError}`);
+      // Enhanced mobile debugging for disconnect errors
+      alert(
+        `🔓 WALLET DISCONNECT ERROR\n\n` +
+        `Action: Disconnecting wallet\n` +
+        `Error Type: ${walletError.name}\n` +
+        `Message: ${walletError.message}\n\n` +
+        `Original Error: ${error instanceof Error ? error.message : 'Unknown'}\n` +
+        `Time: ${new Date().toISOString()}\n\n` +
+        `Failed to disconnect wallet properly.`
+      );
       throw walletError;
     }
   }, [disconnect]);
@@ -502,7 +578,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', walletError);
-        alert(`[DEBUG 2] walletError: ${walletError}`);
+        // Enhanced mobile debugging for logout disconnect errors
+        alert(
+          `🚪 LOGOUT DISCONNECT ERROR\n\n` +
+          `Action: Disconnect during logout\n` +
+          `Error Type: ${walletError.name}\n` +
+          `Message: ${walletError.message}\n\n` +
+          `Security Risk: User may still have active wallet connection\n` +
+          `Result: Logout process halted for security\n\n` +
+          `Time: ${new Date().toISOString()}`
+        );
         
         // SECURITY: Throw AuthenticationError to prevent auth bypass
         throw new AuthenticationError(
@@ -528,7 +613,17 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', authError);
-        alert(`[DEBUG 3] authError: ${authError}`);
+        // Enhanced mobile debugging for auth cleanup errors
+        alert(
+          `🔑 AUTH CLEANUP ERROR\n\n` +
+          `Action: Clear auth after disconnect\n` +
+          `Error Type: ${authError.name}\n` +
+          `Message: ${authError.message}\n\n` +
+          `Status: Wallet disconnected successfully\n` +
+          `Problem: Failed to clear auth tokens\n` +
+          `Time: ${new Date().toISOString()}\n\n` +
+          `Auth state may be inconsistent.`
+        );
         throw authError;
       }
     },
@@ -557,7 +652,17 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         'Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format.'
       );
       logError('seizeAcceptConnection', error);
-      alert(`[DEBUG 2] error: ${error}`);
+      // Enhanced mobile debugging for address validation errors
+      alert(
+        `📧 ADDRESS VALIDATION ERROR\n\n` +
+        `Action: Accept wallet connection\n` +
+        `Problem: Invalid Ethereum address\n` +
+        `Address Length: ${addressLength}\n` +
+        `Address Format: ${addressFormat}\n\n` +
+        `Error: ${error.message}\n` +
+        `Time: ${new Date().toISOString()}\n\n` +
+        `Address must be valid EIP-55 format.`
+      );
       throw error;
     }
     
@@ -625,7 +730,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useSeizeConnectContext = (): SeizeConnectContextType => {
   const context = useContext(SeizeConnectContext);
   if (!context) {
-    alert(`[DEBUG 1] context: ${context}`);
+    // Enhanced mobile debugging for context hook errors
+    alert(
+      `🎯 CONTEXT HOOK ERROR\n\n` +
+      `Problem: useSeizeConnectContext called outside provider\n` +
+      `Context Value: ${context}\n` +
+      `Location: Check your component tree\n\n` +
+      `Fix: Wrap component with SeizeConnectProvider\n` +
+      `Time: ${new Date().toISOString()}`
+    );
     throw new Error(
       "useSeizeConnectContext must be used within a SeizeConnectProvider"
     );

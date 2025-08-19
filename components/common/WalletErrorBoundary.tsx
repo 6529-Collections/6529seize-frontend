@@ -31,8 +31,28 @@ export class WalletErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    // Update state so the next render will show the fallback UI
-    alert(`[DEBUG 1] error: ${error}`);
+    // Enhanced mobile debugging with full error details
+    const errorDetails = {
+      name: error.name,
+      message: error.message,
+      stack: error.stack?.substring(0, 400),
+      toString: error.toString(),
+      isMinified: error.message && error.message.includes('Minified React error'),
+      isWalletError: error instanceof WalletInitializationError,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Show comprehensive error alert for mobile debugging
+    alert(
+      `🚨 WALLET ERROR BOUNDARY\n\n` +
+      `Error Type: ${errorDetails.name}\n` +
+      `Is Wallet Error: ${errorDetails.isWalletError}\n` +
+      `Is Minified: ${errorDetails.isMinified}\n\n` +
+      `Message: ${errorDetails.message}\n\n` +
+      `Stack (first 200 chars):\n${errorDetails.stack?.substring(0, 200) || 'No stack'}...\n\n` +
+      `Time: ${errorDetails.timestamp}`
+    );
+    
     return {
       hasError: true,
       error,
@@ -46,33 +66,31 @@ export class WalletErrorBoundary extends Component<Props, State> {
       errorInfo,
     });
 
-    // Log the error for monitoring
+    // Enhanced mobile debugging for componentDidCatch
     const timestamp = new Date().toISOString();
     const isProduction = process.env.NODE_ENV === 'production';
     
     if (error instanceof WalletInitializationError) {
-      // Special handling for wallet initialization errors
-      const sanitizedErrorInfo = {
-        timestamp,
-        errorType: 'WalletInitializationError',
-        message: error.message,
-        addressAttempt: isProduction ? '***REDACTED***' : error.addressAttempt,
-        stack: isProduction ? undefined : error.stack,
-        componentStack: isProduction ? undefined : errorInfo.componentStack,
-      };
-      
-      console.error('[WALLET_ERROR_BOUNDARY] WalletInitializationError caught:', sanitizedErrorInfo);
+      // Special mobile alert for wallet initialization errors
+      alert(
+        `🔧 WALLET INIT ERROR CAUGHT\n\n` +
+        `Location: WalletErrorBoundary\n` +
+        `Type: WalletInitializationError\n` +
+        `Time: ${timestamp}\n\n` +
+        `Message: ${error.message}\n\n` +
+        `Address Attempt: ${isProduction ? '***REDACTED***' : error.addressAttempt}\n\n` +
+        `Component Stack (first 200 chars):\n${errorInfo.componentStack?.substring(0, 200) || 'No stack'}...`
+      );
     } else {
-      // General error handling
-      const sanitizedErrorInfo = {
-        timestamp,
-        errorType: error.name || 'Unknown',
-        message: error.message,
-        stack: isProduction ? undefined : error.stack,
-        componentStack: isProduction ? undefined : errorInfo.componentStack,
-      };
-      
-      console.error('[WALLET_ERROR_BOUNDARY] Error caught:', sanitizedErrorInfo);
+      // General mobile alert for other errors
+      alert(
+        `⚠️ GENERAL ERROR CAUGHT\n\n` +
+        `Location: WalletErrorBoundary\n` +
+        `Type: ${error.name || 'Unknown'}\n` +
+        `Time: ${timestamp}\n\n` +
+        `Message: ${error.message}\n\n` +
+        `Component Stack (first 200 chars):\n${errorInfo.componentStack?.substring(0, 200) || 'No stack'}...`
+      );
     }
 
     // Call custom error handler if provided
@@ -125,8 +143,47 @@ export class WalletErrorBoundary extends Component<Props, State> {
                   {this.state.error.stack && (
                     <pre>{this.state.error.stack}</pre>
                   )}
+                  {this.state.errorInfo?.componentStack && (
+                    <div>
+                      <strong>Component Stack:</strong>
+                      <pre>{this.state.errorInfo.componentStack}</pre>
+                    </div>
+                  )}
                 </details>
               )}
+              <button 
+                onClick={() => {
+                  // Enhanced mobile debugging button for wallet errors
+                  const debugInfo = {
+                    errorName: this.state.error?.name,
+                    errorMessage: this.state.error?.message,
+                    isWalletError: this.state.error instanceof WalletInitializationError,
+                    timestamp: new Date().toISOString(),
+                    componentStack: this.state.errorInfo?.componentStack?.substring(0, 300)
+                  };
+                  
+                  alert(
+                    `📊 DEBUG INFO FOR WALLET ERROR\n\n` +
+                    `Error Name: ${debugInfo.errorName}\n` +
+                    `Is Wallet Error: ${debugInfo.isWalletError}\n` +
+                    `Time: ${debugInfo.timestamp}\n\n` +
+                    `Full Message: ${debugInfo.errorMessage}\n\n` +
+                    `Component Stack: ${debugInfo.componentStack || 'None'}\n\n` +
+                    `Use this info to debug the wallet initialization issue.`
+                  );
+                }}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginLeft: '10px'
+                }}
+              >
+                Show Debug Info
+              </button>
             </div>
           </div>
         );
@@ -161,8 +218,45 @@ export class WalletErrorBoundary extends Component<Props, State> {
                 {this.state.error?.stack && (
                   <pre>{this.state.error.stack}</pre>
                 )}
+                {this.state.errorInfo?.componentStack && (
+                  <div>
+                    <strong>Component Stack:</strong>
+                    <pre>{this.state.errorInfo.componentStack}</pre>
+                  </div>
+                )}
               </details>
             )}
+            <button 
+              onClick={() => {
+                // Enhanced mobile debugging for general errors
+                const debugInfo = {
+                  errorName: this.state.error?.name,
+                  errorMessage: this.state.error?.message,
+                  timestamp: new Date().toISOString(),
+                  componentStack: this.state.errorInfo?.componentStack?.substring(0, 300)
+                };
+                
+                alert(
+                  `📊 DEBUG INFO FOR GENERAL ERROR\n\n` +
+                  `Error Name: ${debugInfo.errorName}\n` +
+                  `Time: ${debugInfo.timestamp}\n\n` +
+                  `Full Message: ${debugInfo.errorMessage}\n\n` +
+                  `Component Stack: ${debugInfo.componentStack || 'None'}\n\n` +
+                  `Use this info to debug the application error.`
+                );
+              }}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                marginLeft: '10px'
+              }}
+            >
+              Show Debug Info
+            </button>
           </div>
         </div>
       );
