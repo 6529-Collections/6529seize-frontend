@@ -79,6 +79,7 @@ export enum CommunityMembersSortOption {
 }
 
 export enum AboutSection {
+  API = "api",
   MEMES = "the-memes",
   MEMES_CALENDAR = "memes-calendar",
   MEME_LAB = "meme-lab",
