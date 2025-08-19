@@ -354,6 +354,8 @@ const getMobileErrorMessage = (error: unknown): string => {
     return 'This operation is not supported by your current wallet app.';
   }
 
+  alert(`[DEBUG 1] message: ${message}`);
+
   // Default fallback for mobile
   return 'Signing failed. Please try again or switch to a different wallet app if the issue persists.';
 };
