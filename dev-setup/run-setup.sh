@@ -287,6 +287,40 @@ EOF
 
 # ---------- Build & Run ----------
 
+ensure_java_for_openapi() {
+  # Install Java runtime if missing (needed by @openapitools/openapi-generator-cli)
+  if command -v java >/dev/null 2>&1; then
+    color green "Java detected: $(java -version 2>&1 | head -n1)"
+    return 0
+  fi
+
+  color yellow "Java not found. Installing OpenJDK 17 (headless)…"
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    if command -v brew >/dev/null 2>&1; then
+      brew install openjdk@17
+      # make java available on PATH for current shell
+      if [[ -d "/opt/homebrew/opt/openjdk@17/bin" ]]; then
+        export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+      elif [[ -d "/usr/local/opt/openjdk@17/bin" ]]; then
+        export PATH="/usr/local/opt/openjdk@17/bin:$PATH"
+      fi
+    else
+      color red "Homebrew not found. Please install Java (OpenJDK 17) manually, then re-run."
+      exit 1
+    fi
+  else
+    # Ubuntu/Debian
+    sudo apt-get update -y
+    sudo apt-get install -y openjdk-17-jre-headless
+  fi
+
+  if ! command -v java >/dev/null 2>&1; then
+    color red "Java installation failed. Install OpenJDK 17 and re-run."
+    exit 1
+  fi
+  color green "Java installed: $(java -version 2>&1 | head -n1)"
+}
+
 install_dependencies() {
   color yellow "Installing project dependencies…"
   if [[ -d "$REPO_ROOT/node_modules" ]]; then
@@ -433,6 +467,8 @@ setup_nginx_and_certbot_flow() {
   fi
 }
 
+
+
 # ---------- Main ----------
 
 main() {
@@ -447,6 +483,7 @@ main() {
   create_env_file
 
   # 2) Build & run app
+  ensure_java_for_openapi
   install_dependencies
   build_project
   start_pm2
