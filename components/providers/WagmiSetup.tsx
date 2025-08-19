@@ -16,7 +16,7 @@ import { AppKitInitializationError, AppKitValidationError, AppKitTimeoutError, A
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../auth/Auth';
 import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
-import { 
+import {
   initializeAppKit as initializeAppKitUtil,
   AppKitInitializationConfig,
   AppKitInitializationCallbacks
@@ -34,7 +34,6 @@ export default function WagmiSetup({
   const [isInitialized, setIsInitialized] = useState(false);
   const [appKitInitialized, setAppKitInitialized] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Retry tracking state for fail-fast behavior
   const [retryCount, setRetryCount] = useState(0);
@@ -135,7 +134,7 @@ export default function WagmiSetup({
       };
 
       const result = await initializeAppKitUtil(config, callbacks);
-      
+
       setCurrentAdapter(result.adapter);
       setIsInitialized(true);
 
@@ -184,93 +183,24 @@ export default function WagmiSetup({
     }
   };
 
-  const handleAppWalletUpdate = (wallets: AppWallet[]) => {
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Debounce updates
-    timeoutRef.current = setTimeout(async () => {
-      try {
-        const shouldRecreate = (adapterManager as AppKitAdapterManager).shouldRecreateAdapter(wallets);
-
-        if (shouldRecreate) {
-          // Use async/await instead of .catch() to prevent Promise chain issues
-          await initializeAppKit(wallets);
-        }
-      } catch (error) {
-        logErrorSecurely('[WagmiSetup] Failed to reinitialize AppKit during wallet update', error);
-        // Show user-friendly error message
-        const userMessage = sanitizeErrorForUser(error);
-        setToast({
-          message: userMessage,
-          type: "error",
-        });
-        // Error is handled - don't re-throw in timeout callback
-      }
-    }, 300);
-  };
-
   // Initialize only after mounting and when AppWallets are ready
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[WagmiSetup] useEffect triggered:', { isMounted, fetchingAppWallets, appWalletsLength: appWallets.length });
-    }
-    
+
+    alert(`[DEBUG 2] isMounted: ${isMounted}, fetchingAppWallets: ${fetchingAppWallets}, appWalletsLength: ${appWallets.length}`);
+
     if (isMounted && !fetchingAppWallets) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[WagmiSetup] Starting AppKit initialization with wallets:', appWallets.length);
-          }
           // Pass actual appWallets instead of empty array
           await initializeAppKit(appWallets);
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[WagmiSetup] AppKit initialization completed successfully');
-          }
         } catch (error) {
           logErrorSecurely('[WagmiSetup] Failed to initialize AppKit on mount', error);
-          console.error('[WagmiSetup] AppKit initialization failed - this is causing the loading screen to persist:', error);
-          
-          // CRITICAL: Don't let initialization failure block the app completely
-          // Set minimal adapter to allow app to continue
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('[WagmiSetup] Setting fallback state to unblock app');
-          }
-          // TODO: Consider setting fallback adapter here
         }
       })();
     }
   }, [isMounted, fetchingAppWallets, appWallets]);
 
-  // Listen for AppWallet changes
-  useEffect(() => {
-    appWalletsEventEmitter.on("update", handleAppWalletUpdate);
-
-    return () => {
-      appWalletsEventEmitter.off("update", handleAppWalletUpdate);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      try {
-        // Clear initialization timeout
-        if (initTimeoutRef.current) {
-          clearTimeout(initTimeoutRef.current);
-        }
-
-        adapterManager.cleanup();
-      } catch (error) {
-        logErrorSecurely('[WagmiSetup] Error during cleanup', error);
-        if (error instanceof AdapterCleanupError) {
-          logErrorSecurely('[WagmiSetup] Adapter cleanup failed', error);
-          // Don't throw here as this is in cleanup - just log the error
-        }
-      }
-    };
-  }, [adapterManager]);
 
   // Don't render anything until mounted (fixes SSR issues)
   if (!isMounted) {
