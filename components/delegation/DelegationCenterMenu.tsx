@@ -1,28 +1,28 @@
 "use client";
 
-import styles from "./Delegation.module.scss";
-import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
-import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { DELEGATION_CONTRACT } from "../../constants";
-import { sepolia } from "wagmi/chains";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
+import { Col, Container, Row, Toast, ToastContainer } from "react-bootstrap";
 import { useEnsName } from "wagmi";
+import { sepolia } from "wagmi/chains";
+import { DELEGATION_CONTRACT } from "../../constants";
 import {
   ANY_COLLECTION,
   GRADIENTS_COLLECTION,
   MEMES_COLLECTION,
   MEME_LAB_COLLECTION,
 } from "../../pages/delegation/[...section]";
-import DelegationCenterComponent from "./DelegationCenter";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import CollectionDelegationComponent from "./CollectionDelegation";
+import styles from "./Delegation.module.scss";
+import DelegationCenterComponent from "./DelegationCenter";
+import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
-import { useRouter } from "next/router";
-import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 export enum DelegationCenterSection {
   CENTER = "delegation-center",
@@ -294,11 +294,6 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 Wallet Checker
               </Col>
             </Row>
-            <Row className="pt-4 pb-2">
-              <Col>
-                <NFTDelegationLink />
-              </Col>
-            </Row>
             <Row className="pt-2 pb-2">
               <Col>
                 <EtherscanLink />
@@ -396,11 +391,6 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 <Container className="no-padding">
                   <Row className="pt-2 pb-2">
                     <Col>
-                      <NFTDelegationLink />
-                    </Col>
-                  </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
                       <EtherscanLink />
                     </Col>
                   </Row>
@@ -424,24 +414,6 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         />
       )}
     </Container>
-  );
-}
-
-function NFTDelegationLink() {
-  return (
-    <a
-      href="https://nftdelegation.com/"
-      target="_blank"
-      rel="noreferrer"
-      className={styles.delegationLink}>
-      <Image
-        src="/nftdelegation.jpg"
-        alt="nftdelegation"
-        width={30}
-        height={30}
-      />
-      <span>NFTDelegation.com</span>
-    </a>
   );
 }
 
