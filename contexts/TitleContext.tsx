@@ -1,14 +1,14 @@
 "use client";
 
+import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,
   useContext,
-  useState,
   useEffect,
-  useRef,
   useMemo,
+  useRef,
+  useState,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 
 type TitleContextType = {
   title: string;
@@ -58,6 +58,7 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
       "tools",
       "about",
       "delegation",
+      "memes-minting",
     ];
     if (!knownRoutes.includes(firstSegment)) {
       return `Profile | 6529.io`;

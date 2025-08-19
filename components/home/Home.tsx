@@ -1,44 +1,38 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import { NftPageStats } from "@/components/nftAttributes/NftStats";
+import MemeCalendarOverview from "@/components/schedule/MemeCalendarOverview";
+import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NextGenCollection } from "@/entities/INextgen";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NftOwner } from "@/entities/IOwner";
 import {
-  numberWithCommas,
-  fromGWEI,
-  printMintDate,
-  isEmptyObject,
   capitalizeEveryWord,
+  fromGWEI,
+  isEmptyObject,
+  numberWithCommas,
+  printMintDate,
 } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
-import { ManifoldClaim } from "@/hooks/useManifoldClaim";
-import { fetchUrl } from "@/services/6529api";
-import dynamic from "next/dynamic";
-import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import Link from "next/link";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
-import { NftPageStats } from "@/components/nftAttributes/NftStats";
-import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
-import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
-
-const NFTImage = dynamic(() => import("@/components/nft-image/NFTImage"), {
-  ssr: false,
-});
-
-const LatestActivity = dynamic(
-  () => import("@/components/latest-activity/LatestActivity"),
-  { ssr: false }
-);
+import useCapacitor from "@/hooks/useCapacitor";
+import { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import { fetchUrl } from "@/services/6529api";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import LatestActivity from "../latest-activity/LatestActivity";
+import NFTImage from "../nft-image/NFTImage";
 
 const MemePageMintCountdown = dynamic(
   () => import("@/components/the-memes/MemePageMintCountdown"),
@@ -137,7 +131,7 @@ export default function Home({
                   <span className={connectedProfile ? "tw-pb-[35px]" : ""}>
                     <NFTImage
                       nft={featuredNft}
-                      animation={true}
+                      animation
                       height={650}
                       balance={nftBalance}
                       showUnseized={!!connectedProfile}
@@ -149,7 +143,7 @@ export default function Home({
                     className={connectedProfile ? "tw-pb-[35px]" : ""}>
                     <NFTImage
                       nft={featuredNft}
-                      animation={true}
+                      animation
                       height={650}
                       balance={nftBalance}
                       showUnseized={!!connectedProfile}
@@ -249,7 +243,7 @@ export default function Home({
                   <MemePageMintCountdown
                     nft_id={featuredNft.id}
                     setClaim={setManifoldClaim}
-                    is_full_width={true}
+                    is_full_width
                   />
                 </Col>
               </Row>
@@ -281,8 +275,8 @@ export default function Home({
                   </tr>
                   <NftPageStats
                     nft={featuredNft}
-                    hide_mint_price={true}
-                    hide_hodl_rate={true}
+                    hide_mint_price
+                    hide_hodl_rate
                   />
                 </tbody>
               </Table>
@@ -300,6 +294,13 @@ export default function Home({
           </Col>
         </Row>
       </Container>
+      <Container className="py-5">
+        <Row>
+          <Col>
+            <MemeCalendarOverview displayTz="local" showViewAll />
+          </Col>
+        </Row>
+      </Container>
       {featuredNextgen && !isEmptyObject(featuredNextgen) && (
         <Container className="pt-3 pb-5">
           <Row>
@@ -313,7 +314,7 @@ export default function Home({
                   featuredNextgen.name
                 )}`}
                 className="tw-no-underline">
-                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#222] hover:tw-border-[#222]max-[800px]:tw-text-[12px]">
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
                   View Collection
                 </span>
               </Link>
