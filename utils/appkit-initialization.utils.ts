@@ -61,6 +61,7 @@ function createAdapter(
   try {
     return adapterManager.createAdapterWithCache(wallets);
   } catch (error) {
+    alert(`[DEBUG 4] error: ${error}`);
     if (error instanceof AdapterError || error instanceof AdapterCacheError) {
       logErrorSecurely('[AppKitInitialization] Adapter creation failed', error);
       const userMessage = sanitizeErrorForUser(error);
