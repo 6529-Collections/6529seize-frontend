@@ -27,6 +27,7 @@ export function createAppWalletConnector(
     if (walletClient) return walletClient;
 
     if (!decryptedPrivateKey) {
+      alert(`[DEBUG 1] No decrypted key found. Call connect() first.`);
       throw new Error("No decrypted key found. Call connect() first.");
     }
 
@@ -78,10 +79,12 @@ export function createAppWalletConnector(
     async setPassword(password: string): Promise<void> { // VOID RETURN - NO SILENT FAILURES
       // Input validation - fail fast
       if (!password || typeof password !== 'string') {
+        alert(`[DEBUG 2] Password is required and must be a string`);
         throw new InvalidPasswordError('Password is required and must be a string');
       }
       
       if (password.length < 8) {
+        alert(`[DEBUG 3] Password must be at least 8 characters long`);
         throw new InvalidPasswordError('Password must be at least 8 characters long');
       }
 
@@ -98,6 +101,7 @@ export function createAppWalletConnector(
         );
 
         if (!decryptedAddress) {
+          alert(`[DEBUG 4] Password decryption resulted in empty data`);
           throw new InvalidPasswordError('Password decryption resulted in empty data');
         }
 
@@ -106,9 +110,11 @@ export function createAppWalletConnector(
           const match = decryptedAddress.toLowerCase() === 
                        options.appWallet.address.toLowerCase();
           if (!match) {
+            alert(`[DEBUG 5] Password does not match wallet`);
             throw new InvalidPasswordError('Password does not match wallet');
           }
         } else if (!areEqualAddresses(decryptedAddress, options.appWallet.address)) {
+          alert(`[DEBUG 6] Password does not match wallet - address verification failed`);
           throw new InvalidPasswordError('Password does not match wallet - address verification failed');
         }
 
@@ -120,11 +126,13 @@ export function createAppWalletConnector(
         );
 
         if (!privateKey) {
+          alert(`[DEBUG 7] Private key decryption returned empty result`);
           throw new PrivateKeyDecryptionError('Private key decryption returned empty result');
         }
 
         // Validate private key format
         if (!privateKey.match(/^[0-9a-fA-F]{64}$/)) {
+          alert(`[DEBUG 8] Decrypted private key has invalid format`);
           throw new PrivateKeyDecryptionError('Decrypted private key has invalid format');
         }
 
@@ -137,10 +145,12 @@ export function createAppWalletConnector(
         
         // Re-throw our custom errors unchanged
         if (error instanceof WalletAuthenticationError) {
+          alert(`[DEBUG 9] Wallet authentication error, ${error.message}`);
           throw error;
         }
         
         // Wrap unexpected errors
+        alert(`[DEBUG 10] Unexpected error during password validation, ${error instanceof Error ? error.message : String(error)}`);
         throw new PrivateKeyDecryptionError(
           'Unexpected error during password validation',
           error
@@ -164,12 +174,14 @@ export function createAppWalletConnector(
       // Validate chainId
       const validChain = chains.find((c) => c.id === chainId);
       if (!validChain) {
+        alert(`[DEBUG 11] Chain ID ${chainId} is not supported. Supported chains: ${chains.map(c => c.id).join(', ')}`);
         throw new Error(`Chain ID ${chainId} is not supported. Supported chains: ${chains.map(c => c.id).join(', ')}`);
       }
 
       if (!decryptedPrivateKey) {
         const password = await requestPasswordModal();
         if (!password) {
+          alert(`[DEBUG 12] Password is required for wallet connection`);
           throw new InvalidPasswordError('Password is required for wallet connection');
         }
         
@@ -179,16 +191,19 @@ export function createAppWalletConnector(
 
       // Verify we have the decrypted key after password validation
       if (!decryptedPrivateKey) {
+        alert(`[DEBUG 13] Private key not available after password validation`);
         throw new PrivateKeyDecryptionError('Private key not available after password validation');
       }
 
       const client = await getOrCreateClient(chainId);
       if (!client.account?.address) {
+        alert(`[DEBUG 14] No valid local account found after decryption.`);
         throw new Error("No valid local account found after decryption.");
       }
 
       // Verify the account address matches the expected wallet address
       if (!areEqualAddresses(client.account.address, options.appWallet.address)) {
+        alert(`[DEBUG 15] Account address mismatch - potential security breach`);
         throw new WalletAuthenticationError('Account address mismatch - potential security breach');
       }
 
@@ -233,11 +248,15 @@ export function createAppWalletConnector(
     async switchChain({ chainId: newChainId }) {
       currentChainId = newChainId;
       const newChain = chains.find((c) => c.id === newChainId);
-      if (!newChain) throw new Error(`Chain with id ${newChainId} not found!`);
+      if (!newChain) {
+        alert(`[DEBUG 16] Chain with id ${newChainId} not found!`);
+        throw new Error(`Chain with id ${newChainId} not found!`);
+      }
 
       walletClient = undefined;
       const client = await getOrCreateClient(newChainId);
       if (!client.account?.address) {
+        alert(`[DEBUG 17] No valid local account found after decryption.`);
         throw new Error("No valid local account found after decryption.");
       }
 
