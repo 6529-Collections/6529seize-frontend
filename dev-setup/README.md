@@ -22,7 +22,7 @@ This repo includes `dev-setup/run-setup.sh` to bootstrap a fresh EC2 host for a 
 - **Region:** eu‑west‑1 (recommended)
 - **AMI:** Ubuntu 22.04 LTS
 - **Instance type:** t3.large (2 vCPU / 8 GB RAM)
-- **Disk:** 20 GB gp3
+- **Disk:** 30 GB gp3
 - **Security Group (inbound):** 22/tcp (SSH), 80/tcp (HTTP), 443/tcp (HTTPS)
 
 ---
@@ -38,7 +38,7 @@ Create an **A record** in the `6529.io` hosted zone **now**, pointing your dev s
 Example:
 
 ```
-prxtstaging.6529.io  →  54.12.34.56
+punk6529staging.6529.io  →  54.12.34.56
 ```
 
 Doing this **before** running the script lets Certbot succeed on the first pass.  

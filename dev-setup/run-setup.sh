@@ -119,10 +119,10 @@ sedi() {
 prompt_dev_slug_and_port() {
   exec 3</dev/tty || true
 
-  read -u 3 -r -p "Enter developer slug (e.g., prxt): " DEV_SLUG
+  read -u 3 -r -p "Enter developer slug (e.g., punk6529): " DEV_SLUG
   while [[ -z "${DEV_SLUG:-}" ]]; do
     color red "Slug is required."
-    read -u 3 -r -p "Enter developer slug (e.g., prxt): " DEV_SLUG
+    read -u 3 -r -p "Enter developer slug (e.g., punk6529): " DEV_SLUG
   done
 
   read -u 3 -r -p "Proxy to local port [default: 3001]: " DEV_PORT
@@ -376,7 +376,7 @@ install_nginx_and_certbot() {
 }
 
 create_nginx_vhost_http_only() {
-  local domain="$1"   # e.g., prxtstaging.6529.io
+  local domain="$1"   # e.g., punk6529staging.6529.io
   local port="$2"     # e.g., 3001
   local file="/etc/nginx/sites-available/${domain}.conf"
 
