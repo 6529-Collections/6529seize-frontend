@@ -3,7 +3,7 @@ import React from "react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => <img {...props} alt="test" />,
 }));
 
 jest.mock("../../../components/delegation/DelegationCenter", () => () => (
