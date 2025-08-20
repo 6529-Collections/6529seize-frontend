@@ -1,6 +1,6 @@
 /**
- * Seize API
- * This is the API interface description for the most commonly used operations in Seize API.  Some modifying endpoints require an authentication token.   We are in the process of documenting all Seize APIs.   If there is an API that you need, please ping us in Discord and we will aim to prioritize its documentation.
+ * 6529.io API
+ * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -23,6 +23,7 @@ export class ApiIdentity {
     'rep': number;
     'level': number;
     'tdh': number;
+    'tdh_rate': number;
     'consolidation_key': string;
     'display': string;
     'primary_wallet': string;
@@ -85,6 +86,12 @@ export class ApiIdentity {
             "baseName": "tdh",
             "type": "number",
             "format": "int65"
+        },
+        {
+            "name": "tdh_rate",
+            "baseName": "tdh_rate",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "consolidation_key",
