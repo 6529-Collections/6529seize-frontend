@@ -61,24 +61,24 @@ export class WalletErrorBoundary extends Component<Props, State> {
     }
 
     return (
-      <div className="flex items-center justify-center min-h-[200px] p-6">
-        <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <h3 className="text-lg font-semibold text-red-800 mb-3">
+      <div className="tw-flex tw-items-center tw-justify-center tw-min-h-[200px] tw-p-6">
+        <div className="tw-max-w-md tw-w-full tw-bg-red-50 tw-border tw-border-red-200 tw-rounded-lg tw-p-6 tw-text-center">
+          <h3 className="tw-text-lg tw-font-semibold tw-text-red-800 tw-mb-3">
             Connection Problem
           </h3>
-          <p className="text-red-700 mb-6">
+          <p className="tw-text-red-700 tw-mb-6">
             Something went wrong with your wallet connection.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="tw-flex tw-flex-col sm:tw-flex-row tw-gap-3 tw-justify-center">
             <button
               onClick={this.handleRetry}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="tw-px-4 tw-py-2 tw-bg-blue-600 tw-text-white tw-rounded-md hover:tw-bg-blue-700 tw-transition-colors"
             >
               Try Again
             </button>
             <button
               onClick={this.handleReset}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              className="tw-px-4 tw-py-2 tw-bg-red-600 tw-text-white tw-rounded-md hover:tw-bg-red-700 tw-transition-colors"
             >
               Clear Storage & Reload
             </button>
