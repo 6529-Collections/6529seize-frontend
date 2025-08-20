@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Crumb } from "../components/breadcrumb/Breadcrumb";
-import { BreadcrumbQueueItem } from "./breadcrumbs.types";
-import { buildStaticCrumbs } from "./breadcrumbs.utils";
 import {
   DYNAMIC_ROUTE_CONFIGS,
   DeterminedRouteInfo,
 } from "./breadcrumbs.config";
+import { BreadcrumbQueueItem } from "./breadcrumbs.types";
+import { buildStaticCrumbs } from "./breadcrumbs.utils";
 
 const determineRouteConfig = (
   routeSegments: readonly string[],
@@ -134,7 +134,26 @@ export const useBreadcrumbs = (): Crumb[] => {
     refetchOnWindowFocus: false,
   });
 
+  const normalizeCrumbs = (crumbs: Crumb[]): Crumb[] =>
+    crumbs.map((c) => {
+      const disp = c.display.toLowerCase();
+
+      // 1) Special caps
+      if (disp === "api") c = { ...c, display: "API" };
+
+      // 2) Force non-link for "Tools"
+      if (disp === "tools") {
+        // If your <Breadcrumb> renders a link only when `href` exists:
+        return { ...c, href: undefined as unknown as string };
+        // If you prefer an explicit flag, use:
+        // return { ...c, isLink: false } as Crumb & { isLink?: boolean };
+      }
+
+      return c;
+    });
+
   const finalCrumbs = useMemo(() => {
+    let crumbs: Crumb[];
     if ("config" in determinedRouteInfo && determinedRouteInfo.config) {
       const dynamicCrumbs = determinedRouteInfo.config.crumbBuilder(
         determinedRouteInfo.params,
@@ -143,10 +162,11 @@ export const useBreadcrumbs = (): Crumb[] => {
         pathSegments,
         activeQuery
       );
-      return [...baseCrumbs, ...dynamicCrumbs];
+      crumbs = [...baseCrumbs, ...dynamicCrumbs];
     } else {
-      return [...baseCrumbs, ...buildStaticCrumbs(pathSegments)];
+      crumbs = [...baseCrumbs, ...buildStaticCrumbs(pathSegments)];
     }
+    return normalizeCrumbs(crumbs);
   }, [
     baseCrumbs,
     determinedRouteInfo,

@@ -1,13 +1,14 @@
 "use client";
 
-import {AboutSection} from "@/enums";
-import {useRouter} from "next/navigation";
-import {useSetTitle} from "@/contexts/TitleContext";
-import {useCookieConsent} from "../cookies/CookieConsentContext";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { AboutSection } from "@/enums";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useRouter } from "next/navigation";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 // Section components
-import AboutHTML from "./AboutHTML";
+import { capitalizeEveryWord } from "@/helpers/Helpers";
+import { Col, Container, Row } from "react-bootstrap";
 import AboutApply from "./AboutApply";
 import AboutContactUs from "./AboutContactUs";
 import AboutCookiePolicy from "./AboutCookiePolicy";
@@ -15,6 +16,7 @@ import AboutCopyright from "./AboutCopyright";
 import AboutDataDecentral from "./AboutDataDecentral";
 import AboutGDRC1 from "./AboutGDRC1";
 import AboutGradients from "./AboutGradients";
+import AboutHTML from "./AboutHTML";
 import AboutLicense from "./AboutLicense";
 import AboutMemeLab from "./AboutMemeLab";
 import AboutMemes from "./AboutMemes";
@@ -27,13 +29,10 @@ import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTermsOfService from "./AboutTermsOfService";
-import {Col, Container, Row} from "react-bootstrap";
-import AboutApi from "@/components/about/AboutApi";
-import {capitalizeEveryWord} from "@/helpers/Helpers";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const router = useRouter();
-  const sectionTitle = section === AboutSection.API ? 'API' : capitalizeEveryWord(section.replaceAll("-", " "));
+  const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
   useSetTitle(`${sectionTitle} | About`);
 
   const setNewSection = (newSection: AboutSection) => {
@@ -84,8 +83,6 @@ export default function About({ section }: { readonly section: AboutSection }) {
         return <AboutHTML path="faq" title="FAQ" />;
       case AboutSection.ENS:
         return <AboutHTML path="ens" title="ENS" />;
-      case AboutSection.API:
-        return <AboutApi />
       default:
         return null;
     }
@@ -180,12 +177,6 @@ function AboutMenu({
 
       <hr className="tw-my-2" />
 
-    <MenuItem
-        section={AboutSection.API}
-        title="API"
-        setSection={setSection}
-        currentSection={currentSection}
-    />
       <MenuItem
         section={AboutSection.FAQ}
         title="FAQ"
