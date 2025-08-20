@@ -339,7 +339,6 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileRow("Groups", "/network/groups")}
                 {printMobileRow("NFT Activity", "/nft-activity")}
                 {printMobileHr()}
-                {printMobileHr()}
                 {printMobileSubheader("Metrics")}
                 {printMobileRow("Definitions", "/network/metrics")}
                 {printMobileRow("Network Stats", "/network/stats")}
@@ -414,6 +413,7 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileRow("Meme Accounting", "/meme-accounting")}
                 {printMobileRow("Meme Gas", "/meme-gas")}
                 {printMobileHr()}
+                {printMobileRow("API", "/tools/api")}
                 {printMobileRow("EMMA", "/emma")}
                 {printMobileRow("Block Finder", "/meme-blocks")}
                 {printMobileRow("Open Data", "/open-data")}
@@ -466,8 +466,6 @@ export default function Header(props: Readonly<Props>) {
                   "Gradients",
                   `/about/${AboutSection.GRADIENTS}`
                 )}
-                {printMobileHr()}
-                {printMobileRow("API", `/about/${AboutSection.API}`)}
                 {printMobileHr()}
                 {printMobileRow("GDRC1", `/about/${AboutSection.GDRC1}`)}
                 {printMobileHr()}
@@ -788,6 +786,12 @@ export default function Header(props: Readonly<Props>) {
                               <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
+                                  name: "API",
+                                  path: `/tools/api`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
                                   name: "EMMA",
                                   path: "/emma",
                                 }}
@@ -870,12 +874,6 @@ export default function Header(props: Readonly<Props>) {
                                   />
                                 </div>
                               </div>
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "API",
-                                  path: `/about/${AboutSection.API}`,
-                                }}
-                              />
                               <HeaderDesktopLink
                                 link={{
                                   name: "GDRC1",
