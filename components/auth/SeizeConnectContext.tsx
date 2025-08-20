@@ -136,103 +136,145 @@ const createWalletError = (
   );
 };
 
-// Secure wallet initialization hook that moves initialization logic from useState to useEffect
+// Address validation utilities
+interface AddressValidationResult {
+  isValid: boolean;
+  normalizedAddress?: string;
+  errorContext?: {
+    length: number;
+    format: 'hex_prefixed' | 'other';
+    debugAddress: string;
+  };
+}
+
+const isCapacitorPlatform = (): boolean => {
+  return typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.());
+};
+
+const validateStoredAddress = (storedAddress: string): AddressValidationResult => {
+  // Capacitor-specific validation (more lenient)
+  if (isCapacitorPlatform()) {
+    if (storedAddress.startsWith('0x') && storedAddress.length === 42) {
+      return {
+        isValid: true,
+        normalizedAddress: storedAddress.toLowerCase()
+      };
+    }
+  }
+
+  // Standard validation using viem
+  if (isAddress(storedAddress)) {
+    return {
+      isValid: true,
+      normalizedAddress: getAddress(storedAddress) // checksummed format
+    };
+  }
+
+  // Invalid address - prepare error context
+  const addressLength = storedAddress.length;
+  const addressFormat = storedAddress.startsWith('0x') ? 'hex_prefixed' : 'other';
+  const debugAddress = storedAddress.length >= 10 
+    ? storedAddress.slice(0, 10) + '...' 
+    : storedAddress;
+
+  return {
+    isValid: false,
+    errorContext: {
+      length: addressLength,
+      format: addressFormat,
+      debugAddress
+    }
+  };
+};
+
+// Initialization state machine
+type InitializationState = 'LOADING' | 'VALIDATING' | 'READY' | 'ERROR';
+
+// Initialization error handling utility
+const handleInitializationError = (
+  error: unknown,
+  errorContext?: AddressValidationResult['errorContext']
+): WalletInitializationError => {
+  if (errorContext) {
+    // Invalid address error
+    logSecurityEvent(
+      SecurityEventType.INVALID_ADDRESS_DETECTED,
+      createValidationEventContext(
+        'wallet_initialization',
+        false,
+        errorContext.length,
+        errorContext.format
+      )
+    );
+
+    // Clear invalid stored address
+    try {
+      removeAuthJwt();
+    } catch (cleanupError) {
+      logError('auth_cleanup_during_init', new Error(`Failed to clear invalid auth state: ${cleanupError}`));
+    }
+
+    const initError = new WalletInitializationError(
+      'Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.',
+      undefined,
+      errorContext.debugAddress
+    );
+    logError('wallet_initialization', initError);
+    return initError;
+  }
+
+  // Unexpected error
+  const initError = new WalletInitializationError(
+    'Unexpected error during wallet initialization',
+    error
+  );
+  logError('wallet_initialization', initError);
+  return initError;
+};
+
+// Simplified and robust wallet initialization hook
 const useSecureWalletInitialization = () => {
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(undefined);
-  const [hasInitializationError, setHasInitializationError] = useState(false);
+  const [initializationState, setInitializationState] = useState<InitializationState>('LOADING');
   const [initializationError, setInitializationError] = useState<Error | undefined>(undefined);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Perform secure initialization in useEffect to prevent application crashes
     const initializeWallet = async () => {
       try {
+        // LOADING → VALIDATING
+        setInitializationState('VALIDATING');
+        
+        // Step 1: Retrieve stored address
         const storedAddress: string | null = getWalletAddress();
 
-        // If no stored address, return undefined (legitimate case)
+        // Step 2: Handle no stored address (legitimate case)
         if (!storedAddress) {
           setConnectedAddress(undefined);
-          setIsInitialized(true);
+          setInitializationState('READY');
           return;
         }
 
-        // Check if we're in Capacitor for more lenient validation
-        const isCapacitor = typeof window !== 'undefined' &&
-          window.Capacitor?.isNativePlatform?.();
+        // Step 3: Validate stored address
+        const validationResult = validateStoredAddress(storedAddress);
 
-        if (isCapacitor) {
-          // Simplified validation for Capacitor
-          if (storedAddress.startsWith('0x') && storedAddress.length === 42) {
-            setConnectedAddress(storedAddress.toLowerCase());
-            setIsInitialized(true);
-            return;
-          }
+        if (validationResult.isValid && validationResult.normalizedAddress) {
+          // Step 4: Success - set valid address
+          setConnectedAddress(validationResult.normalizedAddress);
+          setInitializationState('READY');
+        } else {
+          // Step 4: Error - handle invalid address
+          const error = handleInitializationError(undefined, validationResult.errorContext);
+          setInitializationError(error);
+          setConnectedAddress(undefined);
+          setInitializationState('ERROR');
         }
-
-        // At this point, storedAddress is definitely a string (not null)
-        // Check if stored address is valid
-        if (isAddress(storedAddress)) {
-          // Valid address - return checksummed format
-          const checksummedAddress = getAddress(storedAddress);
-          setConnectedAddress(checksummedAddress);
-          setIsInitialized(true);
-          return;
-        }
-
-        // If stored address exists but is invalid, this is a critical security issue
-        // Store the address string before validation for error handling
-        // TypeScript type assertion needed due to complex type narrowing with viem isAddress
-        const invalidAddressString = storedAddress as string;
-
-        // Extract diagnostic data for logging
-        const addressLength = invalidAddressString.length;
-        const addressFormat = invalidAddressString.startsWith('0x') ? 'hex_prefixed' : 'other';
-        const debugAddress = invalidAddressString.length >= 10 ?
-          invalidAddressString.slice(0, 10) + '...' :
-          invalidAddressString;
-
-        // Log security event for monitoring
-        logSecurityEvent(
-          SecurityEventType.INVALID_ADDRESS_DETECTED,
-          createValidationEventContext(
-            'wallet_initialization',
-            false,
-            addressLength,
-            addressFormat
-          )
-        );
-
-        // Clear the invalid stored address immediately
-        try {
-          removeAuthJwt();
-        } catch (cleanupError) {
-          // Log cleanup failure but continue with error throwing
-          logError('auth_cleanup_during_init', new Error('Failed to clear invalid auth state', { cause: cleanupError }));
-        }
-
-        // Create initialization error to prevent silent authentication bypass
-        const initError = new WalletInitializationError(
-          'Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.',
-          undefined,
-          debugAddress
-        );
-        logError('wallet_initialization', initError);
-        setHasInitializationError(true);
-        setInitializationError(initError);
-        setConnectedAddress(undefined);
-        setIsInitialized(true);
 
       } catch (error) {
-        // Catch any unexpected errors during initialization
-        const initError = new WalletInitializationError(
-          'Unexpected error during wallet initialization',
-          error
-        );
-        logError('wallet_initialization', initError);
-        setHasInitializationError(true);
+        // Step 4: Error - handle unexpected errors
+        const initError = handleInitializationError(error);
         setInitializationError(initError);
         setConnectedAddress(undefined);
-        setIsInitialized(true);
+        setInitializationState('ERROR');
       }
     };
 
@@ -247,9 +289,10 @@ const useSecureWalletInitialization = () => {
   return {
     connectedAddress,
     setConnectedAddress: stableSetConnectedAddress,
-    hasInitializationError,
+    hasInitializationError: initializationState === 'ERROR',
     initializationError,
-    isInitialized
+    isInitialized: initializationState === 'READY' || initializationState === 'ERROR',
+    initializationState // Expose state for advanced use cases
   };
 };
 
