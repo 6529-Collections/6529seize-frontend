@@ -370,7 +370,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       logError('seizeConnect', connectionError);
       throw connectionError;
     }
-  }, [open, account, state]);
+  }, [open]); // FIXED: Removed account, state dependencies that caused infinite loop
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
     try {
@@ -414,7 +414,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         // If reconnect requested, delay after successful logout
         if (reconnect) {
           setTimeout(() => {
-            seizeConnect();
+            // Call open directly to avoid circular dependency with seizeConnect
+            try {
+              logSecurityEvent(
+                SecurityEventType.WALLET_CONNECTION_ATTEMPT,
+                createConnectionEventContext('seizeDisconnectAndLogout_reconnect')
+              );
+              open({ view: "Connect" });
+            } catch (openError) {
+              console.error('Failed to reopen wallet connection after logout:', openError);
+            }
           }, 100);
         }
       } catch (error: unknown) {
@@ -426,7 +435,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         throw authError;
       }
     },
-    [disconnect, seizeConnect, setConnectedAddress]
+    [disconnect, setConnectedAddress, open] // FIXED: Removed seizeConnect to break circular dependency
   );
 
   const seizeAcceptConnection = useCallback((address: string): void => {
