@@ -87,9 +87,36 @@ export class WalletErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoun
 
   /**
    * Determines whether to show development or production UI
+   * Includes special mobile debugging support for production
    */
   private isDevelopmentMode = (): boolean => {
-    return process.env.NODE_ENV === 'development';
+    // Standard development mode
+    if (process.env.NODE_ENV === 'development') {
+      return true;
+    }
+    
+    // Mobile production debugging support
+    // Enable detailed error display in production for mobile debugging
+    if (typeof window !== 'undefined') {
+      // Check for mobile debugging flag in localStorage
+      const enableMobileDebug = localStorage.getItem('ENABLE_MOBILE_ERROR_DEBUG') === 'true';
+      
+      // Check for Capacitor (mobile app environment)
+      const isCapacitor = window.Capacitor?.isNativePlatform?.();
+      
+      // Check for mobile user agent as fallback
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Enable debug mode if:
+      // 1. Mobile debug flag is set AND (device is mobile OR is Capacitor app)
+      // 2. OR if there's a special debug query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceDebug = urlParams.get('debug_errors') === 'true';
+      
+      return forceDebug || (enableMobileDebug && (isCapacitor || isMobile));
+    }
+    
+    return false;
   };
 
   render() {

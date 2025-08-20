@@ -74,6 +74,30 @@ export const ErrorRecoveryActions: React.FC<RecoveryActionsProps> = ({
     }
   };
 
+  const handleToggleMobileDebug = () => {
+    const currentValue = localStorage.getItem('ENABLE_MOBILE_ERROR_DEBUG');
+    const newValue = currentValue === 'true' ? 'false' : 'true';
+    localStorage.setItem('ENABLE_MOBILE_ERROR_DEBUG', newValue);
+    
+    if (newValue === 'true') {
+      alert('Mobile debug mode ENABLED. Refresh the page and trigger the error again to see detailed debug information.');
+    } else {
+      alert('Mobile debug mode DISABLED. Refresh the page to return to user-friendly error display.');
+    }
+  };
+
+  // Check if we should show the mobile debug toggle
+  const showMobileDebugToggle = () => {
+    if (typeof window === 'undefined') return false;
+    
+    // Show in production on mobile devices
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isCapacitor = window.Capacitor?.isNativePlatform?.();
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    return isProduction && (isCapacitor || isMobile);
+  };
+
   const buttonBaseStyle: React.CSSProperties = {
     padding: '12px 20px',
     border: 'none',
@@ -102,6 +126,14 @@ export const ErrorRecoveryActions: React.FC<RecoveryActionsProps> = ({
     ...buttonBaseStyle,
     backgroundColor: '#d32f2f',
     color: 'white'
+  };
+
+  const debugButtonStyle: React.CSSProperties = {
+    ...buttonBaseStyle,
+    backgroundColor: '#ff9800',
+    color: 'white',
+    fontSize: '12px',
+    padding: '8px 16px'
   };
 
   return (
@@ -140,6 +172,16 @@ export const ErrorRecoveryActions: React.FC<RecoveryActionsProps> = ({
       >
         Reset & Reload
       </button>
+      
+      {showMobileDebugToggle() && (
+        <button
+          onClick={handleToggleMobileDebug}
+          style={debugButtonStyle}
+          title="Toggle detailed error information for mobile debugging"
+        >
+          Debug Mode
+        </button>
+      )}
     </div>
   );
 };
