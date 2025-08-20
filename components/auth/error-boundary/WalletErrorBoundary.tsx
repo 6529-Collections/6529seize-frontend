@@ -1,144 +1,91 @@
-import React, { Component, ErrorInfo } from 'react';
-import { ErrorBoundaryProps, ErrorBoundaryState, ErrorDetails } from './types';
-import { UserErrorDisplay } from './UserErrorDisplay';
-import { DeveloperErrorPanel } from './DeveloperErrorPanel';
-import { sanitizeErrorMessage } from '../../../src/utils/security-logger';
-import { logError } from '../../../src/utils/security-logger';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { sanitizeErrorMessage, logError } from '../../../src/utils/security-logger';
+import { removeAuthJwt } from '../../../services/auth/auth.utils';
+
+interface Props {
+  children: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error: Error | null;
+}
 
 /**
- * Main error boundary component that catches React errors in wallet initialization
- * Provides environment-aware error display with sanitized data
+ * Simplified wallet error boundary with minimal UI and console-based debugging
+ * Provides essential error recovery without over-engineered complexity
  */
-export class WalletErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
+export class WalletErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      error: null, 
-      errorDetails: undefined 
-    };
+    this.state = { hasError: false, error: null };
   }
 
-  /**
-   * Creates sanitized error details from the caught error
-   */
-  private createSanitizedErrorDetails(error: Error): ErrorDetails {
-    return {
-      name: error.name,
-      message: sanitizeErrorMessage(error.message),
-      stack: error.stack ? sanitizeErrorMessage(error.stack) : undefined,
-      toString: sanitizeErrorMessage(error.toString()),
-      isMinified: !!(error.message && error.message.includes('Minified React error')),
-      timestamp: new Date().toISOString()
-    };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
-  /**
-   * Static method called when an error is caught
-   * Returns new state with sanitized error information
-   */
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Create sanitized error details immediately
-    const errorDetails: ErrorDetails = {
-      name: error.name,
-      message: sanitizeErrorMessage(error.message),
-      stack: error.stack ? sanitizeErrorMessage(error.stack) : undefined,
-      toString: sanitizeErrorMessage(error.toString()),
-      isMinified: !!(error.message && error.message.includes('Minified React error')),
-      timestamp: new Date().toISOString()
-    };
-    
-    return { 
-      hasError: true, 
-      error, 
-      errorDetails 
-    };
-  }
-
-  /**
-   * Called after an error has been caught
-   * Updates state with component stack and logs the error
-   */
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Update state with sanitized component stack information
-    this.setState(prevState => ({
-      ...prevState,
-      errorDetails: prevState.errorDetails ? {
-        ...prevState.errorDetails,
-        componentStack: errorInfo.componentStack ? 
-          sanitizeErrorMessage(errorInfo.componentStack) : undefined
-      } : undefined
-    }));
-    
-    // Log the error using the secure logging system
+    // Log detailed error information to console for debugging
+    console.error('🚨 Wallet Error Boundary Caught Error:', {
+      name: error.name,
+      message: sanitizeErrorMessage(error.message),
+      stack: error.stack ? sanitizeErrorMessage(error.stack) : undefined,
+      componentStack: errorInfo.componentStack ? sanitizeErrorMessage(errorInfo.componentStack) : undefined,
+      timestamp: new Date().toISOString(),
+      isMinified: !!(error.message && error.message.includes('Minified React error'))
+    });
+
+    // Log using the secure logging system
     logError('wallet_error_boundary', error);
   }
 
-  /**
-   * Retry handler - resets the error boundary state
-   */
   private handleRetry = () => {
-    this.setState({ 
-      hasError: false, 
-      error: null, 
-      errorDetails: undefined 
-    });
+    this.setState({ hasError: false, error: null });
   };
 
-  /**
-   * Determines whether to show development or production UI
-   * Includes special mobile debugging support for production
-   */
-  private isDevelopmentMode = (): boolean => {
-    // Standard development mode
-    if (process.env.NODE_ENV === 'development') {
-      return true;
+  private handleReset = async () => {
+    try {
+      removeAuthJwt();
+      localStorage.clear();
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to clear storage:', error);
+      window.location.reload();
     }
-    
-    // Mobile production debugging support
-    // Enable detailed error display in production for mobile debugging
-    if (typeof window !== 'undefined') {
-      // Check for mobile debugging flag in localStorage
-      const enableMobileDebug = localStorage.getItem('ENABLE_MOBILE_ERROR_DEBUG') === 'true';
-      
-      // Check for Capacitor (mobile app environment)
-      const isCapacitor = window.Capacitor?.isNativePlatform?.();
-      
-      // Check for mobile user agent as fallback
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      // Enable debug mode if:
-      // 1. Mobile debug flag is set AND (device is mobile OR is Capacitor app)
-      // 2. OR if there's a special debug query parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const forceDebug = urlParams.get('debug_errors') === 'true';
-      
-      return forceDebug || (enableMobileDebug && (isCapacitor || isMobile));
-    }
-    
-    return false;
   };
 
   render() {
-    // If no error, render children normally
-    if (!this.state.hasError || !this.state.errorDetails) {
+    if (!this.state.hasError) {
       return this.props.children;
     }
 
-    // Prepare props for error display components
-    const errorDisplayProps = {
-      errorDetails: this.state.errorDetails,
-      onRetry: this.handleRetry,
-      onReset: undefined, // Let ErrorRecoveryActions handle default reset
-      onCopyDetails: undefined // Let ErrorRecoveryActions handle copying
-    };
-
-    // Render appropriate error display based on environment
-    if (this.isDevelopmentMode()) {
-      return <DeveloperErrorPanel {...errorDisplayProps} />;
-    } else {
-      return <UserErrorDisplay {...errorDisplayProps} />;
-    }
+    return (
+      <div className="flex items-center justify-center min-h-[200px] p-6">
+        <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <h3 className="text-lg font-semibold text-red-800 mb-3">
+            Connection Problem
+          </h3>
+          <p className="text-red-700 mb-6">
+            Something went wrong with your wallet connection.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={this.handleRetry}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={this.handleReset}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              Clear Storage & Reload
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 }
 
