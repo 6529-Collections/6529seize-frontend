@@ -19,10 +19,10 @@ import { WalletInitializationError } from "../../src/errors/wallet";
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from "@reown/appkit/react";
 import { isAddress, getAddress } from "viem";
 import { SecurityEventType } from "../../src/types/security";
-import { 
-  logSecurityEvent, 
-  logError, 
-  createConnectionEventContext, 
+import {
+  logSecurityEvent,
+  logError,
+  createConnectionEventContext,
   createValidationEventContext
 } from "../../src/utils/security-logger";
 import { WalletErrorBoundary } from "./error-boundary";
@@ -63,25 +63,25 @@ export class AuthenticationError extends Error {
 interface SeizeConnectContextType {
   /** Current connected wallet address, undefined if not connected */
   address: string | undefined;
-  
+
   /** Name of the connected wallet (e.g. "MetaMask", "Trust Wallet") */
   walletName: string | undefined;
-  
+
   /** Icon URL of the connected wallet */
   walletIcon: string | undefined;
-  
+
   /** Whether the connected wallet is a Safe (Gnosis Safe) wallet */
   isSafeWallet: boolean;
-  
+
   /** Opens the wallet connection modal */
   seizeConnect: () => void;
-  
+
   /** 
    * Disconnects the current wallet connection
    * @throws {WalletDisconnectionError} When disconnection fails
    */
   seizeDisconnect: () => Promise<void>;
-  
+
   /** 
    * Disconnects wallet and clears authentication state
    * @param reconnect - Whether to automatically reopen connection modal after logout
@@ -89,28 +89,28 @@ interface SeizeConnectContextType {
    * @throws {AuthenticationError} When auth cleanup fails
    */
   seizeDisconnectAndLogout: (reconnect?: boolean) => Promise<void>;
-  
+
   /** 
    * Manually set the connected address (for internal use)
    * @param address - The wallet address to set as connected
    */
   seizeAcceptConnection: (address: string) => void;
-  
+
   /** Whether the connection modal is currently open */
   seizeConnectOpen: boolean;
-  
+
   /** Whether a wallet is currently connected to the app */
   isConnected: boolean;
-  
+
   /** Whether the user is authenticated with a wallet address */
   isAuthenticated: boolean;
-  
+
   /** Current connection state for better timing control */
   connectionState: 'disconnected' | 'connecting' | 'connected';
-  
+
   /** Whether there was an initialization error */
   hasInitializationError: boolean;
-  
+
   /** The initialization error if one occurred */
   initializationError: Error | undefined;
 }
@@ -125,10 +125,10 @@ const createWalletError = (
   operation: string,
   originalError: unknown
 ): WalletConnectionError | WalletDisconnectionError => {
-  const message = originalError instanceof Error 
-    ? originalError.message 
+  const message = originalError instanceof Error
+    ? originalError.message
     : `Unknown error during ${operation}`;
-  
+
   return new ErrorClass(
     `Failed to ${operation}: ${message}`,
     originalError,
@@ -148,18 +148,18 @@ const useSecureWalletInitialization = () => {
     const initializeWallet = async () => {
       try {
         const storedAddress: string | null = getWalletAddress();
-        
+
         // If no stored address, return undefined (legitimate case)
         if (!storedAddress) {
           setConnectedAddress(undefined);
           setIsInitialized(true);
           return;
         }
-        
+
         // Check if we're in Capacitor for more lenient validation
-        const isCapacitor = typeof window !== 'undefined' && 
-                           window.Capacitor?.isNativePlatform?.();
-        
+        const isCapacitor = typeof window !== 'undefined' &&
+          window.Capacitor?.isNativePlatform?.();
+
         if (isCapacitor) {
           // Simplified validation for Capacitor
           if (storedAddress.startsWith('0x') && storedAddress.length === 42) {
@@ -168,7 +168,7 @@ const useSecureWalletInitialization = () => {
             return;
           }
         }
-        
+
         // At this point, storedAddress is definitely a string (not null)
         // Check if stored address is valid
         if (isAddress(storedAddress)) {
@@ -178,19 +178,19 @@ const useSecureWalletInitialization = () => {
           setIsInitialized(true);
           return;
         }
-        
+
         // If stored address exists but is invalid, this is a critical security issue
         // Store the address string before validation for error handling
         // TypeScript type assertion needed due to complex type narrowing with viem isAddress
         const invalidAddressString = storedAddress as string;
-        
+
         // Extract diagnostic data for logging
         const addressLength = invalidAddressString.length;
         const addressFormat = invalidAddressString.startsWith('0x') ? 'hex_prefixed' : 'other';
-        const debugAddress = invalidAddressString.length >= 10 ? 
-          invalidAddressString.slice(0, 10) + '...' : 
+        const debugAddress = invalidAddressString.length >= 10 ?
+          invalidAddressString.slice(0, 10) + '...' :
           invalidAddressString;
-        
+
         // Log security event for monitoring
         logSecurityEvent(
           SecurityEventType.INVALID_ADDRESS_DETECTED,
@@ -201,7 +201,7 @@ const useSecureWalletInitialization = () => {
             addressFormat
           )
         );
-        
+
         // Clear the invalid stored address immediately
         try {
           removeAuthJwt();
@@ -209,7 +209,7 @@ const useSecureWalletInitialization = () => {
           // Log cleanup failure but continue with error throwing
           logError('auth_cleanup_during_init', new Error('Failed to clear invalid auth state', { cause: cleanupError }));
         }
-        
+
         // Create initialization error to prevent silent authentication bypass
         const initError = new WalletInitializationError(
           'Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.',
@@ -221,7 +221,7 @@ const useSecureWalletInitialization = () => {
         setInitializationError(initError);
         setConnectedAddress(undefined);
         setIsInitialized(true);
-        
+
       } catch (error) {
         // Catch any unexpected errors during initialization
         const initError = new WalletInitializationError(
@@ -239,9 +239,14 @@ const useSecureWalletInitialization = () => {
     initializeWallet();
   }, []);
 
+  // Stabilize setConnectedAddress to prevent unnecessary re-renders in consuming components
+  const stableSetConnectedAddress = useCallback((address: string | undefined) => {
+    setConnectedAddress(address);
+  }, []);
+
   return {
     connectedAddress,
-    setConnectedAddress,
+    setConnectedAddress: stableSetConnectedAddress,
     hasInitializationError,
     initializationError,
     isInitialized
@@ -292,9 +297,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (isAddress(account.address)) {
           const checksummedAddress = getAddress(account.address);
           setConnectedAddress(checksummedAddress);
-          
+
           // Use functional state update to prevent unnecessary re-renders
-          setConnectionState(currentState => 
+          setConnectionState(currentState =>
             currentState !== 'connected' ? 'connected' : currentState
           );
         } else {
@@ -309,9 +314,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
               addressStr?.startsWith('0x') ? 'hex_prefixed' : 'other'
             )
           );
-          
+
           setConnectedAddress(undefined);
-          setConnectionState(currentState => 
+          setConnectionState(currentState =>
             currentState !== 'disconnected' ? 'disconnected' : currentState
           );
         }
@@ -323,17 +328,17 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         } else {
           setConnectedAddress(undefined);
         }
-        
-        setConnectionState(currentState => 
+
+        setConnectionState(currentState =>
           currentState !== 'disconnected' ? 'disconnected' : currentState
         );
       } else if (account.status === 'connecting') {
-        setConnectionState(currentState => 
+        setConnectionState(currentState =>
           currentState !== 'connecting' ? 'connecting' : currentState
         );
       } else {
         // Default fallback
-        setConnectionState(currentState => 
+        setConnectionState(currentState =>
           currentState !== 'disconnected' ? 'disconnected' : currentState
         );
       }
@@ -354,9 +359,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
         createConnectionEventContext('seizeConnect')
       );
-      
+
       open({ view: "Connect" });
-      
+
       // Log successful modal opening
       logSecurityEvent(
         SecurityEventType.WALLET_MODAL_OPENED,
@@ -370,7 +375,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       logError('seizeConnect', connectionError);
       throw connectionError;
     }
-  }, [open]); // FIXED: Removed account, state dependencies that caused infinite loop
+  }, [open]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
     try {
@@ -398,19 +403,19 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', walletError);
-        
+
         // SECURITY: Throw AuthenticationError to prevent auth bypass
         throw new AuthenticationError(
           'Cannot complete logout: wallet disconnection failed. User may still have active wallet connection.',
           walletError
         );
       }
-      
+
       // Only proceed with auth cleanup after successful disconnect
       try {
         removeAuthJwt();
         setConnectedAddress(undefined);
-        
+
         // If reconnect requested, delay after successful logout
         if (reconnect) {
           setTimeout(() => {
@@ -435,7 +440,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         throw authError;
       }
     },
-    [disconnect, setConnectedAddress, open] // FIXED: Removed seizeConnect to break circular dependency
+    [disconnect, open] // FIXED: Removed setConnectedAddress (stable) and seizeConnect to break circular dependency
   );
 
   const seizeAcceptConnection = useCallback((address: string): void => {
@@ -454,14 +459,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           addressFormat
         )
       );
-      
+
       const error = new AuthenticationError(
         'Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format.'
       );
       logError('seizeAcceptConnection', error);
       throw error;
     }
-    
+
     // Log successful address validation with NO address data
     logSecurityEvent(
       SecurityEventType.ADDRESS_VALIDATION_SUCCESS,
@@ -470,11 +475,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         true
       )
     );
-    
+
     // Normalize address to checksummed format for consistency
     const checksummedAddress = getAddress(address);
     setConnectedAddress(checksummedAddress);
-  }, [setConnectedAddress]);
+  }, []); // setConnectedAddress is stable and doesn't need to be in dependencies
 
   const contextValue = useMemo((): SeizeConnectContextType => ({
     address: connectedAddress,
