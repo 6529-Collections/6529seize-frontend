@@ -30,7 +30,7 @@ const isSecurityLoggingEnabled = (): boolean => {
  * Sanitizes error messages to remove sensitive data
  * Removes wallet addresses, tokens, and other potential PII
  */
-const sanitizeErrorMessage = (message: string): string => {
+export const sanitizeErrorMessage = (message: string): string => {
   return message
     // Remove Ethereum addresses (0x followed by 40 hex chars)
     .replace(/0x[a-fA-F0-9]{40}/g, '0x***REDACTED***')

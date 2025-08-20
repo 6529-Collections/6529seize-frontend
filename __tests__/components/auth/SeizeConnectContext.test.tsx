@@ -1095,9 +1095,9 @@ describe('SeizeConnectContext Security Vulnerability Fix', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Wallet Initialization Error')).toBeInTheDocument();
-        expect(screen.getByText('Test initialization error')).toBeInTheDocument();
-        expect(screen.getByText('Clear Storage and Reload')).toBeInTheDocument();
+        expect(screen.getByText('Wallet Setup Problem')).toBeInTheDocument();
+        expect(screen.getByText(/We encountered an issue while setting up your wallet connection/)).toBeInTheDocument();
+        expect(screen.getByText('Reset & Reload')).toBeInTheDocument();
       });
     });
 
@@ -1113,14 +1113,14 @@ describe('SeizeConnectContext Security Vulnerability Fix', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Clear Storage and Reload')).toBeInTheDocument();
+        expect(screen.getByText('Reset & Reload')).toBeInTheDocument();
       });
 
       // The main test is that the error boundary shows correctly
       // and provides a recovery option - clicking it would reload in real use
-      expect(screen.getByText('Wallet Initialization Error')).toBeInTheDocument();
-      expect(screen.getByText(/There was an error initializing the wallet connection/)).toBeInTheDocument();
-      expect(screen.getByText('Generic error')).toBeInTheDocument();
+      expect(screen.getByText('Unexpected Error')).toBeInTheDocument();
+      expect(screen.getByText(/An unexpected error occurred with your wallet connection/)).toBeInTheDocument();
+      expect(screen.getByText('Copy Error Details')).toBeInTheDocument();
     });
   });
 

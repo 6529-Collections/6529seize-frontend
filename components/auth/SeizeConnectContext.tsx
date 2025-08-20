@@ -8,9 +8,6 @@ import React, {
   useMemo,
   useState,
   useRef,
-  ReactNode,
-  Component,
-  ErrorInfo,
 } from "react";
 
 import {
@@ -28,6 +25,7 @@ import {
   createConnectionEventContext, 
   createValidationEventContext
 } from "../../src/utils/security-logger";
+import { WalletErrorBoundary } from "./error-boundary";
 
 // Custom error types for better error handling
 export class WalletConnectionError extends Error {
@@ -138,19 +136,6 @@ const createWalletError = (
   );
 };
 
-// REMOVED: Old insecure logging functions replaced with secure logger from src/utils/security-logger.ts
-
-// Type guard for validating wallet addresses with EIP-55 checksum validation
-const isValidAddress = (address: unknown): address is string => {
-  if (typeof address !== 'string') {
-    return false;
-  }
-  
-  // Use viem's comprehensive address validation
-  // This includes EIP-55 checksum validation and format checking
-  return isAddress(address);
-};
-
 // Secure wallet initialization hook that moves initialization logic from useState to useEffect
 const useSecureWalletInitialization = () => {
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(undefined);
@@ -186,7 +171,7 @@ const useSecureWalletInitialization = () => {
         
         // At this point, storedAddress is definitely a string (not null)
         // Check if stored address is valid
-        if (isValidAddress(storedAddress)) {
+        if (isAddress(storedAddress)) {
           // Valid address - return checksummed format
           const checksummedAddress = getAddress(storedAddress);
           setConnectedAddress(checksummedAddress);
@@ -221,16 +206,6 @@ const useSecureWalletInitialization = () => {
         try {
           removeAuthJwt();
         } catch (cleanupError) {
-          // Enhanced mobile debugging for cleanup errors during init
-          alert(
-            `🧹 CLEANUP ERROR DURING INIT\n\n` +
-            `Action: Remove invalid auth state\n` +
-            `Problem: Cleanup failed\n` +
-            `Cleanup Error: ${cleanupError instanceof Error ? cleanupError.message : cleanupError}\n\n` +
-            `Impact: Invalid auth may persist\n` +
-            `Time: ${new Date().toISOString()}\n\n` +
-            `Continuing with error creation...`
-          );
           // Log cleanup failure but continue with error throwing
           logError('auth_cleanup_during_init', new Error('Failed to clear invalid auth state', { cause: cleanupError }));
         }
@@ -240,17 +215,6 @@ const useSecureWalletInitialization = () => {
           'Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.',
           undefined,
           debugAddress
-        );
-        // Enhanced mobile debugging for initialization errors
-        alert(
-          `🔧 WALLET INIT VALIDATION ERROR\n\n` +
-          `Problem: Invalid address in storage\n` +
-          `Address Length: ${addressLength}\n` +
-          `Address Format: ${addressFormat}\n` +
-          `Debug Preview: ${debugAddress}\n\n` +
-          `Action: Cleared invalid auth state\n` +
-          `Next: User needs to reconnect wallet\n\n` +
-          `Full Error: ${initError.message}`
         );
         logError('wallet_initialization', initError);
         setHasInitializationError(true);
@@ -263,15 +227,6 @@ const useSecureWalletInitialization = () => {
         const initError = new WalletInitializationError(
           'Unexpected error during wallet initialization',
           error
-        );
-        // Enhanced mobile debugging for unexpected initialization errors
-        alert(
-          `⚠️ UNEXPECTED WALLET INIT ERROR\n\n` +
-          `Type: ${initError.name}\n` +
-          `Message: ${initError.message}\n\n` +
-          `Cause: ${error instanceof Error ? error.message : 'Unknown cause'}\n` +
-          `Time: ${new Date().toISOString()}\n\n` +
-          `This was an unexpected error during wallet initialization.`
         );
         logError('wallet_initialization', initError);
         setHasInitializationError(true);
@@ -293,275 +248,6 @@ const useSecureWalletInitialization = () => {
   };
 };
 
-// Error boundary to catch initialization errors and prevent application crashes
-interface WalletInitializationErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-  errorDetails?: {
-    name: string;
-    message: string;
-    stack?: string;
-    toString: string;
-    isMinified: boolean;
-    timestamp: string;
-    componentStack?: string;
-  };
-}
-
-interface WalletInitializationErrorBoundaryProps {
-  children: ReactNode;
-}
-
-class WalletInitializationErrorBoundary extends Component<
-  WalletInitializationErrorBoundaryProps,
-  WalletInitializationErrorBoundaryState
-> {
-  constructor(props: WalletInitializationErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null, errorDetails: undefined };
-  }
-
-  static getDerivedStateFromError(error: Error): WalletInitializationErrorBoundaryState {
-    // Capture detailed error info before React minifies it
-    const errorDetails = {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      toString: error.toString(),
-      isMinified: !!(error.message && error.message.includes('Minified React error')),
-      timestamp: new Date().toISOString()
-    };
-    
-    // Brief alert to indicate error captured, details will be in UI
-    alert(
-      `🚨 WALLET INIT ERROR DETECTED\n\n` +
-      `Error: ${errorDetails.name}\n` +
-      `Minified: ${errorDetails.isMinified}\n\n` +
-      `Full details will be displayed in the error UI.`
-    );
-    
-    return { hasError: true, error, errorDetails };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Update state with component stack information
-    this.setState(prevState => ({
-      ...prevState,
-      errorDetails: prevState.errorDetails ? {
-        ...prevState.errorDetails,
-        componentStack: errorInfo.componentStack || undefined
-      } : undefined
-    }));
-    
-    // Brief alert to indicate component context captured
-    alert(
-      `📍 COMPONENT CONTEXT CAPTURED\n\n` +
-      `Location: WalletInitializationErrorBoundary\n` +
-      `Component stack added to error details.\n\n` +
-      `View full details in the error UI below.`
-    );
-    
-    // Still log for any server-side monitoring
-    logError('wallet_initialization_boundary', error);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // Fallback UI for initialization errors with comprehensive debugging
-      return (
-        <div style={{
-          padding: '20px',
-          border: '1px solid #ff4444',
-          borderRadius: '8px',
-          backgroundColor: '#fff5f5',
-          color: '#cc0000',
-          margin: '20px',
-          textAlign: 'left' as const,
-          maxHeight: '90vh',
-          overflow: 'auto'
-        }}>
-          <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>🚨 Wallet Initialization Error</h3>
-          <p style={{ textAlign: 'center', marginBottom: '20px' }}>
-            There was an error initializing the wallet connection. 
-            This may be due to corrupted storage data or a security issue.
-          </p>
-          
-          {/* Error Summary */}
-          <div style={{
-            backgroundColor: '#ffebee',
-            padding: '15px',
-            borderRadius: '6px',
-            marginBottom: '15px',
-            border: '1px solid #ffcdd2'
-          }}>
-            <h4 style={{ margin: '0 0 10px 0', color: '#d32f2f' }}>Error Summary</h4>
-            <p><strong>Type:</strong> {this.state.errorDetails?.name || this.state.error?.name || 'Unknown'}</p>
-            <p><strong>Time:</strong> {this.state.errorDetails?.timestamp || new Date().toISOString()}</p>
-            <p><strong>Is Minified React Error:</strong> {this.state.errorDetails?.isMinified ? 'Yes' : 'No'}</p>
-            <p><strong>Message:</strong></p>
-            <div style={{
-              backgroundColor: '#ffffff',
-              padding: '10px',
-              borderRadius: '4px',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              border: '1px solid #ddd',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word'
-            }}>
-              {this.state.errorDetails?.message || this.state.error?.message || 'No message available'}
-            </div>
-          </div>
-
-          {/* Stack Trace */}
-          {this.state.errorDetails?.stack && (
-            <div style={{
-              backgroundColor: '#fff3e0',
-              padding: '15px',
-              borderRadius: '6px',
-              marginBottom: '15px',
-              border: '1px solid #ffcc02'
-            }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#ef6c00' }}>Stack Trace</h4>
-              <div style={{
-                backgroundColor: '#ffffff',
-                padding: '10px',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                fontSize: '11px',
-                border: '1px solid #ddd',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                maxHeight: '200px',
-                overflow: 'auto'
-              }}>
-                {this.state.errorDetails.stack}
-              </div>
-            </div>
-          )}
-
-          {/* Component Stack */}
-          {this.state.errorDetails?.componentStack && (
-            <div style={{
-              backgroundColor: '#e8f5e8',
-              padding: '15px',
-              borderRadius: '6px',
-              marginBottom: '15px',
-              border: '1px solid #c8e6c9'
-            }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#2e7d32' }}>Component Stack</h4>
-              <div style={{
-                backgroundColor: '#ffffff',
-                padding: '10px',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                fontSize: '11px',
-                border: '1px solid #ddd',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                maxHeight: '150px',
-                overflow: 'auto'
-              }}>
-                {this.state.errorDetails.componentStack}
-              </div>
-            </div>
-          )}
-
-          {/* Error String Representation */}
-          {this.state.errorDetails?.toString && (
-            <div style={{
-              backgroundColor: '#f3e5f5',
-              padding: '15px',
-              borderRadius: '6px',
-              marginBottom: '20px',
-              border: '1px solid #e1bee7'
-            }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#7b1fa2' }}>Error toString()</h4>
-              <div style={{
-                backgroundColor: '#ffffff',
-                padding: '10px',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                border: '1px solid #ddd',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word'
-              }}>
-                {this.state.errorDetails.toString}
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <button
-              onClick={() => {
-                // Copy error details to clipboard if available
-                const errorInfo = {
-                  timestamp: this.state.errorDetails?.timestamp,
-                  type: this.state.errorDetails?.name,
-                  message: this.state.errorDetails?.message,
-                  isMinified: this.state.errorDetails?.isMinified,
-                  stack: this.state.errorDetails?.stack,
-                  componentStack: this.state.errorDetails?.componentStack,
-                  toString: this.state.errorDetails?.toString
-                };
-                
-                const errorText = JSON.stringify(errorInfo, null, 2);
-                
-                // Try to copy to clipboard, fallback to alert
-                if (navigator.clipboard) {
-                  navigator.clipboard.writeText(errorText).then(() => {
-                    alert('Error details copied to clipboard!');
-                  }).catch(() => {
-                    alert(`Error details:\n\n${errorText}`);
-                  });
-                } else {
-                  alert(`Error details:\n\n${errorText}`);
-                }
-              }}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#1976d2',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                marginRight: '10px'
-              }}
-            >
-              Copy Error Details
-            </button>
-            <button
-              onClick={() => {
-                // Clear local storage and reload
-                try {
-                  removeAuthJwt();
-                  localStorage.clear();
-                  window.location.reload();
-                } catch (error) {
-                  alert(`Failed to clear storage: ${error}`);
-                }
-              }}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#cc0000',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Clear Storage and Reload
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -601,30 +287,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Use debounced state update to prevent race conditions
     debounceTimeoutRef.current = setTimeout(() => {
-      // Add debugging for AppWallet infinite loop issue
-      const debugInfo = {
-        address: account.address,
-        isConnected: account.isConnected,
-        status: account.status,
-        walletName: walletInfo?.name,
-        currentConnectionState: connectionState
-      };
-      
-      // Only alert for AppWallet to avoid spam
-      if (walletInfo?.name && walletInfo.name.toLowerCase().includes('app')) {
-        alert(
-          `🔍 APPWALLET STATE CHECK\\n\\n` +
-          `Address: ${debugInfo.address ? 'Present' : 'None'}\\n` +
-          `IsConnected: ${debugInfo.isConnected}\\n` +
-          `Status: ${debugInfo.status}\\n` +
-          `Current State: ${debugInfo.currentConnectionState}\\n\\n` +
-          `This might reveal the infinite loop pattern.`
-        );
-      }
-      
       if (account.address && account.isConnected) {
         // Validate and normalize address to checksummed format
-        if (isValidAddress(account.address)) {
+        if (isAddress(account.address)) {
           const checksummedAddress = getAddress(account.address);
           setConnectedAddress(checksummedAddress);
           
@@ -652,7 +317,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } else if (account.isConnected === false) {
         const storedAddress = getWalletAddress();
-        if (storedAddress && isValidAddress(storedAddress)) {
+        if (storedAddress && isAddress(storedAddress)) {
           const checksummedAddress = getAddress(storedAddress);
           setConnectedAddress(checksummedAddress);
         } else {
@@ -702,16 +367,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         'Failed to open wallet connection modal',
         error
       );
-      // Enhanced mobile debugging for connection errors
-      alert(
-        `🔌 WALLET CONNECTION ERROR\n\n` +
-        `Action: Opening wallet modal\n` +
-        `Error Type: ${connectionError.name}\n` +
-        `Message: ${connectionError.message}\n\n` +
-        `Cause: ${error instanceof Error ? error.message : 'Unknown'}\n` +
-        `Time: ${new Date().toISOString()}\n\n` +
-        `The wallet connection modal failed to open.`
-      );
       logError('seizeConnect', connectionError);
       throw connectionError;
     }
@@ -727,16 +382,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         error
       );
       logError('seizeDisconnect', walletError);
-      // Enhanced mobile debugging for disconnect errors
-      alert(
-        `🔓 WALLET DISCONNECT ERROR\n\n` +
-        `Action: Disconnecting wallet\n` +
-        `Error Type: ${walletError.name}\n` +
-        `Message: ${walletError.message}\n\n` +
-        `Original Error: ${error instanceof Error ? error.message : 'Unknown'}\n` +
-        `Time: ${new Date().toISOString()}\n\n` +
-        `Failed to disconnect wallet properly.`
-      );
       throw walletError;
     }
   }, [disconnect]);
@@ -753,16 +398,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', walletError);
-        // Enhanced mobile debugging for logout disconnect errors
-        alert(
-          `🚪 LOGOUT DISCONNECT ERROR\n\n` +
-          `Action: Disconnect during logout\n` +
-          `Error Type: ${walletError.name}\n` +
-          `Message: ${walletError.message}\n\n` +
-          `Security Risk: User may still have active wallet connection\n` +
-          `Result: Logout process halted for security\n\n` +
-          `Time: ${new Date().toISOString()}`
-        );
         
         // SECURITY: Throw AuthenticationError to prevent auth bypass
         throw new AuthenticationError(
@@ -788,17 +423,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           error
         );
         logError('seizeDisconnectAndLogout', authError);
-        // Enhanced mobile debugging for auth cleanup errors
-        alert(
-          `🔑 AUTH CLEANUP ERROR\n\n` +
-          `Action: Clear auth after disconnect\n` +
-          `Error Type: ${authError.name}\n` +
-          `Message: ${authError.message}\n\n` +
-          `Status: Wallet disconnected successfully\n` +
-          `Problem: Failed to clear auth tokens\n` +
-          `Time: ${new Date().toISOString()}\n\n` +
-          `Auth state may be inconsistent.`
-        );
         throw authError;
       }
     },
@@ -809,9 +433,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     // Extract diagnostic data before validation check
     const addressLength = address.length;
     const addressFormat = address.startsWith('0x') ? 'hex_prefixed' : 'other';
-    const isValidAddr = isValidAddress(address);
 
-    if (!isValidAddr) {
+    if (!isAddress(address)) {
       // Log security event with NO address data
       logSecurityEvent(
         SecurityEventType.INVALID_ADDRESS_DETECTED,
@@ -827,17 +450,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         'Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format.'
       );
       logError('seizeAcceptConnection', error);
-      // Enhanced mobile debugging for address validation errors
-      alert(
-        `📧 ADDRESS VALIDATION ERROR\n\n` +
-        `Action: Accept wallet connection\n` +
-        `Problem: Invalid Ethereum address\n` +
-        `Address Length: ${addressLength}\n` +
-        `Address Format: ${addressFormat}\n\n` +
-        `Error: ${error.message}\n` +
-        `Time: ${new Date().toISOString()}\n\n` +
-        `Address must be valid EIP-55 format.`
-      );
       throw error;
     }
     
@@ -894,26 +506,17 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   return (
-    <WalletInitializationErrorBoundary>
+    <WalletErrorBoundary>
       <SeizeConnectContext.Provider value={contextValue}>
         {children}
       </SeizeConnectContext.Provider>
-    </WalletInitializationErrorBoundary>
+    </WalletErrorBoundary>
   );
 };
 
 export const useSeizeConnectContext = (): SeizeConnectContextType => {
   const context = useContext(SeizeConnectContext);
   if (!context) {
-    // Enhanced mobile debugging for context hook errors
-    alert(
-      `🎯 CONTEXT HOOK ERROR\n\n` +
-      `Problem: useSeizeConnectContext called outside provider\n` +
-      `Context Value: ${context}\n` +
-      `Location: Check your component tree\n\n` +
-      `Fix: Wrap component with SeizeConnectProvider\n` +
-      `Time: ${new Date().toISOString()}`
-    );
     throw new Error(
       "useSeizeConnectContext must be used within a SeizeConnectProvider"
     );
