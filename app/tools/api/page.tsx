@@ -91,7 +91,6 @@ export async function loginAndFetchFeed() {
                 className="tw-text-blue-500 tw-font-semibold">
                 https://api.6529.io/docs
               </a>
-              .
             </p>
 
             <p>
