@@ -4,14 +4,13 @@ import { WagmiProvider } from "wagmi";
 import { useEffect, useState, useMemo, useRef } from "react";
 import {
   AppWallet,
-  appWalletsEventEmitter,
   useAppWallets,
 } from "../app-wallets/AppWalletsContext";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { AppKitAdapterManager } from './AppKitAdapterManager';
 import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
-import { AdapterError, AdapterCacheError, AdapterCleanupError } from '@/src/errors/adapter';
+import { AdapterError, AdapterCacheError } from '@/src/errors/adapter';
 import { AppKitInitializationError, AppKitValidationError, AppKitTimeoutError, AppKitRetryError } from '@/src/errors/appkit-initialization';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../auth/Auth';
@@ -29,7 +28,7 @@ export default function WagmiSetup({
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
-  const { appWallets, fetchingAppWallets, appWalletsSupported } = useAppWallets();
+  const { appWallets, fetchingAppWallets } = useAppWallets();
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [appKitInitialized, setAppKitInitialized] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -209,7 +208,7 @@ export default function WagmiSetup({
     );
   }
 
-  if (!currentAdapter ) {
+  if (!currentAdapter) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
         <div className="text-center">

@@ -366,7 +366,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           const checksummedAddress = getAddress(account.address);
           
           // Only update if not already connected with same address
-          if (walletState.status !== 'connected' || (walletState.status === 'connected' && walletState.address !== checksummedAddress)) {
+          const isAlreadyConnected = walletState.status === 'connected' && walletState.address === checksummedAddress;
+          if (!isAlreadyConnected) {
             setConnected(checksummedAddress);
           }
         } else {
@@ -388,7 +389,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         const storedAddress = getWalletAddress();
         if (storedAddress && isAddress(storedAddress)) {
           const checksummedAddress = getAddress(storedAddress);
-          if (walletState.status !== 'connected' || (walletState.status === 'connected' && walletState.address !== checksummedAddress)) {
+          const isAlreadyConnected = walletState.status === 'connected' && walletState.address === checksummedAddress;
+          if (!isAlreadyConnected) {
             setConnected(checksummedAddress);
           }
         } else {
