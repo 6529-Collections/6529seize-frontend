@@ -106,7 +106,10 @@ interface SeizeConnectContextType {
   isAuthenticated: boolean;
 
   /** Current connection state for better timing control */
-  connectionState: 'disconnected' | 'connecting' | 'connected';
+  connectionState: 'initializing' | 'disconnected' | 'connecting' | 'connected' | 'error';
+
+  /** Unified wallet state machine for advanced consumers */
+  walletState: WalletState;
 
   /** Whether there was an initialization error */
   hasInitializationError: boolean;
@@ -187,8 +190,14 @@ const validateStoredAddress = (storedAddress: string): AddressValidationResult =
   };
 };
 
-// Initialization state machine
-type InitializationState = 'LOADING' | 'VALIDATING' | 'READY' | 'ERROR';
+// Unified Wallet State Machine - eliminates multiple state variables and inconsistencies
+type WalletState =
+  | { status: 'initializing' }
+  | { status: 'error'; error: Error }
+  | { status: 'disconnected' }
+  | { status: 'connecting' }
+  | { status: 'connected'; address: string };
+
 
 // Initialization error handling utility
 const handleInitializationError = (
@@ -232,25 +241,19 @@ const handleInitializationError = (
   return initError;
 };
 
-// Simplified and robust wallet initialization hook
-const useSecureWalletInitialization = () => {
-  const [connectedAddress, setConnectedAddress] = useState<string | undefined>(undefined);
-  const [initializationState, setInitializationState] = useState<InitializationState>('LOADING');
-  const [initializationError, setInitializationError] = useState<Error | undefined>(undefined);
+// Consolidated wallet state management hook with unified state machine
+const useConsolidatedWalletState = () => {
+  const [walletState, setWalletState] = useState<WalletState>({ status: 'initializing' });
 
   useEffect(() => {
     const initializeWallet = async () => {
-      try {
-        // LOADING → VALIDATING
-        setInitializationState('VALIDATING');
-        
+      try {        
         // Step 1: Retrieve stored address
         const storedAddress: string | null = getWalletAddress();
 
         // Step 2: Handle no stored address (legitimate case)
         if (!storedAddress) {
-          setConnectedAddress(undefined);
-          setInitializationState('READY');
+          setWalletState({ status: 'disconnected' });
           return;
         }
 
@@ -258,41 +261,61 @@ const useSecureWalletInitialization = () => {
         const validationResult = validateStoredAddress(storedAddress);
 
         if (validationResult.isValid && validationResult.normalizedAddress) {
-          // Step 4: Success - set valid address
-          setConnectedAddress(validationResult.normalizedAddress);
-          setInitializationState('READY');
+          // Step 4: Success - set connected state with valid address
+          setWalletState({ 
+            status: 'connected', 
+            address: validationResult.normalizedAddress 
+          });
         } else {
           // Step 4: Error - handle invalid address
           const error = handleInitializationError(undefined, validationResult.errorContext);
-          setInitializationError(error);
-          setConnectedAddress(undefined);
-          setInitializationState('ERROR');
+          setWalletState({ status: 'error', error });
         }
 
       } catch (error) {
         // Step 4: Error - handle unexpected errors
         const initError = handleInitializationError(error);
-        setInitializationError(initError);
-        setConnectedAddress(undefined);
-        setInitializationState('ERROR');
+        setWalletState({ status: 'error', error: initError });
       }
     };
 
     initializeWallet();
   }, []);
 
-  // Stabilize setConnectedAddress to prevent unnecessary re-renders in consuming components
-  const stableSetConnectedAddress = useCallback((address: string | undefined) => {
-    setConnectedAddress(address);
+  // State transition methods
+  const setConnecting = useCallback(() => {
+    setWalletState({ status: 'connecting' });
   }, []);
 
+  const setConnected = useCallback((address: string) => {
+    setWalletState({ status: 'connected', address });
+  }, []);
+
+  const setDisconnected = useCallback(() => {
+    setWalletState({ status: 'disconnected' });
+  }, []);
+
+  const setError = useCallback((error: Error) => {
+    setWalletState({ status: 'error', error });
+  }, []);
+
+  // Computed properties for backward compatibility
+  const connectedAddress = walletState.status === 'connected' ? walletState.address : undefined;
+  const hasInitializationError = walletState.status === 'error';
+  const initializationError = walletState.status === 'error' ? walletState.error : undefined;
+  const isInitialized = walletState.status !== 'initializing';
+
   return {
+    walletState,
     connectedAddress,
-    setConnectedAddress: stableSetConnectedAddress,
-    hasInitializationError: initializationState === 'ERROR',
+    setConnecting,
+    setConnected,
+    setDisconnected,
+    setError,
+    // Backward compatibility properties
+    hasInitializationError,
     initializationError,
-    isInitialized: initializationState === 'READY' || initializationState === 'ERROR',
-    initializationState // Expose state for advanced use cases
+    isInitialized
   };
 };
 
@@ -306,16 +329,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const state = useAppKitState();
   const { walletInfo } = useWalletInfo();
 
-  // Use secure initialization hook instead of vulnerable useState initializer
+  // Use consolidated wallet state management
   const {
+    walletState,
     connectedAddress,
-    setConnectedAddress,
+    setConnecting,
+    setConnected,
+    setDisconnected,
+    setError,
     hasInitializationError,
     initializationError,
     isInitialized
-  } = useSecureWalletInitialization();
-
-  const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  } = useConsolidatedWalletState();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -339,12 +364,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         // Validate and normalize address to checksummed format
         if (isAddress(account.address)) {
           const checksummedAddress = getAddress(account.address);
-          setConnectedAddress(checksummedAddress);
-
-          // Use functional state update to prevent unnecessary re-renders
-          setConnectionState(currentState =>
-            currentState !== 'connected' ? 'connected' : currentState
-          );
+          
+          // Only update if not already connected with same address
+          if (walletState.status !== 'connected' || (walletState.status === 'connected' && walletState.address !== checksummedAddress)) {
+            setConnected(checksummedAddress);
+          }
         } else {
           // Invalid address from wallet - log security event and disconnect
           const addressStr = account.address as string | undefined;
@@ -358,32 +382,29 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
             )
           );
 
-          setConnectedAddress(undefined);
-          setConnectionState(currentState =>
-            currentState !== 'disconnected' ? 'disconnected' : currentState
-          );
+          setDisconnected();
         }
       } else if (account.isConnected === false) {
         const storedAddress = getWalletAddress();
         if (storedAddress && isAddress(storedAddress)) {
           const checksummedAddress = getAddress(storedAddress);
-          setConnectedAddress(checksummedAddress);
+          if (walletState.status !== 'connected' || (walletState.status === 'connected' && walletState.address !== checksummedAddress)) {
+            setConnected(checksummedAddress);
+          }
         } else {
-          setConnectedAddress(undefined);
+          if (walletState.status !== 'disconnected') {
+            setDisconnected();
+          }
         }
-
-        setConnectionState(currentState =>
-          currentState !== 'disconnected' ? 'disconnected' : currentState
-        );
       } else if (account.status === 'connecting') {
-        setConnectionState(currentState =>
-          currentState !== 'connecting' ? 'connecting' : currentState
-        );
+        if (walletState.status !== 'connecting') {
+          setConnecting();
+        }
       } else {
         // Default fallback
-        setConnectionState(currentState =>
-          currentState !== 'disconnected' ? 'disconnected' : currentState
-        );
+        if (walletState.status !== 'disconnected') {
+          setDisconnected();
+        }
       }
     }, 50); // Small delay to debounce rapid changes
 
@@ -393,7 +414,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [account.address, account.isConnected, account.status, isInitialized]);
+  }, [account.address, account.isConnected, account.status, isInitialized, walletState, setConnected, setDisconnected, setConnecting]);
 
   const seizeConnect = useCallback((): void => {
     try {
@@ -457,7 +478,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       // Only proceed with auth cleanup after successful disconnect
       try {
         removeAuthJwt();
-        setConnectedAddress(undefined);
+        setDisconnected();
 
         // If reconnect requested, delay after successful logout
         if (reconnect) {
@@ -483,7 +504,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         throw authError;
       }
     },
-    [disconnect, open] // FIXED: Removed setConnectedAddress (stable) and seizeConnect to break circular dependency
+    [disconnect, open, setDisconnected] // FIXED: Use unified state transition
   );
 
   const seizeAcceptConnection = useCallback((address: string): void => {
@@ -521,8 +542,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Normalize address to checksummed format for consistency
     const checksummedAddress = getAddress(address);
-    setConnectedAddress(checksummedAddress);
-  }, []); // setConnectedAddress is stable and doesn't need to be in dependencies
+    setConnected(checksummedAddress);
+  }, [setConnected]);
 
   const contextValue = useMemo((): SeizeConnectContextType => ({
     address: connectedAddress,
@@ -536,7 +557,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     seizeConnectOpen: state.open,
     isConnected: account.isConnected,
     isAuthenticated: !!connectedAddress,
-    connectionState,
+    connectionState: walletState.status, // Unified state machine
+    walletState, // Expose unified state for advanced consumers
     hasInitializationError,
     initializationError,
   }), [
@@ -548,7 +570,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     seizeAcceptConnection,
     state.open,
     account.isConnected,
-    connectionState,
+    walletState,
     hasInitializationError,
     initializationError,
   ]);
