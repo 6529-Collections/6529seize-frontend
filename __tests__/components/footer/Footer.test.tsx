@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
 import Footer from "@/components/footer/Footer";
 import { AboutSection } from "@/enums";
+import { render, screen } from "@testing-library/react";
 
 describe("Footer", () => {
   it("renders social links with images", () => {
@@ -43,9 +43,10 @@ describe("Footer", () => {
       "href",
       `/about/${AboutSection.LICENSE}`
     );
-    expect(
-      screen.getByRole("link", { name: "API Documentation" })
-    ).toHaveAttribute("href", "https://api.6529.io/docs");
+    expect(screen.getByRole("link", { name: "API" })).toHaveAttribute(
+      "href",
+      "/tools/api"
+    );
     expect(screen.getByRole("link", { name: "Contact Us" })).toHaveAttribute(
       "href",
       `/about/${AboutSection.CONTACT_US}`

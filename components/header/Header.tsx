@@ -339,7 +339,6 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileRow("Groups", "/network/groups")}
                 {printMobileRow("NFT Activity", "/nft-activity")}
                 {printMobileHr()}
-                {printMobileHr()}
                 {printMobileSubheader("Metrics")}
                 {printMobileRow("Definitions", "/network/metrics")}
                 {printMobileRow("Network Stats", "/network/stats")}
