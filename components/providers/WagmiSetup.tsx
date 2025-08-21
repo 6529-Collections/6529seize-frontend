@@ -219,8 +219,8 @@ export default function WagmiSetup({
       ) => Promise<string>
     ): Connector | null => {
       const connector = createAppWalletConnector(
-        // Get chains from the current adapter - we need to ensure compatibility
-        currentAdapter.wagmiConfig.chains,
+        // Convert readonly chains to mutable array for compatibility
+        Array.from(currentAdapter.wagmiConfig.chains),
         { appWallet: wallet },
         () => requestPassword(wallet.address, wallet.address_hashed)
       );
