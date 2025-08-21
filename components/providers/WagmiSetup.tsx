@@ -158,14 +158,7 @@ export default function WagmiSetup({
 
   // Show loading state until fully initialized
   if (!isMounted || !currentAdapter) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
-        <div className="text-center">
-          <div className="spinner-border" role="status" aria-hidden="true"></div>
-          <div className="mt-2">Initializing...</div>
-        </div>
-      </div>
-    );
+    return null
   }
 
   return (
