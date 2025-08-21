@@ -577,14 +577,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     initializationError,
   ]);
 
-  // Don't render context until initialization is complete
-  if (!isInitialized) {
-    return (
-      <div style={{ padding: '20px', textAlign: 'center' as const }}>
-        <p>Initializing wallet connection...</p>
-      </div>
-    );
-  }
+
 
   return (
     <WalletErrorBoundary>

@@ -13,16 +13,3 @@ export class AppKitValidationError extends AppKitInitializationError {
   }
 }
 
-export class AppKitTimeoutError extends AppKitInitializationError {
-  constructor(message: string, cause?: unknown) {
-    super(`AppKit timeout: ${message}`, cause);
-    this.name = 'AppKitTimeoutError';
-  }
-}
-
-export class AppKitRetryError extends AppKitInitializationError {
-  constructor(message: string, public readonly retryCount: number, cause?: unknown) {
-    super(`AppKit retry failed after ${retryCount} attempts: ${message}`, cause);
-    this.name = 'AppKitRetryError';
-  }
-}
