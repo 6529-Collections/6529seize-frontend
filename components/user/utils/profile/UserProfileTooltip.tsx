@@ -96,6 +96,12 @@ export default function UserProfileTooltip({
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+            {formatNumberWithCommasOrDash(profile?.tdh_rate ?? 0)}
+          </span>
+          <span className="tw-text-sm tw-text-iron-400">TDH Rate</span>
+        </div>
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommasOrDash(profile?.rep ?? 0)}
           </span>
           <span className="tw-text-sm tw-text-iron-400">REP</span>
