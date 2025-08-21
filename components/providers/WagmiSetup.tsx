@@ -41,6 +41,13 @@ export default function WagmiSetup({
   // Memoize platform detection to avoid repeated calls
   const isCapacitor = useMemo(() => Capacitor.isNativePlatform(), []);
 
+  // Use the same adapter manager for both mobile and web
+  // AppKit will automatically handle the appropriate connectors
+  const adapterManager = useMemo(
+    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
+    [appWalletPasswordModal.requestPassword]
+  );
+
   // Fail-fast validation for essential requirements
   const validateEssentials = useCallback((): void => {
     if (!CW_PROJECT_ID) {
@@ -58,13 +65,6 @@ export default function WagmiSetup({
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  // Use the same adapter manager for both mobile and web
-  // AppKit will automatically handle the appropriate connectors
-  const adapterManager = useMemo(
-    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
-    [appWalletPasswordModal.requestPassword]
-  );
 
   // Prevent concurrent initialization attempts
   const [isInitializing, setIsInitializing] = useState(false);
@@ -145,7 +145,7 @@ export default function WagmiSetup({
           );
           return currentAdapter.wagmiConfig._internal.connectors.setup(connector);
         })
-        .filter((connector): connector is Connector => connector !== null);
+        .filter((connector) => connector !== null);
 
       // Get existing non-app-wallet connectors
       const existingConnectors = currentAdapter.wagmiConfig.connectors.filter(
