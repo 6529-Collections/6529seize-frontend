@@ -33,12 +33,6 @@ export default function WagmiSetup({
   const { setToast } = useAuth();
   const { appWallets } = useAppWallets();
   
-  // Memoize requestPassword function to prevent unnecessary re-renders
-  const requestPassword = useCallback(
-    (address: string, addressHashed: string) => 
-      appWalletPasswordModal.requestPassword(address, addressHashed),
-    [appWalletPasswordModal] // Use the whole object since requestPassword is stable within it
-  );
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -51,22 +45,10 @@ export default function WagmiSetup({
   // Use the same adapter manager for both mobile and web
   // AppKit will automatically handle the appropriate connectors
   const adapterManager = useMemo(
-    () => new AppKitAdapterManager(requestPassword),
-    [requestPassword]
+    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
+    [appWalletPasswordModal.requestPassword]
   );
 
-  // Fail-fast validation for essential requirements
-  const validateEssentials = useCallback((): void => {
-    if (!CW_PROJECT_ID) {
-      throw new AppKitValidationError('Internal API failed');
-    }
-    if (!VALIDATED_BASE_ENDPOINT) {
-      throw new AppKitValidationError('Internal API failed');
-    }
-    if (!adapterManager) {
-      throw new AppKitValidationError('Internal API failed');
-    }
-  }, [adapterManager]);
 
   // Handle client-side mounting for App Router
   useEffect(() => {
@@ -76,9 +58,12 @@ export default function WagmiSetup({
   // Prevent concurrent initialization attempts
   const [isInitializing, setIsInitializing] = useState(false);
 
-  // Create adapter with simplified configuration
+  // Create adapter with essential configuration only
   const createAdapterWithWallets = useCallback(async (wallets: AppWallet[]): Promise<WagmiAdapter> => {
-    validateEssentials();
+    // Basic validation - let util handle detailed validation
+    if (!CW_PROJECT_ID || !VALIDATED_BASE_ENDPOINT || !adapterManager) {
+      throw new AppKitValidationError('Internal API failed');
+    }
     
     const config: AppKitInitializationConfig = {
       wallets,
@@ -96,7 +81,7 @@ export default function WagmiSetup({
 
     const result = await initializeAppKitUtil(config, callbacks);
     return result.adapter;
-  }, [adapterManager, isCapacitor, setToast, validateEssentials]);
+  }, [adapterManager, isCapacitor, setToast]);
 
   // Initialize AppKit with fail-fast approach
   const initializeAppKit = useCallback(async (wallets: AppWallet[]): Promise<void> => {
@@ -156,7 +141,7 @@ export default function WagmiSetup({
           const connector = createAppWalletConnector(
             Array.from(currentAdapter.wagmiConfig.chains),
             { appWallet: wallet },
-            () => requestPassword(wallet.address, wallet.address_hashed)
+            () => appWalletPasswordModal.requestPassword(wallet.address, wallet.address_hashed)
           );
           return currentAdapter.wagmiConfig._internal.connectors.setup(connector);
         })
@@ -185,29 +170,16 @@ export default function WagmiSetup({
       });
       // Don't throw here - let the component continue but notify the user
     }
-  }, [currentAdapter, appWallets, requestPassword, setToast]);
+  }, [currentAdapter, appWallets, appWalletPasswordModal, setToast]);
 
-  // Don't render anything until mounted (fixes SSR issues)
-  if (!isMounted) {
+  // Show loading state until fully initialized
+  if (!isMounted || !currentAdapter) {
+    const message = !isMounted ? "Initializing..." : "Initializing wallet service...";
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
         <div className="text-center">
           <div className="spinner-border" role="status" aria-hidden="true"></div>
-          <div className="mt-2">Initializing...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Fallback if adapter is not ready
-  if (!currentAdapter) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
-        <div className="text-center">
-          <div className="spinner-border" role="status" aria-hidden="true"></div>
-          <div className="mt-2">
-            Initializing wallet service...
-          </div>
+          <div className="mt-2">{message}</div>
         </div>
       </div>
     );
