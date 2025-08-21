@@ -83,6 +83,7 @@ export default function WagmiSetup({
 
   // Handle client-side mounting for App Router
   useEffect(() => {
+    alert('[WagmiSetup] Component mounting - setting isMounted to true');
     setIsMounted(true);
   }, []);
 
@@ -190,33 +191,61 @@ export default function WagmiSetup({
 
   // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
+    alert(`[WagmiSetup] Initial mount check:
+- isMounted: ${isMounted}
+- currentAdapter: ${!!currentAdapter}
+- isInitializing: ${isInitializing}`);
+    
     if (isMounted && !currentAdapter && !isInitializing) {
+      alert('[WagmiSetup] Starting initial AppKit initialization with empty wallets');
+      
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
           // Initialize with empty wallets for immediate UI rendering
           await initializeAppKit([]);
+          alert('[WagmiSetup] Initial AppKit initialization completed');
         } catch (error) {
+          alert(`[WagmiSetup] Initial initialization failed: ${error instanceof Error ? error.message : String(error)}`);
           logErrorSecurely('[WagmiSetup] Failed to initialize AppKit on mount', error);
         }
       })();
+    } else {
+      alert('[WagmiSetup] Skipping initial initialization - conditions not met');
     }
   }, [isMounted, currentAdapter, isInitializing]);
 
   // Recreate adapter when appWallets change
   useEffect(() => {
+    // DEBUG: Alert wallet state changes
+    alert(`[WagmiSetup] Wallet update check:
+- currentAdapter: ${!!currentAdapter}
+- fetchingAppWallets: ${fetchingAppWallets}
+- appWallets.length: ${appWallets.length}
+- lastProcessed.length: ${lastProcessedWallets.current.length}`);
+    
     // Only recreate if wallets actually changed (prevent infinite loops)
     const walletsChanged = JSON.stringify(appWallets) !== JSON.stringify(lastProcessedWallets.current);
     
+    alert(`[WagmiSetup] Wallets changed: ${walletsChanged}`);
+    
     if (currentAdapter && !fetchingAppWallets && appWallets.length > 0 && walletsChanged) {
+      alert(`[WagmiSetup] Starting wallet update with ${appWallets.length} wallets`);
+      
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
           setIsUpdatingWallets(true);
           lastProcessedWallets.current = appWallets; // Update reference before async operation
+          
+          alert(`[WagmiSetup] Creating new adapter...`);
           const newAdapter = await createAdapterWithWallets(appWallets);
+          
+          alert(`[WagmiSetup] New adapter created successfully`);
           setCurrentAdapter(newAdapter);
+          
         } catch (error) {
+          alert(`[WagmiSetup] Error updating wallets: ${error instanceof Error ? error.message : String(error)}`);
           logErrorSecurely('[WagmiSetup] Failed to update AppKit with new wallets', error);
           // Reset reference on failure to allow retry
           lastProcessedWallets.current = [];
@@ -224,6 +253,8 @@ export default function WagmiSetup({
           setIsUpdatingWallets(false);
         }
       })();
+    } else {
+      alert(`[WagmiSetup] Skipping wallet update - conditions not met`);
     }
   }, [appWallets, fetchingAppWallets]); // Removed currentAdapter to prevent infinite loop
 
