@@ -76,7 +76,7 @@ export default function WagmiSetup({
   }, [adapterManager, isCapacitor]);
 
   // Initialize AppKit with fail-fast approach
-  const initializeAppKit = useCallback(async (wallets: AppWallet[]): Promise<void> => {
+  const initializeAppKit = useCallback((wallets: AppWallet[]) => {
     if (isInitializing) {
       throw new AppKitValidationError('Internal API failed');
     }
