@@ -33,18 +33,18 @@ export class WalletErrorBoundary extends Component<Props, State> {
       stack: error.stack ? sanitizeErrorMessage(error.stack) : undefined,
       componentStack: errorInfo.componentStack ? sanitizeErrorMessage(errorInfo.componentStack) : undefined,
       timestamp: new Date().toISOString(),
-      isMinified: !!(error.message && error.message.includes('Minified React error'))
+      isMinified: !!(error.message?.includes('Minified React error'))
     });
 
     // Log using the secure logging system
     logError('wallet_error_boundary', error);
   }
 
-  private handleRetry = () => {
+  private readonly handleRetry = () => {
     this.setState({ hasError: false, error: null });
   };
 
-  private handleReset = async () => {
+  private readonly handleReset = async () => {
     try {
       removeAuthJwt();
       localStorage.clear();

@@ -6,7 +6,7 @@ import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from '@/constants';
 import { AppKitAdapterManager } from '@/components/providers/AppKitAdapterManager';
 import { AppWallet } from '@/components/app-wallets/AppWalletsContext';
 import { AdapterError, AdapterCacheError } from '@/src/errors/adapter';
-import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
+import { logErrorSecurely } from '@/utils/error-sanitizer';
 
 // Configuration interface for AppKit initialization
 export interface AppKitInitializationConfig {

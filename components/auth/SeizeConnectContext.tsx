@@ -176,8 +176,8 @@ const validateStoredAddress = (storedAddress: string): AddressValidationResult =
   // Invalid address - prepare error context
   const addressLength = storedAddress.length;
   const addressFormat = storedAddress.startsWith('0x') ? 'hex_prefixed' : 'other';
-  const debugAddress = storedAddress.length >= 10 
-    ? storedAddress.slice(0, 10) + '...' 
+  const debugAddress = storedAddress.length >= 10
+    ? storedAddress.slice(0, 10) + '...'
     : storedAddress;
 
   return {
@@ -247,7 +247,7 @@ const useConsolidatedWalletState = () => {
 
   useEffect(() => {
     const initializeWallet = async () => {
-      try {        
+      try {
         // Step 1: Retrieve stored address
         const storedAddress: string | null = getWalletAddress();
 
@@ -262,9 +262,9 @@ const useConsolidatedWalletState = () => {
 
         if (validationResult.isValid && validationResult.normalizedAddress) {
           // Step 4: Success - set connected state with valid address
-          setWalletState({ 
-            status: 'connected', 
-            address: validationResult.normalizedAddress 
+          setWalletState({
+            status: 'connected',
+            address: validationResult.normalizedAddress
           });
         } else {
           // Step 4: Error - handle invalid address
@@ -336,7 +336,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setConnecting,
     setConnected,
     setDisconnected,
-    setError,
     hasInitializationError,
     initializationError,
     isInitialized
@@ -364,7 +363,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         // Validate and normalize address to checksummed format
         if (isAddress(account.address)) {
           const checksummedAddress = getAddress(account.address);
-          
+
           // Only update if not already connected with same address
           const isAlreadyConnected = walletState.status === 'connected' && walletState.address === checksummedAddress;
           if (!isAlreadyConnected) {
@@ -393,20 +392,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           if (!isAlreadyConnected) {
             setConnected(checksummedAddress);
           }
-        } else {
-          if (walletState.status !== 'disconnected') {
-            setDisconnected();
-          }
+        } else if (walletState.status !== 'disconnected') {
+          setDisconnected();
         }
       } else if (account.status === 'connecting') {
         if (walletState.status !== 'connecting') {
           setConnecting();
         }
-      } else {
-        // Default fallback
-        if (walletState.status !== 'disconnected') {
-          setDisconnected();
-        }
+      } else if (walletState.status !== 'disconnected') {
+        setDisconnected();
       }
     }, 50); // Small delay to debounce rapid changes
 
