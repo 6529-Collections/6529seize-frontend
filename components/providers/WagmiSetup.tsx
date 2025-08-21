@@ -30,8 +30,8 @@ export default function WagmiSetup({
   const { setToast } = useAuth();
   const { appWallets, fetchingAppWallets } = useAppWallets();
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
-  const [appKitInitialized, setAppKitInitialized] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isUpdatingWallets, setIsUpdatingWallets] = useState(false);
 
   // Retry tracking state for fail-fast behavior
   const [retryCount, setRetryCount] = useState(0);
@@ -96,6 +96,32 @@ export default function WagmiSetup({
   // Prevent concurrent initialization attempts
   const [isInitializing, setIsInitializing] = useState(false);
 
+  // Create adapter with current wallets - extracted for reusability
+  const createAdapterWithWallets = async (wallets: AppWallet[]): Promise<WagmiAdapter> => {
+    const config: AppKitInitializationConfig = {
+      wallets,
+      adapterManager: adapterManager as AppKitAdapterManager,
+      isCapacitor,
+      appKitInitialized: false, // Always treat as fresh initialization
+      maxRetries: MAX_RETRIES,
+      retryDelayMs: RETRY_DELAY_MS,
+      initTimeoutMs: INIT_TIMEOUT_MS
+    };
+
+    const callbacks: AppKitInitializationCallbacks = {
+      onToast: setToast,
+      onRetryUpdate: (count, lastFailure) => {
+        setRetryCount(count);
+        setLastFailureTime(lastFailure);
+      },
+      onAppKitInitialized: () => {}, // No longer needed since we recreate adapters
+      validatePreconditions: validateInitializationPreconditions
+    };
+
+    const result = await initializeAppKitUtil(config, callbacks);
+    return result.adapter;
+  };
+
   // Initialize AppKit with wallets - FAIL-FAST implementation with async/await and iterative retry
   const initializeAppKit = async (wallets: AppWallet[]): Promise<void> => {
     // Prevent concurrent initialization
@@ -111,29 +137,8 @@ export default function WagmiSetup({
         clearTimeout(initTimeoutRef.current);
       }
 
-      const config: AppKitInitializationConfig = {
-        wallets,
-        adapterManager: adapterManager as AppKitAdapterManager,
-        isCapacitor,
-        appKitInitialized,
-        maxRetries: MAX_RETRIES,
-        retryDelayMs: RETRY_DELAY_MS,
-        initTimeoutMs: INIT_TIMEOUT_MS
-      };
-
-      const callbacks: AppKitInitializationCallbacks = {
-        onToast: setToast,
-        onRetryUpdate: (count, lastFailure) => {
-          setRetryCount(count);
-          setLastFailureTime(lastFailure);
-        },
-        onAppKitInitialized: () => setAppKitInitialized(true),
-        validatePreconditions: validateInitializationPreconditions
-      };
-
-      const result = await initializeAppKitUtil(config, callbacks);
-
-      setCurrentAdapter(result.adapter);
+      const adapter = await createAdapterWithWallets(wallets);
+      setCurrentAdapter(adapter);
 
     } catch (error) {
       // Handle specific error types
@@ -180,20 +185,39 @@ export default function WagmiSetup({
     }
   };
 
-  // Initialize only after mounting and when AppWallets are ready
+  // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
-    if (isMounted && !fetchingAppWallets) {
+    if (isMounted && !currentAdapter) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
-          // Pass actual appWallets instead of empty array
-          await initializeAppKit(appWallets);
+          // Initialize with empty wallets for immediate UI rendering
+          await initializeAppKit([]);
         } catch (error) {
           logErrorSecurely('[WagmiSetup] Failed to initialize AppKit on mount', error);
         }
       })();
     }
-  }, [isMounted, fetchingAppWallets, appWallets]);
+  }, [isMounted]);
+
+  // Recreate adapter when appWallets change
+  useEffect(() => {
+    if (currentAdapter && !fetchingAppWallets && appWallets.length > 0) {
+      // Use IIFE pattern for async operations in useEffect
+      (async () => {
+        try {
+          setIsUpdatingWallets(true);
+          const newAdapter = await createAdapterWithWallets(appWallets);
+          setCurrentAdapter(newAdapter);
+        } catch (error) {
+          logErrorSecurely('[WagmiSetup] Failed to update AppKit with new wallets', error);
+          // Keep existing adapter on failure rather than breaking the app
+        } finally {
+          setIsUpdatingWallets(false);
+        }
+      })();
+    }
+  }, [appWallets, fetchingAppWallets, currentAdapter]);
 
 
   // Don't render anything until mounted (fixes SSR issues)
@@ -208,13 +232,32 @@ export default function WagmiSetup({
     );
   }
 
+  // Show brief updating indicator during wallet transitions (optional)
+  if (isUpdatingWallets) {
+    return (
+      <WagmiProvider config={currentAdapter!.wagmiConfig}>
+        <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
+          <div className="toast show" role="alert">
+            <div className="toast-body d-flex align-items-center">
+              <div className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+              Updating wallet configuration...
+            </div>
+          </div>
+        </div>
+        {children}
+        {appWalletPasswordModal.modal}
+      </WagmiProvider>
+    );
+  }
+
+  // This should rarely happen now since we initialize eagerly
   if (!currentAdapter) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
         <div className="text-center">
           <div className="spinner-border" role="status" aria-hidden="true"></div>
           <div className="mt-2">
-            Connecting to {isCapacitor ? 'mobile' : 'web'} wallet service...
+            Initializing wallet service...
           </div>
         </div>
       </div>
