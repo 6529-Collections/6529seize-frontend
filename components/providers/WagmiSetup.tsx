@@ -1,6 +1,6 @@
 "use client";
 
-import { Connector, WagmiProvider } from "wagmi";
+import { WagmiProvider } from "wagmi";
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
   AppWallet,
@@ -32,6 +32,13 @@ export default function WagmiSetup({
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
   const { appWallets } = useAppWallets();
+  
+  // Memoize requestPassword function to prevent unnecessary re-renders
+  const requestPassword = useCallback(
+    (address: string, addressHashed: string) => 
+      appWalletPasswordModal.requestPassword(address, addressHashed),
+    [appWalletPasswordModal] // Use the whole object since requestPassword is stable within it
+  );
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -44,8 +51,8 @@ export default function WagmiSetup({
   // Use the same adapter manager for both mobile and web
   // AppKit will automatically handle the appropriate connectors
   const adapterManager = useMemo(
-    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
-    [appWalletPasswordModal.requestPassword]
+    () => new AppKitAdapterManager(requestPassword),
+    [requestPassword]
   );
 
   // Fail-fast validation for essential requirements
@@ -128,11 +135,19 @@ export default function WagmiSetup({
         }
       })();
     }
-  }, [isMounted, currentAdapter, isInitializing, initializeAppKit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted, currentAdapter, isInitializing]); // initializeAppKit intentionally excluded to prevent loops
 
   // Inject wallet connectors dynamically using hooks (simplified approach)
   useEffect(() => {
     if (!currentAdapter) return;
+
+    // Check if wallets have actually changed to prevent unnecessary re-injection
+    const currentAddresses = new Set(appWallets.map(w => w.address));
+    const addressesEqual = processedWallets.current.size === currentAddresses.size &&
+      [...processedWallets.current].every(addr => currentAddresses.has(addr));
+    
+    if (addressesEqual) return;
 
     try {
       // Create connectors for current wallets
@@ -141,7 +156,7 @@ export default function WagmiSetup({
           const connector = createAppWalletConnector(
             Array.from(currentAdapter.wagmiConfig.chains),
             { appWallet: wallet },
-            () => appWalletPasswordModal.requestPassword(wallet.address, wallet.address_hashed)
+            () => requestPassword(wallet.address, wallet.address_hashed)
           );
           return currentAdapter.wagmiConfig._internal.connectors.setup(connector);
         })
@@ -159,7 +174,7 @@ export default function WagmiSetup({
       ]);
 
       // Update processed wallets tracking
-      processedWallets.current = new Set(appWallets.map(w => w.address));
+      processedWallets.current = currentAddresses;
 
     } catch (error) {
       logErrorSecurely('[WagmiSetup] Connector injection failed', error);
@@ -170,7 +185,7 @@ export default function WagmiSetup({
       });
       // Don't throw here - let the component continue but notify the user
     }
-  }, [currentAdapter, appWallets, appWalletPasswordModal, setToast]);
+  }, [currentAdapter, appWallets, requestPassword, setToast]);
 
   // Don't render anything until mounted (fixes SSR issues)
   if (!isMounted) {
