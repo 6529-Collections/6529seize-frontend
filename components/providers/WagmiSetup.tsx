@@ -145,7 +145,7 @@ export default function WagmiSetup({
     // Check if wallets have actually changed to prevent unnecessary re-injection
     const currentAddresses = new Set(appWallets.map(w => w.address));
     const addressesEqual = processedWallets.current.size === currentAddresses.size &&
-      [...processedWallets.current].every(addr => currentAddresses.has(addr));
+      Array.from(processedWallets.current).every(addr => currentAddresses.has(addr));
     
     if (addressesEqual) return;
 
