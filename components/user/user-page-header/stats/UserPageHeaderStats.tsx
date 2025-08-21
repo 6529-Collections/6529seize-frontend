@@ -15,7 +15,7 @@ export default function UserPageHeaderStats({
   const user = router.query.user as string;
   return (
     <div className="tw-mt-3">
-      <div className="tw-flex tw-gap-x-6">
+      <div className="tw-flex tw-gap-x-4 sm:tw-gap-x-6 tw-flex-wrap tw-gap-y-2">
         <Link
           href={`/${user}/collected`}
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1">
@@ -24,6 +24,16 @@ export default function UserPageHeaderStats({
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             TDH
+          </span>
+        </Link>
+        <Link
+          href={`/${user}/collected`}
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1">
+          <span className="tw-text-base tw-font-medium tw-text-iron-50">
+            {formatNumberWithCommas(profile.tdh_rate)}
+          </span>
+          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
+            TDH Rate
           </span>
         </Link>
         <Link
