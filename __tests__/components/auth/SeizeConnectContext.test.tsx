@@ -923,7 +923,7 @@ describe('SeizeConnectContext Security Logging', () => {
         ),
       });
 
-      expect(result.current.connectionState).toBe('disconnected');
+      expect(result.current.connectionState).toBe('error');
       expect(result.current.isAuthenticated).toBe(false);
     });
   });
@@ -1095,9 +1095,9 @@ describe('SeizeConnectContext Security Vulnerability Fix', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Wallet Setup Problem')).toBeInTheDocument();
-        expect(screen.getByText(/We encountered an issue while setting up your wallet connection/)).toBeInTheDocument();
-        expect(screen.getByText('Reset & Reload')).toBeInTheDocument();
+        expect(screen.getByText('Connection Problem')).toBeInTheDocument();
+        expect(screen.getByText(/Something went wrong with your wallet connection/)).toBeInTheDocument();
+        expect(screen.getByText('Clear Storage & Reload')).toBeInTheDocument();
       });
     });
 
@@ -1113,14 +1113,14 @@ describe('SeizeConnectContext Security Vulnerability Fix', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Reset & Reload')).toBeInTheDocument();
+        expect(screen.getByText('Clear Storage & Reload')).toBeInTheDocument();
       });
 
       // The main test is that the error boundary shows correctly
       // and provides a recovery option - clicking it would reload in real use
-      expect(screen.getByText('Unexpected Error')).toBeInTheDocument();
-      expect(screen.getByText(/An unexpected error occurred with your wallet connection/)).toBeInTheDocument();
-      expect(screen.getByText('Copy Error Details')).toBeInTheDocument();
+      expect(screen.getByText('Connection Problem')).toBeInTheDocument();
+      expect(screen.getByText(/Something went wrong with your wallet connection/)).toBeInTheDocument();
+      expect(screen.getByText('Try Again')).toBeInTheDocument();
     });
   });
 

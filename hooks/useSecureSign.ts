@@ -226,11 +226,23 @@ const executeWagmiSignature = async (
     };
   } catch (error) {
     // Handle user rejection specifically
-    if (error instanceof UserRejectedRequestError) {
-      return {
-        signature: null,
-        userRejected: true,
-      };
+    // Use multiple detection methods for robustness across different environments
+    try {
+      if ((typeof UserRejectedRequestError !== 'undefined' && error instanceof UserRejectedRequestError) || 
+          (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError')) {
+        return {
+          signature: null,
+          userRejected: true,
+        };
+      }
+    } catch {
+      // If instanceof check fails, fall back to name-based detection
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError') {
+        return {
+          signature: null,
+          userRejected: true,
+        };
+      }
     }
     throw error; // Re-throw for general error handling
   }
@@ -241,11 +253,23 @@ const executeWagmiSignature = async (
  */
 const classifySigningError = (error: unknown): SignatureResult => {
   // Handle user rejection (most common case)
-  if (error instanceof UserRejectedRequestError) {
-    return {
-      signature: null,
-      userRejected: true,
-    };
+  // Use multiple detection methods for robustness across different environments
+  try {
+    if ((typeof UserRejectedRequestError !== 'undefined' && error instanceof UserRejectedRequestError) || 
+        (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError')) {
+      return {
+        signature: null,
+        userRejected: true,
+      };
+    }
+  } catch {
+    // If instanceof check fails, fall back to name-based detection
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError') {
+      return {
+        signature: null,
+        userRejected: true,
+      };
+    }
   }
 
   // Handle custom errors we've defined (use name check for Jest compatibility)

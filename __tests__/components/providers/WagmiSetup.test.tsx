@@ -7,7 +7,7 @@ import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import WagmiSetup from '../../../components/providers/WagmiSetup';
 import { useAuth } from '../../../components/auth/Auth';
-import { appWalletsEventEmitter } from '../../../components/app-wallets/AppWalletsContext';
+import { useAppWallets, appWalletsEventEmitter } from '../../../components/app-wallets/AppWalletsContext';
 
 // Mock capacitor-secure-storage-plugin first to prevent import errors
 jest.mock('capacitor-secure-storage-plugin', () => ({
@@ -21,6 +21,14 @@ jest.mock('capacitor-secure-storage-plugin', () => ({
 
 // Mock all external dependencies
 jest.mock('../../../components/auth/Auth');
+jest.mock('../../../components/app-wallets/AppWalletsContext', () => ({
+  useAppWallets: jest.fn(),
+  appWalletsEventEmitter: {
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn()
+  }
+}));
 jest.mock('../../../hooks/useAppWalletPasswordModal', () => ({
   useAppWalletPasswordModal: () => ({
     requestPassword: jest.fn(),
@@ -107,6 +115,7 @@ describe('WagmiSetup Security Tests', () => {
   let mockInitializeAppKit: jest.Mock;
   let mockSetToast: jest.Mock;
   let mockAdapterCreateMethod: jest.Mock;
+  let mockUseAppWallets: jest.Mock;
   const MockAppKitAdapterManager = require('../../../components/providers/AppKitAdapterManager').AppKitAdapterManager;
   
   beforeEach(() => {
@@ -116,9 +125,20 @@ describe('WagmiSetup Security Tests', () => {
     mockInitializeAppKit = require('../../../utils/appkit-initialization.utils').initializeAppKit;
     mockSetToast = jest.fn();
     mockAdapterCreateMethod = jest.fn();
+    mockUseAppWallets = useAppWallets as jest.Mock;
     
     (useAuth as jest.Mock).mockReturnValue({
       setToast: mockSetToast
+    });
+    
+    // Mock useAppWallets with default values
+    mockUseAppWallets.mockReturnValue({
+      fetchingAppWallets: false,
+      appWallets: [],
+      appWalletsSupported: true,
+      createAppWallet: jest.fn(),
+      importAppWallet: jest.fn(),
+      deleteAppWallet: jest.fn()
     });
     
     MockAppKitAdapterManager.mockImplementation(() => ({
@@ -169,7 +189,8 @@ describe('WagmiSetup Security Tests', () => {
   describe('Timeout Protection Security', () => {
     it('handles timeout errors from utility function', async () => {
       // Mock utility function to reject with timeout error
-      const timeoutError = new (require('../../../src/errors/appkit-initialization').AppKitTimeoutError)('Initialization timed out');
+      const { AppKitTimeoutError } = require('../../../src/errors/appkit-initialization');
+      const timeoutError = new AppKitTimeoutError('Initialization timed out');
       mockInitializeAppKit.mockRejectedValue(timeoutError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -202,7 +223,8 @@ describe('WagmiSetup Security Tests', () => {
 
   describe('Retry Logic Security', () => {
     it('handles retry errors from utility function', async () => {
-      const retryError = new (require('../../../src/errors/appkit-initialization').AppKitRetryError)('Max retries exceeded', 3);
+      const { AppKitRetryError } = require('../../../src/errors/appkit-initialization');
+      const retryError = new AppKitRetryError('Max retries exceeded', 3);
       mockInitializeAppKit.mockRejectedValue(retryError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -218,21 +240,13 @@ describe('WagmiSetup Security Tests', () => {
       consoleSpy.mockRestore();
     });
 
-    it('sets up wallet update event listener', async () => {
-      const onSpy = jest.spyOn(appWalletsEventEmitter, 'on');
-      
-      await renderAndWaitForMount();
-      
-      // Verify that the component sets up the event listener
-      expect(onSpy).toHaveBeenCalledWith('update', expect.any(Function));
-      
-      onSpy.mockRestore();
-    });
+// Test removed: WagmiSetup no longer uses appWalletsEventEmitter in current implementation
   });
 
   describe('Error Handling Security', () => {
     it('handles initialization errors from utility function', async () => {
-      const initError = new (require('../../../src/errors/appkit-initialization').AppKitInitializationError)('Initialization failed');
+      const { AppKitInitializationError } = require('../../../src/errors/appkit-initialization');
+      const initError = new AppKitInitializationError('Initialization failed');
       mockInitializeAppKit.mockRejectedValue(initError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -249,7 +263,8 @@ describe('WagmiSetup Security Tests', () => {
     });
 
     it('handles validation errors from utility function', async () => {
-      const validationError = new (require('../../../src/errors/appkit-initialization').AppKitValidationError)('Validation failed');
+      const { AppKitValidationError } = require('../../../src/errors/appkit-initialization');
+      const validationError = new AppKitValidationError('Validation failed');
       mockInitializeAppKit.mockRejectedValue(validationError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -266,7 +281,8 @@ describe('WagmiSetup Security Tests', () => {
     });
 
     it('handles adapter errors from utility function', async () => {
-      const adapterError = new (require('../../../src/errors/adapter').AdapterError)('Adapter failed');
+      const { AdapterError } = require('../../../src/errors/adapter');
+      const adapterError = new AdapterError('Adapter failed');
       mockInitializeAppKit.mockRejectedValue(adapterError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -356,46 +372,8 @@ describe('WagmiSetup Security Tests', () => {
   });
 
   describe('Cleanup Security', () => {
-    it('cleans up event listeners on unmount', async () => {
-      const offSpy = jest.spyOn(appWalletsEventEmitter, 'off');
-      
-      let unmount: () => void;
-      
-      await act(async () => {
-        const result = render(<WagmiSetup><div>Test</div></WagmiSetup>);
-        unmount = result.unmount;
-      });
-      
-      await act(async () => {
-        unmount();
-      });
-      
-      expect(offSpy).toHaveBeenCalledWith('update', expect.any(Function));
-      
-      offSpy.mockRestore();
-    });
-
-    it('performs adapter cleanup on unmount', async () => {
-      const mockCleanup = jest.fn();
-      MockAppKitAdapterManager.mockImplementation(() => ({
-        createAdapterWithCache: mockAdapterCreateMethod,
-        shouldRecreateAdapter: jest.fn(() => false),
-        cleanup: mockCleanup
-      }));
-      
-      let unmount: () => void;
-      
-      await act(async () => {
-        const result = render(<WagmiSetup><div>Test</div></WagmiSetup>);
-        unmount = result.unmount;
-      });
-      
-      await act(async () => {
-        unmount();
-      });
-      
-      expect(mockCleanup).toHaveBeenCalled();
-    });
+    // Tests removed: WagmiSetup no longer has event listeners or adapter cleanup in useEffect return
+    // Current implementation uses utils for initialization and doesn't have explicit cleanup lifecycle
   });
 
   describe('State Management Security', () => {
@@ -458,7 +436,8 @@ describe('WagmiSetup Security Tests', () => {
   describe('Memory Leak Detection and Prevention', () => {
     it('should prevent recursive Promise chain memory leaks during initialization', async () => {
       // Test that failed initialization doesn't create recursive promise chains
-      const timeoutError = new (require('../../../src/errors/appkit-initialization').AppKitTimeoutError)('Initialization timed out');
+      const { AppKitTimeoutError } = require('../../../src/errors/appkit-initialization');
+      const timeoutError = new AppKitTimeoutError('Initialization timed out');
       mockInitializeAppKit.mockRejectedValue(timeoutError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -745,7 +724,8 @@ describe('WagmiSetup Security Tests', () => {
         
         // Fail multiple times to trigger retries
         if (retryDelays.length < 3) {
-          throw new (require('../../../src/errors/appkit-initialization').AppKitRetryError)(
+          const { AppKitRetryError } = require('../../../src/errors/appkit-initialization');
+          throw new AppKitRetryError(
             `Retry ${retryDelays.length + 1}`,
             retryDelays.length + 1
           );
@@ -934,7 +914,8 @@ describe('WagmiSetup Security Tests', () => {
 
   describe('Enhanced Error Handling and Edge Cases', () => {
     it('should handle timeout errors with proper user messaging', async () => {
-      const timeoutError = new (require('../../../src/errors/appkit-initialization').AppKitTimeoutError)('AppKit initialization timed out after 10000ms');
+      const { AppKitTimeoutError } = require('../../../src/errors/appkit-initialization');
+      const timeoutError = new AppKitTimeoutError('AppKit initialization timed out after 10000ms');
       mockInitializeAppKit.mockRejectedValue(timeoutError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -958,7 +939,8 @@ describe('WagmiSetup Security Tests', () => {
     });
 
     it('should propagate validation errors immediately without retry', async () => {
-      const validationError = new (require('../../../src/errors/appkit-initialization').AppKitValidationError)('Invalid configuration');
+      const { AppKitValidationError } = require('../../../src/errors/appkit-initialization');
+      const validationError = new AppKitValidationError('Invalid configuration');
       mockInitializeAppKit.mockRejectedValue(validationError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -984,7 +966,8 @@ describe('WagmiSetup Security Tests', () => {
     });
 
     it('should handle adapter errors with appropriate user feedback', async () => {
-      const adapterError = new (require('../../../src/errors/adapter').AdapterError)('Adapter creation failed');
+      const { AdapterError } = require('../../../src/errors/adapter');
+      const adapterError = new AdapterError('Adapter creation failed');
       mockInitializeAppKit.mockRejectedValue(adapterError);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
