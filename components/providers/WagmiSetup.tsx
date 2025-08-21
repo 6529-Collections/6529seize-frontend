@@ -96,6 +96,9 @@ export default function WagmiSetup({
   // Prevent concurrent initialization attempts
   const [isInitializing, setIsInitializing] = useState(false);
 
+  // Track last processed wallets to prevent unnecessary recreations
+  const lastProcessedWallets = useRef<AppWallet[]>([]);
+
   // Create adapter with current wallets - extracted for reusability
   const createAdapterWithWallets = async (wallets: AppWallet[]): Promise<WagmiAdapter> => {
     const config: AppKitInitializationConfig = {
@@ -187,7 +190,7 @@ export default function WagmiSetup({
 
   // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
-    if (isMounted && !currentAdapter) {
+    if (isMounted && !currentAdapter && !isInitializing) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
@@ -198,26 +201,31 @@ export default function WagmiSetup({
         }
       })();
     }
-  }, [isMounted]);
+  }, [isMounted, currentAdapter, isInitializing]);
 
   // Recreate adapter when appWallets change
   useEffect(() => {
-    if (currentAdapter && !fetchingAppWallets && appWallets.length > 0) {
+    // Only recreate if wallets actually changed (prevent infinite loops)
+    const walletsChanged = JSON.stringify(appWallets) !== JSON.stringify(lastProcessedWallets.current);
+    
+    if (currentAdapter && !fetchingAppWallets && appWallets.length > 0 && walletsChanged) {
       // Use IIFE pattern for async operations in useEffect
       (async () => {
         try {
           setIsUpdatingWallets(true);
+          lastProcessedWallets.current = appWallets; // Update reference before async operation
           const newAdapter = await createAdapterWithWallets(appWallets);
           setCurrentAdapter(newAdapter);
         } catch (error) {
           logErrorSecurely('[WagmiSetup] Failed to update AppKit with new wallets', error);
-          // Keep existing adapter on failure rather than breaking the app
+          // Reset reference on failure to allow retry
+          lastProcessedWallets.current = [];
         } finally {
           setIsUpdatingWallets(false);
         }
       })();
     }
-  }, [appWallets, fetchingAppWallets, currentAdapter]);
+  }, [appWallets, fetchingAppWallets]); // Removed currentAdapter to prevent infinite loop
 
 
   // Don't render anything until mounted (fixes SSR issues)
