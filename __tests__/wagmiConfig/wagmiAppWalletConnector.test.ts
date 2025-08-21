@@ -241,8 +241,8 @@ describe('wagmiAppWalletConnector', () => {
 
   describe('connector properties', () => {
     it('has correct icon URL based on wallet address', () => {
-      expect(connectorInstance.icon).toBe(`https://robohash.org/${mockAppWallet.address}.png?set=set2&size=64x64`);
-      expect(connectorInstance.iconUrl).toBe(`https://robohash.org/${mockAppWallet.address}.png?set=set2&size=64x64`);
+      expect(connectorInstance.icon).toBe(`https://robohash.org/${mockAppWallet.address}.png?size=64x64`);
+      expect(connectorInstance.iconUrl).toBe(`https://robohash.org/${mockAppWallet.address}.png?size=64x64`);
     });
 
     it('has correct ID based on wallet address', () => {

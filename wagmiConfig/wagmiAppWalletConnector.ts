@@ -52,7 +52,7 @@ export function createAppWalletConnector(
 
   return createConnector(({ emitter }) => ({
     get icon() {
-      return `https://robohash.org/${options.appWallet.address}.png?set=set2&size=64x64`;
+      return `https://robohash.org/${options.appWallet.address}.png?size=64x64`;
     },
     get id() {
       return options.appWallet.address;
@@ -68,7 +68,7 @@ export function createAppWalletConnector(
       return [APP_WALLET_CONNECTOR_TYPE];
     },
     get iconUrl() {
-      return `https://robohash.org/${options.appWallet.address}.png?set=set2&size=64x64`;
+      return `https://robohash.org/${options.appWallet.address}.png?size=64x64`;
     },
     get walletConnectId() {
       return undefined; // Not a WalletConnect connector
