@@ -31,7 +31,7 @@ import {
 import Download from "../download/Download";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { TDHMetrics } from "../../entities/ITDH";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import Pagination from "../pagination/Pagination";
@@ -70,6 +70,8 @@ interface Props {
 
 export default function LabPage(props: Readonly<Props>) {
   const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
@@ -105,43 +107,34 @@ export default function LabPage(props: Readonly<Props>) {
   useSetTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
 
   useEffect(() => {
-    if (router.isReady) {
-      setIsFullScreenSupported(fullScreenSupported());
-      let initialFocus = MEME_FOCUS.LIVE;
+    setIsFullScreenSupported(fullScreenSupported());
+    let initialFocus = MEME_FOCUS.LIVE;
 
-      const routerFocus = router.query.focus;
-      if (routerFocus) {
-        const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
-          (sd) => sd === routerFocus
-        );
-        if (resolvedRouterFocus) {
-          initialFocus = resolvedRouterFocus;
-        }
-      }
-      if (router.query.id) {
-        setNftId(router.query.id as string);
-        setActiveTab(initialFocus);
+    const routerFocus = searchParams.get("focus");
+    if (routerFocus) {
+      const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
+        (sd) => sd === routerFocus
+      );
+      if (resolvedRouterFocus) {
+        initialFocus = resolvedRouterFocus;
       }
     }
-  }, [router.isReady]);
+    const idParam = params?.id as string | undefined;
+    if (idParam) {
+      setNftId(idParam);
+      setActiveTab(initialFocus);
+    }
+  }, [params, searchParams]);
 
   useEffect(() => {
-    if (activeTab && router.isReady) {
-      let query: any = { id: nftId };
+    if (activeTab && nftId) {
+      const query: any = { id: nftId };
       if (activeTab) {
         query.focus = activeTab;
       }
-      if (router.query != query) {
-        router.replace(
-          {
-            query: query,
-          },
-          undefined,
-          { shallow: true }
-        );
-      }
+      router.replace(`?${new URLSearchParams(query).toString()}`);
     }
-  }, [activeTab, router.isReady]);
+  }, [activeTab, nftId, router]);
 
   useEffect(() => {
     if (nftId) {
@@ -240,11 +233,11 @@ export default function LabPage(props: Readonly<Props>) {
         setNftHistory(response);
       });
     }
-    if (router.isReady && nftId) {
+    if (nftId) {
       const initialUrlHistory = `${process.env.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
       fetchHistory(initialUrlHistory);
     }
-  }, [router.isReady, nftId]);
+  }, [nftId]);
 
   function printContent() {
     if (activeTab === MEME_FOCUS.ACTIVITY) {

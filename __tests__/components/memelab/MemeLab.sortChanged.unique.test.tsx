@@ -23,9 +23,7 @@ describe('sortChanged unique percent ex museum', () => {
       setNfts
     );
     expect(router.replace).toHaveBeenCalledWith(
-      { query: { sort: 'unique_percent_ex_museum', sort_dir: 'desc' } },
-      undefined,
-      { shallow: true }
+      "?sort=unique_percent_ex_museum&sort_dir=desc"
     );
     expect(setNfts).toHaveBeenLastCalledWith([{ id:2 }, { id:1 }]);
   });

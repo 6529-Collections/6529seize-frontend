@@ -60,23 +60,23 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     reject: jest.fn(),
   })),
 }));
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  useParams: jest.fn(),
 }));
 
-const { useRouter } = require("next/router");
+const { useRouter, useSearchParams, useParams } = require("next/navigation");
 const { fetchUrl, fetchAllPages } = require("@/services/6529api");
-jest.mock("next/router");
+jest.mock("next/navigation");
 jest.mock("@/services/6529api");
 
 beforeEach(() => {
   jest.clearAllMocks();
   process.env.API_ENDPOINT = "https://test.6529.io";
-  (useRouter as jest.Mock).mockReturnValue({
-    isReady: true,
-    query: { id: "1" },
-    replace: jest.fn(),
-  });
+  (useRouter as jest.Mock).mockReturnValue({ replace: jest.fn() });
+  (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+  (useParams as jest.Mock).mockReturnValue({ id: "1" });
 });
 
 function mockNftCalls(balance: number) {
@@ -192,11 +192,11 @@ describe("MemeLabPage", () => {
   });
 
   it("shows transaction history on your cards tab", async () => {
-    (useRouter as jest.Mock).mockReturnValue({
-      isReady: true,
-      query: { id: "1", focus: MEME_FOCUS.YOUR_CARDS },
-      replace: jest.fn(),
-    });
+    (useRouter as jest.Mock).mockReturnValue({ replace: jest.fn() });
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams({ focus: MEME_FOCUS.YOUR_CARDS })
+    );
+    (useParams as jest.Mock).mockReturnValue({ id: "1" });
     mockNftCalls(2);
     render(<LabPage wallets={["0xabc"]} />);
     await waitFor(() =>

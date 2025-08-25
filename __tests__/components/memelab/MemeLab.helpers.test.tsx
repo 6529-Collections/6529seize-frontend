@@ -17,16 +17,15 @@ jest.mock("../../../components/the-memes/TheMemes", () => ({
   printVolumeTypeDropdown: jest.fn(() => <div data-testid="volume-dropdown" />),
 }));
 
-const routerMock = (query: any) => ({ query, replace: jest.fn() } as any);
+const routerMock = () => ({ replace: jest.fn() } as any);
 
 describe("MemeLab helpers", () => {
   test("getInitialRouterValues resolves from router", () => {
-    const { initialSort, initialSortDir } = getInitialRouterValues(
-      routerMock({
-        sort: MemeLabSort.EDITION_SIZE,
-        sort_dir: SortDirection.DESC,
-      })
-    );
+    const params = new URLSearchParams({
+      sort: MemeLabSort.EDITION_SIZE,
+      sort_dir: SortDirection.DESC,
+    });
+    const { initialSort, initialSortDir } = getInitialRouterValues(params);
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);
     expect(initialSortDir).toBe(SortDirection.DESC);
   });
@@ -90,7 +89,7 @@ describe("MemeLab helpers", () => {
   });
 
   test("sortChanged sorts by edition size and updates router", () => {
-    const router = routerMock({});
+    const router = routerMock();
     const nfts: LabNFT[] = [
       {
         id: 2,
@@ -124,7 +123,9 @@ describe("MemeLab helpers", () => {
       undefined,
       setNfts
     );
-    expect(router.replace).toHaveBeenCalled();
+    expect(router.replace).toHaveBeenCalledWith(
+      "?sort=edition_size&sort_dir=asc"
+    );
     const sorted = [...nfts].sort((a, b) => a.supply - b.supply || a.id - b.id);
     expect(setNfts).toHaveBeenLastCalledWith(sorted);
   });

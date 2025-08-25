@@ -8,7 +8,6 @@ import {
 } from "../../../components/memelab/MemeLab";
 import { MemeLabSort } from "../../../enums";
 import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
-import { NextRouter } from "next/router";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -74,19 +73,15 @@ const nftMeta: LabExtendedData = {
 
 describe("MemeLab utilities", () => {
   it("parses router query for initial values", () => {
-    const router = {
-      query: { sort: 'hodlers', sort_dir: "DESC" },
-    } as unknown as NextRouter;
-    const { initialSortDir, initialSort } = getInitialRouterValues(router);
+    const params = new URLSearchParams({ sort: "hodlers", sort_dir: "DESC" });
+    const { initialSortDir, initialSort } = getInitialRouterValues(params);
     expect(initialSort).toBe(MemeLabSort.HODLERS);
     expect(initialSortDir).toBe("DESC");
   });
 
   it("falls back to defaults for invalid router values", () => {
-    const router = {
-      query: { sort: "bad", sort_dir: "bad" },
-    } as unknown as NextRouter;
-    const { initialSortDir, initialSort } = getInitialRouterValues(router);
+    const params = new URLSearchParams({ sort: "bad", sort_dir: "bad" });
+    const { initialSortDir, initialSort } = getInitialRouterValues(params);
     expect(initialSort).toBe(MemeLabSort.AGE);
     expect(initialSortDir).toBe("ASC");
   });

@@ -7,8 +7,8 @@ import { LabNFT, LabExtendedData, VolumeType } from '../../../entities/INFT';
 
 describe('MemeLab extra tests', () => {
   it('getInitialRouterValues falls back to defaults when query empty', () => {
-    const router: any = { query: {} };
-    const res = getInitialRouterValues(router);
+    const params = new URLSearchParams();
+    const res = getInitialRouterValues(params);
     expect(res.initialSort).toBe(MemeLabSort.AGE);
     expect(res.initialSortDir).toBe(SortDirection.ASC);
   });

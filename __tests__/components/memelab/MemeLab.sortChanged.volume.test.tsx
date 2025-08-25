@@ -12,7 +12,7 @@ describe('sortChanged volume sorting', () => {
     ];
     const setNfts = jest.fn();
     sortChanged(router, MemeLabSort.VOLUME, SortDirection.DESC, VolumeType.DAYS_7, nfts, [] as any, undefined, setNfts);
-    expect(router.replace).toHaveBeenCalledWith({ query: { sort: 'volume', sort_dir: 'desc' } }, undefined, { shallow: true });
+    expect(router.replace).toHaveBeenCalledWith("?sort=volume&sort_dir=desc");
     expect(setNfts).toHaveBeenLastCalledWith([nfts[1], nfts[0]]);
   });
 });

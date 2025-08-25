@@ -7,7 +7,7 @@ import ElementColumns from "@/app/element_category/columns/page";
 import ElementSections from "@/app/element_category/sections/page";
 import EmmaPlan from "@/app/emma/plans/[id]/page";
 import Museum from "@/app/museum/page";
-import MemeLabDistribution from "@/pages/meme-lab/[id]/distribution";
+import MemeLabDistribution from "@/app/meme-lab/[id]/distribution/page";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -32,6 +32,7 @@ jest.mock("next/navigation", () => ({
     replace: jest.fn(),
   }),
   useSearchParams: () => ({ get: () => "1" }),
+  useParams: () => ({}),
 }));
 jest.mock("react-use", () => ({ useInterval: jest.fn() }));
 
@@ -39,6 +40,9 @@ jest.mock(
   "@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar",
   () => () => <div data-testid="sidebar" />
 );
+jest.mock("@/components/distribution/Distribution", () => () => (
+  <div data-testid="distribution" />
+));
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
@@ -82,7 +86,7 @@ describe("static pages render", () => {
 
   it("meme lab distribution page loads", () => {
     render(<MemeLabDistribution />);
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(screen.getByTestId("distribution")).toBeInTheDocument();
   });
 
   it("renders author page", () => {

@@ -4,7 +4,7 @@ import Seize404 from "@/pages/404";
 import DisputeResolution from "@/app/dispute-resolution/page";
 import GradientsPage from "@/app/6529-gradient/page";
 import PlansPage from "@/app/emma/plans/page";
-import MemeLabCollectionPage from "@/pages/meme-lab/collection/[collection]";
+import MemeLabCollectionPage from "@/app/meme-lab/collection/[collection]/page";
 import { AuthContext } from "@/components/auth/Auth";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
@@ -101,6 +101,6 @@ describe("additional static pages", () => {
         <MemeLabCollectionPage name="Test Collection" />
       </TestProvider>
     );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+    expect(screen.getByTestId("collection")).toBeInTheDocument();
   });
 });

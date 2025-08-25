@@ -23,8 +23,11 @@ jest.mock("../../components/memelab/MemeLab.module.scss", () => ({}));
 
 describe("MemeLab utilities", () => {
   it("getInitialRouterValues parses router", () => {
-    const router: any = { query: { sort_dir: "DESC", sort: "edition_size" } };
-    const { initialSortDir, initialSort } = getInitialRouterValues(router);
+    const params = new URLSearchParams({
+      sort_dir: "DESC",
+      sort: "edition_size",
+    });
+    const { initialSortDir, initialSort } = getInitialRouterValues(params);
     expect(initialSortDir).toBe(SortDirection.DESC);
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);
   });
@@ -106,11 +109,7 @@ describe("MemeLab utilities", () => {
       undefined,
       setNfts
     );
-    expect(router.replace).toHaveBeenCalledWith(
-      { query: { sort: 'age', sort_dir: 'asc' } },
-      undefined,
-      { shallow: true }
-    );
+    expect(router.replace).toHaveBeenCalledWith("?sort=age&sort_dir=asc");
     expect(setNfts).toHaveBeenCalledWith([
       { id: 2, supply: 3 },
       { id: 1, supply: 5 },

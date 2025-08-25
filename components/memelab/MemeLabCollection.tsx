@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import { addProtocol } from "../../helpers/Helpers";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { fetchAllPages } from "../../services/6529api";
 import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
@@ -33,6 +33,8 @@ interface Props {
 
 export default function LabCollection(props: Readonly<Props>) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const params = useParams();
   const { connectedProfile } = useContext(AuthContext);
 
   const [collectionName, setCollectionName] = useState<string>();
@@ -49,19 +51,17 @@ export default function LabCollection(props: Readonly<Props>) {
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
-    if (router.isReady) {
-      if (router.query.collection) {
-        let c = router.query.collection as string;
-        c = c.replaceAll("-", " ");
-        setCollectionName(c);
+    const collectionParam = params?.collection as string | undefined;
+    if (collectionParam) {
+      let c = collectionParam.replaceAll("-", " ");
+      setCollectionName(c);
 
-        const { initialSortDir, initialSort } = getInitialRouterValues(router);
+      const { initialSortDir, initialSort } = getInitialRouterValues(searchParams);
 
-        setSortDir(initialSortDir);
-        setSort(initialSort);
-      }
+      setSortDir(initialSortDir);
+      setSort(initialSort);
     }
-  }, [router.isReady]);
+  }, [params, searchParams]);
 
   useEffect(() => {
     if (collectionName) {
