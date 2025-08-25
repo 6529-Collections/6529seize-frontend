@@ -689,3 +689,22 @@ pre code {
   line-height: 1.2em;
   vertical-align: middle;
 }
+
+/* Drop Content Wrapper Utilities */
+.drop-content-container {
+  position: relative;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.drop-content-container.should-truncate:not(.expanded) {
+  max-height: 1000px;
+}
+
+.drop-expand-button {
+  display: none;
+}
+
+.drop-content-container.should-truncate .drop-expand-button {
+  display: flex;
+}

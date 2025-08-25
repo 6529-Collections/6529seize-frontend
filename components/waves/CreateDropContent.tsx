@@ -337,6 +337,7 @@ const getOptimisticDrop = (
       cic: connectedProfile.cic,
       rep: connectedProfile.rep,
       tdh: connectedProfile.tdh,
+      tdh_rate: connectedProfile.tdh_rate,
       level: connectedProfile.level,
       subscribed_actions: [],
       archived: false,

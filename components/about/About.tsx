@@ -1,14 +1,14 @@
 "use client";
 
-import { AboutSection } from "@/enums";
-import { useRouter } from "next/navigation";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { capitalizeEveryWord } from "@/helpers/Helpers";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
+import { AboutSection } from "@/enums";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useRouter } from "next/navigation";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 // Section components
-import AboutHTML from "./AboutHTML";
+import { capitalizeEveryWord } from "@/helpers/Helpers";
+import { Col, Container, Row } from "react-bootstrap";
 import AboutApply from "./AboutApply";
 import AboutContactUs from "./AboutContactUs";
 import AboutCookiePolicy from "./AboutCookiePolicy";
@@ -16,6 +16,7 @@ import AboutCopyright from "./AboutCopyright";
 import AboutDataDecentral from "./AboutDataDecentral";
 import AboutGDRC1 from "./AboutGDRC1";
 import AboutGradients from "./AboutGradients";
+import AboutHTML from "./AboutHTML";
 import AboutLicense from "./AboutLicense";
 import AboutMemeLab from "./AboutMemeLab";
 import AboutMemes from "./AboutMemes";
@@ -28,7 +29,6 @@ import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTermsOfService from "./AboutTermsOfService";
-import { Container, Row, Col } from "react-bootstrap";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const router = useRouter();

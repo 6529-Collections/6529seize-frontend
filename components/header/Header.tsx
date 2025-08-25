@@ -1,33 +1,33 @@
 "use client";
 
-import styles from "./Header.module.scss";
-import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import { AboutSection } from "@/enums";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
-import HeaderDesktopLink from "./HeaderDesktopLink";
-import Link from "next/link";
-import HeaderUser from "./user/HeaderUser";
-import HeaderSearchButton from "./header-search/HeaderSearchButton";
-import { useAuth } from "../auth/Auth";
-import HeaderNotifications from "./notifications/HeaderNotifications";
-import useCapacitor from "../../hooks/useCapacitor";
-import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import {
   faBars,
   faChevronRight,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import HeaderShare from "./share/HeaderShare";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
-import HeaderQRScanner from "./share/HeaderQRScanner";
-import HeaderOpenMobile from "./open-mobile/HeaderOpenMobile";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Nav, Navbar, NavDropdown, Row } from "react-bootstrap";
+import { DBResponse } from "../../entities/IDBResponse";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
+import useCapacitor from "../../hooks/useCapacitor";
+import { fetchUrl } from "../../services/6529api";
+import { useAppWallets } from "../app-wallets/AppWalletsContext";
+import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
+import HeaderSearchButton from "./header-search/HeaderSearchButton";
+import styles from "./Header.module.scss";
+import HeaderDesktopLink from "./HeaderDesktopLink";
+import HeaderNotifications from "./notifications/HeaderNotifications";
+import HeaderOpenMobile from "./open-mobile/HeaderOpenMobile";
+import HeaderQRScanner from "./share/HeaderQRScanner";
+import HeaderShare from "./share/HeaderShare";
+import HeaderUser from "./user/HeaderUser";
 
 interface Props {
   onLoad?: () => void;
@@ -339,8 +339,6 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileRow("Groups", "/network/groups")}
                 {printMobileRow("NFT Activity", "/nft-activity")}
                 {printMobileHr()}
-                {printMobileRow("Prenodes", "/network/prenodes")}
-                {printMobileHr()}
                 {printMobileSubheader("Metrics")}
                 {printMobileRow("Definitions", "/network/metrics")}
                 {printMobileRow("Network Stats", "/network/stats")}
@@ -415,6 +413,7 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileRow("Meme Accounting", "/meme-accounting")}
                 {printMobileRow("Meme Gas", "/meme-gas")}
                 {printMobileHr()}
+                {printMobileRow("API", "/tools/api")}
                 {printMobileRow("EMMA", "/emma")}
                 {printMobileRow("Block Finder", "/meme-blocks")}
                 {printMobileRow("Open Data", "/open-data")}
@@ -664,14 +663,6 @@ export default function Header(props: Readonly<Props>) {
                                   path: "/nft-activity",
                                 }}
                               />
-                              <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Prenodes",
-                                  path: "/network/prenodes",
-                                }}
-                              />
-                              <NavDropdown.Divider />
                               <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   Metrics
@@ -793,6 +784,12 @@ export default function Header(props: Readonly<Props>) {
                                 </div>
                               </div>
                               <NavDropdown.Divider />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "API",
+                                  path: `/tools/api`,
+                                }}
+                              />
                               <HeaderDesktopLink
                                 link={{
                                   name: "EMMA",

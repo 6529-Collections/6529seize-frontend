@@ -58,7 +58,7 @@ export default function ConsolidationMappingToolPage() {
                   lg={{ span: 8, offset: 2 }}>
                   The Consolidation Mapping tool allows anyone to easily upload
                   a CSV file with addresses and balances to receive consolidated
-                  addresses in return (from the NFTDelegation.com contract).{" "}
+                  addresses in return (from the NFTDelegation contract).{" "}
                   <a href="#how-to-use">How to use this tool?</a>
                 </Col>
               </Row>
