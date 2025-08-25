@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
 import LabPage from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
+import { render, screen, waitFor } from "@testing-library/react";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -60,21 +60,30 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     reject: jest.fn(),
   })),
 }));
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(() => ({
+    connectedProfile: {
+      wallets: ["0xabc"],
+    },
+  })),
 }));
 
-const { useRouter } = require("next/router");
+const { useRouter, useSearchParams } = require("next/navigation");
 const { fetchUrl, fetchAllPages } = require("@/services/6529api");
-jest.mock("next/router");
+jest.mock("next/navigation");
 jest.mock("@/services/6529api");
 
 beforeEach(() => {
   jest.clearAllMocks();
   process.env.API_ENDPOINT = "https://test.6529.io";
+  (useSearchParams as jest.Mock).mockReturnValue({
+    get: jest.fn(),
+  });
   (useRouter as jest.Mock).mockReturnValue({
-    isReady: true,
-    query: { id: "1" },
     replace: jest.fn(),
   });
 });
@@ -180,7 +189,7 @@ function mockNftCalls(balance: number) {
 describe("MemeLabPage", () => {
   it("shows edition balance", async () => {
     mockNftCalls(1);
-    render(<LabPage wallets={["0xabc"]} />);
+    render(<LabPage nftId="1" />);
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenCalledWith(
         "https://test.6529.io/api/lab_extended_data?id=1"
@@ -192,13 +201,17 @@ describe("MemeLabPage", () => {
   });
 
   it("shows transaction history on your cards tab", async () => {
+    (useSearchParams as jest.Mock).mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.YOUR_CARDS;
+        return null;
+      }),
+    });
     (useRouter as jest.Mock).mockReturnValue({
-      isReady: true,
-      query: { id: "1", focus: MEME_FOCUS.YOUR_CARDS },
       replace: jest.fn(),
     });
     mockNftCalls(2);
-    render(<LabPage wallets={["0xabc"]} />);
+    render(<LabPage nftId="1" />);
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenCalledWith(
         expect.stringContaining("transactions_memelab?wallet=")
