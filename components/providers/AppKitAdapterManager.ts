@@ -63,10 +63,6 @@ export class AppKitAdapterManager {
         throw error;
       }
     })
-
-    if (!CW_PROJECT_ID) {
-      throw new AdapterError('ADAPTER_003: CW_PROJECT_ID is not defined')
-    }
     
     // Create adapter with all connectors
     const wagmiAdapter = new WagmiAdapter({

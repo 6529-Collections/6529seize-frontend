@@ -13,13 +13,13 @@ import {
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { AppKitAdapterManager } from './AppKitAdapterManager';
-import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
+import { VALIDATED_BASE_ENDPOINT } from "@/constants";
 import { AppKitValidationError } from '@/src/errors/appkit-initialization';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../auth/Auth';
 import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
 import {
-  initializeAppKit as initializeAppKitUtil,
+  initializeAppKit,
   AppKitInitializationConfig
 } from '@/utils/appkit-initialization.utils';
 
@@ -60,7 +60,7 @@ export default function WagmiSetup({
   // Create adapter with essential configuration only
   const createAdapterWithWallets = useCallback((wallets: AppWallet[]): WagmiAdapter => {
     // Basic validation - let util handle detailed validation
-    if (!CW_PROJECT_ID || !VALIDATED_BASE_ENDPOINT || !adapterManager) {
+    if (!VALIDATED_BASE_ENDPOINT || !adapterManager) {
       throw new AppKitValidationError('Internal API failed');
     }
 
@@ -71,12 +71,12 @@ export default function WagmiSetup({
     };
 
 
-    const result = initializeAppKitUtil(config);
+    const result = initializeAppKit(config);
     return result.adapter;
   }, [adapterManager, isCapacitor]);
 
   // Initialize AppKit with fail-fast approach
-  const initializeAppKit = useCallback((wallets: AppWallet[]) => {
+  const setupAppKitAdapter = useCallback((wallets: AppWallet[]) => {
     if (isInitializing) {
       throw new AppKitValidationError('Internal API failed');
     }
@@ -102,10 +102,10 @@ export default function WagmiSetup({
   // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
     if (isMounted && !currentAdapter && !isInitializing) {
-      initializeAppKit([])
+      setupAppKitAdapter([])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMounted, currentAdapter, isInitializing]); // initializeAppKit intentionally excluded to prevent loops
+  }, [isMounted, currentAdapter, isInitializing]); // setupAppKitAdapter intentionally excluded to prevent loops
 
   // Inject wallet connectors dynamically using hooks (simplified approach)
   useEffect(() => {
