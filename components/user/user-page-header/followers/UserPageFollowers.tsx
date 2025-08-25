@@ -37,7 +37,7 @@ export default function UserPageFollowers({
   return (
     <Link
       href={`/${profile.handle}/followers`}
-      className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+      className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
     >
       {isFetching ? (
         <CircleLoader size={CircleLoaderSize.SMALL} />
