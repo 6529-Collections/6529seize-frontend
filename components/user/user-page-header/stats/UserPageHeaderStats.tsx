@@ -62,7 +62,7 @@ export default function UserPageHeaderStats({
         }}
       >
         <span className="tw-text-xs">
-          TDH Rate measures your average TDH score across all NFT collections
+          The TDH you gain per day from your current holdings.
         </span>
       </Tooltip>
     </div>
