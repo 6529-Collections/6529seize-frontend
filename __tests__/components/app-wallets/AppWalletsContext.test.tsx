@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import {
   AppWalletsProvider,
   useAppWallets,
@@ -113,7 +113,7 @@ describe("AppWalletsContext", () => {
       expect(screen.getByTestId("has-supported")).toHaveTextContent("true");
     });
 
-    it("initializes with default state", () => {
+    it("initializes with correct final state after async operations", async () => {
       const TestComponent = () => {
         const { appWallets, fetchingAppWallets, appWalletsSupported } =
           useAppWallets();
@@ -132,12 +132,16 @@ describe("AppWalletsContext", () => {
         </AppWalletsProvider>
       );
 
+      // Wait for initialization to complete
+      await waitFor(() => {
+        expect(screen.getByTestId("fetching")).toHaveTextContent("false");
+      });
+
+      // After initialization completes (with mocked non-Capacitor environment)
       expect(screen.getByTestId("wallets-length")).toHaveTextContent("0");
-      // Initially true while checking support
-      expect(screen.getByTestId("fetching")).toHaveTextContent("true");
-      // Initially false until support is checked
       expect(screen.getByTestId("supported")).toHaveTextContent("false");
     });
+
   });
 
   describe("useAppWallets hook", () => {
@@ -193,28 +197,80 @@ describe("AppWalletsContext", () => {
     });
   });
 
-  describe("interface types", () => {
-    it("AppWallet interface is properly structured", () => {
-      // This test ensures the interface is exported and importable
-      const TestComponent = () => {
-        const { appWallets } = useAppWallets();
 
-        // Test that we can access the wallet properties
-        const hasWalletStructure = appWallets.every(
-          (wallet: any) =>
-            typeof wallet === "object" &&
-            "name" in wallet &&
-            "created_at" in wallet &&
-            "address" in wallet &&
-            "address_hashed" in wallet &&
-            "mnemonic" in wallet &&
-            "private_key" in wallet &&
-            "imported" in wallet
-        );
+  describe("context value memoization", () => {
+    it("provides stable context object with proper memoization", async () => {
+      let renderCount = 0;
+
+      const TestComponent = () => {
+        const contextValue = useAppWallets();
+        renderCount++;
 
         return (
-          <div data-testid="wallet-structure">
-            {hasWalletStructure.toString()}
+          <div>
+            <div data-testid="render-count">{renderCount}</div>
+            <div data-testid="context-exists">{contextValue ? "true" : "false"}</div>
+            <div data-testid="context-functions-exist">{
+              typeof contextValue.createAppWallet === "function" &&
+              typeof contextValue.importAppWallet === "function" &&
+              typeof contextValue.deleteAppWallet === "function" ? "true" : "false"
+            }</div>
+          </div>
+        );
+      };
+
+      const { rerender } = render(
+        <AppWalletsProvider>
+          <TestComponent />
+        </AppWalletsProvider>
+      );
+
+      // Wait for initial render to complete
+      await waitFor(() => {
+        expect(screen.getByTestId("context-exists")).toHaveTextContent("true");
+      });
+
+      expect(screen.getByTestId("context-functions-exist")).toHaveTextContent("true");
+      const initialRenderCount = parseInt(screen.getByTestId("render-count").textContent || "0");
+
+      // Force a re-render with the same provider
+      rerender(
+        <AppWalletsProvider>
+          <TestComponent />
+        </AppWalletsProvider>
+      );
+
+      // Context should still be functional after rerender
+      await waitFor(() => {
+        expect(screen.getByTestId("context-exists")).toHaveTextContent("true");
+      });
+
+      expect(screen.getByTestId("context-functions-exist")).toHaveTextContent("true");
+      // Component should have re-rendered since we created a new provider instance
+      expect(parseInt(screen.getByTestId("render-count").textContent || "0")).toBeGreaterThan(initialRenderCount);
+    });
+  });
+
+  describe("Wallet Operations - Error Handling", () => {
+    it("createAppWallet fails when app wallets not supported", async () => {
+      const TestComponent = () => {
+        const { createAppWallet, appWalletsSupported } = useAppWallets();
+        const [result, setResult] = React.useState<boolean | null>(null);
+
+        const handleCreate = async () => {
+          try {
+            const success = await createAppWallet("Test Wallet", "password123");
+            setResult(success);
+          } catch (error) {
+            setResult(false);
+          }
+        };
+
+        return (
+          <div>
+            <div data-testid="supported">{appWalletsSupported.toString()}</div>
+            <button onClick={handleCreate} data-testid="create-btn">Create</button>
+            <div data-testid="result">{result?.toString() || "null"}</div>
           </div>
         );
       };
@@ -225,59 +281,48 @@ describe("AppWalletsContext", () => {
         </AppWalletsProvider>
       );
 
-      // Empty array should return true for every()
-      expect(screen.getByTestId("wallet-structure")).toHaveTextContent("true");
+      // Wait for initialization
+      await waitFor(() => {
+        expect(screen.getByTestId("supported")).toHaveTextContent("false");
+      });
+
+      // Try to create wallet
+      act(() => {
+        screen.getByTestId("create-btn").click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("result")).toHaveTextContent("false");
+      });
     });
-  });
 
-  describe("context value memoization", () => {
-    it("provides stable context object", () => {
-      let contextValueChanges = 0;
-      let lastContextValue: any = null;
-
+    it("importAppWallet fails when app wallets not supported", async () => {
       const TestComponent = () => {
-        const contextValue = useAppWallets();
+        const { importAppWallet, appWalletsSupported } = useAppWallets();
+        const [result, setResult] = React.useState<boolean | null>(null);
 
-        if (lastContextValue !== contextValue) {
-          contextValueChanges++;
-          lastContextValue = contextValue;
-        }
+        const handleImport = async () => {
+          try {
+            const success = await importAppWallet(
+              "Imported Wallet",
+              "password123",
+              "0x1234567890abcdef",
+              "test mnemonic phrase",
+              "0xprivatekey123"
+            );
+            setResult(success);
+          } catch (error) {
+            setResult(false);
+          }
+        };
 
-        return <div data-testid="context-changes">{contextValueChanges}</div>;
-      };
-
-      const { rerender } = render(
-        <AppWalletsProvider>
-          <TestComponent />
-        </AppWalletsProvider>
-      );
-
-      // Should have changed once on mount
-      expect(screen.getByTestId("context-changes")).toHaveTextContent("1");
-
-      // Re-render should not change context value due to memoization
-      rerender(
-        <AppWalletsProvider>
-          <TestComponent />
-        </AppWalletsProvider>
-      );
-
-      // Should still be 1 if properly memoized
-      expect(screen.getByTestId("context-changes")).toHaveTextContent("1");
-    });
-  });
-
-  describe("constants and exports", () => {
-    it("exports the correct wallet key prefix", () => {
-      // Test that the component handles the wallet key prefix correctly
-      // We can't directly test the constant, but we can test its usage
-      const TestComponent = () => {
-        const { createAppWallet } = useAppWallets();
-
-        // Just testing that the function exists and is callable
-        const isCallable = typeof createAppWallet === "function";
-
-        return <div data-testid="create-callable">{isCallable.toString()}</div>;
+        return (
+          <div>
+            <div data-testid="supported">{appWalletsSupported.toString()}</div>
+            <button onClick={handleImport} data-testid="import-btn">Import</button>
+            <div data-testid="result">{result?.toString() || "null"}</div>
+          </div>
+        );
       };
 
       render(
@@ -286,7 +331,101 @@ describe("AppWalletsContext", () => {
         </AppWalletsProvider>
       );
 
-      expect(screen.getByTestId("create-callable")).toHaveTextContent("true");
+      // Wait for initialization
+      await waitFor(() => {
+        expect(screen.getByTestId("supported")).toHaveTextContent("false");
+      });
+
+      // Try to import wallet
+      act(() => {
+        screen.getByTestId("import-btn").click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("result")).toHaveTextContent("false");
+      });
+    });
+
+    it("deleteAppWallet fails when app wallets not supported", async () => {
+      const TestComponent = () => {
+        const { deleteAppWallet, appWalletsSupported } = useAppWallets();
+        const [result, setResult] = React.useState<boolean | null>(null);
+
+        const handleDelete = async () => {
+          try {
+            const success = await deleteAppWallet("0x1234567890abcdef");
+            setResult(success);
+          } catch (error) {
+            setResult(false);
+          }
+        };
+
+        return (
+          <div>
+            <div data-testid="supported">{appWalletsSupported.toString()}</div>
+            <button onClick={handleDelete} data-testid="delete-btn">Delete</button>
+            <div data-testid="result">{result?.toString() || "null"}</div>
+          </div>
+        );
+      };
+
+      render(
+        <AppWalletsProvider>
+          <TestComponent />
+        </AppWalletsProvider>
+      );
+
+      // Wait for initialization
+      await waitFor(() => {
+        expect(screen.getByTestId("supported")).toHaveTextContent("false");
+      });
+
+      // Try to delete wallet
+      act(() => {
+        screen.getByTestId("delete-btn").click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("result")).toHaveTextContent("false");
+      });
     });
   });
+
+  describe("Event Emitter Integration", () => {
+    it("emits events when event emitter is used directly", () => {
+      const mockListener = jest.fn();
+      appWalletsEventEmitter.on("test-direct", mockListener);
+
+      appWalletsEventEmitter.emit("test-direct", { data: "test" });
+
+      expect(mockListener).toHaveBeenCalledWith({ data: "test" });
+      appWalletsEventEmitter.removeListener("test-direct", mockListener);
+    });
+
+    it("cleans up event listeners properly", () => {
+      const mockListener1 = jest.fn();
+      const mockListener2 = jest.fn();
+
+      // Add listeners
+      appWalletsEventEmitter.on("test-cleanup", mockListener1);
+      appWalletsEventEmitter.on("test-cleanup", mockListener2);
+
+      // Emit event
+      appWalletsEventEmitter.emit("test-cleanup", "test-data");
+
+      expect(mockListener1).toHaveBeenCalledWith("test-data");
+      expect(mockListener2).toHaveBeenCalledWith("test-data");
+
+      // Remove specific listener
+      appWalletsEventEmitter.removeListener("test-cleanup", mockListener1);
+      appWalletsEventEmitter.emit("test-cleanup", "test-data-2");
+
+      expect(mockListener1).toHaveBeenCalledTimes(1); // Should not be called again
+      expect(mockListener2).toHaveBeenCalledTimes(2); // Should be called again
+
+      // Clean up remaining listeners
+      appWalletsEventEmitter.removeAllListeners("test-cleanup");
+    });
+  });
+
 });

@@ -4,6 +4,7 @@ import { useWaitForTransactionReceipt } from "wagmi";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "./nextgen_contracts";
 import DotLoader from "../dotLoader/DotLoader";
+import { sanitizeErrorForUser } from "../../utils/error-sanitizer";
 import { useEffect, useState } from "react";
 import { NULL_MERKLE } from "../../constants";
 
@@ -66,7 +67,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
     if (error.message) {
       return error.message;
     }
-    return JSON.stringify(props.error);
+    return sanitizeErrorForUser(props.error);
   }
 
   function getStatusMessage() {

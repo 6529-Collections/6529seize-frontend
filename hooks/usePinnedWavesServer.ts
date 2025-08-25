@@ -35,16 +35,16 @@ export interface UsePinnedWavesServerReturn {
 export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const queryClient = useQueryClient();
-  
+
   // Track ongoing operations to prevent concurrent pins
   const ongoingOperations = useRef<Set<string>>(new Set());
-  
+
   // Only fetch if user is authenticated
   const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
-  
+
   // Define the specific query key as a constant
   const PINNED_WAVES_QUERY_KEY = [QueryKey.WAVES_OVERVIEW, { pinned: ApiWavesPinFilter.Pinned }];
-  
+
   // Fetch pinned waves
   const {
     data: pinnedWaves = [],
@@ -66,7 +66,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       // Clear pinned waves data immediately when user logs out
       queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, []);
     }
-  }, [isAuthenticated, queryClient, PINNED_WAVES_QUERY_KEY]);
+  }, [isAuthenticated]);
 
   // Derive pinned IDs from pinned waves
   const pinnedIds = pinnedWaves.map(wave => wave.id);
@@ -74,11 +74,11 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   // Shared invalidation logic for both pin and unpin operations
   const invalidateWavesQueries = useCallback(() => {
     // Invalidate specific queries only
-    queryClient.invalidateQueries({ 
-      queryKey: PINNED_WAVES_QUERY_KEY 
+    queryClient.invalidateQueries({
+      queryKey: PINNED_WAVES_QUERY_KEY
     });
     // Also invalidate main waves to update isPinned status
-    queryClient.invalidateQueries({ 
+    queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_OVERVIEW],
       predicate: (query) => {
         // Only invalidate main waves queries, not pinned waves
@@ -93,24 +93,24 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     mutationFn: pinnedWavesApi.pinWave,
     onMutate: async (waveId: string) => {
       // Cancel only the specific pinned waves query
-      await queryClient.cancelQueries({ 
-        queryKey: PINNED_WAVES_QUERY_KEY 
+      await queryClient.cancelQueries({
+        queryKey: PINNED_WAVES_QUERY_KEY
       });
-      
+
       const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(PINNED_WAVES_QUERY_KEY);
-      
+
       // Try to find the wave object in other queries for optimistic update
       let waveToPin: ApiWave | undefined;
-      
+
       // Search through all waves overview queries to find the wave
-      queryClient.getQueriesData<ApiWave[] | InfiniteQueryData<ApiWave>>({ 
-        queryKey: [QueryKey.WAVES_OVERVIEW] 
+      queryClient.getQueriesData<ApiWave[] | InfiniteQueryData<ApiWave>>({
+        queryKey: [QueryKey.WAVES_OVERVIEW]
       }).forEach(([_, data]) => {
         if (data && !waveToPin) {
           // Type guard for array data
           if (Array.isArray(data)) {
             const waves = data as ApiWave[];
-            waveToPin = waves.find((wave): wave is ApiWave => 
+            waveToPin = waves.find((wave): wave is ApiWave =>
               wave && typeof wave.id === 'string' && wave.id === waveId
             );
           } else if (typeof data === 'object' && 'pages' in data) {
@@ -119,7 +119,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
             if (Array.isArray(infiniteData.pages)) {
               for (const page of infiniteData.pages) {
                 if (Array.isArray(page)) {
-                  waveToPin = page.find((wave): wave is ApiWave => 
+                  waveToPin = page.find((wave): wave is ApiWave =>
                     wave && typeof wave.id === 'string' && wave.id === waveId
                   );
                   if (waveToPin) break;
@@ -129,7 +129,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
           }
         }
       });
-      
+
       // If we found the wave, optimistically add it to pinned waves
       if (waveToPin && previousPinnedWaves) {
         // Check if wave is already pinned to avoid duplicates
@@ -139,7 +139,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
           queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, [optimisticWave, ...previousPinnedWaves]);
         }
       }
-      
+
       return { previousPinnedWaves };
     },
     onError: (err, waveId, context) => {
@@ -157,10 +157,10 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     mutationFn: pinnedWavesApi.unpinWave,
     onMutate: async (waveId: string) => {
       // Cancel only the specific pinned waves query
-      await queryClient.cancelQueries({ 
-        queryKey: PINNED_WAVES_QUERY_KEY 
+      await queryClient.cancelQueries({
+        queryKey: PINNED_WAVES_QUERY_KEY
       });
-      
+
       const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(PINNED_WAVES_QUERY_KEY);
 
       // Optimistic update - remove from pinned waves immediately
@@ -188,7 +188,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     if (ongoingOperations.current.has(waveId)) {
       throw new Error('Operation already in progress for this wave');
     }
-    
+
     // Check limit including ongoing pin operations
     let ongoingPinCount = 0;
     ongoingOperations.current.forEach(id => {
@@ -197,14 +197,14 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       }
     });
     const totalPinnedCount = pinnedIds.length + ongoingPinCount;
-    
+
     if (totalPinnedCount >= MAX_PINNED_WAVES) {
       throw new Error(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
     }
-    
+
     // Mark operation as ongoing (synchronous)
     ongoingOperations.current.add(waveId);
-    
+
     try {
       await pinMutation.mutateAsync(waveId);
     } finally {
@@ -218,10 +218,10 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     if (ongoingOperations.current.has(waveId)) {
       throw new Error('Operation already in progress for this wave');
     }
-    
+
     // Mark operation as ongoing (synchronous)
     ongoingOperations.current.add(waveId);
-    
+
     try {
       await unpinMutation.mutateAsync(waveId);
     } finally {

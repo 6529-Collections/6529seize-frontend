@@ -2,6 +2,7 @@ import { act } from "@testing-library/react";
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import CreateDropWrapper from '../../components/drops/create/utils/CreateDropWrapper';
+import { useSeizeConnectContext } from '../../components/auth/SeizeConnectContext';
 const CreateDropViewType = { COMPACT: 'COMPACT', FULL: 'FULL' } as const;
 
 const setDrop = jest.fn();
@@ -23,11 +24,27 @@ jest.mock('../../components/drops/create/lexical/transformers/MentionTransformer
 jest.mock('../../components/drops/create/lexical/transformers/HastagTransformer', () => ({}));
 jest.mock('../../components/drops/create/lexical/transformers/ImageTransformer', () => ({}));
 jest.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: null }) }));
+jest.mock('../../components/auth/SeizeConnectContext');
 
 const profile = { id: '1', handle: 'u', pfp: null, banner1_color: null, banner2_color: null, cic:0, rep:0, tdh:0, level:0, primary_address:'0x' } as any;
 
+const mockSeizeConnect = useSeizeConnectContext as jest.MockedFunction<typeof useSeizeConnectContext>;
+
 beforeEach(() => {
   (global as any).ResizeObserver = class { observe(){} disconnect(){} };
+  mockSeizeConnect.mockReturnValue({
+    address: '0x123',
+    isSafeWallet: false,
+    walletName: 'MetaMask',
+    walletIcon: 'metamask-icon.svg',
+    seizeConnect: jest.fn(),
+    seizeDisconnect: jest.fn(),
+    seizeDisconnectAndLogout: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    seizeConnectOpen: false,
+    isConnected: true,
+    isAuthenticated: true,
+  } as any);
 });
 describe('CreateDropWrapper', () => {
   it('renders compact component', () => {

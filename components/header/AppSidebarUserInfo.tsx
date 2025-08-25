@@ -37,6 +37,9 @@ export default function AppSidebarUserInfo() {
   const tdh = activeProfileProxy
     ? activeProfileProxy.created_by.tdh
     : profile?.tdh ?? 0;
+  const tdh_rate = activeProfileProxy
+    ? activeProfileProxy.created_by.tdh_rate
+    : profile?.tdh_rate ?? 0;
   const rep = activeProfileProxy
     ? activeProfileProxy.created_by.rep
     : profile?.rep ?? 0;
@@ -61,6 +64,7 @@ export default function AppSidebarUserInfo() {
       <AppSidebarUserStats
         handle={handleOrWallet ?? ""}
         tdh={tdh}
+        tdh_rate={tdh_rate}
         rep={rep}
         profileId={profile?.id ?? null}
       />

@@ -29,7 +29,6 @@ export default function CustomTooltip({
   const [actualPlacement, setActualPlacement] = useState<"top" | "bottom" | "left" | "right">(
     placement === "auto" ? "bottom" : placement
   );
-  const [initialCalculationDone, setInitialCalculationDone] = useState(false);
   
   const childRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -52,8 +51,8 @@ export default function CustomTooltip({
     const requiredHorizontalSpace = tooltipRect.width + offset + arrowSize;
     
     const placements = [
-      { name: "bottom", space: spaces.bottom, required: requiredVerticalSpace },
       { name: "top", space: spaces.top, required: requiredVerticalSpace },
+      { name: "bottom", space: spaces.bottom, required: requiredVerticalSpace },
       { name: "right", space: spaces.right, required: requiredHorizontalSpace },
       { name: "left", space: spaces.left, required: requiredHorizontalSpace }
     ] as const;
@@ -68,11 +67,11 @@ export default function CustomTooltip({
     
     switch (targetPlacement) {
       case "top":
-        x = childRect.left + (childRect.width - tooltipRect.width) / 2;
-        y = childRect.top - tooltipRect.height - offset - 12;
+        x = childRect.left;
+        y = childRect.top - tooltipRect.height - offset;
         break;
       case "bottom":
-        x = childRect.left + (childRect.width - tooltipRect.width) / 2;
+        x = childRect.left;
         y = childRect.bottom + offset;
         break;
       case "left":
@@ -103,7 +102,7 @@ export default function CustomTooltip({
       y = childRect.bottom + offset;
     } else if (targetPlacement === "bottom" && y + tooltipRect.height > window.innerHeight - padding) {
       finalPlacement = "top";
-      y = childRect.top - tooltipRect.height - offset - 12;
+      y = childRect.top - tooltipRect.height - offset;
     } else if (targetPlacement === "left" && x < padding) {
       finalPlacement = "right";
       x = childRect.right + offset;
@@ -138,8 +137,6 @@ export default function CustomTooltip({
     const childRect = childRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     
-    setInitialCalculationDone(true);
-    
     const targetPlacement = getOptimalPlacement(childRect, tooltipRect);
     const initialPosition = calculateInitialPosition(childRect, tooltipRect, targetPlacement);
     const adjustedPosition = adjustPositionForViewport(initialPosition, childRect, tooltipRect, targetPlacement);
@@ -155,7 +152,6 @@ export default function CustomTooltip({
     clearTimeout(hideTimer.current);
     showTimer.current = setTimeout(() => {
       setIsVisible(true);
-      setInitialCalculationDone(false); // Reset for fresh calculation
     }, delayShow);
   }, [disabled, delayShow]);
 
@@ -165,17 +161,15 @@ export default function CustomTooltip({
   }, [delayHide]);
 
   useEffect(() => {
-    if (isVisible && !initialCalculationDone) {
-      // Calculate position ONLY ONCE when tooltip first appears
-      const raf = requestAnimationFrame(() => {
-        calculatePosition();
+    if (isVisible) {
+      // Double RAF ensures DOM is fully updated before measuring
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          calculatePosition();
+        });
       });
-      
-      return () => {
-        cancelAnimationFrame(raf);
-      };
     }
-  }, [isVisible, calculatePosition, initialCalculationDone]);
+  }, [isVisible, calculatePosition]);
 
   useEffect(() => {
     return () => {

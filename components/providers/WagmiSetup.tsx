@@ -1,18 +1,27 @@
 "use client";
 
-import { Connector, WagmiProvider } from "wagmi";
-import { useEffect, useState } from "react";
+import { WagmiProvider } from "wagmi";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
   AppWallet,
-  appWalletsEventEmitter,
+  useAppWallets,
 } from "../app-wallets/AppWalletsContext";
 import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { getWagmiConfig, WagmiConfig } from "@/wagmiConfig/wagmiConfig";
-import { initWeb3Modal } from "./web3ModalSetup";
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { AppKitAdapterManager } from './AppKitAdapterManager';
+import { VALIDATED_BASE_ENDPOINT } from "@/constants";
+import { AppKitValidationError } from '@/src/errors/appkit-initialization';
+import { Capacitor } from '@capacitor/core';
+import { useAuth } from '../auth/Auth';
+import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
+import {
+  initializeAppKit,
+  AppKitInitializationConfig
+} from '@/utils/appkit-initialization.utils';
 
 export default function WagmiSetup({
   children,
@@ -20,85 +29,140 @@ export default function WagmiSetup({
   readonly children: React.ReactNode;
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
-  const [wagmiConfig, setWagmiConfig] = useState<WagmiConfig>();
+  const { setToast } = useAuth();
+  const { appWallets } = useAppWallets();
+
+  const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Track processed wallets by address for efficient comparison
+  const processedWallets = useRef<Set<string>>(new Set());
+
+  // Memoize platform detection to avoid repeated calls
+  const isCapacitor = useMemo(() => Capacitor.isNativePlatform(), []);
+
+  // Use the same adapter manager for both mobile and web
+  // AppKit will automatically handle the appropriate connectors
+  const adapterManager = useMemo(
+    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
+    [appWalletPasswordModal.requestPassword]
+  );
+
+
+  // Handle client-side mounting for App Router
   useEffect(() => {
-    const wagmiConfig = getWagmiConfig();
-    initWeb3Modal(wagmiConfig.config);
-    setWagmiConfig(wagmiConfig);
+    setIsMounted(true);
   }, []);
 
+  // Prevent concurrent initialization attempts
+  const [isInitializing, setIsInitializing] = useState(false);
+
+  // Create adapter with essential configuration only
+  const createAdapterWithWallets = useCallback((wallets: AppWallet[]): WagmiAdapter => {
+    // Basic validation - let util handle detailed validation
+    if (!VALIDATED_BASE_ENDPOINT || !adapterManager) {
+      throw new AppKitValidationError('Internal API failed');
+    }
+
+    const config: AppKitInitializationConfig = {
+      wallets,
+      adapterManager: adapterManager as AppKitAdapterManager,
+      isCapacitor,
+    };
+
+
+    const result = initializeAppKit(config);
+    return result.adapter;
+  }, [adapterManager, isCapacitor]);
+
+  // Initialize AppKit with fail-fast approach
+  const setupAppKitAdapter = useCallback((wallets: AppWallet[]) => {
+    if (isInitializing) {
+      throw new AppKitValidationError('Internal API failed');
+    }
+
+    setIsInitializing(true);
+
+    try {
+      const adapter = createAdapterWithWallets(wallets);
+      setCurrentAdapter(adapter);
+    } catch (error) {
+      logErrorSecurely('[WagmiSetup] AppKit initialization failed', error);
+      const userMessage = sanitizeErrorForUser(error);
+      setToast({
+        message: userMessage,
+        type: "error",
+      });
+      throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
+    } finally {
+      setIsInitializing(false);
+    }
+  }, [isInitializing, createAdapterWithWallets, setToast]);
+
+  // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
-    if (!wagmiConfig) return;
+    if (isMounted && !currentAdapter && !isInitializing) {
+      setupAppKitAdapter([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted, currentAdapter, isInitializing]); // setupAppKitAdapter intentionally excluded to prevent loops
 
-    const createConnectorForWallet = (
-      wallet: AppWallet,
-      requestPassword: (
-        address: string,
-        addressHashed: string
-      ) => Promise<string>
-    ): Connector | null => {
-      const connector = createAppWalletConnector(
-        wagmiConfig.chains,
-        { appWallet: wallet },
-        () => requestPassword(wallet.address, wallet.address_hashed)
+  // Inject wallet connectors dynamically using hooks (simplified approach)
+  useEffect(() => {
+    if (!currentAdapter) return;
+
+    // Check if wallets have actually changed to prevent unnecessary re-injection
+    const currentAddresses = new Set(appWallets.map(w => w.address));
+    const addressesEqual = processedWallets.current.size === currentAddresses.size &&
+      Array.from(processedWallets.current).every(addr => currentAddresses.has(addr));
+
+    if (addressesEqual) return;
+
+    try {
+      // Create connectors for current wallets
+      const connectors = appWallets
+        .map((wallet) => {
+          const connector = createAppWalletConnector(
+            Array.from(currentAdapter.wagmiConfig.chains),
+            { appWallet: wallet },
+            () => appWalletPasswordModal.requestPassword(wallet.address, wallet.address_hashed)
+          );
+          return currentAdapter.wagmiConfig._internal.connectors.setup(connector);
+        })
+        .filter((connector) => connector !== null);
+
+      // Get existing non-app-wallet connectors
+      const existingConnectors = currentAdapter.wagmiConfig.connectors.filter(
+        (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
       );
-      return wagmiConfig.config?._internal.connectors.setup(connector) ?? null;
-    };
 
-    const isConnectorNew = (
-      connector: Connector,
-      existingConnectors: Connector[]
-    ): boolean => {
-      return !existingConnectors.some(
-        (existing) => existing.id === connector.id
-      );
-    };
-
-    const getNewConnectors = (
-      connectors: Connector[],
-      existingConnectors: Connector[]
-    ): Connector[] => {
-      return connectors.filter((connector) =>
-        isConnectorNew(connector, existingConnectors)
-      );
-    };
-
-    const appWalletsEventEmitterHandler = async (wallets: AppWallet[]) => {
-      const connectors = wallets
-        .map((wallet) =>
-          createConnectorForWallet(
-            wallet,
-            appWalletPasswordModal.requestPassword
-          )
-        )
-        .filter((connector): connector is Connector => connector !== null);
-
-      const existingConnectors =
-        wagmiConfig.config?.connectors.filter(
-          (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
-        ) ?? [];
-
-      const newConnectors = getNewConnectors(connectors, existingConnectors);
-
-      wagmiConfig.config?._internal.connectors.setState([
-        ...newConnectors,
+      // Update connector state with fail-fast approach
+      currentAdapter.wagmiConfig._internal.connectors.setState([
+        ...connectors,
         ...existingConnectors,
       ]);
-    };
 
-    appWalletsEventEmitter.on("update", appWalletsEventEmitterHandler);
+      // Update processed wallets tracking
+      processedWallets.current = currentAddresses;
 
-    return () => {
-      appWalletsEventEmitter.off("update", appWalletsEventEmitterHandler);
-    };
-  }, [wagmiConfig]);
+    } catch (error) {
+      logErrorSecurely('[WagmiSetup] Connector injection failed', error);
+      const userMessage = sanitizeErrorForUser(error);
+      setToast({
+        message: userMessage,
+        type: "error",
+      });
+      // Don't throw here - let the component continue but notify the user
+    }
+  }, [currentAdapter, appWallets, appWalletPasswordModal, setToast]);
 
-  if (!wagmiConfig) {
-    return null;
+  // Show loading state until fully initialized
+  if (!isMounted || !currentAdapter) {
+    return null
   }
 
   return (
-    <WagmiProvider config={wagmiConfig.config}>
+    <WagmiProvider config={currentAdapter.wagmiConfig}>
       {children}
       {appWalletPasswordModal.modal}
     </WagmiProvider>

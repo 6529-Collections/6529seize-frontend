@@ -25,7 +25,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const { setToast } = useAuth();
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
-  
+
   // Check if this specific wave operation is in progress
   const isCurrentlyProcessing = isOperationInProgress(waveId);
 
@@ -33,12 +33,12 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const canPinWave = useCallback(() => {
     // If this wave is already pinned, we can always unpin it
     if (isPinned) return true;
-    
+
     // Check if we have room for another pinned wave using the hook's data
     return pinnedIds.length < MAX_PINNED_WAVES;
   }, [isPinned, pinnedIds.length]);
 
-  // Reset tooltip state when pinned state changes
+  // // Reset tooltip state when pinned state changes
   useEffect(() => {
     setShowMaxLimitTooltip(false);
   }, [isPinned]);
@@ -64,9 +64,9 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       // Check if device supports touch events
       setIsTouchDevice(
         "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0 ||
-          // @ts-ignore: matchMedia may not be available in all environments
-          (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
+        navigator.maxTouchPoints > 0 ||
+        // @ts-ignore: matchMedia may not be available in all environments
+        (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
       );
     };
 
@@ -104,7 +104,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       }
     } catch (error) {
       console.error('Error updating wave pin status:', error);
-      
+
       // Show user-friendly error message
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
       setToast({
