@@ -1,16 +1,15 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import {
   getInitialRouterValues,
-  printSortButtons,
   printNftContent,
+  printSortButtons,
   sortChanged,
-} from "../../../components/memelab/MemeLab";
-import { MemeLabSort } from "../../../enums";
-import { SortDirection } from "../../../entities/ISort";
-import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
+} from "@/components/memelab/MemeLab";
+import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
+import { SortDirection } from "@/entities/ISort";
+import { MemeLabSort } from "@/enums";
+import { render, screen } from "@testing-library/react";
 
-jest.mock("../../../components/the-memes/TheMemes", () => ({
+jest.mock("@/components/the-memes/TheMemes", () => ({
   SortButton: (p: any) => (
     <button data-testid="sort" onClick={() => p.select()}>
       {p.sort}
@@ -19,12 +18,14 @@ jest.mock("../../../components/the-memes/TheMemes", () => ({
   printVolumeTypeDropdown: () => <div data-testid="volume" />,
 }));
 
-jest.mock("../../components/memelab/MemeLab.module.scss", () => ({}));
+jest.mock("@/components/memelab/MemeLab.module.scss", () => ({}));
 
 describe("MemeLab utilities", () => {
   it("getInitialRouterValues parses router", () => {
-    const router: any = { query: { sort_dir: "DESC", sort: "edition_size" } };
-    const { initialSortDir, initialSort } = getInitialRouterValues(router);
+    const { initialSortDir, initialSort } = getInitialRouterValues(
+      "DESC",
+      "edition_size"
+    );
     expect(initialSortDir).toBe(SortDirection.DESC);
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);
   });
@@ -106,11 +107,7 @@ describe("MemeLab utilities", () => {
       undefined,
       setNfts
     );
-    expect(router.replace).toHaveBeenCalledWith(
-      { query: { sort: 'age', sort_dir: 'asc' } },
-      undefined,
-      { shallow: true }
-    );
+    expect(router.replace).toHaveBeenCalledWith("?sort=age&sort_dir=asc");
     expect(setNfts).toHaveBeenCalledWith([
       { id: 2, supply: 3 },
       { id: 1, supply: 5 },
