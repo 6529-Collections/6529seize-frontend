@@ -55,21 +55,6 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const capacitor = useCapacitor();
 
-  const checkUnsupported = async () => {
-    if (!capacitor.isCapacitor) {
-      setAppWalletsSupported(false);
-      return;
-    }
-
-    try {
-      await SecureStoragePlugin.keys();
-      setAppWalletsSupported(true);
-    } catch (error) {
-      console.error("SecureStoragePlugin is not available:", error);
-      setAppWalletsSupported(false);
-    }
-  };
-
   const fetchAppWallets = async () => {
     if (!appWalletsSupported) {
       setFetchingAppWallets(false);
@@ -88,14 +73,35 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const initialize = async () => {
-      await checkUnsupported();
-      if (appWalletsSupported) {
-        await fetchAppWallets();
+      // Step 1: Check support (fresh local variable)
+      let supported = false;
+      if (capacitor.isCapacitor) {
+        try {
+          await SecureStoragePlugin.keys();
+          supported = true;
+        } catch (error) {
+          console.error("SecureStoragePlugin is not available:", error);
+        }
       }
+      
+      setAppWalletsSupported(supported);
+      
+      // Step 2: Handle wallets based on fresh support value
+      if (!supported) {
+        setFetchingAppWallets(false);
+        setAppWallets([]);
+        return;
+      }
+
+      setFetchingAppWallets(true);
+      const wallets = await getAllWallets();
+      setAppWallets(wallets);
+      appWalletsEventEmitter.emit("update", wallets);
+      setFetchingAppWallets(false);
     };
 
     initialize();
-  }, [appWalletsSupported]);
+  }, []); // Run only once on mount
 
   const createAppWallet = async (
     name: string,
