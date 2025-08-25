@@ -35,7 +35,7 @@ interface Props {
 export default function LabCollection({
   collectionName,
 }: {
-  collectionName: string;
+  readonly collectionName: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
