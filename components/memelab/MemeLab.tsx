@@ -1,44 +1,44 @@
 "use client";
 
-import styles from "./MemeLab.module.scss";
-import { useContext, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col } from "react-bootstrap";
-import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
-import { NftOwner } from "../../entities/IOwner";
-import { SortDirection } from "../../entities/ISort";
+import { useAuth } from "@/components/auth/Auth";
+import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import NFTImage from "@/components/nft-image/NFTImage";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
+import {
+  SortButton,
+  printVolumeTypeDropdown,
+} from "@/components/the-memes/TheMemes";
+import { MEMELAB_CONTRACT } from "@/constants";
+import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
+import { NftOwner } from "@/entities/IOwner";
+import { SortDirection } from "@/entities/ISort";
+import { MemeLabSort } from "@/enums";
 import {
   getValuesForVolumeType,
   numberWithCommas,
   printMintDate,
-} from "../../helpers/Helpers";
-import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
-import { fetchAllPages } from "../../services/6529api";
-import NFTImage from "../nft-image/NFTImage";
-import DotLoader from "../dotLoader/DotLoader";
-import { AuthContext } from "../auth/Auth";
-import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
-import { MEMELAB_CONTRACT } from "../../constants";
-import { SortButton, printVolumeTypeDropdown } from "../the-memes/TheMemes";
-import { MemeLabSort } from "../../enums";
-import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
-import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
+} from "@/helpers/Helpers";
+import { fetchAllPages } from "@/services/6529api";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
-
-interface Props {
-  wallets: string[];
-}
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import styles from "./MemeLab.module.scss";
 
 export function getInitialRouterValues(
-  searchParams: ReadonlyURLSearchParams
+  sortDir: string | null,
+  sort: string | null
 ) {
   let initialSortDir = SortDirection.ASC;
   let initialSort = MemeLabSort.AGE;
 
-  const routerSortDir = searchParams.get("sort_dir");
+  const routerSortDir = sortDir;
   if (routerSortDir) {
     const resolvedRouterSortDir = Object.values(SortDirection).find(
       (sd) => sd.toLowerCase() === routerSortDir.toLowerCase()
@@ -48,7 +48,7 @@ export function getInitialRouterValues(
     }
   }
 
-  const routerSort = searchParams.get("sort");
+  const routerSort = sort;
   if (routerSort) {
     const resolvedKey = Object.keys(MemeLabSort).find(
       (k) => k.toLowerCase() === routerSort.toLowerCase()
@@ -435,13 +435,16 @@ export function sortChanged(
   }
 }
 
-export default function MemeLabComponent(props: Readonly<Props>) {
+export default function MemeLabComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile } = useAuth();
 
   useEffect(() => {
-    const { initialSortDir, initialSort } = getInitialRouterValues(searchParams);
+    const { initialSortDir, initialSort } = getInitialRouterValues(
+      searchParams?.get("sort_dir") ?? null,
+      searchParams?.get("sort") ?? null
+    );
     setSort(initialSort);
     setSortDir(initialSortDir);
   }, [searchParams]);
@@ -553,17 +556,14 @@ export default function MemeLabComponent(props: Readonly<Props>) {
         lg={{ span: 3 }}>
         <a href={`/meme-lab/${nft.id}`} className="decoration-none scale-hover">
           <Container fluid>
-            <Row
-              className={
-                props.wallets.length > 0 ? styles.nftImagePadding : ""
-              }>
+            <Row className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
                 nft={nft}
                 animation={false}
                 height={300}
                 balance={balancesLoaded ? getBalance(nft.id) : -1}
                 showThumbnail={true}
-                showUnseized={props.wallets.length > 0}
+                showUnseized={!!connectedProfile}
               />
             </Row>
             <Row>

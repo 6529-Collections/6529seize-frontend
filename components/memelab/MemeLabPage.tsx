@@ -2,81 +2,73 @@
 
 import styles from "./MemeLab.module.scss";
 
-import { Fragment, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  Container,
-  Row,
-  Col,
-  Table,
-  Carousel,
-  Dropdown,
-} from "react-bootstrap";
-import {
-  MEMELAB_CONTRACT,
-  MEMES_CONTRACT,
-  NULL_ADDRESS,
-} from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { LabNFT, LabExtendedData, NFT, NFTHistory } from "../../entities/INFT";
-import {
-  areEqualAddresses,
-  enterArtFullScreen,
-  fullScreenSupported,
-  numberWithCommas,
-  addProtocol,
-  printMintDate,
-  parseNftDescriptionToHtml,
-} from "../../helpers/Helpers";
-import Download from "../download/Download";
-import LatestActivityRow from "../latest-activity/LatestActivityRow";
-import { Transaction } from "../../entities/ITransaction";
-import { useRouter, useSearchParams, useParams } from "next/navigation";
-import { TDHMetrics } from "../../entities/ITDH";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import Pagination from "../pagination/Pagination";
-import { TypeFilter } from "../latest-activity/LatestActivity";
-import NFTImage from "../nft-image/NFTImage";
-import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
-import Timeline from "../timeline/Timeline";
-import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
-import {
-  getFileTypeFromMetadata,
-  getDimensionsFromMetadata,
-} from "../../helpers/nft.helpers";
-import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
-import NFTAttributes from "../nftAttributes/NFTAttributes";
-import { NftPageStats } from "../nftAttributes/NftStats";
-import { printMemeReferences } from "../rememes/RememePage";
-import useCapacitor from "../../hooks/useCapacitor";
-import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
-import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
+import { useAuth } from "@/components/auth/Auth";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import Download from "@/components/download/Download";
+import { TypeFilter } from "@/components/latest-activity/LatestActivity";
+import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
+import NFTImage from "@/components/nft-image/NFTImage";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import NFTAttributes from "@/components/nftAttributes/NFTAttributes";
+import { NftPageStats } from "@/components/nftAttributes/NftStats";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
+import Pagination from "@/components/pagination/Pagination";
+import { printMemeReferences } from "@/components/rememes/RememePage";
+import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import {
   getMemeTabTitle,
   MEME_FOCUS,
   MEME_TABS,
   TabButton,
-} from "../the-memes/MemeShared";
-import { useSetTitle } from "../../contexts/TitleContext";
-import NftNavigation from "../nft-navigation/NftNavigation";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
+} from "@/components/the-memes/MemeShared";
+import Timeline from "@/components/timeline/Timeline";
+import { MEMELAB_CONTRACT, MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
+import { useTitle } from "@/contexts/TitleContext";
+import { DBResponse } from "@/entities/IDBResponse";
+import { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
+import { Transaction } from "@/entities/ITransaction";
+import {
+  addProtocol,
+  areEqualAddresses,
+  enterArtFullScreen,
+  fullScreenSupported,
+  numberWithCommas,
+  parseNftDescriptionToHtml,
+  printMintDate,
+} from "@/helpers/Helpers";
+import {
+  getDimensionsFromMetadata,
+  getFileTypeFromMetadata,
+} from "@/helpers/nft.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { fetchAllPages, fetchUrl } from "@/services/6529api";
+import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Fragment, useEffect, useState } from "react";
+import {
+  Carousel,
+  Col,
+  Container,
+  Dropdown,
+  Row,
+  Table,
+} from "react-bootstrap";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
-interface Props {
-  wallets: string[];
-}
-
-export default function LabPage(props: Readonly<Props>) {
+export default function MemeLabPage({ nftId }: { readonly nftId: string }) {
   const router = useRouter();
-  const params = useParams();
   const searchParams = useSearchParams();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
+  const { connectedProfile } = useAuth();
+  const { setTitle } = useTitle();
 
-  const [nftId, setNftId] = useState<string>();
   const [fullscreenElementId, setFullscreenElementId] = useState<string>(
     "the-art-fullscreen-img"
   );
@@ -90,8 +82,6 @@ export default function LabPage(props: Readonly<Props>) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activity, setActivity] = useState<Transaction[]>([]);
 
-  const [myOwner, setMyOwner] = useState<TDHMetrics>();
-
   const [userLoaded, setUserLoaded] = useState(false);
   const [originalMemesLoaded, setOriginalMemesLoaded] = useState(false);
 
@@ -104,13 +94,15 @@ export default function LabPage(props: Readonly<Props>) {
     TypeFilter.ALL
   );
 
-  useSetTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
+  useEffect(() => {
+    setTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
+  }, [nft, nftId, activeTab]);
 
   useEffect(() => {
     setIsFullScreenSupported(fullScreenSupported());
     let initialFocus = MEME_FOCUS.LIVE;
 
-    const routerFocus = searchParams.get("focus");
+    const routerFocus = searchParams?.get("focus");
     if (routerFocus) {
       const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
         (sd) => sd === routerFocus
@@ -119,22 +111,14 @@ export default function LabPage(props: Readonly<Props>) {
         initialFocus = resolvedRouterFocus;
       }
     }
-    const idParam = params?.id as string | undefined;
-    if (idParam) {
-      setNftId(idParam);
-      setActiveTab(initialFocus);
-    }
-  }, [params, searchParams]);
+    setActiveTab(initialFocus);
+  }, [searchParams]);
 
   useEffect(() => {
-    if (activeTab && nftId) {
-      const query: any = { id: nftId };
-      if (activeTab) {
-        query.focus = activeTab;
-      }
-      router.replace(`?${new URLSearchParams(query).toString()}`);
+    if (activeTab) {
+      router.replace(`?focus=${activeTab}`);
     }
-  }, [activeTab, nftId, router]);
+  }, [activeTab]);
 
   useEffect(() => {
     if (nftId) {
@@ -173,22 +157,21 @@ export default function LabPage(props: Readonly<Props>) {
   }, [nftId]);
 
   useEffect(() => {
-    if (props.wallets.length > 0 && nftId) {
+    if (connectedProfile?.wallets && nftId) {
+      const wallets = connectedProfile.wallets;
       fetchUrl(
         `${
           process.env.API_ENDPOINT
-        }/api/transactions_memelab?wallet=${props.wallets.join(
-          ","
-        )}&id=${nftId}`
+        }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
         let countIn = 0;
         let countOut = 0;
         response.data.map((d: Transaction) => {
-          if (props.wallets.some((w) => areEqualAddresses(w, d.from_address))) {
+          if (wallets.some((w) => areEqualAddresses(w, d.from_address))) {
             countOut += d.token_count;
           }
-          if (props.wallets.some((w) => areEqualAddresses(w, d.to_address))) {
+          if (wallets.some((w) => areEqualAddresses(w, d.to_address))) {
             countIn += d.token_count;
           }
         });
@@ -198,7 +181,7 @@ export default function LabPage(props: Readonly<Props>) {
     } else {
       setNftBalance(0);
     }
-  }, [nftId, props.wallets]);
+  }, [nftId, connectedProfile?.wallets]);
 
   useEffect(() => {
     if (nftId) {
@@ -273,7 +256,7 @@ export default function LabPage(props: Readonly<Props>) {
                     animation={true}
                     height={650}
                     balance={nftBalance}
-                    showUnseized={props.wallets.length > 0}
+                    showUnseized={!!connectedProfile}
                   />
                 </Col>
                 {activeTab === MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -564,31 +547,33 @@ export default function LabPage(props: Readonly<Props>) {
       (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
+    const wallets = connectedProfile?.wallets ?? [];
+
     const transferredIn =
-      props.wallets.length === 0
+      wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
               !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
-              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+              wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
               t.value === 0
           );
 
     const transferredOut =
-      props.wallets.length === 0
+      wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+              wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
               t.value === 0
           );
 
     const bought =
-      props.wallets.length === 0
+      wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+              wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
               t.value > 0
           );
 
@@ -598,11 +583,11 @@ export default function LabPage(props: Readonly<Props>) {
     });
 
     const sold =
-      props.wallets.length === 0
+      wallets.length === 0
         ? []
         : transactions.filter(
             (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+              wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
               t.value > 0
           );
 
@@ -619,53 +604,22 @@ export default function LabPage(props: Readonly<Props>) {
         lg={{ span: 6 }}>
         <Container className="p-0">
           <Row>
-            {props.wallets.length === 0 && (
+            {wallets.length === 0 && (
               <Row className="pt-2">
                 <Col>
                   <h4>Connect your wallet to view your cards.</h4>
                 </Col>
               </Row>
             )}
-            {nftBalance === 0 &&
-              props.wallets.length > 0 &&
-              nft &&
-              userLoaded && (
-                <Row className="pt-2">
-                  <Col>
-                    <h3>You don&apos;t own any editions of Card {nft.id}</h3>
-                  </Col>
-                </Row>
-              )}
-            {transactions.length > 0 && props.wallets && (
+            {nftBalance === 0 && wallets.length > 0 && nft && userLoaded && (
+              <Row className="pt-2">
+                <Col>
+                  <h3>You don&apos;t own any editions of Meme Lab #{nft.id}</h3>
+                </Col>
+              </Row>
+            )}
+            {transactions.length > 0 && wallets && (
               <>
-                {nftBalance > 0 && myOwner && (
-                  <>
-                    <Row className="pt-2">
-                      <Col
-                        xs={{ span: 12 }}
-                        sm={{ span: 12 }}
-                        md={{ span: 12 }}
-                        lg={{ span: 8 }}>
-                        <Table bordered={false}>
-                          <tbody>
-                            <tr className={`${styles.overviewColumn}`}>
-                              <td>Cards</td>
-                              <td className="text-right">{`x${nftBalance}`}</td>
-                            </tr>
-                            <tr className={`pt-1 ${styles.overviewColumn}`}>
-                              <td>Rank</td>
-                              <td className="text-right">
-                                {`#${numberWithCommas(
-                                  myOwner.dense_rank_balance
-                                )}`}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </Table>
-                      </Col>
-                    </Row>
-                  </>
-                )}
                 <Row className="pt-2 pb-2">
                   <Col>
                     <h3>Overview</h3>

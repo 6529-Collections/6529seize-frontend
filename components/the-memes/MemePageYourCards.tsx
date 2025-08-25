@@ -1,15 +1,15 @@
-import styles from "./TheMemes.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { NULL_ADDRESS } from "../../constants";
 import { NFT, NftRank, NftTDH } from "../../entities/INFT";
+import { ConsolidatedTDH } from "../../entities/ITDH";
+import { Transaction } from "../../entities/ITransaction";
 import {
   areEqualAddresses,
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
-import { Transaction } from "../../entities/ITransaction";
-import { ConsolidatedTDH } from "../../entities/ITDH";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
+import styles from "./TheMemes.module.scss";
 
 export function MemePageYourCardsRightMenu(props: {
   show: boolean;
@@ -106,7 +106,8 @@ export function MemePageYourCardsRightMenu(props: {
                 <Row className="pt-2">
                   <Col>
                     <h3>
-                      You don&apos;t own any editions of Card {props.nft.id}
+                      You don&apos;t own any editions of The Memes #
+                      {props.nft.id}
                     </h3>
                   </Col>
                 </Row>

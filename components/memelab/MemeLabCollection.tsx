@@ -2,18 +2,23 @@
 
 import styles from "./MemeLab.module.scss";
 
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
-import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
-import { addProtocol } from "../../helpers/Helpers";
-import { useRouter, useSearchParams, useParams } from "next/navigation";
-import { fetchAllPages } from "../../services/6529api";
+import { Col, Container, Row } from "react-bootstrap";
+import { MEMES_CONTRACT } from "../../constants";
+import { LabExtendedData, LabNFT, VolumeType } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import NFTImage from "../nft-image/NFTImage";
-import { MEMES_CONTRACT } from "../../constants";
+import { MemeLabSort } from "../../enums";
+import { addProtocol } from "../../helpers/Helpers";
+import { fetchAllPages } from "../../services/6529api";
 import { AuthContext } from "../auth/Auth";
+import NFTImage from "../nft-image/NFTImage";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import {
   getInitialRouterValues,
@@ -21,17 +26,8 @@ import {
   printSortButtons,
   sortChanged,
 } from "./MemeLab";
-import { MemeLabSort } from "../../enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
 
-interface Props {
-  wallets: string[];
-}
-
-export default function LabCollection(props: Readonly<Props>) {
+export default function LabCollection() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams();
@@ -56,7 +52,10 @@ export default function LabCollection(props: Readonly<Props>) {
       let c = collectionParam.replaceAll("-", " ");
       setCollectionName(c);
 
-      const { initialSortDir, initialSort } = getInitialRouterValues(searchParams);
+      const { initialSortDir, initialSort } = getInitialRouterValues(
+        searchParams?.get("sort_dir") ?? null,
+        searchParams?.get("sort") ?? null
+      );
 
       setSortDir(initialSortDir);
       setSort(initialSort);
@@ -146,16 +145,14 @@ export default function LabCollection(props: Readonly<Props>) {
           <Row>
             <a
               href={`/meme-lab/${nft.id}`}
-              className={
-                props.wallets.length > 0 ? styles.nftImagePadding : ""
-              }>
+              className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
                 nft={nft}
                 animation={false}
                 height={300}
                 balance={getBalance(nft.id)}
                 showThumbnail={true}
-                showUnseized={props.wallets.length > 0}
+                showUnseized={!!connectedProfile}
               />
             </a>
           </Row>

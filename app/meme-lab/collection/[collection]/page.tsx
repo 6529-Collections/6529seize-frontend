@@ -1,17 +1,10 @@
-import styles from "@/styles/Home.module.scss";
 import LabCollectionComponent from "@/components/memelab/MemeLabCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
+import styles from "@/styles/Home.module.scss";
 import { Metadata } from "next";
-import { useAuth } from "@/components/auth/Auth";
 
 function MemeLabCollectionClient() {
-  "use client";
-  const { connectedProfile } = useAuth();
-  return (
-    <LabCollectionComponent
-      wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
-    />
-  );
+  return <LabCollectionComponent />;
 }
 
 export default function MemeLabCollectionPage() {
@@ -31,4 +24,3 @@ export async function generateMetadata({
   const name = collection.replaceAll("-", " ");
   return getAppMetadata({ title: name, description: "Meme Lab" });
 }
-
