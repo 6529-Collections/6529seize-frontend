@@ -105,3 +105,72 @@ export const removeAuthJwt = () => {
   safeLocalStorage.removeItem(WALLET_REFRESH_TOKEN_STORAGE_KEY);
   safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
 };
+
+/**
+ * Validates JWT role against wallet role with fail-fast security checks
+ * 
+ * @param freshJwt - The fresh JWT token from server response
+ * @param walletRole - The role associated with the current wallet
+ * @param requestedRole - The role that was requested (optional)
+ * @returns The validated role from the fresh JWT
+ * @throws Error if validation fails
+ */
+export const syncWalletRoleWithServer = (serverRole: string | null, address: string): void => {
+  const currentRole = getWalletRole();
+  if (currentRole !== serverRole) {
+    // Update local storage to match server
+    if (serverRole) {
+      safeLocalStorage.setItem(`auth-role-${address.toLowerCase()}`, serverRole);
+    } else {
+      safeLocalStorage.removeItem(`auth-role-${address.toLowerCase()}`);
+    }
+  }
+};
+
+export const validateJwtRole = (
+  freshJwt: string,
+  walletRole: string | null,
+  requestedRole: string | null = null
+): string | null => {
+  if (!freshJwt) {
+    throw new Error('Fresh JWT is required for role validation');
+  }
+
+  // Extract role from the fresh JWT
+  const decodedJwt = jwtDecode<{
+    id: string;
+    sub: string;
+    iat: number;
+    exp: number;
+  }>(freshJwt);
+  
+  const freshTokenRole = decodedJwt.id || null;
+
+  // SECURITY: Role validation using the fresh token from server
+  if (walletRole && freshTokenRole && freshTokenRole !== walletRole) {
+    throw new Error(
+      `Role mismatch in fresh token: wallet role ${walletRole} does not match fresh token role ${freshTokenRole}`
+    );
+  }
+  
+  if (!walletRole && freshTokenRole) {
+    throw new Error(
+      `Unexpected role ${freshTokenRole} in fresh token when wallet has no role`
+    );
+  }
+  
+  if (walletRole && !freshTokenRole) {
+    throw new Error(
+      `Missing role in fresh token when wallet has role ${walletRole}`
+    );
+  }
+
+  // SECURITY: Ensure the requested role matches what we got from server
+  if (requestedRole && freshTokenRole !== requestedRole) {
+    throw new Error(
+      `Server returned unexpected role: requested ${requestedRole}, received ${freshTokenRole}`
+    );
+  }
+
+  return freshTokenRole;
+};

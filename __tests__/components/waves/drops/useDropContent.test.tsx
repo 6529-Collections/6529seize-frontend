@@ -10,7 +10,7 @@ jest.mock('../../../../services/api/common-api');
 jest.mock('../../../../components/waves/drops/media-utils', () => ({
   isVideoMimeType: (mimeType: string) => mimeType?.startsWith('video/'),
   processContent: (content: string, apiMedia: any[]) => ({
-    segments: [{ type: 'text', content }],
+    segments: content ? [{ type: 'text', content }] : [],
     apiMedia,
   }),
 }));
@@ -28,9 +28,11 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: ReactNode }) => (
+  const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'QueryClientWrapper';
+  return Wrapper;
 };
 
 describe('useDropContent', () => {
@@ -151,7 +153,7 @@ describe('useDropContent', () => {
       ]);
     });
 
-    it('handles media-only content (no text)', () => {
+    it('processes media-only content correctly (no text content)', () => {
       const mediaOnlyDrop = {
         ...mockDrop,
         parts: [
@@ -184,7 +186,7 @@ describe('useDropContent', () => {
       ]);
     });
 
-    it('handles empty media with no content', () => {
+    it('shows fallback message when part has no content and no media', () => {
       const emptyDrop = {
         ...mockDrop,
         parts: [
@@ -208,7 +210,7 @@ describe('useDropContent', () => {
       expect(result.current.content.apiMedia).toEqual([]);
     });
 
-    it('returns empty content when part is not found', () => {
+    it('returns empty segments and media when part ID does not exist', () => {
       const { result } = renderHook(
         () => useDropContent('drop-123', 999, mockDrop),
         { wrapper: createWrapper() }
@@ -231,7 +233,7 @@ describe('useDropContent', () => {
 
       await waitFor(() => {
         expect(result.current.content.segments).toEqual([
-          { type: 'text', content: 'Error loading drop' },
+          { type: 'text', content: 'Requested resource not found.' },
         ]);
       });
     });
@@ -247,12 +249,12 @@ describe('useDropContent', () => {
 
       await waitFor(() => {
         expect(result.current.content.segments).toEqual([
-          { type: 'text', content: 'Error loading drop' },
+          { type: 'text', content: 'Network error. Please check your connection and try again.' },
         ]);
       });
     });
 
-    it('handles null drop gracefully', () => {
+    it('handles null drop response from API gracefully', () => {
       mockCommonApiFetch.mockResolvedValue(null);
 
       const { result } = renderHook(
@@ -261,6 +263,86 @@ describe('useDropContent', () => {
       );
 
       expect(result.current.drop).toBe(null);
+    });
+
+    it('handles timeout errors with appropriate message', async () => {
+      const error = new Error('Request timeout');
+      mockCommonApiFetch.mockRejectedValue(error);
+
+      const { result } = renderHook(
+        () => useDropContent('drop-123', 1, null),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.content.segments).toEqual([
+          { type: 'text', content: 'Request timed out. Please try again.' },
+        ]);
+      });
+    });
+
+    it('handles unauthorized errors with appropriate message', async () => {
+      const error = new Error('Unauthorized access');
+      mockCommonApiFetch.mockRejectedValue(error);
+
+      const { result } = renderHook(
+        () => useDropContent('drop-123', 1, null),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.content.segments).toEqual([
+          { type: 'text', content: 'Authorization failed. Please reconnect your wallet.' },
+        ]);
+      });
+    });
+
+    it('handles rate limit errors with appropriate message', async () => {
+      const error = new Error('Rate limit exceeded');
+      mockCommonApiFetch.mockRejectedValue(error);
+
+      const { result } = renderHook(
+        () => useDropContent('drop-123', 1, null),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.content.segments).toEqual([
+          { type: 'text', content: 'Too many requests. Please wait a moment and try again.' },
+        ]);
+      });
+    });
+
+    it('handles wallet errors with appropriate message', async () => {
+      const error = new Error('MetaMask wallet connection failed');
+      mockCommonApiFetch.mockRejectedValue(error);
+
+      const { result } = renderHook(
+        () => useDropContent('drop-123', 1, null),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.content.segments).toEqual([
+          { type: 'text', content: 'Wallet error. Please check your wallet connection.' },
+        ]);
+      });
+    });
+
+    it('handles unknown errors with generic fallback message', async () => {
+      const error = new Error('Some unknown error occurred');
+      mockCommonApiFetch.mockRejectedValue(error);
+
+      const { result } = renderHook(
+        () => useDropContent('drop-123', 1, null),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.content.segments).toEqual([
+          { type: 'text', content: 'Some unknown error occurred' },
+        ]);
+      });
     });
   });
 
@@ -341,7 +423,7 @@ describe('useDropContent', () => {
   });
 
   describe('Media handling', () => {
-    it('handles missing media array', () => {
+    it('handles undefined media array gracefully', () => {
       const dropWithoutMedia = {
         ...mockDrop,
         parts: [

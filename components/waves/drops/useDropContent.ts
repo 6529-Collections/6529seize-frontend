@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { commonApiFetch } from "../../../services/api/common-api";
+import { sanitizeErrorForUser } from "../../../utils/error-sanitizer";
 import {
   ProcessedContent,
   isVideoMimeType,
@@ -54,9 +55,10 @@ export const useDropContent = (
       const regex =
         /Drop [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12} not found/;
 
-      const errorMsg = regex.test(JSON.stringify(error))
+      const sanitizedError = sanitizeErrorForUser(error);
+      const errorMsg = regex.test(sanitizedError)
         ? "This drop has been deleted by the author"
-        : "Error loading drop";
+        : sanitizedError;
 
       return { segments: [{ type: "text", content: errorMsg }], apiMedia: [] };
     }
