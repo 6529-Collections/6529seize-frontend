@@ -1,10 +1,15 @@
-import NextGenPageClient from "./NextGenPageClient";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
+import NextGenPageClient from "./NextGenPageClient";
 import { getNextGenView } from "./view-utils";
 
-export async function generateMetadata({ params }: { params: { view?: string[] } }): Promise<Metadata> {
-  const nextgenView = getNextGenView(params.view?.[0] ?? "");
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ view?: string[] }>;
+}): Promise<Metadata> {
+  const { view } = await params;
+  const nextgenView = getNextGenView(view?.[0] ?? "");
   return getAppMetadata({ title: "NextGen " + (nextgenView ?? "") });
 }
 
