@@ -14,7 +14,7 @@ import { DelegationCenterSection } from "@/enums";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (p: any) => <img {...p} />,
+  default: (p: any) => <img {...p} alt="test" />,
 }));
 jest.mock("react-bootstrap", () => ({
   Container: (p: any) => <div>{p.children}</div>,
