@@ -1,22 +1,22 @@
 "use client";
 
-import styles from "./Delegation.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
+import { Col, Container, Row } from "react-bootstrap";
+import styles from "./Delegation.module.scss";
 
-import { SUPPORTED_COLLECTIONS } from "./constants";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { DelegationCenterSection } from "./DelegationCenterMenu";
 import {
   DELEGATION_ALL_ADDRESS,
-  MEMES_CONTRACT,
-  MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
 } from "../../constants";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
+import { DelegationCenterSection } from "./DelegationCenterMenu";
 interface Props {
   setSection(section: DelegationCenterSection): any;
 }

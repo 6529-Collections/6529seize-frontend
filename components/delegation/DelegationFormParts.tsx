@@ -1,25 +1,25 @@
 "use client";
 
-import styles from "./Delegation.module.scss";
+import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { useState, useEffect } from "react";
-import { Form, Row, Col, Container } from "react-bootstrap";
 import {
-  useEnsName,
   useEnsAddress,
-  useWriteContract,
+  useEnsName,
   useWaitForTransactionReceipt,
+  useWriteContract,
 } from "wagmi";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
-import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import {
   DelegationCollection,
   SUPPORTED_COLLECTIONS,
-} from "./constants";
-import { useOrignalDelegatorEnsResolution } from "./delegation_shared";
-import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+} from "./delegation-constants";
+import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
+import styles from "./Delegation.module.scss";
 
 function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
@@ -78,8 +78,10 @@ function DelegationAddressInput(
 export function DelegationFormLabel(
   props: Readonly<{ title: string; tooltip: string; span?: number }>
 ) {
-  const tooltipId = `delegation-form-label-${props.title.toLowerCase().replace(/\s+/g, '-')}`;
-  
+  const tooltipId = `delegation-form-label-${props.title
+    .toLowerCase()
+    .replace(/\s+/g, "-")}`;
+
   return (
     <Form.Label
       column
@@ -489,8 +491,10 @@ export function DelegationTokenSelection(
 export function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
-  const tooltipId = `delegation-close-button-${props.title.toLowerCase().replace(/\s+/g, '-')}`;
-  
+  const tooltipId = `delegation-close-button-${props.title
+    .toLowerCase()
+    .replace(/\s+/g, "-")}`;
+
   return (
     <>
       <FontAwesomeIcon

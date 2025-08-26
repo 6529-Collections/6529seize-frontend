@@ -1,26 +1,29 @@
 "use client";
 
-import styles from "../../NextGen.module.scss";
+import {
+  ALL_USE_CASE,
+  MINTING_USE_CASE,
+} from "@/components/delegation/delegation-constants";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract, useReadContracts } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
 } from "../../../../../constants";
-import { Col, Container, Row } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { NextGenCollection } from "../../../../../entities/INextgen";
+import { fromGWEI } from "../../../../../helpers/Helpers";
+import { fetchUrl } from "../../../../../services/6529api";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import DotLoader from "../../../../dotLoader/DotLoader";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import {
-  CollectionWithMerkle,
   AllowlistType,
+  CollectionWithMerkle,
   Status,
 } from "../../../nextgen_entities";
-import { fromGWEI } from "../../../../../helpers/Helpers";
-import {
-  ALL_USE_CASE,
-  MINTING_USE_CASE,
-} from "@/components/delegation/constants";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
-import { fetchUrl } from "../../../../../services/6529api";
 import {
   formatNameForUrl,
   getStatusFromDates,
@@ -28,17 +31,14 @@ import {
   useMintSharedState,
   useSharedState,
 } from "../../../nextgen_helpers";
-import NextGenMintWidget from "./NextGenMintWidget";
-import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
-import Image from "next/image";
+import styles from "../../NextGen.module.scss";
 import {
   NextGenCountdown,
   NextGenMintCounts,
   NextGenPhases,
 } from "../NextGenCollectionHeader";
-import DotLoader from "../../../../dotLoader/DotLoader";
-import { NextGenCollection } from "../../../../../entities/INextgen";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
+import NextGenMintWidget from "./NextGenMintWidget";
 
 interface Props {
   collection: NextGenCollection;

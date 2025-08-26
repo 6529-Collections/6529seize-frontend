@@ -1,28 +1,28 @@
 "use client";
 
-import styles from "./Delegation.module.scss";
-import { Container, Row, Col, Form } from "react-bootstrap";
 import { useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
+import styles from "./Delegation.module.scss";
 
+import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
+import { isValidEthAddress } from "@/helpers/Helpers";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
-} from "./constants";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
-import { DELEGATION_ABI } from "../../abis";
-import { isValidEthAddress } from "../../helpers/Helpers";
-import { getGasError } from "./delegation_shared";
+} from "./delegation-constants";
+import { getGasError } from "./delegation-shared";
 import {
-  DelegationCloseButton,
-  DelegationFormOriginalDelegatorFormGroup,
-  DelegationFormLabel,
   DelegationAddressDisabledInput,
+  DelegationCloseButton,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
+  DelegationFormLabel,
+  DelegationFormOriginalDelegatorFormGroup,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   address: string;
