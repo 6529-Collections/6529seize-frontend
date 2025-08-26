@@ -1,9 +1,9 @@
-import CollectionPageShell from "../CollectionPageShell";
 import NextGenTraitSets from "@/components/nextGen/collections/collectionParts/NextGenTraitSets";
-import { fetchCollection } from "../page-utils";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import CollectionPageShell from "../CollectionPageShell";
+import { fetchCollection } from "../page-utils";
 
 export async function generateMetadata({
   params,
@@ -22,18 +22,19 @@ export async function generateMetadata({
   });
 }
 
-export default async function Page({
+export default async function NextGenTraitSetsPage({
   params,
 }: {
-  params: { collection: string };
+  params: Promise<{ collection: string }>;
 }) {
-  const collection = await fetchCollection(params.collection);
-  if (!collection) {
+  const { collection } = await params;
+  const resolvedCollection = await fetchCollection(collection);
+  if (!resolvedCollection) {
     notFound();
   }
   return (
-    <CollectionPageShell collection={collection}>
-      <NextGenTraitSets collection={collection} />
+    <CollectionPageShell collection={resolvedCollection}>
+      <NextGenTraitSets collection={resolvedCollection} />
     </CollectionPageShell>
   );
 }

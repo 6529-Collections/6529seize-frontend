@@ -1,9 +1,9 @@
-import NextGenCollectionPageClient from "./NextGenCollectionPageClient";
+import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
-import { fetchCollection, getCollectionView } from "../page-utils";
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { notFound } from "next/navigation";
+import { fetchCollection, getCollectionView } from "../page-utils";
+import NextGenCollectionPageClient from "./NextGenCollectionPageClient";
 
 export async function generateMetadata({
   params,
@@ -30,15 +30,21 @@ export async function generateMetadata({
   });
 }
 
-export default async function Page({
+export default async function NextGenCollectionPage({
   params,
 }: {
-  params: { collection: string; view?: string[] };
+  params: Promise<{ collection: string; view?: string[] }>;
 }) {
-  const collection = await fetchCollection(params.collection);
-  if (!collection) {
+  const { collection, view } = await params;
+  const resolvedCollection = await fetchCollection(collection);
+  if (!resolvedCollection) {
     notFound();
   }
-  const view = getCollectionView(params.view?.[0] ?? "");
-  return <NextGenCollectionPageClient collection={collection} view={view} />;
+  const resolvedView = getCollectionView(view?.[0] ?? "");
+  return (
+    <NextGenCollectionPageClient
+      collection={resolvedCollection}
+      view={resolvedView}
+    />
+  );
 }

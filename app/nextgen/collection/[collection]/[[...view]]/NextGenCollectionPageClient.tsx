@@ -1,13 +1,14 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
-import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import NextGenCollectionComponent, {
+  ContentView,
+} from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
+import { useTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
+import styles from "@/styles/Home.module.scss";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSetTitle } from "@/contexts/TitleContext";
 import { getContentViewKeyByValue } from "../page-utils";
 import { useShallowRedirect } from "../useShallowRedirect";
 
@@ -18,7 +19,7 @@ export default function NextGenCollectionPageClient({
   readonly collection: NextGenCollection;
   readonly view: ContentView;
 }) {
-  const setTitle = useSetTitle();
+  const { setTitle } = useTitle();
   const router = useRouter();
   const searchParams = useSearchParams();
 
