@@ -65,13 +65,13 @@ export default function WaveDropsAll({
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
 
-  const { 
-    scrollContainerRef, 
+  const {
+    scrollContainerRef,
     bottomAnchorRef,
     isAtBottom,
     shouldPinToBottom,
     scrollIntent,
-    scrollToVisualBottom 
+    scrollToVisualBottom
   } = useScrollBehavior();
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
@@ -218,9 +218,9 @@ export default function WaveDropsAll({
     setTimeout(() => {
       if (success) {
         setSerialNo(null);
-        setIsScrolling(false);
       }
     }, 500);
+    setIsScrolling(false);
   }, [
     waveId,
     fetchNextPage,
@@ -345,11 +345,10 @@ export default function WaveDropsAll({
         />
 
         <div
-          className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${
-            typingMessage
+          className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${typingMessage
               ? "tw-opacity-100 tw-visible"
               : "tw-opacity-0 tw-invisible tw-hidden"
-          }`}>
+            }`}>
           <div className="tw-flex tw-items-center tw-gap-x-0.5">
             <FontAwesomeIcon
               icon={faCircle}
