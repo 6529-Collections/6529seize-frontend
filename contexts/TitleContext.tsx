@@ -1,14 +1,14 @@
 "use client";
 
+import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,
   useContext,
-  useState,
   useEffect,
-  useRef,
   useMemo,
+  useRef,
+  useState,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 
 type TitleContextType = {
   title: string;
@@ -33,13 +33,14 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
   if (pathname.startsWith("/my-stream/notifications"))
     return "Notifications | My Stream | Brain";
   if (pathname.startsWith("/my-stream")) return "My Stream | Brain";
-  if (pathname.startsWith("/the-memes")) return "The Memes";
-  if (pathname.startsWith("/meme-lab")) return "Meme Lab";
+  if (pathname.startsWith("/the-memes")) return "The Memes | Collections";
+  if (pathname.startsWith("/meme-lab")) return "Meme Lab | Collections";
   if (pathname.startsWith("/network")) return "Network";
-  if (pathname.startsWith("/6529-gradient")) return "6529 Gradient";
-  if (pathname.startsWith("/nextgen")) return "NextGen";
-  if (pathname.startsWith("/rememes")) return "Rememes";
-  if (pathname.startsWith("/open-data")) return "Open Data";
+  if (pathname.startsWith("/6529-gradient"))
+    return "6529 Gradient | Collections";
+  if (pathname.startsWith("/nextgen")) return "NextGen | Collections";
+  if (pathname.startsWith("/rememes")) return "Rememes | Collections";
+  if (pathname.startsWith("/open-data")) return "Open Data | Tools";
   // Handle profile pages (e.g., /username)
   if (pathname !== "/" && pathname.split("/").length === 2) {
     const segments = pathname.split("/");
