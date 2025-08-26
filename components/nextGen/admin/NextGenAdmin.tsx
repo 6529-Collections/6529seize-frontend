@@ -3,7 +3,7 @@
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import styles from "./NextGenAdmin.module.scss";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -195,8 +195,9 @@ export default function NextGenAdmin() {
     collectionArtists
   );
 
+  const searchParams = useSearchParams()!;
   const [focus, setFocus] = useState<Focus>(
-    (router.query.focus as Focus) || Focus.GLOBAL
+    (searchParams.get("focus") as Focus) || Focus.GLOBAL
   );
 
   const [globalFocus, setGlobalFocus] = useState<GlobalFocus>();
@@ -207,14 +208,9 @@ export default function NextGenAdmin() {
     setGlobalFocus(undefined);
     setCollectionFocus(undefined);
     setArtistFocus(undefined);
-    router.push(
-      {
-        pathname: router.pathname,
-        query: `focus=${focus}`,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("focus", focus);
+    router.push(`?${params.toString()}`);
   }, [focus]);
 
   function close() {
