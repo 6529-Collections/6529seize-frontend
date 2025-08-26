@@ -1,19 +1,21 @@
+import GradientsPage from "@/app/6529-gradient/page";
+import DisputeResolution from "@/app/dispute-resolution/page";
+import PlansPage from "@/app/emma/plans/page";
+import MemeLabCollectionPage from "@/app/meme-lab/collection/[collection]/page";
+import { AuthContext } from "@/components/auth/Auth";
+import MemeLabCollection from "@/components/memelab/MemeLabCollection";
+import Seize404 from "@/pages/404";
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import Seize404 from "@/pages/404";
-import DisputeResolution from "@/app/dispute-resolution/page";
-import GradientsPage from "@/app/6529-gradient/page";
-import PlansPage from "@/app/emma/plans/page";
-import MemeLabCollectionPage from "@/pages/meme-lab/collection/[collection]";
-import { AuthContext } from "@/components/auth/Auth";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("@/components/6529Gradient/6529Gradient", () => () => (
   <div data-testid="gradient" />
 ));
-jest.mock("@/components/memelab/MemeLabCollection", () => () => (
-  <div data-testid="collection" />
-));
+jest.mock("@/components/memelab/MemeLabCollection", () => ({
+  __esModule: true,
+  default: jest.fn(() => <div data-testid="meme-lab-collection" />),
+}));
 jest.mock(
   "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper",
   () =>
@@ -95,12 +97,14 @@ describe("additional static pages", () => {
     expect(screen.getByText(/EMMA/i)).toBeInTheDocument();
   });
 
-  it("renders meme lab collection page", () => {
-    render(
-      <TestProvider>
-        <MemeLabCollectionPage name="Test Collection" />
-      </TestProvider>
-    );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
+  it("renders MemeLabCollection with collectionName", async () => {
+    const Page = await MemeLabCollectionPage({
+      params: Promise.resolve({ collection: "test-collection" }),
+    });
+
+    render(Page);
+
+    const calls = (MemeLabCollection as jest.Mock).mock.calls;
+    expect(calls[0][0]).toEqual({ collectionName: "test collection" });
   });
 });
