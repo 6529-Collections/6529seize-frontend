@@ -11,7 +11,7 @@ import {
 import Image from "next/image";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import DateCountdown from "../../../date-countdown/DateCountdown";
 import { fetchUrl } from "../../../../services/6529api";
 import DotLoader from "../../../dotLoader/DotLoader";
@@ -74,7 +74,7 @@ export function NextGenBackToCollectionPageLink(
 }
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
-  const router = useRouter();
+  const pathname = usePathname() || "";
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
     props.collection.allowlist_end
@@ -108,7 +108,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   }
 
   function printCountdown(title: string, date: number) {
-    const pathParts = router.pathname.split("/");
+    const pathParts = pathname.split("/");
     const hideMintBtn = pathParts[pathParts.length - 1] === "mint";
 
     return (

@@ -45,7 +45,7 @@ describe('wagmiAppWalletConnector', () => {
     address_hashed: 'hashed_address_data',
     private_key: 'encrypted_private_key_data',
     name: 'Test Wallet'
-  };
+  } as any;
 
   const mockRequestPasswordModal = jest.fn() as jest.MockedFunction<() => Promise<string>>;
   let connector: any;

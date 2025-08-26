@@ -18,7 +18,7 @@ import {
 } from "../../../../entities/INextgen";
 import { Fragment, useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { areEqualAddresses } from "../../../../helpers/Helpers";
 import { SortDirection } from "../../../../entities/ISort";
@@ -43,6 +43,7 @@ interface Props {
 
 export default function NextGenCollectionArt(props: Readonly<Props>) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -87,13 +88,10 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   function setTraitsQuery(q: string) {
     if (q) {
-      const traitsQuery = router.query.traits as string;
-      const traitValues = traitsQuery.split(",");
+      const traitValues = q.split(",");
       const selectedTraits: TraitValuePair[] = [];
       traitValues.forEach((tv) => {
-        const traitValue = tv.split(":");
-        const t = traitValue[0];
-        const v = traitValue[1];
+        const [t, v] = tv.split(":");
         if (
           traits.some(
             (tr) =>
@@ -115,33 +113,38 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   useEffect(() => {
     if (traitsLoaded && !routerLoaded) {
-      setTraitsQuery(router.query.traits as string);
-      if (router.query.sort) {
-        const sortQuery = router.query.sort as string;
+      setTraitsQuery(searchParams?.get("traits") ?? "");
+      const sortParam = searchParams?.get("sort");
+      if (sortParam) {
+        const sortQuery = sortParam as string;
         const newSort =
           NextGenListFilters[
             sortQuery?.toUpperCase() as keyof typeof NextGenListFilters
           ] || NextGenListFilters.ID;
         setSort(newSort);
         if (isRaritySort(newSort)) {
-          if (router.query.show_normalised) {
-            setShowNormalised(router.query.show_normalised === "true");
+          const showNorm = searchParams?.get("show_normalised");
+          if (showNorm) {
+            setShowNormalised(showNorm === "true");
           }
-          if (router.query.show_trait_count) {
-            setShowTraitCount(router.query.show_trait_count === "true");
+          const showCount = searchParams?.get("show_trait_count");
+          if (showCount) {
+            setShowTraitCount(showCount === "true");
           }
         }
       }
-      if (router.query.sort_direction) {
-        const sortDirQuery = router.query.sort_direction as string;
+      const sortDirParam = searchParams?.get("sort_direction");
+      if (sortDirParam) {
+        const sortDirQuery = sortDirParam as string;
         setSortDir(
           SortDirection[
             sortDirQuery?.toUpperCase() as keyof typeof SortDirection
           ] || SortDirection.DESC
         );
       }
-      if (router.query.listed) {
-        const listedQuery = router.query.listed as string;
+      const listedParam = searchParams?.get("listed");
+      if (listedParam) {
+        const listedQuery = listedParam as string;
         setListedType(
           listedQuery === "true"
             ? NextGenTokenListedType.LISTED
@@ -150,7 +153,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       }
       setRouterLoaded(true);
     }
-  }, [router.query.traits, traitsLoaded]);
+  }, [searchParams, traitsLoaded, routerLoaded]);
 
   useEffect(() => {
     commonApiFetch<TraitValues[]>({
@@ -190,9 +193,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       router.push(
         `/nextgen/collection/${formatNameForUrl(props.collection.name)}/art${
           query ? `?${query}` : ""
-        }`,
-        undefined,
-        { shallow: true }
+        }`
       );
     }
   }, [
