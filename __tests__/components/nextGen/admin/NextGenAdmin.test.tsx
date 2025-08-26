@@ -10,6 +10,7 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
 }));
 jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/contexts/TitleContext', () => ({ useSetTitle: jest.fn() }));
 
 jest.mock('../../../../components/nextGen/admin/NextGenAdminSetData', () => ({ __esModule: true, default: () => <div /> }));
 jest.mock('../../../../components/nextGen/admin/NextGenAdminSetCosts', () => ({ __esModule: true, default: () => <div /> }));

@@ -43,6 +43,7 @@ import NextGenAdminUpdateCollection, {
 import NextGenAdminUploadAL from "./NextGenAdminUploadAL";
 import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 enum Focus {
   GLOBAL = "global",
@@ -104,6 +105,7 @@ export function printAdminErrors(errors: string[]) {
 export default function NextGenAdmin() {
   const router = useRouter();
   const account = useSeizeConnectContext();
+  useSetTitle("NextGen Admin");
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const createCollectionFunctionAdmin = useFunctionAdmin(
