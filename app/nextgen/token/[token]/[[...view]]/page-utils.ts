@@ -1,7 +1,11 @@
-import { NextGenCollection, NextGenToken, NextGenTrait } from "@/entities/INextgen";
-import { commonApiFetch } from "@/services/api/common-api";
-import { isEmptyObject } from "@/helpers/Helpers";
 import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import {
+  NextGenCollection,
+  NextGenToken,
+  NextGenTrait,
+} from "@/entities/INextgen";
+import { isEmptyObject } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export interface TokenData {
   tokenId: number;
@@ -11,11 +15,15 @@ export interface TokenData {
   collection: NextGenCollection;
 }
 
-export async function fetchTokenData(tokenId: string): Promise<TokenData | null> {
+export async function fetchTokenData(
+  tokenId: string,
+  headers: Record<string, string>
+): Promise<TokenData | null> {
   let token: NextGenToken | null;
   try {
     token = await commonApiFetch<NextGenToken>({
       endpoint: `nextgen/tokens/${tokenId}`,
+      headers: headers,
     });
   } catch {
     token = null;
@@ -28,6 +36,7 @@ export async function fetchTokenData(tokenId: string): Promise<TokenData | null>
   if (token && !token.pending) {
     traits = await commonApiFetch<NextGenTrait[]>({
       endpoint: `nextgen/tokens/${token.id}/traits`,
+      headers: headers,
     }).catch(() => []);
     tokenCount = traits[0]?.token_count ?? 0;
     collectionId = token.collection_id;
@@ -38,6 +47,7 @@ export async function fetchTokenData(tokenId: string): Promise<TokenData | null>
 
   const collection = await commonApiFetch<NextGenCollection>({
     endpoint: `nextgen/collections/${collectionId}`,
+    headers: headers,
   }).catch(() => null);
 
   if (!collection || isEmptyObject(collection)) {

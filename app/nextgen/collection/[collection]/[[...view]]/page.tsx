@@ -1,5 +1,6 @@
 import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchCollection, getCollectionView } from "../page-utils";
@@ -11,7 +12,8 @@ export async function generateMetadata({
   readonly params: Promise<{ collection: string; view?: string[] }>;
 }): Promise<Metadata> {
   const { collection, view } = await params;
-  const resolvedCollection = await fetchCollection(collection);
+  const headers = await getAppCommonHeaders();
+  const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
     return getAppMetadata({ title: "NextGen" });
   }
@@ -37,7 +39,8 @@ export default async function NextGenCollectionPage({
   readonly params: Promise<{ collection: string; view?: string[] }>;
 }) {
   const { collection, view } = await params;
-  const resolvedCollection = await fetchCollection(collection);
+  const headers = await getAppCommonHeaders();
+  const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
     notFound();
   }

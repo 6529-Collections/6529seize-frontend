@@ -1,5 +1,6 @@
 import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
@@ -11,7 +12,8 @@ export async function generateMetadata({
   readonly params: Promise<{ token: string; view?: string[] }>;
 }): Promise<Metadata> {
   const { token, view } = await params;
-  const data = await fetchTokenData(token);
+  const headers = await getAppCommonHeaders();
+  const data = await fetchTokenData(token, headers);
   if (!data) {
     return getAppMetadata({ title: "NextGen Token" });
   }
@@ -31,13 +33,14 @@ export async function generateMetadata({
   });
 }
 
-export default async function Page({
+export default async function NextGenTokenPage({
   params,
 }: {
   readonly params: Promise<{ token: string; view?: string[] }>;
 }) {
   const { token, view } = await params;
-  const data = await fetchTokenData(token);
+  const headers = await getAppCommonHeaders();
+  const data = await fetchTokenData(token, headers);
   if (!data) {
     notFound();
   }
