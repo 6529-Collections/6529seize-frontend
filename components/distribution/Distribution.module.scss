@@ -97,53 +97,8 @@
   }
 }
 
-.clearSearchText {
-  color: variables.$font-color-h;
-  font-size: larger;
-  font-weight: bold;
-  text-decoration: none;
-}
-
 .distributionPhaseLinkActive {
   color: variables.$font-color;
-}
-
-.searchBtn {
-  background-color: white;
-  color: black;
-  width: 40px;
-  height: 40px;
-  text-align: center;
-  border-radius: 20px;
-  padding: 10px;
-  cursor: pointer;
-  &:hover {
-    background-color: variables.$off-white;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .searchBtn {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-.searchBtnActive {
-  background-color: color.adjust($color: variables.$project-green, $lightness: 10%);
-
-  &:hover {
-    border: 1px solid variables.$project-green;
-    background-color: color.adjust(
-      $color: variables.$project-green,
-      $lightness: 10%
-    );
-  }
-}
-
-.searchBtnIcon {
-  width: 20px;
-  font-size: 20px;
 }
 
 .totalResults {
@@ -166,56 +121,5 @@
   color: variables.$lightest-grey;
   &:hover {
     color: white;
-  }
-}
-
-.searchWalletDisplayWrapper {
-  white-space: nowrap;
-  float: none;
-  line-height: 250%;
-}
-
-.searchWalletDisplay {
-  background-color: #333;
-  padding: 5px 10px;
-  margin-right: 10px;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-}
-
-.searchWalletDisplayBtn {
-  width: 30px;
-  background-color: #333;
-  padding: 5px 10px;
-  border-right: 1px solid #999;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  cursor: pointer;
-  outline: 0 !important;
-
-  &:hover {
-    background-color: variables.$lighter-grey;
-  }
-}
-
-.clearSearchBtnIcon {
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
-  cursor: pointer;
-
-  &:hover {
-    color: variables.$lightest-grey;
-  }
-
-  &:focus {
-    outline: none !important;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .clearSearchBtnIcon {
-    width: 32px;
-    height: 32px;
   }
 }

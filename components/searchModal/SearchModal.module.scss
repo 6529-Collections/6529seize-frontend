@@ -118,7 +118,7 @@
 }
 
 .searchBtn {
-  background-color: white;
+  background-color: white !important;
   color: black;
   width: 40px;
   height: 40px;
@@ -137,7 +137,10 @@
 }
 
 .searchBtnActive {
-  background-color: color.adjust($color: variables.$project-green, $lightness: 10%) !important;
+  background-color: color.adjust(
+    $color: variables.$project-green,
+    $lightness: 10%
+  ) !important;
 
   &:hover,
   &:active,
@@ -156,17 +159,17 @@
 
 .searchWalletDisplayBtn {
   width: 30px;
-  background-color: #333;
-  padding: 2px 5px;
-  border-right: 1px solid #999;
+  background-color: #333 !important;
+  padding: 3px 5px !important;
+  border-right: 1px solid #999 !important;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
   cursor: pointer;
   outline: 0 !important;
-  text-decoration: none;
+  text-decoration: none !important;
 
   &:hover {
-    background-color: variables.$lighter-grey;
+    background-color: variables.$lighter-grey !important;
   }
 
   &:disabled {
