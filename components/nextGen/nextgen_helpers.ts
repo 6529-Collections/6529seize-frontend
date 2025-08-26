@@ -1,6 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { goerli, mainnet, sepolia } from "viem/chains";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
+import { NextGenCollection } from "../../entities/INextgen";
+import { areEqualAddresses } from "../../helpers/Helpers";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { Crumb } from "../breadcrumb/Breadcrumb";
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
@@ -8,7 +14,6 @@ import {
   NEXTGEN_MINTER,
   NextGenContract,
 } from "./nextgen_contracts";
-import { areEqualAddresses } from "../../helpers/Helpers";
 import {
   AdditionalData,
   Info,
@@ -20,11 +25,6 @@ import {
   Status,
   TokensPerAddress,
 } from "./nextgen_entities";
-import { useEffect, useState } from "react";
-import { Crumb } from "../breadcrumb/Breadcrumb";
-import { goerli, mainnet, sepolia } from "viem/chains";
-import { NextGenCollection } from "../../entities/INextgen";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 export function useGlobalAdmin(address: string) {
   return useReadContract({
@@ -646,16 +646,28 @@ export function getOpenseaLink(chainId: number, tokenId?: number) {
   }/${tokenId ?? ""}`;
 }
 
-export function getBlurLink(tokenId: number) {
-  return `https://blur.io/eth/asset/${NEXTGEN_CORE[
+export function getBlurCollectionLink() {
+  return `https://blur.io/eth/collection/${NEXTGEN_CORE[
     NEXTGEN_CHAIN_ID
-  ].toLowerCase()}/${tokenId}`;
+  ].toLowerCase()}`;
 }
 
-export function getMagicEdenLink(tokenId: number) {
+export function getMagicEdenCollectionLink() {
+  return `https://magiceden.io/collections/ethereum/${NEXTGEN_CORE[
+    NEXTGEN_CHAIN_ID
+  ].toLowerCase()}`;
+}
+
+export function getBlurLink(tokenId?: number) {
+  return `https://blur.io/eth/asset/${NEXTGEN_CORE[
+    NEXTGEN_CHAIN_ID
+  ].toLowerCase()}/${tokenId ?? ""}`;
+}
+
+export function getMagicEdenLink(tokenId?: number) {
   return `https://magiceden.io/item-details/ethereum/${NEXTGEN_CORE[
     NEXTGEN_CHAIN_ID
-  ].toLowerCase()}/${tokenId}`;
+  ].toLowerCase()}/${tokenId ?? ""}`;
 }
 
 export function formatNameForUrl(name: string) {

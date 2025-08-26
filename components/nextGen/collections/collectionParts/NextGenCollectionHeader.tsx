@@ -11,6 +11,8 @@ import {
 } from "@/components/nextGen/nextgen_entities";
 import {
   formatNameForUrl,
+  getBlurCollectionLink,
+  getMagicEdenCollectionLink,
   getOpenseaLink,
   getStatusFromDates,
   useCollectionMintCount,
@@ -25,6 +27,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -236,8 +239,8 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             />
           }
           {props.show_links && (!capacitor.isIos || country === "US") && (
-            <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
-              <a
+            <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-2">
+              <Link
                 href={
                   props.collection.opensea_link ||
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
@@ -251,7 +254,31 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   width={32}
                   height={32}
                 />
-              </a>
+              </Link>
+              <Link
+                href={getBlurCollectionLink()}
+                target="_blank"
+                rel="noreferrer">
+                <Image
+                  className={styles.marketplace}
+                  src="/blur.png"
+                  alt="blur"
+                  width={32}
+                  height={32}
+                />
+              </Link>
+              <Link
+                href={getMagicEdenCollectionLink()}
+                target="_blank"
+                rel="noreferrer">
+                <Image
+                  className={styles.marketplace}
+                  src="/magiceden.png"
+                  alt="magiceden"
+                  width={32}
+                  height={32}
+                />
+              </Link>
             </span>
           )}
         </Col>

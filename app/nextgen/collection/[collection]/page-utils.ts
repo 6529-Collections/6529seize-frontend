@@ -1,7 +1,9 @@
 import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { getAppMetadata } from "@/components/providers/metadata";
 import { NextGenCollection } from "@/entities/INextgen";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { Metadata } from "next";
 
 export async function fetchCollection(
   id: string,
@@ -40,4 +42,25 @@ export function getContentViewKeyByValue(value: string): string {
     return ContentView.TOP_TRAIT_SETS;
   }
   return ContentView.OVERVIEW;
+}
+
+export async function generateNextgenCollectionMetadata({
+  collection,
+  headers,
+  page,
+}: {
+  readonly collection: string;
+  readonly headers: Record<string, string>;
+  readonly page: string;
+}): Promise<Metadata> {
+  const resolvedCollection = await fetchCollection(collection, headers);
+  if (!resolvedCollection) {
+    return getAppMetadata({ title: page });
+  }
+  return getAppMetadata({
+    title: `${page} | ${resolvedCollection.name}`,
+    ogImage: resolvedCollection.image,
+    description: "NextGen",
+    twitterCard: "summary_large_image",
+  });
 }
