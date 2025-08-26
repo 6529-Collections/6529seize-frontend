@@ -1,12 +1,16 @@
-import { NextGenCollection } from "@/entities/INextgen";
-import { commonApiFetch } from "@/services/api/common-api";
-import { isEmptyObject } from "@/helpers/Helpers";
 import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { NextGenCollection } from "@/entities/INextgen";
+import { isEmptyObject } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 
-export async function fetchCollection(id: string): Promise<NextGenCollection | null> {
+export async function fetchCollection(
+  id: string,
+  headers: Record<string, string>
+): Promise<NextGenCollection | null> {
   const parsedId = encodeURIComponent(id.replaceAll(/-/g, " "));
   const collection = await commonApiFetch<NextGenCollection>({
     endpoint: `nextgen/collections/${parsedId}`,
+    headers: headers,
   }).catch(() => null);
   return isEmptyObject(collection) ? null : collection;
 }

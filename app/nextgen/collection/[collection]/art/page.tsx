@@ -1,5 +1,6 @@
 import NextGenCollectionArtPage from "@/components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CollectionPageShell from "../CollectionPageShell";
@@ -11,7 +12,8 @@ export async function generateMetadata({
   readonly params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const { collection } = await params;
-  const resolvedCollection = await fetchCollection(collection);
+  const headers = await getAppCommonHeaders();
+  const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
     return getAppMetadata({ title: "Art" });
   }
@@ -29,7 +31,8 @@ export default async function NextGenArtPage({
   readonly params: Promise<{ collection: string }>;
 }) {
   const { collection } = await params;
-  const resolvedCollection = await fetchCollection(collection);
+  const headers = await getAppCommonHeaders();
+  const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
     notFound();
   }

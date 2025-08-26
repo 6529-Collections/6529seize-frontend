@@ -77,7 +77,7 @@ export default function NextGen(props: Readonly<Props>) {
                             props.collection.name
                           )}`}>
                           <button
-                            className={`font-larger pt-2 pb-2 seize-btn no-wrap ${styles.exploreBtn}`}>
+                            className={`font-larger pt-2 pb-2 no-wrap ${styles.exploreBtn}`}>
                             <span className="font-larger">
                               Explore Collection
                             </span>

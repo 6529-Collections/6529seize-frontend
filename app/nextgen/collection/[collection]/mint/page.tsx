@@ -1,5 +1,6 @@
 import NextGenCollectionMint from "@/components/nextGen/collections/collectionParts/mint/NextGenCollectionMint";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CollectionPageShell from "../CollectionPageShell";
@@ -11,7 +12,8 @@ export async function generateMetadata({
   readonly params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const { collection } = await params;
-  const resolvedCollection = await fetchCollection(collection);
+  const headers = await getAppCommonHeaders();
+  const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
     return getAppMetadata({ title: "Mint" });
   }
@@ -29,7 +31,8 @@ export default async function NextGenMintPage({
   readonly params: Promise<{ collection: string }>;
 }) {
   const { collection } = await params;
-  const resolvedCollection = await fetchCollection(collection);
+  const headers = await getAppCommonHeaders();
+  const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
     notFound();
   }
