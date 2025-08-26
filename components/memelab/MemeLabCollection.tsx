@@ -35,7 +35,7 @@ interface Props {
 export default function LabCollection({
   collectionName,
 }: {
-  collectionName: string;
+  readonly collectionName: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -112,16 +112,7 @@ export default function LabCollection({
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      sortChanged(
-        router,
-        sort,
-        sortDir,
-        volumeType,
-        nfts,
-        nftMetas,
-        collectionName,
-        setNfts
-      );
+      sortChanged(router, sort, sortDir, volumeType, nfts, nftMetas, setNfts);
     }
   }, [sort, sortDir, nftsLoaded]);
 

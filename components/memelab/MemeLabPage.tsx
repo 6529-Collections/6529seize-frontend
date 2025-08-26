@@ -321,7 +321,7 @@ export default function MemeLabPageComponent({
                       <td>
                         <Link
                           href={`/meme-lab/collection/${encodeURIComponent(
-                            nftMeta.metadata_collection.replace(" ", "-")
+                            nftMeta.metadata_collection.replaceAll(" ", "-")
                           )}`}>
                           {nftMeta.metadata_collection}
                         </Link>
