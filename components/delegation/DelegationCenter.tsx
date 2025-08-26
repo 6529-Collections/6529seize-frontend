@@ -4,7 +4,7 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 
-import { SUPPORTED_COLLECTIONS } from "../../pages/delegation/[...section]";
+import { SUPPORTED_COLLECTIONS } from "./constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { DelegationCenterSection } from "./DelegationCenterMenu";

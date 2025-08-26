@@ -18,7 +18,7 @@ import {
   ALL_USE_CASES,
   SUPPORTED_COLLECTIONS,
   MINTING_USE_CASE,
-} from "../../../pages/delegation/[...section]";
+} from "../constants";
 import { fetchUrl } from "../../../services/6529api";
 import Address from "../../address/Address";
 import {

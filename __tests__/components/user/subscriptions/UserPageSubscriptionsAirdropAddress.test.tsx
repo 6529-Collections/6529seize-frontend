@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import UserPageSubscriptionsAirdropAddress from '../../../../components/user/subscriptions/UserPageSubscriptionsAirdropAddress';
 import { MEMES_CONTRACT } from '../../../../constants';
-import { AIRDROPS_USE_CASE } from '../../../../pages/delegation/[...section]';
+import { AIRDROPS_USE_CASE } from '../../../../components/delegation/constants';
 
 jest.mock('../../../../helpers/Helpers', () => ({ formatAddress: () => 'formatted' }));
 

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegation/[...section]";
+} from "@/components/delegation/constants";
 import { fetchAllPages } from "../../services/6529api";
 import { Delegation } from "../../entities/IDelegation";
 import { areEqualAddresses } from "../../helpers/Helpers";

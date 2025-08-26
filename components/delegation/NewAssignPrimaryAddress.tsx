@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import {
   DelegationCollection,
   PRIMARY_ADDRESS_USE_CASE,
-} from "../../pages/delegation/[...section]";
+} from "./constants";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,

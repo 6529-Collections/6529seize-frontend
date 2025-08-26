@@ -17,7 +17,7 @@ import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import {
   DelegationCollection,
   SUPPORTED_COLLECTIONS,
-} from "../../pages/delegation/[...section]";
+} from "./constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation_shared";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 

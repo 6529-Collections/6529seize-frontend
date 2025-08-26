@@ -14,7 +14,7 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { ANY_COLLECTION } from "../../../pages/delegation/[...section]";
+import { ANY_COLLECTION } from "@/components/delegation/constants";
 import { MintingDetails } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
 import {

@@ -1,7 +1,7 @@
 import { getParams, getReadParams, getActiveDelegationsReadParams, getConsolidationReadParams, formatExpiry, getDelegationsFromData } from '../../../components/delegation/CollectionDelegation';
 import { DELEGATION_CONTRACT, NEVER_DATE } from '../../../constants';
 import { DELEGATION_ABI } from '../../../abis';
-import { PRIMARY_ADDRESS_USE_CASE, SUB_DELEGATION_USE_CASE, CONSOLIDATION_USE_CASE, DELEGATION_USE_CASES } from '../../../pages/delegation/[...section]';
+import { PRIMARY_ADDRESS_USE_CASE, SUB_DELEGATION_USE_CASE, CONSOLIDATION_USE_CASE, DELEGATION_USE_CASES } from '../../../components/delegation/constants';
 
 describe('CollectionDelegation utility functions', () => {
   it('builds params with extra use cases', () => {

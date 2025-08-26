@@ -8,7 +8,7 @@ import { useState } from "react";
 import {
   DelegationCollection,
   ALL_USE_CASES,
-} from "../../pages/delegation/[...section]";
+} from "./constants";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";

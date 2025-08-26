@@ -18,7 +18,7 @@ import { fromGWEI } from "../../../../../helpers/Helpers";
 import {
   ALL_USE_CASE,
   MINTING_USE_CASE,
-} from "../../../../../pages/delegation/[...section]";
+} from "@/components/delegation/constants";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import { fetchUrl } from "../../../../../services/6529api";
 import {

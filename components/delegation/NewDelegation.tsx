@@ -7,7 +7,7 @@ import { useState } from "react";
 import {
   DELEGATION_USE_CASES,
   DelegationCollection,
-} from "../../pages/delegation/[...section]";
+} from "./constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";

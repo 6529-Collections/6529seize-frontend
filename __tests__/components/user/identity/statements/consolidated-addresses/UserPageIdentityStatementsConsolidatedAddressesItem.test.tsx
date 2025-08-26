@@ -4,7 +4,7 @@ import UserPageIdentityStatementsConsolidatedAddressesItem from '../../../../../
 import { AuthContext } from '../../../../../../components/auth/Auth';
 import { DELEGATION_ABI } from '../../../../../../abis';
 import { DELEGATION_CONTRACT, DELEGATION_ALL_ADDRESS, NEVER_DATE } from '../../../../../../constants';
-import { PRIMARY_ADDRESS_USE_CASE } from '../../../../../../pages/delegation/[...section]';
+import { PRIMARY_ADDRESS_USE_CASE } from '../../../../../../components/delegation/constants';
 
 jest.useFakeTimers();
 

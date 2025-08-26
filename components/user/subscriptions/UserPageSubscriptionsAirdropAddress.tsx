@@ -2,7 +2,7 @@ import { formatAddress } from "../../../helpers/Helpers";
 import { Container, Row, Col } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { MEMES_CONTRACT } from "../../../constants";
-import { AIRDROPS_USE_CASE } from "../../../pages/delegation/[...section]";
+import { AIRDROPS_USE_CASE } from "@/components/delegation/constants";
 
 interface AirdropAddress {
   address: string;

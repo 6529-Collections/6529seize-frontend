@@ -9,7 +9,7 @@ import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
-} from "../../pages/delegation/[...section]";
+} from "./constants";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";

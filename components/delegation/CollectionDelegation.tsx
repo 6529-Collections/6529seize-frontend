@@ -30,7 +30,7 @@ import {
   ALL_USE_CASES,
   MEMES_COLLECTION,
   PRIMARY_ADDRESS_USE_CASE,
-} from "../../pages/delegation/[...section]";
+} from "./constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import {

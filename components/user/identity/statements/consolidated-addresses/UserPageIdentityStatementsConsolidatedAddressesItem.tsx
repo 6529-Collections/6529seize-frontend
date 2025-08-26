@@ -13,7 +13,7 @@ import {
   DELEGATION_CONTRACT,
   NEVER_DATE,
 } from "../../../../../constants";
-import { PRIMARY_ADDRESS_USE_CASE } from "../../../../../pages/delegation/[...section]";
+import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/constants";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
 import { useAuth } from "../../../../../components/auth/Auth";
