@@ -188,7 +188,6 @@ export function sortChanged(
   volumeType: VolumeType,
   nfts: LabNFT[],
   nftMetas: LabExtendedData[],
-  collectionName: string | undefined,
   setNfts: (nfts: LabNFT[]) => void,
   labArtists?: string[],
   labCollections?: string[],
@@ -203,9 +202,6 @@ export function sortChanged(
     sort: sortKey,
     sort_dir: sortDir.toLowerCase(),
   };
-  if (collectionName) {
-    newQuery.collection = collectionName?.replaceAll(" ", "-");
-  }
 
   router.replace(`?${new URLSearchParams(newQuery).toString()}`);
 
@@ -545,7 +541,6 @@ export default function MemeLabComponent() {
         volumeType,
         nfts,
         nftMetas,
-        undefined,
         setNfts,
         labArtists,
         labCollections,

@@ -23,8 +23,9 @@ export async function generateMetadata({
   params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const { collection } = await params;
+  const collectionName = collection.replaceAll("-", " ");
   return getAppMetadata({
-    title: `${collection} | Meme Lab Collections`,
+    title: `${collectionName} | Meme Lab Collections`,
     description: "Collections",
     ogImage: `${process.env.BASE_ENDPOINT}/meme-lab.jpg`,
     twitterCard: "summary",
