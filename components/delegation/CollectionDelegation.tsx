@@ -25,6 +25,8 @@ import {
   faCircleArrowLeft,
   faEdit,
   faInfoCircle,
+  faLock,
+  faLockOpen,
   faMinus,
   faPlus,
   faXmark,
@@ -1624,7 +1626,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 setToast({ title, message });
               }}>
               <FontAwesomeIcon
-                icon={collectionLockRead.data ? "lock" : "lock-open"}
+                icon={collectionLockRead.data ? faLock : faLockOpen}
                 className={styles.buttonIcon}
               />
               {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
@@ -1740,8 +1742,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   <FontAwesomeIcon
                     icon={
                       useCaseLockStatuses.data?.[lockUseCaseIndex]
-                        ? "lock"
-                        : "lock-open"
+                        ? faLock
+                        : faLockOpen
                     }
                     className={styles.buttonIcon}
                   />
