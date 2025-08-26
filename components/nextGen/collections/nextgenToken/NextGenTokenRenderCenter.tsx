@@ -1,15 +1,15 @@
 "use client";
 
-import styles from "./NextGenToken.module.scss";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
-import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
-import { NextGenToken } from "../../../../entities/INextgen";
+import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants";
+import { NextGenToken } from "@/entities/INextgen";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { mainnet } from "wagmi/chains";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { numberWithCommas } from "../../../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
-import { NEXTGEN_GENERATOR_BASE_URL } from "../../../../constants";
+import styles from "./NextGenToken.module.scss";
+import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 
 export default function NextgenTokenRenderCenter(
   props: Readonly<{ token: NextGenToken }>

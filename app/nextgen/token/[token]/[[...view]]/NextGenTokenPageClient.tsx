@@ -1,14 +1,18 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import { NextGenCollection, NextGenToken, NextGenTrait } from "@/entities/INextgen";
-import NextGenTokenComponent from "@/components/nextGen/collections/nextgenToken/NextGenToken";
-import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
 import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
+import NextGenTokenComponent from "@/components/nextGen/collections/nextgenToken/NextGenToken";
+import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
+import { useTitle } from "@/contexts/TitleContext";
+import {
+  NextGenCollection,
+  NextGenToken,
+  NextGenTrait,
+} from "@/entities/INextgen";
+import styles from "@/styles/Home.module.scss";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSetTitle } from "@/contexts/TitleContext";
 
 export default function NextGenTokenPageClient({
   tokenId,
@@ -26,8 +30,8 @@ export default function NextGenTokenPageClient({
   readonly view: ContentView;
 }) {
   const router = useRouter();
-  const setTitle = useSetTitle();
-  const [tokenView, setTokenView] = useState<ContentView>(initialView);
+  const { setTitle } = useTitle();
+  const [tokenView] = useState<ContentView>(initialView);
 
   useEffect(() => {
     const baseTitle = token?.name ?? `${collection.name} - #${tokenId}`;
@@ -41,7 +45,7 @@ export default function NextGenTokenPageClient({
     if (newView && newView !== ContentView.ABOUT) {
       newPath += `/${newView.toLowerCase().replaceAll(" ", "-")}`;
     }
-    router.push(newPath);
+    router.replace(newPath, { scroll: false });
   };
 
   return (

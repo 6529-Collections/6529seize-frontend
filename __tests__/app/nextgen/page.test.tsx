@@ -1,12 +1,14 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { commonApiFetch } from "@/services/api/common-api";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 
 process.env.BASE_ENDPOINT = "http://localhost";
 
-const navModule = require("@/components/nextGen/collections/NextGenNavigationHeader");
-const NextGenView = navModule.NextGenView;
-const { default: NextGenPage, generateMetadata } = require("@/app/nextgen/[[...view]]/page");
+// Import after mocks are set up if you prefer; require works fine too
+const {
+  default: NextGenPage,
+  generateMetadata,
+} = require("@/app/nextgen/[[...view]]/page");
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -17,41 +19,48 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock("@/components/nextGen/collections/NextGen", () => () => <div data-testid="nextgen" />);
-jest.mock("@/components/nextGen/collections/NextGenCollections", () => () => <div />);
-jest.mock("@/components/nextGen/collections/NextGenArtists", () => () => <div />);
+// Server helper used by the page; stub it to control headers
+jest.mock("@/helpers/server.app.helpers", () => ({
+  getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-mock": "1" }),
+}));
+
+// Lighten children
+jest.mock("@/components/nextGen/collections/NextGen", () => () => (
+  <div data-testid="nextgen" />
+));
+jest.mock("@/components/nextGen/collections/NextGenCollections", () => () => (
+  <div />
+));
+jest.mock("@/components/nextGen/collections/NextGenArtists", () => () => (
+  <div />
+));
 jest.mock("@/components/nextGen/collections/NextGenAbout", () => () => <div />);
 
 jest.mock("@/components/nextGen/collections/NextGenNavigationHeader", () => {
-  const actual = jest.requireActual(
-    "@/components/nextGen/collections/NextGenNavigationHeader"
-  );
+  const { NextGenView } = jest.requireActual("@/enums"); // <-- get enum from the real source
   return {
     __esModule: true,
-    NextGenView: actual.NextGenView,
     default: ({ view, setView }: any) => (
-      <button data-testid="nav" onClick={() => setView(actual.NextGenView.ARTISTS)}>
+      <button
+        data-testid="nav"
+        onClick={() => setView(NextGenView.ARTISTS)} // <-- now defined
+      >
         {view}
       </button>
     ),
   };
 });
 
+// Title context: just mock the hook
 jest.mock("@/contexts/TitleContext", () => ({
-  useTitle: () => ({
-    title: "Test Title",
-    setTitle: jest.fn(),
-    notificationCount: 0,
-    setNotificationCount: jest.fn(),
-    setWaveData: jest.fn(),
-    setStreamHasNewItems: jest.fn(),
-  }),
-  useSetTitle: jest.fn(),
-  useSetNotificationCount: jest.fn(),
-  useSetWaveData: jest.fn(),
-  useSetStreamHasNewItems: jest.fn(),
-  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+  useTitle: () => ({ setTitle: jest.fn(), title: "" }),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
+
+// Next/Image (safe stub for tests)
+jest.mock("next/image", () => (props: any) => <img {...props} />);
 
 const useRouterMock = require("next/navigation").useRouter as jest.Mock;
 const useParamsMock = require("next/navigation").useParams as jest.Mock;
@@ -59,7 +68,9 @@ const mockedFetch = commonApiFetch as jest.Mock;
 
 describe("generateMetadata", () => {
   it("returns metadata based on view", async () => {
-    const md = await generateMetadata({ params: { view: ["artists"] } } as any);
+    const md = await generateMetadata({
+      params: Promise.resolve({ view: ["artists"] }),
+    } as any);
     expect(md).toMatchObject({ title: "NextGen Artists" });
   });
 });
@@ -69,27 +80,41 @@ describe("NextGen page component", () => {
 
   beforeEach(() => {
     push.mockClear();
-    mockedFetch.mockReset().mockResolvedValue({ id: 1 });
+    mockedFetch.mockReset().mockResolvedValue({ id: 1 }); // featured collection exists
     useRouterMock.mockReturnValue({ push });
-    useParamsMock.mockReturnValue({ view: undefined });
+    useParamsMock.mockReturnValue({ view: undefined }); // landing (no view)
   });
 
   it("fetches collection and handles navigation", async () => {
-    render(<NextGenPage />);
+    const jsx = await NextGenPage({
+      params: Promise.resolve({ view: undefined }),
+    } as any);
+
+    render(jsx);
+
     await waitFor(() =>
-      expect(mockedFetch).toHaveBeenCalledWith({ endpoint: "nextgen/featured" })
+      expect(mockedFetch).toHaveBeenCalledWith({
+        endpoint: "nextgen/featured",
+        headers: { "x-mock": "1" },
+      })
     );
+
     const nav = await screen.findByTestId("nav");
     fireEvent.click(nav);
-    expect(push).toHaveBeenCalledWith("/nextgen/artists");
+    expect(push).toHaveBeenCalledWith("/nextgen/artists", { scroll: false });
   });
 
   it("shows placeholder when collection missing", async () => {
-    mockedFetch.mockResolvedValueOnce(null);
-    render(<NextGenPage />);
+    mockedFetch.mockResolvedValueOnce(null); // no featured collection
+
+    const jsx = await NextGenPage({
+      params: Promise.resolve({ view: undefined }),
+    } as any);
+
+    render(jsx);
+
     await waitFor(() =>
       expect(screen.getByAltText("questionmark")).toBeInTheDocument()
     );
   });
 });
-

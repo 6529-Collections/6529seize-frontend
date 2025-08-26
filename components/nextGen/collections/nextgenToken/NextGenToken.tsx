@@ -1,30 +1,30 @@
-import styles from "../NextGen.module.scss";
-import { Col, Container, Row } from "react-bootstrap";
 import {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
-} from "../../../../entities/INextgen";
-import NextGenTokenProvenance from "./NextGenTokenProvenance";
-import NextgenTokenRarity, {
-  NextgenTokenTraits,
-} from "./NextGenTokenProperties";
-import NextGenTokenAbout from "./NextGenTokenAbout";
-import NextGenTokenArt from "./NextGenTokenArt";
-import {
-  ContentView,
-  printViewButton,
-} from "../collectionParts/NextGenCollection";
-import { isNullAddress } from "../../../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
-import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
+} from "@/entities/INextgen";
+import { isNullAddress } from "@/helpers/Helpers";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
   faFire,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import {
+  ContentView,
+  printViewButton,
+} from "../collectionParts/NextGenCollection";
+import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
+import styles from "../NextGen.module.scss";
+import NextGenTokenAbout from "./NextGenTokenAbout";
+import NextGenTokenArt from "./NextGenTokenArt";
+import NextgenTokenRarity, {
+  NextgenTokenTraits,
+} from "./NextGenTokenProperties";
+import NextGenTokenProvenance from "./NextGenTokenProvenance";
+import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 
 interface Props {
   collection: NextGenCollection;
@@ -106,7 +106,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
       <FontAwesomeIcon
         title="Previous Token"
         icon={faChevronCircleLeft}
-        data-tooltip-id={hasPreviousToken ? `prev-token-${props.token.id}` : undefined}
+        data-tooltip-id={
+          hasPreviousToken ? `prev-token-${props.token.id}` : undefined
+        }
         onClick={() => {
           if (!hasPreviousToken) {
             return;
@@ -135,8 +137,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Previous Token
           </Tooltip>
         )}
@@ -149,7 +150,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     const next = (
       <FontAwesomeIcon
         icon={faChevronCircleRight}
-        data-tooltip-id={hasNextToken ? `next-token-${props.token.id}` : undefined}
+        data-tooltip-id={
+          hasNextToken ? `next-token-${props.token.id}` : undefined
+        }
         onClick={() => {
           if (!hasNextToken) {
             return;
@@ -178,8 +181,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Next Token
           </Tooltip>
         )}
@@ -213,8 +215,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                                 backgroundColor: "#1F2937",
                                 color: "white",
                                 padding: "4px 8px",
-                              }}
-                            >
+                              }}>
                               Burnt
                             </Tooltip>
                           </>

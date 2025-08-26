@@ -8,22 +8,23 @@ import NextGenCollectionPageClient from "./NextGenCollectionPageClient";
 export async function generateMetadata({
   params,
 }: {
-  params: { collection: string; view?: string[] };
+  params: Promise<{ collection: string; view?: string[] }>;
 }): Promise<Metadata> {
-  const collection = await fetchCollection(params.collection);
-  if (!collection) {
+  const { collection, view } = await params;
+  const resolvedCollection = await fetchCollection(collection);
+  if (!resolvedCollection) {
     return getAppMetadata({ title: "NextGen" });
   }
-  const view = getCollectionView(params.view?.[0] ?? "");
-  let title = collection.name;
-  if (view !== ContentView.OVERVIEW) {
-    title += ` | ${view}`;
+  const resolvedView = getCollectionView(view?.[0] ?? "");
+  let title = resolvedCollection.name;
+  if (resolvedView !== ContentView.OVERVIEW) {
+    title += ` | ${resolvedView}`;
   }
   return getAppMetadata({
     title,
     ogImage:
-      collection.banner ||
-      collection.image ||
+      resolvedCollection.banner ||
+      resolvedCollection.image ||
       `${process.env.BASE_ENDPOINT}/nextgen.png`,
     description: "NextGen",
     twitterCard: "summary_large_image",

@@ -8,15 +8,16 @@ import { fetchCollection } from "../page-utils";
 export async function generateMetadata({
   params,
 }: {
-  params: { collection: string };
+  params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
-  const collection = await fetchCollection(params.collection);
-  if (!collection) {
+  const { collection } = await params;
+  const resolvedCollection = await fetchCollection(collection);
+  if (!resolvedCollection) {
     return getAppMetadata({ title: "Trait Sets" });
   }
   return getAppMetadata({
-    title: `Trait Sets | ${collection.name}`,
-    ogImage: collection.image,
+    title: `Trait Sets | ${resolvedCollection.name}`,
+    ogImage: resolvedCollection.image,
     description: "NextGen",
     twitterCard: "summary_large_image",
   });
