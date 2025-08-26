@@ -1,9 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import NextGenCollectionArt from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionArt";
 import { NextGenCollection } from "../../../../entities/INextgen";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
+}));
 jest.mock("../../../../services/api/common-api", () => ({
   commonApiFetch: jest.fn(() => Promise.resolve([])),
 }));
@@ -14,7 +17,7 @@ jest.mock("../../../../components/nextGen/collections/NextGenTokenList", () => (
 });
 
 const routerPush = jest.fn();
-(useRouter as jest.Mock).mockReturnValue({ query: {}, push: routerPush });
+(useRouter as jest.Mock).mockReturnValue({ push: routerPush });
 
 const collection: NextGenCollection = { id: 1, name: "My Collection" } as any;
 

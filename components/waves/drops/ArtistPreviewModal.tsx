@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import { createPortal } from "react-dom";
 import { Dialog, Transition } from "@headlessui/react";

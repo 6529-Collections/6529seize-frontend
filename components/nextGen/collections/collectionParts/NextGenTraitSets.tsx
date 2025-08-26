@@ -1,44 +1,44 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
-import { useState, useEffect, Fragment } from "react";
-import { Container, Row, Col, Accordion } from "react-bootstrap";
+import {
+  faArrowCircleRight,
+  faCheckCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import { Fragment, useEffect, useState } from "react";
+import { Accordion, Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import {
   NextGenCollection,
   NextgenTraitSet,
   TraitValues,
 } from "../../../../entities/INextgen";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import {
   capitalizeEveryWord,
   cicToType,
   formatAddress,
 } from "../../../../helpers/Helpers";
-import Pagination from "../../../pagination/Pagination";
+import { commonApiFetch } from "../../../../services/api/common-api";
 import DotLoader from "../../../dotLoader/DotLoader";
-import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import {
-  formatNameForUrl,
-  normalizeNextgenTokenID,
-} from "../../nextgen_helpers";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
-import NextGenCollectionHeader from "./NextGenCollectionHeader";
+import Pagination from "../../../pagination/Pagination";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../../../searchModal/SearchModal";
+import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
+import {
+  formatNameForUrl,
+  normalizeNextgenTokenID,
+} from "../../nextgen_helpers";
+import styles from "../NextGen.module.scss";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextgenToken/NextGenTokenImage";
-import {
-  faArrowCircleRight,
-  faCheckCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import NextGenCollectionHeader from "./NextGenCollectionHeader";
 
 const TRAITS: Record<number, string[]> = {
   1: ["Palette", "Size", "Traced"],
@@ -130,7 +130,10 @@ export default function NextGenTraitSets(
 
   function printTraitPill(t: string) {
     return (
-      <Col xs={12 / (availableTraits.length + 1)} className="no-padding">
+      <Col
+        key={t}
+        xs={12 / (availableTraits.length + 1)}
+        className="no-padding">
         <button
           key={getRandomObjectId()}
           className={`${styles.collectorSetPill} ${
@@ -530,7 +533,8 @@ function TraitSetAccordion(
                                 color: "white",
                                 padding: "4px 8px",
                               }}>
-                              {props.collection.name} #{normalizeNextgenTokenID(t).token_id}
+                              {props.collection.name} #
+                              {normalizeNextgenTokenID(t).token_id}
                             </Tooltip>
                           </>
                         </a>

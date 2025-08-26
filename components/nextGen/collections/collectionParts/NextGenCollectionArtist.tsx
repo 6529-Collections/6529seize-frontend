@@ -1,14 +1,14 @@
 "use client";
 
-import { Col, Container, Row } from "react-bootstrap";
-import { NextGenCollection } from "../../../../entities/INextgen";
-import { useEffect, useState } from "react";
-import { CicStatement } from "../../../../entities/IProfile";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { STATEMENT_TYPE } from "../../../../helpers/Types";
+import { NextGenCollection } from "@/entities/INextgen";
+import { CicStatement } from "@/entities/IProfile";
+import { STATEMENT_TYPE } from "@/helpers/Types";
+import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import Image from "next/image";
+import { Fragment, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import { formatNameForUrl } from "../../nextgen_helpers";
-import { useIdentity } from "../../../../hooks/useIdentity";
 
 interface Props {
   collection: NextGenCollection;
@@ -76,7 +76,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                 <Col>
                   Collection{props.link_collections.length > 1 ? "s" : ""}:{" "}
                   {props.link_collections.map((c, index) => (
-                    <>
+                    <Fragment key={`link-collection-${c.id}`}>
                       {index > 0 && ", "}
                       <a
                         key={`link-collection-${c.id}`}
@@ -85,7 +85,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                         )}`}>
                         {c.name}
                       </a>
-                    </>
+                    </Fragment>
                   ))}
                 </Col>
               </Row>
