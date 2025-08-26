@@ -186,6 +186,7 @@ export function SearchWalletsDisplay(
           style={{
             width: "20px",
             height: "20px",
+            color: "#000",
           }}
           icon={faSearch}></FontAwesomeIcon>
       </button>
