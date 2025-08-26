@@ -1,59 +1,25 @@
 "use client";
 
-import styles from "./Delegation.module.scss";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
-  Container,
-  Row,
-  Col,
   Accordion,
-  Table,
-  FormCheck,
+  Col,
+  Container,
   Form,
+  FormCheck,
+  Row,
+  Table,
 } from "react-bootstrap";
 import {
+  useChainId,
+  useEnsName,
   useReadContract,
   useReadContracts,
-  useWriteContract,
-  useEnsName,
   useWaitForTransactionReceipt,
-  useChainId,
+  useWriteContract,
 } from "wagmi";
-import { Fragment, useEffect, useRef, useState } from "react";
+import styles from "./Delegation.module.scss";
 
-import {
-  ANY_COLLECTION_PATH,
-  CONSOLIDATION_USE_CASE,
-  DelegationCollection,
-  DELEGATION_USE_CASES,
-  MAX_BULK_ACTIONS,
-  SUB_DELEGATION_USE_CASE,
-  ALL_USE_CASES,
-  MEMES_COLLECTION,
-  PRIMARY_ADDRESS_USE_CASE,
-} from "../../pages/delegation/[...section]";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NEVER_DATE,
-  NULL_ADDRESS,
-} from "../../constants";
-import { DELEGATION_ABI } from "../../abis";
-import { Tooltip } from "react-tooltip";
-import {
-  DelegationCenterSection,
-  DelegationToast,
-} from "./DelegationCenterMenu";
-import DelegationWallet from "./DelegationWallet";
-import NewConsolidationComponent from "./NewConsolidation";
-import NewDelegationComponent from "./NewDelegation";
-import NewSubDelegationComponent from "./NewSubDelegation";
-import UpdateDelegationComponent from "./UpdateDelegation";
-import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
-import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
-import { Spinner } from "../dotLoader/DotLoader";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import {
   faCircleArrowLeft,
   faEdit,
@@ -62,6 +28,40 @@ import {
   faPlus,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Tooltip } from "react-tooltip";
+import { DELEGATION_ABI } from "../../abis";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+  NEVER_DATE,
+  NULL_ADDRESS,
+} from "../../constants";
+import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { Spinner } from "../dotLoader/DotLoader";
+import {
+  ALL_USE_CASES,
+  ANY_COLLECTION_PATH,
+  CONSOLIDATION_USE_CASE,
+  DELEGATION_USE_CASES,
+  DelegationCollection,
+  MAX_BULK_ACTIONS,
+  MEMES_COLLECTION,
+  PRIMARY_ADDRESS_USE_CASE,
+  SUB_DELEGATION_USE_CASE,
+} from "./delegation-constants";
+import {
+  DelegationCenterSection,
+  DelegationToast,
+} from "./DelegationCenterMenu";
+import DelegationWallet from "./DelegationWallet";
+import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
+import NewConsolidationComponent from "./NewConsolidation";
+import NewDelegationComponent from "./NewDelegation";
+import NewSubDelegationComponent from "./NewSubDelegation";
+import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
+import UpdateDelegationComponent from "./UpdateDelegation";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;

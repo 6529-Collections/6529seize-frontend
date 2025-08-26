@@ -1,10 +1,12 @@
 import { render, fireEvent, screen } from "@testing-library/react";
 import React from "react";
-import DelegationPage from "@/pages/delegation/[...section]";
+import DelegationPage from "@/app/delegation/[...section]/page.client";
 import { DelegationCenterSection } from "@/components/delegation/DelegationCenterMenu";
 import { AuthContext } from "@/components/auth/Auth";
 
-jest.mock("next/dynamic", () => () => (props: any) => (
+jest.mock("@/components/delegation/DelegationCenterMenu", () => (
+  props: any,
+) => (
   <button
     data-testid="menu"
     onClick={() => props.setActiveSection(DelegationCenterSection.CHECKER)}>
@@ -13,7 +15,7 @@ jest.mock("next/dynamic", () => () => (props: any) => (
 ));
 
 const push = jest.fn();
-jest.mock("next/router", () => ({ useRouter: () => ({ push }) }));
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 window.scrollTo = jest.fn();
 
@@ -42,9 +44,8 @@ describe("Delegation page component", () => {
       </AuthContext.Provider>
     );
     fireEvent.click(screen.getByTestId("menu"));
-    expect(push).toHaveBeenCalledWith({
-      pathname: `/delegation/${DelegationCenterSection.CHECKER}`,
-      query: {},
-    });
+    expect(push).toHaveBeenCalledWith(
+      `/delegation/${DelegationCenterSection.CHECKER}`
+    );
   });
 });

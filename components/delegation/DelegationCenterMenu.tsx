@@ -1,18 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row, Toast, ToastContainer } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { DELEGATION_CONTRACT } from "../../constants";
-import {
-  ANY_COLLECTION,
-  GRADIENTS_COLLECTION,
-  MEMES_COLLECTION,
-  MEME_LAB_COLLECTION,
-} from "../../pages/delegation/[...section]";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import CollectionDelegationComponent from "./CollectionDelegation";
 import styles from "./Delegation.module.scss";
@@ -21,6 +15,12 @@ import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
+import {
+  ANY_COLLECTION,
+  GRADIENTS_COLLECTION,
+  MEMES_COLLECTION,
+  MEME_LAB_COLLECTION,
+} from "./delegation-constants";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
@@ -55,6 +55,7 @@ interface Props {
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
   const router = useRouter();
+  const pathname = usePathname();
   const accountResolution = useSeizeConnectContext();
   const ensResolution = useEnsName({
     address: accountResolution.address as `0x${string}`,
@@ -258,7 +259,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 className={`${styles.menuLeftItem} ${
                   props.section === DelegationCenterSection.FAQ ||
                   (props.section === DelegationCenterSection.HTML &&
-                    router.asPath.startsWith("/delegation/delegation-faq/"))
+                    pathname.startsWith("/delegation/delegation-faq/"))
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>

@@ -36,8 +36,9 @@ jest.mock("../../../components/auth/SeizeConnectContext", () => ({
 }));
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: "ens" }) }));
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({ asPath: "/delegation" }),
+  usePathname: () => "/delegation",
 }));
 
 const props = {
