@@ -20,6 +20,7 @@ import {
 } from "wagmi";
 import styles from "./Delegation.module.scss";
 
+import { DelegationCenterSection } from "@/enums";
 import {
   faCircleArrowLeft,
   faEdit,
@@ -51,10 +52,7 @@ import {
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
-import {
-  DelegationCenterSection,
-  DelegationToast,
-} from "./DelegationCenterMenu";
+import { DelegationToast } from "./DelegationCenterMenu";
 import DelegationWallet from "./DelegationWallet";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";

@@ -1,18 +1,20 @@
-import { render, fireEvent, screen } from "@testing-library/react";
-import React from "react";
 import DelegationPage from "@/app/delegation/[...section]/page.client";
-import { DelegationCenterSection } from "@/components/delegation/DelegationCenterMenu";
 import { AuthContext } from "@/components/auth/Auth";
+import { DelegationCenterSection } from "@/enums";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
-jest.mock("@/components/delegation/DelegationCenterMenu", () => (
-  props: any,
-) => (
-  <button
-    data-testid="menu"
-    onClick={() => props.setActiveSection(DelegationCenterSection.CHECKER)}>
-    Menu
-  </button>
-));
+jest.mock(
+  "@/components/delegation/DelegationCenterMenu",
+  () => (props: any) =>
+    (
+      <button
+        data-testid="menu"
+        onClick={() => props.setActiveSection(DelegationCenterSection.CHECKER)}>
+        Menu
+      </button>
+    )
+);
 
 const push = jest.fn();
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -40,7 +42,12 @@ describe("Delegation page component", () => {
   it("calls router push when active section changes", () => {
     render(
       <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
-        <DelegationPage section={DelegationCenterSection.CENTER} />
+        <DelegationPage
+          section={DelegationCenterSection.CENTER}
+          addressQuery=""
+          collectionQuery=""
+          useCaseQuery={0}
+        />
       </AuthContext.Provider>
     );
     fireEvent.click(screen.getByTestId("menu"));

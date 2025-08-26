@@ -1,13 +1,14 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { DELEGATION_CONTRACT } from "@/constants";
+import { DelegationCenterSection } from "@/enums";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row, Toast, ToastContainer } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
-import { DELEGATION_CONTRACT } from "../../constants";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import CollectionDelegationComponent from "./CollectionDelegation";
 import styles from "./Delegation.module.scss";
 import DelegationCenterComponent from "./DelegationCenter";
@@ -24,23 +25,6 @@ import {
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
-export enum DelegationCenterSection {
-  CENTER = "delegation-center",
-  REGISTER_DELEGATION = "register-delegation",
-  REGISTER_SUB_DELEGATION = "register-sub-delegation",
-  REGISTER_CONSOLIDATION = "register-consolidation",
-  ASSIGN_PRIMARY_ADDRESS = "assign-primary-address",
-  ANY_COLLECTION = "any-collection",
-  MEMES_COLLECTION = "the-memes",
-  MEME_LAB_COLLECTION = "meme-lab",
-  GRADIENTS_COLLECTION = "6529-gradient",
-  WALLET_ARCHITECTURE = "wallet-architecture",
-  FAQ = "delegation-faq",
-  CONSOLIDATION_USE_CASES = "consolidation-use-cases",
-  CHECKER = "wallet-checker",
-  HTML = "html",
-}
-
 interface Props {
   section: DelegationCenterSection;
   path?: string[];
@@ -54,7 +38,6 @@ interface Props {
 }
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
-  const router = useRouter();
   const pathname = usePathname();
   const accountResolution = useSeizeConnectContext();
   const ensResolution = useEnsName({
@@ -259,7 +242,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 className={`${styles.menuLeftItem} ${
                   props.section === DelegationCenterSection.FAQ ||
                   (props.section === DelegationCenterSection.HTML &&
-                    pathname.startsWith("/delegation/delegation-faq/"))
+                    pathname?.startsWith("/delegation/delegation-faq/"))
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>

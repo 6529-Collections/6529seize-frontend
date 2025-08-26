@@ -1,7 +1,7 @@
 import DelegationPage, {
   generateMetadata,
 } from "@/app/delegation/[...section]/page";
-import { DelegationCenterSection } from "@/components/delegation/DelegationCenterMenu";
+import { DelegationCenterSection } from "@/enums";
 
 describe("delegation page server", () => {
   it("returns props for known section", async () => {

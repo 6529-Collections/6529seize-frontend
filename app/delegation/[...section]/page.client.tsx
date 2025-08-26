@@ -1,12 +1,11 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import DelegationCenterMenu, {
-  DelegationCenterSection,
-} from "@/components/delegation/DelegationCenterMenu";
+import DelegationCenterMenu from "@/components/delegation/DelegationCenterMenu";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { DelegationCenterSection } from "@/enums";
+import styles from "@/styles/Home.module.scss";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function DelegationPageClient(props: {
   readonly section: DelegationCenterSection;
@@ -24,9 +23,7 @@ export default function DelegationPageClient(props: {
   const [collectionQuery, setCollectionQuery] = useState<string>(
     props.collectionQuery ?? ""
   );
-  const [useCaseQuery, setUseCaseQuery] = useState<number>(
-    props.useCaseQuery
-  );
+  const [useCaseQuery, setUseCaseQuery] = useState<number>(props.useCaseQuery);
 
   function getQueryParams(s: DelegationCenterSection) {
     let queryParams: { [key: string]: string | number } = {};

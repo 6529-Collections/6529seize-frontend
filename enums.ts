@@ -112,3 +112,20 @@ export enum LeaderboardFocus {
   TDH = "Cards Collected",
   INTERACTIONS = "Interactions",
 }
+
+export enum DelegationCenterSection {
+  CENTER = "delegation-center",
+  REGISTER_DELEGATION = "register-delegation",
+  REGISTER_SUB_DELEGATION = "register-sub-delegation",
+  REGISTER_CONSOLIDATION = "register-consolidation",
+  ASSIGN_PRIMARY_ADDRESS = "assign-primary-address",
+  ANY_COLLECTION = "any-collection",
+  MEMES_COLLECTION = "the-memes",
+  MEME_LAB_COLLECTION = "meme-lab",
+  GRADIENTS_COLLECTION = "6529-gradient",
+  WALLET_ARCHITECTURE = "wallet-architecture",
+  FAQ = "delegation-faq",
+  CONSOLIDATION_USE_CASES = "consolidation-use-cases",
+  CHECKER = "wallet-checker",
+  HTML = "html",
+}

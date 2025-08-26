@@ -1,14 +1,18 @@
-import DelegationPageClient from "./page.client";
-import { DelegationCenterSection } from "@/components/delegation/DelegationCenterMenu";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DelegationCenterSection } from "@/enums";
 import type { Metadata } from "next";
+import DelegationPageClient from "./page.client";
 
 export default async function DelegationPage({
   params,
   searchParams,
 }: {
   readonly params: Promise<{ section: string[] }>;
-  readonly searchParams: Promise<{ address?: string; collection?: string; use_case?: string }>;
+  readonly searchParams: Promise<{
+    address?: string;
+    collection?: string;
+    use_case?: string;
+  }>;
 }) {
   const { section } = await params;
   const { address = "", collection = "", use_case } = await searchParams;
