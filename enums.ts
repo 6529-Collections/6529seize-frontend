@@ -112,3 +112,9 @@ export enum LeaderboardFocus {
   TDH = "Cards Collected",
   INTERACTIONS = "Interactions",
 }
+
+export enum NextGenView {
+  COLLECTIONS = "Collections",
+  ARTISTS = "Artists",
+  ABOUT = "About",
+}

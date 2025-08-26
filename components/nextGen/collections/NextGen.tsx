@@ -1,16 +1,16 @@
-import styles from "./NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
+import { NextGenView } from "@/enums";
+import { Col, Container, Row } from "react-bootstrap";
 import { NextGenCollection } from "../../../entities/INextgen";
+import { Status } from "../nextgen_entities";
+import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
+import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 import {
   NextGenCountdown,
   NextGenMintCounts,
   NextGenPhases,
 } from "./collectionParts/NextGenCollectionHeader";
-import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
-import { Status } from "../nextgen_entities";
-import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
-import { NextGenView } from "./NextGenNavigationHeader";
 import NextGenCollectionSlideshow from "./collectionParts/NextGenCollectionSlideshow";
+import styles from "./NextGen.module.scss";
 
 interface Props {
   collection: NextGenCollection;

@@ -1,3 +1,5 @@
+"use client"
+
 import { useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";

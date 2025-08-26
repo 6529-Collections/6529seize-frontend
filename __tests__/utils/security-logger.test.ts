@@ -11,7 +11,7 @@ import {
 const originalConsoleDebug = console.debug;
 const originalConsoleWarn = console.warn;
 const originalConsoleError = console.error;
-const originalNodeEnv = process.env.NODE_ENV;
+const originalNodeEnv = (process.env as any).NODE_ENV;
 const originalSecurityLogging = process.env.ENABLE_SECURITY_LOGGING;
 
 let mockConsoleDebug: jest.SpyInstance;
@@ -20,7 +20,7 @@ let mockConsoleError: jest.SpyInstance;
 
 beforeEach(() => {
   // Reset environment variables
-  process.env.NODE_ENV = 'test';
+  (process.env as any).NODE_ENV = 'test';
   process.env.ENABLE_SECURITY_LOGGING = 'false';
   
   // Create fresh mocks for each test
@@ -36,7 +36,7 @@ afterEach(() => {
   mockConsoleError.mockRestore();
   
   // Restore original environment
-  process.env.NODE_ENV = originalNodeEnv;
+  (process.env as any).NODE_ENV = originalNodeEnv;
   process.env.ENABLE_SECURITY_LOGGING = originalSecurityLogging;
 });
 
@@ -52,7 +52,7 @@ describe('Security Logger', () => {
     });
 
     it('should log when security logging is enabled in development', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
       
       const context = createConnectionEventContext('test-source');
@@ -67,7 +67,7 @@ describe('Security Logger', () => {
     });
 
     it('should never log in production even when enabled', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
       
       const context = createConnectionEventContext('test-source');
@@ -148,7 +148,7 @@ describe('Security Logger', () => {
     });
 
     it('should include stack trace in development but sanitized', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       
       const error = new Error('Failed with address 0x742d35Cc6634C0532925a3b8D362Ad5C32B8B73D');
       error.stack = 'Error: Failed with address 0x742d35Cc6634C0532925a3b8D362Ad5C32B8B73D\\n    at test';
@@ -161,7 +161,7 @@ describe('Security Logger', () => {
     });
 
     it('should not include stack trace in production', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       
       const error = new Error('Test error');
       error.stack = 'Error: Test error\\n    at test';
@@ -189,7 +189,7 @@ describe('Security Logger', () => {
     });
 
     it('should handle error with string cause', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       
       const errorWithCause = new Error('Main error');
       (errorWithCause as any).cause = 'String cause message';
@@ -203,7 +203,7 @@ describe('Security Logger', () => {
     });
 
     it('should handle error with Error object cause', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       
       const causeError = new Error('Cause error with address 0x742d35Cc6634C0532925a3b8D362Ad5C32B8B73D');
       const mainError = new Error('Main error');
@@ -218,7 +218,7 @@ describe('Security Logger', () => {
     });
 
     it('should handle error with plain object cause', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       
       const mainError = new Error('Main error');
       (mainError as any).cause = { status: 404, reason: 'Not found' };
@@ -232,7 +232,7 @@ describe('Security Logger', () => {
     });
 
     it('should handle error with circular reference in cause', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       
       const circularObj: any = { name: 'circular' };
       circularObj.self = circularObj;
@@ -249,7 +249,7 @@ describe('Security Logger', () => {
     });
 
     it('should handle error with non-object cause', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       
       const mainError = new Error('Main error');
       (mainError as any).cause = 12345;
@@ -374,7 +374,7 @@ describe('Security Logger', () => {
 
   describe('Environment-specific behavior', () => {
     it('should include userAgent in development', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
       
       const context = createConnectionEventContext('test-source');
@@ -401,7 +401,7 @@ describe('Security Logger', () => {
       const originalNavigator = global.navigator;
       delete (global as any).navigator;
       
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
       
       const context = createConnectionEventContext('server-side-security');
@@ -432,10 +432,10 @@ describe('Security Logger', () => {
 
     it('should handle server-side environment in production logError', () => {
       const originalNavigator = global.navigator;
-      const originalNodeEnv = process.env.NODE_ENV;
+      const originalNodeEnv = (process.env as any).NODE_ENV;
       
       delete (global as any).navigator;
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       
       const error = new Error('Production server-side error');
       logError('production-server-context', error);
@@ -450,7 +450,7 @@ describe('Security Logger', () => {
       
       // Restore environment
       (global as any).navigator = originalNavigator;
-      process.env.NODE_ENV = originalNodeEnv;
+      (process.env as any).NODE_ENV = originalNodeEnv;
     });
 
     it('should handle all context creation functions server-side', () => {
@@ -502,7 +502,7 @@ describe('Security Logger', () => {
     });
 
     it('should allow safe diagnostic data', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
       
       const safeContext = createValidationEventContext('test-source', true, 42, 'hex_prefixed');
@@ -578,7 +578,7 @@ describe('Security Logger', () => {
     });
 
     it('should validate empty string context values are safe', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
       
       const safeContext = {
@@ -598,7 +598,7 @@ describe('Security Logger', () => {
 
   describe('Complete security event type coverage', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
     });
 
@@ -654,7 +654,7 @@ describe('Security Logger', () => {
 
   describe('SecurityEventContext validation completeness', () => {
     it('should validate context with all optional fields populated', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       process.env.ENABLE_SECURITY_LOGGING = 'true';
       
       // Create context with all possible safe fields

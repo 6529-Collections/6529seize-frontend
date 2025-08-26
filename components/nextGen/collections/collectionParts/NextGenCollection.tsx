@@ -1,12 +1,12 @@
+import { NextGenCollection } from "@/entities/INextgen";
+import { Col, Container, Row } from "react-bootstrap";
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
-import NextGenCollectionHeader from "./NextGenCollectionHeader";
-import NextGenCollectionArt from "./NextGenCollectionArt";
-import NextGenCollectionDetails from "./NextGenCollectionDetails";
-import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
-import { NextGenCollection } from "../../../../entities/INextgen";
-import NextGenCollectionArtist from "./NextGenCollectionArtist";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
+import NextGenCollectionArt from "./NextGenCollectionArt";
+import NextGenCollectionArtist from "./NextGenCollectionArtist";
+import NextGenCollectionDetails from "./NextGenCollectionDetails";
+import NextGenCollectionHeader from "./NextGenCollectionHeader";
+import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 
 interface Props {
   collection: NextGenCollection;
