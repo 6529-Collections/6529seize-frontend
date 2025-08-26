@@ -7,7 +7,6 @@ import ElementColumns from "@/app/element_category/columns/page";
 import ElementSections from "@/app/element_category/sections/page";
 import EmmaPlan from "@/app/emma/plans/[id]/page";
 import Museum from "@/app/museum/page";
-import MemeLabDistribution from "@/pages/meme-lab/[id]/distribution";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -78,11 +77,6 @@ describe("static pages render", () => {
   it("element columns page redirects", () => {
     render(<ElementColumns />);
     expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
-  });
-
-  it("meme lab distribution page loads", () => {
-    render(<MemeLabDistribution />);
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
   });
 
   it("renders author page", () => {

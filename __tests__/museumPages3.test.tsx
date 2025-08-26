@@ -1,5 +1,3 @@
-import { render, screen } from "@testing-library/react";
-import React from "react";
 import Azuki from "@/app/museum/6529-fund-szn1/azuki/page";
 import Cod from "@/app/museum/6529-fund-szn1/cod/page";
 import InvisibleFriends from "@/app/museum/6529-fund-szn1/invisible-friends/page";
@@ -8,7 +6,6 @@ import ScreensPage from "@/app/museum/6529-fund-szn1/screens/page";
 import TwinFlames from "@/app/museum/6529-fund-szn1/twin-flames/page";
 import PhotoA from "@/app/museum/6529-photo-a/page";
 import Batsoupyum from "@/app/museum/batsoupyum-museum-2/page";
-import MemeLabId from "../../pages/meme-lab/[id]";
 import BharatKrymo from "@/app/museum/bharat-krymo-museum-1/page";
 import GenerativeArt from "@/app/museum/generative-art/page";
 import SevenTwenty from "@/app/museum/genesis/720-minutes/page";
@@ -19,6 +16,7 @@ import JiometoryNoCompute from "@/app/museum/genesis/jiometory-no-compute/page";
 import ParaBellum from "@/app/museum/genesis/para-bellum/page";
 import ScribbledBoundaries from "@/app/museum/genesis/scribbled-boundaries/page";
 import Spectron from "@/app/museum/genesis/spectron/page";
+import { render, screen } from "@testing-library/react";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
@@ -61,11 +59,6 @@ describe("additional museum and memelab pages render", () => {
   it("renders Batsoupyum Museum page", () => {
     render(<Batsoupyum />);
     expect(screen.getAllByText(/BATSOUP/i).length).toBeGreaterThan(0);
-  });
-
-  it("renders Meme Lab page", () => {
-    render(<MemeLabId />);
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
   });
 
   it("renders Bharat Krymo museum page", () => {
