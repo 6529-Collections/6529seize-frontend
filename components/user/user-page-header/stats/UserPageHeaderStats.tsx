@@ -28,8 +28,9 @@ export default function UserPageHeaderStats({
             TDH
           </span>
         </Link>
-        <span
-          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
+        <Link
+          href={`/${user}/stats?activity=tdh-history`}
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
           data-tooltip-id="tdh-rate-tooltip"
         >
           <span className="tw-text-base tw-font-medium tw-text-iron-50">
@@ -38,7 +39,7 @@ export default function UserPageHeaderStats({
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
             TDH Rate
           </span>
-        </span>
+        </Link>
         <Link
           href={`/${user}/rep`}
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
