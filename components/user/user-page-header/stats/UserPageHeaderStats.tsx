@@ -62,9 +62,7 @@ export default function UserPageHeaderStats({
           padding: "4px 8px",
         }}
       >
-        <span className="tw-text-xs">
-          The TDH you gain per day from your current holdings.
-        </span>
+        <span className="tw-text-xs">How much TDH you earn each day</span>
       </Tooltip>
     </div>
   );
