@@ -1,11 +1,11 @@
+import GradientsPage from "@/app/6529-gradient/page";
+import DisputeResolution from "@/app/dispute-resolution/page";
+import PlansPage from "@/app/emma/plans/page";
+import MemeLabCollectionPage from "@/app/meme-lab/collection/[collection]/page";
+import { AuthContext } from "@/components/auth/Auth";
+import Seize404 from "@/pages/404";
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import Seize404 from "@/pages/404";
-import DisputeResolution from "@/app/dispute-resolution/page";
-import GradientsPage from "@/app/6529-gradient/page";
-import PlansPage from "@/app/emma/plans/page";
-import MemeLabCollectionPage from "@/pages/meme-lab/collection/[collection]";
-import { AuthContext } from "@/components/auth/Auth";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("@/components/6529Gradient/6529Gradient", () => () => (
@@ -98,7 +98,9 @@ describe("additional static pages", () => {
   it("renders meme lab collection page", () => {
     render(
       <TestProvider>
-        <MemeLabCollectionPage name="Test Collection" />
+        <MemeLabCollectionPage
+          params={Promise.resolve({ collection: "Test Collection" })}
+        />
       </TestProvider>
     );
     expect(screen.getByTestId("dynamic")).toBeInTheDocument();

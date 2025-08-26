@@ -118,7 +118,6 @@ describe("MemeLab helpers", () => {
       VolumeType.ALL_TIME,
       nfts,
       metas,
-      undefined,
       setNfts
     );
     expect(router.replace).toHaveBeenCalled();

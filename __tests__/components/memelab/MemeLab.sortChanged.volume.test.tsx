@@ -18,7 +18,6 @@ describe("sortChanged volume sorting", () => {
       VolumeType.DAYS_7,
       nfts,
       [] as any,
-      undefined,
       setNfts
     );
     expect(router.replace).toHaveBeenCalledWith("?sort=volume&sort_dir=desc");

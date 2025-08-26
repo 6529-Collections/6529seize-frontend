@@ -104,7 +104,6 @@ describe("MemeLab utilities", () => {
       VolumeType.ALL_TIME,
       nfts,
       metas,
-      undefined,
       setNfts
     );
     expect(router.replace).toHaveBeenCalledWith("?sort=age&sort_dir=asc");

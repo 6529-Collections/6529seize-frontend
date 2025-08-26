@@ -19,7 +19,6 @@ describe("sortChanged unique percent ex museum", () => {
       VolumeType.ALL_TIME,
       nfts,
       metas,
-      undefined,
       setNfts
     );
     expect(router.replace).toHaveBeenCalledWith(
