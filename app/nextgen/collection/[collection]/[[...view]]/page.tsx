@@ -8,7 +8,7 @@ import NextGenCollectionPageClient from "./NextGenCollectionPageClient";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ collection: string; view?: string[] }>;
+  readonly params: Promise<{ collection: string; view?: string[] }>;
 }): Promise<Metadata> {
   const { collection, view } = await params;
   const resolvedCollection = await fetchCollection(collection);
@@ -34,7 +34,7 @@ export async function generateMetadata({
 export default async function NextGenCollectionPage({
   params,
 }: {
-  params: Promise<{ collection: string; view?: string[] }>;
+  readonly params: Promise<{ collection: string; view?: string[] }>;
 }) {
   const { collection, view } = await params;
   const resolvedCollection = await fetchCollection(collection);

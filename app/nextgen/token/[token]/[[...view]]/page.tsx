@@ -8,7 +8,7 @@ import { fetchTokenData, getContentView } from "./page-utils";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ token: string; view?: string[] }>;
+  readonly params: Promise<{ token: string; view?: string[] }>;
 }): Promise<Metadata> {
   const { token, view } = await params;
   const data = await fetchTokenData(token);
@@ -34,7 +34,7 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: Promise<{ token: string; view?: string[] }>;
+  readonly params: Promise<{ token: string; view?: string[] }>;
 }) {
   const { token, view } = await params;
   const data = await fetchTokenData(token);

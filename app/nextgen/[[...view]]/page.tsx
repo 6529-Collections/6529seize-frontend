@@ -18,7 +18,7 @@ async function fetchFeaturedNextGenCollection(
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ view?: string[] }>;
+  readonly params: Promise<{ view?: string[] }>;
 }): Promise<Metadata> {
   const { view } = await params;
   const nextgenView = getNextGenView(view?.[0] ?? "");
@@ -28,7 +28,7 @@ export async function generateMetadata({
 export default async function NextGenPage({
   params,
 }: {
-  params: Promise<{ view?: string[] }>;
+  readonly params: Promise<{ view?: string[] }>;
 }) {
   const headers = await getAppCommonHeaders();
   const featuredCollection = await fetchFeaturedNextGenCollection(headers);
