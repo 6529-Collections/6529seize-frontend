@@ -33,7 +33,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function Page({
+export default async function NextGenTokenPage({
   params,
 }: {
   readonly params: Promise<{ token: string; view?: string[] }>;
