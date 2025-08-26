@@ -60,7 +60,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 // Next/Image (safe stub for tests)
-jest.mock("next/image", () => (props: any) => <img {...props} />);
+jest.mock("next/image", () => (props: any) => <img {...props} alt="test" />);
 
 const useRouterMock = require("next/navigation").useRouter as jest.Mock;
 const useParamsMock = require("next/navigation").useParams as jest.Mock;

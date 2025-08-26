@@ -8,7 +8,7 @@ import { fetchCollection } from "../page-utils";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ collection: string }>;
+  readonly params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const { collection } = await params;
   const resolvedCollection = await fetchCollection(collection);
@@ -26,7 +26,7 @@ export async function generateMetadata({
 export default async function NextGenTraitSetsPage({
   params,
 }: {
-  params: Promise<{ collection: string }>;
+  readonly params: Promise<{ collection: string }>;
 }) {
   const { collection } = await params;
   const resolvedCollection = await fetchCollection(collection);
