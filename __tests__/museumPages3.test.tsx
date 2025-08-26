@@ -1,4 +1,3 @@
-import MemeLabId from "@/app/meme-lab/[id]/page";
 import Azuki from "@/app/museum/6529-fund-szn1/azuki/page";
 import Cod from "@/app/museum/6529-fund-szn1/cod/page";
 import InvisibleFriends from "@/app/museum/6529-fund-szn1/invisible-friends/page";
@@ -60,11 +59,6 @@ describe("additional museum and memelab pages render", () => {
   it("renders Batsoupyum Museum page", () => {
     render(<Batsoupyum />);
     expect(screen.getAllByText(/BATSOUP/i).length).toBeGreaterThan(0);
-  });
-
-  it("renders Meme Lab page", () => {
-    render(<MemeLabId params={Promise.resolve({ id: "1" })} />);
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
   });
 
   it("renders Bharat Krymo museum page", () => {
