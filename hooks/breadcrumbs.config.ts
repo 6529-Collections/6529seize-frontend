@@ -176,24 +176,51 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
     pathPattern: /^meme-lab$/,
     paramExtractor: (pathSegments, query) => {
       const id = getDynamicParam(pathSegments, "meme-lab", 1, query.id);
+      if (id === "collection") {
+        const collection = getDynamicParam(
+          pathSegments,
+          "meme-lab",
+          2,
+          query.collection
+        );
+        return collection ? { collection } : undefined;
+      }
       return id ? { id } : undefined;
     },
-    fetcher: async (params: { readonly id: string }) =>
-      fetchMemeLabName(params.id),
+    fetcher: async (params: {
+      readonly id: string;
+      readonly collection: string;
+    }) => {
+      if (params.collection) {
+        return undefined;
+      }
+      return fetchMemeLabName(params.id);
+    },
     queryKeyBuilder: (params: { readonly id: string }) =>
       ["breadcrumb", "meme-lab", params.id] as const,
     crumbBuilder: (
-      params: { readonly id: string },
+      params: { readonly id: string; readonly collection: string },
       data: { name: string } | null | undefined,
       isLoading: boolean
     ) => {
       const crumbs: Crumb[] = [{ display: "Meme Lab", href: "/meme-lab" }];
-      const displayName = isLoading
-        ? "Loading..."
-        : data?.name
-        ? `Card ${params.id} - ${data.name}`
-        : `Card ${params.id}`;
-      crumbs.push({ display: displayName });
+      if (params.collection) {
+        const collectionName = params.collection.replaceAll("-", " ");
+        crumbs.push({
+          display: `Collections`,
+          href: "/meme-lab?sort=collections",
+        });
+        crumbs.push({
+          display: collectionName,
+        });
+      } else {
+        const displayName = isLoading
+          ? "Loading..."
+          : data?.name
+          ? `Card ${params.id} - ${data.name}`
+          : `Card ${params.id}`;
+        crumbs.push({ display: displayName });
+      }
       return crumbs;
     },
   },

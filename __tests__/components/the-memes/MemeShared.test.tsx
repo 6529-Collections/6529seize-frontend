@@ -1,63 +1,6 @@
-import {
-  getSharedServerSideProps,
-  getMemeTabTitle,
-  MEME_FOCUS,
-} from "@/components/the-memes/MemeShared";
-import { MEMELAB_CONTRACT } from "@/constants";
-import { fetchUrl } from "@/services/6529api";
+import { getMemeTabTitle, MEME_FOCUS } from "@/components/the-memes/MemeShared";
 
 jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
-
-const originalEnv = { ...process.env };
-
-describe("getSharedServerSideProps", () => {
-  beforeEach(() => {
-    Object.assign(process.env, {
-      API_ENDPOINT: "https://test.6529.io",
-      BASE_ENDPOINT: "https://base.6529.io",
-    });
-  });
-  afterAll(() => {
-    process.env = originalEnv;
-  });
-
-  it("builds props from api response with meme lab contract", async () => {
-    (fetchUrl as jest.Mock).mockResolvedValue({
-      data: [{ name: "Meme", thumbnail: "img.png" }],
-    });
-    const req = { query: { id: "1", focus: MEME_FOCUS.THE_ART } } as any;
-    const result = await getSharedServerSideProps(req, MEMELAB_CONTRACT);
-    expect(fetchUrl).toHaveBeenCalledWith(
-      "https://test.6529.io/api/nfts_memelab?contract=" +
-        MEMELAB_CONTRACT +
-        "&id=1"
-    );
-    expect(result).toEqual({
-      props: {
-        id: "1",
-        name: "Meme | The Art",
-        image: "img.png",
-        metadata: {
-          title: "Meme | The Art",
-          description: "Meme Lab #1 | Collections",
-          ogImage: "img.png",
-          twitterCard: "summary",
-        },
-      },
-    });
-  });
-
-  it("uses defaults when api returns empty", async () => {
-    (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
-    const req = { query: { id: "2" } } as any;
-    const result = await getSharedServerSideProps(req, "0xabc");
-    expect(fetchUrl).toHaveBeenCalledWith(
-      "https://test.6529.io/api/nfts?contract=0xabc&id=2"
-    );
-    expect(result.props.name).toBe("The Memes #2");
-    expect(result.props.image).toBe("https://base.6529.io/6529io.png");
-  });
-});
 
 describe("getMemeTabTitle", () => {
   it("constructs title with id, nft name and focus", () => {

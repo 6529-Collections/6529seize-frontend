@@ -1,11 +1,11 @@
-import { MEMELAB_CONTRACT } from "../../constants";
-import { fetchUrl } from "../../services/6529api";
-import { areEqualAddresses } from "../../helpers/Helpers";
-import { BaseNFT, VolumeType } from "../../entities/INFT";
-import { getAppMetadata } from "../providers/metadata";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { MEMELAB_CONTRACT } from "../../constants";
+import { BaseNFT, VolumeType } from "../../entities/INFT";
+import { areEqualAddresses } from "../../helpers/Helpers";
+import { fetchUrl } from "../../services/6529api";
+import { getAppMetadata } from "../providers/metadata";
 
 export enum MEME_FOCUS {
   LIVE = "live",
@@ -92,34 +92,6 @@ export async function getSharedAppServerSideProps(
     ogImage,
     twitterCard: "summary",
   });
-}
-
-export async function getSharedServerSideProps(
-  req: any,
-  contract: string,
-  isDistribution: boolean = false
-) {
-  const { id, focus } = req.query;
-  const { title, description, ogImage } = await getMetadataProps(
-    contract,
-    id,
-    focus,
-    isDistribution
-  );
-
-  return {
-    props: {
-      id: id,
-      name: title,
-      image: ogImage,
-      metadata: {
-        title,
-        description,
-        ogImage,
-        twitterCard: "summary",
-      },
-    },
-  };
 }
 
 export function getMemeTabTitle(
