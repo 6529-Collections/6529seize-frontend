@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
