@@ -1,23 +1,5 @@
 "use client";
 
-import styles from "./NextGenToken.module.scss";
-import { useEffect, useRef, useState } from "react";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenTokenImage, get16KUrl, get8KUrl } from "./NextGenTokenImage";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import Lightbulb from "./Lightbulb";
-import {
-  NextGenTokenDownloadDropdownItem,
-  Resolution,
-} from "./NextGenTokenDownload";
-import useIsMobileDevice from "../../../../hooks/isMobileDevice";
-import NextGenZoomableImage, {
-  MAX_ZOOM_SCALE,
-  MIN_ZOOM_SCALE,
-} from "./NextGenZoomableImage";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import {
   faDownload,
   faExternalLink,
@@ -27,6 +9,24 @@ import {
   faPlusSquare,
   faRefresh,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useRef, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import Lightbulb from "./Lightbulb";
+import styles from "./NextGenToken.module.scss";
+import {
+  NextGenTokenDownloadDropdownItem,
+  Resolution,
+} from "./NextGenTokenDownload";
+import { NextGenTokenImage, get16KUrl, get8KUrl } from "./NextGenTokenImage";
+import NextGenZoomableImage, {
+  MAX_ZOOM_SCALE,
+  MIN_ZOOM_SCALE,
+} from "./NextGenZoomableImage";
 
 interface Props {
   collection: NextGenCollection;
@@ -154,7 +154,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
         <Col
           xs={12}
           sm={mode === Mode.HIGH_RES ? 4 : 6}
-          className={`pt-2 pb-2 d-flex gap-3 ${
+          className={`pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-start"
           }`}>
           <button
@@ -179,13 +179,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           />
           <Tooltip
             id={`live-tooltip-${props.token.id}`}
-           place="bottom"
+            place="bottom"
             style={{
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Live
           </Tooltip>
         </Col>
@@ -229,7 +228,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
         <Col
           xs={mode === Mode.HIGH_RES ? 6 : 12}
           sm={mode === Mode.HIGH_RES ? 4 : 6}
-          className={`pt-2 pb-2 d-flex gap-3 ${
+          className={`pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-end"
           }`}>
           <Lightbulb
@@ -251,13 +250,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               />
               <Tooltip
                 id={`download-tooltip-${props.token.id}`}
-               place="bottom"
+                place="bottom"
                 style={{
                   backgroundColor: "#1F2937",
                   color: "white",
                   padding: "4px 8px",
-                }}
-              >
+                }}>
                 Download
               </Tooltip>
             </Dropdown.Toggle>
@@ -286,13 +284,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           />
           <Tooltip
             id={`external-tooltip-${props.token.id}`}
-           place="bottom"
+            place="bottom"
             style={{
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Open in new tab
           </Tooltip>
           <FontAwesomeIcon
@@ -303,13 +300,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           />
           <Tooltip
             id={`fullscreen-tooltip-${props.token.id}`}
-           place="bottom"
+            place="bottom"
             style={{
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Fullscreen
           </Tooltip>
         </Col>
