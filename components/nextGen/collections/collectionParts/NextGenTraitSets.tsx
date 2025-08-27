@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
@@ -220,7 +221,7 @@ export default function NextGenTraitSets(
             <span className="font-lightest">Trait</span> Sets
           </h1>
           {props.preview && (
-            <a
+            <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/trait-sets`}
@@ -232,7 +233,7 @@ export default function NextGenTraitSets(
                   className={styles.viewAllIcon}
                 />
               </h5>
-            </a>
+            </Link>
           )}
           {!props.preview && (
             <SearchWalletsDisplay
@@ -336,7 +337,7 @@ export default function NextGenTraitSets(
         setsLoaded && (
           <Row className="pt-3">
             <Col>
-              <a
+              <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
                 )}/trait-sets`}
@@ -348,7 +349,7 @@ export default function NextGenTraitSets(
                     className={styles.viewAllIcon}
                   />
                 </h5>
-              </a>
+              </Link>
             </Col>
           </Row>
         )
@@ -411,7 +412,7 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
   }
 
   return (
-    <a
+    <Link
       className="d-flex gap-2 decoration-hover-underline"
       onClick={(e) => e.stopPropagation()}
       href={`/${props.set.handle ?? props.set.owner}`}>
@@ -420,7 +421,7 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
         cicType={cicToType(props.set.tdh + props.set.rep_score)}
       />{" "}
       {getOwnerDisplay()}
-    </a>
+    </Link>
   );
 }
 function TraitSetAccordion(
@@ -485,7 +486,7 @@ function TraitSetAccordion(
                         style={{ height: "1.5em", color: "#00aa00" }}
                         icon={faCheckCircle}></FontAwesomeIcon>
                       <b>
-                        <a
+                        <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
                           )}/art?traits=${props.trait}:${tv.value}`}
@@ -493,12 +494,12 @@ function TraitSetAccordion(
                           target="_blank"
                           rel="noreferrer">
                           {tv.value}
-                        </a>
+                        </Link>
                       </b>
                     </span>
                     <span className="d-flex flex-wrap">
                       {tv.tokens.map((t) => (
-                        <a
+                        <Link
                           key={`accordion-${props.trait}-${tv.value}-${t}`}
                           href={`/nextgen/token/${t}`}
                           target="_blank"
@@ -537,7 +538,7 @@ function TraitSetAccordion(
                               {normalizeNextgenTokenID(t).token_id}
                             </Tooltip>
                           </>
-                        </a>
+                        </Link>
                       ))}
                     </span>
                   </Col>
@@ -550,7 +551,7 @@ function TraitSetAccordion(
                     Not Seized:{" "}
                     {missingValues.map((mv, index) => (
                       <Fragment key={mv}>
-                        <a
+                        <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
                           )}/art?traits=${props.trait}:${mv}`}
@@ -558,7 +559,7 @@ function TraitSetAccordion(
                           target="_blank"
                           rel="noreferrer">
                           {mv}
-                        </a>
+                        </Link>
                         {index < missingValues.length - 1 ? ", " : ""}
                       </Fragment>
                     ))}

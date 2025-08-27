@@ -1,22 +1,23 @@
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import {
+  ETHEREUM_ICON_TEXT,
+  NEXTGEN_MEDIA_BASE_URL,
+} from "../../../../constants";
 import { NextGenToken } from "../../../../entities/INextgen";
-import { TraitScore } from "./NextGenTokenAbout";
-import { NextGenTokenRarityType } from "../../nextgen_helpers";
 import {
   cicToType,
   formatAddress,
   getRoyaltyImage,
 } from "../../../../helpers/Helpers";
-import {
-  ETHEREUM_ICON_TEXT,
-  NEXTGEN_MEDIA_BASE_URL,
-} from "../../../../constants";
-import { Tooltip } from "react-tooltip";
-import { Container, Row, Col } from "react-bootstrap";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { NextGenTokenRarityType } from "../../nextgen_helpers";
+import { TraitScore } from "./NextGenTokenAbout";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -74,8 +75,8 @@ export function NextGenTokenImage(
             e.preventDefault();
             e.stopPropagation();
           }}>
-          <FontAwesomeIcon 
-            height={18} 
+          <FontAwesomeIcon
+            height={18}
             icon={faInfoCircle}
             data-tooltip-id={`owner-info-${props.token.id}`}
           />
@@ -304,11 +305,11 @@ export function NextGenTokenImage(
     return getContent();
   } else {
     return (
-      <a
+      <Link
         href={`/nextgen/token/${props.token.id}`}
         className="decoration-none scale-hover unselectable">
         {getContent()}
-      </a>
+      </Link>
     );
   }
 }

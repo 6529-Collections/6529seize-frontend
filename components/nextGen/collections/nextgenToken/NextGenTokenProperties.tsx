@@ -9,8 +9,9 @@ import {
   NextGenTrait,
 } from "../../../../entities/INextgen";
 
-import Toggle from "react-toggle";
+import Link from "next/link";
 import { useState } from "react";
+import Toggle from "react-toggle";
 import { formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
@@ -100,12 +101,12 @@ function TraitAccordion(
                     )}-${t.value.replaceAll(" ", "-")}`}>
                     <Col xs={5}>
                       <span className="font-color-h">{t.trait}:</span>{" "}
-                      <a
+                      <Link
                         href={`/nextgen/collection/${formatNameForUrl(
                           props.collection.name
                         )}/art?traits=${t.trait}:${t.value}`}>
                         {t.value}
-                      </a>
+                      </Link>
                     </Col>
                     <Col xs={2} className="text-center">
                       {t.value_count.toLocaleString()} (
@@ -380,12 +381,12 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
           <Col className="pb-3 d-flex gap-2">
             <span className="font-color-h">{t.trait}:</span>
             <span>
-              <a
+              <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
                 )}/art?traits=${t.trait}:${t.value}`}>
                 {t.value}
-              </a>
+              </Link>
             </span>
             <span className="font-color-h">
               {t.value_count.toLocaleString()}/{t.token_count.toLocaleString()}

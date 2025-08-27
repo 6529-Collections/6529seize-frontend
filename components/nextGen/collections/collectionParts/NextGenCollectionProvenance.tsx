@@ -1,30 +1,31 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Accordion } from "react-bootstrap";
+import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { Accordion, Col, Container, Row } from "react-bootstrap";
+import { NULL_ADDRESS } from "../../../../constants";
+import { NextGenCollection, NextGenLog } from "../../../../entities/INextgen";
 import {
   areEqualAddresses,
   formatAddress,
   getDateDisplay,
   getTransactionLink,
 } from "../../../../helpers/Helpers";
-import { useEffect, useRef, useState } from "react";
-import { NextGenCollection, NextGenLog } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Pagination from "../../../pagination/Pagination";
-import Image from "next/image";
-import {
-  getNextGenIconUrl,
-  getNextGenImageUrl,
-} from "../nextgenToken/NextGenTokenImage";
-import { NULL_ADDRESS } from "../../../../constants";
 import {
   printGas,
   printRoyalties,
 } from "../../../latest-activity/LatestActivityRow";
-import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import Pagination from "../../../pagination/Pagination";
+import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
+import styles from "../NextGen.module.scss";
+import {
+  getNextGenIconUrl,
+  getNextGenImageUrl,
+} from "../nextgenToken/NextGenTokenImage";
 
 interface Props {
   collection: NextGenCollection;
@@ -114,7 +115,9 @@ export function NextGenCollectionProvenanceRow(
   const [isTransaction, setIsTransaction] = useState<boolean>(false);
 
   function printAddress(address: string, display?: string) {
-    return <a href={`/${address}`}>{display ?? formatAddress(address)}</a>;
+    return (
+      <Link href={`/${address}`}>{display ?? formatAddress(address)}</Link>
+    );
   }
 
   function printParsedLog() {
@@ -206,11 +209,11 @@ export function NextGenCollectionProvenanceRow(
             <>
               {beforeMatchSpan}
               &nbsp;
-              <a
+              <Link
                 href={`/nextgen/token/${tokenId}`}
                 onClick={(e) => e.stopPropagation()}>
                 {content}
-              </a>
+              </Link>
               {afterMatchSpan}
               {fromTo}
             </>
@@ -278,7 +281,7 @@ export function NextGenCollectionProvenanceRow(
                         log.royalties,
                         log.from_address
                       )}
-                    <a
+                    <Link
                       href={getTransactionLink(
                         NEXTGEN_CHAIN_ID,
                         log.transaction
@@ -292,7 +295,7 @@ export function NextGenCollectionProvenanceRow(
                           cursor: "pointer",
                         }}
                         icon={faExternalLinkSquare}></FontAwesomeIcon>
-                    </a>
+                    </Link>
                   </span>
                 </span>
               </Col>

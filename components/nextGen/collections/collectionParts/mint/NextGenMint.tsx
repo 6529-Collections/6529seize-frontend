@@ -1,23 +1,21 @@
 "use client";
 
+import { DELEGATION_ABI } from "@/abis";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   ALL_USE_CASE,
   MINTING_USE_CASE,
 } from "@/components/delegation/delegation-constants";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
+import { NextGenCollection } from "@/entities/INextgen";
+import { fromGWEI } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract, useReadContracts } from "wagmi";
-import { DELEGATION_ABI } from "../../../../../abis";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-} from "../../../../../constants";
-import { NextGenCollection } from "../../../../../entities/INextgen";
-import { fromGWEI } from "../../../../../helpers/Helpers";
-import { fetchUrl } from "../../../../../services/6529api";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import DotLoader from "../../../../dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import {
   AllowlistType,
@@ -347,19 +345,19 @@ export default function NextGenMint(props: Readonly<Props>) {
       <Row className="pt-2">
         <Col sm={12} md={6} className="d-flex flex-column">
           <NextGenPhases collection={props.collection} available={available} />
-          <a
+          <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}`}
             className="decoration-hover-underline">
             <h1 className="mb-0 font-color">{props.collection.name}</h1>
-          </a>
+          </Link>
           <span className="font-larger">
             by{" "}
             <b>
-              <a href={`/${props.collection.artist_address}`}>
+              <Link href={`/${props.collection.artist_address}`}>
                 {props.collection.artist}
-              </a>
+              </Link>
             </b>
           </span>
           <span className="pt-2 font-larger d-inline-flex align-items-center">
