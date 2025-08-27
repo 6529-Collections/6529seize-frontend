@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function NextGenAbout() {
@@ -285,12 +286,12 @@ export default function NextGenAbout() {
       <Row className="pb-3">
         <Col>
           Additional technical information can be found here:{" "}
-          <a
+          <Link
             href="https://seize-io.gitbook.io/nextgen/"
             target="_blank"
             rel="noopener noreferrer">
             https://seize-io.gitbook.io/nextgen/
-          </a>
+          </Link>
         </Col>
       </Row>
       <Row className="pb-3">

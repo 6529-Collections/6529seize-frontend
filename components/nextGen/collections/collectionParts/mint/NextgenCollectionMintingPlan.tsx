@@ -1,25 +1,26 @@
 "use client";
 
-import styles from "../../NextGen.module.scss";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import {
   NextGenCollection,
   NextgenAllowlist,
   NextgenAllowlistCollection,
 } from "../../../../../entities/INextgen";
-import NextGenCollectionHeader from "../NextGenCollectionHeader";
-import { useEffect, useRef, useState } from "react";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { Time } from "../../../../../helpers/time";
-import { getJsonData } from "./NextGenMintWidget";
+import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "../../../../../helpers/Helpers";
+import { Time } from "../../../../../helpers/time";
+import { commonApiFetch } from "../../../../../services/api/common-api";
 import Pagination from "../../../../pagination/Pagination";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../../../../searchModal/SearchModal";
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
-import dynamic from "next/dynamic";
+import styles from "../../NextGen.module.scss";
+import NextGenCollectionHeader from "../NextGenCollectionHeader";
+import { getJsonData } from "./NextGenMintWidget";
 
 const PdfViewer = dynamic(() => import("../../../../pdfViewer/PdfViewer"), {
   ssr: false,
@@ -238,14 +239,14 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
               {allowlist.map((al) => (
                 <tr key={`${al.address}-${al.spots}-${al.info}`}>
                   <td>
-                    <a
+                    <Link
                       href={`/${al.address}`}
                       target="_blank"
                       rel="noreferrer"
                       className="decoration-hover-underline">
                       {al.wallet_display && `${al.wallet_display} - `}
                       {al.address}
-                    </a>
+                    </Link>
                   </td>
                   <td className="text-center">{al.phase}</td>
                   <td className="text-center">
