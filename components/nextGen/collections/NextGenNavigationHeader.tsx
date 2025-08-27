@@ -2,17 +2,12 @@
 
 import styles from "./NextGen.module.scss";
 
-import { useState, useEffect } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { NextGenView } from "@/enums";
 import Image from "next/image";
-import { LFGButton } from "../../lfg-slideshow/LFGSlideshow";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import CollectionsDropdown from "../../collections-dropdown/CollectionsDropdown";
-
-export enum NextGenView {
-  COLLECTIONS = "Collections",
-  ARTISTS = "Artists",
-  ABOUT = "About",
-}
+import { LFGButton } from "../../lfg-slideshow/LFGSlideshow";
 
 export default function NextGenNavigationHeader(
   props: Readonly<{

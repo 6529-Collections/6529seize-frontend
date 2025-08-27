@@ -2,8 +2,9 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import NextGenCollectionArt from '../../../../../components/nextGen/collections/collectionParts/NextGenCollectionArt';
 
-jest.mock('next/router', () => ({
-  useRouter: () => ({ query: {}, push: jest.fn() }),
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock('../../../../../services/api/common-api', () => ({

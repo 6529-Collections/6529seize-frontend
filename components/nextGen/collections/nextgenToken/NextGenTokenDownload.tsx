@@ -1,14 +1,14 @@
 "use client";
 
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenToken } from "../../../../entities/INextgen";
-import useDownloader from "react-use-downloader";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DotLoader, { Spinner } from "../../../dotLoader/DotLoader";
-import { Tooltip } from "react-tooltip";
-import { useEffect, useState } from "react";
-import { numberWithCommas } from "../../../../helpers/Helpers";
 import { faDownload, faExternalLink } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import useDownloader from "react-use-downloader";
+import { NextGenToken } from "../../../../entities/INextgen";
+import { numberWithCommas } from "../../../../helpers/Helpers";
+import DotLoader, { Spinner } from "../../../dotLoader/DotLoader";
 
 export enum Resolution {
   "Thumbnail" = "Thumbnail",
@@ -111,7 +111,7 @@ export default function NextGenTokenDownload(
       <span className="d-flex gap-3 align-items-center no-wrap">
         <FontAwesomeIcon
           data-tooltip-id={`external-link-${props.token.id}-${quality}`}
-          style={{ cursor: "pointer", height: "24px", width: "24px" }}
+          style={{ cursor: "pointer", height: "20px", width: "20px" }}
           onClick={() => {
             const h = getUrl(props.token, quality);
             window.open(h, "_blank");
@@ -126,8 +126,7 @@ export default function NextGenTokenDownload(
             backgroundColor: "#1F2937",
             color: "white",
             padding: "4px 8px",
-          }}
-        >
+          }}>
           Open in new tab
         </Tooltip>
         <NextGenTokenDownloadButton token={props.token} quality={quality} />
@@ -181,7 +180,7 @@ function NextGenTokenDownloadButton(
         data-tooltip-id={`download-${props.token.id}-${props.quality}`}
         icon={faDownload}
         className={props.class}
-        style={{ cursor: "pointer", height: "24px", width: "24px" }}
+        style={{ cursor: "pointer", height: "20px", width: "20px" }}
         onClick={() => {
           downloader.download(
             getUrl(props.token, props.quality),
@@ -197,8 +196,7 @@ function NextGenTokenDownloadButton(
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
-        }}
-      >
+        }}>
         Download
       </Tooltip>
     </>

@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { ArtistActiveSubmissionContent } from "./ArtistActiveSubmissionContent";

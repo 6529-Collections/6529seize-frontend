@@ -1,3 +1,5 @@
+"use client"
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   CREATE_DIRECT_MESSAGE_SEARCH_PATH,

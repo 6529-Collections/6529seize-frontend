@@ -1,12 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import NextGenAdmin, { printAdminErrors } from '../../../../components/nextGen/admin/NextGenAdmin';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
 import * as helpers from '../../../../components/nextGen/nextgen_helpers';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/contexts/TitleContext', () => ({ useSetTitle: jest.fn() }));
 
 jest.mock('../../../../components/nextGen/admin/NextGenAdminSetData', () => ({ __esModule: true, default: () => <div /> }));
 jest.mock('../../../../components/nextGen/admin/NextGenAdminSetCosts', () => ({ __esModule: true, default: () => <div /> }));
@@ -31,8 +35,9 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdminUploadAL', () => ({ 
 
 jest.mock('../../../../components/header/user/HeaderUserConnect', () => () => <div data-testid="connect" />);
 
-const routerMock = { pathname: '/', query: {}, push: jest.fn() };
+const routerMock = { push: jest.fn() };
 (useRouter as jest.Mock).mockReturnValue(routerMock);
+(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 (useSeizeConnectContext as jest.Mock).mockReturnValue({ isConnected: false });
 
 jest.spyOn(helpers, 'useGlobalAdmin').mockReturnValue({ data: false } as any);
@@ -69,6 +74,8 @@ describe('NextGenAdmin component', () => {
     render(<NextGenAdmin />);
     expect(screen.getByText('REGISTER / REVOKE ADMINS')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Collection'));
-    await waitFor(() => expect(routerMock.push).toHaveBeenCalledWith({ pathname: '/', query: 'focus=collection' }, undefined, { shallow: true }));
+    await waitFor(() =>
+      expect(routerMock.push).toHaveBeenCalledWith('?focus=collection')
+    );
   });
 });
