@@ -1,8 +1,8 @@
-import { formatAddress } from "../../../helpers/Helpers";
-import { Container, Row, Col } from "react-bootstrap";
+import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
+import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { MEMES_CONTRACT } from "../../../constants";
-import { AIRDROPS_USE_CASE } from "../../../pages/delegation/[...section]";
+import { formatAddress } from "../../../helpers/Helpers";
 
 interface AirdropAddress {
   address: string;
@@ -33,7 +33,8 @@ export default function UserPageSubscriptionsAirdropAddress(
             {props.airdrop?.airdrop_address && (
               <>
                 <>
-                  <span data-tooltip-id={`airdrop-address-${props.airdrop.airdrop_address.address}`}>
+                  <span
+                    data-tooltip-id={`airdrop-address-${props.airdrop.airdrop_address.address}`}>
                     {formatAddress(props.airdrop.airdrop_address.address)}
                   </span>
                   <Tooltip
@@ -42,8 +43,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                       backgroundColor: "#1F2937",
                       color: "white",
                       padding: "4px 8px",
-                    }}
-                  >
+                    }}>
                     {props.airdrop.airdrop_address.address}
                   </Tooltip>
                 </>
@@ -56,8 +56,7 @@ export default function UserPageSubscriptionsAirdropAddress(
           {props.airdrop?.airdrop_address && props.show_edit && (
             <a
               href={`/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`}
-              aria-label="Change airdrop address"
-            >
+              aria-label="Change airdrop address">
               Change
             </a>
           )}
