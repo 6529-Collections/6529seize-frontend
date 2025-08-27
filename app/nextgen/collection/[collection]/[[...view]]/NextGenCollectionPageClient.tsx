@@ -42,7 +42,7 @@ export default function NextGenCollectionPageClient({
     const newPath = `/nextgen/collection/${formatNameForUrl(
       collection.name
     )}${path}`;
-    router.replace(newPath, { scroll: false });
+    router.push(newPath, { scroll: false });
   };
 
   return (
