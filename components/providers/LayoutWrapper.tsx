@@ -15,7 +15,6 @@ export default function LayoutWrapper({
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
 
-  const isSmall = pathname?.startsWith("/my-stream");
   const isAccessOrRestricted =
     pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
 
@@ -23,9 +22,9 @@ export default function LayoutWrapper({
     return isApp ? (
       <MobileLayout>{children}</MobileLayout>
     ) : (
-      <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
+      <DesktopLayout>{children}</DesktopLayout>
     );
-  }, [isApp, isSmall, children]);
+  }, [isApp, children]);
 
   if (isAccessOrRestricted) {
     return <>{children}</>;
