@@ -1,134 +1,71 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useAuth } from "../../auth/Auth";
+import Image from "next/image";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useIdentity } from "@/hooks/useIdentity";
+import DesktopSidebarNav from "./DesktopSidebarNav";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import DropPfp from "@/components/drops/create/utils/DropPfp";
+import { DropPartSize } from "@/components/drops/view/part/DropPart";
+import HeaderUserProxyDropdown from "@/components/header/user/proxy/HeaderUserProxyDropdown";
 
 export default function DesktopSidebar() {
-  const { showWaves } = useAuth();
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { address } = useSeizeConnectContext();
 
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => 
-      prev.includes(section) 
-        ? prev.filter(s => s !== section)
-        : [...prev, section]
-    );
-  };
-
-  const NavItem = ({ href, children, onClick }: { href?: string; children: React.ReactNode; onClick?: () => void }) => (
-    <div className="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-text-iron-300 hover:tw-text-white hover:tw-bg-iron-800 tw-transition-colors">
-      {href ? (
-        <Link href={href} className="tw-no-underline tw-text-inherit">
-          {children}
-        </Link>
-      ) : (
-        <button onClick={onClick} className="tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-p-0 tw-text-inherit">
-          {children}
-        </button>
-      )}
-    </div>
-  );
-
-  const NavSection = ({ title, children, isExpanded, onToggle }: { 
-    title: string; 
-    children: React.ReactNode; 
-    isExpanded: boolean; 
-    onToggle: () => void; 
-  }) => (
-    <div>
-      <NavItem onClick={onToggle}>
-        <div className="tw-flex tw-justify-between tw-items-center">
-          {title}
-          <span className={`tw-transition-transform ${isExpanded ? 'tw-rotate-90' : ''}`}>›</span>
-        </div>
-      </NavItem>
-      {isExpanded && (
-        <div className="tw-ml-4 tw-mt-1 tw-space-y-1">
-          {children}
-        </div>
-      )}
-    </div>
-  );
+  const { profile } = useIdentity({
+    handleOrWallet: address || "",
+    initialProfile: null,
+  });
 
   return (
-    <div className="tw-w-64 tw-h-full tw-bg-black tw-border-r tw-border-iron-700 tw-flex tw-flex-col">
-      {/* Logo/Brand Section */}
-      <div className="tw-p-4 tw-border-b tw-border-iron-700">
-        <Link href="/" className="tw-no-underline">
-          <div className="tw-text-white tw-font-bold tw-text-lg">
-            6529
-          </div>
+    <div className="tw-flex tw-grow tw-flex-col tw-gap-y-5 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-desktop-hover:hover:desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-border-r tw-border-iron-700 tw-bg-iron-950 tw-fixed tw-inset-y-0 tw-z-50 tw-w-16 lg:tw-w-80  tw-px-3 lg:tw-px-6 tw-pb-6">
+      <div className="tw-flex tw-h-16 tw-shrink-0 tw-items-center tw-justify-center lg:tw-justify-start">
+        <Link href="/">
+          <Image
+            alt="6529Seize"
+            src="/6529.png"
+            className="tw-h-8 tw-w-8"
+            width={32}
+            height={32}
+          />
         </Link>
       </div>
 
-      {/* Navigation Section */}
-      <div className="tw-flex-1 tw-overflow-y-auto tw-p-2">
-        <nav className="tw-space-y-1">
-          <NavItem href="/">Home</NavItem>
-          
-          {showWaves && (
-            <NavSection 
-              title="Brain" 
-              isExpanded={expandedSections.includes('brain')}
-              onToggle={() => toggleSection('brain')}
+      <DesktopSidebarNav />
+
+      {/* User section at bottom */}
+      {address && profile && (
+        <div className="tw-mt-auto tw-relative">
+          <div className="tw-flex tw-items-center tw-py-2.5 tw-rounded-xl tw-px-3 tw-gap-x-3 tw-text-sm tw-font-semibold tw-text-white desktop-hover:hover:tw-bg-iron-900 tw-justify-center lg:tw-justify-start">
+            <DropPfp pfpUrl={profile.pfp} size={DropPartSize.MEDIUM} />
+            <div className="tw-flex-1 tw-hidden lg:tw-block">
+              <div className="tw-text-white tw-font-medium tw-text-base">
+                {profile.handle
+                  ? `@${profile.handle}`
+                  : `${address.slice(0, 6)}...${address.slice(-4)}`}
+              </div>
+              <div className="tw-text-iron-400 tw-text-xs">
+                Level {profile.level || 0}
+              </div>
+            </div>
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="tw-text-iron-300 desktop-hover:hover:tw-text-white tw-p-1 tw-rounded tw-transition-colors tw-bg-transparent tw-border-0"
+              title={profile.handle ? `@${profile.handle}` : address}
             >
-              <NavItem href="/my-stream">My Stream</NavItem>
-              <NavItem href="/waves">Waves</NavItem>
-            </NavSection>
-          )}
-
-          <NavSection 
-            title="Collections" 
-            isExpanded={expandedSections.includes('collections')}
-            onToggle={() => toggleSection('collections')}
-          >
-            <NavItem href="/the-memes">The Memes</NavItem>
-            <NavItem href="/6529-gradient">Gradient</NavItem>
-            <NavItem href="/nextgen">NextGen</NavItem>
-            <NavItem href="/meme-lab">Meme Lab</NavItem>
-            <NavItem href="/rememes">ReMemes</NavItem>
-          </NavSection>
-
-          <NavSection 
-            title="Network" 
-            isExpanded={expandedSections.includes('network')}
-            onToggle={() => toggleSection('network')}
-          >
-            <NavItem href="/network">Identities</NavItem>
-            <NavItem href="/network/activity">Activity</NavItem>
-            <NavItem href="/network/groups">Groups</NavItem>
-            <NavItem href="/network/nft-activity">NFT Activity</NavItem>
-          </NavSection>
-
-          <NavSection 
-            title="Tools" 
-            isExpanded={expandedSections.includes('tools')}
-            onToggle={() => toggleSection('tools')}
-          >
-            <NavItem href="/tools/delegation">Delegation Center</NavItem>
-            <NavItem href="/api">API</NavItem>
-            <NavItem href="/emma">EMMA</NavItem>
-            <NavItem href="/block-finder">Block Finder</NavItem>
-          </NavSection>
-
-          <NavSection 
-            title="About" 
-            isExpanded={expandedSections.includes('about')}
-            onToggle={() => toggleSection('about')}
-          >
-            <NavItem href="/about/the-memes">The Memes</NavItem>
-            <NavItem href="/about/subscriptions">Subscriptions</NavItem>
-            <NavItem href="/about/memes-calendar">Memes Calendar</NavItem>
-            <NavItem href="/about">FAQ</NavItem>
-          </NavSection>
-        </nav>
-      </div>
-
-      {/* User Section */}
-      <div className="tw-p-4 tw-border-t tw-border-iron-700">
-        <div className="tw-text-iron-300 tw-text-sm">User Area</div>
-      </div>
+              <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+            </button>
+          </div>
+          <HeaderUserProxyDropdown
+            profile={profile}
+            isOpen={showUserMenu}
+            onClose={() => setShowUserMenu(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

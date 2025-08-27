@@ -22,4 +22,21 @@ export type ViewNavItem = {
   disabled?: boolean;
 };
 
-export type NavItem = RouteNavItem | ViewNavItem; 
+export type NavItem = RouteNavItem | ViewNavItem;
+
+// Sidebar-specific types
+export interface SidebarSection {
+  key: string;
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  items: SidebarNavItem[];
+  subsections?: {
+    name: string;
+    items: SidebarNavItem[];
+  }[];
+}
+
+export interface SidebarNavItem {
+  name: string;
+  href: string;
+} 

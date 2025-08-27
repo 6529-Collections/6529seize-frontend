@@ -8,13 +8,12 @@ interface DesktopLayoutProps {
 }
 
 const DesktopLayout = ({ children }: DesktopLayoutProps) => {
-
   return (
-    <div className="tw-flex">
-      <DesktopSidebar />
-      <main className="tw-flex-1 tw-overflow-auto">
-        {children}
-      </main>
+    <div className="tw-flex tw-min-h-dvh tw-w-full tw-items-stretch">
+      <div className="tailwind-scope tw-relative tw-flex tw-flex-col tw-w-80 tw-h-full">
+        <DesktopSidebar />
+      </div>
+      <main className="tw-flex-1 tw-overflow-auto">{children}</main>
     </div>
   );
 };
