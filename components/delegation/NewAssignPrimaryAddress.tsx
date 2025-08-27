@@ -1,32 +1,32 @@
 "use client";
 
-import { Container, Row, Col, Form } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
 
-import {
-  DelegationCollection,
-  PRIMARY_ADDRESS_USE_CASE,
-} from "../../pages/delegation/[...section]";
+import { DELEGATION_ABI } from "@/abis";
+import { AuthContext } from "@/components/auth/Auth";
+import DotLoader from "@/components/dotLoader/DotLoader";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
-} from "../../constants";
-import { DELEGATION_ABI } from "../../abis";
-import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
-import { getGasError } from "./delegation_shared";
-import {
-  DelegationCloseButton,
-  DelegationFormOriginalDelegatorFormGroup,
-  DelegationFormLabel,
-  DelegationAddressDisabledInput,
-  DelegationSubmitGroups,
-  DelegationFormOptionsFormGroup,
-} from "./DelegationFormParts";
-import { AuthContext } from "../auth/Auth";
-import { commonApiFetch } from "../../services/api/common-api";
+} from "@/constants";
+import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import DotLoader from "../dotLoader/DotLoader";
+import {
+  DelegationCollection,
+  PRIMARY_ADDRESS_USE_CASE,
+} from "./delegation-constants";
+import { getGasError } from "./delegation-shared";
+import {
+  DelegationAddressDisabledInput,
+  DelegationCloseButton,
+  DelegationFormLabel,
+  DelegationFormOptionsFormGroup,
+  DelegationFormOriginalDelegatorFormGroup,
+  DelegationSubmitGroups,
+} from "./DelegationFormParts";
 
 interface Props {
   address: string;

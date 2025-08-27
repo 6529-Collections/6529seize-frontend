@@ -1,3 +1,4 @@
+import { DelegationCenterSection } from "@/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -6,43 +7,33 @@ jest.mock("next/image", () => ({
   default: (props: any) => <img {...props} alt="test" />,
 }));
 
-jest.mock("../../../components/delegation/DelegationCenter", () => () => (
+jest.mock("@/components/delegation/DelegationCenter", () => () => (
   <div data-testid="center" />
 ));
-jest.mock(
-  "../../../components/delegation/walletChecker/WalletChecker",
-  () => () => <div />
-);
-jest.mock("../../../components/delegation/NewDelegation", () => () => <div />);
-jest.mock("../../../components/delegation/NewSubDelegation", () => () => (
+jest.mock("@/components/delegation/walletChecker/WalletChecker", () => () => (
   <div />
 ));
-jest.mock("../../../components/delegation/NewConsolidation", () => () => (
+jest.mock("@/components/delegation/NewDelegation", () => () => <div />);
+jest.mock("@/components/delegation/NewSubDelegation", () => () => <div />);
+jest.mock("@/components/delegation/NewConsolidation", () => () => <div />);
+jest.mock("@/components/delegation/NewAssignPrimaryAddress", () => () => (
   <div />
 ));
-jest.mock(
-  "../../../components/delegation/NewAssignPrimaryAddress",
-  () => () => <div />
-);
-jest.mock("../../../components/delegation/CollectionDelegation", () => () => (
-  <div />
-));
-jest.mock("../../../components/delegation/html/DelegationHTML", () => () => (
-  <div />
-));
+jest.mock("@/components/delegation/CollectionDelegation", () => () => <div />);
+jest.mock("@/components/delegation/html/DelegationHTML", () => () => <div />);
 
-jest.mock("../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0xabc" }),
 }));
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: "ens" }) }));
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({ asPath: "/delegation" }),
+  usePathname: () => "/delegation",
 }));
 
 const props = {
-  section: require("../../../components/delegation/DelegationCenterMenu")
-    .DelegationCenterSection.CENTER,
+  section: DelegationCenterSection.CENTER,
   path: [],
   setActiveSection: jest.fn(),
   address_query: "",
@@ -55,9 +46,7 @@ const props = {
 
 describe("DelegationCenterMenu links", () => {
   it("renders resource links", async () => {
-    const mod = await import(
-      "../../../components/delegation/DelegationCenterMenu"
-    );
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
     const DelegationCenterMenu = mod.default;
     render(<DelegationCenterMenu {...props} />);
     const etherscan = screen
@@ -72,23 +61,20 @@ describe("DelegationCenterMenu links", () => {
   });
 
   it("changes section on wallet checker click", async () => {
-    const mod = await import(
-      "../../../components/delegation/DelegationCenterMenu"
-    );
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
     const DelegationCenterMenu = mod.default;
     render(<DelegationCenterMenu {...props} />);
     fireEvent.click(screen.getAllByText("Wallet Checker")[0]);
     expect(props.setActiveSection).toHaveBeenCalledWith(
-      mod.DelegationCenterSection.CHECKER
+      DelegationCenterSection.CHECKER
     );
   });
 });
 
 describe("DelegationToast", () => {
-  it("closes when clicking outside or close button", () => {
-    const {
-      DelegationToast,
-    } = require("../../../components/delegation/DelegationCenterMenu");
+  it("closes when clicking outside or close button", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationToast = mod.DelegationToast;
     const setShow = jest.fn();
     const ref = React.createRef<HTMLDivElement>();
     const { container } = render(

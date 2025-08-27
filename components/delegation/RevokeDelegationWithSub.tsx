@@ -1,24 +1,21 @@
 "use client";
 
-import styles from "./Delegation.module.scss";
-import { Container, Row, Col, Form } from "react-bootstrap";
-import { useEnsName } from "wagmi";
 import { useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
+import { useEnsName } from "wagmi";
+import styles from "./Delegation.module.scss";
 
+import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_CONTRACT } from "@/constants";
+import { isValidEthAddress } from "@/helpers/Helpers";
+import { ALL_USE_CASES, DelegationCollection } from "./delegation-constants";
+import { getGasError } from "./delegation-shared";
 import {
-  DelegationCollection,
-  ALL_USE_CASES,
-} from "../../pages/delegation/[...section]";
-import { DELEGATION_CONTRACT } from "../../constants";
-import { DELEGATION_ABI } from "../../abis";
-import { isValidEthAddress } from "../../helpers/Helpers";
-import { getGasError } from "./delegation_shared";
-import {
-  DelegationCloseButton,
-  DelegationFormLabel,
   DelegationAddressDisabledInput,
+  DelegationCloseButton,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
+  DelegationFormLabel,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
