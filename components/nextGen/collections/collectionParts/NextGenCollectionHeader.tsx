@@ -1,35 +1,38 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import DateCountdown from "@/components/date-countdown/DateCountdown";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import {
   AllowlistType,
   CollectionWithMerkle,
   Status,
-} from "../../nextgen_entities";
-import Image from "next/image";
-import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import DateCountdown from "../../../date-countdown/DateCountdown";
-import { fetchUrl } from "../../../../services/6529api";
-import DotLoader from "../../../dotLoader/DotLoader";
-import { NextGenCollection } from "../../../../entities/INextgen";
+} from "@/components/nextGen/nextgen_entities";
 import {
   formatNameForUrl,
+  getBlurCollectionLink,
+  getMagicEdenCollectionLink,
   getOpenseaLink,
   getStatusFromDates,
   useCollectionMintCount,
-} from "../../nextgen_helpers";
-import { isEmptyObject, numberWithCommas } from "../../../../helpers/Helpers";
-import { DistributionLink } from "../NextGen";
-import { getCommonHeaders } from "../../../../helpers/server.helpers";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { useSetTitle } from "../../../../contexts/TitleContext";
-import useCapacitor from "../../../../hooks/useCapacitor";
+} from "@/components/nextGen/nextgen_helpers";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { NextGenCollection } from "@/entities/INextgen";
+import { isEmptyObject, numberWithCommas } from "@/helpers/Helpers";
+import { getCommonHeaders } from "@/helpers/server.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
-import { useCookieConsent } from "../../../cookies/CookieConsentContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { DistributionLink } from "../NextGen";
+import styles from "../NextGen.module.scss";
 
 interface Props {
   collection: NextGenCollection;
@@ -74,7 +77,7 @@ export function NextGenBackToCollectionPageLink(
 }
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
-  const router = useRouter();
+  const pathname = usePathname() || "";
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
     props.collection.allowlist_end
@@ -108,7 +111,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   }
 
   function printCountdown(title: string, date: number) {
-    const pathParts = router.pathname.split("/");
+    const pathParts = pathname.split("/");
     const hideMintBtn = pathParts[pathParts.length - 1] === "mint";
 
     return (
@@ -120,7 +123,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
               props.collection.name
             )}/mint`}>
             <button
-              className={`pt-2 pb-2 seize-btn btn-block no-wrap ${styles.exploreBtn}`}>
+              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}>
               {getButtonLabel()}
             </button>
           </a>
@@ -236,8 +239,8 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             />
           }
           {props.show_links && (!capacitor.isIos || country === "US") && (
-            <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
-              <a
+            <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-2">
+              <Link
                 href={
                   props.collection.opensea_link ||
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
@@ -251,7 +254,31 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   width={32}
                   height={32}
                 />
-              </a>
+              </Link>
+              <Link
+                href={getBlurCollectionLink()}
+                target="_blank"
+                rel="noreferrer">
+                <Image
+                  className={styles.marketplace}
+                  src="/blur.png"
+                  alt="blur"
+                  width={32}
+                  height={32}
+                />
+              </Link>
+              <Link
+                href={getMagicEdenCollectionLink()}
+                target="_blank"
+                rel="noreferrer">
+                <Image
+                  className={styles.marketplace}
+                  src="/magiceden.png"
+                  alt="magiceden"
+                  width={32}
+                  height={32}
+                />
+              </Link>
             </span>
           )}
         </Col>

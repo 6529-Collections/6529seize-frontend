@@ -129,3 +129,9 @@ export enum DelegationCenterSection {
   CHECKER = "wallet-checker",
   HTML = "html",
 }
+
+export enum NextGenView {
+  COLLECTIONS = "Collections",
+  ARTISTS = "Artists",
+  ABOUT = "About",
+}
