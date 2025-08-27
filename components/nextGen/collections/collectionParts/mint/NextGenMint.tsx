@@ -1,24 +1,21 @@
 "use client";
 
+import { DELEGATION_ABI } from "@/abis";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
+import { NextGenCollection } from "@/entities/INextgen";
+import { fromGWEI } from "@/helpers/Helpers";
+import {
+  ALL_USE_CASE,
+  MINTING_USE_CASE,
+} from "@/pages/delegation/[...section]";
+import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract, useReadContracts } from "wagmi";
-import { DELEGATION_ABI } from "../../../../../abis";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-} from "../../../../../constants";
-import { NextGenCollection } from "../../../../../entities/INextgen";
-import { fromGWEI } from "../../../../../helpers/Helpers";
-import {
-  ALL_USE_CASE,
-  MINTING_USE_CASE,
-} from "../../../../../pages/delegation/[...section]";
-import { fetchUrl } from "../../../../../services/6529api";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import DotLoader from "../../../../dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
 import {
   AllowlistType,
