@@ -1,16 +1,16 @@
 "use client";
 
-import styles from "./SearchModal.module.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
-import { Modal, InputGroup, Form, Button } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
-import { formatAddress } from "../../helpers/Helpers";
 import {
   faSearch,
   faSquareXmark,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
+import { Button, Form, InputGroup, Modal } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { formatAddress } from "../../helpers/Helpers";
+import styles from "./SearchModal.module.scss";
 
 interface Props {
   show: boolean;
@@ -88,8 +88,7 @@ function SearchModal(props: Readonly<Props>) {
                   backgroundColor: "#1F2937",
                   color: "white",
                   padding: "4px 8px",
-                }}
-              >
+                }}>
                 Clear
               </Tooltip>
             </>
@@ -137,8 +136,7 @@ export function SearchWalletsDisplay(
                 onClick={() =>
                   setSearchWallets(searchWallets.filter((s) => s != sw))
                 }
-                data-tooltip-id={`clear-wallet-display-${sw}`}
-              >
+                data-tooltip-id={`clear-wallet-display-${sw}`}>
                 x
               </button>
               <Tooltip
@@ -149,8 +147,7 @@ export function SearchWalletsDisplay(
                   backgroundColor: "#f8f9fa",
                   color: "#212529",
                   padding: "4px 8px",
-                }}
-              >
+                }}>
                 Clear
               </Tooltip>
             </>
@@ -175,8 +172,7 @@ export function SearchWalletsDisplay(
               backgroundColor: "#f8f9fa",
               color: "#212529",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Clear All
           </Tooltip>
         </>

@@ -52,7 +52,10 @@
   width: 100%;
 
   &:hover {
-    background-color: color.adjust($color: variables.$project-green, $lightness: 10%) !important;
+    background-color: color.adjust(
+      $color: variables.$project-green,
+      $lightness: 10%
+    ) !important;
   }
 }
 
@@ -416,7 +419,7 @@
 }
 
 .nextgenTokenDetailsLinkSelected {
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid white !important;
 }
 
 .tokenLogsTable {
@@ -488,6 +491,8 @@
   border: 2px solid white !important;
   font-size: larger !important;
   font-weight: bold;
+  padding-left: 20px;
+  padding-right: 20px;
 
   &:hover {
     background-color: white;

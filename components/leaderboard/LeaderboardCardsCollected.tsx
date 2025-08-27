@@ -1,20 +1,20 @@
 "use client";
 
+import { MemeSeason } from "@/entities/ISeason";
+import { SortDirection } from "@/entities/ISort";
+import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./Leaderboard.module.scss";
-import { numberWithCommas } from "../../helpers/Helpers";
-import { SortDirection } from "../../entities/ISort";
-import { LeaderboardCollector } from "./LeaderboardCollector";
-import { MemeSeason } from "../../entities/ISeason";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import { Collector, Content } from "./Leaderboard";
-import LeaderboardSort from "./LeaderboardSort";
+import styles from "./Leaderboard.module.scss";
 import {
   LeaderboardCardsCollectedSort,
   LeaderboardMetrics,
   useFetchLeaderboard,
 } from "./leaderboard_helpers";
+import { LeaderboardCollector } from "./LeaderboardCollector";
 import LeaderboardFooter from "./LeaderboardDownload";
+import LeaderboardSort from "./LeaderboardSort";
 
 const PAGE_SIZE = 50;
 
@@ -158,7 +158,7 @@ export default function LeaderboardCardsCollectedComponent(
                   </th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
-                      Daily Change&nbsp; &nbsp;
+                      Daily Change&nbsp;
                       <LeaderboardSort
                         sort_option={LeaderboardCardsCollectedSort.day_change}
                         sort={sort}
@@ -168,7 +168,7 @@ export default function LeaderboardCardsCollectedComponent(
                   </th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
-                      vs Network&nbsp; &nbsp;
+                      vs Network&nbsp;
                     </span>
                   </th>
                 </tr>
