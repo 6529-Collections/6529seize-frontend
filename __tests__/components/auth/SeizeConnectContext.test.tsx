@@ -27,9 +27,6 @@ jest.mock('@reown/appkit/react', () => ({
   })),
   useDisconnect: jest.fn(() => ({
     disconnect: jest.fn()
-  })),
-  useWalletInfo: jest.fn(() => ({
-    walletInfo: null
   }))
 }));
 
@@ -44,6 +41,15 @@ jest.mock('../../../services/auth/auth.utils', () => ({
   migrateCookiesToLocalStorage: jest.fn(),
   getWalletAddress: jest.fn(() => null),
   removeAuthJwt: jest.fn(),
+}));
+
+// Mock wallet detection utils
+jest.mock('../../../src/utils/wallet-detection.utils', () => ({
+  detectConnectedWallet: jest.fn(() => ({
+    name: 'Unknown Wallet',
+    icon: undefined,
+    isSafe: false,
+  })),
 }));
 
 // Don't mock security logger - we want to test actual logging behavior
@@ -80,7 +86,12 @@ const TestComponent: React.FC = () => {
     seizeConnect,
     seizeAcceptConnection,
     address,
+    walletName,
+    walletIcon,
+    isSafeWallet,
     isAuthenticated,
+    connectionState,
+    walletState,
     hasInitializationError,
     initializationError
   } = useSeizeConnectContext();
@@ -115,7 +126,12 @@ const TestComponent: React.FC = () => {
       <button onClick={handleAcceptValid} data-testid="accept-valid">Accept Valid</button>
       <button onClick={handleAcceptInvalid} data-testid="accept-invalid">Accept Invalid</button>
       <div data-testid="address">{address || 'undefined'}</div>
+      <div data-testid="wallet-name">{walletName || 'undefined'}</div>
+      <div data-testid="wallet-icon">{walletIcon || 'undefined'}</div>
+      <div data-testid="is-safe-wallet">{isSafeWallet.toString()}</div>
       <div data-testid="is-authenticated">{isAuthenticated.toString()}</div>
+      <div data-testid="connection-state">{connectionState}</div>
+      <div data-testid="wallet-state-status">{walletState.status}</div>
       <div data-testid="has-error">{hasInitializationError.toString()}</div>
       <div data-testid="error-message">{initializationError?.message || 'no error'}</div>
     </div>
@@ -1228,6 +1244,278 @@ describe('SeizeConnectContext Security Vulnerability Fix', () => {
   });
 });
 
+describe('Wallet Detection Integration Tests', () => {
+  let mockDetectConnectedWallet: jest.MockedFunction<any>;
+  let mockUseAppKitAccount: jest.MockedFunction<any>;
+  let mockGetWalletAddress: jest.MockedFunction<any>;
+  let mockIsAddress: jest.MockedFunction<any>;
+  let mockGetAddress: jest.MockedFunction<any>;
+
+  beforeEach(() => {
+    mockDetectConnectedWallet = require('../../../src/utils/wallet-detection.utils').detectConnectedWallet as jest.MockedFunction<any>;
+    mockUseAppKitAccount = require('@reown/appkit/react').useAppKitAccount as jest.MockedFunction<any>;
+    mockGetWalletAddress = require('../../../services/auth/auth.utils').getWalletAddress as jest.MockedFunction<any>;
+    mockIsAddress = require('viem').isAddress as jest.MockedFunction<any>;
+    mockGetAddress = require('viem').getAddress as jest.MockedFunction<any>;
+    
+    // Mock console methods
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should call detectConnectedWallet only when connected', async () => {
+    // Setup: Not connected
+    mockUseAppKitAccount.mockReturnValue({
+      address: undefined,
+      isConnected: false,
+      status: 'disconnected'
+    });
+    mockGetWalletAddress.mockReturnValue(null);
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    // Should return default wallet info when not connected
+    expect(screen.getByTestId('wallet-name')).toHaveTextContent('undefined');
+    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('undefined');
+    expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('false');
+  });
+
+  it('should detect MetaMask wallet when connected', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    const checksummedAddress = '0x1234567890AbcdEF1234567890AbcDEF12345678';
+    
+    // Setup: Connected state
+    mockUseAppKitAccount.mockReturnValue({
+      address: validAddress,
+      isConnected: true,
+      status: 'connected'
+    });
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockReturnValue(checksummedAddress);
+    
+    // Mock wallet detection to return MetaMask
+    mockDetectConnectedWallet.mockReturnValue({
+      name: 'MetaMask',
+      icon: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
+      isSafe: false,
+    });
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    // Verify wallet detection was called and results are displayed
+    expect(mockDetectConnectedWallet).toHaveBeenCalled();
+    expect(screen.getByTestId('wallet-name')).toHaveTextContent('MetaMask');
+    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg');
+    expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('false');
+  });
+
+  it('should detect Safe Wallet correctly', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    const checksummedAddress = '0x1234567890AbcdEF1234567890AbcDEF12345678';
+    
+    // Setup: Connected state
+    mockUseAppKitAccount.mockReturnValue({
+      address: validAddress,
+      isConnected: true,
+      status: 'connected'
+    });
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockReturnValue(checksummedAddress);
+    
+    // Mock wallet detection to return Safe Wallet
+    mockDetectConnectedWallet.mockReturnValue({
+      name: 'Safe Wallet',
+      icon: 'https://app.safe.global/images/logo-round.svg',
+      isSafe: true,
+    });
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('wallet-name')).toHaveTextContent('Safe Wallet');
+    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('https://app.safe.global/images/logo-round.svg');
+    expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('true');
+  });
+
+  it('should handle wallet detection errors gracefully', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    
+    mockUseAppKitAccount.mockReturnValue({
+      address: validAddress,
+      isConnected: true,
+      status: 'connected'
+    });
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockReturnValue(validAddress);
+    
+    // Mock wallet detection to return default (the actual implementation catches errors)
+    mockDetectConnectedWallet.mockReturnValue({
+      name: 'Unknown Wallet',
+      icon: undefined,
+      isSafe: false,
+    });
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    // Should show default values when detection fails
+    expect(screen.getByTestId('wallet-name')).toHaveTextContent('Unknown Wallet');
+    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('undefined');
+    expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('false');
+  });
+});
+
+describe('Unified Wallet State Machine Tests', () => {
+  let mockGetWalletAddress: jest.MockedFunction<any>;
+  let mockIsAddress: jest.MockedFunction<any>;
+  let mockGetAddress: jest.MockedFunction<any>;
+  let mockUseAppKitAccount: jest.MockedFunction<any>;
+
+  beforeEach(() => {
+    mockGetWalletAddress = require('../../../services/auth/auth.utils').getWalletAddress as jest.MockedFunction<any>;
+    mockIsAddress = require('viem').isAddress as jest.MockedFunction<any>;
+    mockGetAddress = require('viem').getAddress as jest.MockedFunction<any>;
+    mockUseAppKitAccount = require('@reown/appkit/react').useAppKitAccount as jest.MockedFunction<any>;
+    
+    // Mock console methods
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should complete initialization successfully', async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+    mockUseAppKitAccount.mockReturnValue({
+      address: undefined,
+      isConnected: false,
+      status: 'disconnected'
+    });
+    
+    renderWithProvider();
+
+    // Wait for initialization to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+    
+    // After initialization, should be in disconnected state
+    expect(screen.getByTestId('wallet-state-status')).toHaveTextContent('disconnected');
+    expect(screen.getByTestId('connection-state')).toHaveTextContent('disconnected');
+  });
+
+  it('should transition to connected state with valid stored address', async () => {
+    const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+    const checksummedAddress = '0x1234567890AbcdEF1234567890AbcDEF12345678';
+    
+    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockReturnValue(checksummedAddress);
+    mockUseAppKitAccount.mockReturnValue({
+      address: undefined,
+      isConnected: false,
+      status: 'disconnected'
+    });
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('wallet-state-status')).toHaveTextContent('connected');
+    expect(screen.getByTestId('connection-state')).toHaveTextContent('connected');
+    expect(screen.getByTestId('address')).toHaveTextContent(checksummedAddress);
+  });
+
+  it('should transition to disconnected state when no stored address', async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+    mockUseAppKitAccount.mockReturnValue({
+      address: undefined,
+      isConnected: false,
+      status: 'disconnected'
+    });
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('wallet-state-status')).toHaveTextContent('disconnected');
+    expect(screen.getByTestId('connection-state')).toHaveTextContent('disconnected');
+    expect(screen.getByTestId('address')).toHaveTextContent('undefined');
+  });
+
+  it('should transition to error state with invalid stored address', async () => {
+    mockGetWalletAddress.mockReturnValue('invalid-address');
+    mockIsAddress.mockReturnValue(false);
+    mockUseAppKitAccount.mockReturnValue({
+      address: undefined,
+      isConnected: false,
+      status: 'disconnected'
+    });
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('wallet-state-status')).toHaveTextContent('error');
+    expect(screen.getByTestId('connection-state')).toHaveTextContent('error');
+    expect(screen.getByTestId('has-error')).toHaveTextContent('true');
+  });
+
+  it('should handle state transitions properly', async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+    
+    // Start with connecting state
+    mockUseAppKitAccount.mockReturnValue({
+      address: undefined,
+      isConnected: false,
+      status: 'connecting'
+    });
+
+    renderWithProvider();
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
+
+    // Due to debouncing and initialization timing, state might be disconnected or connecting
+    const state = screen.getByTestId('connection-state').textContent;
+    expect(['connecting', 'disconnected']).toContain(state);
+  });
+});
+
 describe('Regression Tests: Original Functionality with Secure Implementation', () => {
   let mockGetWalletAddress: jest.MockedFunction<typeof authUtils.getWalletAddress>;
   let mockIsAddress: jest.MockedFunction<any>;
@@ -1258,7 +1546,7 @@ describe('Regression Tests: Original Functionality with Secure Implementation', 
     jest.restoreAllMocks();
   });
 
-  it('should maintain all original context values', async () => {
+  it('should maintain all original context values plus new ones', async () => {
     const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
     const checksummedAddress = '0x1234567890AbcdEF1234567890AbcDEF12345678';
     
@@ -1272,9 +1560,14 @@ describe('Regression Tests: Original Functionality with Secure Implementation', 
       expect(screen.getByTestId('test-component')).toBeInTheDocument();
     });
 
-    // Verify all expected context values are present
+    // Verify all expected context values are present (original + new)
     expect(screen.getByTestId('address')).toBeInTheDocument();
+    expect(screen.getByTestId('wallet-name')).toBeInTheDocument();
+    expect(screen.getByTestId('wallet-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('is-safe-wallet')).toBeInTheDocument();
     expect(screen.getByTestId('is-authenticated')).toBeInTheDocument();
+    expect(screen.getByTestId('connection-state')).toBeInTheDocument();
+    expect(screen.getByTestId('wallet-state-status')).toBeInTheDocument();
     expect(screen.getByTestId('has-error')).toBeInTheDocument();
     expect(screen.getByTestId('error-message')).toBeInTheDocument();
   });

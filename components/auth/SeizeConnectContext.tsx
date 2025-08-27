@@ -26,6 +26,7 @@ import {
   createValidationEventContext
 } from "../../src/utils/security-logger";
 import { WalletErrorBoundary } from "./error-boundary";
+import { detectConnectedWallet } from "../../src/utils/wallet-detection.utils";
 
 // Custom error types for better error handling
 export class WalletConnectionError extends Error {
@@ -541,11 +542,20 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setConnected(checksummedAddress);
   }, [setConnected]);
 
+  // Detect wallet info only when connected
+  const walletInfo = useMemo(() => {
+    return account.isConnected ? detectConnectedWallet() : {
+      name: undefined,
+      icon: undefined,
+      isSafe: false,
+    };
+  }, [account.isConnected]);
+
   const contextValue = useMemo((): SeizeConnectContextType => ({
     address: connectedAddress,
-    walletName: undefined,
-    walletIcon: undefined,
-    isSafeWallet: false,
+    walletName: walletInfo.name,
+    walletIcon: walletInfo.icon,
+    isSafeWallet: walletInfo.isSafe,
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,
@@ -559,6 +569,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     initializationError,
   }), [
     connectedAddress,
+    walletInfo,
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,
