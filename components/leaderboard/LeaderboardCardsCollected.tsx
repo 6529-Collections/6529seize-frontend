@@ -168,7 +168,7 @@ export default function LeaderboardCardsCollectedComponent(
                   </th>
                   <th className={styles.tdhSub}>
                     <span className="d-flex align-items-center justify-content-center">
-                      vs Network&nbsp; &nbsp;
+                      vs Network&nbsp;
                     </span>
                   </th>
                 </tr>

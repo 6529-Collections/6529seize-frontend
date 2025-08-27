@@ -45,7 +45,7 @@ export default function NextGenTokenPageClient({
     if (newView && newView !== ContentView.ABOUT) {
       newPath += `/${newView.toLowerCase().replaceAll(" ", "-")}`;
     }
-    router.replace(newPath, { scroll: false });
+    router.push(newPath, { scroll: false });
   };
 
   return (

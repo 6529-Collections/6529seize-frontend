@@ -415,7 +415,7 @@ export async function findLightDropBySerialNoWithPagination(
   // Return type changed to ApiLightDrop[]
   let currentMaxSerialForNextCall: number = apiParams.max_serial_no;
   let requestsMade = 0;
-  const MAX_REQUESTS = 5;
+  const MAX_REQUESTS = 20;
 
   const allFetchedDropsMap = new Map<number, ApiLightDrop>(); // Used to store unique drops by serial_no
   let targetFound = false;
