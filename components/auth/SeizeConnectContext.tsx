@@ -16,7 +16,7 @@ import {
   removeAuthJwt,
 } from "../../services/auth/auth.utils";
 import { WalletInitializationError } from "../../src/errors/wallet";
-import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect, useWalletInfo } from "@reown/appkit/react";
+import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from "@reown/appkit/react";
 import { isAddress, getAddress } from "viem";
 import { SecurityEventType } from "../../src/types/security";
 import {
@@ -327,7 +327,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
   const state = useAppKitState();
-  const { walletInfo } = useWalletInfo();
+
 
   // Use consolidated wallet state management
   const {
@@ -543,9 +543,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue = useMemo((): SeizeConnectContextType => ({
     address: connectedAddress,
-    walletName: walletInfo?.name,
-    walletIcon: walletInfo?.icon,
-    isSafeWallet: walletInfo?.name === "Safe{Wallet}",
+    walletName: undefined,
+    walletIcon: undefined,
+    isSafeWallet: false,
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,
@@ -559,7 +559,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     initializationError,
   }), [
     connectedAddress,
-    walletInfo,
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,
