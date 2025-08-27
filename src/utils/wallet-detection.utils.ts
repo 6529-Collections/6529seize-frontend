@@ -180,7 +180,8 @@ function detectSafeWallet(provider: any): boolean {
       }
 
     } catch (error) {
-      // Ignore errors accessing window properties in iframe contexts
+      // Log iframe access errors but continue gracefully
+      console.warn('Safe wallet detection failed (iframe context):', error);
     }
   }
 
