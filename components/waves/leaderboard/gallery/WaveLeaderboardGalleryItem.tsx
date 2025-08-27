@@ -7,10 +7,6 @@ import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import WinnerDropBadge from "../../drops/winner/WinnerDropBadge";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../helpers/image.helpers";
 import { VotingModal, MobileVotingModal } from "../../../../components/voting";
 import VotingModalButton from "../../../../components/voting/VotingModalButton";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
