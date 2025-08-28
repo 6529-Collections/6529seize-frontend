@@ -1,5 +1,5 @@
 import NextGenCollectionPageClient from "@/app/nextgen/collection/[collection]/[[...view]]/NextGenCollectionPageClient";
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { NextgenCollectionView } from "@/enums";
 import { render } from "@testing-library/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -15,7 +15,7 @@ jest.mock("@/app/nextgen/collection/[collection]/useShallowRedirect", () => ({
 }));
 
 // Mock the heavy child to capture setView
-let setViewFn: (v: ContentView) => void;
+let setViewFn: (v: NextgenCollectionView) => void;
 jest.mock(
   "@/components/nextGen/collections/collectionParts/NextGenCollection",
   () => {
@@ -62,12 +62,12 @@ describe("NextGenCollectionPageClient updateView", () => {
       // You can wrap with TitleProvider if you like; not required due to mocked useTitle
       <NextGenCollectionPageClient
         collection={{ name: "Cool" } as any}
-        view={ContentView.OVERVIEW}
+        view={NextgenCollectionView.OVERVIEW}
       />
     );
 
     // Simulate child requesting a view change
-    setViewFn(ContentView.PROVENANCE);
+    setViewFn(NextgenCollectionView.PROVENANCE);
 
     expect(replace).toHaveBeenCalledWith(
       "/nextgen/collection/cool/provenance",

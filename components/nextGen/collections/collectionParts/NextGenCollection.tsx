@@ -1,5 +1,13 @@
+"use client";
+
+import { getContentViewKeyByValue } from "@/app/nextgen/collection/[collection]/page-utils";
+import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
+import { useTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
+import { NextgenCollectionView } from "@/enums";
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+import { formatNameForUrl } from "../../nextgen_helpers";
 import styles from "../NextGen.module.scss";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
@@ -8,25 +16,10 @@ import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 
-interface Props {
-  collection: NextGenCollection;
-  view: ContentView;
-  setView: (v: ContentView) => void;
-}
-
-export enum ContentView {
-  ABOUT = "About",
-  PROVENANCE = "Provenance",
-  DISPLAY_CENTER = "Display Center",
-  RARITY = "Rarity",
-  OVERVIEW = "Overview",
-  TOP_TRAIT_SETS = "Trait Sets",
-}
-
 export function printViewButton(
-  currentView: ContentView,
-  v: ContentView,
-  setView: (v: ContentView) => void
+  currentView: NextgenCollectionView,
+  v: NextgenCollectionView,
+  setView: (v: NextgenCollectionView) => void
 ) {
   return (
     <button
@@ -44,47 +37,74 @@ export function printViewButton(
   );
 }
 
-export default function NextGenCollectionComponent(props: Readonly<Props>) {
+export default function NextGenCollectionComponent({
+  collection,
+  initialView,
+}: {
+  readonly collection: NextGenCollection;
+  readonly initialView: NextgenCollectionView;
+}) {
+  useShallowRedirect(collection.name);
+  const { setTitle } = useTitle();
+
+  const [view, setView] = useState<NextgenCollectionView>(initialView);
+  useEffect(() => {
+    const viewTitle =
+      view !== NextgenCollectionView.OVERVIEW ? ` | ${view}` : "";
+    setTitle(`${collection.name}${viewTitle} | NextGen`);
+  }, [collection.name, view, setTitle]);
+
+  const updateView = (newView: NextgenCollectionView) => {
+    setView(newView);
+    let path =
+      newView === NextgenCollectionView.OVERVIEW
+        ? ""
+        : `/${getContentViewKeyByValue(newView).toLowerCase()}`;
+    path = path.replaceAll(" ", "-").replaceAll("_", "-");
+    const newPath = `/nextgen/collection/${formatNameForUrl(
+      collection.name
+    )}${path}`;
+    window.history.pushState(null, "", newPath);
+  };
+
   return (
     <>
       <NextGenNavigationHeader />
-      {props.collection.mint_count > 0 && (
-        <NextGenCollectionSlideshow collection={props.collection} />
+      {collection.mint_count > 0 && (
+        <NextGenCollectionSlideshow collection={collection} />
       )}
       <Container className="pt-3 pb-2">
         <>
-          <NextGenCollectionHeader
-            collection={props.collection}
-            show_links={true}
-          />
+          <NextGenCollectionHeader collection={collection} show_links={true} />
           <Row className="pt-5">
             <Col className="d-flex gap-4">
-              {printViewButton(props.view, ContentView.OVERVIEW, props.setView)}
-              {printViewButton(props.view, ContentView.ABOUT, props.setView)}
               {printViewButton(
-                props.view,
-                ContentView.PROVENANCE,
-                props.setView
+                view,
+                NextgenCollectionView.OVERVIEW,
+                updateView
+              )}
+              {printViewButton(view, NextgenCollectionView.ABOUT, updateView)}
+              {printViewButton(
+                view,
+                NextgenCollectionView.PROVENANCE,
+                updateView
               )}
               {printViewButton(
-                props.view,
-                ContentView.TOP_TRAIT_SETS,
-                props.setView
+                view,
+                NextgenCollectionView.TOP_TRAIT_SETS,
+                updateView
               )}
             </Col>
           </Row>
           <Row className="pt-3">
             <Col>
-              <NextGenCollectionDetails
-                collection={props.collection}
-                view={props.view}
-              />
+              <NextGenCollectionDetails collection={collection} view={view} />
             </Col>
           </Row>
           <Row className="pt-4">
             <Col>
               <NextGenCollectionArt
-                collection={props.collection}
+                collection={collection}
                 show_view_all={true}
               />
             </Col>
@@ -99,7 +119,7 @@ export default function NextGenCollectionComponent(props: Readonly<Props>) {
         </Row>
         <Row>
           <Col>
-            <NextGenCollectionArtist collection={props.collection} />
+            <NextGenCollectionArtist collection={collection} />
           </Col>
         </Row>
       </Container>
