@@ -7,10 +7,6 @@ import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import WinnerDropBadge from "../../drops/winner/WinnerDropBadge";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../helpers/image.helpers";
 import { VotingModal, MobileVotingModal } from "../../../../components/voting";
 import VotingModalButton from "../../../../components/voting/VotingModalButton";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
@@ -147,10 +143,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
             <MediaDisplay
               media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
-              media_url={getScaledImageUri(
-                drop.parts[0].media[0].url,
-                ImageScale.AUTOx450
-              )}
+              media_url={drop.parts[0].media[0].url}
               disableMediaInteraction={true}
             />
           </div>
