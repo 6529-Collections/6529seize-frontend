@@ -1,10 +1,11 @@
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { NextgenCollectionView } from "@/enums";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchCollection, getCollectionView } from "../page-utils";
-import NextGenCollectionPageClient from "./NextGenCollectionPageClient";
 
 export async function generateMetadata({
   params,
@@ -19,7 +20,7 @@ export async function generateMetadata({
   }
   const resolvedView = getCollectionView(view?.[0] ?? "");
   let title = resolvedCollection.name;
-  if (resolvedView !== ContentView.OVERVIEW) {
+  if (resolvedView !== NextgenCollectionView.OVERVIEW) {
     title += ` | ${resolvedView}`;
   }
   return getAppMetadata({
@@ -46,9 +47,11 @@ export default async function NextGenCollectionPage({
   }
   const resolvedView = getCollectionView(view?.[0] ?? "");
   return (
-    <NextGenCollectionPageClient
-      collection={resolvedCollection}
-      view={resolvedView}
-    />
+    <main className={styles.main}>
+      <NextGenCollectionComponent
+        collection={resolvedCollection}
+        initialView={resolvedView}
+      />
+    </main>
   );
 }

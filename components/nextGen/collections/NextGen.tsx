@@ -1,4 +1,4 @@
-import { NextGenView } from "@/enums";
+import { NextgenView } from "@/enums";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenCollection } from "../../../entities/INextgen";
@@ -15,7 +15,7 @@ import styles from "./NextGen.module.scss";
 
 interface Props {
   collection: NextGenCollection;
-  setView: (view: NextGenView) => void;
+  setView: (view: NextgenView) => void;
 }
 
 export default function NextGen(props: Readonly<Props>) {
@@ -115,7 +115,7 @@ export default function NextGen(props: Readonly<Props>) {
                   <button
                     className="btn-link pt-2"
                     onClick={() => {
-                      props.setView(NextGenView.ABOUT);
+                      props.setView(NextgenView.ABOUT);
                       window.scrollTo(0, 120);
                     }}>
                     <span className="font-larger">Learn More</span>

@@ -1,6 +1,6 @@
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { NextGenCollection } from "@/entities/INextgen";
+import { NextgenCollectionView } from "@/enums";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Metadata } from "next";
@@ -17,31 +17,33 @@ export async function fetchCollection(
   return isEmptyObject(collection) ? null : collection;
 }
 
-export function getCollectionView(view: string): ContentView {
+export function getCollectionView(view: string): NextgenCollectionView {
   const normalizedView = view.toLowerCase();
-  const entry = Object.entries(ContentView).find(
+  const entry = Object.entries(NextgenCollectionView).find(
     ([key]) => key.toLowerCase() === normalizedView
   );
 
   if (entry) {
-    return ContentView[entry[0] as keyof typeof ContentView];
+    return NextgenCollectionView[
+      entry[0] as keyof typeof NextgenCollectionView
+    ];
   }
   if (view === "top-trait-sets") {
-    return ContentView.TOP_TRAIT_SETS;
+    return NextgenCollectionView.TOP_TRAIT_SETS;
   }
-  return ContentView.OVERVIEW;
+  return NextgenCollectionView.OVERVIEW;
 }
 
 export function getContentViewKeyByValue(value: string): string {
-  for (const [key, val] of Object.entries(ContentView)) {
+  for (const [key, val] of Object.entries(NextgenCollectionView)) {
     if (val === value) {
       return key;
     }
   }
   if (value === "trait-sets") {
-    return ContentView.TOP_TRAIT_SETS;
+    return NextgenCollectionView.TOP_TRAIT_SETS;
   }
-  return ContentView.OVERVIEW;
+  return NextgenCollectionView.OVERVIEW;
 }
 
 export async function generateNextgenCollectionMetadata({

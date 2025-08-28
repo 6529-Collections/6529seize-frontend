@@ -1,11 +1,11 @@
-import { render } from "@testing-library/react";
 import {
   fetchCollection,
   getCollectionView,
   getContentViewKeyByValue,
 } from "@/app/nextgen/collection/[collection]/page-utils";
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { NextgenCollectionView } from "@/enums";
+import { render } from "@testing-library/react";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/helpers/Helpers", () => ({ isEmptyObject: jest.fn(() => false) }));
@@ -21,7 +21,7 @@ const { useRouter, usePathname } = require("next/navigation");
 describe("collection utils", () => {
   it("fetchCollection returns collection", async () => {
     (commonApiFetch as jest.Mock).mockResolvedValue({ id: 1 });
-    const res = await fetchCollection("Cool");
+    const res = await fetchCollection("Cool", {});
     expect(commonApiFetch).toHaveBeenCalled();
     expect(res).toEqual({ id: 1 });
   });
@@ -29,13 +29,13 @@ describe("collection utils", () => {
   it("fetchCollection returns null when empty", async () => {
     (isEmptyObject as jest.Mock).mockReturnValue(true);
     (commonApiFetch as jest.Mock).mockResolvedValue({});
-    const res = await fetchCollection("c");
+    const res = await fetchCollection("c", {});
     expect(res).toBeNull();
   });
 
   it("maps views correctly", () => {
-    expect(getCollectionView("rarity")).toBe(ContentView.RARITY);
-    expect(getContentViewKeyByValue(ContentView.PROVENANCE)).toBe(
+    expect(getCollectionView("rarity")).toBe(NextgenCollectionView.RARITY);
+    expect(getContentViewKeyByValue(NextgenCollectionView.PROVENANCE)).toBe(
       "PROVENANCE"
     );
   });

@@ -1,7 +1,7 @@
 import NextGen, {
   DistributionLink,
 } from "@/components/nextGen/collections/NextGen";
-import { NextGenView } from "@/enums";
+import { NextgenView } from "@/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -47,7 +47,7 @@ describe("NextGen component", () => {
     const setView = jest.fn();
     render(<NextGen collection={collection} setView={setView} />);
     await userEvent.click(screen.getByText("Learn More"));
-    expect(setView).toHaveBeenCalledWith(NextGenView.ABOUT);
+    expect(setView).toHaveBeenCalledWith(NextgenView.ABOUT);
   });
 });
 
