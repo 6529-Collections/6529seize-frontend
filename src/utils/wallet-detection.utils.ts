@@ -155,9 +155,15 @@ function detectSafeWallet(provider: any): boolean {
   if (typeof window !== 'undefined') {
     try {
       // Safe app runs in iframe and has specific URL patterns
+      // Use exact hostname matching to prevent bypass attacks
+      const allowedSafeHosts = [
+        'app.safe.global',
+        'gnosis-safe.io',
+        'safe.global'
+      ];
       const isSafeIframe = window.parent !== window && 
-        (window.location.hostname.includes('app.safe.global') ||
-         window.location.hostname.includes('gnosis-safe.io'));
+        (allowedSafeHosts.includes(window.location.hostname) ||
+         allowedSafeHosts.some(host => window.location.hostname.endsWith('.' + host)));
 
       if (isSafeIframe) {
         return true;

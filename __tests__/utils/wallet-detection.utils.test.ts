@@ -425,4 +425,116 @@ describe('Advanced Safe Wallet Detection', () => {
       configurable: true
     });
   });
+
+  // Security tests for hostname validation
+  it('rejects malicious hostname with Safe domain in path', () => {
+    const originalParent = window.parent;
+    const originalLocation = window.location;
+    
+    Object.defineProperty(window, 'parent', {
+      value: {}, // Different from window to simulate iframe
+      writable: true,
+      configurable: true
+    });
+    
+    Object.defineProperty(window, 'location', {
+      value: { hostname: 'evil-site.com' }, // Malicious site pretending to be Safe
+      writable: true,
+      configurable: true
+    });
+
+    mockWindowEthereum({
+      selectedAddress: '0x123...',
+    });
+    
+    const result = detectConnectedWallet();
+    expect(result.name).not.toBe('Safe Wallet');
+    expect(result.isSafe).toBe(false);
+
+    // Restore original values
+    Object.defineProperty(window, 'parent', {
+      value: originalParent,
+      writable: true,
+      configurable: true
+    });
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
+  });
+
+  it('rejects malicious hostname with Safe domain as prefix', () => {
+    const originalParent = window.parent;
+    const originalLocation = window.location;
+    
+    Object.defineProperty(window, 'parent', {
+      value: {}, // Different from window to simulate iframe
+      writable: true,
+      configurable: true
+    });
+    
+    Object.defineProperty(window, 'location', {
+      value: { hostname: 'app.safe.global.malicious-site.com' }, // Subdomain attack
+      writable: true,
+      configurable: true
+    });
+
+    mockWindowEthereum({
+      selectedAddress: '0x123...',
+    });
+    
+    const result = detectConnectedWallet();
+    expect(result.name).not.toBe('Safe Wallet');
+    expect(result.isSafe).toBe(false);
+
+    // Restore original values
+    Object.defineProperty(window, 'parent', {
+      value: originalParent,
+      writable: true,
+      configurable: true
+    });
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
+  });
+
+  it('accepts legitimate Safe subdomains', () => {
+    const originalParent = window.parent;
+    const originalLocation = window.location;
+    
+    Object.defineProperty(window, 'parent', {
+      value: {}, // Different from window to simulate iframe
+      writable: true,
+      configurable: true
+    });
+    
+    Object.defineProperty(window, 'location', {
+      value: { hostname: 'staging.app.safe.global' }, // Legitimate subdomain
+      writable: true,
+      configurable: true
+    });
+
+    mockWindowEthereum({
+      selectedAddress: '0x123...',
+    });
+    
+    const result = detectConnectedWallet();
+    expect(result.name).toBe('Safe Wallet');
+    expect(result.isSafe).toBe(true);
+
+    // Restore original values
+    Object.defineProperty(window, 'parent', {
+      value: originalParent,
+      writable: true,
+      configurable: true
+    });
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
+  });
 });
