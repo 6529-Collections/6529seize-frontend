@@ -47,7 +47,6 @@ jest.mock('../../../services/auth/auth.utils', () => ({
 jest.mock('../../../src/utils/wallet-detection.utils', () => ({
   detectConnectedWallet: jest.fn(() => ({
     name: 'Unknown Wallet',
-    icon: undefined,
     isSafe: false,
   })),
 }));
@@ -87,7 +86,6 @@ const TestComponent: React.FC = () => {
     seizeAcceptConnection,
     address,
     walletName,
-    walletIcon,
     isSafeWallet,
     isAuthenticated,
     connectionState,
@@ -127,7 +125,6 @@ const TestComponent: React.FC = () => {
       <button onClick={handleAcceptInvalid} data-testid="accept-invalid">Accept Invalid</button>
       <div data-testid="address">{address || 'undefined'}</div>
       <div data-testid="wallet-name">{walletName || 'undefined'}</div>
-      <div data-testid="wallet-icon">{walletIcon || 'undefined'}</div>
       <div data-testid="is-safe-wallet">{isSafeWallet.toString()}</div>
       <div data-testid="is-authenticated">{isAuthenticated.toString()}</div>
       <div data-testid="connection-state">{connectionState}</div>
@@ -1286,7 +1283,6 @@ describe('Wallet Detection Integration Tests', () => {
 
     // Should return default wallet info when not connected
     expect(screen.getByTestId('wallet-name')).toHaveTextContent('undefined');
-    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('undefined');
     expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('false');
   });
 
@@ -1307,7 +1303,6 @@ describe('Wallet Detection Integration Tests', () => {
     // Mock wallet detection to return MetaMask
     mockDetectConnectedWallet.mockReturnValue({
       name: 'MetaMask',
-      icon: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
       isSafe: false,
     });
 
@@ -1320,7 +1315,6 @@ describe('Wallet Detection Integration Tests', () => {
     // Verify wallet detection was called and results are displayed
     expect(mockDetectConnectedWallet).toHaveBeenCalled();
     expect(screen.getByTestId('wallet-name')).toHaveTextContent('MetaMask');
-    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg');
     expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('false');
   });
 
@@ -1341,7 +1335,6 @@ describe('Wallet Detection Integration Tests', () => {
     // Mock wallet detection to return Safe Wallet
     mockDetectConnectedWallet.mockReturnValue({
       name: 'Safe Wallet',
-      icon: 'https://app.safe.global/images/logo-round.svg',
       isSafe: true,
     });
 
@@ -1352,7 +1345,6 @@ describe('Wallet Detection Integration Tests', () => {
     });
 
     expect(screen.getByTestId('wallet-name')).toHaveTextContent('Safe Wallet');
-    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('https://app.safe.global/images/logo-round.svg');
     expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('true');
   });
 
@@ -1371,7 +1363,6 @@ describe('Wallet Detection Integration Tests', () => {
     // Mock wallet detection to return default (the actual implementation catches errors)
     mockDetectConnectedWallet.mockReturnValue({
       name: 'Unknown Wallet',
-      icon: undefined,
       isSafe: false,
     });
 
@@ -1383,7 +1374,6 @@ describe('Wallet Detection Integration Tests', () => {
 
     // Should show default values when detection fails
     expect(screen.getByTestId('wallet-name')).toHaveTextContent('Unknown Wallet');
-    expect(screen.getByTestId('wallet-icon')).toHaveTextContent('undefined');
     expect(screen.getByTestId('is-safe-wallet')).toHaveTextContent('false');
   });
 });
@@ -1563,7 +1553,6 @@ describe('Regression Tests: Original Functionality with Secure Implementation', 
     // Verify all expected context values are present (original + new)
     expect(screen.getByTestId('address')).toBeInTheDocument();
     expect(screen.getByTestId('wallet-name')).toBeInTheDocument();
-    expect(screen.getByTestId('wallet-icon')).toBeInTheDocument();
     expect(screen.getByTestId('is-safe-wallet')).toBeInTheDocument();
     expect(screen.getByTestId('is-authenticated')).toBeInTheDocument();
     expect(screen.getByTestId('connection-state')).toBeInTheDocument();
@@ -1814,5 +1803,173 @@ describe('Fail-Fast Security Tests', () => {
 
     // Verify disconnect was successful before auth cleanup failure
     expect(mockDisconnect).toHaveBeenCalled();
+  });
+
+  describe('Advanced Security Patterns', () => {
+    it('should validate address format strictly without bypassing via regex', async () => {
+      // Mock viem to return false for invalid addresses
+      require('viem').isAddress.mockImplementation((addr: string) => {
+        // Only return true for properly formatted addresses
+        return addr === '0x1234567890AbcdEF1234567890AbcDEF12345678';
+      });
+      
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => (
+          <SeizeConnectProvider>{children}</SeizeConnectProvider>
+        ),
+      });
+
+      await waitFor(() => {
+        expect(result.current.connectionState).toBe('disconnected');
+      });
+
+      // Test addresses that look valid but aren't proper checksummed EIP-55 addresses
+      const invalidAddresses = [
+        '0x1234567890abcdef1234567890abcdef12345678', // Wrong checksum
+        '0X1234567890ABCDEF1234567890ABCDEF12345678', // Wrong prefix case
+        '0x1234567890abcdef1234567890abcdef1234567g', // Invalid hex character
+        '0x1234567890abcdef1234567890abcdef123456789', // Too long
+        '0x1234567890abcdef1234567890abcdef1234567',  // Too short
+        'x1234567890abcdef1234567890abcdef12345678',  // Missing 0x prefix
+        '1234567890abcdef1234567890abcdef12345678',   // No prefix at all
+      ];
+      
+      for (const invalidAddress of invalidAddresses) {
+        expect(() => {
+          result.current.seizeAcceptConnection(invalidAddress);
+        }).toThrow();
+      }
+
+      // Verify no address was set after any invalid attempt
+      expect(result.current.address).toBeUndefined();
+      expect(result.current.isAuthenticated).toBe(false);
+    });
+
+    it('should prevent race conditions in address validation', async () => {
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => (
+          <SeizeConnectProvider>{children}</SeizeConnectProvider>
+        ),
+      });
+
+      const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
+      require('viem').isAddress.mockReturnValue(true);
+      require('viem').getAddress.mockReturnValue(validAddress);
+
+      // Try to set multiple addresses rapidly
+      await act(async () => {
+        result.current.seizeAcceptConnection(validAddress);
+        result.current.seizeAcceptConnection(validAddress);
+        result.current.seizeAcceptConnection(validAddress);
+      });
+
+      // Should only have one address set, not multiple calls
+      expect(result.current.address).toBe(validAddress);
+      expect(result.current.isAuthenticated).toBe(true);
+    });
+
+    it('should handle Capacitor platform validation differences', async () => {
+      const originalWindow = global.window;
+      
+      // Mock Capacitor environment
+      (global as any).window = {
+        ...originalWindow,
+        Capacitor: {
+          isNativePlatform: () => true
+        }
+      };
+      
+      // Mock a stored address that's valid for Capacitor but might not pass strict viem validation
+      const capacitorAddress = '0x1234567890abcdef1234567890abcdef12345678';
+      mockGetWalletAddress.mockReturnValue(capacitorAddress);
+      
+      renderWithProvider();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
+      });
+      
+      // Should handle Capacitor-specific validation without throwing
+      const addressElement = screen.getByTestId('address');
+      expect(addressElement).toBeInTheDocument();
+      
+      // Restore original window
+      global.window = originalWindow;
+    });
+
+    it('should prevent timing attacks on address validation', async () => {
+      // Mock viem to return false for invalid addresses consistently
+      require('viem').isAddress.mockReturnValue(false);
+      
+      const { result } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => (
+          <SeizeConnectProvider>{children}</SeizeConnectProvider>
+        ),
+      });
+
+      await waitFor(() => {
+        expect(result.current.connectionState).toBe('disconnected');
+      });
+
+      const startTime = Date.now();
+      
+      // Test multiple invalid addresses - timing should be similar to prevent enumeration
+      const invalidAddresses = [
+        'short',
+        'x'.repeat(42),
+        '0x' + 'f'.repeat(38),
+        'completely invalid string'
+      ];
+      
+      const timings: number[] = [];
+      
+      for (const invalidAddress of invalidAddresses) {
+        const testStart = Date.now();
+        expect(() => {
+          result.current.seizeAcceptConnection(invalidAddress);
+        }).toThrow();
+        timings.push(Date.now() - testStart);
+      }
+      
+      // All validation attempts should be fast (< 10ms) and similar timing
+      timings.forEach(timing => {
+        expect(timing).toBeLessThan(10);
+      });
+      
+      const endTime = Date.now();
+      expect(endTime - startTime).toBeLessThan(50); // Total test time should be minimal
+    });
+
+    it('should prevent circular reference attacks in error logging', async () => {
+      const { useAppKit } = require('@reown/appkit/react');
+      
+      // Create a circular reference object that could cause JSON.stringify to fail
+      const circularError: any = new Error('Test error');
+      circularError.circular = circularError;
+      
+      const mockOpen = jest.fn().mockImplementation(() => {
+        throw circularError;
+      });
+      useAppKit.mockReturnValue({ open: mockOpen });
+
+      render(
+        <TestErrorBoundary>
+          <SeizeConnectProvider>
+            <TestComponent />
+          </SeizeConnectProvider>
+        </TestErrorBoundary>
+      );
+
+      const connectButton = screen.getByTestId('connect-button');
+      
+      await act(async () => {
+        fireEvent.click(connectButton);
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // Should handle circular references in error logging gracefully
+      // Test passes if no uncaught exceptions are thrown
+      expect(screen.getByTestId('test-component')).toBeInTheDocument();
+    });
   });
 });

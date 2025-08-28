@@ -7,13 +7,11 @@
 
 export interface WalletInfo {
   name: string;
-  icon?: string;
   isSafe: boolean;
 }
 
 const DEFAULT_WALLET_INFO: WalletInfo = {
   name: 'Unknown Wallet',
-  icon: undefined,
   isSafe: false,
 };
 
@@ -61,7 +59,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (detectSafeWallet(provider)) {
     return {
       name: 'Safe Wallet',
-      icon: 'https://app.safe.global/images/logo-round.svg',
       isSafe: true,
     };
   }
@@ -70,7 +67,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.isMetaMask && !provider.isBraveWallet && !provider.isRabby) {
     return {
       name: 'MetaMask',
-      icon: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
       isSafe: false,
     };
   }
@@ -79,7 +75,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.isCoinbaseWallet || provider.isWalletLink) {
     return {
       name: 'Coinbase Wallet',
-      icon: 'https://wallet.coinbase.com/img/favicon.ico',
       isSafe: false,
     };
   }
@@ -88,7 +83,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.isTrust || provider.isTrustWallet) {
     return {
       name: 'Trust Wallet',
-      icon: 'https://trustwallet.com/assets/images/favicon.ico',
       isSafe: false,
     };
   }
@@ -97,7 +91,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.isBraveWallet) {
     return {
       name: 'Brave Wallet',
-      icon: 'https://brave.com/static-assets/images/brave-favicon.png',
       isSafe: false,
     };
   }
@@ -106,7 +99,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.isRabby) {
     return {
       name: 'Rabby Wallet',
-      icon: 'https://rabby.io/assets/images/logo-128.png',
       isSafe: false,
     };
   }
@@ -115,7 +107,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.isRainbow) {
     return {
       name: 'Rainbow Wallet',
-      icon: 'https://rainbow.me/favicon.ico',
       isSafe: false,
     };
   }
@@ -124,7 +115,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.isWalletConnect || provider.connector?.id === 'walletConnect') {
     return {
       name: 'WalletConnect',
-      icon: 'https://walletconnect.com/favicon.ico',
       isSafe: false,
     };
   }
@@ -133,7 +123,6 @@ function detectSingleProvider(provider: any): WalletInfo {
   if (provider.selectedAddress || provider.accounts?.length > 0) {
     return {
       name: 'Connected Wallet',
-      icon: undefined,
       isSafe: false,
     };
   }

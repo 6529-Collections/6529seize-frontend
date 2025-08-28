@@ -68,9 +68,6 @@ interface SeizeConnectContextType {
   /** Name of the connected wallet (e.g. "MetaMask", "Trust Wallet") */
   walletName: string | undefined;
 
-  /** Icon URL of the connected wallet */
-  walletIcon: string | undefined;
-
   /** Whether the connected wallet is a Safe (Gnosis Safe) wallet */
   isSafeWallet: boolean;
 
@@ -554,7 +551,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const contextValue = useMemo((): SeizeConnectContextType => ({
     address: connectedAddress,
     walletName: walletInfo.name,
-    walletIcon: walletInfo.icon,
     isSafeWallet: walletInfo.isSafe,
     seizeConnect,
     seizeDisconnect,

@@ -24,7 +24,6 @@ describe('detectConnectedWallet', () => {
     
     expect(result).toEqual({
       name: 'Unknown Wallet',
-      icon: undefined,
       isSafe: false,
     });
   });
@@ -39,7 +38,6 @@ describe('detectConnectedWallet', () => {
     
     expect(result.name).toBe('MetaMask');
     expect(result.isSafe).toBe(false);
-    expect(result.icon).toContain('metamask');
   });
 
   it('detects Coinbase Wallet correctly', () => {
@@ -52,7 +50,6 @@ describe('detectConnectedWallet', () => {
     
     expect(result.name).toBe('Coinbase Wallet');
     expect(result.isSafe).toBe(false);
-    expect(result.icon).toContain('coinbase');
   });
 
   it('detects Safe Wallet correctly', () => {
@@ -65,7 +62,6 @@ describe('detectConnectedWallet', () => {
     
     expect(result.name).toBe('Safe Wallet');
     expect(result.isSafe).toBe(true);
-    expect(result.icon).toContain('safe');
   });
 
   it('detects Trust Wallet correctly', () => {
@@ -105,7 +101,6 @@ describe('detectConnectedWallet', () => {
     
     expect(result.name).toBe('Connected Wallet');
     expect(result.isSafe).toBe(false);
-    expect(result.icon).toBeUndefined();
   });
 
   it('handles detection errors gracefully', () => {
@@ -122,7 +117,6 @@ describe('detectConnectedWallet', () => {
     
     expect(result).toEqual({
       name: 'Unknown Wallet',
-      icon: undefined,
       isSafe: false,
     });
     expect(consoleSpy).toHaveBeenCalledWith('Wallet detection failed:', expect.any(Error));
@@ -201,6 +195,43 @@ describe('detectConnectedWallet', () => {
     const result = detectConnectedWallet();
     
     expect(result.name).toBe('WalletConnect');
+    expect(result.isSafe).toBe(false);
+  });
+
+  it('handles WalletConnect detection via connector ID', () => {
+    mockWindowEthereum({
+      connector: { id: 'walletConnect' },
+      selectedAddress: '0x123...',
+    });
+
+    const result = detectConnectedWallet();
+    
+    expect(result.name).toBe('WalletConnect');
+    expect(result.isSafe).toBe(false);
+  });
+
+  it('detects Coinbase Wallet via isWalletLink flag', () => {
+    mockWindowEthereum({
+      isWalletLink: true,
+      selectedAddress: '0x123...',
+    });
+
+    const result = detectConnectedWallet();
+    
+    expect(result.name).toBe('Coinbase Wallet');
+    expect(result.isSafe).toBe(false);
+  });
+
+  it('detects Trust Wallet via isTrustWallet flag', () => {
+    mockWindowEthereum({
+      isTrustWallet: true,
+      selectedAddress: '0x123...',
+    });
+
+    const result = detectConnectedWallet();
+    
+    expect(result.name).toBe('Trust Wallet');
+    expect(result.isSafe).toBe(false);
   });
 
   it('handles multiple providers correctly', () => {
@@ -231,7 +262,6 @@ describe('detectConnectedWallet', () => {
     // Should fail gracefully when encountering null provider and return default
     expect(result.name).toBe('Unknown Wallet');
     expect(result.isSafe).toBe(false);
-    expect(result.icon).toBeUndefined();
     expect(consoleSpy).toHaveBeenCalledWith('Wallet detection failed:', expect.any(TypeError));
 
     consoleSpy.mockRestore();
@@ -286,7 +316,6 @@ describe('useWalletDetection Hook', () => {
     
     expect(result.current).toEqual({
       name: 'Unknown Wallet',
-      icon: undefined,
       isSafe: false,
     });
   });
@@ -396,6 +425,28 @@ describe('Advanced Safe Wallet Detection', () => {
       constructor: { name: 'SafeProvider' }
     };
     mockWindowEthereum(mockProvider);
+
+    const result = detectConnectedWallet();
+    expect(result.name).toBe('Safe Wallet');
+    expect(result.isSafe).toBe(true);
+  });
+
+  it('detects Safe via isSafeProvider flag', () => {
+    mockWindowEthereum({
+      isSafeProvider: true,
+      selectedAddress: '0x123...',
+    });
+
+    const result = detectConnectedWallet();
+    expect(result.name).toBe('Safe Wallet');
+    expect(result.isSafe).toBe(true);
+  });
+
+  it('detects Safe via _safe property', () => {
+    mockWindowEthereum({
+      _safe: {},
+      selectedAddress: '0x123...',
+    });
 
     const result = detectConnectedWallet();
     expect(result.name).toBe('Safe Wallet');
