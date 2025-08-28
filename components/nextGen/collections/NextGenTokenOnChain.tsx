@@ -1,25 +1,26 @@
 "use client";
 
-import styles from "./NextGen.module.scss";
-import { useReadContract, useEnsName } from "wagmi";
-import { Col, Container, Row } from "react-bootstrap";
-import { useEffect, useState } from "react";
 import Image from "next/image";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
-import DotLoader from "../../dotLoader/DotLoader";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { useEnsName, useReadContract } from "wagmi";
 import { NextGenCollection } from "../../../entities/INextgen";
+import DotLoader from "../../dotLoader/DotLoader";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
+import styles from "./NextGen.module.scss";
 
-import Address from "../../address/Address";
-import { areEqualAddresses } from "../../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { mainnet } from "viem/chains";
-import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
-import { Tooltip } from "react-tooltip";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import { useIdentity } from "../../../hooks/useIdentity";
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { Tooltip } from "react-tooltip";
+import { mainnet } from "viem/chains";
+import { areEqualAddresses } from "../../../helpers/Helpers";
+import useCapacitor from "../../../hooks/useCapacitor";
+import { useIdentity } from "../../../hooks/useIdentity";
+import Address from "../../address/Address";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useCookieConsent } from "../../cookies/CookieConsentContext";
+import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -152,18 +153,18 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
               </span>
               <span className="pt-1 pb-1 d-flex flex-column">
                 <span className="font-color-h">Collection</span>
-                <a
+                <Link
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
                   )}`}>
                   {props.collection.name}
-                </a>
+                </Link>
               </span>
               <span className="pt-1 pb-1 d-flex flex-column">
                 <span className="font-color-h">Artist</span>
-                <a href={`/${props.collection.artist_address}`}>
+                <Link href={`/${props.collection.artist_address}`}>
                   {props.collection.artist}
-                </a>
+                </Link>
               </span>
               <span className="pt-1 pb-1 d-flex flex-column">
                 <span className="font-color-h">Owner</span>
@@ -182,11 +183,14 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 <span className="d-flex align-items-center gap-1">
                   <span>
                     {props.collection.on_chain ? "On-Chain" : "Off-Chain"}{" "}
-                    <a href={tokenMetadataUrl} target="_blank" rel="noreferrer">
+                    <Link
+                      href={tokenMetadataUrl}
+                      target="_blank"
+                      rel="noreferrer">
                       <FontAwesomeIcon
                         className={styles.copyIcon}
                         icon={faExternalLinkSquare}></FontAwesomeIcon>
-                    </a>
+                    </Link>
                   </span>
                 </span>
               </span>
@@ -195,7 +199,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   <span className="font-color-h">Marketplaces</span>
                   <span className="d-flex gap-4">
                     <>
-                      <a
+                      <Link
                         href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
                         rel="noreferrer"
@@ -207,7 +211,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                           width={28}
                           height={28}
                         />
-                      </a>
+                      </Link>
                       <Tooltip
                         id={`opensea-${props.token_id}`}
                         content="Opensea"

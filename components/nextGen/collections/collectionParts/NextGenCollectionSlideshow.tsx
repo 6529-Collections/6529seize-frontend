@@ -1,22 +1,23 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
-import { Col, Container, Row } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
-import { Navigation, A11y, Autoplay } from "swiper/modules";
-import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { formatNameForUrl } from "../../nextgen_helpers";
-import useCapacitor from "../../../../hooks/useCapacitor";
 import {
   faArrowCircleRight,
-  faPlayCircle,
   faPauseCircle,
+  faPlayCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { A11y, Autoplay, Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
+import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import useCapacitor from "../../../../hooks/useCapacitor";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import { formatNameForUrl } from "../../nextgen_helpers";
+import styles from "../NextGen.module.scss";
+import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 
 interface Props {
   collection: NextGenCollection;
@@ -83,7 +84,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
           <Container className="pt-3 pb-3">
             <Row>
               <Col className="d-flex align-items-center justify-content-end">
-                <a
+                <Link
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
                   )}/art`}
@@ -95,7 +96,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                       className={styles.viewAllIcon}
                     />
                   </h5>
-                </a>
+                </Link>
               </Col>
             </Row>
             <Row>

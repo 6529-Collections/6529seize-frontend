@@ -1,44 +1,45 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
-import { useState, useEffect, Fragment } from "react";
-import { Container, Row, Col, Accordion } from "react-bootstrap";
+import {
+  faArrowCircleRight,
+  faCheckCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { Fragment, useEffect, useState } from "react";
+import { Accordion, Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import {
   NextGenCollection,
   NextgenTraitSet,
   TraitValues,
 } from "../../../../entities/INextgen";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import {
   capitalizeEveryWord,
   cicToType,
   formatAddress,
 } from "../../../../helpers/Helpers";
-import Pagination from "../../../pagination/Pagination";
+import { commonApiFetch } from "../../../../services/api/common-api";
 import DotLoader from "../../../dotLoader/DotLoader";
-import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import {
-  formatNameForUrl,
-  normalizeNextgenTokenID,
-} from "../../nextgen_helpers";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
-import NextGenCollectionHeader from "./NextGenCollectionHeader";
+import Pagination from "../../../pagination/Pagination";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../../../searchModal/SearchModal";
+import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
+import {
+  formatNameForUrl,
+  normalizeNextgenTokenID,
+} from "../../nextgen_helpers";
+import styles from "../NextGen.module.scss";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextgenToken/NextGenTokenImage";
-import {
-  faArrowCircleRight,
-  faCheckCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import NextGenCollectionHeader from "./NextGenCollectionHeader";
 
 const TRAITS: Record<number, string[]> = {
   1: ["Palette", "Size", "Traced"],
@@ -130,7 +131,10 @@ export default function NextGenTraitSets(
 
   function printTraitPill(t: string) {
     return (
-      <Col xs={12 / (availableTraits.length + 1)} className="no-padding">
+      <Col
+        key={t}
+        xs={12 / (availableTraits.length + 1)}
+        className="no-padding">
         <button
           key={getRandomObjectId()}
           className={`${styles.collectorSetPill} ${
@@ -217,7 +221,7 @@ export default function NextGenTraitSets(
             <span className="font-lightest">Trait</span> Sets
           </h1>
           {props.preview && (
-            <a
+            <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/trait-sets`}
@@ -229,7 +233,7 @@ export default function NextGenTraitSets(
                   className={styles.viewAllIcon}
                 />
               </h5>
-            </a>
+            </Link>
           )}
           {!props.preview && (
             <SearchWalletsDisplay
@@ -333,7 +337,7 @@ export default function NextGenTraitSets(
         setsLoaded && (
           <Row className="pt-3">
             <Col>
-              <a
+              <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
                 )}/trait-sets`}
@@ -345,7 +349,7 @@ export default function NextGenTraitSets(
                     className={styles.viewAllIcon}
                   />
                 </h5>
-              </a>
+              </Link>
             </Col>
           </Row>
         )
@@ -408,7 +412,7 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
   }
 
   return (
-    <a
+    <Link
       className="d-flex gap-2 decoration-hover-underline"
       onClick={(e) => e.stopPropagation()}
       href={`/${props.set.handle ?? props.set.owner}`}>
@@ -417,7 +421,7 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
         cicType={cicToType(props.set.tdh + props.set.rep_score)}
       />{" "}
       {getOwnerDisplay()}
-    </a>
+    </Link>
   );
 }
 function TraitSetAccordion(
@@ -482,7 +486,7 @@ function TraitSetAccordion(
                         style={{ height: "1.5em", color: "#00aa00" }}
                         icon={faCheckCircle}></FontAwesomeIcon>
                       <b>
-                        <a
+                        <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
                           )}/art?traits=${props.trait}:${tv.value}`}
@@ -490,12 +494,12 @@ function TraitSetAccordion(
                           target="_blank"
                           rel="noreferrer">
                           {tv.value}
-                        </a>
+                        </Link>
                       </b>
                     </span>
                     <span className="d-flex flex-wrap">
                       {tv.tokens.map((t) => (
-                        <a
+                        <Link
                           key={`accordion-${props.trait}-${tv.value}-${t}`}
                           href={`/nextgen/token/${t}`}
                           target="_blank"
@@ -530,10 +534,11 @@ function TraitSetAccordion(
                                 color: "white",
                                 padding: "4px 8px",
                               }}>
-                              {props.collection.name} #{normalizeNextgenTokenID(t).token_id}
+                              {props.collection.name} #
+                              {normalizeNextgenTokenID(t).token_id}
                             </Tooltip>
                           </>
-                        </a>
+                        </Link>
                       ))}
                     </span>
                   </Col>
@@ -546,7 +551,7 @@ function TraitSetAccordion(
                     Not Seized:{" "}
                     {missingValues.map((mv, index) => (
                       <Fragment key={mv}>
-                        <a
+                        <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
                           )}/art?traits=${props.trait}:${mv}`}
@@ -554,7 +559,7 @@ function TraitSetAccordion(
                           target="_blank"
                           rel="noreferrer">
                           {mv}
-                        </a>
+                        </Link>
                         {index < missingValues.length - 1 ? ", " : ""}
                       </Fragment>
                     ))}
