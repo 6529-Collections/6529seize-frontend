@@ -67,12 +67,12 @@ export function NextGenBackToCollectionPageLink(
   }`;
 
   return (
-    <a
+    <Link
       href={link}
       className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
       <FontAwesomeIcon icon={faArrowCircleLeft} className={styles.backIcon} />
       {content}
-    </a>
+    </Link>
   );
 }
 
@@ -118,7 +118,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
       <span className={styles.countdownContainer}>
         <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
         {!hideMintBtn && (
-          <a
+          <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}/mint`}>
@@ -126,7 +126,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
               className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}>
               {getButtonLabel()}
             </button>
-          </a>
+          </Link>
         )}
         <DistributionLink collection={props.collection} />
       </span>
@@ -294,9 +294,9 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           <span className="font-larger">
             by{" "}
             <b>
-              <a href={`/${props.collection.artist_address}`}>
+              <Link href={`/${props.collection.artist_address}`}>
                 {props.collection.artist}
-              </a>
+              </Link>
             </b>
           </span>
           <span className="pt-2 font-larger d-inline-flex align-items-center">

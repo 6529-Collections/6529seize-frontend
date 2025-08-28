@@ -6,6 +6,7 @@ import { STATEMENT_TYPE } from "@/helpers/Types";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import Image from "next/image";
+import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { formatNameForUrl } from "../../nextgen_helpers";
@@ -67,7 +68,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
             {profile?.handle && (
               <Row className="pt-3">
                 <Col>
-                  <a href={`/${profile?.handle}`}>@{profile?.handle}</a>
+                  <Link href={`/${profile?.handle}`}>@{profile?.handle}</Link>
                 </Col>
               </Row>
             )}
@@ -78,13 +79,13 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                   {props.link_collections.map((c, index) => (
                     <Fragment key={`link-collection-${c.id}`}>
                       {index > 0 && ", "}
-                      <a
+                      <Link
                         key={`link-collection-${c.id}`}
                         href={`/nextgen/collection/${formatNameForUrl(
                           c.name
                         )}`}>
                         {c.name}
-                      </a>
+                      </Link>
                     </Fragment>
                   ))}
                 </Col>
