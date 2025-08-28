@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
@@ -78,14 +79,14 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                   <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
                     <span className="font-color-h">Contract</span>
                     <span>
-                      <a
+                      <Link
                         className="font-color text-decoration-none"
                         href={getEtherscanLink()}
                         target="_blank"
                         rel="noreferrer"
                         data-tooltip-id={`contract-tooltip-${props.collection.id}`}>
                         {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
-                      </a>
+                      </Link>
                       <Tooltip
                         id={`contract-tooltip-${props.collection.id}`}
                         place="right"
