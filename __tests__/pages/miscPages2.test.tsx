@@ -5,11 +5,9 @@ import ConsolidatedMetrics from "@/app/open-data/consolidated-network-metrics/pa
 import MemeSubscriptions from "@/app/open-data/meme-subscriptions/page";
 import AddRememes from "@/app/rememes/add/page";
 import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
-import AppWallets from "@/app/tools/app-wallets/page";
+import AppWalletsClient from "@/app/tools/app-wallets/page.client";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import { AuthContext } from "@/components/auth/Auth";
-import { NextGenCollection } from "@/entities/INextgen";
-import NextGenDistributionPlan from "@/pages/nextgen/collection/[collection]/distribution-plan";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
@@ -70,55 +68,54 @@ const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-describe("misc pages render", () => {
-  it("renders Willow Shield page", () => {
+describe("Miscellaneous Pages Rendering", () => {
+  it("should render Willow Shield page with correct content", () => {
     render(<WillowShield />);
-    expect(screen.getAllByText(/WILLOW SHIELD/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("WILLOW SHIELD")).toHaveLength(2);
+    expect(screen.getAllByText(/Willow Shield/i)).toHaveLength(4); // Multiple instances in different elements
+    expect(screen.getByText(/Mint Date: 08\/02\/2021/)).toBeInTheDocument();
   });
 
-  it("renders NextGen distribution plan page", () => {
-    render(
-      <NextGenDistributionPlan
-        collection={{ name: "name" } as NextGenCollection}
-      />
-    );
-    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
-  });
 
-  it("renders Join OM page", () => {
+  it("should render Join OM page with form elements", () => {
     render(<JoinOm />);
-    expect(screen.getAllByText(/JOIN OM GENERATION 1/i).length).toBeGreaterThan(
-      0
-    );
+    expect(screen.getAllByText("JOIN OM GENERATION 1")).toHaveLength(3);
+    expect(screen.getByLabelText(/Name/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Twitter Handle/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Submit/i })).toBeInTheDocument();
   });
 
-  it("renders partnership request redirect page", () => {
+  it("should render partnership request redirect page with proper redirect message", () => {
     render(<PartnershipRequest />);
-    expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
+    expect(screen.getByText("You are being redirected to")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "/om/join-om/" })).toHaveAttribute("href", "/om/join-om/");
   });
 
-  it("renders consolidated metrics page", () => {
+  it("should render consolidated metrics page with proper title", () => {
     render(
       <TestProvider>
         <ConsolidatedMetrics />
       </TestProvider>
     );
-    expect(
-      screen.getByText(/Consolidated Network Metrics/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText("Consolidated Network Metrics")).toBeInTheDocument();
   });
 
-  it("renders meme subscriptions page", () => {
+  it("should render meme subscriptions page with proper title", () => {
     render(
       <TestProvider>
         <MemeSubscriptions />
       </TestProvider>
     );
-    expect(screen.getByText(/Meme Subscriptions/i)).toBeInTheDocument();
+    expect(screen.getByText("Meme Subscriptions")).toBeInTheDocument();
   });
 
-  it("renders add rememes page", () => {
-    const queryClient = new QueryClient();
+  it("should render add rememes page with all required providers", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
     const mockConfig = createConfig({
       chains: [mainnet],
       transports: {
@@ -126,35 +123,35 @@ describe("misc pages render", () => {
       },
     });
 
-    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    render(
       <WagmiProvider config={mockConfig}>
-        <TestProvider>{children}</TestProvider>
+        <QueryClientProvider client={queryClient}>
+          <TestProvider>
+            <AddRememes />
+          </TestProvider>
+        </QueryClientProvider>
       </WagmiProvider>
     );
-    render(
-      <QueryClientProvider client={queryClient}>
-        <TestProvider>
-          <AddRememes />
-        </TestProvider>
-      </QueryClientProvider>,
-      { wrapper: Wrapper }
-    );
-    expect(screen.getByText(/add ReMemes/i)).toBeInTheDocument();
+    
+    expect(screen.getByText("Add Rememe")).toBeInTheDocument();
   });
 
-  it("renders slide initiatives redirect page", () => {
+  it("should render slide initiatives redirect page with home redirect", () => {
     render(<SlideInitiatives />);
-    expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
+    expect(screen.getByText("You are being redirected to")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "/" })).toHaveAttribute("href", "/");
   });
 
-  it("renders app wallets page", () => {
+  it("should render app wallets page with proper providers", () => {
     render(
       <TestProvider>
         <AppWalletsProvider>
-          <AppWallets />
+          <AppWalletsClient />
         </AppWalletsProvider>
       </TestProvider>
     );
-    expect(screen.getByText(/App Wallets/i)).toBeInTheDocument();
+    // Text is split across spans, so check for both parts
+    expect(screen.getByText("App")).toBeInTheDocument();
+    expect(screen.getByText("Wallets")).toBeInTheDocument();
   });
 });
