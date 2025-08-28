@@ -4,10 +4,10 @@ import { NextGenCollection } from "@/entities/INextgen";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
-import Home from "@/components/home/Home";
+import HomePage from "@/components/home/HomePage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 
-export default async function HomePage() {
+export default async function Home() {
   const headers = await getAppCommonHeaders();
   const featuredNft = await commonApiFetch<NFTWithMemesExtendedData>({
     endpoint: `memes_latest`,
@@ -21,7 +21,7 @@ export default async function HomePage() {
 
   return (
     <main className={styles.main}>
-      <Home featuredNft={featuredNft} featuredNextgen={featuredNextgen} />
+      <HomePage featuredNft={featuredNft} featuredNextgen={featuredNextgen} />
     </main>
   );
 }
