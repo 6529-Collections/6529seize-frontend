@@ -45,6 +45,8 @@ jobs:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
           TENOR_API_KEY: ${{ secrets.TENOR_API_KEY }}
+          NEXT_PUBLIC_AWS_RUM_APP_ID: ${{ secrets.NEXT_PUBLIC_AWS_RUM_APP_ID }}
+          NEXT_PUBLIC_AWS_RUM_REGION: ${{ secrets.NEXT_PUBLIC_AWS_RUM_REGION }}
         run: npm run build
 
       - name: Build Target
