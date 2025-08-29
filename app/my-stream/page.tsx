@@ -12,7 +12,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 export default async function MyStreamPage({
   searchParams,
 }: {
-  searchParams: Promise<{ wave?: string; drop?: string }>;
+  readonly searchParams: Promise<{ wave?: string; drop?: string }>;
 }) {
   const queryClient = new QueryClient();
   const headers = await getAppCommonHeaders();
@@ -36,7 +36,7 @@ export default async function MyStreamPage({
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ wave?: string }>;
+  readonly searchParams: Promise<{ wave?: string }>;
 }) {
   const resolvedParams = await searchParams;
   let title = "My Stream";

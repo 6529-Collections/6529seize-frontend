@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
@@ -19,7 +19,6 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
 > = ({ wave, onClose }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;

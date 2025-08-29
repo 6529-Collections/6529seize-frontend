@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 import { usePrefetchWaveData } from "../../../hooks/usePrefetchWaveData";
 import { useWaveData } from "../../../hooks/useWaveData";
@@ -28,7 +28,6 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
   const { data: wave } = useWaveData({
