@@ -228,10 +228,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   return (
     <Container className="no-padding pt-2">
       <Row>
-        <Col
-          sm={12}
-          md={6}
-          className="d-flex align-items-center justify-content-between no-wrap">
+        <Col className="d-flex align-items-center justify-content-between no-wrap">
           <h3 className="mb-0">
             The Art{" "}
             {totalResultsSet ? (
@@ -244,8 +241,6 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           </h3>
         </Col>
         <Col
-          sm={12}
-          md={6}
           className={`d-flex align-items-center ${
             isMobile ? "pt-3 justify-content-between" : "justify-content-end"
           }`}>
