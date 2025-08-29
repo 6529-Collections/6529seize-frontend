@@ -21,7 +21,7 @@ export default function AwsRumProvider({ children }: AwsRumProviderProps) {
     try {
       // Check if required environment variables are set
       const APPLICATION_ID = process.env.NEXT_PUBLIC_AWS_RUM_APP_ID;
-      const APPLICATION_REGION = process.env.NEXT_PUBLIC_AWS_RUM_REGION || 'us-east-1';
+      const APPLICATION_REGION = process.env.NEXT_PUBLIC_AWS_RUM_REGION || 'eu-west-1';
       const APPLICATION_VERSION = process.env.VERSION || '1.0.0';
 
       if (!APPLICATION_ID) {
