@@ -1,9 +1,9 @@
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
+import { NextgenCollectionView } from "@/enums";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -57,13 +57,13 @@ export async function fetchTokenData(
   return { tokenId: Number(tokenId), token, traits, tokenCount, collection };
 }
 
-export function getContentView(view: string): ContentView {
+export function getContentView(view: string): NextgenCollectionView {
   view = view?.toLowerCase().replaceAll("-", " ") ?? "";
   const allowedViews = [
-    ContentView.DISPLAY_CENTER,
-    ContentView.PROVENANCE,
-    ContentView.RARITY,
+    NextgenCollectionView.DISPLAY_CENTER,
+    NextgenCollectionView.PROVENANCE,
+    NextgenCollectionView.RARITY,
   ];
   const matchedView = allowedViews.find((v) => v.toLowerCase() === view);
-  return matchedView ?? ContentView.ABOUT;
+  return matchedView ?? NextgenCollectionView.ABOUT;
 }

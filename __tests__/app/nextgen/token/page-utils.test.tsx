@@ -1,5 +1,8 @@
-import { fetchTokenData, getContentView } from "@/app/nextgen/token/[token]/[[...view]]/page-utils";
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import {
+  fetchTokenData,
+  getContentView,
+} from "@/app/nextgen/token/[token]/[[...view]]/page-utils";
+import { NextgenCollectionView } from "@/enums";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/helpers/Helpers", () => ({ isEmptyObject: jest.fn(() => false) }));
@@ -17,7 +20,7 @@ describe("token utils", () => {
       if (endpoint === "nextgen/tokens/1/traits") return [{ token_count: 5 }];
       if (endpoint === "nextgen/collections/2") return { id: 2, name: "Coll" };
     });
-    const data = await fetchTokenData("1");
+    const data = await fetchTokenData("1", {});
     expect(data?.token?.id).toBe(1);
     expect(data?.tokenCount).toBe(5);
   });
@@ -28,12 +31,12 @@ describe("token utils", () => {
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce({});
     (isEmptyObject as jest.Mock).mockReturnValue(true);
-    const data = await fetchTokenData("5");
+    const data = await fetchTokenData("5", {});
     expect(data).toBeNull();
   });
 
   it("maps content view", () => {
-    expect(getContentView("provenance")).toBe(ContentView.PROVENANCE);
-    expect(getContentView("unknown")).toBe(ContentView.ABOUT);
+    expect(getContentView("provenance")).toBe(NextgenCollectionView.PROVENANCE);
+    expect(getContentView("unknown")).toBe(NextgenCollectionView.ABOUT);
   });
 });
