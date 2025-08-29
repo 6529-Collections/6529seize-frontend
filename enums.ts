@@ -113,8 +113,17 @@ export enum LeaderboardFocus {
   INTERACTIONS = "Interactions",
 }
 
-export enum NextGenView {
+export enum NextgenView {
   COLLECTIONS = "Collections",
   ARTISTS = "Artists",
   ABOUT = "About",
+}
+
+export enum NextgenCollectionView {
+  ABOUT = "About",
+  PROVENANCE = "Provenance",
+  DISPLAY_CENTER = "Display Center",
+  RARITY = "Rarity",
+  OVERVIEW = "Overview",
+  TOP_TRAIT_SETS = "Trait Sets",
 }
