@@ -38,7 +38,6 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
   // Access layout context for pre-calculated styles
   const { contentContainerStyle } = useLayout();
 
-  // Extract query parameters (undefined for parity with Pages Router)
   const dropId = searchParams?.get('drop') ?? undefined;
   const waveId = searchParams?.get('wave') ?? undefined;
 
