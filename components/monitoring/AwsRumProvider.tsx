@@ -23,6 +23,7 @@ export default function AwsRumProvider({ children }: Readonly<AwsRumProviderProp
       const APPLICATION_ID = process.env.NEXT_PUBLIC_AWS_RUM_APP_ID;
       const APPLICATION_REGION = process.env.NEXT_PUBLIC_AWS_RUM_REGION || 'us-east-1';
       const APPLICATION_VERSION = process.env.VERSION || '1.0.0';
+      const SAMPLE_RATE = parseFloat(process.env.NEXT_PUBLIC_AWS_RUM_SAMPLE_RATE || '0.2');
 
       if (!APPLICATION_ID) {
         console.log('AWS RUM: Skipped initialization - missing required environment variables');
@@ -30,8 +31,7 @@ export default function AwsRumProvider({ children }: Readonly<AwsRumProviderProp
       }
 
       const config: AwsRumConfig = {
-        sessionSampleRate: 0.2,
-        endpoint: "https://dataplane.rum.eu-west-1.amazonaws.com/",
+        sessionSampleRate: SAMPLE_RATE,
         telemetries: ["performance", "errors", "http"],
         allowCookies: true,
         enableXRay: false,
