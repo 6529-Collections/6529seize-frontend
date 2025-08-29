@@ -77,6 +77,8 @@ export default function WaveDropsAll({
   const targetDropRef = useRef<HTMLDivElement | null>(null);
 
   const [isScrolling, setIsScrolling] = useState(false);
+  const scrollOperationAbortController = useRef<AbortController | null>(null);
+  const SCROLL_OPERATION_TIMEOUT = 10000; // 10 seconds max for any scroll operation
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
@@ -155,6 +157,35 @@ export default function WaveDropsAll({
     connectedProfile?.handle ?? null
   );
 
+  // Automatic timeout safety net - prevents isScrolling from staying true indefinitely
+  useEffect(() => {
+    if (!isScrolling) return;
+    
+    const timeoutId = setTimeout(() => {
+      console.warn('Scroll operation timed out after', SCROLL_OPERATION_TIMEOUT, 'ms, clearing isScrolling state');
+      setIsScrolling(false);
+      // Also abort any ongoing operation
+      if (scrollOperationAbortController.current) {
+        scrollOperationAbortController.current.abort();
+        scrollOperationAbortController.current = null;
+      }
+    }, SCROLL_OPERATION_TIMEOUT);
+    
+    return () => clearTimeout(timeoutId);
+  }, [isScrolling, SCROLL_OPERATION_TIMEOUT]);
+
+  // Cleanup on component unmount - prevent state leaks and cancel ongoing operations
+  useEffect(() => {
+    return () => {
+      // Force cleanup if component unmounts while scrolling
+      if (scrollOperationAbortController.current) {
+        scrollOperationAbortController.current.abort();
+        scrollOperationAbortController.current = null;
+      }
+      setIsScrolling(false);
+    };
+  }, []);
+
   // // Effect to update the ref whenever waveMessages changes
   useEffect(() => {
     latestWaveMessagesRef.current = waveMessages;
@@ -204,23 +235,60 @@ export default function WaveDropsAll({
 
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo || isScrolling) return;
-    setIsScrolling(true); // Set scrolling true for the entire process
-    await fetchNextPage(
-      {
-        waveId,
-        type: DropSize.LIGHT,
-        targetSerialNo: serialNo,
-      },
-      dropId
-    );
-    await waitAndRevealDrop(serialNo);
-    const success = await smoothScrollWithRetries();
-    setTimeout(() => {
-      if (success) {
-        setSerialNo(null);
+    
+    // Cancel any existing operation
+    if (scrollOperationAbortController.current) {
+      scrollOperationAbortController.current.abort();
+    }
+    
+    // Create new abort controller for this operation
+    scrollOperationAbortController.current = new AbortController();
+    const signal = scrollOperationAbortController.current.signal;
+    
+    setIsScrolling(true);
+    
+    try {
+      // Check if operation was cancelled before starting
+      if (signal.aborted) return;
+      
+      await fetchNextPage(
+        {
+          waveId,
+          type: DropSize.LIGHT,
+          targetSerialNo: serialNo,
+        },
+        dropId
+      );
+      
+      // Check if operation was cancelled after fetch
+      if (signal.aborted) return;
+      
+      await waitAndRevealDrop(serialNo);
+      
+      // Check if operation was cancelled after reveal
+      if (signal.aborted) return;
+      
+      const success = await smoothScrollWithRetries();
+      
+      // Only proceed with cleanup if operation wasn't cancelled
+      if (!signal.aborted) {
+        setTimeout(() => {
+          if (success && !signal.aborted) {
+            setSerialNo(null);
+          }
+        }, 500);
       }
-    }, 500);
-    setIsScrolling(false);
+    } catch (error) {
+      // Log error but don't throw - we want to clean up gracefully
+      if (!signal.aborted) {
+        console.warn('Scroll operation failed:', error);
+      }
+    } finally {
+      // Always reset scrolling state, regardless of success/failure/cancellation
+      if (!signal.aborted) {
+        setIsScrolling(false);
+      }
+    }
   }, [
     waveId,
     fetchNextPage,
@@ -315,7 +383,7 @@ export default function WaveDropsAll({
           isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
           hasNextPage={!!waveMessages?.hasNextPage && (waveMessages?.drops?.length ?? 0) >= 25}
           onTopIntersection={handleTopIntersection}
-          onUserScroll={(direction, currentIsAtBottom) => {
+          onUserScroll={() => {
             // The useScrollBehavior hook now handles all scroll intent logic
             // This callback can be used for additional scroll-based features if needed
           }}>

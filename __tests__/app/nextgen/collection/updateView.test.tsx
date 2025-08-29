@@ -44,10 +44,13 @@ jest.mock("@/contexts/TitleContext", () => {
 });
 
 describe("NextGenCollectionPageClient updateView", () => {
-  it("pushes new url when view changes", () => {
-    const replace = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ replace });
+  let mockPush: jest.Mock;
 
+  beforeEach(() => {
+    mockPush = jest.fn();
+    
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
+    
     // Only used in the effect deps; return a stable object
     (useSearchParams as jest.Mock).mockReturnValue({
       get: () => null,
@@ -57,11 +60,16 @@ describe("NextGenCollectionPageClient updateView", () => {
       values: function* () {},
       has: () => false,
     });
+  });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("pushes new url when view changes to non-overview view", () => {
     render(
-      // You can wrap with TitleProvider if you like; not required due to mocked useTitle
       <NextGenCollectionPageClient
-        collection={{ name: "Cool" } as any}
+        collection={{ name: "Cool Collection" } as any}
         view={ContentView.OVERVIEW}
       />
     );
@@ -69,8 +77,76 @@ describe("NextGenCollectionPageClient updateView", () => {
     // Simulate child requesting a view change
     setViewFn(ContentView.PROVENANCE);
 
-    expect(replace).toHaveBeenCalledWith(
-      "/nextgen/collection/cool/provenance",
+    expect(mockPush).toHaveBeenCalledWith(
+      "/nextgen/collection/cool-collection/provenance",
+      { scroll: false }
+    );
+  });
+
+  it("pushes overview url when view changes to OVERVIEW", () => {
+    render(
+      <NextGenCollectionPageClient
+        collection={{ name: "Cool Collection" } as any}
+        view={ContentView.PROVENANCE}
+      />
+    );
+
+    // Simulate child requesting a view change to overview
+    setViewFn(ContentView.OVERVIEW);
+
+    expect(mockPush).toHaveBeenCalledWith(
+      "/nextgen/collection/cool-collection/",
+      { scroll: false }
+    );
+  });
+
+  it("handles collection names with special characters in URL generation", () => {
+    render(
+      <NextGenCollectionPageClient
+        collection={{ name: "My Amazing NFT Collection!" } as any}
+        view={ContentView.OVERVIEW}
+      />
+    );
+
+    // Simulate child requesting a view change
+    setViewFn(ContentView.RARITY);
+
+    expect(mockPush).toHaveBeenCalledWith(
+      "/nextgen/collection/my-amazing-nft-collection!/rarity",
+      { scroll: false }
+    );
+  });
+
+  it("handles different content view types correctly", () => {
+    render(
+      <NextGenCollectionPageClient
+        collection={{ name: "Test Collection" } as any}
+        view={ContentView.OVERVIEW}
+      />
+    );
+
+    // Test ABOUT view
+    setViewFn(ContentView.ABOUT);
+    expect(mockPush).toHaveBeenCalledWith(
+      "/nextgen/collection/test-collection/about",
+      { scroll: false }
+    );
+
+    mockPush.mockClear();
+
+    // Test DISPLAY_CENTER view (contains spaces and underscore-like words)
+    setViewFn(ContentView.DISPLAY_CENTER);
+    expect(mockPush).toHaveBeenCalledWith(
+      "/nextgen/collection/test-collection/display-center",
+      { scroll: false }
+    );
+
+    mockPush.mockClear();
+
+    // Test TOP_TRAIT_SETS view (contains underscore)
+    setViewFn(ContentView.TOP_TRAIT_SETS);
+    expect(mockPush).toHaveBeenCalledWith(
+      "/nextgen/collection/test-collection/top-trait-sets",
       { scroll: false }
     );
   });
