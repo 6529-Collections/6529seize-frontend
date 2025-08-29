@@ -160,7 +160,7 @@ export default function WaveDropsAll({
   // Automatic timeout safety net - prevents isScrolling from staying true indefinitely
   useEffect(() => {
     if (!isScrolling) return;
-    
+
     const timeoutId = setTimeout(() => {
       console.warn('Scroll operation timed out after', SCROLL_OPERATION_TIMEOUT, 'ms, clearing isScrolling state');
       setIsScrolling(false);
@@ -170,7 +170,7 @@ export default function WaveDropsAll({
         scrollOperationAbortController.current = null;
       }
     }, SCROLL_OPERATION_TIMEOUT);
-    
+
     return () => clearTimeout(timeoutId);
   }, [isScrolling, SCROLL_OPERATION_TIMEOUT]);
 
@@ -235,22 +235,22 @@ export default function WaveDropsAll({
 
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo || isScrolling) return;
-    
+
     // Cancel any existing operation
     if (scrollOperationAbortController.current) {
       scrollOperationAbortController.current.abort();
     }
-    
+
     // Create new abort controller for this operation
     scrollOperationAbortController.current = new AbortController();
     const signal = scrollOperationAbortController.current.signal;
-    
+
     setIsScrolling(true);
-    
+
     try {
       // Check if operation was cancelled before starting
       if (signal.aborted) return;
-      
+
       await fetchNextPage(
         {
           waveId,
@@ -259,17 +259,17 @@ export default function WaveDropsAll({
         },
         dropId
       );
-      
+
       // Check if operation was cancelled after fetch
       if (signal.aborted) return;
-      
+
       await waitAndRevealDrop(serialNo);
-      
+
       // Check if operation was cancelled after reveal
       if (signal.aborted) return;
-      
+
       const success = await smoothScrollWithRetries();
-      
+
       // Only proceed with cleanup if operation wasn't cancelled
       if (!signal.aborted) {
         setTimeout(() => {
@@ -285,9 +285,7 @@ export default function WaveDropsAll({
       }
     } finally {
       // Always reset scrolling state, regardless of success/failure/cancellation
-      if (!signal.aborted) {
-        setIsScrolling(false);
-      }
+      setIsScrolling(false);
     }
   }, [
     waveId,
@@ -414,8 +412,8 @@ export default function WaveDropsAll({
 
         <div
           className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${typingMessage
-              ? "tw-opacity-100 tw-visible"
-              : "tw-opacity-0 tw-invisible tw-hidden"
+            ? "tw-opacity-100 tw-visible"
+            : "tw-opacity-0 tw-invisible tw-hidden"
             }`}>
           <div className="tw-flex tw-items-center tw-gap-x-0.5">
             <FontAwesomeIcon
