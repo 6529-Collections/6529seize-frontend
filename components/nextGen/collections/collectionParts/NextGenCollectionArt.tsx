@@ -4,6 +4,8 @@ import {
   faArrowCircleRight,
   faChevronCircleDown,
   faChevronCircleUp,
+  faFilter,
+  faFilterCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -264,7 +266,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           ) : (
             <>
               <FontAwesomeIcon
-                icon={showFilters ? "filter-circle-xmark" : "filter"}
+                icon={showFilters ? faFilterCircleXmark : faFilter}
                 style={{
                   cursor: "pointer",
                   height: "22px",
