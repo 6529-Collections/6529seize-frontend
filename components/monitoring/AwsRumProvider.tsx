@@ -21,7 +21,7 @@ export default function AwsRumProvider({ children }: AwsRumProviderProps) {
     try {
       // Check if required environment variables are set
       const APPLICATION_ID = process.env.NEXT_PUBLIC_AWS_RUM_APP_ID;
-      const APPLICATION_REGION = process.env.NEXT_PUBLIC_AWS_RUM_REGION || 'eu-west-1';
+      const APPLICATION_REGION = process.env.NEXT_PUBLIC_AWS_RUM_REGION || 'us-east-1';
       const APPLICATION_VERSION = process.env.VERSION || '1.0.0';
 
       if (!APPLICATION_ID) {
@@ -30,7 +30,7 @@ export default function AwsRumProvider({ children }: AwsRumProviderProps) {
       }
 
       const config: AwsRumConfig = {
-        sessionSampleRate: 1 ,
+        sessionSampleRate: 0.2,
         endpoint: "https://dataplane.rum.eu-west-1.amazonaws.com/" ,
         telemetries: ["performance","errors","http"] ,
         allowCookies: true ,
@@ -45,9 +45,6 @@ export default function AwsRumProvider({ children }: AwsRumProviderProps) {
         APPLICATION_REGION,
         config
       );
-
-      console.log('AWS RUM: Successfully initialized');
-
       // Optional: Store the instance globally for manual tracking if needed
       (window as any).awsRum = awsRum;
 
