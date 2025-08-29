@@ -47,6 +47,7 @@ jobs:
           TENOR_API_KEY: ${{ secrets.TENOR_API_KEY }}
           NEXT_PUBLIC_AWS_RUM_APP_ID: ${{ secrets.NEXT_PUBLIC_AWS_RUM_APP_ID }}
           NEXT_PUBLIC_AWS_RUM_REGION: ${{ secrets.NEXT_PUBLIC_AWS_RUM_REGION }}
+          NEXT_PUBLIC_AWS_RUM_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_AWS_RUM_SAMPLE_RATE }}
         run: npm run build
 
       - name: Build Target
