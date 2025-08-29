@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
@@ -16,7 +16,8 @@ const REQUEST_SIZE = 10;
 
 export default function Drops() {
   const router = useRouter();
-  const handleOrWallet = (router.query.user as string).toLowerCase();
+  const searchParams = useSearchParams();
+  const handleOrWallet = (searchParams?.get('user') ?? '').toLowerCase();
   const { connectedProfile } = useContext(AuthContext);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
 
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
@@ -31,12 +31,13 @@ export default function FeedItemWaveCreated({
 }) {
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
-    router.push(`/my-stream?wave=${item.item.id}&serialNo=${serialNo}/`);
+    router.push(`/my-stream?wave=${item.item.id}&serialNo=${serialNo}/`, { scroll: false });
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
     router.push(
-      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`,
+      { scroll: false }
     );
   };
 

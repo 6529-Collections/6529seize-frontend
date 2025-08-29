@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { createPortal } from "react-dom";
 import {
@@ -83,8 +85,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               <div className="tw-flex tw-items-center tw-justify-between">
                 <div className="tw-flex tw-items-center tw-gap-x-3">
                   <Link
-                    href={`/${winner.drop.author?.handle}`}
+                    href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
                     onClick={(e) => e.stopPropagation()}
+                    scroll={false}
                     className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
                   >
                     <WaveWinnersDropHeaderAuthorPfp winner={winner} />
@@ -101,8 +104,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                       {winner.drop.author?.handle ? (
                         <UserProfileTooltipWrapper user={winner.drop.author.handle ?? winner.drop.author.id}>
                           <Link
-                            href={`/${winner.drop.author?.handle}`}
+                            href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
                             onClick={(e) => e.stopPropagation()}
+                            scroll={false}
                             className="tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80 tw-transition-opacity"
                           >
                             <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
@@ -112,8 +116,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         </UserProfileTooltipWrapper>
                       ) : (
                         <Link
-                          href={`/${winner.drop.author?.handle}`}
+                          href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
                           onClick={(e) => e.stopPropagation()}
+                          scroll={false}
                           className="tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80 tw-transition-opacity"
                         >
                           <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
@@ -180,11 +185,11 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-flex tw-items-center -tw-space-x-1.5">
                 {topVoters.map((voter) => (
-                  <>
+                  <React.Fragment key={voter.profile.handle}>
                     <Link
-                      key={voter.profile.handle}
-                      href={`/${voter.profile.handle}`}
+                      href={`/${voter.profile.handle ?? voter.profile.id}`}
                       onClick={(e) => e.stopPropagation()}
+                      scroll={false}
                       className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
                       data-tooltip-id={`voter-${voter.profile.handle}-${voter.rating}`}
                     >
@@ -208,7 +213,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     >
                       {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
                     </Tooltip>
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
               <div className="tw-flex tw-items-baseline tw-gap-x-1">

@@ -7,7 +7,7 @@ import {
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "../components/react-query-wrapper/utils/query-utils";
 import { jwtDecode } from "jwt-decode";
-import { getUserProfile } from "./server.helpers";
+import { getUserProfile, getCommonHeaders } from "./server.helpers";
 import { TypedFeedItem, TypedNotificationsResponse } from "../types/feed.types";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import { GetServerSidePropsContext } from "next";
@@ -319,24 +319,29 @@ const prefetchAuthenticatedNotificationsItems = async ({
   });
 };
 
+type PrefetchAuthNotifsArgs = {
+  queryClient: QueryClient;
+  headers?: HeadersInit;                 // NEW: App Router path
+  context?: GetServerSidePropsContext | null; // still allowed for Pages
+};
+
 export const prefetchAuthenticatedNotifications = async ({
   queryClient,
   headers,
   context,
-}: {
-  queryClient: QueryClient;
-  headers: Record<string, string>;
-  context: GetServerSidePropsContext;
-}) => {
-  const handle = await getHandleFromJwt(headers);
+}: PrefetchAuthNotifsArgs) => {
+  // Preserve previous behavior: if headers not provided, derive from Pages context
+  const resolvedHeaders = headers ?? getCommonHeaders(context as any);
+
+  const handle = await getHandleFromJwt(resolvedHeaders as Record<string, string>);
 
   if (!handle) return;
   await Promise.all([
     prefetchAuthenticatedNotificationsItems({
       queryClient,
-      headers,
+      headers: resolvedHeaders as Record<string, string>,
       handle,
     }),
-    prefetchAuthenticatedMyStreamContext({ queryClient, headers, handle }),
+    prefetchAuthenticatedMyStreamContext({ queryClient, headers: resolvedHeaders as Record<string, string>, handle }),
   ]);
 };

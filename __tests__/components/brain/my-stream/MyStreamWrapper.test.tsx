@@ -2,7 +2,11 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import MyStreamWrapper from '../../../../components/brain/my-stream/MyStreamWrapper';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 
 let query: any = {};
 const push = jest.fn();
@@ -36,7 +40,6 @@ jest.mock('../../../../components/auth/Auth', () => ({
   TitleType: { MY_STREAM: 'MY_STREAM' }
 }));
 
-const { useRouter } = require('next/router');
 
 // Mock TitleContext
 jest.mock('../../../../contexts/TitleContext', () => ({
@@ -67,10 +70,17 @@ jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
 }));
 
 
+const { useRouter, useSearchParams, usePathname } = require('next/navigation');
+
 beforeEach(() => {
   query = {};
   push.mockReset();
-  (useRouter as jest.Mock).mockReturnValue({ query, push });
+  (useRouter as jest.Mock).mockReturnValue({ push });
+  (useSearchParams as jest.Mock).mockReturnValue({
+    get: (key: string) => query[key] || null,
+    toString: () => new URLSearchParams(query).toString(),
+  });
+  (usePathname as jest.Mock).mockReturnValue('/my-stream');
   useMyStreamQueryMock.mockReturnValue({
     items: [], fetchNextPage: fetchNextPageMock, hasNextPage: true,
     isFetching: false, isFetchingNextPage: false, status: 'success',
