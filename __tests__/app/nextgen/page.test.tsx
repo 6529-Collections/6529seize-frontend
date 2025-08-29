@@ -1,3 +1,4 @@
+const { NextgenView } = require("@/enums");
 import { commonApiFetch } from "@/services/api/common-api";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
@@ -74,12 +75,20 @@ describe("generateMetadata", () => {
 
 describe("NextGen page component", () => {
   const push = jest.fn();
+  let pushStateSpy: jest.SpyInstance;
 
   beforeEach(() => {
     push.mockClear();
     mockedFetch.mockReset().mockResolvedValue({ id: 1 }); // featured collection exists
     useRouterMock.mockReturnValue({ push });
     useParamsMock.mockReturnValue({ view: undefined }); // landing (no view)
+    pushStateSpy = jest
+      .spyOn(window.history, "pushState")
+      .mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    pushStateSpy?.mockRestore();
   });
 
   it("fetches collection and handles navigation", async () => {
@@ -98,7 +107,16 @@ describe("NextGen page component", () => {
 
     const nav = await screen.findByTestId("nav");
     fireEvent.click(nav);
-    expect(push).toHaveBeenCalledWith("/nextgen/artists", { scroll: false });
+    // History API assertions
+    expect(pushStateSpy).toHaveBeenCalled();
+    const lastCall =
+      pushStateSpy.mock.calls[pushStateSpy.mock.calls.length - 1];
+    // lastCall: [state, title, url]
+    expect(lastCall[2]).toBe("/nextgen/artists");
+    // Optionally assert state carries the view enum for back/forward restore
+    expect(lastCall[0]).toEqual(
+      expect.objectContaining({ view: NextgenView.ARTISTS })
+    );
   });
 
   it("shows placeholder when collection missing", async () => {
