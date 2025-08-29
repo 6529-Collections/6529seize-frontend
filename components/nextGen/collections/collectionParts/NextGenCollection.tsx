@@ -1,6 +1,9 @@
 "use client";
 
-import { getContentViewKeyByValue } from "@/app/nextgen/collection/[collection]/page-utils";
+import {
+  getCollectionView,
+  getContentViewKeyByValue,
+} from "@/app/nextgen/collection/[collection]/page-utils";
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
 import { useTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
@@ -64,8 +67,19 @@ export default function NextGenCollectionComponent({
     const newPath = `/nextgen/collection/${formatNameForUrl(
       collection.name
     )}${path}`;
-    window.history.pushState(null, "", newPath);
+    window.history.pushState({ view: newView }, "", newPath);
   };
+
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (e.state?.view) {
+        const newView = getCollectionView(e.state.view);
+        setView(newView);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   return (
     <>

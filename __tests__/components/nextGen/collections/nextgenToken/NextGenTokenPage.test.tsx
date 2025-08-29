@@ -1,8 +1,24 @@
+jest.mock("next/navigation", () => {
+  return {
+    __esModule: true,
+    useRouter: () => ({
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+    }),
+    useParams: () => ({ view: undefined }),
+    useSearchParams: () => ({ get: jest.fn() }),
+    usePathname: () => "/nextgen/collection/COL/token/1",
+  };
+});
+
 import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/NextGenToken";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("react-bootstrap", () => {
-  const React = require("react");
   return {
     Container: (p: any) => <div {...p} />,
     Row: (p: any) => <div {...p} />,

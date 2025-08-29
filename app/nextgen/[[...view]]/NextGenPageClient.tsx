@@ -12,6 +12,7 @@ import styles from "@/styles/Home.module.scss";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+import { getNextGenView } from "./view-utils";
 
 export default function NextGenPageClient({
   featuredCollection,
@@ -32,8 +33,19 @@ export default function NextGenPageClient({
   const updateView = (newView?: NextgenView) => {
     setView(newView);
     const newPath = newView ? `/nextgen/${newView.toLowerCase()}` : "/nextgen";
-    window.history.pushState(null, "", newPath);
+    window.history.pushState({ view: newView }, "", newPath);
   };
+
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (e.state?.view) {
+        const newView = getNextGenView(e.state.view);
+        setView(newView);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   return (
     <main className={styles.main}>
