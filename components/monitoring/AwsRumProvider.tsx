@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 import { AwsRum, AwsRumConfig } from 'aws-rum-web';
 
 interface AwsRumProviderProps {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
-export default function AwsRumProvider({ children }: AwsRumProviderProps) {
+export default function AwsRumProvider({ children }: Readonly<AwsRumProviderProps>) {
   useEffect(() => {
     // Only initialize AWS RUM on the client side
     if (typeof window === 'undefined') return;
@@ -31,10 +31,10 @@ export default function AwsRumProvider({ children }: AwsRumProviderProps) {
 
       const config: AwsRumConfig = {
         sessionSampleRate: 0.2,
-        endpoint: "https://dataplane.rum.eu-west-1.amazonaws.com/" ,
-        telemetries: ["performance","errors","http"] ,
-        allowCookies: true ,
-        enableXRay: false ,
+        endpoint: "https://dataplane.rum.eu-west-1.amazonaws.com/",
+        telemetries: ["performance", "errors", "http"],
+        allowCookies: true,
+        enableXRay: false,
         signing: false
       };
 
