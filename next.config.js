@@ -82,6 +82,9 @@ const nextConfig = {
     DEV_MODE_AUTH_JWT: process.env.DEV_MODE_AUTH_JWT,
     USE_DEV_AUTH: process.env.USE_DEV_AUTH,
     STAGING_API_KEY: process.env.STAGING_API_KEY,
+    NEXT_PUBLIC_AWS_RUM_APP_ID: process.env.NEXT_PUBLIC_AWS_RUM_APP_ID,
+    NEXT_PUBLIC_AWS_RUM_REGION: process.env.NEXT_PUBLIC_AWS_RUM_REGION,
+    NEXT_PUBLIC_AWS_RUM_SAMPLE_RATE: process.env.NEXT_PUBLIC_AWS_RUM_SAMPLE_RATE,
   },
   async generateBuildId() {
     return VERSION;

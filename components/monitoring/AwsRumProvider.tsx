@@ -48,6 +48,8 @@ export default function AwsRumProvider({ children }: Readonly<AwsRumProviderProp
       // Optional: Store the instance globally for manual tracking if needed
       (window as any).awsRum = awsRum;
 
+      console.log('AWS RUM: Successfully initialized');
+
     } catch (error) {
       // Silently handle errors to prevent breaking the application
       console.warn('AWS RUM: Failed to initialize', error);
