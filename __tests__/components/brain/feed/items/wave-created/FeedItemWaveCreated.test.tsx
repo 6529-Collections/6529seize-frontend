@@ -3,7 +3,11 @@ import React from 'react';
 import FeedItemWaveCreated from '../../../../../../components/brain/feed/items/wave-created/FeedItemWaveCreated';
 
 const push = jest.fn();
-jest.mock('next/router', () => ({ useRouter: () => ({ push }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push }),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 
 jest.mock('../../../../../../components/waves/drops/Drop', () => ({
   __esModule: true,

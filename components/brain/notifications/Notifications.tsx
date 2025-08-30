@@ -8,7 +8,7 @@ import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/commo
 import NotificationsWrapper from "./NotificationsWrapper";
 import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
@@ -29,6 +29,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     useContext(AuthContext);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { notificationsViewStyle } = useLayout();
+  const searchParams = useSearchParams();
 
   const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
     null
@@ -37,7 +38,8 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
   const router = useRouter();
-  const { reload } = router.query;
+  const pathname = usePathname();
+  const reload = searchParams?.get('reload') ?? undefined;
 
   useSetTitle("Notifications | My Stream | Brain");
 
@@ -50,15 +52,10 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
         .catch((error) => {
           console.error("Error during refetch:", error);
         });
-      const { reload, ...restQuery } = router.query;
-      router.replace(
-        {
-          pathname: router.pathname,
-          query: restQuery,
-        },
-        undefined,
-        { shallow: true }
-      );
+      const params = new URLSearchParams(searchParams?.toString() || '');
+      params.delete('reload');
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream/notifications');
+      router.replace(newUrl, { scroll: false });
     }
   }, [reload]);
 

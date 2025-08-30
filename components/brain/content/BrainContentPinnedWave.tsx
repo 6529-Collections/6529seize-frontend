@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 import { usePrefetchWaveData } from "../../../hooks/usePrefetchWaveData";
 import { useWaveData } from "../../../hooks/useWaveData";
@@ -27,6 +27,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   onRemove,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
   const { data: wave } = useWaveData({
@@ -36,7 +37,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const isMobile = useIsMobileDevice();
   const isDropWave = wave && wave.wave.type !== ApiWaveType.Chat;
   const getHref = (waveId: string) => {
-    const currentWaveId = router.query.wave as string | undefined;
+    const currentWaveId = searchParams?.get('wave') ?? undefined;
     if (currentWaveId === waveId) {
       return "/my-stream";
     }
@@ -47,12 +48,13 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
     e.preventDefault();
     onMouseLeave();
     // Navigate to the new wave
-    router.push(getHref(waveId), undefined, { shallow: true });
+    router.push(getHref(waveId));
   };
 
   const onHover = () => {
     onMouseEnter(waveId);
-    if (waveId === router.query.wave) return;
+    const currentWaveId = searchParams?.get('wave') ?? undefined;
+    if (waveId === currentWaveId) return;
     registerWave(waveId);
     prefetchWaveData(waveId);
   };

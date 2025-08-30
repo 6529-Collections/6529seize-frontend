@@ -12,7 +12,11 @@ jest.mock('../../../../../components/waves/drops/Drop', () => ({
   DropLocation: { MY_STREAM: 'MY_STREAM' },
 }));
 const mockUseRouter = jest.fn(() => ({ push: jest.fn() }));
-jest.mock('next/router', () => ({ useRouter: mockUseRouter }));
+jest.mock('next/navigation', () => ({
+  useRouter: mockUseRouter,
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 
 import NotificationIdentityMentioned from '../../../../../components/brain/notifications/identity-mentioned/NotificationIdentityMentioned';
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { DropPartSize } from "../../../view/part/DropPart";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
@@ -13,8 +13,8 @@ export default function DropAuthorHandle({
   readonly profile: ProfileMinWithoutSubs;
   readonly size: DropPartSize;
 }) {
-  const router = useRouter();
-  const handleOrWallet = (router.query.user as string)?.toLowerCase();
+  const searchParams = useSearchParams();
+  const handleOrWallet = (searchParams?.get('user') ?? '').toLowerCase();
   const amIAuthor = handle?.toLowerCase() === handleOrWallet;
 
   const getTextClasses = (): string => {

@@ -3,7 +3,11 @@ import React from 'react';
 import BrainLeftSidebar from '../../../../components/brain/left-sidebar/BrainLeftSidebar';
 import { MyStreamWaveTab } from '../../../../types/waves.types';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 jest.mock('../../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
 jest.mock('../../../../hooks/useUnreadIndicator', () => ({ useUnreadIndicator: jest.fn() }));
 jest.mock('../../../../hooks/useWaveData', () => ({ useWaveData: jest.fn() }));
@@ -31,7 +35,7 @@ const { useUnreadIndicator } = jest.requireMock('../../../../hooks/useUnreadIndi
 const { useWaveData } = jest.requireMock('../../../../hooks/useWaveData');
 const { useWave } = jest.requireMock('../../../../hooks/useWave');
 const { useContentTab } = jest.requireMock('../../../../components/brain/ContentTabContext');
-const { useRouter: useRouterMock } = require('next/router');
+const { useRouter: useRouterMock, useSearchParams } = require('next/navigation');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -46,8 +50,11 @@ beforeEach(() => {
 });
 
 function setup(query: any = {}, waveIsDm = false) {
-  const router = { query } as any;
-  (useRouterMock as jest.Mock).mockReturnValue(router);
+  const searchParams = new URLSearchParams();
+  Object.keys(query).forEach(key => searchParams.set(key, query[key]));
+  
+  (useRouterMock as jest.Mock).mockReturnValue({ push: jest.fn() });
+  (useSearchParams as jest.Mock).mockReturnValue(searchParams);
   (useWave as jest.Mock).mockReturnValue({ isDm: waveIsDm });
   (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: true });
   (useWaveData as jest.Mock).mockReturnValue({ data: waveIsDm ? {} : null });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { IFeedItemDropCreated } from "../../../../../types/feed.types";
 import Drop, {
   DropInteractionParams,

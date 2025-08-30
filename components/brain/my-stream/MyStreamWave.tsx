@@ -9,7 +9,7 @@ import { useWaveData } from "../../../hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { createBreakpoint } from "react-use";
-import { useRouter } from "next/router";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
@@ -25,18 +25,17 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
   const { waves, directMessages } = useMyStream();
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => {
-      router.push(
-        { pathname: router.pathname, query: { wave: null } },
-        undefined,
-        {
-          shallow: true,
-        }
-      );
+      const params = new URLSearchParams(searchParams?.toString() || '');
+      params.delete('wave');
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      router.push(newUrl, { scroll: false });
     },
   });
 
@@ -62,16 +61,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('drop', drop.id);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   // Early return if no wave data - all hooks must be called before this

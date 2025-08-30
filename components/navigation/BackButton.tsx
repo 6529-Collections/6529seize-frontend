@@ -2,7 +2,7 @@
 
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
-import { useRouter } from "next/router";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Spinner from "../utils/Spinner";
 import { useWaveData } from "../../hooks/useWaveData";
@@ -13,62 +13,52 @@ export default function BackButton() {
   const { canGoBack, goBack } = useNavigationHistoryContext();
   const { hardBack } = useViewContext();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const stopLoading = () => setLoading(false);
-    router.events.on("routeChangeComplete", stopLoading);
-    router.events.on("routeChangeError", stopLoading);
-    return () => {
-      router.events.off("routeChangeComplete", stopLoading);
-      router.events.off("routeChangeError", stopLoading);
-    };
-  }, [router.events]);
-
-  const waveId =
-    typeof router.query.wave === "string" ? router.query.wave : null;
-  const dropId =
-    typeof router.query.drop === "string" ? router.query.drop : null;
+  const waveId = searchParams?.get("wave") ?? null;
+  const dropId = searchParams?.get("drop") ?? null;
 
   // Fetch wave to determine if it is DM
   const { data: wave } = useWaveData({
     waveId: waveId,
     onWaveNotFound: () => {
-      const newQuery = { ...router.query } as Record<string, any>;
-      delete newQuery.wave;
-      router.replace(
-        { pathname: router.pathname, query: newQuery },
-        undefined,
-        { shallow: true }
-      );
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.delete("wave");
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      router.replace(newUrl, { scroll: false });
     },
   });
 
   const { isDm } = useWave(wave);
 
+  // Reset loading when URL changes
+  useEffect(() => {
+    setLoading(false);
+  }, [pathname, searchParams?.toString()]);
+
   const handleClick = () => {
     if (loading) return;
-    setLoading(true);
+
     if (dropId) {
-      const newQuery = { ...router.query } as Record<string, any>;
-      delete newQuery.drop;
-      router.replace(
-        { pathname: router.pathname, query: newQuery },
-        undefined,
-        {
-          shallow: true,
-        }
-      );
+      setLoading(true);
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.delete("drop");
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      router.replace(newUrl, { scroll: false });
       return;
     }
 
     if (waveId) {
+      // In-app view switch, not a router nav — no spinner
       const targetView = isDm ? "messages" : "waves";
       hardBack(targetView);
       return;
     }
 
     if (canGoBack) {
+      setLoading(true);
       goBack();
     }
   };
