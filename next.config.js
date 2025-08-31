@@ -49,7 +49,7 @@ const nextConfig = {
     : "",
   reactStrictMode: false,
   compress: true,
-  productionBrowserSourceMaps: true,
+  productionBrowserSourceMaps: false,
   sassOptions: {
     quietDeps: true,
   },
