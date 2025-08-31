@@ -47,6 +47,7 @@ export default function AwsRumProvider({
         disableAutoPageView: false,
         retries: 2,
         useBeacon: true,
+        releaseId: APPLICATION_VERSION,
       };
 
       // Initialize AWS RUM
