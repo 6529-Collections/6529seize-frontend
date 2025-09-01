@@ -2,9 +2,13 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import UserPageTabs, { UserPageTabType } from '../../../../components/user/layout/UserPageTabs';
 import { AuthContext } from '../../../../components/auth/Auth';
-import { useRouter } from 'next/router';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 const useCapacitorMock = jest.fn();
 jest.mock('../../../../hooks/useCapacitor', () => ({ __esModule: true, default: () => useCapacitorMock() }));
 jest.mock('../../../../components/user/layout/UserPageTab', () => ({ __esModule: true, default: (p: any) => <div data-testid="tab">{p.tab}</div> }));
@@ -15,7 +19,9 @@ jest.mock('../../../../components/cookies/CookieConsentContext', () => ({
 const { useCookieConsent } = require('../../../../components/cookies/CookieConsentContext');
 
 const renderTabs = (showWaves: boolean, isIos: boolean, country: string = 'US') => {
-  (useRouter as jest.Mock).mockReturnValue({ pathname: '/[user]/rep', query: {} });
+  (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+  (usePathname as jest.Mock).mockReturnValue('/[user]/rep');
+  (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
   useCapacitorMock.mockReturnValue({ isIos });
   (useCookieConsent as jest.Mock).mockReturnValue({
     showCookieConsent: false,

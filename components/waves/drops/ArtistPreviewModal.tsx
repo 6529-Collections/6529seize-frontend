@@ -80,7 +80,7 @@ export const ArtistPreviewModal: React.FC<
 
   return createPortal(
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="tw-cursor-default tw-relative tw-z-[100]" onClose={() => {}}>
+      <Dialog as="div" className="tw-cursor-default tw-relative tw-z-[9999]" onClose={() => {}}>
         {/* Backdrop */}
         <Transition.Child
           as={Fragment}

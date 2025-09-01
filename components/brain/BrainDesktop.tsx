@@ -7,7 +7,7 @@ import BrainRightSidebar, {
   SidebarTab,
 } from "./right-sidebar/BrainRightSidebar";
 import { ContentTabProvider } from "./ContentTabContext";
-import { useRouter } from "next/router";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../generated/models/ApiDrop";
@@ -24,7 +24,10 @@ interface Props {
 const SIDEBAR_COLLAPSED_COOKIE = "brain-right-sidebar-collapsed";
 
 const BrainDesktop: React.FC<Props> = ({ children }) => {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
+  
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const cookie = Cookies.get(SIDEBAR_COLLAPSED_COOKIE);
     return cookie ? JSON.parse(cookie) : false;
@@ -35,23 +38,26 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
   // Access layout context for pre-calculated styles
   const { contentContainerStyle } = useLayout();
 
+  const dropId = searchParams?.get('drop') ?? undefined;
+  const waveId = searchParams?.get('wave') ?? undefined;
+
   const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
+    queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
       await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${router.query.drop}`,
+        endpoint: `drops/${dropId}`,
       }),
     placeholderData: keepPreviousData,
-    enabled: !!router.query.drop,
+    enabled: !!dropId,
   });
 
   useEffect(() => {
-    if (router.query.wave) {
+    if (waveId) {
       setShowRightSidebar(true);
     } else {
       setShowRightSidebar(false);
     }
-  }, [router.query.wave]);
+  }, [waveId]);
 
   useEffect(() => {
     Cookies.set(SIDEBAR_COLLAPSED_COOKIE, isCollapsed, {
@@ -60,29 +66,21 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
   }, [isCollapsed]);
 
   const onDropClose = () => {
-    const currentQuery = { ...router.query };
-    delete currentQuery.drop;
-    router.push({ pathname: router.pathname, query: currentQuery }, undefined, {
-      shallow: true,
-    });
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.delete('drop');
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+    router.push(newUrl, { scroll: false });
   };
 
   const onDropClick = (drop: ExtendedDrop) => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('drop', drop.id);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const isDropOpen =
     drop &&
-    drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
+    drop?.id?.toLowerCase() === dropId?.toLowerCase();
 
   const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full tw-px-3 min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto
     ${
@@ -102,7 +100,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
           <div
             className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-w-full tw-overflow-hidden"
             style={contentContainerStyle}>
-            <BrainLeftSidebar activeWaveId={router.query.wave as string} />
+            <BrainLeftSidebar activeWaveId={waveId} />
             <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
               {children}
               {isDropOpen && (
@@ -125,12 +123,12 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
         </motion.div>
       </div>
 
-      {showRightSidebar && !isDropOpen && router.query.wave && (
+      {showRightSidebar && !isDropOpen && waveId && (
         <BrainRightSidebar
           key="right-sidebar"
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
-          waveId={router.query.wave as string}
+          waveId={waveId}
           onDropClick={onDropClick}
           activeTab={sidebarTab}
           setActiveTab={setSidebarTab}

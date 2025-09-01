@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrainLeftSidebarViewChange } from '../../../../components/brain/left-sidebar/BrainLeftSidebarViewChange';
 import { AuthContext } from '../../../../components/auth/Auth';
-import { useRouter } from 'next/router';
+import { useRouter, usePathname } from 'next/navigation';
 import { useUnreadNotifications } from '../../../../hooks/useUnreadNotifications';
 
 jest.mock('next/link', () => ({
@@ -13,20 +13,23 @@ jest.mock('next/link', () => ({
     </a>
   ),
 }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
+}));
 jest.mock('../../../../hooks/useUnreadNotifications');
 
 const mockedUseRouter = useRouter as jest.Mock;
+const mockedUsePathname = usePathname as jest.Mock;
 const mockedUseUnreadNotifications = useUnreadNotifications as jest.Mock;
 
 const baseAuth = { connectedProfile: { handle: 'alice' } } as any;
 
 function renderSidebar(route: string, unread = false) {
-  const push = jest.fn((path: string, _as?: any, _opts?: any) => {
-    router.pathname = path;
-  });
-  const router = { pathname: route, push } as any;
-  mockedUseRouter.mockReturnValue(router);
+  const push = jest.fn();
+  
+  mockedUseRouter.mockReturnValue({ push });
+  mockedUsePathname.mockReturnValue(route);
   mockedUseUnreadNotifications.mockReturnValue({ haveUnreadNotifications: unread });
 
   const utils = render(
@@ -34,7 +37,7 @@ function renderSidebar(route: string, unread = false) {
       <BrainLeftSidebarViewChange />
     </AuthContext.Provider>
   );
-  return { push, router, ...utils };
+  return { push, ...utils };
 }
 
 describe('BrainLeftSidebarViewChange', () => {
@@ -61,6 +64,6 @@ describe('BrainLeftSidebarViewChange', () => {
     const user = userEvent.setup();
     const { push } = renderSidebar('/my-stream');
     await user.click(screen.getByRole('link', { name: /notifications/i }));
-    expect(push).toHaveBeenCalledWith('/my-stream/notifications', undefined, { shallow: true });
+    expect(push).toHaveBeenCalledWith('/my-stream/notifications', { scroll: false });
   });
 });

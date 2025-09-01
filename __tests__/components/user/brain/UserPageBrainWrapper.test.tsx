@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import UserPageBrainWrapper from '../../../../components/user/brain/UserPageBrainWrapper';
-import { useRouter } from 'next/router';
 import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
 import { useIdentity } from '../../../../hooks/useIdentity';
 
@@ -12,7 +11,11 @@ jest.mock('../../../../hooks/useIdentity', () => ({ useIdentity: jest.fn() }));
 jest.mock('../../../../components/user/brain/UserPageDrops', () => (props: any) => <div data-testid="drops" {...props} />);
 
 const routerPush = jest.fn();
-(useRouter as jest.Mock).mockReturnValue({ query: { user: 'alice' }, push: routerPush });
+const useRouter = require('next/router').useRouter;
+(useRouter as jest.Mock).mockReturnValue({ 
+  push: routerPush,
+  query: { user: 'alice' }
+});
 
 function renderWithContext(ctx: any) {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: ctx.address });

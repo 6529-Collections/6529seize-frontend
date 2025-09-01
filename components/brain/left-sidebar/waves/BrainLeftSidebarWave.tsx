@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WavePicture from "../../../waves/WavePicture";
@@ -22,31 +22,36 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   showPin = true,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const isDropWave = wave.type !== ApiWaveType.Chat;
 
   const getHref = (waveId: string) => {
-    const currentWaveId = router.query.wave as string | undefined;
-    return currentWaveId === waveId
-      ? "/my-stream"
-      : `/my-stream?wave=${waveId}`;
+    const currentWaveId = searchParams?.get('wave') ?? undefined;
+    if (currentWaveId === waveId) {
+      return "/my-stream";
+    }
+    const params = new URLSearchParams();
+    params.set('wave', waveId);
+    return `/my-stream?${params.toString()}`;
   };
 
   const haveNewDrops = wave.newDropsCount.count > 0;
 
   const onWaveHover = (waveId: string) => {
-    if (waveId !== router.query.wave) {
+    const currentWaveId = searchParams?.get('wave') ?? undefined;
+    if (waveId !== currentWaveId) {
       onHover(waveId);
       prefetchWaveData(waveId);
     }
   };
 
-  const isActive = wave.id === router.query.wave;
+  const isActive = wave.id === (searchParams?.get('wave') ?? undefined);
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     // Navigate to the new wave
-    router.push(getHref(wave.id), undefined, { shallow: true });
+    router.push(getHref(wave.id));
   };
 
   const getAvatarRingClasses = () => {
