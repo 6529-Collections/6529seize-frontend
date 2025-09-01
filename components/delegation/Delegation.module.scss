@@ -1,4 +1,4 @@
-@use 'sass:color';
+@use "sass:color";
 @use "../../styles/variables.scss" as variables;
 
 .Web3NetworkSwitch {
@@ -417,7 +417,9 @@
 .toast {
   position: fixed;
   z-index: 101;
-  top: 140px !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 
   a {
     color: black !important;
