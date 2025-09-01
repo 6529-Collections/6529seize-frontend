@@ -1,14 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { useRouter } from 'next/router';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import UserPageCollected from '../../../../components/user/collected/UserPageCollected';
 import { CollectedCollectionType } from '../../../../entities/IProfile';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
+  useParams: jest.fn(),
 }));
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
@@ -42,9 +41,9 @@ jest.mock('../../../../components/user/collected/UserPageCollectedFirstLoading',
 );
 
 describe('UserPageCollected', () => {
-  const useRouterMock = useRouter as jest.Mock;
   const usePathnameMock = usePathname as jest.Mock;
   const useSearchParamsMock = useSearchParams as jest.Mock;
+  const useParamsMock = useParams as jest.Mock;
   const useQueryMock = useQuery as jest.Mock;
 
   const mockProfile = {
@@ -58,10 +57,7 @@ describe('UserPageCollected', () => {
   };
 
   beforeEach(() => {
-    useRouterMock.mockReturnValue({
-      query: { user: 'testuser' },
-      replace: jest.fn(),
-    });
+    useParamsMock.mockReturnValue({ user: 'testuser' });
     usePathnameMock.mockReturnValue('/testuser/collected');
     useSearchParamsMock.mockReturnValue(mockSearchParams);
     mockSearchParams.get.mockReturnValue(null);

@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/router";
-import { CommonSelectItem } from "../../../utils/select/CommonSelect";
-import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
+import { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import { ApiWallet } from "@/generated/models/ApiWallet";
+import { formatAddress } from "@/helpers/Helpers";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RefObject, useEffect, useState } from "react";
-import { formatAddress } from "../../../../helpers/Helpers";
 import UserAddressesSelectDropdownItem from "./UserAddressesSelectDropdownItem";
-import { ApiWallet } from "../../../../generated/models/ApiWallet";
 
 type SelectedType = string | null;
 
@@ -20,6 +20,9 @@ export default function UserAddressesSelectDropdown({
   readonly onActiveAddress: (address: SelectedType) => void;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
   const items: CommonSelectItem<SelectedType, ApiWallet | null>[] = [
     {
       label: "All Addresses",
@@ -36,17 +39,11 @@ export default function UserAddressesSelectDropdown({
   ];
 
   const getAddressFromQuery = (): string | null => {
-    if (!router.query.address) {
+    const addressParam = searchParams?.get("address");
+    if (!addressParam) {
       return null;
     }
-    if (typeof router.query.address === "string") {
-      return router.query.address.toLowerCase();
-    }
-
-    if (router.query.address.length > 0) {
-      return router.query.address[0].toLowerCase();
-    }
-    return null;
+    return addressParam.toLowerCase();
   };
 
   const [activeAddress, setActiveAddress] = useState<string | null>(
@@ -54,39 +51,28 @@ export default function UserAddressesSelectDropdown({
   );
 
   useEffect(() => {
-    setActiveAddress((router.query.address as string) ?? null);
-  }, [router.query.address]);
+    setActiveAddress(searchParams?.get("address") ?? null);
+  }, [searchParams]);
 
   useEffect(() => {
     onActiveAddress(activeAddress);
   }, [activeAddress]);
 
   const onAddressChange = (address: string | null) => {
+    const params = new URLSearchParams(searchParams?.toString());
     if (!address || address === activeAddress) {
       setActiveAddress(null);
-      const currentQuery = { ...router.query };
-      delete currentQuery.address;
-      router.push(
-        {
-          pathname: router.pathname,
-          query: currentQuery,
-        },
-        undefined,
-        { shallow: true }
-      );
+      params.delete("address");
+      const newUrl =
+        pathname + (params.toString() ? `?${params.toString()}` : "");
+      router.push(newUrl, { scroll: false });
       return;
     }
     setActiveAddress(address);
-    const currentQuery = { ...router.query };
-    currentQuery.address = address;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    params.set("address", address);
+    const newUrl =
+      pathname + (params.toString() ? `?${params.toString()}` : "");
+    router.push(newUrl, { scroll: false });
   };
 
   const getActiveItem = (): SelectedType => {
