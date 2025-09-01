@@ -203,6 +203,7 @@ export function DelegationFormCollectionFormGroup(
       originalDelegator: string;
       collection: DelegationCollection;
     };
+    consolidation?: boolean;
   }>
 ) {
   const collections =
@@ -218,7 +219,9 @@ export function DelegationFormCollectionFormGroup(
     <Form.Group as={Row} className="pb-4">
       <DelegationFormLabel
         title="Collection"
-        tooltip="Collection address for delegation"
+        tooltip={`Collection address for ${
+          props.consolidation ? "consolidation" : "delegation"
+        }`}
       />
       <Col sm={9}>
         <Form.Select

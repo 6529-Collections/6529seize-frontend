@@ -142,7 +142,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
                 title={props.subdelegation ? `Delegation Manager` : `Delegator`}
                 tooltip={`Address ${
                   props.subdelegation ? `executing` : `registering`
-                } the sub-consolidation`}
+                } the consolidation`}
               />
               <Col sm={9}>
                 <DelegationAddressDisabledInput
@@ -155,6 +155,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               collection={newDelegationCollection}
               setCollection={setNewDelegationCollection}
               subdelegation={props.subdelegation}
+              consolidation
             />
             <DelegationFormDelegateAddressFormGroup
               setAddress={setNewDelegationToAddress}

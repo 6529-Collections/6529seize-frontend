@@ -17,7 +17,8 @@ jest.mock(
 );
 
 const push = jest.fn();
-jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+const replace = jest.fn();
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push, replace }) }));
 
 window.scrollTo = jest.fn();
 
