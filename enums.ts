@@ -113,6 +113,21 @@ export enum LeaderboardFocus {
   INTERACTIONS = "Interactions",
 }
 
+export enum NextgenView {
+  COLLECTIONS = "Collections",
+  ARTISTS = "Artists",
+  ABOUT = "About",
+}
+
+export enum NextgenCollectionView {
+  ABOUT = "About",
+  PROVENANCE = "Provenance",
+  DISPLAY_CENTER = "Display Center",
+  RARITY = "Rarity",
+  OVERVIEW = "Overview",
+  TOP_TRAIT_SETS = "Trait Sets",
+}
+
 export enum DelegationCenterSection {
   CENTER = "delegation-center",
   REGISTER_DELEGATION = "register-delegation",
@@ -128,10 +143,4 @@ export enum DelegationCenterSection {
   CONSOLIDATION_USE_CASES = "consolidation-use-cases",
   CHECKER = "wallet-checker",
   HTML = "html",
-}
-
-export enum NextGenView {
-  COLLECTIONS = "Collections",
-  ARTISTS = "Artists",
-  ABOUT = "About",
 }

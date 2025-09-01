@@ -1,40 +1,43 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
 import {
-  Container,
-  Row,
-  Col,
-  Accordion,
-  Form,
-  Dropdown,
-} from "react-bootstrap";
-import NextGenTokenList from "../NextGenTokenList";
+  faArrowCircleRight,
+  faChevronCircleDown,
+  faChevronCircleUp,
+  faFilter,
+  faFilterCircleXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Fragment, useEffect, useState } from "react";
+import {
+  Accordion,
+  Col,
+  Container,
+  Dropdown,
+  Form,
+  Row,
+} from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import {
   NextGenCollection,
   TraitValuePair,
   TraitValues,
 } from "../../../../entities/INextgen";
-import { Fragment, useEffect, useState } from "react";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { useRouter, useSearchParams } from "next/navigation";
-import DotLoader from "../../../dotLoader/DotLoader";
-import { areEqualAddresses } from "../../../../helpers/Helpers";
 import { SortDirection } from "../../../../entities/ISort";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import { areEqualAddresses } from "../../../../helpers/Helpers";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import DotLoader from "../../../dotLoader/DotLoader";
 import {
   NextGenListFilters,
   NextGenTokenListedType,
   formatNameForUrl,
 } from "../../nextgen_helpers";
+import styles from "../NextGen.module.scss";
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
-import { Tooltip } from "react-tooltip";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import {
-  faArrowCircleRight,
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
+import NextGenTokenList from "../NextGenTokenList";
 
 interface Props {
   collection: NextGenCollection;
@@ -225,10 +228,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   return (
     <Container className="no-padding pt-2">
       <Row>
-        <Col
-          sm={12}
-          md={6}
-          className="d-flex align-items-center justify-content-between no-wrap">
+        <Col className="d-flex align-items-center justify-content-between no-wrap">
           <h3 className="mb-0">
             The Art{" "}
             {totalResultsSet ? (
@@ -241,13 +241,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           </h3>
         </Col>
         <Col
-          sm={12}
-          md={6}
           className={`d-flex align-items-center ${
             isMobile ? "pt-3 justify-content-between" : "justify-content-end"
           }`}>
           {props.show_view_all ? (
-            <a
+            <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/art`}
@@ -259,11 +257,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   className={styles.viewAllIcon}
                 />
               </h5>
-            </a>
+            </Link>
           ) : (
             <>
               <FontAwesomeIcon
-                icon={showFilters ? "filter-circle-xmark" : "filter"}
+                icon={showFilters ? faFilterCircleXmark : faFilter}
                 style={{
                   cursor: "pointer",
                   height: "22px",
@@ -279,7 +277,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   color: "white",
                   padding: "4px 8px",
                 }}
-               place="bottom"
+                place="bottom"
                 delayShow={250}>
                 {`${showFilters ? "Hide" : "Show"} Filters${
                   selectedTraitValues.length > 0

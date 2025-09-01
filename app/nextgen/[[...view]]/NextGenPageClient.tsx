@@ -7,10 +7,9 @@ import NextgenCollectionsComponent from "@/components/nextGen/collections/NextGe
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 import { useTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
-import { NextGenView } from "@/enums";
+import { NextgenView } from "@/enums";
 import styles from "@/styles/Home.module.scss";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { getNextGenView } from "./view-utils";
@@ -20,25 +19,33 @@ export default function NextGenPageClient({
   initialView,
 }: {
   readonly featuredCollection: NextGenCollection;
-  readonly initialView?: NextGenView;
+  readonly initialView?: NextgenView;
 }) {
-  const router = useRouter();
-  const params = useParams<{ view?: string[] }>();
   const { setTitle } = useTitle();
 
   const [collection] = useState<NextGenCollection>(featuredCollection);
-  const [view, setView] = useState<NextGenView | undefined>(initialView);
+  const [view, setView] = useState<NextgenView | undefined>(initialView);
 
   useEffect(() => {
-    const viewFromUrl = getNextGenView(params?.view?.[0] ?? "") ?? undefined;
-    setView(viewFromUrl);
-    setTitle("NextGen " + (viewFromUrl ?? ""));
-  }, [params?.view]);
+    setTitle("NextGen " + (view ?? ""));
+  }, [view]);
 
-  const updateView = (newView?: NextGenView) => {
+  const updateView = (newView?: NextgenView) => {
+    setView(newView);
     const newPath = newView ? `/nextgen/${newView.toLowerCase()}` : "/nextgen";
-    router.push(newPath, { scroll: false });
+    window.history.pushState({ view: newView }, "", newPath);
   };
+
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (e.state?.view) {
+        const newView = getNextGenView(e.state.view);
+        setView(newView);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   return (
     <main className={styles.main}>
@@ -55,13 +62,13 @@ export default function NextGenPageClient({
                   <Container className="pb-4">
                     <Row>
                       <Col>
-                        {view === NextGenView.COLLECTIONS && (
+                        {view === NextgenView.COLLECTIONS && (
                           <NextgenCollectionsComponent />
                         )}
-                        {view === NextGenView.ARTISTS && (
+                        {view === NextgenView.ARTISTS && (
                           <NextgenArtistsComponent />
                         )}
-                        {view === NextGenView.ABOUT && (
+                        {view === NextgenView.ABOUT && (
                           <NextgenAboutComponent />
                         )}
                       </Col>

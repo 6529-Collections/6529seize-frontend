@@ -1,14 +1,15 @@
 "use client";
 
+import { NextGenCollection } from "@/entities/INextgen";
+import { NextgenCollectionView } from "@/enums";
+import { formatAddress } from "@/helpers/Helpers";
+import Link from "next/link";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
-import { NextGenCollection } from "../../../../entities/INextgen";
-import { formatAddress } from "../../../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { DistributionLink } from "../NextGen";
 import styles from "../NextGen.module.scss";
-import { ContentView } from "./NextGenCollection";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
 import NextGenTraitSets from "./NextGenTraitSets";
 
@@ -17,7 +18,7 @@ interface CollectionProps {
 }
 
 interface Props extends CollectionProps {
-  view: ContentView;
+  view: NextgenCollectionView;
 }
 
 function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
@@ -78,14 +79,14 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                   <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
                     <span className="font-color-h">Contract</span>
                     <span>
-                      <a
+                      <Link
                         className="font-color text-decoration-none"
                         href={getEtherscanLink()}
                         target="_blank"
                         rel="noreferrer"
                         data-tooltip-id={`contract-tooltip-${props.collection.id}`}>
                         {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
-                      </a>
+                      </Link>
                       <Tooltip
                         id={`contract-tooltip-${props.collection.id}`}
                         place="right"
@@ -317,11 +318,11 @@ function NextGenCollectionDetailsAbout(props: Readonly<CollectionProps>) {
 }
 
 export default function NextGenCollectionDetails(props: Readonly<Props>) {
-  if (props.view === ContentView.PROVENANCE) {
+  if (props.view === NextgenCollectionView.PROVENANCE) {
     return <NextGenCollectionProvenance collection={props.collection} />;
-  } else if (props.view === ContentView.OVERVIEW) {
+  } else if (props.view === NextgenCollectionView.OVERVIEW) {
     return <NextGenCollectionDetailsOverview collection={props.collection} />;
-  } else if (props.view === ContentView.TOP_TRAIT_SETS) {
+  } else if (props.view === NextgenCollectionView.TOP_TRAIT_SETS) {
     return <NextGenTraitSets preview collection={props.collection} />;
   } else {
     return <NextGenCollectionDetailsAbout collection={props.collection} />;

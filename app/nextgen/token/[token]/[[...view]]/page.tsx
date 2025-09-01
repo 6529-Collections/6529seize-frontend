@@ -1,5 +1,5 @@
-import { ContentView } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { NextgenCollectionView } from "@/enums";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -18,7 +18,8 @@ export async function generateMetadata({
     return getAppMetadata({ title: "NextGen Token" });
   }
   const resolvedView = getContentView(view?.[0] ?? "");
-  const viewDisplay = resolvedView !== ContentView.ABOUT ? resolvedView : "";
+  const viewDisplay =
+    resolvedView !== NextgenCollectionView.ABOUT ? resolvedView : "";
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
   const title = viewDisplay ? `${baseTitle} | ${viewDisplay}` : baseTitle;
