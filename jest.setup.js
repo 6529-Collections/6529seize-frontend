@@ -1,4 +1,8 @@
 import { TextEncoder, TextDecoder } from "util";
+import { config } from "dotenv";
+
+// Load environment variables for tests
+config({ path: ".env.development" });
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
@@ -102,4 +106,41 @@ if (typeof global.fetch === "undefined") {
       json: () => Promise.resolve([]),
     })
   );
+}
+
+// Mock AbortController for Node.js environment - ensure it's available everywhere
+class MockAbortController {
+  constructor() {
+    this.signal = { 
+      aborted: false, 
+      addEventListener: jest.fn(), 
+      removeEventListener: jest.fn(),
+      reason: undefined,
+      throwIfAborted: jest.fn()
+    };
+  }
+  abort(reason) {
+    this.signal.aborted = true;
+    this.signal.reason = reason;
+  }
+}
+
+// Set on all global objects to ensure it's available during module loading
+global.AbortController = MockAbortController;
+globalThis.AbortController = MockAbortController;
+if (typeof window !== 'undefined') {
+  window.AbortController = MockAbortController;
+}
+
+// Mock AbortSignal for Node.js environment
+if (typeof global.AbortSignal === "undefined") {
+  global.AbortSignal = class MockAbortSignal {
+    constructor() {
+      this.aborted = false;
+      this.reason = undefined;
+      this.addEventListener = jest.fn();
+      this.removeEventListener = jest.fn();
+      this.throwIfAborted = jest.fn();
+    }
+  };
 }

@@ -5,5 +5,6 @@
   },
   "editor.tabSize": 2,
   "window.autoDetectColorScheme": false,
-  "workbench.colorTheme": "Default Dark+"
+  "workbench.colorTheme": "Default Dark+",
+  "typescript.preferences.importModuleSpecifier": "shortest"
 }

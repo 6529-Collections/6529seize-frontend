@@ -1,4 +1,5 @@
-import { Container, Row, Col } from "react-bootstrap";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function NextGenAbout() {
   return (
@@ -55,20 +56,18 @@ export default function NextGenAbout() {
             The fundamental structure of the NextGen contract follows the
             overall approach pioneered by Art Blocks in 2020-2021.
           </p>
-          <p>
-            <ul>
-              <li>
-                A single core contract (with various supporter contracts) with
-                custom token number spaces to separate out different collections
-                by different artists
-              </li>
-              <li>
-                On-chain storage of the generative script and the seed/hash used
-                to generate the image
-              </li>
-              <li>Randomized traits at mint</li>
-            </ul>
-          </p>
+          <ul>
+            <li>
+              A single core contract (with various supporter contracts) with
+              custom token number spaces to separate out different collections
+              by different artists
+            </li>
+            <li>
+              On-chain storage of the generative script and the seed/hash used
+              to generate the image
+            </li>
+            <li>Randomized traits at mint</li>
+          </ul>
           <p>
             Given the above structure is generally well-understood, we would
             like to focus on a few areas where we have adjusted the standard
@@ -109,8 +108,8 @@ export default function NextGenAbout() {
             smart contracts.
           </p>
           <p>
-            To support this objective, we launched NFTDelegation.com in Spring
-            2023 and have been using it within the community to support address
+            To support this objective, we launched NFTDelegation in Spring 2023
+            and have been using it within the community to support address
             consolidation and delegation.
           </p>
           <p>
@@ -138,20 +137,18 @@ export default function NextGenAbout() {
             about the collecting or minting address.
           </p>
           <p>This is most easily explained with two examples:</p>
-          <p>
-            <ul>
-              <li>
-                Pebbles, for example, will pass some collector information for
-                certain mints and adjust the output to reflect their provenance
-                in a small way.
-              </li>
-              <li>
-                The NextGen contract has been also deployed by the University of
-                Nicosia to deploy student generative art certificates with
-                on-chain student information (grade and name).
-              </li>
-            </ul>
-          </p>
+          <ul>
+            <li>
+              Pebbles, for example, will pass some collector information for
+              certain mints and adjust the output to reflect their provenance in
+              a small way.
+            </li>
+            <li>
+              The NextGen contract has been also deployed by the University of
+              Nicosia to deploy student generative art certificates with
+              on-chain student information (grade and name).
+            </li>
+          </ul>
           <p>
             We believe this area is largely unexplored and potentially very
             fruitful.
@@ -251,19 +248,17 @@ export default function NextGenAbout() {
             NextGen supports all widely used (and some not-widely used) minting
             sales models
           </p>
-          <p>
-            <ul>
-              <li>Airdrops</li>
-              <li>Fixed price mints</li>
-              <li>Phase priced mints</li>
-              <li>Linear descending auction</li>
-              <li>Exponentially descending auction</li>
-              <li>Linear ascending mint</li>
-              <li>Burn-to-mint (internal or external collection)</li>
-              <li>Swap-to-mint (internal or external collection)</li>
-              <li>Mint-to-auction</li>
-            </ul>
-          </p>
+          <ul>
+            <li>Airdrops</li>
+            <li>Fixed price mints</li>
+            <li>Phase priced mints</li>
+            <li>Linear descending auction</li>
+            <li>Exponentially descending auction</li>
+            <li>Linear ascending mint</li>
+            <li>Burn-to-mint (internal or external collection)</li>
+            <li>Swap-to-mint (internal or external collection)</li>
+            <li>Mint-to-auction</li>
+          </ul>
           <p>
             The combination of Minting Sales Models and Phases can be used to
             create very interesting and experimental minting dynamics.
@@ -291,12 +286,12 @@ export default function NextGenAbout() {
       <Row className="pb-3">
         <Col>
           Additional technical information can be found here:{" "}
-          <a
+          <Link
             href="https://seize-io.gitbook.io/nextgen/"
             target="_blank"
             rel="noopener noreferrer">
             https://seize-io.gitbook.io/nextgen/
-          </a>
+          </Link>
         </Col>
       </Row>
       <Row className="pb-3">
@@ -311,73 +306,63 @@ export default function NextGenAbout() {
             collection and will develop and refine our approach over time.
           </p>
           <p>This is what we currently believe will be our direction:</p>
-          <p>
-            <ul>
-              <li>
-                We do not anticipate a large number of NextGen collections in
-                the short-term.
-                <ul>
-                  <li>
-                    Generative collections require a lot of work to be done
-                    correctly and we only would like to make interesting drops.
-                  </li>
-                  <li>
-                    We have no pressure to mint NextGen collections, so we will
-                    mint a collection whenever we feel right about it
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </p>
-          <p>
-            <ul>
-              <li>
-                We are broadly interested in 3 categories of collections:
-                <ul>
-                  <li>
-                    Collections that support our decentralization objectives
-                  </li>
-                  <li>
-                    Collections that explore interoperability or composability
-                    on-chain
-                  </li>
-                  <li>
-                    Collections that are unusual or interesting aesthetically or
-                    technically
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </p>
-          <p>
-            <ul>
-              <li>
-                We have a strong bias towards all NextGen collections being
-                released under a CC0 license.
-              </li>
-            </ul>
-          </p>
-          <p>
-            <ul>
-              <li>
-                The NextGen contracts are available under an Apache 2
-                open-source license
-                <ul>
-                  <li>
-                    Anyone who would like to take advantage of the work and time
-                    we have invested in the contracts, is welcome to deploy
-                    their own instance of the contracts and mint their own
-                    collections.
-                  </li>
-                  <li>
-                    You do not need to ask our permission, but I am sure we will
-                    appreciate hearing about what you are doing with the
-                    contracts
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </p>
+          <ul>
+            <li>
+              We do not anticipate a large number of NextGen collections in the
+              short-term.
+              <ul>
+                <li>
+                  Generative collections require a lot of work to be done
+                  correctly and we only would like to make interesting drops.
+                </li>
+                <li>
+                  We have no pressure to mint NextGen collections, so we will
+                  mint a collection whenever we feel right about it
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              We are broadly interested in 3 categories of collections:
+              <ul>
+                <li>
+                  Collections that support our decentralization objectives
+                </li>
+                <li>
+                  Collections that explore interoperability or composability
+                  on-chain
+                </li>
+                <li>
+                  Collections that are unusual or interesting aesthetically or
+                  technically
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              We have a strong bias towards all NextGen collections being
+              released under a CC0 license.
+            </li>
+          </ul>
+          <ul>
+            <li>
+              The NextGen contracts are available under an Apache 2 open-source
+              license
+              <ul>
+                <li>
+                  Anyone who would like to take advantage of the work and time
+                  we have invested in the contracts, is welcome to deploy their
+                  own instance of the contracts and mint their own collections.
+                </li>
+                <li>
+                  You do not need to ask our permission, but I am sure we will
+                  appreciate hearing about what you are doing with the contracts
+                </li>
+              </ul>
+            </li>
+          </ul>
           <p>
             If you have an interesting idea along the lines above, please get in
             touch with us. We would love to brainstorm about it and see if it is

@@ -2,40 +2,45 @@
 
 import styles from "./MemeLab.module.scss";
 
-import { useContext, useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
-import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
-import { addProtocol } from "../../helpers/Helpers";
-import { useRouter } from "next/router";
-import { fetchAllPages } from "../../services/6529api";
-import { NftOwner } from "../../entities/IOwner";
-import { SortDirection } from "../../entities/ISort";
+import { AuthContext } from "@/components/auth/Auth";
+import NFTImage from "@/components/nft-image/NFTImage";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
+import { MEMES_CONTRACT } from "@/constants";
+import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
+import { NftOwner } from "@/entities/IOwner";
+import { SortDirection } from "@/entities/ISort";
+import { MemeLabSort } from "@/enums";
+import { addProtocol } from "@/helpers/Helpers";
+import { fetchAllPages } from "@/services/6529api";
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import NFTImage from "../nft-image/NFTImage";
-import { MEMES_CONTRACT } from "../../constants";
-import { AuthContext } from "../auth/Auth";
-import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import {
   getInitialRouterValues,
   printNftContent,
   printSortButtons,
   sortChanged,
 } from "./MemeLab";
-import { MemeLabSort } from "../../enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   wallets: string[];
 }
 
-export default function LabCollection(props: Readonly<Props>) {
+export default function LabCollection({
+  collectionName,
+}: {
+  readonly collectionName: string;
+}) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
 
-  const [collectionName, setCollectionName] = useState<string>();
   const [website, setWebsite] = useState<string>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
@@ -49,19 +54,14 @@ export default function LabCollection(props: Readonly<Props>) {
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
-    if (router.isReady) {
-      if (router.query.collection) {
-        let c = router.query.collection as string;
-        c = c.replaceAll("-", " ");
-        setCollectionName(c);
-
-        const { initialSortDir, initialSort } = getInitialRouterValues(router);
-
-        setSortDir(initialSortDir);
-        setSort(initialSort);
-      }
-    }
-  }, [router.isReady]);
+    const { initialSortDir, initialSort } = getInitialRouterValues(
+      searchParams?.get("sortDir") ?? null,
+      searchParams?.get("sort") ?? null
+    );
+    setSortDir(initialSortDir);
+    setSort(initialSort);
+    setVolumeType(VolumeType.HOURS_24);
+  }, []);
 
   useEffect(() => {
     if (collectionName) {
@@ -112,16 +112,7 @@ export default function LabCollection(props: Readonly<Props>) {
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      sortChanged(
-        router,
-        sort,
-        sortDir,
-        volumeType,
-        nfts,
-        nftMetas,
-        collectionName,
-        setNfts
-      );
+      sortChanged(router, sort, sortDir, volumeType, nfts, nftMetas, setNfts);
     }
   }, [sort, sortDir, nftsLoaded]);
 
@@ -142,37 +133,35 @@ export default function LabCollection(props: Readonly<Props>) {
         sm={{ span: 4 }}
         md={{ span: 3 }}
         lg={{ span: 3 }}>
-        <Container fluid className="no-padding">
-          <Row>
-            <a
-              href={`/meme-lab/${nft.id}`}
-              className={
-                props.wallets.length > 0 ? styles.nftImagePadding : ""
-              }>
+        <Link
+          href={`/meme-lab/${nft.id}`}
+          className="decoration-none scale-hover">
+          <Container fluid>
+            <Row className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
                 nft={nft}
                 animation={false}
                 height={300}
                 balance={getBalance(nft.id)}
                 showThumbnail={true}
-                showUnseized={props.wallets.length > 0}
+                showUnseized={!!connectedProfile}
               />
-            </a>
-          </Row>
-          <Row>
-            <Col className="text-center pt-2">
-              <a href={`/the-memes/${nft.id}`}>{nft.name}</a>
-            </Col>
-          </Row>
-          <Row>
-            <Col className="text-center pt-2">Artists: {nft.artist}</Col>
-          </Row>
-          <Row>
-            <Col className="text-center pt-1">
-              {printNftContent(nft, sort, nftMetas, volumeType)}
-            </Col>
-          </Row>
-        </Container>
+            </Row>
+            <Row>
+              <Col className="text-center pt-2">
+                #{nft.id} - {nft.name}
+              </Col>
+            </Row>
+            <Row>
+              <Col className="text-center pt-2">Artists: {nft.artist}</Col>
+            </Row>
+            <Row>
+              <Col className="text-center pt-1">
+                {printNftContent(nft, sort, nftMetas, volumeType)}
+              </Col>
+            </Row>
+          </Container>
+        </Link>
       </Col>
     );
   }
@@ -236,7 +225,7 @@ export default function LabCollection(props: Readonly<Props>) {
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col>
+                <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
                   {printSortButtons(
                     sort,
                     volumeType,

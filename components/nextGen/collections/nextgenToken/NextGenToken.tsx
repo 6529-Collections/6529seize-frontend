@@ -1,58 +1,73 @@
-import styles from "../NextGen.module.scss";
-import { Col, Container, Row } from "react-bootstrap";
+"use client";
+
 import {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
-} from "../../../../entities/INextgen";
-import NextGenTokenProvenance from "./NextGenTokenProvenance";
-import NextgenTokenRarity, {
-  NextgenTokenTraits,
-} from "./NextGenTokenProperties";
-import NextGenTokenAbout from "./NextGenTokenAbout";
-import NextGenTokenArt from "./NextGenTokenArt";
-import {
-  ContentView,
-  printViewButton,
-} from "../collectionParts/NextGenCollection";
-import { isNullAddress } from "../../../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
-import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
+} from "@/entities/INextgen";
+import { NextgenCollectionView } from "@/enums";
+import { isNullAddress } from "@/helpers/Helpers";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
   faFire,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
+import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { printViewButton } from "../collectionParts/NextGenCollection";
+import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
+import styles from "../NextGen.module.scss";
+import NextGenTokenAbout from "./NextGenTokenAbout";
+import NextGenTokenArt from "./NextGenTokenArt";
+import NextgenTokenRarity, {
+  NextgenTokenTraits,
+} from "./NextGenTokenProperties";
+import NextGenTokenProvenance from "./NextGenTokenProvenance";
+import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
   traits: NextGenTrait[];
   tokenCount: number;
-  view: ContentView;
-  setView: (view: ContentView) => void;
+  view: NextgenCollectionView;
+  setView: (view: NextgenCollectionView) => void;
 }
 
 export default function NextGenTokenPage(props: Readonly<Props>) {
+  const router = useRouter();
+
   function printDetails() {
     return (
       <Container className="pt-4">
         <Row>
           <Col className="d-flex gap-4">
-            {printViewButton(props.view, ContentView.ABOUT, props.setView)}
-            {printViewButton(props.view, ContentView.PROVENANCE, props.setView)}
             {printViewButton(
               props.view,
-              ContentView.DISPLAY_CENTER,
+              NextgenCollectionView.ABOUT,
               props.setView
             )}
-            {printViewButton(props.view, ContentView.RARITY, props.setView)}
+            {printViewButton(
+              props.view,
+              NextgenCollectionView.PROVENANCE,
+              props.setView
+            )}
+            {printViewButton(
+              props.view,
+              NextgenCollectionView.DISPLAY_CENTER,
+              props.setView
+            )}
+            {printViewButton(
+              props.view,
+              NextgenCollectionView.RARITY,
+              props.setView
+            )}
           </Col>
         </Row>
         <Row>
-          {props.view === ContentView.ABOUT && (
+          {props.view === NextgenCollectionView.ABOUT && (
             <>
               <Col sm={12} md={6} className="pt-4 pb-4">
                 <NextGenTokenAbout
@@ -72,7 +87,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               </Col>
             </>
           )}
-          {props.view === ContentView.PROVENANCE && (
+          {props.view === NextgenCollectionView.PROVENANCE && (
             <Col className="pt-4 pb-4">
               <NextGenTokenProvenance
                 token_id={props.token.id}
@@ -80,12 +95,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               />
             </Col>
           )}
-          {props.view === ContentView.DISPLAY_CENTER && (
+          {props.view === NextgenCollectionView.DISPLAY_CENTER && (
             <Col className="pt-4 pb-4">
               <NextGenTokenRenderCenter token={props.token} />
             </Col>
           )}
-          {props.view === ContentView.RARITY && (
+          {props.view === NextgenCollectionView.RARITY && (
             <Col className="pt-4 pb-4">
               <NextgenTokenRarity
                 collection={props.collection}
@@ -106,7 +121,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
       <FontAwesomeIcon
         title="Previous Token"
         icon={faChevronCircleLeft}
-        data-tooltip-id={hasPreviousToken ? `prev-token-${props.token.id}` : undefined}
+        data-tooltip-id={
+          hasPreviousToken ? `prev-token-${props.token.id}` : undefined
+        }
         onClick={() => {
           if (!hasPreviousToken) {
             return;
@@ -116,7 +133,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             props.token.id.toString(),
             (props.token.id - 1).toString()
           );
-          window.location.href = prevHref;
+          router.push(prevHref, { scroll: false });
         }}
         style={{
           height: "35px",
@@ -135,8 +152,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Previous Token
           </Tooltip>
         )}
@@ -149,7 +165,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     const next = (
       <FontAwesomeIcon
         icon={faChevronCircleRight}
-        data-tooltip-id={hasNextToken ? `next-token-${props.token.id}` : undefined}
+        data-tooltip-id={
+          hasNextToken ? `next-token-${props.token.id}` : undefined
+        }
         onClick={() => {
           if (!hasNextToken) {
             return;
@@ -159,7 +177,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             props.token.id.toString(),
             (props.token.id + 1).toString()
           );
-          window.location.href = nextHref;
+          router.push(nextHref, { scroll: false });
         }}
         style={{
           height: "35px",
@@ -178,8 +196,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             Next Token
           </Tooltip>
         )}
@@ -213,8 +230,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                                 backgroundColor: "#1F2937",
                                 color: "white",
                                 padding: "4px 8px",
-                              }}
-                            >
+                              }}>
                               Burnt
                             </Tooltip>
                           </>

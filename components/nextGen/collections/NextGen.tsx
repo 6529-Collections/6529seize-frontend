@@ -1,20 +1,21 @@
-import styles from "./NextGen.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
+import { NextgenView } from "@/enums";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
 import { NextGenCollection } from "../../../entities/INextgen";
+import { Status } from "../nextgen_entities";
+import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
+import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 import {
   NextGenCountdown,
   NextGenMintCounts,
   NextGenPhases,
 } from "./collectionParts/NextGenCollectionHeader";
-import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
-import { Status } from "../nextgen_entities";
-import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
-import { NextGenView } from "./NextGenNavigationHeader";
 import NextGenCollectionSlideshow from "./collectionParts/NextGenCollectionSlideshow";
+import styles from "./NextGen.module.scss";
 
 interface Props {
   collection: NextGenCollection;
-  setView: (view: NextGenView) => void;
+  setView: (view: NextgenView) => void;
 }
 
 export default function NextGen(props: Readonly<Props>) {
@@ -43,14 +44,14 @@ export default function NextGen(props: Readonly<Props>) {
                     </Row>
                     <Row className="pt-2">
                       <Col>
-                        <a
+                        <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
                           )}`}
                           className="decoration-none font-bolder"
                           style={{ fontSize: "60px" }}>
                           {props.collection.name}
-                        </a>
+                        </Link>
                       </Col>
                     </Row>
                     <Row className="font-larger font-color font-bolder">
@@ -58,11 +59,11 @@ export default function NextGen(props: Readonly<Props>) {
                         className="font-larger font-lighter"
                         style={{ fontSize: "48px", lineHeight: "48px" }}>
                         by{" "}
-                        <a
+                        <Link
                           href={`/${props.collection.artist_address}`}
                           className="decoration-hover-underline">
                           {props.collection.artist}
-                        </a>
+                        </Link>
                       </Col>
                     </Row>
                     <Row className="pt-3 font-larger font-color">
@@ -72,17 +73,17 @@ export default function NextGen(props: Readonly<Props>) {
                     </Row>
                     <Row className="pt-3">
                       <Col>
-                        <a
+                        <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
                           )}`}>
                           <button
-                            className={`font-larger pt-2 pb-2 seize-btn no-wrap ${styles.exploreBtn}`}>
+                            className={`font-larger pt-2 pb-2 no-wrap ${styles.exploreBtn}`}>
                             <span className="font-larger">
                               Explore Collection
                             </span>
                           </button>
-                        </a>
+                        </Link>
                       </Col>
                     </Row>
                     <Row className="pt-4 pb-2">
@@ -114,7 +115,7 @@ export default function NextGen(props: Readonly<Props>) {
                   <button
                     className="btn-link pt-2"
                     onClick={() => {
-                      props.setView(NextGenView.ABOUT);
+                      props.setView(NextgenView.ABOUT);
                       window.scrollTo(0, 120);
                     }}>
                     <span className="font-larger">Learn More</span>
@@ -183,12 +184,12 @@ export function DistributionLink(
       <Container className="no-padding">
         <Row className={`pt-1 font-color ${props.class ? props.class : ""}`}>
           <Col>
-            <a
+            <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/distribution-plan`}>
               Distribution Plan
-            </a>
+            </Link>
           </Col>
         </Row>
       </Container>

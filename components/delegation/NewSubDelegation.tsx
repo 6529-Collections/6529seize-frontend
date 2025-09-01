@@ -1,23 +1,23 @@
 "use client";
 
-import { Container, Row, Col, Form } from "react-bootstrap";
 import { useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
 
+import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
+import { isValidEthAddress } from "@/helpers/Helpers";
 import {
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
-} from "../../pages/delegation/[...section]";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
-import { DELEGATION_ABI } from "../../abis";
-import { isValidEthAddress } from "../../helpers/Helpers";
-import { getGasError } from "./delegation_shared";
+} from "./delegation-constants";
+import { getGasError } from "./delegation-shared";
 import {
-  DelegationCloseButton,
-  DelegationFormOriginalDelegatorFormGroup,
-  DelegationFormLabel,
   DelegationAddressDisabledInput,
+  DelegationCloseButton,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
+  DelegationFormLabel,
+  DelegationFormOriginalDelegatorFormGroup,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 

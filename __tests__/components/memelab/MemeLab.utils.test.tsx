@@ -1,14 +1,13 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import {
   getInitialRouterValues,
-  printSortButtons,
   printNftContent,
-} from "../../../components/memelab/MemeLab";
-import { MemeLabSort } from "../../../enums";
-import { VolumeType, LabNFT, LabExtendedData } from "../../../entities/INFT";
-import { NextRouter } from "next/router";
+  printSortButtons,
+} from "@/components/memelab/MemeLab";
+import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
+import { SortDirection } from "@/entities/ISort";
+import { MemeLabSort } from "@/enums";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -74,21 +73,21 @@ const nftMeta: LabExtendedData = {
 
 describe("MemeLab utilities", () => {
   it("parses router query for initial values", () => {
-    const router = {
-      query: { sort: 'hodlers', sort_dir: "DESC" },
-    } as unknown as NextRouter;
-    const { initialSortDir, initialSort } = getInitialRouterValues(router);
+    const { initialSortDir, initialSort } = getInitialRouterValues(
+      "desc",
+      "collectors"
+    );
     expect(initialSort).toBe(MemeLabSort.HODLERS);
-    expect(initialSortDir).toBe("DESC");
+    expect(initialSortDir).toBe(SortDirection.DESC);
   });
 
   it("falls back to defaults for invalid router values", () => {
-    const router = {
-      query: { sort: "bad", sort_dir: "bad" },
-    } as unknown as NextRouter;
-    const { initialSortDir, initialSort } = getInitialRouterValues(router);
+    const { initialSortDir, initialSort } = getInitialRouterValues(
+      "bad",
+      "bad"
+    );
     expect(initialSort).toBe(MemeLabSort.AGE);
-    expect(initialSortDir).toBe("ASC");
+    expect(initialSortDir).toBe(SortDirection.ASC);
   });
 
   it("renders sort buttons and triggers callbacks", async () => {

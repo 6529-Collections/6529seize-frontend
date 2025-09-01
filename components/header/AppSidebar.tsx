@@ -1,5 +1,4 @@
 "use client";
-import { Fragment, useCallback, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogPanel,
@@ -7,15 +6,16 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import {
+  DocumentTextIcon,
   UserIcon,
   WrenchIcon,
-  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import { Fragment, useCallback, useEffect, useMemo } from "react";
+import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import UsersIcon from "../common/icons/UsersIcon";
-import AppUserConnect from "./AppUserConnect";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
-import { useAppWallets } from "../app-wallets/AppWalletsContext";
+import AppUserConnect from "./AppUserConnect";
 
 const MENU = [
   { label: "Profile", path: "/profile", icon: UserIcon },
@@ -36,7 +36,8 @@ const MENU = [
       { label: "Memes Subscriptions", path: "/tools/subscriptions-report" },
       { label: "Meme Accounting", path: "/meme-accounting?focus=the-memes" },
       { label: "Meme Gas", path: "/meme-gas?focus=the-memes" },
-      { label: "EMMA", path: "/emma", dividerBefore: true },
+      { label: "API", path: "/tools/api", dividerBefore: true },
+      { label: "EMMA", path: "/emma" },
       { label: "Block Finder", path: "/meme-blocks" },
       { label: "Open Data", path: "/open-data" },
     ],
@@ -78,11 +79,6 @@ const MENU = [
       { label: "Network Activity", path: "/network/activity" },
       { label: "Groups", path: "/network/groups" },
       { label: "NFT Activity", path: "/nft-activity" },
-      {
-        label: "Prenodes Status",
-        path: "/network/prenodes",
-        dividerBefore: true,
-      },
       { label: "Metrics", section: true },
       { label: "Definitions", path: "/network/metrics" },
       { label: "Network Stats", path: "/network/stats" },

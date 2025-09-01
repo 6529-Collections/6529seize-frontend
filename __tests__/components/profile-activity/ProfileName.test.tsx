@@ -1,20 +1,18 @@
-import { render, screen } from "@testing-library/react";
 import ProfileName, {
   ProfileNameType,
 } from "@/components/profile-activity/ProfileName";
-import { useSearchParams } from "next/navigation";
 import { useIdentity } from "@/hooks/useIdentity";
+import { render, screen } from "@testing-library/react";
+import { useParams } from "next/navigation";
 
-jest.mock("next/navigation", () => ({ useSearchParams: jest.fn() }));
+jest.mock("next/navigation", () => ({ useParams: jest.fn() }));
 jest.mock("@/hooks/useIdentity");
 
 const useIdentityMock = useIdentity as jest.MockedFunction<typeof useIdentity>;
 
 describe("ProfileName", () => {
   beforeEach(() => {
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams({ user: "bob" })
-    );
+    (useParams as jest.Mock).mockReturnValue({ user: "bob" });
   });
 
   it("shows possession string", () => {

@@ -1,26 +1,27 @@
 "use client";
 
-import styles from "../../NextGen.module.scss";
-import { useReadContract, useReadContracts } from "wagmi";
-import { DELEGATION_ABI } from "../../../../../abis";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-} from "../../../../../constants";
-import { Col, Container, Row } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import {
-  CollectionWithMerkle,
-  AllowlistType,
-  Status,
-} from "../../../nextgen_entities";
-import { fromGWEI } from "../../../../../helpers/Helpers";
+import { DELEGATION_ABI } from "@/abis";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   ALL_USE_CASE,
   MINTING_USE_CASE,
-} from "../../../../../pages/delegation/[...section]";
+} from "@/components/delegation/delegation-constants";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
+import { NextGenCollection } from "@/entities/INextgen";
+import { fromGWEI } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { useReadContract, useReadContracts } from "wagmi";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
-import { fetchUrl } from "../../../../../services/6529api";
+import {
+  AllowlistType,
+  CollectionWithMerkle,
+  Status,
+} from "../../../nextgen_entities";
 import {
   formatNameForUrl,
   getStatusFromDates,
@@ -28,17 +29,14 @@ import {
   useMintSharedState,
   useSharedState,
 } from "../../../nextgen_helpers";
-import NextGenMintWidget from "./NextGenMintWidget";
-import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
-import Image from "next/image";
+import styles from "../../NextGen.module.scss";
 import {
   NextGenCountdown,
   NextGenMintCounts,
   NextGenPhases,
 } from "../NextGenCollectionHeader";
-import DotLoader from "../../../../dotLoader/DotLoader";
-import { NextGenCollection } from "../../../../../entities/INextgen";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
+import NextGenMintWidget from "./NextGenMintWidget";
 
 interface Props {
   collection: NextGenCollection;
@@ -347,19 +345,19 @@ export default function NextGenMint(props: Readonly<Props>) {
       <Row className="pt-2">
         <Col sm={12} md={6} className="d-flex flex-column">
           <NextGenPhases collection={props.collection} available={available} />
-          <a
+          <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}`}
             className="decoration-hover-underline">
             <h1 className="mb-0 font-color">{props.collection.name}</h1>
-          </a>
+          </Link>
           <span className="font-larger">
             by{" "}
             <b>
-              <a href={`/${props.collection.artist_address}`}>
+              <Link href={`/${props.collection.artist_address}`}>
                 {props.collection.artist}
-              </a>
+              </Link>
             </b>
           </span>
           <span className="pt-2 font-larger d-inline-flex align-items-center">

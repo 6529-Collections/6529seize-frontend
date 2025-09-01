@@ -24,7 +24,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com/ 'unsafe-eval'; connect-src * 'self' blob: ${process.env.API_ENDPOINT} https://registry.walletconnect.com/api/v2/wallets wss://*.bridge.walletconnect.org wss://*.walletconnect.com wss://www.walletlink.org/rpc https://explorer-api.walletconnect.com/v3/wallets https://www.googletagmanager.com https://*.google-analytics.com https://cloudflare-eth.com/ https://arweave.net/* https://rpc.walletconnect.com/v1/; font-src 'self' data: https://fonts.gstatic.com https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com; img-src 'self' data: blob: *; media-src 'self' blob: https://*.cloudfront.net https://videos.files.wordpress.com https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/* https://*.twimg.com; frame-src 'self' https://media.generator.seize.io https://media.generator.6529.io https://generator.seize.io https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/* https://nftstorage.link https://*.ipfs.nftstorage.link https://verify.walletconnect.com https://verify.walletconnect.org https://secure.walletconnect.com https://d3lqz0a4bldqgf.cloudfront.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/css2 https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com http://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src data:;`,
+    value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com/ https://dataplane.rum.us-east-1.amazonaws.com 'unsafe-eval'; connect-src * 'self' blob: ${process.env.API_ENDPOINT} https://registry.walletconnect.com/api/v2/wallets wss://*.bridge.walletconnect.org wss://*.walletconnect.com wss://www.walletlink.org/rpc https://explorer-api.walletconnect.com/v3/wallets https://www.googletagmanager.com https://*.google-analytics.com https://cloudflare-eth.com/ https://arweave.net/* https://rpc.walletconnect.com/v1/ https://sts.us-east-1.amazonaws.com https://sts.us-west-2.amazonaws.com; font-src 'self' data: https://fonts.gstatic.com https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com; img-src 'self' data: blob: *; media-src 'self' blob: https://*.cloudfront.net https://videos.files.wordpress.com https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/* https://*.twimg.com; frame-src 'self' https://media.generator.seize.io https://media.generator.6529.io https://generator.seize.io https://arweave.net https://*.arweave.net https://ipfs.io/ipfs/* https://cf-ipfs.com/ipfs/* https://nftstorage.link https://*.ipfs.nftstorage.link https://verify.walletconnect.com https://verify.walletconnect.org https://secure.walletconnect.com https://d3lqz0a4bldqgf.cloudfront.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/css2 https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com http://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src data:;`,
   },
   {
     key: "X-Frame-Options",
@@ -82,6 +82,9 @@ const nextConfig = {
     DEV_MODE_AUTH_JWT: process.env.DEV_MODE_AUTH_JWT,
     USE_DEV_AUTH: process.env.USE_DEV_AUTH,
     STAGING_API_KEY: process.env.STAGING_API_KEY,
+    AWS_RUM_APP_ID: process.env.AWS_RUM_APP_ID,
+    AWS_RUM_REGION: process.env.AWS_RUM_REGION,
+    AWS_RUM_SAMPLE_RATE: process.env.AWS_RUM_SAMPLE_RATE,
   },
   async generateBuildId() {
     return VERSION;
@@ -96,9 +99,42 @@ const nextConfig = {
     ];
   },
 
-  webpack: (config) => {
+  webpack: (config, { dev, isServer }) => {
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
+    
+    // Validate required environment variables at build time
+    if (!dev && !isServer) {
+      const requiredEnvVars = [
+        'BASE_ENDPOINT',
+      ];
+      
+      const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+      
+      if (missingEnvVars.length > 0) {
+        throw new Error(
+          `Missing required environment variables for production build: ${missingEnvVars.join(', ')}. ` +
+          `Please set these in your environment or .env.local file. See .env.example for reference.`
+        );
+      }
+      
+      // Validate BASE_ENDPOINT format
+      const baseEndpoint = process.env.BASE_ENDPOINT;
+      try {
+        const url = new URL(baseEndpoint);
+        if (url.protocol !== 'https:' && !baseEndpoint.includes('localhost') && !baseEndpoint.includes('127.0.0.1')) {
+          throw new Error(`BASE_ENDPOINT must use HTTPS in production: ${baseEndpoint}`);
+        }
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw new Error(`BASE_ENDPOINT is not a valid URL: ${baseEndpoint}`);
+        }
+        throw error;
+      }
+      
+      console.log('[Build] Environment variables validated successfully');
+    }
+    
     return config;
   },
   turbopack: {

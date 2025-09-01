@@ -35,6 +35,8 @@ import { ApiWaveParticipationRequirement } from "../../../../generated/models/Ap
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { WalletValidationError } from "../../../../src/errors/wallet";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -124,7 +126,23 @@ const CreateDropWrapper = forwardRef<
     },
     ref
   ) => {
+    const { isSafeWallet, address, isAuthenticated } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
+    
+    // SECURITY: Fail-fast if wallet is not properly authenticated
+    useEffect(() => {
+      if (!isAuthenticated) {
+        throw new WalletValidationError(
+          'Authentication required for drop creation. Please connect and authenticate your wallet.'
+        );
+      }
+      
+      if (!address) {
+        throw new WalletValidationError(
+          'Authenticated wallet address is missing. Please reconnect your wallet.'
+        );
+      }
+    }, [isAuthenticated, address]);
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
       CreateDropScreenType.DESKTOP
     );
@@ -338,6 +356,8 @@ const CreateDropWrapper = forwardRef<
           referenced_nfts: drop?.referenced_nfts ?? [],
           metadata,
           signature: null,
+          is_safe_signature: isSafeWallet,
+          signer_address: address, // Already validated via useEffect above
         };
         setDrop(currentDrop);
         clearInputState();
@@ -378,6 +398,8 @@ const CreateDropWrapper = forwardRef<
         referenced_nfts: allNfts,
         metadata,
         signature: null,
+        is_safe_signature: isSafeWallet,
+        signer_address: address, // Already validated via useEffect above
       };
       currentDrop.parts.push({
         content: markdown?.length ? markdown : null,
