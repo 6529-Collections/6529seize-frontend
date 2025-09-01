@@ -1,19 +1,24 @@
-import { render, fireEvent, screen } from "@testing-library/react";
-import React from "react";
-import DelegationPage from "@/pages/delegation/[...section]";
-import { DelegationCenterSection } from "@/components/delegation/DelegationCenterMenu";
+import DelegationPage from "@/app/delegation/[...section]/page.client";
 import { AuthContext } from "@/components/auth/Auth";
+import { DelegationCenterSection } from "@/enums";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
-jest.mock("next/dynamic", () => () => (props: any) => (
-  <button
-    data-testid="menu"
-    onClick={() => props.setActiveSection(DelegationCenterSection.CHECKER)}>
-    Menu
-  </button>
-));
+jest.mock(
+  "@/components/delegation/DelegationCenterMenu",
+  () => (props: any) =>
+    (
+      <button
+        data-testid="menu"
+        onClick={() => props.setActiveSection(DelegationCenterSection.CHECKER)}>
+        Menu
+      </button>
+    )
+);
 
 const push = jest.fn();
-jest.mock("next/router", () => ({ useRouter: () => ({ push }) }));
+const replace = jest.fn();
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push, replace }) }));
 
 window.scrollTo = jest.fn();
 
@@ -38,13 +43,17 @@ describe("Delegation page component", () => {
   it("calls router push when active section changes", () => {
     render(
       <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
-        <DelegationPage section={DelegationCenterSection.CENTER} />
+        <DelegationPage
+          section={DelegationCenterSection.CENTER}
+          addressQuery=""
+          collectionQuery=""
+          useCaseQuery={0}
+        />
       </AuthContext.Provider>
     );
     fireEvent.click(screen.getByTestId("menu"));
-    expect(push).toHaveBeenCalledWith({
-      pathname: `/delegation/${DelegationCenterSection.CHECKER}`,
-      query: {},
-    });
+    expect(push).toHaveBeenCalledWith(
+      `/delegation/${DelegationCenterSection.CHECKER}`
+    );
   });
 });
