@@ -26,8 +26,7 @@ export default async function NotificationsPage() {
   ) {
     await prefetchAuthenticatedNotifications({
       queryClient,
-      headers, // ✅ use headers in App Router
-      // context: not needed
+      headers,
     });
   }
 
