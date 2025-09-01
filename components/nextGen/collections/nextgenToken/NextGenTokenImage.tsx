@@ -297,7 +297,7 @@ export function NextGenTokenImage(
         />
       );
     } else {
-      return getImage();
+      return null
     }
   }
 
