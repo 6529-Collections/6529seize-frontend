@@ -9,7 +9,7 @@ import UserSettingsUsername from "../../settings/UserSettingsUsername";
 import UserSettingsSave from "../../settings/UserSettingsSave";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageHeaderEditName({
   profile,
@@ -25,6 +25,8 @@ export default function UserPageHeaderEditName({
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const params = useParams();
 
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
@@ -49,8 +51,8 @@ export default function UserPageHeaderEditName({
         message: "Profile updated.",
         type: "success",
       });
-      const newPath = router.pathname.replace(
-        "[user]",
+      const newPath = pathname.replace(
+        params.user?.toString() ?? "",
         updatedProfile.handle!?.toLowerCase()
       );
       await router.replace(newPath);

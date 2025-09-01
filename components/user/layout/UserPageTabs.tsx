@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/router";
 import { useContext, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import UserPageTab from "./UserPageTab";
 import { AuthContext } from "../../auth/Auth";
 import useCapacitor from "../../../hooks/useCapacitor";
@@ -78,29 +78,26 @@ export const USER_PAGE_TAB_META: Record<
 };
 
 export default function UserPageTabs() {
-  const router = useRouter();
+  const pathname = usePathname() ?? "";
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { showWaves } = useContext(AuthContext);
   const pathnameToTab = (pathname: string): UserPageTabType => {
-    const regex = /\/\[user\]\/([^/?]+)/;
-    const match = pathname.match(regex);
-    const name = Array.isArray(match) ? match.at(1) : "";
+    const segments = pathname.split("/").filter(Boolean);
+    const name = segments[1] ?? "";
     const tab = Object.values(UserPageTabType).find(
       (tab) =>
         USER_PAGE_TAB_META[tab].route.toLowerCase() ===
-        name?.toLocaleLowerCase()
+        name?.toLowerCase()
     );
     return tab ?? UserPageTabType.COLLECTED;
   };
 
-  const [tab, setTab] = useState<UserPageTabType>(
-    pathnameToTab(router.pathname)
-  );
+  const [tab, setTab] = useState<UserPageTabType>(pathnameToTab(pathname));
 
   useEffect(() => {
-    setTab(pathnameToTab(router.pathname));
-  }, [router.query]);
+    setTab(pathnameToTab(pathname));
+  }, [pathname]);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
