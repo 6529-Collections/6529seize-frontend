@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import { AuthContext } from "../../auth/Auth";
@@ -78,7 +78,6 @@ export const USER_PAGE_TAB_META: Record<
 };
 
 export default function UserPageTabs() {
-  const router = useRouter();
   const pathname = usePathname();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
