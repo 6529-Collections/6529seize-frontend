@@ -1,19 +1,21 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import UserPageBrainWrapper from '../../../../components/user/brain/UserPageBrainWrapper';
-import { useRouter, useParams } from 'next/navigation';
 import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
 import { useIdentity } from '../../../../hooks/useIdentity';
 
-jest.mock('next/navigation', () => ({ useRouter: jest.fn(), useParams: jest.fn() }));
+jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 jest.mock('../../../../components/auth/Auth', () => ({ AuthContext: React.createContext({}), }));
 jest.mock('../../../../hooks/useIdentity', () => ({ useIdentity: jest.fn() }));
 jest.mock('../../../../components/user/brain/UserPageDrops', () => (props: any) => <div data-testid="drops" {...props} />);
 
 const routerPush = jest.fn();
-(useRouter as jest.Mock).mockReturnValue({ push: routerPush });
-(useParams as jest.Mock).mockReturnValue({ user: 'alice' });
+const useRouter = require('next/router').useRouter;
+(useRouter as jest.Mock).mockReturnValue({ 
+  push: routerPush,
+  query: { user: 'alice' }
+});
 
 function renderWithContext(ctx: any) {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: ctx.address });
