@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useRef } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { BrainView } from "../BrainMobile";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboard";
@@ -163,7 +163,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <>
             <button
               onClick={() => {
-                router.push("/my-stream", undefined, { shallow: true });
+                router.push("/my-stream");
                 onViewChange(BrainView.DEFAULT);
               }}
               className={backButtonClasses}>

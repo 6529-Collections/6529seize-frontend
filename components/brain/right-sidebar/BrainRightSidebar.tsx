@@ -13,7 +13,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 interface BrainRightSidebarProps {
   readonly isCollapsed: boolean;
   readonly setIsCollapsed: (isCollapsed: boolean) => void;
-  readonly waveId: string;
+  readonly waveId: string | null | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;

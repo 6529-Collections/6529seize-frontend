@@ -16,7 +16,7 @@ jest.mock("../../components/delegation/DelegationFormParts", () => ({
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }) }));
 
-jest.mock("../../pages/delegation/[...section]", () => ({
+jest.mock("../../components/delegation/constants", () => ({
   __esModule: true,
   ALL_USE_CASES: [{ use_case: 1, display: "One" }],
   DelegationCollection: {} as any,

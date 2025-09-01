@@ -8,14 +8,14 @@ import { TabToggle } from "../../common/TabToggle";
 import { useContentTab } from "../ContentTabContext";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import DirectMessagesList from "../direct-messages/DirectMessagesList";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import { useUnreadIndicator } from "../../../hooks/useUnreadIndicator";
 import { useAuth } from "../../auth/Auth";
 import { useWaveData } from "../../../hooks/useWaveData";
 import { useWave } from "../../../hooks/useWave";
 
 interface BrainLeftSidebarProps {
-  readonly activeWaveId: string | null;
+  readonly activeWaveId: string | null | undefined;
 }
 
 const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
@@ -23,11 +23,11 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { connectedProfile } = useAuth();
-  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Get wave data to determine if it's a DM
   const { data: currentWave } = useWaveData({
-    waveId: activeWaveId,
+    waveId: activeWaveId || null,
     onWaveNotFound: () => {},
   });
   const { isDm } = useWave(currentWave);
@@ -62,16 +62,15 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   });
 
   // keep tab in sync with url ?view=
+  const viewParam = searchParams?.get('view');
   useEffect(() => {
-    const viewParam =
-      typeof router.query.view === "string" ? router.query.view : null;
     if (viewParam === "messages") {
       setSidebarTab("messages");
     } else {
       // default to waves when param is 'waves' or absent
       setSidebarTab("waves");
     }
-  }, [router.query.view]);
+  }, [viewParam]);
 
   useEffect(() => {
     localStorage.setItem("sidebarTab", sidebarTab);

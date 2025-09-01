@@ -11,7 +11,7 @@ import Drop, {
   DropLocation,
 } from "../../../waves/drops/Drop";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";

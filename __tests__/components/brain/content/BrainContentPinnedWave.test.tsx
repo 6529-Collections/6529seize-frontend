@@ -12,10 +12,11 @@ jest.mock('next/link', () => ({
 }));
 
 const push = jest.fn();
-let routerQuery: any = {};
+const searchParams = new URLSearchParams('wave=2');
 
-jest.mock('next/router', () => ({
-  useRouter: () => ({ query: routerQuery, push }),
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push }),
+  useSearchParams: () => searchParams,
 }));
 
 const prefetch = jest.fn();
@@ -59,7 +60,7 @@ describe('BrainContentPinnedWave', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    routerQuery = { wave: '2' };
+    searchParams.set('wave', '2');
     (useIsMobileDevice as jest.Mock).mockReturnValue(false);
     useWaveDataMock = jest.fn(() => ({ data: waveData }));
   });
@@ -93,11 +94,11 @@ describe('BrainContentPinnedWave', () => {
 
     await user.click(screen.getByRole('link'));
     expect(onMouseLeave).toHaveBeenCalled();
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=1', undefined, { shallow: true });
+    expect(push).toHaveBeenCalledWith('/my-stream?wave=1');
   });
 
   it('uses /my-stream when viewing active wave and skips prefetch', async () => {
-    routerQuery = { wave: '1' };
+    searchParams.set('wave', '1');
     const user = userEvent.setup();
     const { container } = renderComponent();
 

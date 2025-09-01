@@ -3,7 +3,11 @@ import React from 'react';
 import FeedItemDropReplied from '../../../../../../components/brain/feed/items/drop-replied/FeedItemDropReplied';
 
 const push = jest.fn();
-jest.mock('next/router', () => ({ useRouter: () => ({ push }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push }),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 
 jest.mock('../../../../../../components/waves/drops/Drop', () => ({
   __esModule: true,
