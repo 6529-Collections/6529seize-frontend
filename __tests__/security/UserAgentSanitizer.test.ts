@@ -794,7 +794,6 @@ describe("UserAgentSanitizer Security Tests", () => {
       for (const testCase of normalXSSCases) {
         const startTime = performance.now();
 
-        // FIXED: XSS detection now works consistently for all cases
         expect(() => sanitizeUserAgent(testCase)).toThrow(
           "XSS attempt detected"
         );
