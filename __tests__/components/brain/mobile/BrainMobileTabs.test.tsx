@@ -18,7 +18,13 @@ enum BrainView {
 
 const push = jest.fn();
 
-jest.mock("next/router", () => ({ useRouter: () => ({ push }) }));
+jest.mock("next/navigation", () => ({ 
+  useRouter: () => ({ push }), 
+  useSearchParams: () => ({
+    get: jest.fn().mockReturnValue(null)
+  }),
+  usePathname: () => "/brain"
+}));
 
 jest.mock("react-use", () => ({
   createBreakpoint: () => () => "S",
@@ -93,9 +99,7 @@ describe("BrainMobileTabs", () => {
     const button = screen.getByRole("button", { name: /my stream/i });
     expect(button).toBeInTheDocument();
     await userEvent.click(button);
-    expect(push).toHaveBeenCalledWith("/my-stream", undefined, {
-      shallow: true,
-    });
+    expect(push).toHaveBeenCalledWith("/my-stream");
     expect(onViewChange).toHaveBeenCalledWith(BrainView.DEFAULT);
   });
 

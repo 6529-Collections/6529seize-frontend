@@ -59,7 +59,7 @@ describe("BackButton", () => {
   it("removes drop param and replaces route", async () => {
     const { replace } = setup({ drop: "123" });
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(replace).toHaveBeenCalledWith("/test");
+    expect(replace).toHaveBeenCalledWith("/test", { scroll: false });
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
   });
 

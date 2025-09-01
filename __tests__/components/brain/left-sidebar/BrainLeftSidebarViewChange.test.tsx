@@ -64,6 +64,6 @@ describe('BrainLeftSidebarViewChange', () => {
     const user = userEvent.setup();
     const { push } = renderSidebar('/my-stream');
     await user.click(screen.getByRole('link', { name: /notifications/i }));
-    expect(push).toHaveBeenCalledWith('/my-stream/notifications');
+    expect(push).toHaveBeenCalledWith('/my-stream/notifications', { scroll: false });
   });
 });

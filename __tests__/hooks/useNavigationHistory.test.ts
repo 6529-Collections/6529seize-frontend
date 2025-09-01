@@ -496,7 +496,7 @@ describe('useNavigationHistory', () => {
       domainLocales: undefined,
     });
 
-    mockUseNavRouter.mockReturnValue({
+    mockUseRouter.mockReturnValue({
       back: jest.fn(),
       forward: jest.fn(),
       refresh: jest.fn(),

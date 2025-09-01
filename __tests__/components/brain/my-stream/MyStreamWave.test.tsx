@@ -123,7 +123,7 @@ describe('MyStreamWave', () => {
     render(<MyStreamWave waveId="1" />);
     expect(screen.getByTestId('tabs')).toHaveTextContent('1');
     fireEvent.click(screen.getByTestId('leaderboard'));
-    expect(mockRouterPush).toHaveBeenCalledWith('/path?wave=1&drop=d1');
+    expect(mockRouterPush).toHaveBeenCalledWith('/path?wave=1&drop=d1', { scroll: false });
   });
 
   it('hides tabs when breakpoint is small', () => {
