@@ -13,6 +13,7 @@ import { getPageMetadata } from "@/components/providers/metadata";
 import { wrapper } from "@/store/store";
 import { Provider } from "react-redux";
 import BaseLayout from "@/components/layout/BaseLayout";
+import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement<any>) => ReactNode;
@@ -36,14 +37,16 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   });
 
   return (
-    <Provider store={store}>
-      <BaseLayout metadata={metadata}>
-        <Providers>
-          <MainLayout>
-            {getLayout(<Component {...rest.pageProps} {...props.pageProps} />)}
-          </MainLayout>
-        </Providers>
-      </BaseLayout>
-    </Provider>
+    <AwsRumProvider>
+      <Provider store={store}>
+        <BaseLayout metadata={metadata}>
+          <Providers>
+            <MainLayout>
+              {getLayout(<Component {...rest.pageProps} {...props.pageProps} />)}
+            </MainLayout>
+          </Providers>
+        </BaseLayout>
+      </Provider>
+    </AwsRumProvider>
   );
 }
