@@ -1,12 +1,17 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentityWrapper";
+import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
 import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
+import { ApiProfileRepRatesState } from "@/entities/IProfile";
 import { RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
 import { getInitialRatersParams } from "@/helpers/server.helpers";
 
-const MATTER_TYPE = RateMatter.NIC;
+export interface UserPageRepPropsRepRates {
+  readonly ratings: ApiProfileRepRatesState;
+  readonly rater: string | null;
+}
 
 function getInitialActivityLogParams(
   handleOrWallet: string
@@ -14,30 +19,30 @@ function getInitialActivityLogParams(
   return {
     page: 1,
     pageSize: 10,
-    logTypes: [],
-    matter: null,
+    logTypes: getProfileLogTypes({ logTypes: [] }),
+    matter: RateMatter.REP,
     targetType: FilterTargetType.ALL,
     handleOrWallet,
     groupId: null,
   };
 }
 
-function IdentityTab({ profile }: { profile: ApiIdentity }) {
+function RepTab({ profile }: { profile: ApiIdentity }) {
   const handleOrWallet = (
     profile.handle ??
     profile.wallets?.[0]?.wallet ??
     ""
   ).toLowerCase();
 
-  const initialCICGivenParams = getInitialRatersParams({
+  const initialRepGivenParams = getInitialRatersParams({
     handleOrWallet,
-    matter: MATTER_TYPE,
+    matter: RateMatter.REP,
     given: false,
   });
 
-  const initialCICReceivedParams = getInitialRatersParams({
+  const initialRepReceivedParams = getInitialRatersParams({
     handleOrWallet,
-    matter: MATTER_TYPE,
+    matter: RateMatter.REP,
     given: true,
   });
 
@@ -45,10 +50,10 @@ function IdentityTab({ profile }: { profile: ApiIdentity }) {
 
   return (
     <div className="tailwind-scope">
-      <UserPageIdentityWrapper
+      <UserPageRepWrapper
         profile={profile}
-        initialCICReceivedParams={initialCICReceivedParams}
-        initialCICGivenParams={initialCICGivenParams}
+        initialRepReceivedParams={initialRepReceivedParams}
+        initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}
       />
     </div>
@@ -56,9 +61,9 @@ function IdentityTab({ profile }: { profile: ApiIdentity }) {
 }
 
 const { Page, generateMetadata } = createUserTabPage({
-  subroute: "identity",
-  metaLabel: "Identity",
-  Tab: IdentityTab,
+  subroute: "rep",
+  metaLabel: "Rep",
+  Tab: RepTab,
 });
 
 export default Page;

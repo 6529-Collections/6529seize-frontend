@@ -2,8 +2,10 @@
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
-import { RateMatter, RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+
 import { SortDirection } from "@/entities/ISort";
+import { RateMatter } from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -12,6 +14,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ProfileRatersTable from "../ProfileRatersTable";
 import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
+
 export enum ProfileRatersTableType {
   CIC_RECEIVED = "CIC_RECEIVED",
   CIC_GIVEN = "CIC_GIVEN",
@@ -40,7 +43,7 @@ export default function ProfileRatersTableWrapper({
   readonly initialParams: ProfileRatersParams;
 }) {
   const params = useParams();
-  const handleOrWallet = (params?.user as string).toLowerCase();
+  const handleOrWallet = (params?.user as string)?.toLowerCase();
   const pageSize = initialParams.pageSize;
   const given = initialParams.given;
   const matter = initialParams.matter;

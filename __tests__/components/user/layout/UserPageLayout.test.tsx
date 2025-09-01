@@ -1,60 +1,79 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
-import UserPageLayout from '../../../../components/user/layout/UserPageLayout';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
-import { ApiIdentity } from '../../../../generated/models/ApiIdentity';
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import { TitleProvider } from "@/contexts/TitleContext";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 
-jest.mock('next/navigation', () => ({ useParams: jest.fn() }));
-jest.mock('../../../../hooks/useIdentity', () => ({ useIdentity: jest.fn() }));
-jest.mock('../../../../components/user/user-page-header/UserPageHeader', () =>
-  function MockHeader() {
-    return <div data-testid="user-page-header" />;
-  }
+jest.mock("next/navigation", () => ({
+  useSearchParams: jest.fn(),
+  useParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
+jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
+jest.mock(
+  "@/components/user/user-page-header/UserPageHeader",
+  () =>
+    function MockHeader() {
+      return <div data-testid="user-page-header" />;
+    }
 );
-jest.mock('../../../../components/user/layout/UserPageTabs', () =>
-  function MockTabs() {
-    return <div data-testid="user-page-tabs" />;
-  }
+jest.mock(
+  "@/components/user/layout/UserPageTabs",
+  () =>
+    function MockTabs() {
+      return <div data-testid="user-page-tabs" />;
+    }
 );
 
-const mockProfile: ApiIdentity = { handle: 'testuser', primary_wallet: '0x1' } as any;
+const mockProfile: ApiIdentity = {
+  handle: "testuser",
+  primary_wallet: "0x1",
+} as any;
 const mockAuthContext = {} as any;
 const mockReactQueryContext = { setProfile: jest.fn() } as any;
-const mockUseIdentity = require('../../../../hooks/useIdentity').useIdentity as jest.Mock;
+const mockUseIdentity = require("@/hooks/useIdentity").useIdentity as jest.Mock;
 const mockUseParams = useParams as jest.Mock;
+const mockUsePathname = usePathname as jest.Mock;
+const mockUseSearchParams = useSearchParams as jest.Mock;
 
-describe('UserPageLayout', () => {
+describe("UserPageLayout", () => {
   beforeEach(() => {
-    mockUseParams.mockReturnValue({ user: 'testuser' });
+    mockUseParams.mockReturnValue({ user: "testuser" });
+    mockUsePathname.mockReturnValue("/testuser");
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
     mockUseIdentity.mockReturnValue({ profile: mockProfile });
   });
 
   const renderComponent = () => {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     return render(
-      <QueryClientProvider client={queryClient}>
-        <AuthContext.Provider value={mockAuthContext}>
-          <ReactQueryWrapperContext.Provider value={mockReactQueryContext}>
-            <UserPageLayout profile={mockProfile}>
-              <div>Content</div>
-            </UserPageLayout>
-          </ReactQueryWrapperContext.Provider>
-        </AuthContext.Provider>
-      </QueryClientProvider>
+      <TitleProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthContext.Provider value={mockAuthContext}>
+            <ReactQueryWrapperContext.Provider value={mockReactQueryContext}>
+              <UserPageLayout profile={mockProfile}>
+                <div>Content</div>
+              </UserPageLayout>
+            </ReactQueryWrapperContext.Provider>
+          </AuthContext.Provider>
+        </QueryClientProvider>
+      </TitleProvider>
     );
   };
 
-  it('renders header, tabs and children', () => {
+  it("renders header, tabs and children", () => {
     renderComponent();
-    expect(screen.getByTestId('user-page-header')).toBeInTheDocument();
-    expect(screen.getByTestId('user-page-tabs')).toBeInTheDocument();
-    expect(screen.getByText('Content')).toBeInTheDocument();
+    expect(screen.getByTestId("user-page-header")).toBeInTheDocument();
+    expect(screen.getByTestId("user-page-tabs")).toBeInTheDocument();
+    expect(screen.getByText("Content")).toBeInTheDocument();
   });
 
-  it('sets profile in context when not cached', () => {
+  it("sets profile in context when not cached", () => {
     renderComponent();
     expect(mockReactQueryContext.setProfile).toHaveBeenCalledWith(mockProfile);
   });

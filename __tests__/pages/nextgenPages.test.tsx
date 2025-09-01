@@ -1,9 +1,9 @@
+import NextGenTokenPageClient from "@/app/nextgen/token/[token]/[[...view]]/NextGenTokenPageClient";
+import { AuthContext } from "@/components/auth/Auth";
+import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { NextgenCollectionView } from "@/enums";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import NextGenTokenPageClient from "@/app/nextgen/token/[token]/[[...view]]/NextGenTokenPageClient";
-import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
-import { AuthContext } from "@/components/auth/Auth";
-import { NextgenCollectionView } from "@/enums";
 
 // Mock Next.js App Router navigation
 jest.mock("next/navigation", () => ({
@@ -17,22 +17,24 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock the main NextGen components
-jest.mock("@/components/nextGen/collections/collectionParts/NextGenCollection", () => ({
-  __esModule: true,
-  default: ({ collection }: any) => {
-    const { setTitle } = require("@/contexts/TitleContext").useTitle();
-    const { NextgenCollectionView } = require("@/enums");
-    React.useEffect(() => {
-      setTitle(`${collection.name} | NextGen`);
-    }, [collection.name, setTitle]);
-    return <div data-testid="collection-component" />;
-  },
-  ContentView: {
-    OVERVIEW: "OVERVIEW",
-    ABOUT: "ABOUT",
-    ART: "ART",
-  },
-}));
+jest.mock(
+  "@/components/nextGen/collections/collectionParts/NextGenCollection",
+  () => ({
+    __esModule: true,
+    default: ({ collection }: any) => {
+      const { setTitle } = require("@/contexts/TitleContext").useTitle();
+      React.useEffect(() => {
+        setTitle(`${collection.name} | NextGen`);
+      }, [collection.name, setTitle]);
+      return <div data-testid="collection-component" />;
+    },
+    ContentView: {
+      OVERVIEW: "OVERVIEW",
+      ABOUT: "ABOUT",
+      ART: "ART",
+    },
+  })
+);
 
 jest.mock("@/components/nextGen/collections/nextgenToken/NextGenToken", () => ({
   __esModule: true,
@@ -62,13 +64,10 @@ jest.mock(
   })
 );
 
-jest.mock(
-  "@/components/nextGen/collections/NextGenNavigationHeader",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="navigation-header" />,
-  })
-);
+jest.mock("@/components/nextGen/collections/NextGenNavigationHeader", () => ({
+  __esModule: true,
+  default: () => <div data-testid="navigation-header" />,
+}));
 
 // Mock TitleContext
 const mockSetTitle = jest.fn();
@@ -237,7 +236,6 @@ describe("NextGen Client Components", () => {
   });
 
   describe("NextGenTokenPageClient", () => {
-
     it("renders with token - shows token component and navigation", () => {
       renderWithAuth(<NextGenTokenPageClient {...mockTokenPageClientProps} />);
       expect(screen.getByTestId("navigation-header")).toBeInTheDocument();
@@ -254,12 +252,13 @@ describe("NextGen Client Components", () => {
       expect(screen.getByTestId("navigation-header")).toBeInTheDocument();
       expect(screen.getByTestId("token-onchain-component")).toBeInTheDocument();
     });
-
   });
 
   describe("NextGenCollectionComponent", () => {
     it("renders collection component and sets title", async () => {
-      renderWithAuth(<NextGenCollectionComponent {...mockCollectionComponentProps} />);
+      renderWithAuth(
+        <NextGenCollectionComponent {...mockCollectionComponentProps} />
+      );
       expect(screen.getByTestId("collection-component")).toBeInTheDocument();
       await waitFor(() => {
         expect(mockSetTitle).toHaveBeenCalled();
@@ -268,7 +267,9 @@ describe("NextGen Client Components", () => {
 
     it("sets correct title when token exists", () => {
       renderWithAuth(<NextGenTokenPageClient {...mockTokenPageClientProps} />);
-      expect(mockSetTitle).toHaveBeenCalledWith(expect.stringContaining("Test Token"));
+      expect(mockSetTitle).toHaveBeenCalledWith(
+        expect.stringContaining("Test Token")
+      );
     });
 
     it("sets collection and token ID title when token is null", () => {
@@ -277,14 +278,22 @@ describe("NextGen Client Components", () => {
         token: null,
       };
       renderWithAuth(<NextGenTokenPageClient {...propsWithoutToken} />);
-      expect(mockSetTitle).toHaveBeenCalledWith(expect.stringContaining("Test Collection - #123"));
+      expect(mockSetTitle).toHaveBeenCalledWith(
+        expect.stringContaining("Test Collection - #123")
+      );
     });
 
     it("sets correct collection title with NextGen suffix", async () => {
-      renderWithAuth(<NextGenCollectionComponent {...mockCollectionComponentProps} />);
+      renderWithAuth(
+        <NextGenCollectionComponent {...mockCollectionComponentProps} />
+      );
       await waitFor(() => {
-        expect(mockSetTitle).toHaveBeenCalledWith(expect.stringContaining("Test Collection"));
-        expect(mockSetTitle).toHaveBeenCalledWith(expect.stringContaining("NextGen"));
+        expect(mockSetTitle).toHaveBeenCalledWith(
+          expect.stringContaining("Test Collection")
+        );
+        expect(mockSetTitle).toHaveBeenCalledWith(
+          expect.stringContaining("NextGen")
+        );
       });
     });
 
@@ -293,9 +302,13 @@ describe("NextGen Client Components", () => {
         ...mockCollectionComponentProps,
         initialView: NextgenCollectionView.RARITY,
       };
-      renderWithAuth(<NextGenCollectionComponent {...propsWithDifferentView} />);
+      renderWithAuth(
+        <NextGenCollectionComponent {...propsWithDifferentView} />
+      );
       await waitFor(() => {
-        expect(mockSetTitle).toHaveBeenCalledWith(expect.stringContaining("Test Collection"));
+        expect(mockSetTitle).toHaveBeenCalledWith(
+          expect.stringContaining("Test Collection")
+        );
       });
     });
   });

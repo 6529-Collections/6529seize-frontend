@@ -1,11 +1,12 @@
 "use client";
 
-import { ApiProfileRepRatesState, RateMatter } from "@//entities/IProfile";
-import { ApiIdentity } from "@//generated/models/ApiIdentity";
-import { commonApiFetch } from "@//services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
 import { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import { RateMatter } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
@@ -31,7 +32,7 @@ export default function UserPageRep({
   const { connectedProfile } = useContext(AuthContext);
 
   const params = useParams();
-  const user = (params?.user as string).toLowerCase();
+  const user = (params?.user as string)?.toLowerCase();
 
   const [rater, setRater] = useState<string | undefined>(undefined);
   useEffect(

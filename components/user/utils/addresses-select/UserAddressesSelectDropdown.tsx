@@ -5,7 +5,7 @@ import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { ApiWallet } from "@/generated/models/ApiWallet";
 import { formatAddress } from "@/helpers/Helpers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { RefObject, useEffect, useState } from "react";
+import { RefObject, useEffect, useMemo, useState } from "react";
 import UserAddressesSelectDropdownItem from "./UserAddressesSelectDropdownItem";
 
 type SelectedType = string | null;
@@ -23,27 +23,22 @@ export default function UserAddressesSelectDropdown({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const items: CommonSelectItem<SelectedType, ApiWallet | null>[] = [
-    {
-      label: "All Addresses",
-      value: null,
-      key: "all",
-      childrenProps: null,
-    },
-    ...wallets.map((wallet) => ({
-      label: wallet.display ?? formatAddress(wallet.wallet),
-      value: wallet.wallet.toLowerCase(),
-      key: wallet.wallet.toLowerCase(),
-      childrenProps: wallet,
-    })),
-  ];
+  const items: CommonSelectItem<SelectedType, ApiWallet | null>[] = useMemo(
+    () => [
+      { label: "All Addresses", value: null, key: "all", childrenProps: null },
+      ...wallets.map((wallet) => ({
+        label: wallet.display ?? formatAddress(wallet.wallet),
+        value: wallet.wallet.toLowerCase(),
+        key: wallet.wallet.toLowerCase(),
+        childrenProps: wallet,
+      })),
+    ],
+    [wallets]
+  );
 
   const getAddressFromQuery = (): string | null => {
     const addressParam = searchParams?.get("address");
-    if (!addressParam) {
-      return null;
-    }
-    return addressParam.toLowerCase();
+    return addressParam ? addressParam.toLowerCase() : null;
   };
 
   const [activeAddress, setActiveAddress] = useState<string | null>(
@@ -51,15 +46,20 @@ export default function UserAddressesSelectDropdown({
   );
 
   useEffect(() => {
-    setActiveAddress(searchParams?.get("address") ?? null);
+    const next = searchParams?.get("address");
+    setActiveAddress(next ? next.toLowerCase() : null);
   }, [searchParams]);
 
   useEffect(() => {
     onActiveAddress(activeAddress);
-  }, [activeAddress]);
+  }, [activeAddress, onActiveAddress]);
 
   const onAddressChange = (address: string | null) => {
-    const params = new URLSearchParams(searchParams?.toString());
+    // Robust clone of current params (works in tests/mocks)
+    const params = new URLSearchParams(
+      searchParams?.entries ? Array.from(searchParams.entries()) : []
+    );
+
     if (!address || address === activeAddress) {
       setActiveAddress(null);
       params.delete("address");
@@ -68,22 +68,19 @@ export default function UserAddressesSelectDropdown({
       router.push(newUrl, { scroll: false });
       return;
     }
-    setActiveAddress(address);
-    params.set("address", address);
+
+    const lower = address.toLowerCase();
+    setActiveAddress(lower);
+    params.set("address", lower);
     const newUrl =
       pathname + (params.toString() ? `?${params.toString()}` : "");
     router.push(newUrl, { scroll: false });
   };
 
-  const getActiveItem = (): SelectedType => {
-    return items.find((item) => item.value === activeAddress)?.value ?? null;
-  };
-
-  const [activeItem, setActiveItem] = useState<SelectedType>(getActiveItem());
-
-  useEffect(() => {
-    setActiveItem(getActiveItem());
-  }, [activeAddress]);
+  const activeItem: SelectedType = useMemo(
+    () => items.find((item) => item.value === activeAddress)?.value ?? null,
+    [items, activeAddress]
+  );
 
   return (
     <CommonDropdown
@@ -96,7 +93,7 @@ export default function UserAddressesSelectDropdown({
         item.childrenProps ? (
           <UserAddressesSelectDropdownItem wallet={item.childrenProps} />
         ) : (
-          <></> // return an empty fragment when item.childrenProps is not available
+          <></>
         )
       }
     />

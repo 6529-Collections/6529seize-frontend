@@ -20,7 +20,7 @@ export default function UserPageIdentityWrapper({
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   const params = useParams();
-  const user = (params?.user as string).toLowerCase();
+  const user = (params?.user as string)?.toLowerCase();
 
   const { profile } = useIdentity({
     handleOrWallet: user,

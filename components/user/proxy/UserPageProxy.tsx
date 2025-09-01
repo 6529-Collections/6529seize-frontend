@@ -30,7 +30,7 @@ export default function UserPageProxy({
   readonly profile: ApiIdentity;
 }) {
   const params = useParams();
-  const user = (params?.user as string).toLowerCase();
+  const user = (params?.user as string)?.toLowerCase();
   const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 

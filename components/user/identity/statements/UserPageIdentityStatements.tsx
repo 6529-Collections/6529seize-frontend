@@ -21,7 +21,7 @@ export default function UserPageIdentityStatements({
   readonly profile: ApiIdentity;
 }) {
   const params = useParams();
-  const user = (params?.user as string).toLowerCase();
+  const user = (params?.user as string)?.toLowerCase();
   const [socialMediaAccounts, setSocialMediaAccounts] = useState<
     CicStatement[]
   >([]);

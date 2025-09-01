@@ -12,7 +12,7 @@ export default function UserPageGroupsWrapper({
   readonly profile: ApiIdentity;
 }) {
   const params = useParams();
-  const user = (params?.user as string).toLowerCase();
+  const user = (params?.user as string)?.toLowerCase();
 
   const { profile } = useIdentity({
     handleOrWallet: user,
