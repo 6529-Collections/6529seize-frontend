@@ -3,7 +3,11 @@ import React from 'react';
 import FeedItemWaveCreated from '../../../../../../components/brain/feed/items/wave-created/FeedItemWaveCreated';
 
 const push = jest.fn();
-jest.mock('next/router', () => ({ useRouter: () => ({ push }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push }),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 
 jest.mock('../../../../../../components/waves/drops/Drop', () => ({
   __esModule: true,
@@ -39,8 +43,8 @@ describe('FeedItemWaveCreated', () => {
     );
     expect(screen.getByText(/user/)).toBeInTheDocument();
     fireEvent.click(screen.getByText('reply'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=42/');
+    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=42/', { scroll: false });
     fireEvent.click(screen.getByText('quote'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=7/');
+    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=7/', { scroll: false });
   });
 });

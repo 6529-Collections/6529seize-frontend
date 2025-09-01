@@ -1,4 +1,4 @@
-@use 'sass:color';
+@use "sass:color";
 @use "../../../styles/variables.scss" as variables;
 
 .formInput {
@@ -19,18 +19,23 @@
   padding: 10px 15px;
 
   &:hover {
-    background-color: color.adjust($color: variables.$project-blue, $lightness: 5%);
+    background-color: color.adjust(
+      $color: variables.$project-blue,
+      $lightness: 5%
+    );
   }
 
   &:active,
   &:disabled {
-    background-color: color.scale(variables.$project-blue, $lightness: -5%) !important;
+    background-color: color.scale(
+      variables.$project-blue,
+      $lightness: -5%
+    ) !important;
   }
 }
 
 .clearBtn {
   background-color: transparent;
-  border: 1px solid white !important;
   border-radius: 0;
   color: white;
   padding: 10px 15px;

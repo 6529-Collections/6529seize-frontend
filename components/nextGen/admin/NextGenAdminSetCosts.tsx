@@ -1,27 +1,27 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { ANY_COLLECTION } from "@/components/delegation/delegation-constants";
 import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { FunctionSelectors } from "../nextgen_contracts";
+import { MintingDetails } from "../nextgen_entities";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
+  useCollectionAdmin,
   useCollectionCosts,
+  useCollectionIndex,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useMinterContractWrite,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { ANY_COLLECTION } from "../../../pages/delegation/[...section]";
-import { MintingDetails } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
-  NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 interface Props {
   close: () => void;

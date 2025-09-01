@@ -10,7 +10,6 @@ import { jwtDecode } from "jwt-decode";
 import { getUserProfile } from "./server.helpers";
 import { TypedFeedItem, TypedNotificationsResponse } from "../types/feed.types";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
-import { GetServerSidePropsContext } from "next";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 const getWalletFromJwt = (headers: Record<string, string>): string | null => {
@@ -322,11 +321,9 @@ const prefetchAuthenticatedNotificationsItems = async ({
 export const prefetchAuthenticatedNotifications = async ({
   queryClient,
   headers,
-  context,
 }: {
   queryClient: QueryClient;
   headers: Record<string, string>;
-  context: GetServerSidePropsContext;
 }) => {
   const handle = await getHandleFromJwt(headers);
 

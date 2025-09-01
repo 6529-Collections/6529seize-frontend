@@ -2,7 +2,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 jest.mock('../../../components/header/user/HeaderUser', () => ({ __esModule: true, default: () => <div data-testid="user" /> }));
 jest.mock('../../../components/header/notifications/HeaderNotifications', () => ({ __esModule: true, default: () => <div data-testid="notify" /> }));
 jest.mock('../../../components/header/share/HeaderShare', () => ({ __esModule: true, default: () => <div data-testid="share" /> }));
@@ -28,7 +32,7 @@ jest.mock('../../../components/cookies/CookieConsentContext', () => ({
   }))
 }));
 
-const { useRouter } = require('next/router');
+const { useRouter } = require('next/navigation');
 const { useSeizeConnectContext } = require('../../../components/auth/SeizeConnectContext');
 const useCapacitor = require('../../../hooks/useCapacitor').default as jest.Mock;
 const { useAppWallets } = require('../../../components/app-wallets/AppWalletsContext');

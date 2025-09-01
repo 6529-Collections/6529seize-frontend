@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import { useRouter as useNavRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface NavigationHistory {
   canGoBack: boolean;
@@ -21,8 +20,8 @@ const dlog = (...args: unknown[]): void => {
 };
 
 export const useNavigationHistory = (): NavigationHistory => {
+  const pathname = usePathname();
   const router = useRouter();
-  const navRouter = useNavRouter();
 
   const [canGoBack, setCanGoBack] = useState<boolean>(false);
   const [canGoForward, setCanGoForward] = useState<boolean>(false);
@@ -57,7 +56,7 @@ export const useNavigationHistory = (): NavigationHistory => {
 
   useEffect(() => {
     dlog("pathname effect", {
-      pathname: router.pathname,
+      pathname,
       backIndex,
       forwardIndex,
       isGoingBack,
@@ -81,7 +80,7 @@ export const useNavigationHistory = (): NavigationHistory => {
       setForwardIndex(0);
       setBackIndex(backIndex + 1);
     }
-  }, [router.pathname]);
+  }, [pathname]);
 
   useEffect(() => {
     setCanGoBack(backIndex > 0);
@@ -116,7 +115,7 @@ export const useNavigationHistory = (): NavigationHistory => {
       if (typeof window !== "undefined") {
         sessionStorage.setItem("isGoingBack", "true");
       }
-      navRouter.back();
+      router.back();
     } else {
       console.log("Cannot go back", backIndex);
     }
@@ -129,7 +128,7 @@ export const useNavigationHistory = (): NavigationHistory => {
       if (typeof window !== "undefined") {
         sessionStorage.setItem("isGoingForward", "true");
       }
-      navRouter.forward();
+      router.forward();
     } else {
       console.log("Cannot go forward", forwardIndex);
     }
@@ -137,7 +136,7 @@ export const useNavigationHistory = (): NavigationHistory => {
 
   const refresh = () => {
     setIsLoading(true);
-    navRouter.refresh();
+    router.refresh();
   };
 
   return {

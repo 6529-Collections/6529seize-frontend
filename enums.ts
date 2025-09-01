@@ -113,8 +113,34 @@ export enum LeaderboardFocus {
   INTERACTIONS = "Interactions",
 }
 
-export enum NextGenView {
+export enum NextgenView {
   COLLECTIONS = "Collections",
   ARTISTS = "Artists",
   ABOUT = "About",
+}
+
+export enum NextgenCollectionView {
+  ABOUT = "About",
+  PROVENANCE = "Provenance",
+  DISPLAY_CENTER = "Display Center",
+  RARITY = "Rarity",
+  OVERVIEW = "Overview",
+  TOP_TRAIT_SETS = "Trait Sets",
+}
+
+export enum DelegationCenterSection {
+  CENTER = "delegation-center",
+  REGISTER_DELEGATION = "register-delegation",
+  REGISTER_SUB_DELEGATION = "register-sub-delegation",
+  REGISTER_CONSOLIDATION = "register-consolidation",
+  ASSIGN_PRIMARY_ADDRESS = "assign-primary-address",
+  ANY_COLLECTION = "any-collection",
+  MEMES_COLLECTION = "the-memes",
+  MEME_LAB_COLLECTION = "meme-lab",
+  GRADIENTS_COLLECTION = "6529-gradient",
+  WALLET_ARCHITECTURE = "wallet-architecture",
+  FAQ = "delegation-faq",
+  CONSOLIDATION_USE_CASES = "consolidation-use-cases",
+  CHECKER = "wallet-checker",
+  HTML = "html",
 }

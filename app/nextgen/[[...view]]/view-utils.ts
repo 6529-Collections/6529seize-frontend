@@ -1,9 +1,9 @@
-import { NextGenView } from "@/enums";
+import { NextgenView } from "@/enums";
 
-export function getNextGenView(view: string): NextGenView | undefined {
+export function getNextGenView(view: string): NextgenView | undefined {
   const normalizedView = view.toLowerCase();
-  const entry = Object.entries(NextGenView).find(
+  const entry = Object.entries(NextgenView).find(
     ([, value]) => value.toLowerCase() === normalizedView
   );
-  return entry ? NextGenView[entry[0] as keyof typeof NextGenView] : undefined;
+  return entry ? NextgenView[entry[0] as keyof typeof NextgenView] : undefined;
 }

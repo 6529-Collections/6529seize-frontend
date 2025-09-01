@@ -7,7 +7,7 @@ import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "../../../waves/drops/Drop";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 export default function NotificationDropQuoted({

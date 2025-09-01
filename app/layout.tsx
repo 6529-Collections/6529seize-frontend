@@ -11,6 +11,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import StoreSetup from "@/components/providers/StoreSetup";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
+import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import { Viewport } from "next";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./error-page";
@@ -37,14 +38,16 @@ export default function RootLayout({
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
       </Head>
       <body>
-        <StoreSetup>
-          <Providers>
-            <DynamicHeadTitle />
-            <ErrorBoundary fallback={<ErrorPage />}>
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </ErrorBoundary>
-          </Providers>
-        </StoreSetup>
+        <AwsRumProvider>
+          <StoreSetup>
+            <Providers>
+              <DynamicHeadTitle />
+              <ErrorBoundary fallback={<ErrorPage />}>
+                <LayoutWrapper>{children}</LayoutWrapper>
+              </ErrorBoundary>
+            </Providers>
+          </StoreSetup>
+        </AwsRumProvider>
       </body>
     </html>
   );

@@ -2,14 +2,14 @@
 
 import { DELEGATION_ABI } from "@/abis";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import {
+  ALL_USE_CASE,
+  MINTING_USE_CASE,
+} from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
 import { NextGenCollection } from "@/entities/INextgen";
 import { fromGWEI } from "@/helpers/Helpers";
-import {
-  ALL_USE_CASE,
-  MINTING_USE_CASE,
-} from "@/pages/delegation/[...section]";
 import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
 import Link from "next/link";
