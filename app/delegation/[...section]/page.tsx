@@ -70,7 +70,6 @@ export async function generateMetadata({
     return getAppMetadata({
       title,
       description: "NFT Delegation",
-      twitterCard: "summary_large_image",
     });
   }
 
