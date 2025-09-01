@@ -2,7 +2,7 @@ import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import UserPageWaves from "@/components/user/waves/UserPageWaves";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-function WavesTab({ profile }: { profile: ApiIdentity }) {
+function WavesTab({ profile }: { profile: Readonly<ApiIdentity> }) {
   return <UserPageWaves profile={profile} />;
 }
 

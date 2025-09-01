@@ -3,6 +3,7 @@
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
+import { useSetTitle } from "@/contexts/TitleContext";
 import { ProfileActivityLog } from "@/entities/IProfile";
 import { INITIAL_ACTIVITY_LOGS_PARAMS } from "@/helpers/profile-logs.helpers";
 import { CountlessPage } from "@/helpers/Types";
@@ -13,7 +14,7 @@ export default function CommunityActivityPageClient({
 }: {
   logsPage: CountlessPage<ProfileActivityLog>;
 }) {
-  // useSetTitle("Activity | Network");
+  useSetTitle("Activity | Network");
 
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
   initCommunityActivityPage({

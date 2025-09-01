@@ -2,7 +2,7 @@ import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import UserPageStats from "@/components/user/stats/UserPageStats";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-function StatsTab({ profile }: { profile: ApiIdentity }) {
+function StatsTab({ profile }: { profile: Readonly<ApiIdentity> }) {
   return <UserPageStats profile={profile} />;
 }
 

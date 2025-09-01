@@ -2,7 +2,7 @@ import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import UserPageSubscriptions from "@/components/user/subscriptions/UserPageSubscriptions";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-function SubscriptionsTab({ profile }: { profile: ApiIdentity }) {
+function SubscriptionsTab({ profile }: { profile: Readonly<ApiIdentity> }) {
   return <UserPageSubscriptions profile={profile} />;
 }
 
