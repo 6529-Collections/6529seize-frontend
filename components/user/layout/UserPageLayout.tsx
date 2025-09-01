@@ -1,18 +1,18 @@
 "use client";
 
-import { ReactNode, useContext } from "react";
-import { containsEmojis, formatAddress } from "../../../helpers/Helpers";
-import UserPageHeader from "../user-page-header/UserPageHeader";
-import { useParams } from "next/navigation";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import UserPageTabs from "./UserPageTabs";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../react-query-wrapper/ReactQueryWrapper";
-import { useSetTitle } from "../../../contexts/TitleContext";
-import { useIdentity } from "../../../hooks/useIdentity";
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { containsEmojis, formatAddress } from "@/helpers/Helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useQueryClient } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { ReactNode, useContext } from "react";
+import UserPageHeader from "../user-page-header/UserPageHeader";
+import UserPageTabs from "./UserPageTabs";
 
 export default function UserPageLayout({
   profile: initialProfile,

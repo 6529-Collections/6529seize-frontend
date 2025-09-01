@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
-import {
-  RateMatter,
-  RatingWithProfileInfoAndLevel,
-} from "../../../../../entities/IProfile";
-import { useRouter } from "next/router";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
+import { RateMatter, RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Page } from "../../../../../helpers/Types";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import { SortDirection } from "../../../../../entities/ISort";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import ProfileRatersTable from "../ProfileRatersTable";
-import CommonSkeletonLoader from "../../../../utils/animation/CommonSkeletonLoader";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
 export enum ProfileRatersTableType {
   CIC_RECEIVED = "CIC_RECEIVED",
   CIC_GIVEN = "CIC_GIVEN",
@@ -42,8 +39,8 @@ export default function ProfileRatersTableWrapper({
 }: {
   readonly initialParams: ProfileRatersParams;
 }) {
-  const router = useRouter();
-  const handleOrWallet = (router.query.user as string).toLowerCase();
+  const params = useParams();
+  const handleOrWallet = (params?.user as string).toLowerCase();
   const pageSize = initialParams.pageSize;
   const given = initialParams.given;
   const matter = initialParams.matter;

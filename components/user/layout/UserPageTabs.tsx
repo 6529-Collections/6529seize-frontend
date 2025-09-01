@@ -1,11 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
+import { AuthContext } from "@/components/auth/Auth";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import useCapacitor from "@/hooks/useCapacitor";
 import { usePathname } from "next/navigation";
+import { useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
-import { AuthContext } from "../../auth/Auth";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { useCookieConsent } from "../../cookies/CookieConsentContext";
 
 export enum UserPageTabType {
   BRAIN = "BRAIN",
@@ -87,8 +87,7 @@ export default function UserPageTabs() {
     const name = segments[1] ?? "";
     const tab = Object.values(UserPageTabType).find(
       (tab) =>
-        USER_PAGE_TAB_META[tab].route.toLowerCase() ===
-        name?.toLowerCase()
+        USER_PAGE_TAB_META[tab].route.toLowerCase() === name?.toLowerCase()
     );
     return tab ?? UserPageTabType.COLLECTED;
   };

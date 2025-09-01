@@ -1,16 +1,16 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
-import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import { AuthContext } from "../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import UserSettingsUsername from "../../settings/UserSettingsUsername";
-import UserSettingsSave from "../../settings/UserSettingsSave";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
+import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { useRouter, usePathname, useParams } from "next/navigation";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditName({
   profile,
   onClose,
@@ -52,7 +52,7 @@ export default function UserPageHeaderEditName({
         type: "success",
       });
       const newPath = pathname.replace(
-        params.user?.toString() ?? "",
+        params?.user?.toString() ?? "",
         updatedProfile.handle!?.toLowerCase()
       );
       await router.replace(newPath);

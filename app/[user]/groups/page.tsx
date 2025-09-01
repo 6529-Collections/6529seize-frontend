@@ -1,10 +1,10 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageCollected from "@/components/user/collected/UserPageCollected";
+import UserPageGroups from "@/components/user/groups/UserPageGroups";
 
 const { Page, generateMetadata } = createUserTabPage({
-  subroute: "collected",
-  metaLabel: "Collected",
-  Tab: UserPageCollected,
+  subroute: "groups",
+  metaLabel: "Groups",
+  Tab: UserPageGroups,
 });
 
 export default Page;
