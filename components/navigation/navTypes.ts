@@ -22,7 +22,17 @@ export type ViewNavItem = {
   disabled?: boolean;
 };
 
-export type NavItem = RouteNavItem | ViewNavItem;
+export type ActionNavItem = {
+  kind: "action";
+  name: string;
+  action: () => void;
+  icon: string;
+  iconComponent?: React.ComponentType<{ className?: string }>;
+  iconSizeClass?: string;
+  disabled?: boolean;
+};
+
+export type NavItem = RouteNavItem | ViewNavItem | ActionNavItem;
 
 // Sidebar-specific types
 export interface SidebarSection {

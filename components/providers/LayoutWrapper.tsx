@@ -20,9 +20,15 @@ export default function LayoutWrapper({
 
   const content = useMemo(() => {
     return isApp ? (
-      <MobileLayout>{children}</MobileLayout>
+      <MobileLayout>
+        {children}
+        <FooterWrapper />
+      </MobileLayout>
     ) : (
-      <DesktopLayout>{children}</DesktopLayout>
+      <DesktopLayout>
+        {children}
+        <FooterWrapper />
+      </DesktopLayout>
     );
   }, [isApp, children]);
 
@@ -30,10 +36,5 @@ export default function LayoutWrapper({
     return <>{children}</>;
   }
 
-  return (
-    <>
-      {content}
-      <FooterWrapper />
-    </>
-  );
+  return content;
 }

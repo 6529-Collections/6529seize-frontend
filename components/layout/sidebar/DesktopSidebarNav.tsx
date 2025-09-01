@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
@@ -8,11 +8,13 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { type UseSidebarStateReturn } from "@/hooks/useSidebarState";
 import {
   type NavItem,
   type SidebarSection,
 } from "@/components/navigation/navTypes";
 import { AboutSection } from "@/enums";
+import CollectionsSubmenu from "./CollectionsSubmenu";
 // Import the same icons used in BottomNavigation
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
@@ -30,7 +32,11 @@ function classNames(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function DesktopSidebarNav() {
+interface DesktopSidebarNavProps {
+  sidebarState: UseSidebarStateReturn;
+}
+
+function DesktopSidebarNav({ sidebarState }: DesktopSidebarNavProps) {
   const pathname = usePathname();
   const { showWaves } = useAuth();
   const { address } = useSeizeConnectContext();
@@ -38,15 +44,23 @@ export default function DesktopSidebarNav() {
   const { country } = useCookieConsent();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  const toggleSection = (section: string) => {
+  const toggleSection = useCallback((section: string) => {
     setExpandedSections((prev) =>
       prev.includes(section)
         ? prev.filter((s) => s !== section)
         : [...prev, section]
     );
-  };
+  }, []);
 
-  const navigation: NavItem[] = [
+  // Auto-open collections submenu when on a collections page
+  useEffect(() => {
+    const collectionsPages = ["/the-memes", "/meme-lab", "/gradients", "/6529-gradient", "/nextgen"];
+    if (collectionsPages.some(page => pathname?.startsWith(page))) {
+      sidebarState.openCollectionsSubmenu();
+    }
+  }, [pathname, sidebarState]);
+
+  const navigation: NavItem[] = useMemo(() => [
     {
       kind: "route",
       name: "Home",
@@ -81,9 +95,9 @@ export default function DesktopSidebarNav() {
       iconComponent: BellIcon,
     },
     {
-      kind: "route",
+      kind: "action" as const,
       name: "Collections",
-      href: "/the-memes",
+      action: sidebarState.handleCollectionsClick,
       icon: "collections",
       iconComponent: Squares2X2Icon,
     },
@@ -105,10 +119,10 @@ export default function DesktopSidebarNav() {
           },
         ]
       : []),
-  ];
+  ], [showWaves, address, sidebarState.handleCollectionsClick]);
 
   // Sidebar expandable sections
-  const expandableSections: SidebarSection[] = [
+  const expandableSections: SidebarSection[] = useMemo(() => [
     {
       key: "tools",
       name: "Tools",
@@ -224,10 +238,10 @@ export default function DesktopSidebarNav() {
         },
       ],
     },
-  ];
+  ], [capacitor.isIos, country]);
 
   // Helper function to determine if nav item is active
-  const isNavItemActive = (item: NavItem): boolean => {
+  const isNavItemActive = useCallback((item: NavItem): boolean => {
     if (item.kind === "route") {
       return pathname === item.href;
     }
@@ -239,18 +253,51 @@ export default function DesktopSidebarNav() {
       return pathname === "/waves";
     }
     return false;
-  };
+  }, [pathname]);
 
   return (
-    <nav className="tw-flex tw-flex-1 tw-flex-col">
-      <ul
-        role="list"
-        className="tw-flex tw-flex-1 tw-flex-col tw-space-y-2 tw-list-none tw-pl-0"
-      >
+    <>
+      <nav className="tw-flex tw-flex-1 tw-flex-col">
+        <ul
+          role="list"
+          className="tw-flex tw-flex-1 tw-flex-col tw-space-y-2 tw-list-none tw-pl-0"
+        >
         {/* Main Navigation */}
         {navigation.map((item) => {
           const IconComponent = item.iconComponent;
-          const isActive = isNavItemActive(item);
+          const isActive = item.kind === "action" 
+            ? sidebarState.isCollectionsSubmenuOpen 
+            : isNavItemActive(item);
+
+          if (item.kind === "action") {
+            return (
+              <li key={item.name}>
+                <button
+                  onClick={item.action}
+                  className={classNames(
+                    isActive
+                      ? "tw-bg-iron-800 tw-text-white desktop-hover:hover:tw-text-white"
+                      : "tw-text-iron-300 hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white",
+                    "tw-w-full tw-text-lg tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-group tw-justify-center lg:tw-justify-start",
+                    "tw-px-3 tw-py-2.5"
+                  )}
+                  title={item.name}
+                  aria-label={`${isActive ? 'Close' : 'Open'} ${item.name}`}
+                  aria-expanded={isActive}
+                  aria-controls="collections-submenu"
+                >
+                  {IconComponent && (
+                    <IconComponent
+                      className={`tw-h-6 tw-w-6 tw-shrink-0 ${
+                        item.iconSizeClass || ""
+                      }`}
+                    />
+                  )}
+                  {!sidebarState.isMainSidebarCollapsed && <span className="tw-hidden lg:tw-block">{item.name}</span>}
+                </button>
+              </li>
+            );
+          }
 
           return (
             <li key={item.name}>
@@ -272,14 +319,14 @@ export default function DesktopSidebarNav() {
                     }`}
                   />
                 )}
-                <span className="tw-hidden lg:tw-block">{item.name}</span>
+                {!sidebarState.isMainSidebarCollapsed && <span className="tw-hidden lg:tw-block">{item.name}</span>}
               </Link>
             </li>
           );
         })}
 
-        {/* Expandable sections - only show on large screens */}
-        {expandableSections.map((section) => (
+        {/* Expandable sections - only show on large screens when not collapsed */}
+        {!sidebarState.isMainSidebarCollapsed && expandableSections.map((section) => (
           <div key={section.key} className="tw-hidden lg:tw-block">
             <button
               onClick={() => toggleSection(section.key)}
@@ -288,13 +335,16 @@ export default function DesktopSidebarNav() {
                 "tw-w-full tw-text-lg tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-group tw-justify-center lg:tw-justify-between",
                 "tw-px-3 tw-py-2.5"
               )}
+              aria-expanded={expandedSections.includes(section.key)}
+              aria-controls={`${section.key}-section`}
+              aria-label={`${expandedSections.includes(section.key) ? 'Collapse' : 'Expand'} ${section.name} section`}
             >
               <div className="tw-flex tw-gap-4 tw-items-center tw-justify-center lg:tw-justify-start">
                 <section.icon
                   aria-hidden="true"
                   className="tw-h-6 tw-w-6 tw-shrink-0"
                 />
-                <span className="tw-hidden lg:tw-block">{section.name}</span>
+                {!sidebarState.isMainSidebarCollapsed && <span className="tw-hidden lg:tw-block">{section.name}</span>}
               </div>
               <ChevronRightIcon
                 className={classNames(
@@ -304,7 +354,11 @@ export default function DesktopSidebarNav() {
               />
             </button>
             {expandedSections.includes(section.key) && (
-              <ul role="list" className="tw-mt-1 tw-space-y-1">
+              <ul 
+                role="list" 
+                className="tw-mt-1 tw-space-y-1"
+                id={`${section.key}-section`}
+              >
                 {section.items.map((item) => (
                   <li key={item.name} className="tw-ml-6">
                     <Link
@@ -374,5 +428,14 @@ export default function DesktopSidebarNav() {
         ))}
       </ul>
     </nav>
+    <CollectionsSubmenu 
+      isOpen={sidebarState.isCollectionsSubmenuOpen}
+      onExpandSidebar={sidebarState.handleChevronLeftClick}
+      sidebarCollapsed={sidebarState.isMainSidebarCollapsed}
+    />
+    </>
   );
 }
+
+// Memoized export for performance optimization
+export default memo(DesktopSidebarNav);

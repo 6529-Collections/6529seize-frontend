@@ -12,7 +12,10 @@ interface HomePageProps {
   readonly featuredNextgen: NextGenCollection;
 }
 
-export default function HomePage({ featuredNft, featuredNextgen }: HomePageProps) {
+export default function HomePage({
+  featuredNft,
+  featuredNextgen,
+}: HomePageProps) {
   const { isApp } = useDeviceInfo();
   const [activeTab, setActiveTab] = useState<"feed" | "latest">("feed");
 
@@ -22,37 +25,59 @@ export default function HomePage({ featuredNft, featuredNextgen }: HomePageProps
   }
 
   return (
-    <div className="tw-h-full">
-      {/* Tab Navigation */}
-      <div className="tw-border-b tw-border-iron-800 tw-mb-6">
-        <nav className="tw-flex tw-space-x-8" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab("feed")}
-            className={`tw-whitespace-nowrap tw-py-4 tw-px-1 tw-border-b-2 tw-font-medium tw-text-sm ${
-              activeTab === "feed"
-                ? "tw-border-primary-400 tw-text-primary-400"
-                : "tw-border-transparent tw-text-iron-300 hover:tw-text-iron-100 hover:tw-border-iron-300"
-            }`}
+    <div className="tw-h-full tw-px-6 tw-pt-4 tw-pb-6 tw-bg-iron-950">
+      {/* Tab Navigation - matching profile page design */}
+      <div className="tw-overflow-hidden mb-2">
+        <div
+          className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
+          aria-label="Tabs"
+        >
+          <div
+            className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
+            aria-label="Tabs"
           >
-            My Feed
-          </button>
-          <button
-            onClick={() => setActiveTab("latest")}
-            className={`tw-whitespace-nowrap tw-py-4 tw-px-1 tw-border-b-2 tw-font-medium tw-text-sm ${
-              activeTab === "latest"
-                ? "tw-border-primary-400 tw-text-primary-400"
-                : "tw-border-transparent tw-text-iron-300 hover:tw-text-iron-100 hover:tw-border-iron-300"
-            }`}
-          >
-            Latest Drop
-          </button>
-        </nav>
+            <button
+              onClick={() => setActiveTab("feed")}
+              className={`tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
+                activeTab === "feed" ? "tw-pointer-events-none" : ""
+              }`}
+            >
+              <div
+                className={
+                  activeTab === "feed"
+                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-4 tw-px-1"
+                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+                }
+              >
+                My Feed
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab("latest")}
+              className={`tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
+                activeTab === "latest" ? "tw-pointer-events-none" : ""
+              }`}
+            >
+              <div
+                className={
+                  activeTab === "latest"
+                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-4 tw-px-1"
+                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+                }
+              >
+                Latest Drop
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Tab Content */}
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <HomeFeed />
+          <div>
+            <HomeFeed />
+          </div>
         ) : (
           <Home featuredNft={featuredNft} featuredNextgen={featuredNextgen} />
         )}
