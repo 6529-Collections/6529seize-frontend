@@ -3,8 +3,15 @@ import BrainMobile from '../../../components/brain/BrainMobile';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props:any) => <img {...props} /> }));
 
-let mockRouter: any = { query: {}, pathname: '/', push: jest.fn() };
-jest.mock('next/router', () => ({ useRouter: () => mockRouter }));
+let mockSearchParams = new URLSearchParams();
+let mockPathname = '/';
+const mockPush = jest.fn();
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+  useSearchParams: () => mockSearchParams,
+  usePathname: () => mockPathname,
+}));
 
 let isApp = true;
 jest.mock('../../../hooks/useDeviceInfo', () => ({ __esModule: true, default: () => ({ isApp }) }));
@@ -55,21 +62,23 @@ jest.mock('../../../components/brain/my-stream/MyStreamWaveFAQ', () => ({ __esMo
 
 describe('BrainMobile', () => {
   beforeEach(() => {
-    mockRouter = { query: {}, pathname: '/', push: jest.fn() };
+    mockSearchParams = new URLSearchParams();
+    mockPathname = '/';
+    mockPush.mockClear();
     dropData = null;
     waveData = null;
     isApp = true;
   });
 
   it('renders BrainDesktopDrop when drop is open', () => {
-    mockRouter.query = { drop: 'd1' };
+    mockSearchParams.set('drop', 'd1');
     dropData = { id: 'd1' };
     render(<BrainMobile>child</BrainMobile>);
     expect(screen.getByTestId('drop')).toBeInTheDocument();
   });
 
   it('shows notifications view when path matches', async () => {
-    mockRouter.pathname = '/my-stream/notifications';
+    mockPathname = '/my-stream/notifications';
     render(<BrainMobile>child</BrainMobile>);
     await waitFor(() => {
       expect(screen.getByTestId('notifications')).toBeInTheDocument();
@@ -81,7 +90,7 @@ describe('BrainMobile', () => {
     render(<BrainMobile>child</BrainMobile>);
     expect(screen.queryByTestId('tabs')).toBeNull();
 
-    mockRouter.query = { wave: '1' };
+    mockSearchParams.set('wave', '1');
     const { rerender } = render(<BrainMobile>child</BrainMobile>);
     await waitFor(() => expect(screen.getByTestId('tabs')).toBeInTheDocument());
     rerender(<div />);

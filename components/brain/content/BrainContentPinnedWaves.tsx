@@ -3,10 +3,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import BrainContentPinnedWave from "./BrainContentPinnedWave";
 import { usePinnedWaves } from "../../../hooks/usePinnedWaves";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const BrainContentPinnedWaves: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const [onHoverWaveId, setOnHoverWaveId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,19 +87,20 @@ const BrainContentPinnedWaves: React.FC = () => {
   }, [pinnedIds]);
 
   useEffect(() => {
-    const { wave } = router.query;
+    const wave = searchParams?.get('wave') ?? undefined;
     if (wave && typeof wave === "string") {
       addId(wave);
     }
-  }, [router.query, addId]);
+  }, [searchParams, addId]);
 
   if (!pinnedIds.length) {
     return null;
   }
 
   const onRemove = async (waveId: string) => {
-    if (router.query.wave === waveId) {
-      await router.replace("/my-stream", undefined, { shallow: true });
+    const currentWaveId = searchParams?.get('wave') ?? undefined;
+    if (currentWaveId === waveId) {
+      router.replace('/my-stream');
     }
     removeId(waveId);
   };
@@ -155,7 +157,7 @@ const BrainContentPinnedWaves: React.FC = () => {
             <BrainContentPinnedWave
               key={id}
               waveId={id}
-              active={router.query.wave === id || onHoverWaveId === id}
+              active={(searchParams?.get('wave') ?? undefined) === id || onHoverWaveId === id}
               onMouseEnter={setOnHoverWaveId}
               onMouseLeave={() => setOnHoverWaveId(null)}
               onRemove={onRemove}

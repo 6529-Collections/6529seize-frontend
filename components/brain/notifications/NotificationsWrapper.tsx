@@ -9,7 +9,7 @@ import {
 } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface NotificationsWrapperProps {
   readonly items: TypedNotification[];
@@ -28,9 +28,7 @@ export default function NotificationsWrapper({
 
   const onDropContentClick = (drop: ExtendedDrop) => {
     router.push(
-      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`,
-      undefined,
-      { shallow: true }
+      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`
     );
   };
 

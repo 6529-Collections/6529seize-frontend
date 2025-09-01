@@ -13,7 +13,7 @@ import Drop, {
   DropLocation,
 } from "../../../waves/drops/Drop";
 import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";

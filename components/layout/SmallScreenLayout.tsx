@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import React, { ReactNode, useCallback } from "react";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
@@ -22,8 +22,8 @@ export default function SmallScreenLayout({ children }: Props) {
   const { registerRef } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const breadcrumbs = useBreadcrumbs();
-  const router = useRouter();
-  const isHomePage = router.pathname === "/";
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {

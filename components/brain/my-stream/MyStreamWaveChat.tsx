@@ -12,8 +12,7 @@ import PrivilegedDropCreator, {
   DropMode,
 } from "../../waves/PrivilegedDropCreator";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useRouter } from "next/router";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useLayout } from "./layout/LayoutContext";
 import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
 import { useWave } from "../../../hooks/useWave";
@@ -29,6 +28,7 @@ interface MyStreamWaveChatProps {
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
@@ -43,14 +43,15 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     const dropParam = searchParams?.get("serialNo");
     if (dropParam) {
       setInitialDrop(parseInt(dropParam));
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("serialNo");
-      router.replace(newUrl.pathname + newUrl.search);
+      const params = new URLSearchParams(searchParams?.toString() || '');
+      params.delete("serialNo");
+      const href = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      router.replace(href, { scroll: false });
     } else {
       setInitialDrop(null);
     }
     setSearchParamsDone(true);
-  }, [searchParams, router]);
+  }, [searchParams, router, pathname]);
 
   const { waveViewStyle } = useLayout();
 

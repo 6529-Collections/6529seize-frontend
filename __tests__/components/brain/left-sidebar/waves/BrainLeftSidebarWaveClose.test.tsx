@@ -1,9 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BrainLeftSidebarWaveClose from '../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaveClose';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children, id }: any) => (
     <div data-testid={`tooltip-${id}`}>
@@ -33,6 +37,6 @@ describe('BrainLeftSidebarWaveClose', () => {
     render(<BrainLeftSidebarWaveClose waveId="1" />);
     const button = screen.getByRole('button');
     await userEvent.click(button);
-    expect(push).toHaveBeenCalledWith('/my-stream', undefined, { shallow: true });
+    expect(push).toHaveBeenCalledWith('/my-stream');
   });
 });

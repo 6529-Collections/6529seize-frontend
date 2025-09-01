@@ -3,10 +3,13 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Drops from '../../../../components/drops/view/Drops';
 import { AuthContext } from '../../../../components/auth/Auth';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ 
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn()
+}));
 
 jest.mock('@tanstack/react-query', () => {
   const original = jest.requireActual('@tanstack/react-query');
@@ -28,7 +31,10 @@ describe('Drops', () => {
   const observerInstances: any[] = [];
   beforeEach(() => {
     dropsListSpy.mockClear();
-    (useRouter as jest.Mock).mockReturnValue({ query: { user: 'alice' }, push: jest.fn() });
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (useSearchParams as jest.Mock).mockReturnValue({
+      get: jest.fn((key: string) => key === 'user' ? 'alice' : null)
+    });
     (useInfiniteQuery as jest.Mock).mockReturnValue({
       data: { pages: [] },
       fetchNextPage: jest.fn(),
@@ -64,7 +70,10 @@ describe('Drops', () => {
     const drops = Array.from({ length: 10 }, (_, i) => ({ id: i, serial_no: i, wave: { id: `w${i}` } }));
     const fetchNext = jest.fn();
     const push = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ query: { user: 'alice' }, push });
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (useSearchParams as jest.Mock).mockReturnValue({
+      get: jest.fn((key: string) => key === 'user' ? 'alice' : null)
+    });
     (useInfiniteQuery as jest.Mock).mockReturnValue({
       data: { pages: [drops] },
       fetchNextPage: fetchNext,

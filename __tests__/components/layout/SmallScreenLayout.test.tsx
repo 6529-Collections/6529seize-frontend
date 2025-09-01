@@ -10,7 +10,7 @@ jest.mock("next/dynamic", () => () => () => <div data-testid="header" />);
 jest.mock("../../../hooks/useBreadcrumbs", () => ({ useBreadcrumbs }));
 jest.mock("../../../contexts/HeaderContext", () => ({ useHeaderContext: () => ({ setHeaderRef }) }));
 jest.mock("../../../components/brain/my-stream/layout/LayoutContext", () => ({ useLayout: () => ({ registerRef }) }));
-jest.mock("next/router", () => ({ useRouter: () => ({ pathname }) }));
+jest.mock("next/navigation", () => ({ usePathname: () => pathname }));
 
 const SmallScreenLayout = require("../../../components/layout/SmallScreenLayout").default;
 

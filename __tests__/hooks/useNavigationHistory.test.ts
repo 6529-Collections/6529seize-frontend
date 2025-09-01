@@ -2,18 +2,15 @@ import { renderHook, act } from '@testing-library/react';
 import { useNavigationHistory } from '../../hooks/useNavigationHistory';
 
 // Mock Next.js routers
-jest.mock('next/router', () => ({
-  useRouter: jest.fn(),
-}));
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
-const { useRouter } = require('next/router');
-const { useRouter: useNavRouter } = require('next/navigation');
+const { useRouter, usePathname } = require('next/navigation');
 
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
-const mockUseNavRouter = useNavRouter as jest.MockedFunction<typeof useNavRouter>;
+const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 
 // Mock sessionStorage
 const mockSessionStorage = {
@@ -67,34 +64,9 @@ describe('useNavigationHistory', () => {
     jest.clearAllMocks();
     jest.spyOn(console, 'log').mockImplementation(() => {});
     
+    mockUsePathname.mockReturnValue('/test');
+    
     mockUseRouter.mockReturnValue({
-      pathname: '/test',
-      route: '/test',
-      query: {},
-      asPath: '/test',
-      basePath: '',
-      isLocaleDomain: false,
-      isReady: true,
-      isPreview: false,
-      push: jest.fn(),
-      replace: jest.fn(),
-      reload: jest.fn(),
-      back: jest.fn(),
-      prefetch: jest.fn(),
-      beforePopState: jest.fn(),
-      events: {
-        on: jest.fn(),
-        off: jest.fn(),
-        emit: jest.fn(),
-      },
-      isFallback: false,
-      locale: undefined,
-      locales: undefined,
-      defaultLocale: undefined,
-      domainLocales: undefined,
-    });
-
-    mockUseNavRouter.mockReturnValue({
       back: mockBack,
       forward: mockForward,
       refresh: mockRefresh,
@@ -524,7 +496,7 @@ describe('useNavigationHistory', () => {
       domainLocales: undefined,
     });
 
-    mockUseNavRouter.mockReturnValue({
+    mockUseRouter.mockReturnValue({
       back: jest.fn(),
       forward: jest.fn(),
       refresh: jest.fn(),

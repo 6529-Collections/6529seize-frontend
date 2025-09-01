@@ -9,8 +9,10 @@ jest.mock("../../../contexts/NavigationHistoryContext", () => ({
 jest.mock("../../../components/navigation/ViewContext", () => ({
   useViewContext: jest.fn(),
 }));
-jest.mock("next/router", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
 }));
 jest.mock("../../../hooks/useWaveData", () => ({
   useWaveData: jest.fn(),
@@ -27,19 +29,18 @@ const {
   useNavigationHistoryContext,
 } = require("../../../contexts/NavigationHistoryContext");
 const { useViewContext } = require("../../../components/navigation/ViewContext");
-const { useRouter } = require("next/router");
+const { useRouter, useSearchParams, usePathname } = require("next/navigation");
 const { useWaveData } = require("../../../hooks/useWaveData");
 const { useWave } = require("../../../hooks/useWave");
 
 function setup(query: any = {}, opts: any = {}) {
   const replace = jest.fn();
-  const router = {
-    query,
-    pathname: "/test",
-    events: { on: jest.fn(), off: jest.fn() },
-    replace,
-  } as any;
-  (useRouter as jest.Mock).mockReturnValue(router);
+  const searchParams = new URLSearchParams();
+  Object.keys(query).forEach(key => searchParams.set(key, query[key]));
+  
+  (useRouter as jest.Mock).mockReturnValue({ replace });
+  (useSearchParams as jest.Mock).mockReturnValue(searchParams);
+  (usePathname as jest.Mock).mockReturnValue("/test");
   (useNavigationHistoryContext as jest.Mock).mockReturnValue({
     canGoBack: opts.canGoBack ?? false,
     goBack: jest.fn(),
@@ -48,7 +49,7 @@ function setup(query: any = {}, opts: any = {}) {
   (useWaveData as jest.Mock).mockReturnValue({ data: opts.wave });
   (useWave as jest.Mock).mockReturnValue({ isDm: opts.isDm ?? false });
   const utils = render(<BackButton />);
-  return { ...utils, router };
+  return { ...utils, replace };
 }
 
 
@@ -56,30 +57,26 @@ describe("BackButton", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("removes drop param and replaces route", async () => {
-    const { router } = setup({ drop: "123" });
+    const { replace } = setup({ drop: "123" });
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(router.replace).toHaveBeenCalledWith(
-      { pathname: "/test", query: {} },
-      undefined,
-      { shallow: true }
-    );
+    expect(replace).toHaveBeenCalledWith("/test", { scroll: false });
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
   });
 
   it("navigates hard back to messages when wave is DM", async () => {
-    const { router } = setup({ wave: "w1" }, { wave: {}, isDm: true });
+    const { replace } = setup({ wave: "w1" }, { wave: {}, isDm: true });
     const hardBack = (useViewContext as jest.Mock).mock.results[0].value.hardBack;
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(hardBack).toHaveBeenCalledWith("messages");
-    expect(router.replace).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("navigates hard back to waves when wave is not DM", async () => {
-    const { router } = setup({ wave: "w1" }, { wave: {}, isDm: false });
+    const { replace } = setup({ wave: "w1" }, { wave: {}, isDm: false });
     const hardBack = (useViewContext as jest.Mock).mock.results[0].value.hardBack;
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(hardBack).toHaveBeenCalledWith("waves");
-    expect(router.replace).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("calls goBack when no params and canGoBack", async () => {

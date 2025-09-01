@@ -9,7 +9,7 @@ import { useNotificationsContext } from '../../../components/notifications/Notif
 import { isNavItemActive } from '../../../components/navigation/isNavItemActive';
 import { useWaveData } from '../../../hooks/useWaveData';
 import { useWave } from '../../../hooks/useWave';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
 jest.mock('../../../components/navigation/ViewContext', () => ({ useViewContext: jest.fn() }));
 jest.mock('../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
@@ -20,7 +20,11 @@ jest.mock('../../../components/notifications/NotificationsContext', () => ({ use
 jest.mock('../../../components/navigation/isNavItemActive', () => ({ isNavItemActive: jest.fn() }));
 jest.mock('../../../hooks/useWaveData', () => ({ useWaveData: jest.fn() }));
 jest.mock('../../../hooks/useWave', () => ({ useWave: jest.fn() }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 
 describe('NavItem notifications', () => {
   const handleNavClick = jest.fn();
@@ -29,7 +33,9 @@ describe('NavItem notifications', () => {
 
   beforeEach(() => {
     (useViewContext as jest.Mock).mockReturnValue({ activeView: 'home', handleNavClick });
-    (useRouter as jest.Mock).mockReturnValue({ query: {}, pathname: '/' });
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    (usePathname as jest.Mock).mockReturnValue('/');
     (isNavItemActive as jest.Mock).mockReturnValue(false);
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
     (useNotificationsContext as jest.Mock).mockReturnValue({ removeAllDeliveredNotifications });

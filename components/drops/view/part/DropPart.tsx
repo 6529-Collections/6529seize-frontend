@@ -8,7 +8,7 @@ import DropAuthor from "../../create/utils/author/DropAuthor";
 import Link from "next/link";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import DropPartContent from "./DropPartContent";
 import DropContentWrapper from "../../../waves/drops/DropContentWrapper";
 
@@ -79,10 +79,7 @@ const DropPart = memo(
     const onQuoteClick = (drop: ApiDrop) => {
       router.push(
         `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`,
-        undefined,
-        {
-          shallow: true,
-        }
+        { scroll: false }
       );
     };
 

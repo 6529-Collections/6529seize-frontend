@@ -3,7 +3,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 
 interface BrainLeftSidebarWaveCloseProps {
@@ -20,7 +20,7 @@ const BrainLeftSidebarWaveClose: React.FC<BrainLeftSidebarWaveCloseProps> = ({
     e.preventDefault();
 
     // Navigate to the base my-stream URL without the wave parameter
-    router.push("/my-stream", undefined, { shallow: true });
+    router.push("/my-stream");
   };
 
   const tooltipId = `wave-close-${waveId}`;

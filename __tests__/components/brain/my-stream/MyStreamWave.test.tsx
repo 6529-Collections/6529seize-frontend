@@ -57,8 +57,14 @@ jest.mock('../../../../hooks/useWaveData', () => ({
 }));
 
 const mockRouterPush = jest.fn();
-let mockRouter: any = { query: { wave: '1' }, pathname: '/path', push: mockRouterPush };
-jest.mock('next/router', () => ({ useRouter: () => mockRouter }));
+const mockSearchParams = new URLSearchParams('wave=1');
+const mockPathname = '/path';
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+  useSearchParams: () => mockSearchParams,
+  usePathname: () => mockPathname,
+}));
 
 let mockBreakpoint = 'LG';
 jest.mock('react-use', () => ({ createBreakpoint: () => () => mockBreakpoint }));
@@ -100,7 +106,7 @@ describe('MyStreamWave', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRouterPush.mockClear();
-    mockRouter = { query: { wave: '1' }, pathname: '/path', push: mockRouterPush };
+    mockSearchParams.set('wave', '1');
     mockBreakpoint = 'LG';
   });
 
@@ -117,11 +123,7 @@ describe('MyStreamWave', () => {
     render(<MyStreamWave waveId="1" />);
     expect(screen.getByTestId('tabs')).toHaveTextContent('1');
     fireEvent.click(screen.getByTestId('leaderboard'));
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      { pathname: '/path', query: { wave: '1', drop: 'd1' } },
-      undefined,
-      { shallow: true }
-    );
+    expect(mockRouterPush).toHaveBeenCalledWith('/path?wave=1&drop=d1', { scroll: false });
   });
 
   it('hides tabs when breakpoint is small', () => {

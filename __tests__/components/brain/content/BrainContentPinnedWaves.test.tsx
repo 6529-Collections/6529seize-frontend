@@ -11,8 +11,11 @@ jest.mock('../../../../hooks/usePinnedWaves', () => ({
 let mockPinnedIds: string[] = [];
 
 const replace = jest.fn();
-jest.mock('next/router', () => ({
-  useRouter: () => ({ query: mockQuery, replace }),
+const searchParams = new URLSearchParams();
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ replace }),
+  useSearchParams: () => searchParams,
 }));
 
 jest.mock('../../../../components/brain/content/BrainContentPinnedWave', () => ({
@@ -29,7 +32,6 @@ beforeAll(() => {
   (global as any).ResizeObserver = class { observe() {}; unobserve() {}; disconnect() {}; };
 });
 
-let mockQuery: any = {};
 
 describe('BrainContentPinnedWaves', () => {
   beforeEach(() => {
@@ -37,7 +39,7 @@ describe('BrainContentPinnedWaves', () => {
     removeId.mockClear();
     replace.mockClear();
     mockPinnedIds = [];
-    mockQuery = {};
+    searchParams.delete('wave');
   });
 
   it('returns null when no pinned waves', () => {
@@ -47,7 +49,7 @@ describe('BrainContentPinnedWaves', () => {
 
   it('renders pinned waves and handles removal', async () => {
     mockPinnedIds = ['1', '2'];
-    mockQuery = { wave: '1' };
+    searchParams.set('wave', '1');
     const user = userEvent.setup();
     render(<BrainContentPinnedWaves />);
     await waitFor(() => expect(addId).toHaveBeenCalledWith('1'));
@@ -57,6 +59,6 @@ describe('BrainContentPinnedWaves', () => {
     expect(wave2).toBeInTheDocument();
     await user.click(wave1);
     expect(removeId).toHaveBeenCalledWith('1');
-    expect(replace).toHaveBeenCalledWith('/my-stream', undefined, { shallow: true });
+    expect(replace).toHaveBeenCalledWith('/my-stream');
   });
 });

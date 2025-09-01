@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import MyStream from "./MyStream";
-import { useRouter } from "next/router";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import MyStreamWave from "./MyStreamWave";
 import BrainContent from "../content/BrainContent";
 import {
@@ -17,22 +17,23 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 
 const MyStreamWrapper: React.FC = () => {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
 
   useEffect(() => {
-    const { wave: waveId } = router.query;
-    setSerialisedWaveId(typeof waveId === "string" ? waveId : null);
-  }, [router.query]);
+    const waveId = searchParams?.get('wave') || null;
+    setSerialisedWaveId(waveId);
+  }, [searchParams]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    router.push(
-      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`,
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('wave', drop.wave.id);
+    params.set('serialNo', `${drop.serial_no}/`);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   useEffect(() => {

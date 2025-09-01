@@ -5,11 +5,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import { editSlice } from '../../../../store/editSlice';
 import MyStreamWaveChat from '../../../../components/brain/my-stream/MyStreamWaveChat';
 
-jest.mock('next/router', () => ({ useRouter: () => ({ replace: replaceMock }) }));
 const replaceMock = jest.fn();
-
 const searchParamsMock = { get: jest.fn() };
-jest.mock('next/navigation', () => ({ useSearchParams: () => searchParamsMock }));
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: replaceMock }),
+  useSearchParams: () => searchParamsMock,
+  usePathname: jest.fn(),
+}));
 
 let mockIsMemesWave = false;
 jest.mock('../../../../hooks/useWave', () => ({ useWave: () => ({ isMemesWave: mockIsMemesWave }) }));

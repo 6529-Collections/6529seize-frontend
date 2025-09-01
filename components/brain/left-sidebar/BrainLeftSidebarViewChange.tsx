@@ -2,7 +2,7 @@
 
 import React, { useContext, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter, usePathname } from "next/navigation";
 import { AuthContext } from "../../auth/Auth";
 import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
 
@@ -13,15 +13,16 @@ export const BrainLeftSidebarViewChange: React.FC<
 > = () => {
   const { connectedProfile } = useContext(AuthContext);
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState(router.pathname);
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState(pathname);
 
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
   );
 
   useEffect(() => {
-    setActiveTab(router.pathname);
-  }, [router.pathname]);
+    setActiveTab(pathname);
+  }, [pathname]);
 
   const isLinkActive = (path: string) => activeTab === path;
 
@@ -34,7 +35,7 @@ export const BrainLeftSidebarViewChange: React.FC<
 
   const onNotificationsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    router.push("/my-stream/notifications", undefined, { shallow: true });
+    router.push("/my-stream/notifications", { scroll: false });
   };
 
   return (

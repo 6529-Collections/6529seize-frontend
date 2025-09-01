@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BrainLeftSidebarWave from '../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWave';
 import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { usePrefetchWaveData } from '../../../../../hooks/usePrefetchWaveData';
 
 jest.mock('next/link', () => ({
@@ -11,19 +11,25 @@ jest.mock('next/link', () => ({
     <a href={href} onMouseEnter={onMouseEnter} onClick={onClick} className={className}>{children}</a>
   ),
 }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 jest.mock('../../../../../hooks/usePrefetchWaveData');
 jest.mock('../../../../../components/waves/WavePicture', () => (props: any) => <img data-testid="wave-picture" alt={props.name} />);
 jest.mock('../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime', () => (props: any) => <span data-testid="drop-time">{props.time}</span>);
 jest.mock('../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWavePin', () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>);
 
 const mockedUseRouter = useRouter as jest.Mock;
+const mockedUseSearchParams = useSearchParams as jest.Mock;
 const mockedPrefetch = usePrefetchWaveData as jest.Mock;
 
 describe('BrainLeftSidebarWave', () => {
   const prefetch = jest.fn();
   const onHover = jest.fn();
-  const router = { query: {}, push: jest.fn() } as any;
+  const router = { push: jest.fn() };
+  const searchParams = new URLSearchParams();
 
   const baseWave = {
     id: '1',
@@ -38,8 +44,9 @@ describe('BrainLeftSidebarWave', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedUseRouter.mockReturnValue(router);
+    mockedUseSearchParams.mockReturnValue(searchParams);
     mockedPrefetch.mockReturnValue(prefetch);
-    router.query = {};
+    searchParams.delete('wave'); // Clear any previous wave param
   });
 
   it('prefetches wave data on hover when not active', async () => {
@@ -51,7 +58,7 @@ describe('BrainLeftSidebarWave', () => {
   });
 
   it('does not prefetch when hovering active wave', async () => {
-    router.query = { wave: '1' };
+    searchParams.set('wave', '1');
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     await userEvent.hover(screen.getByRole('link'));
     expect(onHover).not.toHaveBeenCalled();
@@ -61,7 +68,7 @@ describe('BrainLeftSidebarWave', () => {
   it('computes href based on current wave', () => {
     const { rerender } = render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream?wave=1');
-    router.query = { wave: '1' };
+    searchParams.set('wave', '1');
     rerender(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream');
   });
@@ -70,7 +77,7 @@ describe('BrainLeftSidebarWave', () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     const link = screen.getByRole('link');
     await userEvent.click(link);
-    expect(router.push).toHaveBeenCalledWith('/my-stream?wave=1', undefined, { shallow: true });
+    expect(router.push).toHaveBeenCalledWith('/my-stream?wave=1');
   });
 
   it('shows drop indicators for non-chat waves', () => {

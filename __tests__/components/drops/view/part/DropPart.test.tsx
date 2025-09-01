@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import DropPart from '../../../../../components/drops/view/part/DropPart';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 const DropPartContentMock = jest.fn(() => null);
 jest.mock('../../../../../components/drops/view/part/DropPartContent', () => (props: any) => {
@@ -9,7 +9,12 @@ jest.mock('../../../../../components/drops/view/part/DropPartContent', () => (pr
   return <div data-testid="content" />;
 });
 
-jest.mock('next/router', () => ({ useRouter: jest.fn(() => ({ push: jest.fn(), query: {} })) }));
+jest.mock('next/navigation', () => ({ 
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useSearchParams: jest.fn(() => ({
+    get: jest.fn().mockReturnValue(null)
+  }))
+}));
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -43,6 +48,6 @@ describe('DropPart', () => {
     const fn = DropPartContentMock.mock.calls[0][0].onQuoteClick;
     fn(drop as any);
     const router = (useRouter as jest.Mock).mock.results[0].value;
-    expect(router.push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=1', undefined, { shallow: true });
+    expect(router.push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=1', { scroll: false });
   });
 });

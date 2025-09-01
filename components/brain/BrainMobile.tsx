@@ -3,7 +3,7 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
@@ -44,6 +44,8 @@ interface Props {
 
 const BrainMobile: React.FC<Props> = ({ children }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const [hydrated, setHydrated] = useState(false);
 
@@ -52,26 +54,25 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   }, []);
 
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
+  const dropId = searchParams?.get('drop') ?? undefined;
   const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
+    queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
       await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${router.query.drop}`,
+        endpoint: `drops/${dropId}`,
       }),
     placeholderData: keepPreviousData,
-    enabled: !!router.query.drop,
+    enabled: !!dropId,
   });
 
+  const waveId = searchParams?.get('wave') ?? null;
   const { data: wave } = useWaveData({
-    waveId: router.query.wave as string,
+    waveId: waveId,
     onWaveNotFound: () => {
-      router.push(
-        { pathname: router.pathname, query: { wave: null } },
-        undefined,
-        {
-          shallow: true,
-        }
-      );
+      const params = new URLSearchParams(searchParams?.toString() || '');
+      params.delete('wave');
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      router.push(newUrl, { scroll: false });
     },
   });
 
@@ -83,41 +84,33 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   } = useWaveTimers(wave);
 
   const onDropClick = (drop: ExtendedDrop) => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('drop', drop.id);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const onDropClose = () => {
-    const currentQuery = { ...router.query };
-    delete currentQuery.drop;
-    router.push({ pathname: router.pathname, query: currentQuery }, undefined, {
-      shallow: true,
-    });
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.delete('drop');
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+    router.push(newUrl, { scroll: false });
   };
 
   const isDropOpen =
     drop &&
-    drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
+    drop?.id?.toLowerCase() === dropId?.toLowerCase();
 
   const isRankWave = wave?.wave.type === ApiWaveType.Rank;
 
-  const hasWave = Boolean(router.query.wave);
+  const hasWave = Boolean(waveId);
 
   useEffect(() => {
-    if (router.pathname === "/my-stream/notifications") {
+    if (pathname === "/my-stream/notifications") {
       setActiveView(BrainView.NOTIFICATIONS);
-    } else if (router.pathname === "/my-stream" && !router.query.wave) {
+    } else if (pathname === "/my-stream" && !waveId) {
       setActiveView(BrainView.DEFAULT);
     }
-  }, [router.pathname, router.query.wave]);
+  }, [pathname, waveId]);
 
   // Handle tab visibility and reset on wave changes
   useEffect(() => {
@@ -152,7 +145,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       setActiveView(BrainView.DEFAULT);
     }
 
-    if (hasWave && router.query.wave) {
+    if (hasWave && waveId) {
       if (
         activeView === BrainView.NOTIFICATIONS ||
         activeView === BrainView.MESSAGES ||
@@ -161,11 +154,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         setActiveView(BrainView.DEFAULT);
       }
     }
-  }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave, router.query.wave]);
+  }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave, waveId]);
 
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.ABOUT]: (
-      <BrainMobileAbout activeWaveId={router.query.wave as string} />
+      <BrainMobileAbout activeWaveId={waveId} />
     ),
     [BrainView.DEFAULT]: children,
     [BrainView.LEADERBOARD]:

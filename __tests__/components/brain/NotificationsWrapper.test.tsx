@@ -1,9 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import NotificationsWrapper from '../../../components/brain/notifications/NotificationsWrapper';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+}));
 jest.mock('../../../components/brain/notifications/NotificationItems', () => (props: any) => {
   // expose callbacks
   return (
@@ -34,6 +38,6 @@ describe('NotificationsWrapper', () => {
     );
     screen.getByTestId('items').click();
     expect(setActive).toHaveBeenCalledTimes(2);
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=1/', undefined, { shallow: true });
+    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=1/');
   });
 });
