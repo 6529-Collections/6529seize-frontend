@@ -96,11 +96,11 @@ export default function UserPageTabs() {
   };
 
   const [tab, setTab] = useState<UserPageTabType>(
-    pathnameToTab(pathname)
+    pathnameToTab(pathname || '')
   );
 
   useEffect(() => {
-    setTab(pathnameToTab(pathname));
+    setTab(pathnameToTab(pathname || ''));
   }, [pathname]);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
