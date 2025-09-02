@@ -3,25 +3,21 @@
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NftOwner } from "@/entities/IOwner";
-import {
-  numberWithCommas,
-  fromGWEI,
-  capitalizeEveryWord,
-} from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 import { fetchUrl } from "@/services/6529api";
 import dynamic from "next/dynamic";
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import DotLoader from "@/components/dotLoader/DotLoader";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import FeaturedNFTImageColumn from "./FeaturedNFTImageColumn";
 import ManifoldClaimTable from "./ManifoldClaimTable";
 import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
+import MintingApproachSection from "./MintingApproachSection";
 
 // Memoized image column to prevent unnecessary re-renders
 const MemoizedFeaturedNFTImageColumn = memo(FeaturedNFTImageColumn);
@@ -44,45 +40,11 @@ export default function LatestDropSection({ featuredNft }: Props) {
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
 
-  const manifoldClaimEditionSizeDisplay = useMemo(() => {
-    if (!manifoldClaim) return <DotLoader />;
-    if (manifoldClaim.isFinalized) {
-      return <>{numberWithCommas(manifoldClaim.total)}</>;
-    } else {
-      return (
-        <>
-          {numberWithCommas(manifoldClaim.total)} /{" "}
-          {numberWithCommas(manifoldClaim.totalMax)}
-          {manifoldClaim.isFetching && (
-            <>
-              {" "}
-              <DotLoader />
-            </>
-          )}
-        </>
-      );
-    }
-  }, [manifoldClaim]);
-
-  const manifoldClaimstatusDisplay = useMemo(() => {
-    if (!manifoldClaim) return <DotLoader />;
-    if (manifoldClaim.isFinalized) {
-      return manifoldClaim.remaining > 0 ? "Ended" : "Sold Out";
-    } else {
-      return capitalizeEveryWord(manifoldClaim.status);
-    }
-  }, [manifoldClaim]);
-
-  const manifoldClaimCostDisplay = useMemo(() => {
-    if (!manifoldClaim) return <DotLoader />;
-    if (manifoldClaim.cost > 0) {
-      return `${numberWithCommas(
-        Math.round(fromGWEI(manifoldClaim.cost) * 100000) / 100000
-      )} ETH`;
-    } else {
-      return `N/A`;
-    }
-  }, [manifoldClaim]);
+  const {
+    editionSizeDisplay: manifoldClaimEditionSizeDisplay,
+    statusDisplay: manifoldClaimstatusDisplay,
+    costDisplay: manifoldClaimCostDisplay,
+  } = useManifoldClaimDisplays({ manifoldClaim });
 
   useEffect(() => {
     if (connectedProfile?.consolidation_key && featuredNft) {
@@ -147,18 +109,7 @@ export default function LatestDropSection({ featuredNft }: Props) {
                 />
               </Col>
             </Row>
-            <Row>
-              <Col>
-                <h3>Minting Approach</h3>
-              </Col>
-            </Row>
-            <Row className="pb-3">
-              <Col>
-                <Link href={`/the-memes/${featuredNft.id}/distribution`}>
-                  Distribution Plan
-                </Link>
-              </Col>
-            </Row>
+            <MintingApproachSection nftId={featuredNft.id} />
             <ManifoldClaimTable
               statusDisplay={manifoldClaimstatusDisplay}
               costDisplay={manifoldClaimCostDisplay}
