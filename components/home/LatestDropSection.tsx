@@ -6,7 +6,6 @@ import { NftOwner } from "@/entities/IOwner";
 import {
   numberWithCommas,
   fromGWEI,
-  printMintDate,
   capitalizeEveryWord,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -18,15 +17,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import Link from "next/link";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
-import {
-  getDimensionsFromMetadata,
-  getFileTypeFromMetadata,
-} from "@/helpers/nft.helpers";
-import { NftPageStats } from "@/components/nftAttributes/NftStats";
+import { Col, Container, Row } from "react-bootstrap";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import FeaturedNFTImageColumn from "./FeaturedNFTImageColumn";
+import ManifoldClaimTable from "./ManifoldClaimTable";
+import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
 
 // Memoized image column to prevent unnecessary re-renders
 const MemoizedFeaturedNFTImageColumn = memo(FeaturedNFTImageColumn);
@@ -137,68 +132,10 @@ export default function LatestDropSection({ featuredNft }: Props) {
             </Row>
             <Row>
               <Col>
-                <Table bordered={false}>
-                  <tbody>
-                    <tr>
-                      <td>Edition Size</td>
-                      <td>
-                        <b>{manifoldClaimEditionSizeDisplay}</b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Collection</td>
-                      <td>
-                        <b>{featuredNft.collection}</b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Season</td>
-                      <td>
-                        <b>{featuredNft.season}</b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Meme</td>
-                      <td>
-                        <b>{featuredNft.meme_name}</b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Artist Name</td>
-                      <td>
-                        <b>{featuredNft.artist}</b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Artist Profile</td>
-                      <td>
-                        <b>
-                          <ArtistProfileHandle nft={featuredNft} />
-                        </b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Mint Date</td>
-                      <td>
-                        <b>{printMintDate(featuredNft.mint_date)}</b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>File Type</td>
-                      <td>
-                        <b>{getFileTypeFromMetadata(featuredNft.metadata)}</b>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Dimensions</td>
-                      <td>
-                        <b>
-                          {getDimensionsFromMetadata(featuredNft.metadata)}
-                        </b>
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
+                <FeaturedNFTDetailsTable 
+                  nft={featuredNft}
+                  editionSizeDisplay={manifoldClaimEditionSizeDisplay}
+                />
               </Col>
             </Row>
             <Row>
@@ -222,27 +159,11 @@ export default function LatestDropSection({ featuredNft }: Props) {
                 </Link>
               </Col>
             </Row>
-            <Table bordered={false}>
-              <tbody>
-                <tr>
-                  <td>Status</td>
-                  <td>
-                    <b>{manifoldClaimstatusDisplay}</b>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Mint Price</td>
-                  <td>
-                    <b>{manifoldClaimCostDisplay}</b>
-                  </td>
-                </tr>
-                <NftPageStats
-                  nft={featuredNft}
-                  hide_mint_price={true}
-                  hide_hodl_rate={true}
-                />
-              </tbody>
-            </Table>
+            <ManifoldClaimTable
+              statusDisplay={manifoldClaimstatusDisplay}
+              costDisplay={manifoldClaimCostDisplay}
+              nft={featuredNft}
+            />
             {(!capacitor.isIos || country === "US") && (
               <Row className="pt-3">
                 <Col>
