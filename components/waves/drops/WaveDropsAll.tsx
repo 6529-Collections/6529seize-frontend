@@ -78,6 +78,7 @@ export default function WaveDropsAll({
 
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollOperationAbortController = useRef<AbortController | null>(null);
+  const scrollOperationLockRef = useRef(false);
   const SCROLL_OPERATION_TIMEOUT = 10000; // 10 seconds max for any scroll operation
 
   const scrollToSerialNo = useCallback(
@@ -163,6 +164,7 @@ export default function WaveDropsAll({
 
     const timeoutId = setTimeout(() => {
       console.warn('Scroll operation timed out after', SCROLL_OPERATION_TIMEOUT, 'ms, clearing isScrolling state');
+      scrollOperationLockRef.current = false;
       setIsScrolling(false);
       // Also abort any ongoing operation
       if (scrollOperationAbortController.current) {
@@ -182,6 +184,7 @@ export default function WaveDropsAll({
         scrollOperationAbortController.current.abort();
         scrollOperationAbortController.current = null;
       }
+      scrollOperationLockRef.current = false;
       setIsScrolling(false);
     };
   }, []);
@@ -234,7 +237,12 @@ export default function WaveDropsAll({
   }, [waveId]);
 
   const fetchAndScrollToDrop = useCallback(async () => {
-    if (!serialNo || isScrolling) return;
+    // Early guards using both state and ref for race condition protection
+    if (!serialNo || isScrolling || scrollOperationLockRef.current) return;
+
+    // Set both locks immediately (ref is synchronous, prevents double execution)
+    scrollOperationLockRef.current = true;
+    setIsScrolling(true);
 
     // Cancel any existing operation
     if (scrollOperationAbortController.current) {
@@ -245,11 +253,13 @@ export default function WaveDropsAll({
     scrollOperationAbortController.current = new AbortController();
     const signal = scrollOperationAbortController.current.signal;
 
-    setIsScrolling(true);
-
     try {
       // Check if operation was cancelled before starting
-      if (signal.aborted) return;
+      if (signal.aborted) {
+        scrollOperationLockRef.current = false;
+        setIsScrolling(false);
+        return;
+      }
 
       await fetchNextPage(
         {
@@ -261,12 +271,20 @@ export default function WaveDropsAll({
       );
 
       // Check if operation was cancelled after fetch
-      if (signal.aborted) return;
+      if (signal.aborted) {
+        scrollOperationLockRef.current = false;
+        setIsScrolling(false);
+        return;
+      }
 
       await waitAndRevealDrop(serialNo);
 
       // Check if operation was cancelled after reveal
-      if (signal.aborted) return;
+      if (signal.aborted) {
+        scrollOperationLockRef.current = false;
+        setIsScrolling(false);
+        return;
+      }
 
       const success = await smoothScrollWithRetries();
 
@@ -284,16 +302,18 @@ export default function WaveDropsAll({
         console.warn('Scroll operation failed:', error);
       }
     } finally {
-      // Always reset scrolling state, regardless of success/failure/cancellation
+      // Always reset both locks, regardless of success/failure/cancellation
+      scrollOperationLockRef.current = false;
       setIsScrolling(false);
     }
   }, [
     waveId,
     fetchNextPage,
     serialNo,
-    setIsScrolling,
     isScrolling,
     waitAndRevealDrop,
+    smoothScrollWithRetries,
+    dropId
   ]);
 
   useEffect(() => {
