@@ -94,6 +94,11 @@ describe("user index page via createUserTabPage", () => {
 
   it("generateMetadata works for index", async () => {
     const spy = jest.spyOn(Helpers, "getMetadataForUserPage");
+    const { generateMetadata } = buildHomeFactory();
+    await generateMetadata({
+      params: Promise.resolve({ user: "dave" }),
+      searchParams: Promise.resolve({}),
+    } as any);
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave" }),
       "Home"
@@ -132,6 +137,11 @@ describe("proxy page via createUserTabPage", () => {
 
   it("generateMetadata works for proxy", async () => {
     const spy = jest.spyOn(Helpers, "getMetadataForUserPage");
+    const { generateMetadata } = buildProxyFactory();
+    await generateMetadata({
+      params: Promise.resolve({ user: "dave" }),
+      searchParams: Promise.resolve({}),
+    } as any);
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave" }),
       "Proxy"
