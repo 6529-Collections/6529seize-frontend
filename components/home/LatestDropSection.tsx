@@ -13,7 +13,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { fetchUrl } from "@/services/6529api";
 import dynamic from "next/dynamic";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -28,6 +28,9 @@ import { NftPageStats } from "@/components/nftAttributes/NftStats";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import FeaturedNFTImageColumn from "./FeaturedNFTImageColumn";
 
+// Memoized image column to prevent unnecessary re-renders
+const MemoizedFeaturedNFTImageColumn = memo(FeaturedNFTImageColumn);
+
 const MemePageMintCountdown = dynamic(
   () => import("@/components/the-memes/MemePageMintCountdown"),
   { ssr: false }
@@ -38,6 +41,7 @@ interface Props {
 }
 
 export default function LatestDropSection({ featuredNft }: Props) {
+
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
@@ -111,7 +115,7 @@ export default function LatestDropSection({ featuredNft }: Props) {
         </Col>
       </Row>
       <Row>
-        <FeaturedNFTImageColumn featuredNft={featuredNft} nftBalance={nftBalance} />
+        <MemoizedFeaturedNFTImageColumn featuredNft={featuredNft} nftBalance={nftBalance} />
 
         <Col
           className="pt-3 pb-3"
