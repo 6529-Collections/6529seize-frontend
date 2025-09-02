@@ -5,12 +5,21 @@ import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import { BaseRendererProps } from "../types/renderer-props";
 
+function getSrc(nft: BaseRendererProps['nft']): string | undefined {
+  const hasMetadata = "metadata" in nft;
+  const hasAnimation = hasMetadata && nft.metadata.animation;
+  
+  if (hasAnimation) {
+    return nft.metadata.animation;
+  } else if (hasMetadata) {
+    return nft.metadata.animation_url;
+  }
+  
+  return undefined;
+}
+
 export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
-  const src = "metadata" in props.nft && props.nft.metadata.animation
-    ? props.nft.metadata.animation
-    : "metadata" in props.nft 
-    ? props.nft.metadata.animation_url
-    : undefined;
+  const src = getSrc(props.nft);
 
   return (
     <Col

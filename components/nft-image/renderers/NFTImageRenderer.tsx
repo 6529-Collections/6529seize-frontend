@@ -4,12 +4,18 @@ import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import { BaseRendererProps } from "../types/renderer-props";
 
+function getSrc(nft: BaseRendererProps['nft'], showThumbnail: boolean, showOriginal: boolean): string {
+  if (showThumbnail) {
+    return nft.thumbnail;
+  } else if (nft.scaled && !showOriginal) {
+    return nft.scaled;
+  } else {
+    return nft.image;
+  }
+}
+
 export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
-  const src = props.showThumbnail
-    ? props.nft.thumbnail
-    : props.nft.scaled && !props.showOriginal
-    ? props.nft.scaled
-    : props.nft.image;
+  const src = getSrc(props.nft, !!props.showThumbnail, !!props.showOriginal);
 
   return (
     <Col
