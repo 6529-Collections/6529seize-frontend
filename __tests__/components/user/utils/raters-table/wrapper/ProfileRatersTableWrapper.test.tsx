@@ -1,8 +1,9 @@
-import ProfileRatersTableWrapper, {
+import ProfileRatersTableWrapper from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import {
   ProfileRatersParamsOrderBy,
   ProfileRatersTableType,
-} from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { RateMatter } from "@/enums";
+  RateMatter,
+} from "@/enums";
 import { useQuery } from "@tanstack/react-query";
 import { act, render } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";

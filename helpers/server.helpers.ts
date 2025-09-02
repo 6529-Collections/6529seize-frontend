@@ -1,11 +1,8 @@
 import { ActivityLogParamsConverted } from "@/components/profile-activity/ProfileActivityLogs";
-import {
-  ProfileRatersParams,
-  ProfileRatersParamsOrderBy,
-} from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { ProfileActivityLog } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import { RateMatter } from "@/enums";
+import { ProfileRatersParamsOrderBy, RateMatter } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Page } from "./Types";

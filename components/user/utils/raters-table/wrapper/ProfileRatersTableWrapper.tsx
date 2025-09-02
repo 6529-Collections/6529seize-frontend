@@ -5,7 +5,11 @@ import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoa
 import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 
 import { SortDirection } from "@/entities/ISort";
-import { RateMatter } from "@/enums";
+import {
+  ProfileRatersParamsOrderBy,
+  ProfileRatersTableType,
+  RateMatter,
+} from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -14,18 +18,6 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ProfileRatersTable from "../ProfileRatersTable";
 import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
-
-export enum ProfileRatersTableType {
-  CIC_RECEIVED = "CIC_RECEIVED",
-  CIC_GIVEN = "CIC_GIVEN",
-  REP_RECEIVED = "REP_RECEIVED",
-  REP_GIVEN = "REP_GIVEN",
-}
-
-export enum ProfileRatersParamsOrderBy {
-  RATING = "RATING",
-  LAST_MODIFIED = "LAST_MODIFIED",
-}
 
 export interface ProfileRatersParams {
   readonly page: number;
