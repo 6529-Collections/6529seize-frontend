@@ -42,7 +42,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
 
   const [allTokens, setAllTokens] = useState<NextGenToken[]>([]);
   const [displayTokens, setDisplayTokens] = useState<NextGenToken[]>([]);
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [currentSlide, setCurrentSlide] = useState<number>(2);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreOnServer, setHasMoreOnServer] = useState(false);
   const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
@@ -160,6 +160,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                     delay: 3000,
                     disableOnInteraction: false,
                   }}
+                  initialSlide={2}
                   spaceBetween={20}
                   slidesPerView={Math.min(slidesPerView, displayTokens.length)}
                   navigation
