@@ -13,19 +13,21 @@ export interface UserPageRepPropsRepRates {
   readonly rater: string | null;
 }
 
-function getInitialActivityLogParams(
+const MATTER_TYPE = RateMatter.REP;
+
+const getInitialActivityLogParams = (
   handleOrWallet: string
-): ActivityLogParams {
-  return {
-    page: 1,
-    pageSize: 10,
-    logTypes: getProfileLogTypes({ logTypes: [] }),
-    matter: RateMatter.REP,
-    targetType: FilterTargetType.ALL,
-    handleOrWallet,
-    groupId: null,
-  };
-}
+): ActivityLogParams => ({
+  page: 1,
+  pageSize: 10,
+  logTypes: getProfileLogTypes({
+    logTypes: [],
+  }),
+  matter: RateMatter.REP,
+  targetType: FilterTargetType.ALL,
+  handleOrWallet,
+  groupId: null,
+});
 
 function RepTab({ profile }: { readonly profile: ApiIdentity }) {
   const handleOrWallet = (
@@ -36,16 +38,15 @@ function RepTab({ profile }: { readonly profile: ApiIdentity }) {
 
   const initialRepGivenParams = getInitialRatersParams({
     handleOrWallet,
-    matter: RateMatter.REP,
+    matter: MATTER_TYPE,
     given: false,
   });
 
   const initialRepReceivedParams = getInitialRatersParams({
     handleOrWallet,
-    matter: RateMatter.REP,
+    matter: MATTER_TYPE,
     given: true,
   });
-
   const initialActivityLogParams = getInitialActivityLogParams(handleOrWallet);
 
   return (
