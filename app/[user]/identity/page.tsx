@@ -22,7 +22,7 @@ function getInitialActivityLogParams(
   };
 }
 
-function IdentityTab({ profile }: { profile: Readonly<ApiIdentity> }) {
+function IdentityTab({ profile }: { readonly profile: ApiIdentity }) {
   const handleOrWallet = (
     profile.handle ??
     profile.wallets?.[0]?.wallet ??
