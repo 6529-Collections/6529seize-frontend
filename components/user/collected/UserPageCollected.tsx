@@ -1,27 +1,32 @@
 "use client";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   CollectedCard,
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
-} from "../../../entities/IProfile";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { Page } from "../../../helpers/Types";
-import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
-import { MEMES_SEASON } from "../../../enums";
-import { SortDirection } from "../../../entities/ISort";
-import { usePathname, useSearchParams, useParams, useRouter } from "next/navigation";
+} from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
+import { MEMES_SEASON } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
-import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 import {
   COLLECTED_COLLECTIONS_META,
   convertAddressToLowerCase,
 } from "./filters/user-page-collected-filters.helpers";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
+import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
+import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -205,8 +210,8 @@ export default function UserPageCollected({
     const queryString = createQueryString(updateItems);
     const path = queryString ? pathname + "?" + queryString : pathname;
     if (path) {
-      await router.replace(path, undefined, {
-        shallow: true,
+      router.replace(path, {
+        scroll: false,
       });
     }
   };
