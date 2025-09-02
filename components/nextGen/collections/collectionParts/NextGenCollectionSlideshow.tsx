@@ -26,6 +26,9 @@ const FETCH_SIZE = 50;
 const DISPLAY_BUFFER = 20;
 const FETCH_TRIGGER = 10;
 
+// Memoized image component to prevent re-downloads on parent re-renders
+const MemoizedTokenImage = memo(NextGenTokenImage);
+
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   const getSlidesPerView = useCallback(() => {
     if (window.innerWidth > 1200) {
@@ -139,7 +142,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                       key={`${token.id}-${index}`}
                       className="pt-4 pb-4 unselectable"
                     >
-                      <NextGenTokenImage
+                      <MemoizedTokenImage
                         token={token}
                         info_class="font-smaller"
                       />
