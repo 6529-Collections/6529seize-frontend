@@ -7,12 +7,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useCallback, useEffect, useState, memo } from "react";
+import { useCallback, useEffect, useState, memo, useRef } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { A11y, Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { useIntersectionObserver } from "../../../../hooks/scroll/useIntersectionObserver";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { formatNameForUrl } from "../../nextgen_helpers";
 import styles from "../NextGen.module.scss";
@@ -45,6 +46,10 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreOnServer, setHasMoreOnServer] = useState(false);
   const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
+  const [isInViewport, setIsInViewport] = useState(false);
+  const [swiperInstance, setSwiperInstance] = useState<any>(null);
+  
+  const slideshowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -53,6 +58,30 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [getSlidesPerView]);
+
+  useIntersectionObserver(
+    slideshowRef,
+    { threshold: 0.3 },
+    (entry) => setIsInViewport(entry.isIntersecting)
+  );
+
+  // Stop autoplay initially when swiper is created
+  useEffect(() => {
+    if (swiperInstance?.autoplay) {
+      swiperInstance.autoplay.stop();
+    }
+  }, [swiperInstance]);
+
+  // Control autoplay based on viewport visibility
+  useEffect(() => {
+    if (swiperInstance?.autoplay) {
+      if (isInViewport) {
+        swiperInstance.autoplay.start();
+      } else {
+        swiperInstance.autoplay.stop();
+      }
+    }
+  }, [isInViewport, swiperInstance]);
 
   const fetchMoreTokens = useCallback(async () => {
     commonApiFetch<{
@@ -101,7 +130,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   }, [currentSlide, displayTokens.length, allTokens, hasMoreOnServer]);
 
   return (
-    <Container fluid className={styles.slideshowContainer}>
+    <Container fluid className={styles.slideshowContainer} ref={slideshowRef}>
       <Row>
         <Col>
           <Container className="pt-3 pb-3">
@@ -127,16 +156,21 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
               <Col>
                 <Swiper
                   modules={[Navigation, A11y, Autoplay]}
-                  autoplay
+                  autoplay={{
+                    delay: 3000,
+                    disableOnInteraction: false,
+                  }}
                   spaceBetween={20}
                   slidesPerView={Math.min(slidesPerView, displayTokens.length)}
                   navigation
+                  centeredSlides
                   pagination={{ clickable: true }}
+                  onSwiper={setSwiperInstance}
                   onSlideChange={(swiper) => {
                     setCurrentSlide(swiper.realIndex);
                   }}
                 >
-                  {displayTokens.length > 1 && <SwiperAutoplayButton />}
+                  {displayTokens.length > 1 && <SwiperAutoplayButton isInViewport={isInViewport} />}
                   {displayTokens.map((token, index) => (
                     <SwiperSlide
                       key={`${token.id}-${index}`}
@@ -158,29 +192,29 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   );
 }
 
-function SwiperAutoplayButton() {
+function SwiperAutoplayButton({ isInViewport }: { isInViewport: boolean }) {
   const swiper = useSwiper();
 
   const { isCapacitor } = useCapacitor();
 
-  const [paused, setPaused] = useState(isCapacitor);
+  const [manuallyPaused, setManuallyPaused] = useState(isCapacitor);
 
   useEffect(() => {
-    if (paused) {
+    if (manuallyPaused || !isInViewport) {
       swiper.autoplay.stop();
-    } else {
+    } else if (isInViewport && !manuallyPaused) {
       swiper.autoplay.start();
     }
-  }, [paused, swiper.autoplay]);
+  }, [manuallyPaused, isInViewport, swiper.autoplay]);
 
   return (
     <div className="text-center">
       <FontAwesomeIcon
         style={{ height: "24px", cursor: "pointer" }}
         onClick={() => {
-          setPaused(!paused);
+          setManuallyPaused(!manuallyPaused);
         }}
-        icon={paused ? faPlayCircle : faPauseCircle}
+        icon={manuallyPaused ? faPlayCircle : faPauseCircle}
       />
     </div>
   );

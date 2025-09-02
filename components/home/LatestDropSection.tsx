@@ -47,6 +47,7 @@ export default function LatestDropSection({ featuredNft }: Props) {
   } = useManifoldClaimDisplays({ manifoldClaim });
 
   useEffect(() => {
+
     if (connectedProfile?.consolidation_key && featuredNft) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${featuredNft.contract}&token_id=${featuredNft.id}`
