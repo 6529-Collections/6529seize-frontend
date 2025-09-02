@@ -298,16 +298,6 @@ export type ProfileActivityLog =
   | ProfileActivityLogDropCreated
   | ProfileActivityLogProxyDropRatingEdit;
 
-interface ProfilesMatterRating {
-  readonly rater_handle: string;
-  readonly matter: RateMatter;
-  readonly matter_category: string;
-  readonly rating: number;
-  readonly rater_cic_rating: number;
-  readonly rater_tdh: number;
-  readonly last_modified: Date;
-}
-
 export interface CommunityMemberMinimal {
   readonly profile_id: string | null;
   readonly handle: string | null;
