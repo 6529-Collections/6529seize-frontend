@@ -20,7 +20,7 @@ import styles from "../NextGen.module.scss";
 import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 
 interface Props {
- readonly collection: NextGenCollection;
+  readonly collection: NextGenCollection;
 }
 
 const FETCH_SIZE = 50;
@@ -48,7 +48,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
   const [isInViewport, setIsInViewport] = useState(false);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
-  
+
   const slideshowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,10 +59,8 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     return () => window.removeEventListener("resize", handleResize);
   }, [getSlidesPerView]);
 
-  useIntersectionObserver(
-    slideshowRef,
-    { threshold: 0.3 },
-    (entry) => setIsInViewport(entry.isIntersecting)
+  useIntersectionObserver(slideshowRef, { threshold: 0.3 }, (entry) =>
+    setIsInViewport(entry.isIntersecting)
   );
 
   // Stop autoplay initially when swiper is created
@@ -171,7 +169,9 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                     setCurrentSlide(swiper.realIndex);
                   }}
                 >
-                  {displayTokens.length > 1 && <SwiperAutoplayButton isInViewport={isInViewport} />}
+                  {displayTokens.length > 1 && (
+                    <SwiperAutoplayButton isInViewport={isInViewport} />
+                  )}
                   {displayTokens.map((token, index) => (
                     <SwiperSlide
                       key={`${token.id}-${index}`}
@@ -193,7 +193,11 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
   );
 }
 
-function SwiperAutoplayButton({ isInViewport }: { isInViewport: boolean }) {
+function SwiperAutoplayButton({
+  isInViewport,
+}: {
+  readonly isInViewport: boolean;
+}) {
   const swiper = useSwiper();
 
   const { isCapacitor } = useCapacitor();
