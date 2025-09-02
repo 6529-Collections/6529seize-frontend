@@ -92,6 +92,9 @@ export default function LatestDropSection({ featuredNft }: Props) {
       ).then((response: DBResponse) => {
         const balanceObject: NftOwner = response.data[0];
         setNftBalance(balanceObject?.balance ?? 0);
+      }).catch((error) => {
+        console.error('Failed to fetch NFT balance:', error);
+        // Balance remains 0, which is the current fallback behavior
       });
     } else {
       setNftBalance(0);

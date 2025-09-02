@@ -20,7 +20,9 @@ export default function NFTHTMLRenderer(props: BaseRendererProps) {
         src={
           "metadata" in props.nft && props.nft.metadata.animation
             ? props.nft.metadata.animation
-            : props.nft.metadata.animation_url
+            : "metadata" in props.nft 
+            ? props.nft.metadata.animation_url
+            : undefined
         }
         id={props.id ?? `iframe-${props.nft.id}`}
       />
