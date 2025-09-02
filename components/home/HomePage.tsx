@@ -41,11 +41,11 @@ export default function HomePage({
   }
 
   return (
-    <div className="tw-h-full tw-pb-6 tw-bg-iron-950">
+    <div className="tw-h-full tw-bg-iron-950">
       {/* Tab Navigation */}
       <div
         ref={setTabsRef}
-        className="tw-px-6 tw-overflow-hidden tw-border-b tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-t-0"
+        className="tw-px-6 tw-sticky tw-top-0 tw-z-50 tw-overflow-hidden tw-bg-iron-950/80 tw-backdrop-blur-sm tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
       >
         <div
           className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"

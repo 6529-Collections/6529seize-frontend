@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { type UseSidebarStateReturn } from "@/hooks/useSidebarState";
+import { type UseSidebarStateReturn, useSidebarState } from "@/hooks/useSidebarState";
 import {
   type NavItem,
   type SidebarSection,
@@ -31,10 +31,11 @@ import DesktopSidebarExpandableItem from "./nav/DesktopSidebarExpandableItem";
 //
 
 interface DesktopSidebarNavProps {
-  sidebarState: UseSidebarStateReturn;
+  isCollapsed: boolean;
 }
 
-function DesktopSidebarNav({ sidebarState }: DesktopSidebarNavProps) {
+function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
+  const sidebarState = useSidebarState();
   const pathname = usePathname();
   const { showWaves } = useAuth();
   const { address } = useSeizeConnectContext();
@@ -280,7 +281,7 @@ function DesktopSidebarNav({ sidebarState }: DesktopSidebarNavProps) {
 
   return (
     <>
-      <nav className="tw-flex tw-flex-1 tw-flex-col">
+      <nav className="tw-flex tw-flex-1 tw-flex-col tw-mt-6">
         <ul
           role="list"
           className="tw-flex tw-flex-1 tw-flex-col tw-space-y-2 tw-list-none tw-pl-0"
@@ -309,7 +310,7 @@ function DesktopSidebarNav({ sidebarState }: DesktopSidebarNavProps) {
                     iconSizeClass={item.iconSizeClass}
                     label={item.name}
                     active={isActive}
-                    collapsed={sidebarState.isMainSidebarCollapsed}
+                    collapsed={isCollapsed}
                     title={item.name}
                     ariaExpanded={isActive}
                     ariaControls="collections-submenu"
@@ -321,7 +322,7 @@ function DesktopSidebarNav({ sidebarState }: DesktopSidebarNavProps) {
                     iconSizeClass={item.iconSizeClass}
                     label={item.name}
                     active={isActive}
-                    collapsed={sidebarState.isMainSidebarCollapsed}
+                    collapsed={isCollapsed}
                     title={item.name}
                   />
                 )}

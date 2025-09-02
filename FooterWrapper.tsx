@@ -12,5 +12,6 @@ export default function FooterWrapper() {
     ["/waves", "/my-stream", "/open-mobile"].some((path) =>
       pathname?.startsWith(path)
     );
-  return hideFooter ? null : <Footer />;
+  // return hideFooter ? null : <Footer />;
+  return null; // Footer temporarily commented out
 }

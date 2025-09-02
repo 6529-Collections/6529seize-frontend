@@ -13,13 +13,16 @@ interface DesktopSidebarSectionProps {
   readonly pathname: string | null;
 }
 
-const baseRowClasses =
-  "tw-w-full tw-text-lg tw-no-underline tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-group tw-justify-start tw-px-3 tw-h-12 tw-transition-all tw-duration-300";
+const baseRowClassesExpanded =
+  "tw-w-full tw-text-base tw-no-underline tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-group tw-justify-start tw-px-3 tw-h-11 tw-transition-all tw-duration-300";
+
+const baseRowClassesCollapsed =
+  "tw-w-full tw-no-underline tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-group tw-h-11 tw-transition-all tw-duration-300";
 
 const navStateClasses = (active?: boolean) =>
   active
-    ? "tw-text-white desktop-hover:hover:tw-text-white"
-    : "tw-text-iron-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
+    ? "tw-bg-iron-800 tw-text-white desktop-hover:hover:tw-text-white"
+    : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
 
 const itemClasses = (active?: boolean) =>
   `tw-group tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-300 tw-px-3 tw-py-2.5 ${
@@ -47,7 +50,7 @@ export default function DesktopSidebarExpandableItem({
       <li>
         <Link
           href={href}
-          className={`${baseRowClasses} ${navStateClasses(sectionActive)}`}
+          className={`${baseRowClassesCollapsed} ${navStateClasses(sectionActive)}`}
           title={section.name}
         >
           <section.icon aria-hidden="true" className="tw-h-6 tw-w-6 tw-shrink-0" />
@@ -62,7 +65,7 @@ export default function DesktopSidebarExpandableItem({
       <button
         type="button"
         onClick={onToggle}
-        className={`${baseRowClasses} ${navStateClasses(sectionActive)} tw-bg-transparent tw-border-0 tw-justify-between`}
+        className={`${baseRowClassesExpanded} ${navStateClasses(sectionActive)} tw-bg-transparent tw-border-0 tw-justify-between`}
         aria-expanded={expanded}
         aria-controls={`${section.key}-section`}
         aria-label={`${expanded ? "Collapse" : "Expand"} ${section.name} section`}
