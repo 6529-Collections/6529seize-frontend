@@ -47,7 +47,7 @@ import {
 } from "@/helpers/server.helpers";
 
 // Dummy Identity tab
-function DummyIdentityTab({ profile }: { profile: any }) {
+function DummyIdentityTab({ profile }: { readonly profile: any }) {
   return <div data-testid="identity">IDENTITY:{profile.handle}</div>;
 }
 

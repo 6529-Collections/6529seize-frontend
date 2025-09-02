@@ -47,7 +47,7 @@ import {
 } from "@/helpers/server.helpers";
 
 // Dummy Rep tab
-function DummyRepTab({ profile }: { profile: any }) {
+function DummyRepTab({ profile }: { readonly profile: any }) {
   return <div data-testid="rep">REP:{profile.handle}</div>;
 }
 

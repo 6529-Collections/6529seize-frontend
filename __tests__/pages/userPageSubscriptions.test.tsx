@@ -47,7 +47,7 @@ import {
 } from "@/helpers/server.helpers";
 
 // A super simple Tab to verify rendering
-function DummySubscriptionsTab({ profile }: { profile: any }) {
+function DummySubscriptionsTab({ profile }: { readonly profile: any }) {
   return <div data-testid="subscriptions">SUBS:{profile.handle}</div>;
 }
 

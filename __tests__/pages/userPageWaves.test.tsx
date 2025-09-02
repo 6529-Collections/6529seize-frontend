@@ -43,7 +43,7 @@ import {
 } from "@/helpers/server.helpers";
 
 // A super simple Tab to verify rendering
-function DummyWavesTab({ profile }: { profile: any }) {
+function DummyWavesTab({ profile }: { readonly profile: any }) {
   return <div data-testid="waves-tab">WAVES:{profile.handle}</div>;
 }
 

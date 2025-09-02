@@ -44,10 +44,10 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { userPageNeedsRedirect } from "@/helpers/server.helpers";
 
 // Dummy tabs for index and proxy
-function DummyHomeTab({ profile }: { profile: any }) {
+function DummyHomeTab({ profile }: { readonly profile: any }) {
   return <div data-testid="home">HOME:{profile.handle}</div>;
 }
-function DummyProxyTab({ profile }: { profile: any }) {
+function DummyProxyTab({ profile }: { readonly profile: any }) {
   return <div data-testid="proxy">PROXY:{profile.handle}</div>;
 }
 
@@ -95,9 +95,6 @@ describe("user index page via createUserTabPage", () => {
   it("generateMetadata works for index", async () => {
     const { generateMetadata } = buildHomeFactory();
     const spy = jest.spyOn(Helpers, "getMetadataForUserPage");
-    const meta = await generateMetadata({
-      params: Promise.resolve({ user: "Dave" }),
-    } as any);
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave" }),
       "Home"
@@ -137,9 +134,6 @@ describe("proxy page via createUserTabPage", () => {
   it("generateMetadata works for proxy", async () => {
     const { generateMetadata } = buildProxyFactory();
     const spy = jest.spyOn(Helpers, "getMetadataForUserPage");
-    const meta = await generateMetadata({
-      params: Promise.resolve({ user: "Dave" }),
-    } as any);
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave" }),
       "Proxy"

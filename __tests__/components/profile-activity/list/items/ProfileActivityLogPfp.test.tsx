@@ -5,7 +5,7 @@ import { render, screen } from "@testing-library/react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (p: any) => <img {...p} />,
+  default: (p: any) => <img {...p} alt="test" />,
 }));
 
 jest.mock(

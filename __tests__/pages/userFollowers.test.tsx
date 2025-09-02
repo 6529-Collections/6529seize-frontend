@@ -47,7 +47,7 @@ import {
 } from "@/helpers/server.helpers";
 
 // Dummy Followers tab
-function DummyFollowersTab({ profile }: { profile: any }) {
+function DummyFollowersTab({ profile }: { readonly profile: any }) {
   return <div data-testid="followers">FOLLOWERS:{profile.handle}</div>;
 }
 
