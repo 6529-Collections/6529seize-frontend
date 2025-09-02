@@ -1,6 +1,14 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import React, { 
+  createContext, 
+  useContext, 
+  useState, 
+  useCallback, 
+  useMemo, 
+  useEffect, 
+  ReactNode 
+} from "react";
 
 export interface SidebarState {
   isMainSidebarCollapsed: boolean;
@@ -22,22 +30,30 @@ export interface UseSidebarStateReturn extends SidebarState, SidebarActions {
   canBothSidebarsBeVisible: boolean;
 }
 
-/**
- * Custom hook for managing desktop sidebar state
- * 
- * This hook manages the state of both the main sidebar and collections submenu,
- * implementing the specific behavior requirements:
- * - Collections click: collapse main sidebar and show submenu
- * - Chevron-left click: expand main sidebar while keeping submenu open
- * - Both sidebars can be visible simultaneously
- */
-export function useSidebarState(): UseSidebarStateReturn {
-  const [isMainSidebarCollapsed, setIsMainSidebarCollapsed] = useState(false);
+const MAIN_SIDEBAR_COLLAPSED_KEY = "desktop-sidebar-collapsed";
+
+// Create the context
+const SidebarContext = createContext<UseSidebarStateReturn | null>(null);
+
+// Provider component
+export function SidebarProvider({ children }: { children: ReactNode }) {
+  const [isMainSidebarCollapsed, setIsMainSidebarCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem(MAIN_SIDEBAR_COLLAPSED_KEY);
+    return saved ? JSON.parse(saved) : false;
+  });
   const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
+
+  // Persist main sidebar state to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(MAIN_SIDEBAR_COLLAPSED_KEY, JSON.stringify(isMainSidebarCollapsed));
+    }
+  }, [isMainSidebarCollapsed]);
 
   // Main sidebar actions
   const toggleMainSidebar = useCallback(() => {
-    setIsMainSidebarCollapsed(prev => !prev);
+    setIsMainSidebarCollapsed((prev: boolean) => !prev);
   }, []);
 
   const collapseMainSidebar = useCallback(() => {
@@ -50,7 +66,7 @@ export function useSidebarState(): UseSidebarStateReturn {
 
   // Collections submenu actions
   const toggleCollectionsSubmenu = useCallback(() => {
-    setIsCollectionsSubmenuOpen(prev => !prev);
+    setIsCollectionsSubmenuOpen((prev: boolean) => !prev);
   }, []);
 
   const openCollectionsSubmenu = useCallback(() => {
@@ -84,7 +100,7 @@ export function useSidebarState(): UseSidebarStateReturn {
     return !isMainSidebarCollapsed && isCollectionsSubmenuOpen;
   }, [isMainSidebarCollapsed, isCollectionsSubmenuOpen]);
 
-  return {
+  const value = useMemo(() => ({
     // State
     isMainSidebarCollapsed,
     isCollectionsSubmenuOpen,
@@ -101,7 +117,34 @@ export function useSidebarState(): UseSidebarStateReturn {
     // Specific interaction handlers
     handleCollectionsClick,
     handleChevronLeftClick,
-  };
+  }), [
+    isMainSidebarCollapsed,
+    isCollectionsSubmenuOpen,
+    canBothSidebarsBeVisible,
+    toggleMainSidebar,
+    collapseMainSidebar,
+    expandMainSidebar,
+    toggleCollectionsSubmenu,
+    openCollectionsSubmenu,
+    closeCollectionsSubmenu,
+    handleCollectionsClick,
+    handleChevronLeftClick,
+  ]);
+
+  return (
+    <SidebarContext.Provider value={value}>
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
+// Hook to use the sidebar context
+export function useSidebarState(): UseSidebarStateReturn {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error('useSidebarState must be used within a SidebarProvider');
+  }
+  return context;
 }
 
 export default useSidebarState;

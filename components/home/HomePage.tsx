@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -18,6 +19,21 @@ export default function HomePage({
 }: HomePageProps) {
   const { isApp } = useDeviceInfo();
   const [activeTab, setActiveTab] = useState<"feed" | "latest">("feed");
+  const { registerRef } = useLayout();
+
+  // Local ref for tabs
+  const tabsRef = useRef<HTMLDivElement | null>(null);
+
+  // Callback ref for registration with LayoutContext
+  const setTabsRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      // Update local ref
+      tabsRef.current = element;
+      // Register with LayoutContext
+      registerRef("tabs", element);
+    },
+    [registerRef]
+  );
 
   // For mobile app, return null to let mobile layout handle routing
   if (isApp) {
@@ -25,9 +41,12 @@ export default function HomePage({
   }
 
   return (
-    <div className="tw-h-full tw-px-6 tw-pt-4 tw-pb-6 tw-bg-iron-950">
-      {/* Tab Navigation - matching profile page design */}
-      <div className="tw-overflow-hidden mb-2">
+    <div className="tw-h-full tw-pb-6 tw-bg-iron-950">
+      {/* Tab Navigation */}
+      <div
+        ref={setTabsRef}
+        className="tw-px-6 tw-overflow-hidden tw-border-b tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-t-0"
+      >
         <div
           className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
           aria-label="Tabs"
@@ -72,10 +91,9 @@ export default function HomePage({
         </div>
       </div>
 
-      {/* Tab Content */}
-      <div className="tw-h-full">
+      <div className="tw-h-full tw-px-6">
         {activeTab === "feed" ? (
-          <div>
+          <div className="tw-h-full tw-overflow-hidden">
             <HomeFeed />
           </div>
         ) : (

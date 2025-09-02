@@ -7,9 +7,11 @@ import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../waves/drops/Drop";
 import BrainContent from "../brain/content/BrainContent";
 import MyStream from "../brain/my-stream/MyStream";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 
 export default function HomeFeed() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const { homepageFeedStyle } = useLayout();
 
   const onDropContentClick = (drop: ExtendedDrop) => {
     // For now, just log - later we can navigate to waves
@@ -65,7 +67,7 @@ export default function HomeFeed() {
   };
 
   return (
-    <div className="tw-h-full">
+    <div style={homepageFeedStyle}>
       <BrainContent
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}

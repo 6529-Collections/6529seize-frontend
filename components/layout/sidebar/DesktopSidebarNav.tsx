@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { type UseSidebarStateReturn } from "@/hooks/useSidebarState";
@@ -27,10 +25,10 @@ import {
   WrenchScrewdriverIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import DesktopSidebarNavItem from "./nav/DesktopSidebarNavItem";
+import DesktopSidebarExpandableItem from "./nav/DesktopSidebarExpandableItem";
 
-function classNames(...classes: (string | boolean | undefined)[]): string {
-  return classes.filter(Boolean).join(" ");
-}
+//
 
 interface DesktopSidebarNavProps {
   sidebarState: UseSidebarStateReturn;
@@ -54,206 +52,231 @@ function DesktopSidebarNav({ sidebarState }: DesktopSidebarNavProps) {
 
   // Auto-open collections submenu when on a collections page
   useEffect(() => {
-    const collectionsPages = ["/the-memes", "/meme-lab", "/gradients", "/6529-gradient", "/nextgen"];
-    if (collectionsPages.some(page => pathname?.startsWith(page))) {
+    const collectionsPages = [
+      "/the-memes",
+      "/meme-lab",
+      "/gradients",
+      "/6529-gradient",
+      "/nextgen",
+    ];
+    if (collectionsPages.some((page) => pathname?.startsWith(page))) {
       sidebarState.openCollectionsSubmenu();
     }
   }, [pathname, sidebarState]);
 
-  const navigation: NavItem[] = useMemo(() => [
-    {
-      kind: "route",
-      name: "Home",
-      href: "/",
-      icon: "home",
-      iconComponent: HomeIcon,
-    },
-    ...(showWaves
-      ? [
-          {
-            kind: "view" as const,
-            name: "Waves",
-            viewKey: "waves" as const,
-            icon: "waves",
-            iconComponent: WavesIcon,
-            iconSizeClass: "tw-size-6",
-          },
-        ]
-      : []),
-    {
-      kind: "view" as const,
-      name: "Messages",
-      viewKey: "messages" as const,
-      icon: "messages",
-      iconComponent: ChatBubbleIcon,
-    },
-    {
-      kind: "route",
-      name: "Notifications",
-      href: "/notifications",
-      icon: "notifications",
-      iconComponent: BellIcon,
-    },
-    {
-      kind: "action" as const,
-      name: "Collections",
-      action: sidebarState.handleCollectionsClick,
-      icon: "collections",
-      iconComponent: Squares2X2Icon,
-    },
-    {
-      kind: "route",
-      name: "Community",
-      href: "/network",
-      icon: "network",
-      iconComponent: UsersIcon,
-    },
-    ...(address
-      ? [
-          {
-            kind: "route" as const,
-            name: "Profile",
-            href: `/${address}`,
-            icon: "profile",
-            iconComponent: UserIcon,
-          },
-        ]
-      : []),
-  ], [showWaves, address, sidebarState.handleCollectionsClick]);
+  const navigation: NavItem[] = useMemo(
+    () => [
+      {
+        kind: "route",
+        name: "Home",
+        href: "/",
+        icon: "home",
+        iconComponent: HomeIcon,
+      },
+      ...(showWaves
+        ? [
+            {
+              kind: "view" as const,
+              name: "Waves",
+              viewKey: "waves" as const,
+              icon: "waves",
+              iconComponent: WavesIcon,
+              iconSizeClass: "tw-size-6",
+            },
+          ]
+        : []),
+      {
+        kind: "route",
+        name: "Messages",
+        href: "/messages",
+        icon: "messages",
+        iconComponent: ChatBubbleIcon,
+      },
+      {
+        kind: "route",
+        name: "Notifications",
+        href: "/notifications",
+        icon: "notifications",
+        iconComponent: BellIcon,
+      },
+      {
+        kind: "action" as const,
+        name: "Collections",
+        action: sidebarState.handleCollectionsClick,
+        icon: "collections",
+        iconComponent: Squares2X2Icon,
+      },
+      {
+        kind: "route",
+        name: "Community",
+        href: "/network",
+        icon: "network",
+        iconComponent: UsersIcon,
+      },
+      ...(address
+        ? [
+            {
+              kind: "route" as const,
+              name: "Profile",
+              href: `/${address}`,
+              icon: "profile",
+              iconComponent: UserIcon,
+            },
+          ]
+        : []),
+    ],
+    [showWaves, address, sidebarState.handleCollectionsClick]
+  );
 
   // Sidebar expandable sections
-  const expandableSections: SidebarSection[] = useMemo(() => [
-    {
-      key: "tools",
-      name: "Tools",
-      icon: WrenchScrewdriverIcon,
-      items: [
-        { name: "API", href: "/tools/api" },
-        { name: "EMMA", href: "/emma" },
-        { name: "Block Finder", href: "/meme-blocks" },
-        { name: "Open Data", href: "/open-data" },
-      ],
-      subsections: [
-        {
-          name: "NFT Delegation",
-          items: [
-            { name: "Delegation Center", href: "/delegation/delegation-center" },
-            { name: "Wallet Architecture", href: "/delegation/wallet-architecture" },
-            { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
-            { name: "Consolidation Use Cases", href: "/delegation/consolidation-use-cases" },
-            { name: "Wallet Checker", href: "/delegation/wallet-checker" },
-          ],
-        },
-        {
-          name: "The Memes Tools",
-          items: [
-            ...(!capacitor.isIos || country === "US"
-              ? [
-                  {
-                    name: "Memes Subscriptions",
-                    href: "/tools/subscriptions-report",
-                  },
-                ]
-              : []),
-            { name: "Memes Accounting", href: "/meme-accounting" },
-            { name: "Memes Gas", href: "/meme-gas" },
-          ],
-        },
-      ],
-    },
-    {
-      key: "about",
-      name: "About",
-      icon: InformationCircleIcon,
-      items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
-      subsections: [
-        {
-          name: "NFTs",
-          items: [
-            { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
-            ...(!capacitor.isIos || country === "US"
-              ? [
-                  {
-                    name: "Subscriptions",
-                    href: `/about/${AboutSection.SUBSCRIPTIONS}`,
-                  },
-                ]
-              : []),
-            {
-              name: "Memes Calendar",
-              href: `/about/${AboutSection.MEMES_CALENDAR}`,
-            },
-            { name: "Minting", href: `/about/${AboutSection.MINTING}` },
-            {
-              name: "Nakamoto Threshold",
-              href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-            },
-            { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
-            { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
-          ],
-        },
-        {
-          name: "NFT Delegation",
-          items: [
-            {
-              name: "About NFTD",
-              href: `/about/${AboutSection.NFT_DELEGATION}`,
-            },
-            {
-              name: "Primary Address",
-              href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
-            },
-          ],
-        },
-        {
-          name: "6529 Capital",
-          items: [
-            { name: "About 6529 Capital", href: "/capital" },
-            { name: "Company Portfolio", href: "/capital/company-portfolio" },
-            { name: "NFT Fund", href: "/capital/fund" },
-          ],
-        },
-        {
-          name: "Support",
-          items: [
-            { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
-            { name: "Apply", href: `/about/${AboutSection.APPLY}` },
-            { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
-          ],
-        },
-        {
-          name: "Resources",
-          items: [
-            {
-              name: "Data Decentralization",
-              href: `/about/${AboutSection.DATA_DECENTR}`,
-            },
-            { name: "ENS", href: `/about/${AboutSection.ENS}` },
-            { name: "License", href: `/about/${AboutSection.LICENSE}` },
-            {
-              name: "Release Notes",
-              href: `/about/${AboutSection.RELEASE_NOTES}`,
-            },
-          ],
-        },
-      ],
-    },
-  ], [capacitor.isIos, country]);
+  const expandableSections: SidebarSection[] = useMemo(
+    () => [
+      {
+        key: "tools",
+        name: "Tools",
+        icon: WrenchScrewdriverIcon,
+        items: [
+          { name: "API", href: "/tools/api" },
+          { name: "EMMA", href: "/emma" },
+          { name: "Block Finder", href: "/meme-blocks" },
+          { name: "Open Data", href: "/open-data" },
+        ],
+        subsections: [
+          {
+            name: "NFT Delegation",
+            items: [
+              {
+                name: "Delegation Center",
+                href: "/delegation/delegation-center",
+              },
+              {
+                name: "Wallet Architecture",
+                href: "/delegation/wallet-architecture",
+              },
+              { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
+              {
+                name: "Consolidation Use Cases",
+                href: "/delegation/consolidation-use-cases",
+              },
+              { name: "Wallet Checker", href: "/delegation/wallet-checker" },
+            ],
+          },
+          {
+            name: "The Memes Tools",
+            items: [
+              ...(!capacitor.isIos || country === "US"
+                ? [
+                    {
+                      name: "Memes Subscriptions",
+                      href: "/tools/subscriptions-report",
+                    },
+                  ]
+                : []),
+              { name: "Memes Accounting", href: "/meme-accounting" },
+              { name: "Memes Gas", href: "/meme-gas" },
+            ],
+          },
+        ],
+      },
+      {
+        key: "about",
+        name: "About",
+        icon: InformationCircleIcon,
+        items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
+        subsections: [
+          {
+            name: "NFTs",
+            items: [
+              { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
+              ...(!capacitor.isIos || country === "US"
+                ? [
+                    {
+                      name: "Subscriptions",
+                      href: `/about/${AboutSection.SUBSCRIPTIONS}`,
+                    },
+                  ]
+                : []),
+              {
+                name: "Memes Calendar",
+                href: `/about/${AboutSection.MEMES_CALENDAR}`,
+              },
+              { name: "Minting", href: `/about/${AboutSection.MINTING}` },
+              {
+                name: "Nakamoto Threshold",
+                href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+              },
+              { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
+              { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
+            ],
+          },
+          {
+            name: "NFT Delegation",
+            items: [
+              {
+                name: "About NFTD",
+                href: `/about/${AboutSection.NFT_DELEGATION}`,
+              },
+              {
+                name: "Primary Address",
+                href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
+              },
+            ],
+          },
+          {
+            name: "6529 Capital",
+            items: [
+              { name: "About 6529 Capital", href: "/capital" },
+              { name: "Company Portfolio", href: "/capital/company-portfolio" },
+              { name: "NFT Fund", href: "/capital/fund" },
+            ],
+          },
+          {
+            name: "Support",
+            items: [
+              { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
+              { name: "Apply", href: `/about/${AboutSection.APPLY}` },
+              { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
+            ],
+          },
+          {
+            name: "Resources",
+            items: [
+              {
+                name: "Data Decentralization",
+                href: `/about/${AboutSection.DATA_DECENTR}`,
+              },
+              { name: "ENS", href: `/about/${AboutSection.ENS}` },
+              { name: "License", href: `/about/${AboutSection.LICENSE}` },
+              {
+                name: "Release Notes",
+                href: `/about/${AboutSection.RELEASE_NOTES}`,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    [capacitor.isIos, country]
+  );
 
   // Helper function to determine if nav item is active
-  const isNavItemActive = useCallback((item: NavItem): boolean => {
-    if (item.kind === "route") {
-      return pathname === item.href;
-    }
-    // For view items, we'd need ViewContext, but for now use simple pathname matching
-    if (item.name === "Messages") {
-      return pathname === "/my-stream";
-    }
-    if (item.name === "Waves") {
-      return pathname === "/waves";
-    }
-    return false;
-  }, [pathname]);
+  const isNavItemActive = useCallback(
+    (item: NavItem): boolean => {
+      if (item.kind === "route") {
+        return pathname === item.href;
+      }
+      if (item.name === "Messages") {
+        return pathname?.startsWith("/messages") || false;
+      }
+      if (item.name === "Waves") {
+        return pathname?.startsWith("/waves") || false;
+      }
+      return false;
+    },
+    [pathname]
+  );
+
+  const baseItemTransition = "tw-transition-all tw-duration-300";
 
   return (
     <>
@@ -262,177 +285,68 @@ function DesktopSidebarNav({ sidebarState }: DesktopSidebarNavProps) {
           role="list"
           className="tw-flex tw-flex-1 tw-flex-col tw-space-y-2 tw-list-none tw-pl-0"
         >
-        {/* Main Navigation */}
-        {navigation.map((item) => {
-          const IconComponent = item.iconComponent;
-          const isActive = item.kind === "action" 
-            ? sidebarState.isCollectionsSubmenuOpen 
-            : isNavItemActive(item);
+          {/* Main Navigation */}
+          {navigation.map((item) => {
+            const IconComponent = item.iconComponent;
+            const isActive =
+              item.kind === "action"
+                ? sidebarState.isCollectionsSubmenuOpen
+                : isNavItemActive(item);
 
-          if (item.kind === "action") {
+            const href =
+              item.kind === "route"
+                ? item.href
+                : item.name === "Waves"
+                ? "/waves"
+                : "/my-stream";
+
             return (
               <li key={item.name}>
-                <button
-                  onClick={item.action}
-                  className={classNames(
-                    isActive
-                      ? "tw-bg-iron-800 tw-text-white desktop-hover:hover:tw-text-white"
-                      : "tw-text-iron-300 hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white",
-                    "tw-w-full tw-text-lg tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-group tw-justify-center lg:tw-justify-start",
-                    "tw-px-3 tw-py-2.5"
-                  )}
-                  title={item.name}
-                  aria-label={`${isActive ? 'Close' : 'Open'} ${item.name}`}
-                  aria-expanded={isActive}
-                  aria-controls="collections-submenu"
-                >
-                  {IconComponent && (
-                    <IconComponent
-                      className={`tw-h-6 tw-w-6 tw-shrink-0 ${
-                        item.iconSizeClass || ""
-                      }`}
-                    />
-                  )}
-                  {!sidebarState.isMainSidebarCollapsed && <span className="tw-hidden lg:tw-block">{item.name}</span>}
-                </button>
-              </li>
-            );
-          }
-
-          return (
-            <li key={item.name}>
-              <Link
-                href={item.kind === "route" ? item.href : "/my-stream"}
-                className={classNames(
-                  isActive
-                    ? "tw-bg-iron-800 tw-text-white desktop-hover:hover:tw-text-white"
-                    : "tw-text-iron-300 hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white",
-                  "tw-w-full tw-text-lg tw-no-underline tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-group tw-justify-center lg:tw-justify-start",
-                  "tw-px-3 tw-py-2.5"
-                )}
-                title={item.name}
-              >
-                {IconComponent && (
-                  <IconComponent
-                    className={`tw-h-6 tw-w-6 tw-shrink-0 ${
-                      item.iconSizeClass || ""
-                    }`}
+                {item.kind === "action" ? (
+                  <DesktopSidebarNavItem
+                    onClick={item.action}
+                    icon={IconComponent}
+                    iconSizeClass={item.iconSizeClass}
+                    label={item.name}
+                    active={isActive}
+                    collapsed={sidebarState.isMainSidebarCollapsed}
+                    title={item.name}
+                    ariaExpanded={isActive}
+                    ariaControls="collections-submenu"
+                  />
+                ) : (
+                  <DesktopSidebarNavItem
+                    href={href}
+                    icon={IconComponent}
+                    iconSizeClass={item.iconSizeClass}
+                    label={item.name}
+                    active={isActive}
+                    collapsed={sidebarState.isMainSidebarCollapsed}
+                    title={item.name}
                   />
                 )}
-                {!sidebarState.isMainSidebarCollapsed && <span className="tw-hidden lg:tw-block">{item.name}</span>}
-              </Link>
-            </li>
-          );
-        })}
+              </li>
+            );
+          })}
 
-        {/* Expandable sections - only show on large screens when not collapsed */}
-        {!sidebarState.isMainSidebarCollapsed && expandableSections.map((section) => (
-          <div key={section.key} className="tw-hidden lg:tw-block">
-            <button
-              onClick={() => toggleSection(section.key)}
-              className={classNames(
-                "tw-text-iron-300 hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white",
-                "tw-w-full tw-text-lg tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-group tw-justify-center lg:tw-justify-between",
-                "tw-px-3 tw-py-2.5"
-              )}
-              aria-expanded={expandedSections.includes(section.key)}
-              aria-controls={`${section.key}-section`}
-              aria-label={`${expandedSections.includes(section.key) ? 'Collapse' : 'Expand'} ${section.name} section`}
-            >
-              <div className="tw-flex tw-gap-4 tw-items-center tw-justify-center lg:tw-justify-start">
-                <section.icon
-                  aria-hidden="true"
-                  className="tw-h-6 tw-w-6 tw-shrink-0"
-                />
-                {!sidebarState.isMainSidebarCollapsed && <span className="tw-hidden lg:tw-block">{section.name}</span>}
-              </div>
-              <ChevronRightIcon
-                className={classNames(
-                  "tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 tw-hidden lg:tw-block",
-                  expandedSections.includes(section.key) ? "tw-rotate-90" : ""
-                )}
-              />
-            </button>
-            {expandedSections.includes(section.key) && (
-              <ul 
-                role="list" 
-                className="tw-mt-1 tw-space-y-1"
-                id={`${section.key}-section`}
-              >
-                {section.items.map((item) => (
-                  <li key={item.name} className="tw-ml-6">
-                    <Link
-                      href={item.href}
-                      className={classNames(
-                        pathname === item.href
-                          ? "tw-bg-iron-800 tw-text-white"
-                          : "tw-text-[#E5E5E5] hover:tw-bg-[#1A1A1A] hover:tw-text-white",
-                        "tw-group tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-px-3 tw-py-2.5"
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-                {section.subsections?.map((subsection) => (
-                  <li key={subsection.name} className="tw-ml-6">
-                    <div className="tw-text-xs tw-font-semibold tw-text-[#E5E5E5] tw-px-2 tw-py-1 tw-mt-4">
-                      {subsection.name}
-                    </div>
-                    <ul role="list" className="tw-space-y-1">
-                      {subsection.items.map((item) => (
-                        <li key={item.name}>
-                          <Link
-                            href={item.href}
-                            className={classNames(
-                              pathname === item.href
-                                ? "tw-bg-iron-800 tw-text-white"
-                                : "tw-text-[#E5E5E5] hover:tw-bg-[#1A1A1A] hover:tw-text-white",
-                              "tw-group tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-px-3 tw-py-2.5"
-                            )}
-                          >
-                            {item.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ))}
-
-        {/* Collapsed expandable sections - show only icons on small screens */}
-        {expandableSections.map((section) => (
-          <li key={`${section.key}-collapsed`} className="lg:tw-hidden">
-            <Link
-              href={section.items[0]?.href || "#"}
-              className={classNames(
-                pathname?.startsWith(section.items[0]?.href || "") ||
-                  (section.key === "tools" && pathname?.startsWith("/tools")) ||
-                  (section.key === "about" && pathname?.startsWith("/about"))
-                  ? "tw-bg-iron-800 tw-text-white desktop-hover:hover:tw-text-white"
-                  : "tw-text-iron-300 hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white",
-                "tw-w-full tw-text-lg tw-no-underline tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-200 tw-group tw-justify-center",
-                "tw-px-3 tw-py-2.5"
-              )}
-              title={section.name}
-            >
-              <section.icon
-                aria-hidden="true"
-                className="tw-h-6 tw-w-6 tw-shrink-0"
-              />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-    <CollectionsSubmenu 
-      isOpen={sidebarState.isCollectionsSubmenuOpen}
-      onExpandSidebar={sidebarState.handleChevronLeftClick}
-      sidebarCollapsed={sidebarState.isMainSidebarCollapsed}
-    />
+          {/* Sections - single component for both states */}
+          {expandableSections.map((section) => (
+            <DesktopSidebarExpandableItem
+              key={section.key}
+              section={section}
+              expanded={expandedSections.includes(section.key)}
+              onToggle={() => toggleSection(section.key)}
+              collapsed={sidebarState.isMainSidebarCollapsed}
+              pathname={pathname || null}
+            />
+          ))}
+        </ul>
+      </nav>
+      <CollectionsSubmenu
+        isOpen={sidebarState.isCollectionsSubmenuOpen}
+        onExpandSidebar={sidebarState.handleChevronLeftClick}
+        sidebarCollapsed={sidebarState.isMainSidebarCollapsed}
+      />
     </>
   );
 }

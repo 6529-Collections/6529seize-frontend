@@ -107,6 +107,9 @@ interface LayoutContextType {
   // Style for feed view
   myStreamFeedStyle: React.CSSProperties;
 
+  // Style for homepage feed view (excludes header/breadcrumbs, includes tabs)
+  homepageFeedStyle: React.CSSProperties;
+
   // Style for mobile waves view
   mobileWavesViewStyle: React.CSSProperties;
 
@@ -139,6 +142,7 @@ const LayoutContext = createContext<LayoutContextType>({
   faqViewStyle: {}, // Empty style object as default for FAQ
   notificationsViewStyle: {}, // Empty style object as default
   myStreamFeedStyle: {}, // Empty style object as default
+  homepageFeedStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
   mobileAboutViewStyle: {}, // Empty style object as default
 });
@@ -400,6 +404,18 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     return calculateHeightStyle("myStreamFeed", spaces, 0);
   }, [spaces]);
 
+  // Homepage-specific feed style that excludes header/breadcrumb space
+  const homepageFeedStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    // For homepage: exclude header and breadcrumb spacer, but include tabs height
+    const homepageSpaces = {
+      ...spaces,
+      headerSpace: 0, // No header in new homepage layout
+      spacerSpace: 0, // No breadcrumb spacer in new homepage layout
+    };
+    return calculateHeightStyle("myStreamFeed", homepageSpaces, 0);
+  }, [spaces]);
+
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
     return calculateHeightStyle("mobileWaves", spaces, 0);
@@ -424,6 +440,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       faqViewStyle,
       notificationsViewStyle,
       myStreamFeedStyle,
+      homepageFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
     }),
@@ -439,6 +456,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       faqViewStyle,
       notificationsViewStyle,
       myStreamFeedStyle,
+      homepageFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
     ]

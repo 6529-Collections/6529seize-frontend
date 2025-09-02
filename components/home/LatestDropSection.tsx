@@ -89,13 +89,15 @@ export default function LatestDropSection({ featuredNft }: Props) {
     if (connectedProfile?.consolidation_key && featuredNft) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${featuredNft.contract}&token_id=${featuredNft.id}`
-      ).then((response: DBResponse) => {
-        const balanceObject: NftOwner = response.data[0];
-        setNftBalance(balanceObject?.balance ?? 0);
-      }).catch((error) => {
-        console.error('Failed to fetch NFT balance:', error);
-        // Balance remains 0, which is the current fallback behavior
-      });
+      )
+        .then((response: DBResponse) => {
+          const balanceObject: NftOwner = response.data[0];
+          setNftBalance(balanceObject?.balance ?? 0);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch NFT balance:", error);
+          // Balance remains 0, which is the current fallback behavior
+        });
     } else {
       setNftBalance(0);
     }
@@ -104,21 +106,18 @@ export default function LatestDropSection({ featuredNft }: Props) {
   return (
     <Container className="pt-4">
       <Row>
-        <Col>
-          <h1>
-            <span className="font-lightest">Latest</span> Drop
-          </h1>
-        </Col>
-      </Row>
-      <Row>
-        <FeaturedNFTImageColumn featuredNft={featuredNft} nftBalance={nftBalance} />
+        <FeaturedNFTImageColumn
+          featuredNft={featuredNft}
+          nftBalance={nftBalance}
+        />
 
         <Col
           className="pt-3 pb-3"
           xs={{ span: 12 }}
           sm={{ span: 12 }}
           md={{ span: 6 }}
-          lg={{ span: 6 }}>
+          lg={{ span: 6 }}
+        >
           <Container>
             <Row>
               <Col>
@@ -188,9 +187,7 @@ export default function LatestDropSection({ featuredNft }: Props) {
                     <tr>
                       <td>Dimensions</td>
                       <td>
-                        <b>
-                          {getDimensionsFromMetadata(featuredNft.metadata)}
-                        </b>
+                        <b>{getDimensionsFromMetadata(featuredNft.metadata)}</b>
                       </td>
                     </tr>
                   </tbody>
