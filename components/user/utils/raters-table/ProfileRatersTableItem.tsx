@@ -1,19 +1,16 @@
 "use client";
 
-import {
-  CICType,
-  RatingWithProfileInfoAndLevel,
-} from "../../../../entities/IProfile";
-import { useEffect, useState } from "react";
+import { CICType, RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { ProfileRatersTableType } from "@/enums";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import {
   cicToType,
   formatNumberWithCommas,
   getTimeAgo,
-} from "../../../../helpers/Helpers";
-import { ProfileRatersTableType } from "./wrapper/ProfileRatersTableWrapper";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import UserCICAndLevel from "../UserCICAndLevel";
+} from "@/helpers/Helpers";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import UserCICAndLevel from "../UserCICAndLevel";
 
 export const CIC_COLOR: Record<CICType, string> = {
   [CICType.INACCURATE]: "tw-bg-[#F97066]",

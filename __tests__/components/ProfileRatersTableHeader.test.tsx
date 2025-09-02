@@ -1,8 +1,8 @@
+import ProfileRatersTableHeader from "@/components/user/utils/raters-table/ProfileRatersTableHeader";
+import { SortDirection } from "@/entities/ISort";
+import { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ProfileRatersTableHeader from "../../components/user/utils/raters-table/ProfileRatersTableHeader";
-import { ProfileRatersTableType, ProfileRatersParamsOrderBy } from "../../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { SortDirection } from "../../entities/ISort";
 
 describe("ProfileRatersTableHeader", () => {
   it("shows correct title based on table type", () => {

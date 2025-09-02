@@ -1,10 +1,7 @@
-import { RatingWithProfileInfoAndLevel } from "../../../../entities/IProfile";
-import {
-
-  getRandomObjectId,
-} from "../../../../helpers/AllowlistToolHelpers";
+import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { ProfileRatersTableType } from "@/enums";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import ProfileRatersTableItem from "./ProfileRatersTableItem";
-import { ProfileRatersTableType } from "./wrapper/ProfileRatersTableWrapper";
 
 export default function ProfileRatersTableBody({
   ratings,

@@ -173,3 +173,15 @@ export enum RateMatter {
   REP = "REP",
   DROP_REP = "DROP_REP",
 }
+
+export enum ProfileRatersTableType {
+  CIC_RECEIVED = "CIC_RECEIVED",
+  CIC_GIVEN = "CIC_GIVEN",
+  REP_RECEIVED = "REP_RECEIVED",
+  REP_GIVEN = "REP_GIVEN",
+}
+
+export enum ProfileRatersParamsOrderBy {
+  RATING = "RATING",
+  LAST_MODIFIED = "LAST_MODIFIED",
+}

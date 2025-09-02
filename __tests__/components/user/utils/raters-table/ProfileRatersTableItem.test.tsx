@@ -1,7 +1,6 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import ProfileRatersTableItem from "@/components/user/utils/raters-table/ProfileRatersTableItem";
-import { ProfileRatersTableType } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { ProfileRatersTableType } from "@/enums";
+import { render, screen } from "@testing-library/react";
 
 let cicProps: any;
 jest.mock("@/components/user/utils/UserCICAndLevel", () => (props: any) => {
