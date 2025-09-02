@@ -7,12 +7,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { A11y, Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { formatNameForUrl } from "../../nextgen_helpers";
@@ -23,24 +22,13 @@ interface Props {
   collection: NextGenCollection;
 }
 
-const SLIDESHOW_LIMIT = 25;
+const FETCH_SIZE = 50;
+const DISPLAY_BUFFER = 20;
+const FETCH_TRIGGER = 10;
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
-  const [tokens, setTokens] = useState<NextGenToken[]>([]);
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
-
-  useEffect(() => {
-    const handleResize = () => {
-      setSlidesPerView(getSlidesPerView());
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  function getSlidesPerView() {
+  console.log("re-rendering page");
+  const getSlidesPerView = useCallback(() => {
     let slides;
     if (window.innerWidth > 1200) {
       slides = 4;
@@ -51,31 +39,67 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     }
 
     return slides;
-  }
+  }, []);
 
-  async function loadNextPage() {
+  const [allTokens, setAllTokens] = useState<NextGenToken[]>([]);
+  const [displayTokens, setDisplayTokens] = useState<NextGenToken[]>([]);
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreOnServer, setHasMoreOnServer] = useState(false);
+  const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSlidesPerView(getSlidesPerView());
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [getSlidesPerView]);
+
+
+
+  const fetchMoreTokens = useCallback(async () => {
     commonApiFetch<{
       count: number;
       page: number;
       next: any;
       data: NextGenToken[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${SLIDESHOW_LIMIT}&page=${page}&sort=random`,
+      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${FETCH_SIZE}&page=${currentPage}&sort=random`,
     }).then((response) => {
-      setTokens([...tokens, ...response.data]);
-      setHasMore(response.next);
+      setAllTokens(prev => [...prev, ...response.data]);
+      setHasMoreOnServer(response.next);
     });
-  }
+  }, [props.collection.id, currentPage]);
 
+  // Initial fetch
   useEffect(() => {
-    loadNextPage();
-  }, [props.collection.id, page]);
+    fetchMoreTokens();
+  }, [fetchMoreTokens]);
 
+  // Update displayTokens when allTokens changes
   useEffect(() => {
-    if (currentSlide >= tokens.length - 5 && hasMore) {
-      setPage(page + 1);
+    if (allTokens.length > 0 && displayTokens.length === 0) {
+      setDisplayTokens(allTokens.slice(0, DISPLAY_BUFFER));
     }
-  }, [currentSlide]);
+  }, [allTokens, displayTokens.length]);
+
+  // Handle scrolling - expand display or fetch more
+  useEffect(() => {
+    const remainingInDisplay = displayTokens.length - currentSlide;
+    const remainingInAll = allTokens.length - displayTokens.length;
+
+    // Need to expand displayTokens?
+    if (remainingInDisplay <= 5 && remainingInAll > 0) {
+      const newDisplayLength = Math.min(displayTokens.length + 10, allTokens.length);
+      setDisplayTokens(allTokens.slice(0, newDisplayLength));
+    }
+
+    // Need to fetch more from server?
+    if (remainingInAll <= FETCH_TRIGGER && hasMoreOnServer) {
+      setCurrentPage(prev => prev + 1);
+    }
+  }, [currentSlide, displayTokens.length, allTokens.length, hasMoreOnServer]);
 
   return (
     <Container fluid className={styles.slideshowContainer}>
@@ -88,7 +112,8 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
                   )}/art`}
-                  className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
+                  className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}
+                >
                   <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                     View All
                     <FontAwesomeIcon
@@ -105,18 +130,19 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   modules={[Navigation, A11y, Autoplay]}
                   autoplay
                   spaceBetween={20}
-                  slidesPerView={Math.min(slidesPerView, tokens.length)}
+                  slidesPerView={Math.min(slidesPerView, displayTokens.length)}
                   navigation
-                  centeredSlides
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
                     setCurrentSlide(swiper.realIndex);
-                  }}>
-                  {tokens.length > 1 && <SwiperAutoplayButton />}
-                  {tokens.map((token, index) => (
+                  }}
+                >
+                  {displayTokens.length > 1 && <SwiperAutoplayButton />}
+                  {displayTokens.map((token, index) => (
                     <SwiperSlide
-                      key={getRandomObjectId()}
-                      className="pt-4 pb-4 unselectable">
+                      key={`${token.id}-${index}`}
+                      className="pt-4 pb-4 unselectable"
+                    >
                       <NextGenTokenImage
                         token={token}
                         info_class="font-smaller"
@@ -146,7 +172,7 @@ function SwiperAutoplayButton() {
     } else {
       swiper.autoplay.start();
     }
-  }, [paused]);
+  }, [paused, swiper.autoplay]);
 
   return (
     <div className="text-center">
