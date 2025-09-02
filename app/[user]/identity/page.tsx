@@ -4,23 +4,24 @@ import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentity
 import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
 import { RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
 import { getInitialRatersParams } from "@/helpers/server.helpers";
 
 const MATTER_TYPE = RateMatter.NIC;
 
-function getInitialActivityLogParams(
+const getInitialActivityLogParams = (
   handleOrWallet: string
-): ActivityLogParams {
-  return {
-    page: 1,
-    pageSize: 10,
+): ActivityLogParams => ({
+  page: 1,
+  pageSize: 10,
+  logTypes: getProfileLogTypes({
     logTypes: [],
-    matter: null,
-    targetType: FilterTargetType.ALL,
-    handleOrWallet,
-    groupId: null,
-  };
-}
+  }),
+  matter: null,
+  targetType: FilterTargetType.ALL,
+  handleOrWallet,
+  groupId: null,
+});
 
 function IdentityTab({ profile }: { readonly profile: ApiIdentity }) {
   const handleOrWallet = (
