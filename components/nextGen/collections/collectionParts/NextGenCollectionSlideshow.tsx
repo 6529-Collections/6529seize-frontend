@@ -20,7 +20,7 @@ import styles from "../NextGen.module.scss";
 import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 
 interface Props {
-  collection: NextGenCollection;
+ readonly collection: NextGenCollection;
 }
 
 const FETCH_SIZE = 50;

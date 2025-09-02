@@ -8,8 +8,8 @@ import {
 } from "@/helpers/nft.helpers";
 
 interface FeaturedNFTDetailsTableProps {
-  nft: NFTWithMemesExtendedData;
-  editionSizeDisplay: React.ReactNode;
+  readonly nft: NFTWithMemesExtendedData;
+  readonly editionSizeDisplay: React.ReactNode;
 }
 
 export default function FeaturedNFTDetailsTable({

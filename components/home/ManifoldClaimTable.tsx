@@ -3,9 +3,9 @@ import { Table } from "react-bootstrap";
 import { NftPageStats } from "@/components/nftAttributes/NftStats";
 
 interface ManifoldClaimTableProps {
-  statusDisplay: React.ReactNode;
-  costDisplay: React.ReactNode;
-  nft: NFTWithMemesExtendedData;
+  readonly statusDisplay: React.ReactNode;
+  readonly costDisplay: React.ReactNode;
+  readonly nft: NFTWithMemesExtendedData;
 }
 
 export default function ManifoldClaimTable({

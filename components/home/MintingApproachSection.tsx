@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Col, Row } from "react-bootstrap";
 
 interface MintingApproachSectionProps {
-  nftId: number;
+ readonly nftId: number;
 }
 
 export default function MintingApproachSection({
