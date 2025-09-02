@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, memo } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { A11y, Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
@@ -27,18 +27,13 @@ const DISPLAY_BUFFER = 20;
 const FETCH_TRIGGER = 10;
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
-  console.log("re-rendering page");
   const getSlidesPerView = useCallback(() => {
-    let slides;
     if (window.innerWidth > 1200) {
-      slides = 4;
+      return 4;
     } else if (window.innerWidth > 500) {
-      slides = 2;
-    } else {
-      slides = 1;
+      return 2;
     }
-
-    return slides;
+    return 1;
   }, []);
 
   const [allTokens, setAllTokens] = useState<NextGenToken[]>([]);
@@ -56,8 +51,6 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     return () => window.removeEventListener("resize", handleResize);
   }, [getSlidesPerView]);
 
-
-
   const fetchMoreTokens = useCallback(async () => {
     commonApiFetch<{
       count: number;
@@ -67,7 +60,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     }>({
       endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${FETCH_SIZE}&page=${currentPage}&sort=random`,
     }).then((response) => {
-      setAllTokens(prev => [...prev, ...response.data]);
+      setAllTokens((prev) => [...prev, ...response.data]);
       setHasMoreOnServer(response.next);
     });
   }, [props.collection.id, currentPage]);
@@ -91,15 +84,18 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
 
     // Need to expand displayTokens?
     if (remainingInDisplay <= 5 && remainingInAll > 0) {
-      const newDisplayLength = Math.min(displayTokens.length + 10, allTokens.length);
+      const newDisplayLength = Math.min(
+        displayTokens.length + 10,
+        allTokens.length
+      );
       setDisplayTokens(allTokens.slice(0, newDisplayLength));
     }
 
     // Need to fetch more from server?
     if (remainingInAll <= FETCH_TRIGGER && hasMoreOnServer) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage((prev) => prev + 1);
     }
-  }, [currentSlide, displayTokens.length, allTokens.length, hasMoreOnServer]);
+  }, [currentSlide, displayTokens.length, allTokens, hasMoreOnServer]);
 
   return (
     <Container fluid className={styles.slideshowContainer}>
