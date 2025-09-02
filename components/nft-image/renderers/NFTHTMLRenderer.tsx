@@ -5,7 +5,13 @@ import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import { BaseRendererProps } from "../types/renderer-props";
 
-export default function NFTHTMLRenderer(props: BaseRendererProps) {
+export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
+  const src = "metadata" in props.nft && props.nft.metadata.animation
+    ? props.nft.metadata.animation
+    : "metadata" in props.nft 
+    ? props.nft.metadata.animation_url
+    : undefined;
+
   return (
     <Col
       className={`${styles.nftAnimation} ${props.heightStyle} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
@@ -17,13 +23,7 @@ export default function NFTHTMLRenderer(props: BaseRendererProps) {
       />
       <iframe
         title={props.id}
-        src={
-          "metadata" in props.nft && props.nft.metadata.animation
-            ? props.nft.metadata.animation
-            : "metadata" in props.nft 
-            ? props.nft.metadata.animation_url
-            : undefined
-        }
+        src={src}
         id={props.id ?? `iframe-${props.nft.id}`}
       />
     </Col>

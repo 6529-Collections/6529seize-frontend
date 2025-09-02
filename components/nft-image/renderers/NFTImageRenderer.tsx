@@ -4,7 +4,13 @@ import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import { BaseRendererProps } from "../types/renderer-props";
 
-export default function NFTImageRenderer(props: BaseRendererProps) {
+export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
+  const src = props.showThumbnail
+    ? props.nft.thumbnail
+    : props.nft.scaled && !props.showOriginal
+    ? props.nft.scaled
+    : props.nft.image;
+
   return (
     <Col
       xs={12}
@@ -23,13 +29,7 @@ export default function NFTImageRenderer(props: BaseRendererProps) {
           maxHeight: "100%",
         }}
         id={props.id ?? `image-${props.nft.id}`}
-        src={
-          props.showThumbnail
-            ? props.nft.thumbnail
-            : props.nft.scaled && !props.showOriginal
-            ? props.nft.scaled
-            : props.nft.image
-        }
+        src={src}
         onError={({ currentTarget }) => {
           if (currentTarget.src === props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled

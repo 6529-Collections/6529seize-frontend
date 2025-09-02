@@ -5,7 +5,7 @@ import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import { BaseRendererProps } from "../types/renderer-props";
 
-export default function NFTVideoRenderer(props: BaseRendererProps) {
+export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <Col
       className={`${styles.nftAnimation} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>

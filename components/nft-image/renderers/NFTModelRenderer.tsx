@@ -6,7 +6,7 @@ import NFTImageBalance from "../NFTImageBalance";
 import NFTModel from "../NFTModel";
 import { BaseRendererProps } from "../types/renderer-props";
 
-export default function NFTModelRenderer(props: BaseRendererProps) {
+export default function NFTModelRenderer(props: Readonly<BaseRendererProps>) {
   // Only render if NFT has metadata (i.e., it's a BaseNFT, not NFTLite)
   if (!("metadata" in props.nft)) {
     return null;
