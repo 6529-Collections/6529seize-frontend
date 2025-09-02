@@ -1,15 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Transaction } from "../../../../../../../entities/ITransaction";
-import CommonTimeAgo from "../../../../../../utils/CommonTimeAgo";
-import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWalletTableRowIcon";
-import {
-  areEqualAddresses,
-  isGradientsContract,
-  isMemesContract,
-  isNextgenContract,
-} from "../../../../../../../helpers/Helpers";
+import { getNextGenIconUrl } from "@/components/nextGen/collections/nextgenToken/NextGenTokenImage";
+import { normalizeNextgenTokenID } from "@/components/nextGen/nextgen_helpers";
+import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import EtherscanIcon from "@/components/user/utils/icons/EtherscanIcon";
+import CommonTimeAgo from "@/components/utils/CommonTimeAgo";
 import {
   GRADIENT_CONTRACT,
   MANIFOLD,
@@ -17,18 +12,23 @@ import {
   MEMES_CONTRACT,
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
-} from "../../../../../../../constants";
-import { ApiIdentity } from "../../../../../../../generated/models/ApiIdentity";
-import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActivityWalletTableRowMainAddress";
-import { MemeLite } from "../../../../../settings/UserSettingsImgSelectMeme";
-import UserPageStatsActivityWalletTableRowSecondAddress from "./UserPageStatsActivityWalletTableRowSecondAddress";
+} from "@/constants";
+import { NextGenCollection } from "@/entities/INextgen";
+import { Transaction } from "@/entities/ITransaction";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import {
+  areEqualAddresses,
+  isGradientsContract,
+  isMemesContract,
+  isNextgenContract,
+} from "@/helpers/Helpers";
 import Link from "next/link";
-import EtherscanIcon from "../../../../../utils/icons/EtherscanIcon";
-import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivityWalletTableRowRoyalties";
+import { useEffect, useState } from "react";
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
-import { NextGenCollection } from "../../../../../../../entities/INextgen";
-import { normalizeNextgenTokenID } from "../../../../../../nextGen/nextgen_helpers";
-import { getNextGenIconUrl } from "../../../../../../nextGen/collections/nextgenToken/NextGenTokenImage";
+import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWalletTableRowIcon";
+import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActivityWalletTableRowMainAddress";
+import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivityWalletTableRowRoyalties";
+import UserPageStatsActivityWalletTableRowSecondAddress from "./UserPageStatsActivityWalletTableRowSecondAddress";
 
 export enum TransactionType {
   AIRDROPPED = "AIRDROPPED",

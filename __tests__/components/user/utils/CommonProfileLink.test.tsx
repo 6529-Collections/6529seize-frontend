@@ -5,7 +5,7 @@ import { UserPageTabType } from '../../../../components/user/layout/UserPageTabs
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
 jest.mock('../../../../helpers/Helpers', () => ({ getProfileTargetRoute: jest.fn(() => '/target') }));
-jest.mock('next/router', () => ({ useRouter: () => ({ route: '/[user]/collected' }) }));
+jest.mock('next/navigation', () => ({ usePathname: () => '/testuser/collected' }));
 
 const { getProfileTargetRoute } = require('../../../../helpers/Helpers');
 

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import UserPageHeader from '../../../../components/user/user-page-header/UserPageHeader';
 import { AuthContext } from '../../../../components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'next/router';
+import { useParams, useRouter } from 'next/navigation';
 import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
 
 jest.mock('next/dynamic', () => () => () => <div />);
@@ -18,11 +18,17 @@ jest.mock('../../../../components/user/utils/UserFollowBtn', () => ({ __esModule
 jest.mock('../../../../components/user/utils/level/UserLevel', () => () => <div data-testid="level" />);
 jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useParams: jest.fn(),
+  useRouter: jest.fn(),
+}));
 
 const profile: any = { handle: 'bob', level: 1 };
+const useParamsMock = useParams as jest.Mock;
+const useRouterMock = useRouter as jest.Mock;
 (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: '0x1' });
-(useRouter as jest.Mock).mockReturnValue({ query: { user: 'bob' }, push: jest.fn() });
+useParamsMock.mockReturnValue({ user: 'bob' });
+useRouterMock.mockReturnValue({ push: jest.fn() });
 
 const auth = { connectedProfile: { handle: 'alice' }, activeProfileProxy: null, setToast: jest.fn() } as any;
 

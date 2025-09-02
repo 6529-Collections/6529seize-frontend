@@ -1,36 +1,36 @@
 "use client";
 
-import { createContext, useMemo } from "react";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { UserPageRepPropsRepRates } from "@/app/[user]/rep/page";
 import {
   ApiProfileRepRatesState,
   ProfileActivityLog,
-  RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
-import { UserPageRepPropsRepRates } from "@/pages/[user]/rep";
+import { RateMatter } from "@/enums";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import { wait } from "@/helpers/Helpers";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
+import { Time } from "@/helpers/time";
 import { CountlessPage, Page } from "@/helpers/Types";
+import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
+import { TypedFeedItem } from "@/types/feed.types";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import Cookies from "js-cookie";
+import { createContext, useMemo } from "react";
 import { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { wait } from "@/helpers/Helpers";
-import { TypedFeedItem } from "@/types/feed.types";
-import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
-import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import { addDropToDrops } from "./utils/addDropsToDrops";
-import { ApiWave } from "@/generated/models/ApiWave";
+import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "./utils/query-utils";
-import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
-import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
-import Cookies from "js-cookie";
-import { Time } from "@/helpers/time";
-import { ApiIdentity } from "@/generated/models/ObjectSerializer";
-import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 export enum QueryKey {
   PROFILE = "PROFILE",

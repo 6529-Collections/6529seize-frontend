@@ -1,17 +1,23 @@
-import { render, screen } from '@testing-library/react';
-import UserPageRateWrapper from '../../../../../components/user/utils/rate/UserPageRateWrapper';
-import { RateMatter } from '../../../../../entities/IProfile';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { useSeizeConnectContext } from '../../../../../components/auth/SeizeConnectContext';
-import React from 'react';
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import UserPageRateWrapper from "@/components/user/utils/rate/UserPageRateWrapper";
+import { RateMatter } from "@/enums";
+import { render, screen } from "@testing-library/react";
 
-jest.mock('../../../../../components/auth/SeizeConnectContext');
-jest.mock('../../../../../components/utils/CommonInfoBox', () => ({ __esModule: true, default: (props: any) => <div data-testid="infobox">{props.message}</div> }));
+jest.mock("@/components/auth/SeizeConnectContext");
+jest.mock("@/components/utils/CommonInfoBox", () => ({
+  __esModule: true,
+  default: (props: any) => <div data-testid="infobox">{props.message}</div>,
+}));
 
-describe('UserPageRateWrapper', () => {
+describe("UserPageRateWrapper", () => {
   const useCtx = useSeizeConnectContext as jest.Mock;
 
-  const profile: any = { query: 'alice', handle: 'alice', wallets: [{ wallet: '0xabc' }] };
+  const profile: any = {
+    query: "alice",
+    handle: "alice",
+    wallets: [{ wallet: "0xabc" }],
+  };
 
   function renderWrapper(ctx: any, seize: any, type = RateMatter.NIC) {
     useCtx.mockReturnValue(seize);
@@ -24,13 +30,21 @@ describe('UserPageRateWrapper', () => {
     );
   }
 
-  it('shows message when not connected', () => {
-    renderWrapper({ connectedProfile: undefined, activeProfileProxy: undefined }, { address: undefined });
-    expect(screen.getByTestId('infobox')).toHaveTextContent('Please connect to NIC rate alice');
+  it("shows message when not connected", () => {
+    renderWrapper(
+      { connectedProfile: undefined, activeProfileProxy: undefined },
+      { address: undefined }
+    );
+    expect(screen.getByTestId("infobox")).toHaveTextContent(
+      "Please connect to NIC rate alice"
+    );
   });
 
-  it('renders children when user can rate', () => {
-    renderWrapper({ connectedProfile: { handle: 'bob' }, activeProfileProxy: undefined }, { address: '0xdef' });
-    expect(screen.getByTestId('child')).toBeInTheDocument();
+  it("renders children when user can rate", () => {
+    renderWrapper(
+      { connectedProfile: { handle: "bob" }, activeProfileProxy: undefined },
+      { address: "0xdef" }
+    );
+    expect(screen.getByTestId("child")).toBeInTheDocument();
   });
 });

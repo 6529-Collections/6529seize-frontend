@@ -1,16 +1,16 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
-import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import { AuthContext } from "../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import UserSettingsUsername from "../../settings/UserSettingsUsername";
-import UserSettingsSave from "../../settings/UserSettingsSave";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
+import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { useRouter } from "next/router";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditName({
   profile,
   onClose,
@@ -25,6 +25,8 @@ export default function UserPageHeaderEditName({
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const params = useParams();
 
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
@@ -49,8 +51,8 @@ export default function UserPageHeaderEditName({
         message: "Profile updated.",
         type: "success",
       });
-      const newPath = router.pathname.replace(
-        "[user]",
+      const newPath = pathname.replace(
+        params?.user?.toString() ?? "",
         updatedProfile.handle!?.toLowerCase()
       );
       await router.replace(newPath);

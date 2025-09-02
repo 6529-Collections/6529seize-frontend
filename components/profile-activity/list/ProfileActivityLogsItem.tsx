@@ -1,7 +1,5 @@
-import {
-  ProfileActivityLog,
-  ProfileActivityLogType,
-} from "@/entities/IProfile";
+import { ProfileActivityLog } from "@/entities/IProfile";
+import { ProfileActivityLogType } from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";

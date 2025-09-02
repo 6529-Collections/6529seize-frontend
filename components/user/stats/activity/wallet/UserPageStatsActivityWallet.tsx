@@ -1,21 +1,20 @@
 "use client";
 
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { useRouter } from "next/router";
-import { usePathname, useSearchParams } from "next/navigation";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import { NextGenCollection } from "@/entities/INextgen";
+import { Transaction } from "@/entities/ITransaction";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   WALLET_ACTIVITY_FILTER_PARAM,
   WALLET_ACTIVITY_PAGE_PARAM,
 } from "../UserPageActivityWrapper";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Page } from "../../../../../helpers/Types";
-import { Transaction } from "../../../../../entities/ITransaction";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
-import { NextGenCollection } from "../../../../../entities/INextgen";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export enum UserPageStatsActivityWalletFilterType {
   ALL = "ALL",
@@ -111,35 +110,19 @@ export default function UserPageStatsActivityWallet({
         ? UserPageStatsActivityWalletFilterType.ALL
         : filter;
     router.replace(
-      pathname +
-        "?" +
-        createQueryString([
-          {
-            name: WALLET_ACTIVITY_FILTER_PARAM,
-            value: enumToPath(targetFilter),
-          },
-          {
-            name: WALLET_ACTIVITY_PAGE_PARAM,
-            value: "1",
-          },
-        ]),
-      undefined,
-      { shallow: true }
+      `${pathname}?${createQueryString([
+        { name: WALLET_ACTIVITY_FILTER_PARAM, value: enumToPath(targetFilter) },
+        { name: WALLET_ACTIVITY_PAGE_PARAM, value: "1" },
+      ])}`
     );
   };
 
   const onPageFilter = (page: number) => {
     router.replace(
-      pathname +
-        "?" +
-        createQueryString([
-          {
-            name: WALLET_ACTIVITY_PAGE_PARAM,
-            value: `${page}`,
-          },
-        ]),
-      undefined,
-      { shallow: true }
+      `${pathname}?${createQueryString([
+        { name: WALLET_ACTIVITY_PAGE_PARAM, value: `${page}` },
+      ])}`,
+      { scroll: false }
     );
   };
 

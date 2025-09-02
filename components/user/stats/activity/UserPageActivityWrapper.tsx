@@ -1,13 +1,12 @@
 "use client";
 
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import UserPageActivityTabs from "./tabs/UserPageActivityTabs";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
-import UserPageStatsActivityWallet from "./wallet/UserPageStatsActivityWallet";
 import UserPageStatsActivityDistributions from "./distributions/UserPageStatsActivityDistributions";
+import UserPageActivityTabs from "./tabs/UserPageActivityTabs";
 import UserPageStatsActivityTDHHistory from "./tdh-history/UserPageStatsActivityTDHHistory";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import UserPageStatsActivityWallet from "./wallet/UserPageStatsActivityWallet";
 
 export enum USER_PAGE_ACTIVITY_TAB {
   WALLET_ACTIVITY = "WALLET_ACTIVITY",
@@ -70,9 +69,8 @@ export default function UserPageActivityWrapper({
 
   const onActiveTab = (tab: USER_PAGE_ACTIVITY_TAB) => {
     router.replace(
-      pathname + "?" + createQueryString(SEARCH_PARAM_ACTIVITY, tab),
-      undefined,
-      { shallow: true }
+      `${pathname}?${createQueryString(SEARCH_PARAM_ACTIVITY, tab)}`,
+      { scroll: false }
     );
   };
 

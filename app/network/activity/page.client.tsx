@@ -1,13 +1,13 @@
 "use client";
 
-import { useContext } from "react";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useSetTitle } from "@/contexts/TitleContext";
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
-import { CountlessPage } from "@/helpers/Types";
-import { ProfileActivityLog } from "@/entities/IProfile";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { ProfileActivityLog } from "@/entities/IProfile";
 import { INITIAL_ACTIVITY_LOGS_PARAMS } from "@/helpers/profile-logs.helpers";
+import { CountlessPage } from "@/helpers/Types";
+import { useContext } from "react";
 
 export default function CommunityActivityPageClient({
   logsPage,

@@ -11,7 +11,7 @@ import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { useRouter } from "next/router";
+import { useParams, useRouter } from "next/navigation";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
 import { AuthContext } from "../../auth/Auth";
 import dynamic from "next/dynamic";
@@ -42,8 +42,9 @@ export default function UserPageHeader({
   readonly profile: ApiIdentity;
   readonly mainAddress: string;
 }) {
+  const params = useParams();
   const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
+  const user = params?.user?.toString().toLowerCase();
   const { address } = useSeizeConnectContext();
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
@@ -80,7 +81,7 @@ export default function UserPageHeader({
   }, [profile, isMyProfile, activeProfileProxy]);
 
   const { isFetched, data: statements } = useQuery<CicStatement[]>({
-    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user?.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
         endpoint: `profiles/${user}/cic/statements`,

@@ -1,14 +1,14 @@
 "use client";
 
-import { RateMatter } from "../../../../entities/IProfile";
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import CommonInfoBox from "@/components/utils/CommonInfoBox";
+import { RateMatter } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { amIUser } from "@/helpers/Helpers";
 import { useContext, useEffect, useState } from "react";
-import { amIUser } from "../../../../helpers/Helpers";
-import { AuthContext } from "../../../auth/Auth";
-import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import CommonInfoBox from "../../../utils/CommonInfoBox";
-import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.NIC]: "NIC rate",

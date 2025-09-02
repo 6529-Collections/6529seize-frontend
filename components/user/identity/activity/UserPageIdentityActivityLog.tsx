@@ -1,10 +1,10 @@
 import ProfileActivityLogs, {
   ActivityLogParams,
-} from "../../../profile-activity/ProfileActivityLogs";
+} from "@/components/profile-activity/ProfileActivityLogs";
 import ProfileName, {
   ProfileNameType,
-} from "../../../profile-activity/ProfileName";
-import UserTableHeaderWrapper from "../../utils/UserTableHeaderWrapper";
+} from "@/components/profile-activity/ProfileName";
+import UserTableHeaderWrapper from "@/components/user/utils/UserTableHeaderWrapper";
 
 export default function UserPageIdentityActivityLog({
   initialActivityLogParams,

@@ -1,18 +1,18 @@
 "use client";
 
-import { useContext, useEffect, useState, useMemo, type JSX } from "react";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import ProxyList from "./list/ProxyList";
-import ProxyCreate from "./create/ProxyCreate";
-import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
+import { AuthContext } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiProfileProxy } from "../../../generated/models/ApiProfileProxy";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { AuthContext } from "../../auth/Auth";
-import { groupProfileProxies } from "../../../helpers/profile-proxy.helpers";
-import { useRouter } from "next/router";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { useIdentity } from "../../../hooks/useIdentity";
+import { useParams } from "next/navigation";
+import { useContext, useEffect, useMemo, useState, type JSX } from "react";
+import ProxyCreate from "./create/ProxyCreate";
+import ProxyList from "./list/ProxyList";
 export enum ProxyMode {
   LIST = "LIST",
   CREATE = "CREATE",
@@ -29,8 +29,8 @@ export default function UserPageProxy({
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
+  const params = useParams();
+  const user = (params?.user as string)?.toLowerCase();
   const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 

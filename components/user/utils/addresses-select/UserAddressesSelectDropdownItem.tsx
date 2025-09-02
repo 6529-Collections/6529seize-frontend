@@ -1,5 +1,5 @@
+import { ApiWallet } from "@/generated/models/ApiWallet";
 import { useCopyToClipboard } from "react-use";
-import { ApiWallet } from "../../../../generated/models/ApiWallet";
 
 export default function UserAddressesSelectDropdownItem({
   wallet,
@@ -26,17 +26,14 @@ export default function UserAddressesSelectDropdownItem({
     <div className="tw-h-full tw-flex tw-items-center tw-gap-x-4 sm:tw-gap-x-2">
       <button
         onClick={copyAddress}
-        type="button"
         title="Copy address"
         aria-label="Copy address"
-        className="tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
-      >
+        className="tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer">
         <svg
           className="tw-flex-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 tw-text-iron-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
           viewBox="0 0 24 24"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M5 15C4.06812 15 3.60218 15 3.23463 14.8478C2.74458 14.6448 2.35523 14.2554 2.15224 13.7654C2 13.3978 2 12.9319 2 12V5.2C2 4.0799 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2H12C12.9319 2 13.3978 2 13.7654 2.15224C14.2554 2.35523 14.6448 2.74458 14.8478 3.23463C15 3.60218 15 4.06812 15 5M12.2 22H18.8C19.9201 22 20.4802 22 20.908 21.782C21.2843 21.5903 21.5903 21.2843 21.782 20.908C22 20.4802 22 19.9201 22 18.8V12.2C22 11.0799 22 10.5198 21.782 10.092C21.5903 9.71569 21.2843 9.40973 20.908 9.21799C20.4802 9 19.9201 9 18.8 9H12.2C11.0799 9 10.5198 9 10.092 9.21799C9.71569 9.40973 9.40973 9.71569 9.21799 10.092C9 10.5198 9 11.0799 9 12.2V18.8C9 19.9201 9 20.4802 9.21799 20.908C9.40973 21.2843 9.71569 21.5903 10.092 21.782C10.5198 22 11.0799 22 12.2 22Z"
             stroke="currentColor"
@@ -48,17 +45,14 @@ export default function UserAddressesSelectDropdownItem({
       </button>
       <button
         onClick={openOpensea}
-        type="button"
         title="Open in OpenSea"
         aria-label="Open in OpenSea"
-        className="tw-group tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
-      >
+        className="tw-group tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer">
         <svg
           className="tw-flex-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
           viewBox="0 0 90 90"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M90 45C90 69.8514 69.8514 90 45 90C20.1486 90 0 69.8514 0 45C0 20.1486 20.1486 0 45 0C69.8566 0 90 20.1486 90 45Z"
             fill="#2081E2"

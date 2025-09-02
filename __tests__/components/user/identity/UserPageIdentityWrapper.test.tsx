@@ -1,27 +1,41 @@
-// @ts-nocheck
-import { render } from '@testing-library/react';
-import React from 'react';
-import UserPageIdentityWrapper from '../../../../components/user/identity/UserPageIdentityWrapper';
-import { useRouter } from 'next/router';
-import { useIdentity } from '../../../../hooks/useIdentity';
+import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentityWrapper";
+import { useIdentity } from "@/hooks/useIdentity";
+import { render } from "@testing-library/react";
+import { useParams, useRouter } from "next/navigation";
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
-jest.mock('../../../../hooks/useIdentity', () => ({ useIdentity: jest.fn() }));
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  useParams: jest.fn(),
+}));
+jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
 
 let wrapperProfile: any;
 let identityProps: any;
 
-jest.mock('../../../../components/user/utils/set-up-profile/UserPageSetUpProfileWrapper', () => (props: any) => { wrapperProfile = props.profile; return <div data-testid="wrapper">{props.children}</div>; });
-jest.mock('../../../../components/user/identity/UserPageIdentity', () => (props: any) => { identityProps = props; return <div data-testid="identity" />; });
+jest.mock(
+  "@/components/user/utils/set-up-profile/UserPageSetUpProfileWrapper",
+  () => (props: any) => {
+    wrapperProfile = props.profile;
+    return <div data-testid="wrapper">{props.children}</div>;
+  }
+);
+jest.mock("@/components/user/identity/UserPageIdentity", () => (props: any) => {
+  identityProps = props;
+  return <div data-testid="identity" />;
+});
 
-describe('UserPageIdentityWrapper', () => {
+describe("UserPageIdentityWrapper", () => {
   const routerMock = useRouter as jest.Mock;
   const useIdentityMock = useIdentity as jest.Mock;
-  beforeEach(() => { wrapperProfile = null; identityProps = null; });
+  const useParamsMock = useParams as jest.Mock;
+  beforeEach(() => {
+    wrapperProfile = null;
+    identityProps = null;
+  });
 
-  it('uses profile from hook when available', () => {
-    routerMock.mockReturnValue({ query: { user: 'alice' } });
-    const profile: any = { handle: 'alice' };
+  it("uses profile from hook when available", () => {
+    useParamsMock.mockReturnValue({ user: "alice" });
+    const profile: any = { handle: "alice" };
     useIdentityMock.mockReturnValue({ profile });
     render(
       <UserPageIdentityWrapper
@@ -31,14 +45,17 @@ describe('UserPageIdentityWrapper', () => {
         initialActivityLogParams={{} as any}
       />
     );
-    expect(useIdentityMock).toHaveBeenCalledWith({ handleOrWallet: 'alice', initialProfile: profile });
+    expect(useIdentityMock).toHaveBeenCalledWith({
+      handleOrWallet: "alice",
+      initialProfile: profile,
+    });
     expect(wrapperProfile).toBe(profile);
     expect(identityProps.profile).toBe(profile);
   });
 
-  it('falls back to initial profile when hook returns null', () => {
-    routerMock.mockReturnValue({ query: { user: 'bob' } });
-    const profile: any = { handle: 'bob' };
+  it("falls back to initial profile when hook returns null", () => {
+    routerMock.mockReturnValue({ query: { user: "bob" } });
+    const profile: any = { handle: "bob" };
     useIdentityMock.mockReturnValue({ profile: null });
     render(
       <UserPageIdentityWrapper

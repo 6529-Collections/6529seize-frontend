@@ -1,6 +1,6 @@
-import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
-import { ProfileActivityLogType } from "@/entities/IProfile";
+import { ProfileActivityLogType } from "@/enums";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 describe("convertActivityLogParams", () => {
   const base = {

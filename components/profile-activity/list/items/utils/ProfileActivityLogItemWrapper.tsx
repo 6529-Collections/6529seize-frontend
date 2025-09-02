@@ -1,11 +1,8 @@
-import {
-  ProfileActivityLog,
-  ProfileActivityLogType,
-  RateMatter,
-} from "../../../../../entities/IProfile";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
+import { ProfileActivityLog } from "@/entities/IProfile";
+import { ProfileActivityLogType, RateMatter } from "@/enums";
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
-import { UserPageTabType } from "../../../../user/layout/UserPageTabs";
-import CommonProfileLink from "../../../../user/utils/CommonProfileLink";
 
 export default function ProfileActivityLogItemWrapper({
   log,

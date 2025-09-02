@@ -1,17 +1,17 @@
 "use client";
 
+import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import {
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
-  RateMatter,
 } from "@/entities/IProfile";
+import { RateMatter } from "@/enums";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { UserPageTabType } from "../../../user/layout/UserPageTabs";
-import CommonProfileLink from "../../../user/utils/CommonProfileLink";
-import Link from "next/link";
-import { SystemAdjustmentPill } from "../../../common/SystemAdjustmentPill";
 
 enum ProfileActivityLogRateType {
   ADDED = "ADDED",

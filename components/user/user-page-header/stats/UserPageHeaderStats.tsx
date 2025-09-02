@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import UserPageFollowers from "../followers/UserPageFollowers";
 import { Tooltip } from "react-tooltip";
 
@@ -12,8 +12,8 @@ export default function UserPageHeaderStats({
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const router = useRouter();
-  const user = router.query.user as string;
+  const params = useParams();
+  const user = params?.user?.toString();
   return (
     <div className="tw-mt-3">
       <div className="tw-flex tw-gap-x-4 sm:tw-gap-x-6 tw-flex-wrap tw-gap-y-2">

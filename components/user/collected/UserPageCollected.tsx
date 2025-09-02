@@ -12,8 +12,7 @@ import { Page } from "../../../helpers/Types";
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import { MEMES_SEASON } from "../../../enums";
 import { SortDirection } from "../../../entities/ISort";
-import { useRouter } from "next/router";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
@@ -76,10 +75,11 @@ export default function UserPageCollected({
   const defaultSeized = CollectionSeized.SEIZED;
   const PAGE_SIZE = 24;
 
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const user = (router.query.user as string).toLowerCase();
+  const params = useParams();
+  const router = useRouter();
+  const user = params?.user?.toString().toLowerCase() ?? "";
 
   const convertSeized = ({
     seized,

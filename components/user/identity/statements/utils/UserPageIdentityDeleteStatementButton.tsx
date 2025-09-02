@@ -1,13 +1,12 @@
 "use client";
 
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import { CicStatement } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useEffect, useState } from "react";
-import { CicStatement } from "../../../../../entities/IProfile";
-import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
-import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";
 import { Tooltip } from "react-tooltip";
-import { useRouter } from "next/router";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";
 export default function UserPageIdentityDeleteStatementButton({
   statement,
   profile,
@@ -15,13 +14,12 @@ export default function UserPageIdentityDeleteStatementButton({
   readonly statement: CicStatement;
   readonly profile: ApiIdentity;
 }) {
-  const router = useRouter();
   const [isDeleteStatementOpen, setIsDeleteStatementOpen] =
     useState<boolean>(false);
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, [router.isReady]);
+  }, []);
   const tooltipId = `delete-statement-${statement.statement_group}-${statement.statement_type}`;
   const showTooltip = !isTouchScreen && !isDeleteStatementOpen;
 
@@ -33,7 +31,9 @@ export default function UserPageIdentityDeleteStatementButton({
         aria-label="Delete statement"
         data-tooltip-id={showTooltip ? tooltipId : undefined}
         className={`${
-          isTouchScreen ? "tw-opacity-100" : "tw-opacity-0 group-hover:tw-opacity-100"
+          isTouchScreen
+            ? "tw-opacity-100"
+            : "tw-opacity-0 group-hover:tw-opacity-100"
         } tw-p-1.5 tw-bg-transparent tw-cursor-pointer tw-text-xs tw-font-semibold tw-text-rose-500 desktop-hover:hover:tw-text-rose-400 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}>
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-110"
@@ -60,8 +60,7 @@ export default function UserPageIdentityDeleteStatementButton({
             backgroundColor: "#1F2937",
             color: "white",
             padding: "4px 8px",
-          }}
-        >
+          }}>
           <span className="tw-text-xs">Delete</span>
         </Tooltip>
       )}

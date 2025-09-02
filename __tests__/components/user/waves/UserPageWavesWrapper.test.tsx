@@ -5,9 +5,12 @@ import UserPageWavesWrapper from "@/components/user/waves/UserPageWavesWrapper";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
 import { render, screen } from "@testing-library/react";
-import { useRouter } from "next/router";
+import { useParams, useRouter } from "next/navigation";
 
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  useParams: jest.fn(),
+}));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
@@ -28,6 +31,7 @@ jest.mock(
 
 describe("UserPageWavesWrapper", () => {
   const useRouterMock = useRouter as jest.Mock;
+  const useParamsMock = useParams as jest.Mock;
   const useSeizeConnectContextMock = useSeizeConnectContext as jest.Mock;
   const useIdentityMock = useIdentity as jest.Mock;
   const mockPush = jest.fn();
@@ -42,9 +46,9 @@ describe("UserPageWavesWrapper", () => {
 
   beforeEach(() => {
     useRouterMock.mockReturnValue({
-      query: { user: "testuser" },
       push: mockPush,
     });
+    useParamsMock.mockReturnValue({ user: "testuser" });
 
     useSeizeConnectContextMock.mockReturnValue({
       address: "0x123",
@@ -140,9 +144,9 @@ describe("UserPageWavesWrapper", () => {
 
   it("handles user query parameter case conversion", () => {
     useRouterMock.mockReturnValue({
-      query: { user: "TestUser" },
       push: mockPush,
     });
+    useParamsMock.mockReturnValue({ user: "TestUser" });
 
     renderComponent();
 

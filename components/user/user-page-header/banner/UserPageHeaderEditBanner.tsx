@@ -1,15 +1,15 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
-import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import { AuthContext } from "../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import UserSettingsBackground from "../../settings/UserSettingsBackground";
-import UserSettingsSave from "../../settings/UserSettingsSave";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import UserSettingsBackground from "@/components/user/settings/UserSettingsBackground";
+import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditBanner({
   profile,
   defaultBanner1,

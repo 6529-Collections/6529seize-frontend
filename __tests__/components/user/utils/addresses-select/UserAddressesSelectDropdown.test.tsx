@@ -1,27 +1,50 @@
-import { render } from '@testing-library/react';
-import UserAddressesSelectDropdown from '../../../../../components/user/utils/addresses-select/UserAddressesSelectDropdown';
+import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
+import { render } from "@testing-library/react";
 
 let capturedProps: any = null;
 
-jest.mock('../../../../../components/utils/select/dropdown/CommonDropdown', () => (props: any) => { capturedProps = props; return <div data-testid="dropdown" />; });
+jest.mock(
+  "@/components/utils/select/dropdown/CommonDropdown",
+  () => (props: any) => {
+    capturedProps = props;
+    return <div data-testid="dropdown" />;
+  }
+);
 
 const push = jest.fn();
-jest.mock('next/router', () => ({ useRouter: () => ({ query: { address: '0xabc' }, pathname: '/p', push }) }));
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+  usePathname: () => "/p",
+  useSearchParams: () => new URLSearchParams({ address: "0xabc" }),
+}));
 
-describe('UserAddressesSelectDropdown', () => {
-  beforeEach(() => { capturedProps = null; push.mockClear(); });
-
-  it('initializes active item from query', () => {
-    render(<UserAddressesSelectDropdown wallets={[{ wallet: '0xabc', display: 'x' } as any]} onActiveAddress={jest.fn()} />);
-    expect(capturedProps.activeItem).toBe('0xabc');
+describe("UserAddressesSelectDropdown", () => {
+  beforeEach(() => {
+    capturedProps = null;
+    push.mockClear();
   });
 
-  it('updates query when selection changes', () => {
+  it("initializes active item from query", () => {
+    render(
+      <UserAddressesSelectDropdown
+        wallets={[{ wallet: "0xabc", display: "x" } as any]}
+        onActiveAddress={jest.fn()}
+      />
+    );
+    expect(capturedProps.activeItem).toBe("0xabc");
+  });
+
+  it("updates query when selection changes", () => {
     const onActive = jest.fn();
-    render(<UserAddressesSelectDropdown wallets={[{ wallet: '0xdef', display: 'd' } as any]} onActiveAddress={onActive} />);
-    capturedProps.setSelected('0xdef');
-    expect(push).toHaveBeenCalledWith({ pathname: '/p', query: { address: '0xdef' } }, undefined, { shallow: true });
+    render(
+      <UserAddressesSelectDropdown
+        wallets={[{ wallet: "0xdef", display: "d" } as any]}
+        onActiveAddress={onActive}
+      />
+    );
+    capturedProps.setSelected("0xdef");
+    expect(push).toHaveBeenCalledWith("/p?address=0xdef", { scroll: false });
     // The component receives the initial query value '0xabc' instead of '0xdef'
-    expect(onActive).toHaveBeenCalledWith('0xabc');
+    expect(onActive).toHaveBeenCalledWith("0xabc");
   });
 });

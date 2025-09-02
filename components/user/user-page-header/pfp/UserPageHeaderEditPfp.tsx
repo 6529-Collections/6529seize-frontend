@@ -1,31 +1,28 @@
 "use client";
 
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
-import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import UserSettingsImgSelectMeme, {
-  MemeLite,
-} from "../../settings/UserSettingsImgSelectMeme";
-import UserSettingsImgSelectFile from "../../settings/UserSettingsImgSelectFile";
-import UserSettingsSave from "../../settings/UserSettingsSave";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
+import { useIpfsService } from "@/components/ipfs/IPFSContext";
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../../react-query-wrapper/ReactQueryWrapper";
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import UserSettingsImgSelectFile from "@/components/user/settings/UserSettingsImgSelectFile";
+import UserSettingsImgSelectMeme, {
+  MemeLite,
+} from "@/components/user/settings/UserSettingsImgSelectMeme";
+import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   commonApiFetch,
   commonApiPost,
   commonApiPostForm,
-} from "../../../../services/api/common-api";
+} from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../helpers/image.helpers";
-import { useIpfsService } from "../../../ipfs/IPFSContext";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import SecondaryButton from "../../../utils/button/SecondaryButton";
+import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditPfp({
   profile,
   onClose,

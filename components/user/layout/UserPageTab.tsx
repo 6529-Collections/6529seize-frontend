@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { USER_PAGE_TAB_META, UserPageTabType } from "./UserPageTabs";
-import { useRouter } from "next/router";
 import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
 
 export default function UserPageTab({
   tab,
@@ -14,8 +14,9 @@ export default function UserPageTab({
   readonly parentRef: React.RefObject<HTMLDivElement | null>;
   readonly activeTab: UserPageTabType;
 }) {
-  const router = useRouter();
-  const handleOrWallet = router.query.user as string;
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const handleOrWallet = params?.user?.toString();
 
   const path = `/${handleOrWallet}/${USER_PAGE_TAB_META[tab].route}`;
 
@@ -64,7 +65,9 @@ export default function UserPageTab({
       ref={ref}
       href={{
         pathname: path,
-        query: router.query.address ? { address: router.query.address } : {},
+        query: searchParams?.get("address")
+          ? { address: searchParams.get("address")! }
+          : {},
       }}
       className={`${
         isActive ? "tw-pointer-events-none" : ""

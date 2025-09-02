@@ -1,25 +1,23 @@
 "use client";
 
-import {
-  ApiProfileRepRatesState,
-  RateMatter,
-} from "../../../entities/IProfile";
-import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
-import { useRouter } from "next/router";
+import { AuthContext } from "@/components/auth/Auth";
+import { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import { RateMatter } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { useParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
-import UserPageRepReps from "./reps/UserPageRepReps";
-import UserPageRepHeader from "./header/UserPageRepHeader";
-import { AuthContext } from "../../auth/Auth";
+import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import ProfileRatersTableWrapper, {
   ProfileRatersParams,
 } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import UserPageRepHeader from "./header/UserPageRepHeader";
+import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
+import UserPageRepReps from "./reps/UserPageRepReps";
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
-import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
-import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function UserPageRep({
   profile,
   initialRepReceivedParams,
@@ -33,8 +31,8 @@ export default function UserPageRep({
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
-  const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
+  const params = useParams();
+  const user = (params?.user as string)?.toLowerCase();
 
   const [rater, setRater] = useState<string | undefined>(undefined);
   useEffect(

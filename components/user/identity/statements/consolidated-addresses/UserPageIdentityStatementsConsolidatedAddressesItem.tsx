@@ -1,23 +1,22 @@
 "use client";
 
+import { DELEGATION_ABI } from "@/abis";
+import { useAuth } from "@/components/auth/Auth";
 import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/delegation-constants";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { Tooltip } from "react-tooltip";
-import { useCopyToClipboard } from "react-use";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { DELEGATION_ABI } from "../../../../../abis";
-import { useAuth } from "../../../../../components/auth/Auth";
+import EtherscanIcon from "@/components/user/utils/icons/EtherscanIcon";
+import OpenseaIcon from "@/components/user/utils/icons/OpenseaIcon";
+import CopyIcon from "@/components/utils/icons/CopyIcon";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
-} from "../../../../../constants";
-import { ApiWallet } from "../../../../../generated/models/ApiWallet";
-import { getTransactionLink } from "../../../../../helpers/Helpers";
-import CopyIcon from "../../../../utils/icons/CopyIcon";
-import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
-import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
+} from "@/constants";
+import { ApiWallet } from "@/generated/models/ApiWallet";
+import { getTransactionLink } from "@/helpers/Helpers";
+import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
+import { useCopyToClipboard } from "react-use";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
@@ -29,7 +28,6 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   readonly primaryAddress: string | null;
   readonly canEdit: boolean;
 }) {
-  const router = useRouter();
   const { setToast } = useAuth();
 
   const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -57,7 +55,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, [router.isReady]);
+  }, []);
 
   const [assigningPrimary, setAssigningPrimary] = useState(false);
   const [statusMessage, setStatusMessage] = useState<any>();

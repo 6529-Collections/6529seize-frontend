@@ -1,8 +1,8 @@
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
-import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
+import UserPageRateWrapper from "@/components/user/utils/rate/UserPageRateWrapper";
+import { RateMatter } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
-import { RateMatter } from "../../../../entities/IProfile";
+import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 
 export default function UserPageIdentityHeader({
   profile,

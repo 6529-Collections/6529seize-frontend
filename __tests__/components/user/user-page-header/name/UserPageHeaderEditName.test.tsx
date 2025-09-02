@@ -6,10 +6,12 @@ import UserPageHeaderEditName from '../../../../../components/user/user-page-hea
 import { AuthContext } from '../../../../../components/auth/Auth';
 import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
 import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
-import { useRouter } from 'next/router';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 
-jest.mock('next/router', () => ({
+jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
+  useParams: jest.fn(),
 }));
 
 jest.mock('react-use', () => ({
@@ -45,7 +47,6 @@ const mockReactQueryContext = {
 };
 
 const mockRouter = {
-  pathname: '/[user]',
   replace: jest.fn(),
 };
 
@@ -60,6 +61,8 @@ describe('UserPageHeaderEditName', () => {
       },
     });
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    (usePathname as jest.Mock).mockReturnValue('/testuser');
+    (useParams as jest.Mock).mockReturnValue({ user: 'testuser' });
     jest.clearAllMocks();
   });
 
