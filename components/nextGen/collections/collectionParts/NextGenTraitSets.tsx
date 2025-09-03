@@ -134,7 +134,8 @@ export default function NextGenTraitSets(
       <Col
         key={t}
         xs={12 / (availableTraits.length + 1)}
-        className="no-padding">
+        className="no-padding"
+      >
         <button
           key={getRandomObjectId()}
           className={`${styles.collectorSetPill} ${
@@ -146,7 +147,8 @@ export default function NextGenTraitSets(
               setTotalResults(0);
             }
             setSelectedTrait(t);
-          }}>
+          }}
+        >
           {t}
         </button>
       </Col>
@@ -160,7 +162,8 @@ export default function NextGenTraitSets(
         <Col
           style={{
             minHeight: "50vh",
-          }}>
+          }}
+        >
           <DotLoader />
         </Col>
       );
@@ -170,10 +173,12 @@ export default function NextGenTraitSets(
           className="d-flex flex-column gap-2"
           style={{
             minHeight: "50vh",
-          }}>
+          }}
+        >
           <span>None!</span>
           <span>
             <Image
+              unoptimized
               priority
               loading="eager"
               width={0}
@@ -193,7 +198,8 @@ export default function NextGenTraitSets(
         <Col
           style={{
             minHeight: "50vh",
-          }}>
+          }}
+        >
           {sets.map((s) => (
             <UltimateOwner key={getRandomObjectId()} set={s} />
           ))}
@@ -225,7 +231,8 @@ export default function NextGenTraitSets(
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/trait-sets`}
-              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
+              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}
+            >
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
                 <FontAwesomeIcon
@@ -290,7 +297,8 @@ export default function NextGenTraitSets(
           <Col
             style={{
               minHeight: "50vh",
-            }}>
+            }}
+          >
             {!setsLoaded ? (
               <DotLoader />
             ) : (
@@ -341,7 +349,8 @@ export default function NextGenTraitSets(
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
                 )}/trait-sets`}
-                className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens} justify-content-center`}>
+                className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens} justify-content-center`}
+              >
                 <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                   View All Trait Sets
                   <FontAwesomeIcon
@@ -373,7 +382,8 @@ function UltimateOwner(props: Readonly<{ set: NextgenTraitSet }>) {
     <Accordion className="pt-1 pb-1">
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button
-          className={styles.collectorSetAccordionButtonUltimate}>
+          className={styles.collectorSetAccordionButtonUltimate}
+        >
           <Container>
             <Row>
               <Col className="d-flex aling-items-center justify-content-between">
@@ -415,7 +425,8 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
     <Link
       className="d-flex gap-2 decoration-hover-underline"
       onClick={(e) => e.stopPropagation()}
-      href={`/${props.set.handle ?? props.set.owner}`}>
+      href={`/${props.set.handle ?? props.set.owner}`}
+    >
       <UserCICAndLevel
         level={props.set.level}
         cicType={cicToType(props.set.tdh + props.set.rep_score)}
@@ -457,14 +468,16 @@ function TraitSetAccordion(
                     <FontAwesomeIcon
                       style={{ height: "1.5em", color: "#00aa00" }}
                       icon={faCheckCircle}
-                      data-tooltip-id={`complete-trait-${props.collection.id}-${props.trait}-${set.owner}`}></FontAwesomeIcon>
+                      data-tooltip-id={`complete-trait-${props.collection.id}-${props.trait}-${set.owner}`}
+                    ></FontAwesomeIcon>
                     <Tooltip
                       id={`complete-trait-${props.collection.id}-${props.trait}-${set.owner}`}
                       style={{
                         backgroundColor: "#1F2937",
                         color: "white",
                         padding: "4px 8px",
-                      }}>
+                      }}
+                    >
                       Complete <b>{props.trait}</b> trait set!
                     </Tooltip>
                   </>
@@ -479,12 +492,14 @@ function TraitSetAccordion(
               props.set.token_values?.map((tv) => (
                 <Row
                   className="pt-3 pb-3"
-                  key={`accordion-${props.trait}-${tv.value}`}>
+                  key={`accordion-${props.trait}-${tv.value}`}
+                >
                   <Col className="d-flex flex-wrap align-items-center gap-3">
                     <span className="d-flex align-items-center gap-3">
                       <FontAwesomeIcon
                         style={{ height: "1.5em", color: "#00aa00" }}
-                        icon={faCheckCircle}></FontAwesomeIcon>
+                        icon={faCheckCircle}
+                      ></FontAwesomeIcon>
                       <b>
                         <Link
                           href={`/nextgen/collection/${formatNameForUrl(
@@ -492,7 +507,8 @@ function TraitSetAccordion(
                           )}/art?traits=${props.trait}:${tv.value}`}
                           className="decoration-hover-underline"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           {tv.value}
                         </Link>
                       </b>
@@ -503,9 +519,11 @@ function TraitSetAccordion(
                           key={`accordion-${props.trait}-${tv.value}-${t}`}
                           href={`/nextgen/token/${t}`}
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           <>
                             <Image
+                              unoptimized
                               priority
                               loading="eager"
                               width={0}
@@ -533,7 +551,8 @@ function TraitSetAccordion(
                                 backgroundColor: "#1F2937",
                                 color: "white",
                                 padding: "4px 8px",
-                              }}>
+                              }}
+                            >
                               {props.collection.name} #
                               {normalizeNextgenTokenID(t).token_id}
                             </Tooltip>
@@ -557,7 +576,8 @@ function TraitSetAccordion(
                           )}/art?traits=${props.trait}:${mv}`}
                           className="decoration-hover-underline"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           {mv}
                         </Link>
                         {index < missingValues.length - 1 ? ", " : ""}

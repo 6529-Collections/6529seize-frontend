@@ -58,8 +58,8 @@ const nextConfig = {
     webpackBuildWorker: true,
   },
   images: {
-    domains: ["6529.io", "arweave.net", "localhost"],
-    unoptimized: true,
+    loader: "default",
+    domains: ["6529.io", "arweave.net", "localhost", "media.generator.seize.io", "d3lqz0a4bldqgf.cloudfront.net"],
     minimumCacheTTL: 86400,
   },
   transpilePackages: ["react-tweet"],
@@ -102,6 +102,11 @@ const nextConfig = {
   webpack: (config, { dev, isServer }) => {
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
+    
+    // Fix source maps for Chrome DevTools
+    if (!dev && !isServer) {
+      config.devtool = 'source-map';
+    }
     
     // Validate required environment variables at build time
     if (!dev && !isServer) {

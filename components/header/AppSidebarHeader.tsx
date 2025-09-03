@@ -24,6 +24,7 @@ const AppSidebarHeader: FC<AppSidebarHeaderProps> = ({ onClose }) => {
           className="tw-inline-flex tw-items-center tw-gap-2"
         >
           <Image
+            unoptimized
             src="/6529.svg"
             alt="6529"
             width={40}

@@ -1,4 +1,4 @@
-"use client";
+
 
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import Link from "next/link";
