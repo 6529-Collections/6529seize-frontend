@@ -64,7 +64,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               xs={12}
               sm={6}
               md={3}
-              className="pt-2 pb-2 d-flex flex-wrap gap-3">
+              className="pt-2 pb-2 d-flex flex-wrap gap-3"
+            >
               <button
                 key={c.contract}
                 className={styles.collectionSelectionButton}
@@ -84,9 +85,11 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   if (newSection) {
                     setRedirect(newSection);
                   }
-                }}>
+                }}
+              >
                 <span className="d-flex align-items-center gap-3">
                   <Image
+                    unoptimized
                     className={styles.collectionSelectionImage}
                     loading="eager"
                     priority
@@ -121,11 +124,13 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               <Col
                 sm={12}
                 md={9}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2">
+                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2"
+              >
                 <span className="d-flex flex-column">
                   <h3 className="pb-4">Delegations</h3>
                   <span className="d-flex align-items-center gap-3">
                     <Image
+                      unoptimized
                       loading="eager"
                       priority
                       src="/delegation-icon.png"
@@ -145,12 +150,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               <Col
                 sm={12}
                 md={3}
-                className="pt-2 pb-2 d-flex flex-column gap-2 align-items-center justify-content-center">
+                className="pt-2 pb-2 d-flex flex-column gap-2 align-items-center justify-content-center"
+              >
                 <button
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_DELEGATION)
-                  }>
+                  }
+                >
                   <FontAwesomeIcon
                     icon={faPlus}
                     className={styles.buttonIcon}
@@ -169,11 +176,13 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               <Col
                 sm={12}
                 md={9}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2">
+                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2"
+              >
                 <span className="d-flex flex-column">
                   <h3 className="pb-4">Consolidations</h3>
                   <span className="d-flex align-items-center gap-3">
                     <Image
+                      unoptimized
                       loading="eager"
                       priority
                       src="/consolidation-icon.png"
@@ -193,12 +202,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               <Col
                 sm={12}
                 md={3}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-center">
+                className="pt-2 pb-2 d-flex align-items-center justify-content-center"
+              >
                 <button
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_CONSOLIDATION)
-                  }>
+                  }
+                >
                   <FontAwesomeIcon
                     icon={faPlus}
                     className={styles.buttonIcon}
@@ -217,11 +228,13 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               <Col
                 sm={12}
                 md={9}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2">
+                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2"
+              >
                 <span className="d-flex flex-column">
                   <h3 className="pb-4">Delegation Management</h3>
                   <span className="d-flex align-items-center gap-3">
                     <Image
+                      unoptimized
                       loading="eager"
                       priority
                       src="/manager-icon.png"
@@ -242,12 +255,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               <Col
                 sm={12}
                 md={3}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-center">
+                className="pt-2 pb-2 d-flex align-items-center justify-content-center"
+              >
                 <button
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_SUB_DELEGATION)
-                  }>
+                  }
+                >
                   <FontAwesomeIcon
                     icon={faPlus}
                     className={styles.buttonIcon}

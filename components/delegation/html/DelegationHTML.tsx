@@ -45,6 +45,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
     return (
       <div className={`${styles.mainContainer} ${styles.pageNotFound}`}>
         <Image
+          unoptimized
           width="0"
           height="0"
           style={{ height: "auto", width: "100px" }}
@@ -74,7 +75,8 @@ export default function DelegationHTML(props: Readonly<Props>) {
             className={styles.htmlContainer}
             dangerouslySetInnerHTML={{
               __html: html,
-            }}></Col>
+            }}
+          ></Col>
         </Row>
       </Container>
     );

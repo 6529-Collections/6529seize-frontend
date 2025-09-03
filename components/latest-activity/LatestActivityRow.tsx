@@ -55,6 +55,7 @@ export function printRoyalties(value: number, royalties: number, from: string) {
   return (
     <>
       <Image
+        unoptimized
         data-tooltip-id={id}
         width={0}
         height={0}
@@ -69,7 +70,8 @@ export function printRoyalties(value: number, royalties: number, from: string) {
         place="top-end"
         opacity={1}
         variant="light"
-        className="tw-leading-tight">
+        className="tw-leading-tight"
+      >
         <div className="tw-flex tw-gap-3">
           <span>Royalties</span>
           <span>
@@ -97,14 +99,16 @@ export function printGas(
       <FontAwesomeIcon
         data-tooltip-id={id}
         className={styles.gasIcon}
-        icon={faGasPump}></FontAwesomeIcon>
+        icon={faGasPump}
+      ></FontAwesomeIcon>
       <Tooltip
         id={id}
         delayShow={150}
         place="top-end"
         opacity={1}
         variant="light"
-        className="tw-leading-tight">
+        className="tw-leading-tight"
+      >
         <div className="tw-flex tw-flex-col tw-gap-1">
           {[
             ["Gas", `${displayDecimal(gas, 5)}`],
@@ -113,7 +117,8 @@ export function printGas(
           ].map(([label, value]) => (
             <div
               key={label}
-              className="tw-flex tw-justify-between tw-w-full tw-gap-4">
+              className="tw-flex tw-justify-between tw-w-full tw-gap-4"
+            >
               <span className="tw-text-left tw-w-1/2">{label}</span>
               <span className="tw-text-right tw-w-1/2">{value}</span>
             </div>
@@ -169,6 +174,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       return (
         <a href={getHref()} target="_blank" rel="noreferrer">
           <Image
+            unoptimized
             width={0}
             height={0}
             style={{ height: "40px", width: "auto" }}
@@ -274,9 +280,11 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       <a
         href={`/nextgen/token/${props.tr.token_id}/provenance`}
         target="_blank"
-        rel="noreferrer">
+        rel="noreferrer"
+      >
         {collectionName} #{normalized.token_id}
         <Image
+          unoptimized
           width={0}
           height={0}
           style={{
@@ -378,10 +386,12 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           target="_blank"
           rel="noreferrer"
-          className="tw-flex">
+          className="tw-flex"
+        >
           <FontAwesomeIcon
             className={styles.gasIcon}
-            icon={faExternalLinkSquare}></FontAwesomeIcon>
+            icon={faExternalLinkSquare}
+          ></FontAwesomeIcon>
         </Link>
       </span>
     );
@@ -438,7 +448,8 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
-      className={styles.latestActivityRow}>
+      className={styles.latestActivityRow}
+    >
       <td className="align-middle text-center">
         {getDateDisplay(new Date(props.tr.transaction_date))}
       </td>

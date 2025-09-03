@@ -82,6 +82,7 @@ export default function NextGenPageClient({
       ) : (
         <div className={styles.nextGenQuestion}>
           <Image
+            unoptimized
             width={0}
             height={0}
             style={{ height: "auto", width: "25vw" }}

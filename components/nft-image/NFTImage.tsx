@@ -1,4 +1,4 @@
-"use client";
+
 
 import styles from "./NFTImage.module.scss";
 import { BaseNFT, NFTLite } from "../../entities/INFT";
@@ -41,6 +41,7 @@ export default function NFTImage(props: Readonly<Props>) {
     imageStyle,
     bgStyle
   };
+
 
   switch (mediaType) {
     case 'html':

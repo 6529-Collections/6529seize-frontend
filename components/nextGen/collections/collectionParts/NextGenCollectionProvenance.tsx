@@ -147,6 +147,7 @@ export function NextGenCollectionProvenanceRow(
           <>
             {match[1]}
             <Image
+              unoptimized
               width={0}
               height={0}
               style={{
@@ -211,7 +212,8 @@ export function NextGenCollectionProvenanceRow(
               &nbsp;
               <Link
                 href={`/nextgen/token/${tokenId}`}
-                onClick={(e) => e.stopPropagation()}>
+                onClick={(e) => e.stopPropagation()}
+              >
                 {content}
               </Link>
               {afterMatchSpan}
@@ -252,14 +254,16 @@ export function NextGenCollectionProvenanceRow(
         props.odd
           ? styles.collectionProvenanceAccordionOdd
           : styles.collectionProvenanceAccordion
-      }>
+      }
+    >
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button
           className={`d-flex justify-content-between ${
             isTransaction
               ? styles.collectionProvenanceAccordionButtonHideCaret
               : ""
-          }`}>
+          }`}
+        >
           <Container className={styles.collectionProvenanceAccordionButton}>
             <Row>
               <Col>
@@ -288,13 +292,15 @@ export function NextGenCollectionProvenanceRow(
                       )}
                       onClick={(e) => e.stopPropagation()}
                       target="_blank"
-                      rel="noreferrer">
+                      rel="noreferrer"
+                    >
                       <FontAwesomeIcon
                         style={{
                           height: "25px",
                           cursor: "pointer",
                         }}
-                        icon={faExternalLinkSquare}></FontAwesomeIcon>
+                        icon={faExternalLinkSquare}
+                      ></FontAwesomeIcon>
                     </Link>
                   </span>
                 </span>
@@ -308,7 +314,8 @@ export function NextGenCollectionProvenanceRow(
               props.odd
                 ? styles.collectionProvenanceAccordionBodyOdd
                 : styles.collectionProvenanceAccordionBody
-            }>
+            }
+          >
             <Container className="no-padding">
               <Row className="pt-2 pb-2">
                 <Col>{printBody()}</Col>
