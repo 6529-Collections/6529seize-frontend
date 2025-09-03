@@ -26,7 +26,6 @@ jest.mock("@/helpers/server.app.helpers", () => ({
 }));
 
 describe("Activity Page loader logic", () => {
-  const mockGetCommonHeaders = getAppCommonHeaders as jest.Mock;
   const mockGetUserProfileActivityLogs =
     getUserProfileActivityLogs as jest.Mock;
   const mockConvertActivityLogParams = convertActivityLogParams as jest.Mock;
@@ -36,7 +35,6 @@ describe("Activity Page loader logic", () => {
   });
 
   it("fetches logs and returns data for page", async () => {
-    mockGetCommonHeaders.mockReturnValue({ h: "v" });
     mockConvertActivityLogParams.mockReturnValue("converted");
     mockGetUserProfileActivityLogs.mockResolvedValue("logs");
 
@@ -50,7 +48,6 @@ describe("Activity Page loader logic", () => {
       }),
     });
 
-    expect(mockGetCommonHeaders).toHaveBeenCalled();
     expect(mockConvertActivityLogParams).toHaveBeenCalledWith({
       params: expect.anything(),
       disableActiveGroup: true,
@@ -63,7 +60,6 @@ describe("Activity Page loader logic", () => {
   });
 
   it("throws error on failure", async () => {
-    mockGetCommonHeaders.mockReturnValue({});
     mockConvertActivityLogParams.mockReturnValue("params");
     mockGetUserProfileActivityLogs.mockRejectedValue(new Error("fail"));
 

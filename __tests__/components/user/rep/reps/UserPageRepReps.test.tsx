@@ -1,15 +1,16 @@
+import { AuthContext } from "@/components/auth/Auth";
+import UserPageRepReps from "@/components/user/rep/reps/UserPageRepReps";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { render, screen } from "@testing-library/react";
-import React from "react";
-import UserPageRepReps from "../../../../../components/user/rep/reps/UserPageRepReps";
-import { AuthContext } from "../../../../../components/auth/Auth";
-import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
-
-jest.mock("next/router", () => ({ useRouter: () => ({ isReady: true }) }));
 
 function setMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockReturnValue({ matches, addListener: jest.fn(), removeListener: jest.fn() }),
+    value: jest.fn().mockReturnValue({
+      matches,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+    }),
   });
 }
 
@@ -24,7 +25,10 @@ const profile = { handle: "target" } as any;
 function renderComponent(authValue: any) {
   return render(
     <AuthContext.Provider value={{ ...authValue }}>
-      <UserPageRepReps repRates={{ rating_stats: sampleReps } as any} profile={profile} />
+      <UserPageRepReps
+        repRates={{ rating_stats: sampleReps } as any}
+        profile={profile}
+      />
     </AuthContext.Provider>
   );
 }
@@ -42,7 +46,10 @@ describe("UserPageRepReps", () => {
   });
 
   it("disables editing when viewing own profile", () => {
-    renderComponent({ connectedProfile: { handle: "target" }, activeProfileProxy: null });
+    renderComponent({
+      connectedProfile: { handle: "target" },
+      activeProfileProxy: null,
+    });
     const button = screen.getAllByRole("button")[0];
     expect(button).toBeDisabled();
   });
