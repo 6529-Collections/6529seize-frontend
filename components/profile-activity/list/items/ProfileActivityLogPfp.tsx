@@ -1,7 +1,10 @@
-import {ProfileActivityLogPfpEdit} from "../../../../entities/IProfile";
+import { ProfileActivityLogPfpEdit } from "../../../../entities/IProfile";
 import Image from "next/image";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import {getScaledImageUri, ImageScale} from "../../../../helpers/image.helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../helpers/image.helpers";
 
 export default function ProfileActivityLogPfp({
   log,
@@ -21,7 +24,11 @@ export default function ProfileActivityLogPfp({
           <div className="tw-pl-1">
             {log.contents.old_value && (
               <Image
-                src={getScaledImageUri(log.contents.old_value, ImageScale.W_AUTO_H_50)}
+                unoptimized
+                src={getScaledImageUri(
+                  log.contents.old_value,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile picture"
                 width="20"
                 height="20"
@@ -48,7 +55,11 @@ export default function ProfileActivityLogPfp({
 
       <div className="tw-ml-2">
         <Image
-          src={getScaledImageUri(log.contents.new_value, ImageScale.W_AUTO_H_50)}
+          unoptimized
+          src={getScaledImageUri(
+            log.contents.new_value,
+            ImageScale.W_AUTO_H_50
+          )}
           alt="Profile picture"
           width="20"
           height="20"

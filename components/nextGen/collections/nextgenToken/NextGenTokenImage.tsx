@@ -74,7 +74,8 @@ export function NextGenTokenImage(
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-          }}>
+          }}
+        >
           <FontAwesomeIcon
             height={18}
             icon={faInfoCircle}
@@ -88,7 +89,8 @@ export function NextGenTokenImage(
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             <Container>
               <Row className="pt-2 pb-2">
                 <Col>{ownerInfo}</Col>
@@ -159,6 +161,7 @@ export function NextGenTokenImage(
           {props.token.opensea_price == props.token.price &&
             props.token.opensea_royalty > 0 && (
               <Image
+                unoptimized
                 width={0}
                 height={0}
                 style={{ height: "20px", width: "auto" }}
@@ -170,6 +173,7 @@ export function NextGenTokenImage(
           {props.token.me_price == props.token.price &&
             props.token.me_price > 0 && (
               <Image
+                unoptimized
                 width={0}
                 height={0}
                 style={{ height: "20px", width: "auto" }}
@@ -236,15 +240,15 @@ export function NextGenTokenImage(
           style={{
             overflow: "hidden",
             height: height,
-          }}>
+          }}
+        >
           <Image
+            quality={100}
             priority
             loading={"eager"}
-            width="0"
-            height="0"
+            width="290"
+            height="380"
             style={{
-              height: "auto",
-              width: "auto",
               maxHeight: "100%",
               maxWidth: "100%",
             }}
@@ -265,7 +269,8 @@ export function NextGenTokenImage(
               props.show_owner_info
                 ? "justify-content-between"
                 : "justify-content-center"
-            }`}>
+            }`}
+          >
             <span className={props.info_class ?? ""}>
               #{props.token.normalised_id}
             </span>
@@ -307,7 +312,8 @@ export function NextGenTokenImage(
     return (
       <Link
         href={`/nextgen/token/${props.token.id}`}
-        className="decoration-none scale-hover unselectable">
+        className="decoration-none scale-hover unselectable"
+      >
         {getContent()}
       </Link>
     );

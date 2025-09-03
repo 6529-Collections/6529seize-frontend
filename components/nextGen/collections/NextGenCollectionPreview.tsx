@@ -14,11 +14,13 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
   return (
     <Link
       href={`/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
-      className="decoration-none">
+      className="decoration-none"
+    >
       <Container className={styles.collectionPreview}>
         <Row>
           <Col className="pb-4">
             <Image
+              unoptimized
               priority
               loading={"eager"}
               width="0"

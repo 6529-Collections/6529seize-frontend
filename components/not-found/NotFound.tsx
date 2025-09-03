@@ -13,6 +13,7 @@ export default function NotFound() {
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-start tw-pt-[100px]">
       <Image
+        unoptimized
         width="0"
         height="0"
         style={{ height: "auto", width: "100px" }}

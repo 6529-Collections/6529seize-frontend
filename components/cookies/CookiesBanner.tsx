@@ -13,9 +13,10 @@ export default function CookiesBanner() {
   const isMobile = useIsMobileDevice();
   const pathname = usePathname() ?? "";
   const { consent, reject } = useCookieConsent();
-  
-  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
+  const isIOS =
+    typeof navigator !== "undefined" &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   if (["/restricted", "/access"].includes(pathname)) {
     return <></>;
@@ -23,14 +24,15 @@ export default function CookiesBanner() {
 
   return (
     <div
-      className={`${styles.banner} ${
-        isApp ? styles.bannerMobile : ""
-      } ${isApp && isIOS ? styles.bannerIOS : ""} d-flex align-items-center justify-content-between gap-2 ${
+      className={`${styles.banner} ${isApp ? styles.bannerMobile : ""} ${
+        isApp && isIOS ? styles.bannerIOS : ""
+      } d-flex align-items-center justify-content-between gap-2 ${
         isApp ? `flex-column` : ""
       }`}
     >
       <span className="d-flex align-items-center gap-2">
         <Image
+          unoptimized
           src="/intern.png"
           alt="Cookie"
           width={isMobile ? 22 : 40}
