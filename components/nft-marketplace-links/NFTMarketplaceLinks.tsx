@@ -20,8 +20,15 @@ export default function NFTMarketplaceLinks({
         className="hover:tw-opacity-75"
         href={`https://opensea.io/assets/ethereum/${contract}/${id}`}
         target="_blank"
-        rel="noreferrer">
-        <Image src="/opensea.png" alt="opensea" width={size} height={size} />
+        rel="noreferrer"
+      >
+        <Image
+          unoptimized
+          src="/opensea.png"
+          alt="opensea"
+          width={size}
+          height={size}
+        />
       </Link>
       {isGradientsContract(contract) && (
         <Link
@@ -29,8 +36,15 @@ export default function NFTMarketplaceLinks({
           className="hover:tw-opacity-75"
           href={`https://blur.io/eth/asset/${contract}/${id}`}
           target="_blank"
-          rel="noreferrer">
-          <Image src="/blur.png" alt="blur" width={size} height={size} />
+          rel="noreferrer"
+        >
+          <Image
+            unoptimized
+            src="/blur.png"
+            alt="blur"
+            width={size}
+            height={size}
+          />
         </Link>
       )}
       <Link
@@ -38,8 +52,10 @@ export default function NFTMarketplaceLinks({
         className="hover:tw-opacity-75"
         href={`https://magiceden.io/item-details/ethereum/${contract}/${id}`}
         target="_blank"
-        rel="noreferrer">
+        rel="noreferrer"
+      >
         <Image
+          unoptimized
           src="/magiceden.png"
           alt="magic-eden"
           width={size}
@@ -51,8 +67,15 @@ export default function NFTMarketplaceLinks({
         className="hover:tw-opacity-75"
         href={`https://rarible.com/token/${contract}:${id}`}
         target="_blank"
-        rel="noreferrer">
-        <Image src="/rarible.svg" alt="rarible" width={size} height={size} />
+        rel="noreferrer"
+      >
+        <Image
+          unoptimized
+          src="/rarible.svg"
+          alt="rarible"
+          width={size}
+          height={size}
+        />
       </Link>
     </div>
   );

@@ -1,20 +1,13 @@
-"use client";
-
 import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import { NextGenCollection } from "@/entities/INextgen";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { isEmptyObject } from "@/helpers/Helpers";
-import dynamic from "next/dynamic";
+import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+import LatestActivity from "../latest-activity/LatestActivity";
 import MemeCalendarOverview from "../schedule/MemeCalendarOverview";
 import LatestDropSection from "./LatestDropSection";
-
-const LatestActivity = dynamic(
-  () => import("@/components/latest-activity/LatestActivity"),
-  { ssr: false }
-);
 
 export default function Home({
   featuredNft,
@@ -46,7 +39,7 @@ export default function Home({
                   featuredNextgen.name
                 )}`}
                 className="tw-no-underline">
-                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#222] hover:tw-border-[#222]max-[800px]:tw-text-[12px]">
                   View Collection
                 </span>
               </Link>

@@ -207,7 +207,8 @@ export default function NextGenZoomableImage(
           maxWidth: "100%",
           overflow: "hidden",
           position: "relative",
-        }}>
+        }}
+      >
         {loading && (
           <span
             className="d-flex flex-column gap-3 align-items-center justify-content-center"
@@ -219,7 +220,8 @@ export default function NextGenZoomableImage(
               height: "100%",
               zIndex: 2,
               backgroundColor: "rgb(0, 0, 0)",
-            }}>
+            }}
+          >
             <span className="d-flex flex-wrap text-center">
               {isMobileDevice ? "8K" : "16K"} Pebbles are very large
             </span>
@@ -240,6 +242,7 @@ export default function NextGenZoomableImage(
           </span>
         )}
         <Image
+          unoptimized
           ref={imgRef}
           priority
           loading={"eager"}

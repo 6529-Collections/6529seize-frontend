@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  DistributionPlanSearchContractMetadataResult,
-} from "../../../allowlist-tool/allowlist-tool.types";
+import { DistributionPlanSearchContractMetadataResult } from "../../../allowlist-tool/allowlist-tool.types";
 import Image from "next/image";
 import DistributionPlanVerifiedIcon from "../../common/DistributionPlanVerifiedIcon";
 import {
@@ -85,10 +83,12 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
   return (
     <tr
       className="tw-cursor-pointer hover:tw-bg-neutral-700 tw-duration-300 tw-ease-out"
-      onClick={onCollectionClick}>
+      onClick={onCollectionClick}
+    >
       <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <Image
+            unoptimized
             src={collectionMeta.imgUrl}
             alt=""
             width={16}
@@ -112,7 +112,8 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
             className="tw-h-4 tw-w-auto"
             viewBox="0 0 1080 1760"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               opacity="0.6"
               d="M539.8 650.9L0 896.3L539.8 1215.4L1079.7 896.3L539.8 650.9Z"
@@ -148,7 +149,8 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
             className="tw-h-4 tw-w-auto"
             viewBox="0 0 1080 1760"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               opacity="0.6"
               d="M539.8 650.9L0 896.3L539.8 1215.4L1079.7 896.3L539.8 650.9Z"

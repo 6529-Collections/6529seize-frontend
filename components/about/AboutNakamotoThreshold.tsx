@@ -33,7 +33,9 @@ export default function AboutNakamotoThreshold() {
           <p>So Meme Card #4 had an edition count of 300.</p>
           <p>
             <Image
+            
               loading="eager"
+              
               width="0"
               height="0"
               style={{

@@ -188,6 +188,7 @@ export default function RememeAddPage() {
             <Row className="pt-2 pb-2">
               <Col sm={12} md={4} className="d-flex align-items-center gap-2">
                 <Image
+                  unoptimized
                   loading={"eager"}
                   width="0"
                   height="0"
@@ -231,7 +232,8 @@ export default function RememeAddPage() {
                       {checkList.map((note, index) => (
                         <li
                           key={`ve-${index}`}
-                          className={`d-flex align-items-center gap-2`}>
+                          className={`d-flex align-items-center gap-2`}
+                        >
                           {note.status ? (
                             <FontAwesomeIcon
                               icon={faCheckCircle}
@@ -254,7 +256,8 @@ export default function RememeAddPage() {
                       {signErrors.map((se, index) => (
                         <li
                           key={`se-${index}`}
-                          className={`d-flex align-items-center gap-2`}>
+                          className={`d-flex align-items-center gap-2`}
+                        >
                           <FontAwesomeIcon
                             icon={faTimesCircle}
                             className={styles.unverifiedIcon}
@@ -288,7 +291,8 @@ export default function RememeAddPage() {
                             message: JSON.stringify(buildRememeObject()),
                           });
                         }
-                      }}>
+                      }}
+                    >
                       Add Rememe
                     </Button>
                   </span>
@@ -296,7 +300,8 @@ export default function RememeAddPage() {
                   <Button
                     className="seize-btn btn-white"
                     disabled={seizeConnectOpen}
-                    onClick={() => seizeConnect()}>
+                    onClick={() => seizeConnect()}
+                  >
                     {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
                   </Button>
                 )}
@@ -310,7 +315,8 @@ export default function RememeAddPage() {
                   <div className="d-inline">
                     <div
                       className={`spinner-border ${styles.loader}`}
-                      role="status">
+                      role="status"
+                    >
                       <span className="sr-only"></span>
                     </div>
                   </div>
@@ -345,7 +351,8 @@ export default function RememeAddPage() {
                     <Col
                       xs={12}
                       className="pt-2"
-                      key={`submission-result-error-${index}`}>
+                      key={`submission-result-error-${index}`}
+                    >
                       {e}
                     </Col>
                   ))}
@@ -359,7 +366,8 @@ export default function RememeAddPage() {
                         <Col
                           xs={12}
                           className="pt-1 pb-1"
-                          key={`submission-result-token-${t.id}`}>
+                          key={`submission-result-token-${t.id}`}
+                        >
                           #{t.id} - {t.name}
                           &nbsp;&nbsp;
                           <a
@@ -370,7 +378,8 @@ export default function RememeAddPage() {
                                 : "https://6529.io"
                             }/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noreferrer"
+                          >
                             view
                           </a>
                         </Col>
@@ -382,7 +391,8 @@ export default function RememeAddPage() {
                           className="seize-btn btn-white"
                           onClick={() => {
                             location.reload();
-                          }}>
+                          }}
+                        >
                           Add Another
                         </Button>
                       </Col>

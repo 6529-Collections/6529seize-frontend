@@ -7,6 +7,7 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import UserPageDrops from "./UserPageDrops";
+
 export default function UserPageBrainWrapper({
   profile: initialProfile,
 }: {

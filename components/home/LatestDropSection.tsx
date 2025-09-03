@@ -1,5 +1,4 @@
 "use client";
-
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NftOwner } from "@/entities/IOwner";
@@ -7,7 +6,6 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 import { fetchUrl } from "@/services/6529api";
-import dynamic from "next/dynamic";
 import { useState, useEffect, memo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -18,21 +16,16 @@ import FeaturedNFTImageColumn from "./FeaturedNFTImageColumn";
 import ManifoldClaimTable from "./ManifoldClaimTable";
 import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
 import MintingApproachSection from "./MintingApproachSection";
+import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 
 // Memoized image column to prevent unnecessary re-renders
 const MemoizedFeaturedNFTImageColumn = memo(FeaturedNFTImageColumn);
-
-const MemePageMintCountdown = dynamic(
-  () => import("@/components/the-memes/MemePageMintCountdown"),
-  { ssr: false }
-);
 
 interface Props {
   readonly featuredNft: NFTWithMemesExtendedData;
 }
 
 export default function LatestDropSection({ featuredNft }: Props) {
-
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
@@ -47,17 +40,18 @@ export default function LatestDropSection({ featuredNft }: Props) {
   } = useManifoldClaimDisplays({ manifoldClaim });
 
   useEffect(() => {
-
     if (connectedProfile?.consolidation_key && featuredNft) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${featuredNft.contract}&token_id=${featuredNft.id}`
-      ).then((response: DBResponse) => {
-        const balanceObject: NftOwner = response.data[0];
-        setNftBalance(balanceObject?.balance ?? 0);
-      }).catch((error) => {
-        console.error('Failed to fetch NFT balance:', error);
-        // Balance remains 0, which is the current fallback behavior
-      });
+      )
+        .then((response: DBResponse) => {
+          const balanceObject: NftOwner = response.data[0];
+          setNftBalance(balanceObject?.balance ?? 0);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch NFT balance:", error);
+          // Balance remains 0, which is the current fallback behavior
+        });
     } else {
       setNftBalance(0);
     }
@@ -73,14 +67,18 @@ export default function LatestDropSection({ featuredNft }: Props) {
         </Col>
       </Row>
       <Row>
-        <MemoizedFeaturedNFTImageColumn featuredNft={featuredNft} nftBalance={nftBalance} />
+        <MemoizedFeaturedNFTImageColumn
+          featuredNft={featuredNft}
+          nftBalance={nftBalance}
+        />
 
         <Col
           className="pt-3 pb-3"
           xs={{ span: 12 }}
           sm={{ span: 12 }}
           md={{ span: 6 }}
-          lg={{ span: 6 }}>
+          lg={{ span: 6 }}
+        >
           <Container>
             <Row>
               <Col>
@@ -95,7 +93,7 @@ export default function LatestDropSection({ featuredNft }: Props) {
             </Row>
             <Row>
               <Col>
-                <FeaturedNFTDetailsTable 
+                <FeaturedNFTDetailsTable
                   nft={featuredNft}
                   editionSizeDisplay={manifoldClaimEditionSizeDisplay}
                 />

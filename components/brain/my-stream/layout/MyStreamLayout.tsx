@@ -66,8 +66,10 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   ) : (
     <div
       id="my-stream-connect"
-      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6">
+      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6"
+    >
       <Image
+        unoptimized
         priority
         loading="eager"
         src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"

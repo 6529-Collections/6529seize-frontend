@@ -253,7 +253,8 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                   .map((m) => (
                     <Dropdown.Item
                       key={`add-rememe-meme-red-${m.id}`}
-                      onClick={() => addReference(m)}>
+                      onClick={() => addReference(m)}
+                    >
                       #{m.id} - {m.name}
                     </Dropdown.Item>
                   ))}
@@ -325,8 +326,10 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                               className="decoration-hover-underline"
                               href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
                               target="_blank"
-                              rel="noreferrer">
+                              rel="noreferrer"
+                            >
                               <Image
+                                unoptimized
                                 src="/opensea.png"
                                 alt="opensea"
                                 width={22}
@@ -373,13 +376,15 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 className="seize-btn"
                 disabled={
                   !contract || !tokenIdDisplay || references.length === 0
-                }>
+                }
+              >
                 Validate
                 {verifying && (
                   <div className="d-inline">
                     <div
                       className={`spinner-border ${styles.loader}`}
-                      role="status">
+                      role="status"
+                    >
                       <span className="sr-only"></span>
                     </div>
                   </div>
@@ -403,7 +408,8 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                     setContractResponse(undefined);
                     props.verifiedRememe(undefined, []);
                   }}
-                  className="seize-btn-link">
+                  className="seize-btn-link"
+                >
                   Edit
                 </Button>
               </div>

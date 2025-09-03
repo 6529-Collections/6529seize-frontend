@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatNameForUrl, normalizeNextgenTokenID } from "../../helpers/nextgen-utils";
 import { goerli, mainnet, sepolia } from "viem/chains";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import { NextGenCollection } from "../../entities/INextgen";
@@ -194,20 +195,6 @@ export function useCollectionAdditionalData(
   return { data, error, isLoading };
 }
 
-function useCollectionAdditionalHook(
-  collection: number,
-  setData: (data: AdditionalData) => void,
-  watch: boolean = false
-) {
-  useCollectionAdditionalData(
-    collection,
-    (data: AdditionalData) => {
-      setData(data);
-    },
-    watch
-  );
-}
-
 export function useCollectionInfo(
   collection: number | string,
   callback: (data: any) => void,
@@ -242,20 +229,6 @@ export function useCollectionInfo(
   }, [data, callback]);
 
   return { data, error, isLoading };
-}
-
-function useCollectionInfoHook(
-  collection: number,
-  setData: (data: Info) => void,
-  watch: boolean = false
-) {
-  useCollectionInfo(
-    collection,
-    (data: Info) => {
-      setData(data);
-    },
-    watch
-  );
 }
 
 export function useCollectionLibraryAndScript(
@@ -355,44 +328,6 @@ export function getStatusFromDates(startTime: number, endTime: number) {
   return Status.UNAVAILABLE;
 }
 
-function extractURI(s: string) {
-  const regex = /"animation_url":"([^"]+)"/;
-  const match = regex.exec(s);
-  if (match && match.length >= 2) {
-    const animationUrl = match[1];
-    const base64Data = animationUrl.split(",")[1];
-    const uri = Buffer.from(base64Data, "base64").toString("utf-8");
-    return {
-      uri: uri,
-      data: animationUrl,
-    };
-  } else {
-    return {
-      uri: "",
-      data: "",
-    };
-  }
-}
-
-function extractField(field: string, s: string) {
-  const regex = new RegExp(`"${field}":"([^"]+)"`);
-  const match = regex.exec(s);
-  if (match && match.length >= 2) {
-    return match[1];
-  } else {
-    return "";
-  }
-}
-
-function extractAttributes(s: string) {
-  const regex = /"attributes":\[(.*?)\]/;
-  const match = regex.exec(s);
-  if (match) {
-    return JSON.parse(`[${match[1]}]`);
-  }
-  return null;
-}
-
 function extractPhases(d: any[]) {
   const al_start = parseInt(d[0]);
   const al_end = parseInt(d[1]);
@@ -412,29 +347,6 @@ function extractPhases(d: any[]) {
     public_status: publicStatus,
   };
   return phases;
-}
-
-function useTokensIndex(
-  type: "min" | "max",
-  collection: number | string,
-  callback: (data: any) => void
-) {
-  const { data, error, isLoading } = useReadContract({
-    address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
-    abi: NEXTGEN_CORE.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    functionName: type === "min" ? "viewTokensIndexMin" : "viewTokensIndexMax",
-    args: [collection],
-  });
-
-  useEffect(() => {
-    if (typeof data === "string" || typeof data === "number") {
-      const d = parseInt(data.toString(), 10);
-      callback(d);
-    }
-  }, [data, callback]);
-
-  return { data, error, isLoading };
 }
 
 export function useCoreContractWrite(
@@ -670,18 +582,7 @@ export function getMagicEdenLink(tokenId?: number) {
   ].toLowerCase()}/${tokenId ?? ""}`;
 }
 
-export function formatNameForUrl(name: string) {
-  return name.replace(/ /g, "-").toLowerCase();
-}
-
-export function normalizeNextgenTokenID(tokenId: number) {
-  const collectionId = Math.round(tokenId / 10000000000);
-  const normalisedTokenId = tokenId - collectionId * 10000000000;
-  return {
-    collection_id: collectionId,
-    token_id: normalisedTokenId,
-  };
-}
+export { formatNameForUrl, normalizeNextgenTokenID };
 
 export enum NextGenTokenRarityType {
   RARITY_SCORE = "RARITY_SCORE",

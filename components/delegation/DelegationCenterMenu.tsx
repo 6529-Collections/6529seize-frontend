@@ -215,7 +215,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   props.section === DelegationCenterSection.CENTER
                     ? styles.menuLeftItemActive
                     : ""
-                }`}>
+                }`}
+              >
                 Delegation Center
               </Col>
             </Row>
@@ -230,7 +231,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   props.section === DelegationCenterSection.WALLET_ARCHITECTURE
                     ? styles.menuLeftItemActive
                     : ""
-                }`}>
+                }`}
+              >
                 Wallet Architecture
               </Col>
             </Row>
@@ -245,7 +247,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                     pathname?.startsWith("/delegation/delegation-faq/"))
                     ? styles.menuLeftItemActive
                     : ""
-                }`}>
+                }`}
+              >
                 Delegation FAQs
               </Col>
             </Row>
@@ -261,7 +264,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   DelegationCenterSection.CONSOLIDATION_USE_CASES
                     ? styles.menuLeftItemActive
                     : ""
-                }`}>
+                }`}
+              >
                 Consolidation Use Cases
               </Col>
             </Row>
@@ -274,7 +278,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   props.section === DelegationCenterSection.CHECKER
                     ? styles.menuLeftItemActive
                     : ""
-                }`}>
+                }`}
+              >
                 Wallet Checker
               </Col>
             </Row>
@@ -307,7 +312,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         props.section === DelegationCenterSection.CENTER
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}>
+                      }`}
+                    >
                       Delegation Center
                     </Col>
                   </Row>
@@ -323,7 +329,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         DelegationCenterSection.WALLET_ARCHITECTURE
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}>
+                      }`}
+                    >
                       Wallet Architecture
                     </Col>
                   </Row>
@@ -336,7 +343,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         props.section === DelegationCenterSection.FAQ
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}>
+                      }`}
+                    >
                       Delegation FAQs
                     </Col>
                   </Row>
@@ -352,7 +360,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         DelegationCenterSection.CONSOLIDATION_USE_CASES
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}>
+                      }`}
+                    >
                       Consolidation Use Cases
                     </Col>
                   </Row>
@@ -365,7 +374,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         props.section === DelegationCenterSection.CHECKER
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}>
+                      }`}
+                    >
                       Wallet Checker
                     </Col>
                   </Row>
@@ -411,8 +421,15 @@ function EtherscanLink() {
       }
       target="_blank"
       rel="noreferrer"
-      className={styles.delegationLink}>
-      <Image src="/etherscan_w.png" alt="etherscan" width={30} height={30} />
+      className={styles.delegationLink}
+    >
+      <Image
+        unoptimized
+        src="/etherscan_w.png"
+        alt="etherscan"
+        width={30}
+        height={30}
+      />
       <span>Etherscan</span>
     </a>
   );
@@ -424,8 +441,15 @@ function GithubLink() {
       href={`https://github.com/6529-Collections/nftdelegation`}
       target="_blank"
       rel="noreferrer"
-      className={styles.delegationLink}>
-      <Image src="/github_w.png" alt="github" width={30} height={30} />
+      className={styles.delegationLink}
+    >
+      <Image
+        unoptimized
+        src="/github_w.png"
+        alt="github"
+        width={30}
+        height={30}
+      />
       <span>Github</span>
     </a>
   );
@@ -446,11 +470,13 @@ export function DelegationToast(
         if (!props.toastRef.current?.contains(e.target as Node)) {
           props.setShowToast(false);
         }
-      }}>
+      }}
+    >
       <ToastContainer
         position={"top-center"}
         className={styles.toast}
-        ref={props.toastRef}>
+        ref={props.toastRef}
+      >
         <Toast onClose={() => props.setShowToast(false)} show={props.showToast}>
           <Toast.Header>
             <span className="me-auto">{props.toast.title}</span>
@@ -459,7 +485,8 @@ export function DelegationToast(
             <Toast.Body
               dangerouslySetInnerHTML={{
                 __html: props.toast.message,
-              }}></Toast.Body>
+              }}
+            ></Toast.Body>
           )}
         </Toast>
       </ToastContainer>

@@ -77,6 +77,7 @@ export default function AccessPage() {
 export function LoginImage(props: Readonly<{ image: string; alt: string }>) {
   return (
     <Image
+      unoptimized
       width="0"
       height="0"
       style={{

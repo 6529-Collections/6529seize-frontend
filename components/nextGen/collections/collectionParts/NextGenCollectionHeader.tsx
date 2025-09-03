@@ -67,7 +67,8 @@ export function NextGenBackToCollectionPageLink(
   return (
     <Link
       href={link}
-      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
+      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2"
+    >
       <FontAwesomeIcon icon={faArrowCircleLeft} className={styles.backIcon} />
       {content}
     </Link>
@@ -119,9 +120,11 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
-            )}/mint`}>
+            )}/mint`}
+          >
             <button
-              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}>
+              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}
+            >
               {getButtonLabel()}
             </button>
           </Link>
@@ -183,7 +186,8 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getAllowlistClassName()}`}>
+          } ${getAllowlistClassName()}`}
+        >
           ALLOWLIST {alStatus}
         </span>
       )}
@@ -191,7 +195,8 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getPublicStatusClassName()}`}>
+          } ${getPublicStatusClassName()}`}
+        >
           PUBLIC PHASE {publicStatus}
         </span>
       )}
@@ -244,8 +249,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
                 }
                 target="_blank"
-                rel="noreferrer">
+                rel="noreferrer"
+              >
                 <Image
+                  unoptimized
                   className={styles.marketplace}
                   src="/opensea.png"
                   alt="opensea"
@@ -256,8 +263,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getBlurCollectionLink()}
                 target="_blank"
-                rel="noreferrer">
+                rel="noreferrer"
+              >
                 <Image
+                  unoptimized
                   className={styles.marketplace}
                   src="/blur.png"
                   alt="blur"
@@ -268,8 +277,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getMagicEdenCollectionLink()}
                 target="_blank"
-                rel="noreferrer">
+                rel="noreferrer"
+              >
                 <Image
+                  unoptimized
                   className={styles.marketplace}
                   src="/magiceden.png"
                   alt="magiceden"
@@ -308,7 +319,8 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           <Col
             className="pt-3 d-flex flex-column align-items-center"
             sm={12}
-            md={6}>
+            md={6}
+          >
             <NextGenCountdown collection={props.collection} />
           </Col>
         )}

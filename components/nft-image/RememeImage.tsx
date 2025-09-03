@@ -69,7 +69,8 @@ export default function RememeImage(props: Readonly<Props>) {
       <Col
         className={`${styles.nftAnimation} ${
           props.height === 650 ? styles.height650 : styles.height300
-        } d-flex justify-content-center align-items-center`}>
+        } d-flex justify-content-center align-items-center`}
+      >
         <video
           id={`${props.nft.contract}-${props.nft.id}`}
           autoPlay={props.animation}
@@ -83,7 +84,8 @@ export default function RememeImage(props: Readonly<Props>) {
             if (nextFallback) {
               currentTarget.src = nextFallback;
             }
-          }}></video>
+          }}
+        ></video>
       </Col>
     );
   }
@@ -93,8 +95,10 @@ export default function RememeImage(props: Readonly<Props>) {
       xs={12}
       className={`mb-2 text-center d-flex align-items-center justify-content-center ${
         styles.imageWrapper
-      } ${props.height === 300 ? styles.height300 : ""}`}>
+      } ${props.height === 300 ? styles.height300 : ""}`}
+    >
       <Image
+        unoptimized
         loading="eager"
         priority
         width="0"

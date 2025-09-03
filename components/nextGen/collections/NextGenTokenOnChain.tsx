@@ -120,6 +120,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 <Row className="pt-4">
                   <Col className="text-center">
                     <Image
+                      unoptimized
                       priority
                       loading={"eager"}
                       width="0"
@@ -156,7 +157,8 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 <Link
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
-                  )}`}>
+                  )}`}
+                >
                   {props.collection.name}
                 </Link>
               </span>
@@ -186,10 +188,12 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                     <Link
                       href={tokenMetadataUrl}
                       target="_blank"
-                      rel="noreferrer">
+                      rel="noreferrer"
+                    >
                       <FontAwesomeIcon
                         className={styles.copyIcon}
-                        icon={faExternalLinkSquare}></FontAwesomeIcon>
+                        icon={faExternalLinkSquare}
+                      ></FontAwesomeIcon>
                     </Link>
                   </span>
                 </span>
@@ -203,8 +207,10 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                         href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
                         rel="noreferrer"
-                        data-tooltip-id={`opensea-${props.token_id}`}>
+                        data-tooltip-id={`opensea-${props.token_id}`}
+                      >
                         <Image
+                          unoptimized
                           className={styles.marketplace}
                           src="/opensea.png"
                           alt="opensea"

@@ -121,7 +121,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   Burnt
                 </Tooltip>
               </>
@@ -129,7 +130,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {profile?.level && profile?.cic ? (
               <Link
                 href={`/${profile?.handle ?? props.token.owner}`}
-                className="d-flex gap-2 decoration-hover-underline align-items-center">
+                className="d-flex gap-2 decoration-hover-underline align-items-center"
+              >
                 <UserCICAndLevel
                   level={profile.level}
                   cicType={cicToType(profile.cic)}
@@ -174,8 +176,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   target="_blank"
                   rel="noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
-                  data-tooltip-id={`opensea-${props.token.id}`}>
+                  data-tooltip-id={`opensea-${props.token.id}`}
+                >
                   <Image
+                    unoptimized
                     className={styles.marketplace}
                     src="/opensea.png"
                     alt="opensea"
@@ -192,6 +196,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                       </span>
                       {props.token.opensea_royalty > 0 && (
                         <Image
+                          unoptimized
                           width={0}
                           height={0}
                           style={{ height: "25px", width: "auto" }}
@@ -214,7 +219,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -238,8 +244,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   target="_blank"
                   rel="noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
-                  data-tooltip-id={`blur-${props.token.id}`}>
+                  data-tooltip-id={`blur-${props.token.id}`}
+                >
                   <Image
+                    unoptimized
                     className={styles.marketplace}
                     src="/blur.png"
                     alt="blur"
@@ -266,7 +274,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -285,8 +294,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   target="_blank"
                   rel="noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
-                  data-tooltip-id={`magic-eden-${props.token.id}`}>
+                  data-tooltip-id={`magic-eden-${props.token.id}`}
+                >
                   <Image
+                    unoptimized
                     className={styles.marketplace}
                     src="/magiceden.png"
                     alt="magiceden"
@@ -303,6 +314,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                       </span>
                       {props.token.me_royalty > 0 && (
                         <Image
+                          unoptimized
                           width={0}
                           height={0}
                           style={{ height: "25px", width: "auto" }}
@@ -325,7 +337,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -354,7 +367,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
-              )}`}>
+              )}`}
+            >
               {props.collection.name}
             </Link>
           </span>

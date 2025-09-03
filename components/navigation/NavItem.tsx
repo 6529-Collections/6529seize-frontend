@@ -75,7 +75,8 @@ const NavItem = ({ item }: Props) => {
         aria-label={name}
         aria-disabled="true"
         disabled
-        className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-full tw-h-16 tw-opacity-40 tw-pointer-events-none tw-min-w-0">
+        className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-full tw-h-16 tw-opacity-40 tw-pointer-events-none tw-min-w-0"
+      >
         <div className="tw-flex tw-items-center tw-justify-center">
           {item.iconComponent ? (
             <item.iconComponent
@@ -115,7 +116,8 @@ const NavItem = ({ item }: Props) => {
       aria-current={isActive ? "page" : undefined}
       onClick={() => handleNavClick(item)}
       className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors 
-      tw-w-full tw-h-16 tw-min-w-0">
+      tw-w-full tw-h-16 tw-min-w-0"
+    >
       {isActive && (
         <motion.div
           layoutId="nav-indicator"
