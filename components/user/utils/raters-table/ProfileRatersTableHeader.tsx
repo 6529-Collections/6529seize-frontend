@@ -1,10 +1,7 @@
-import { SortDirection } from "../../../../entities/ISort";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { SortDirection } from "@/entities/ISort";
+import { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProfileRatersTableHeaderSortableCell from "./ProfileRatersTableHeaderSortableCell";
-import {
-  ProfileRatersParamsOrderBy,
-  ProfileRatersTableType,
-} from "./wrapper/ProfileRatersTableWrapper";
 
 export default function ProfileRatersTableHeader({
   type,

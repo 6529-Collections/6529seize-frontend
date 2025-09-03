@@ -1,36 +1,119 @@
-import { getServerSideProps } from '../../pages/[user]/rep';
-import { getCommonHeaders, getUserProfile, userPageNeedsRedirect } from '../../helpers/server.helpers';
-import { getMetadataForUserPage } from '../../helpers/Helpers';
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
-jest.mock('../../helpers/server.helpers');
-jest.mock('../../helpers/Helpers');
+// Mocks for helpers used by the factory
+jest.mock("@/helpers/server.app.helpers", () => ({
+  getAppCommonHeaders: jest.fn(async () => ({ "x-test": "1" })),
+}));
 
-const mockProfile = { handle: 'alice' } as any;
-(getMetadataForUserPage as jest.Mock).mockReturnValue('meta');
-(getCommonHeaders as jest.Mock).mockReturnValue({ head: '1' });
-(getUserProfile as jest.Mock).mockResolvedValue(mockProfile);
+jest.mock("@/helpers/server.helpers", () => ({
+  getUserProfile: jest.fn(async ({ user }: { user: string }) => ({
+    handle: user,
+    walletAddress: "0xabc",
+    tdh: 0,
+    rep: 0,
+    level: 0,
+  })),
+  userPageNeedsRedirect: jest.fn(() => null),
+}));
 
-describe('rep page getServerSideProps', () => {
+jest.mock("@/components/providers/metadata", () => ({
+  getAppMetadata: jest.fn((v: any) => v),
+}));
+
+// Use real helpers but we'll spy on the metadata builder
+import * as Helpers from "@/helpers/Helpers";
+
+// Mock layout to avoid React Query provider
+jest.mock("@/components/user/layout/UserPageLayout", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="layout">{children}</div>
+  ),
+}));
+
+// Mock redirect from next/navigation
+const redirectMock = jest.fn();
+jest.mock("next/navigation", () => ({
+  redirect: (url: string) => redirectMock(url),
+}));
+
+// Import after mocks
+import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
+import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getUserProfile,
+  userPageNeedsRedirect,
+} from "@/helpers/server.helpers";
+
+// Dummy Rep tab
+function DummyRepTab({ profile }: { readonly profile: any }) {
+  return <div data-testid="rep">REP:{profile.handle}</div>;
+}
+
+const buildFactory = () =>
+  createUserTabPage({ subroute: "rep", metaLabel: "Rep", Tab: DummyRepTab });
+
+describe("rep page via createUserTabPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    redirectMock.mockClear();
+    (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 
-  it('redirects when helper returns redirect', async () => {
-    (userPageNeedsRedirect as jest.Mock).mockReturnValue({ redirect: 'yes' });
-    const result = await getServerSideProps({ query: { user: 'bob' }, req: {} } as any, null as any, null as any);
-    expect(result).toEqual({ redirect: 'yes' });
+  it("renders layout + tab when no redirect needed", async () => {
+    const { Page } = buildFactory();
+
+    const element = await Page({
+      params: Promise.resolve({ user: "Alice" }),
+      searchParams: Promise.resolve({ foo: "bar" }),
+    } as any);
+
+    render(element);
+
+    expect(await screen.findByTestId("rep")).toHaveTextContent("REP:alice");
+
+    expect(getUserProfile).toHaveBeenCalledWith({
+      user: "alice",
+      headers: { "x-test": "1" },
+    });
+    expect(userPageNeedsRedirect).toHaveBeenCalledWith({
+      profile: expect.any(Object),
+      req: { query: { user: "Alice", foo: "bar" } },
+      subroute: "rep",
+    });
+    expect(redirectMock).not.toHaveBeenCalled();
   });
 
-  it('returns props when no redirect needed', async () => {
-    (userPageNeedsRedirect as jest.Mock).mockReturnValue(false);
-    const result = await getServerSideProps({ query: { user: 'bob' }, req: {} } as any, null as any, null as any);
-    expect(result).toEqual({ props: { profile: mockProfile, handleOrWallet: 'bob', metadata: 'meta' } });
+  it("redirects when userPageNeedsRedirect returns destination", async () => {
+    (userPageNeedsRedirect as jest.Mock).mockReturnValue({
+      redirect: { destination: "/bob/rep" },
+    });
+
+    const { Page } = buildFactory();
+
+    await Page({
+      params: Promise.resolve({ user: "Carol" }),
+      searchParams: Promise.resolve({}),
+    } as any);
+
+    expect(redirectMock).toHaveBeenCalledWith("/bob/rep");
   });
 
-  it('returns 404 redirect on error', async () => {
-    (userPageNeedsRedirect as jest.Mock).mockReturnValue(false);
-    (getUserProfile as jest.Mock).mockRejectedValue(new Error('fail'));
-    const result = await getServerSideProps({ query: { user: 'bob' }, req: {} } as any, null as any, null as any);
-    expect(result).toEqual({ redirect: { permanent: false, destination: '/404' }, props: {} });
+  it("generateMetadata uses helpers", async () => {
+    const { generateMetadata } = buildFactory();
+    const spy = jest.spyOn(Helpers, "getMetadataForUserPage");
+
+    const meta = await generateMetadata({
+      params: Promise.resolve({ user: "Dave" }),
+    } as any);
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
+      "Rep"
+    );
+    expect(getAppMetadata).toHaveBeenCalled();
+    expect(meta).toEqual(
+      expect.objectContaining({ title: expect.stringContaining("dave") })
+    );
   });
 });

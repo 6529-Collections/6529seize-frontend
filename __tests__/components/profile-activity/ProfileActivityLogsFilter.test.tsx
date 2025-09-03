@@ -1,12 +1,14 @@
+import ProfileActivityLogsFilter from "@/components/profile-activity/filter/ProfileActivityLogsFilter";
+import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
+import { ProfileActivityLogType } from "@/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import ProfileActivityLogsFilter from "../../../components/profile-activity/filter/ProfileActivityLogsFilter";
-import { ProfileActivityLogType, PROFILE_ACTIVITY_TYPE_TO_TEXT } from "../../../entities/IProfile";
 
-jest.mock("../../../components/profile-activity/filter/ProfileActivityLogsFilterList", () => (props: any) => (
-  <div data-testid="list">{props.options.length}</div>
-));
+jest.mock(
+  "@/components/profile-activity/filter/ProfileActivityLogsFilterList",
+  () => (props: any) => <div data-testid="list">{props.options.length}</div>
+);
 
 jest.mock("react-use", () => ({
   useClickAway: jest.fn(),
@@ -37,12 +39,22 @@ test("title updates based on selection", () => {
       setSelected={jest.fn()}
     />
   );
-  expect(screen.getByText(PROFILE_ACTIVITY_TYPE_TO_TEXT[ProfileActivityLogType.DROP_CREATED])).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      PROFILE_ACTIVITY_TYPE_TO_TEXT[ProfileActivityLogType.DROP_CREATED]
+    )
+  ).toBeInTheDocument();
   rerender(
     <ProfileActivityLogsFilter
       user={"u"}
-      selected={[ProfileActivityLogType.DROP_CREATED, ProfileActivityLogType.HANDLE_EDIT]}
-      options={[ProfileActivityLogType.DROP_CREATED, ProfileActivityLogType.HANDLE_EDIT]}
+      selected={[
+        ProfileActivityLogType.DROP_CREATED,
+        ProfileActivityLogType.HANDLE_EDIT,
+      ]}
+      options={[
+        ProfileActivityLogType.DROP_CREATED,
+        ProfileActivityLogType.HANDLE_EDIT,
+      ]}
       setSelected={jest.fn()}
     />
   );

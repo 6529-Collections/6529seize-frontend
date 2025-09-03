@@ -1,20 +1,20 @@
-import { ProfileActivityLogType } from "../../../entities/IProfile";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { ProfileActivityLogType } from "@/enums";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
 import ProfileActivityLogsCICRatingIcon from "./ProfileActivityLogsCICRatingIcon";
 import ProfileActivityLogsCertificateIcon from "./ProfileActivityLogsCertificateIcon";
 import ProfileActivityLogsContactIcon from "./ProfileActivityLogsContactIcon";
-import ProfileActivityLogsHandleIcon from "./ProfileActivityLogsHandleIcon";
-import ProfileActivityLogsProfileImageIcon from "./ProfileActivityLogsProfileImageIcon";
-import ProfileActivityLogsSocialMediaAccountIcon from "./ProfileActivityLogsSocialMediaAccountIcon";
-import ProfileActivityLogsSocialMediaVerificationPostIcon from "./ProfileActivityLogsSocialMediaVerificationPostIcon";
-import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
-import ProfileActivityLogsProfileArchivedIcon from "./ProfileActivityLogsProfileArchivedIcon";
 import ProfileActivityLogsGeneralCICStatementIcon from "./ProfileActivityLogsGeneralCICStatementIcon";
+import ProfileActivityLogsHandleIcon from "./ProfileActivityLogsHandleIcon";
 import ProfileActivityLogsNFTAccountStatementIcon from "./ProfileActivityLogsNFTAccountStatementIcon";
-import ProfileActivityLogsProxyCreatedIcon from "./ProfileActivityLogsProxyCreatedIcon";
+import ProfileActivityLogsProfileArchivedIcon from "./ProfileActivityLogsProfileArchivedIcon";
+import ProfileActivityLogsProfileImageIcon from "./ProfileActivityLogsProfileImageIcon";
+import ProfileActivityLogsProxyActionChangedIcon from "./ProfileActivityLogsProxyActionChangedIcon";
 import ProfileActivityLogsProxyActionCreatedIcon from "./ProfileActivityLogsProxyActionCreatedIcon";
 import ProfileActivityLogsProxyActionStateChangedIcon from "./ProfileActivityLogsProxyActionStateChangedIcon";
-import ProfileActivityLogsProxyActionChangedIcon from "./ProfileActivityLogsProxyActionChangedIcon";
+import ProfileActivityLogsProxyCreatedIcon from "./ProfileActivityLogsProxyCreatedIcon";
+import ProfileActivityLogsSocialMediaAccountIcon from "./ProfileActivityLogsSocialMediaAccountIcon";
+import ProfileActivityLogsSocialMediaVerificationPostIcon from "./ProfileActivityLogsSocialMediaVerificationPostIcon";
 
 export default function ProfileActivityLogsIcon({
   logType,

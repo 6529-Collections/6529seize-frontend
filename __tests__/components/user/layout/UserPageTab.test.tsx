@@ -1,9 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import UserPageTab from '../../../../components/user/layout/UserPageTab';
-import { useRouter } from 'next/router';
 import { UserPageTabType } from '../../../../components/user/layout/UserPageTabs';
+import { useParams, useSearchParams } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  useParams: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 jest.mock('next/link', () => (props: any) => (
   <a
     data-testid="link"
@@ -16,7 +19,8 @@ jest.mock('next/link', () => (props: any) => (
 
 describe('UserPageTab', () => {
   it('renders active and inactive states', () => {
-    (useRouter as jest.Mock).mockReturnValue({ pathname: '/[user]/rep', query: { user: 'bob', address: '0x1' } });
+    (useParams as jest.Mock).mockReturnValue({ user: 'bob' });
+    (useSearchParams as jest.Mock).mockReturnValue({ get: (k: string) => (k === 'address' ? '0x1' : null) });
     const { rerender } = render(<UserPageTab tab={UserPageTabType.REP} parentRef={{ current: null }} activeTab={UserPageTabType.REP} />);
     const link = screen.getByTestId('link');
     expect(link).toHaveAttribute('href', '/bob/rep?address=0x1');

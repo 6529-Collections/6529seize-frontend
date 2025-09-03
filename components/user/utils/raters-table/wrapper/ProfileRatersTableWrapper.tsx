@@ -1,31 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
-import {
-  RateMatter,
-  RatingWithProfileInfoAndLevel,
-} from "../../../../../entities/IProfile";
-import { useRouter } from "next/router";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Page } from "../../../../../helpers/Types";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import { SortDirection } from "../../../../../entities/ISort";
-import ProfileRatersTable from "../ProfileRatersTable";
-import CommonSkeletonLoader from "../../../../utils/animation/CommonSkeletonLoader";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-export enum ProfileRatersTableType {
-  CIC_RECEIVED = "CIC_RECEIVED",
-  CIC_GIVEN = "CIC_GIVEN",
-  REP_RECEIVED = "REP_RECEIVED",
-  REP_GIVEN = "REP_GIVEN",
-}
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
+import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 
-export enum ProfileRatersParamsOrderBy {
-  RATING = "RATING",
-  LAST_MODIFIED = "LAST_MODIFIED",
-}
+import { SortDirection } from "@/entities/ISort";
+import {
+  ProfileRatersParamsOrderBy,
+  ProfileRatersTableType,
+  RateMatter,
+} from "@/enums";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import ProfileRatersTable from "../ProfileRatersTable";
+import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
 
 export interface ProfileRatersParams {
   readonly page: number;
@@ -42,8 +34,8 @@ export default function ProfileRatersTableWrapper({
 }: {
   readonly initialParams: ProfileRatersParams;
 }) {
-  const router = useRouter();
-  const handleOrWallet = (router.query.user as string).toLowerCase();
+  const params = useParams();
+  const handleOrWallet = (params?.user as string)?.toLowerCase();
   const pageSize = initialParams.pageSize;
   const given = initialParams.given;
   const matter = initialParams.matter;

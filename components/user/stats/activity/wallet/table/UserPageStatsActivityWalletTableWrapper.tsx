@@ -1,13 +1,13 @@
-import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
-import { Transaction } from "../../../../../../entities/ITransaction";
-import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
-import CommonTablePagination from "../../../../../utils/table/paginator/CommonTablePagination";
-import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import { NextGenCollection } from "@/entities/INextgen";
+import { Transaction } from "@/entities/ITransaction";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
-import CommonCardSkeleton from "../../../../../utils/animation/CommonCardSkeleton";
-import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
-import { NextGenCollection } from "../../../../../../entities/INextgen";
-import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
+import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
+import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
   profile,

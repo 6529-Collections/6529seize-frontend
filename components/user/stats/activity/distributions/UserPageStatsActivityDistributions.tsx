@@ -1,14 +1,13 @@
 "use client";
 
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { Distribution } from "@/entities/IDistribution";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Distribution } from "../../../../../entities/IDistribution";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { Page } from "../../../../../helpers/Types";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
@@ -48,16 +47,10 @@ export default function UserPageStatsActivityDistributions({
 
   const onPageFilter = (page: number) => {
     router.replace(
-      pathname +
-        "?" +
-        createQueryString([
-          {
-            name: WALLET_DISTRIBUTION_PAGE_PARAM,
-            value: `${page}`,
-          },
-        ]),
-      undefined,
-      { shallow: true }
+      `${pathname}?${createQueryString([
+        { name: WALLET_DISTRIBUTION_PAGE_PARAM, value: `${page}` },
+      ])}`,
+      { scroll: false }
     );
   };
 
