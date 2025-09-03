@@ -1,12 +1,9 @@
-import { RatingWithProfileInfoAndLevel } from "../../../../entities/IProfile";
-import { SortDirection } from "../../../../entities/ISort";
-import CommonTablePagination from "../../../utils/table/paginator/CommonTablePagination";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
+import { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
 import ProfileRatersTableBody from "./ProfileRatersTableBody";
 import ProfileRatersTableHeader from "./ProfileRatersTableHeader";
-import {
-  ProfileRatersParamsOrderBy,
-  ProfileRatersTableType,
-} from "./wrapper/ProfileRatersTableWrapper";
 
 export default function ProfileRatersTable({
   ratings,

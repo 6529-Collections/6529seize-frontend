@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import UserPageHeaderStats from '../../../../../components/user/user-page-header/stats/UserPageHeaderStats';
-import { useRouter } from 'next/router';
+import { useParams } from 'next/navigation';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
+jest.mock('next/navigation', () => ({ useParams: jest.fn() }));
 
 jest.mock('../../../../../components/user/user-page-header/followers/UserPageFollowers', () => (props: any) => {
   capturedProps = props;
@@ -15,12 +15,12 @@ jest.mock('../../../../../helpers/Helpers', () => ({
 }));
 
 let capturedProps: any = null;
-const useRouterMock = useRouter as jest.Mock;
+const useParamsMock = useParams as jest.Mock;
 
 describe('UserPageHeaderStats', () => {
   beforeEach(() => {
     capturedProps = null;
-    useRouterMock.mockReturnValue({ query: { user: 'bob' } });
+    useParamsMock.mockReturnValue({ user: 'bob' });
   });
 
   it('renders TDH and Rep links with numbers and passes profile to followers', () => {

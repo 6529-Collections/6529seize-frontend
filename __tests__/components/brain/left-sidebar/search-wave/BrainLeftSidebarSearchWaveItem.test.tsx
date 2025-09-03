@@ -6,7 +6,12 @@ const push = jest.fn();
 const registerWave = jest.fn();
 const prefetchWaveData = jest.fn();
 
-jest.mock('next/router', () => ({ useRouter: () => ({ push, query: {} }) }));
+jest.mock('next/navigation', () => ({ 
+  useRouter: () => ({ push }),
+  useSearchParams: () => ({
+    get: jest.fn().mockReturnValue(null)
+  })
+}));
 jest.mock('../../../../../hooks/usePrefetchWaveData', () => ({ usePrefetchWaveData: () => prefetchWaveData }));
 jest.mock('../../../../../contexts/wave/MyStreamContext', () => ({ useMyStream: () => ({ registerWave }) }));
 jest.mock('../../../../../hooks/useWave', () => ({ useWave: () => ({ isDm: false }) }));
@@ -18,7 +23,7 @@ describe('BrainLeftSidebarSearchWaveItem', () => {
     const onClose = jest.fn();
     render(<BrainLeftSidebarSearchWaveItem wave={wave} onClose={onClose} />);
     fireEvent.click(screen.getByRole('link'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w1', undefined, { shallow: true });
+    expect(push).toHaveBeenCalledWith('/my-stream?wave=w1');
     expect(onClose).toHaveBeenCalled();
   });
 

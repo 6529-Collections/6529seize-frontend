@@ -9,15 +9,18 @@ import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 
 export default async function HomePage() {
   const headers = await getAppCommonHeaders();
-  const featuredNft = await commonApiFetch<NFTWithMemesExtendedData>({
-    endpoint: `memes_latest`,
-    headers,
-  }).then(async (responseExtended) => responseExtended);
+  const [featuredNft, featuredNextgen] = await Promise.all([
+    commonApiFetch<NFTWithMemesExtendedData>({
+      endpoint: `memes_latest`,
+      headers,
+    }),
+    commonApiFetch<NextGenCollection>({
+      endpoint: `nextgen/featured`,
+      headers,
+    }),
+  ]);
 
-  const featuredNextgen = await commonApiFetch<NextGenCollection>({
-    endpoint: `nextgen/featured`,
-    headers,
-  });
+
 
   return (
     <main className={styles.main}>

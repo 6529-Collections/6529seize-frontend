@@ -3,7 +3,7 @@ import {
   ActivityLogParamsConverted,
 } from "@/components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
-import { ProfileActivityLogType } from "../entities/IProfile";
+import { ProfileActivityLogType } from "@/enums";
 
 const DISABLED_LOG_TYPES = [
   ProfileActivityLogType.DROP_COMMENT,

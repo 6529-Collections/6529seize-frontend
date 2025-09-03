@@ -1,26 +1,23 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import {
-  ProfileActivityLog,
-  ProfileActivityLogType,
-  RateMatter,
-} from "../../entities/IProfile";
-import { CountlessPage } from "../../helpers/Types";
+import { ProfileActivityLog } from "@/entities/IProfile";
+import { CountlessPage } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../services/api/common-api";
-import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
-import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
+import { useEffect, useState } from "react";
 import CommonFilterTargetSelect, {
   FilterTargetType,
 } from "../utils/CommonFilterTargetSelect";
+import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
+import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 
-import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
-import { useSelector } from "react-redux";
-import { selectActiveGroupId } from "../../store/groupSlice";
-import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { ProfileActivityLogType, RateMatter } from "@/enums";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
+import { selectActiveGroupId } from "@/store/groupSlice";
+import { useSelector } from "react-redux";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
+import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 export interface ActivityLogParams {
   readonly page: number;

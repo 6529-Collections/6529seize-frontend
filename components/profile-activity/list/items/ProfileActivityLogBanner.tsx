@@ -1,8 +1,8 @@
 import {
   ProfileActivityLogBanner1Edit,
   ProfileActivityLogBanner2Edit,
-  ProfileActivityLogType,
-} from "../../../../entities/IProfile";
+} from "@/entities/IProfile";
+import { ProfileActivityLogType } from "@/enums";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 const TITLE: Record<
@@ -30,14 +30,12 @@ export default function ProfileActivityLogBanner({
         <>
           <span
             className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-h-4 tw-w-4 tw-rounded-sm"
-            style={{ backgroundColor: log.contents.old_value }}
-          ></span>
+            style={{ backgroundColor: log.contents.old_value }}></span>
           <svg
             className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
             viewBox="0 0 24 24"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M4 12H20M20 12L14 6M20 12L14 18"
               stroke="currentcOLOR"
@@ -51,8 +49,7 @@ export default function ProfileActivityLogBanner({
 
       <span
         className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-h-4 tw-w-4 tw-rounded-sm"
-        style={{ backgroundColor: log.contents.new_value }}
-      ></span>
+        style={{ backgroundColor: log.contents.new_value }}></span>
     </>
   );
 }

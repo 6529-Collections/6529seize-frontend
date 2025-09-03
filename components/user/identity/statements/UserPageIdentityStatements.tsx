@@ -1,27 +1,27 @@
 "use client";
 
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { CicStatement } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { STATEMENT_GROUP } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { CicStatement } from "../../../../entities/IProfile";
-import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
-import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
-import { useRouter } from "next/router";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { STATEMENT_GROUP } from "../../../../helpers/Types";
-import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
-import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
-import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
-import UserPageIdentityStatementsNFTAccounts from "./nft-accounts/UserPageIdentityStatementsNFTAccounts";
 import { Tooltip } from "react-tooltip";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
+import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
+import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
+import UserPageIdentityStatementsNFTAccounts from "./nft-accounts/UserPageIdentityStatementsNFTAccounts";
+import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
+import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 export default function UserPageIdentityStatements({
   profile,
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
+  const params = useParams();
+  const user = (params?.user as string)?.toLowerCase();
   const [socialMediaAccounts, setSocialMediaAccounts] = useState<
     CicStatement[]
   >([]);
@@ -125,8 +125,7 @@ export default function UserPageIdentityStatements({
                       role="button"
                       aria-label="Statements help"
                       className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-                      data-tooltip-id="statements-help"
-                    >
+                      data-tooltip-id="statements-help">
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
                         viewBox="0 0 24 24"
@@ -149,8 +148,7 @@ export default function UserPageIdentityStatements({
                         backgroundColor: "#1F2937",
                         color: "white",
                         padding: "4px 8px",
-                      }}
-                    >
+                      }}>
                       <ul className="tw-pl-4 tw-list-disc tw-text-iron-300 tw-font-normal tw-space-y-1">
                         <li>All statements are optional.</li>
                         <li>

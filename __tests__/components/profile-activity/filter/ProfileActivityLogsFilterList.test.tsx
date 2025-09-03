@@ -1,14 +1,18 @@
+import ProfileActivityLogsFilterList from "@/components/profile-activity/filter/ProfileActivityLogsFilterList";
+import { ProfileActivityLogType } from "@/enums";
 import { render, screen } from "@testing-library/react";
-import ProfileActivityLogsFilterList from "../../../../components/profile-activity/filter/ProfileActivityLogsFilterList";
-import { ProfileActivityLogType } from "../../../../entities/IProfile";
 
-jest.mock("../../../../components/profile-activity/filter/ProfileActivityLogsFilterListItem", () => (props: any) => (
-  <li data-testid="item" data-item={props.itemType}></li>
-));
+jest.mock(
+  "@/components/profile-activity/filter/ProfileActivityLogsFilterListItem",
+  () => (props: any) => <li data-testid="item" data-item={props.itemType}></li>
+);
 
 describe("ProfileActivityLogsFilterList", () => {
   it("renders list items for options", () => {
-    const options = [ProfileActivityLogType.RATING_EDIT, ProfileActivityLogType.PFP_EDIT];
+    const options = [
+      ProfileActivityLogType.RATING_EDIT,
+      ProfileActivityLogType.PFP_EDIT,
+    ];
     render(
       <ProfileActivityLogsFilterList
         selected={[]}
@@ -17,6 +21,8 @@ describe("ProfileActivityLogsFilterList", () => {
         user="alice"
       />
     );
-    expect(screen.getAllByTestId("item").map((el) => el.getAttribute("data-item"))).toEqual(options);
+    expect(
+      screen.getAllByTestId("item").map((el) => el.getAttribute("data-item"))
+    ).toEqual(options);
   });
 });

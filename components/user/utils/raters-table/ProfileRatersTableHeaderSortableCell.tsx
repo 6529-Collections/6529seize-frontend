@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { SortDirection } from "../../../../entities/ISort";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../distribution-plan-tool/common/CircleLoader";
-import { ProfileRatersParamsOrderBy } from "./wrapper/ProfileRatersTableWrapper";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { SortDirection } from "@/entities/ISort";
+import { ProfileRatersParamsOrderBy } from "@/enums";
+import { useEffect, useState } from "react";
 import CommonTableSortIcon from "../icons/CommonTableSortIcon";
 
 export default function ProfileRatersTableHeaderSortableCell({

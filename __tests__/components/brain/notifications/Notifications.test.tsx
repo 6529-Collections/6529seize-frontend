@@ -7,8 +7,10 @@ jest.mock('@tanstack/react-query', () => ({
   useMutation: () => ({ mutateAsync: mutateAsyncMock }),
 }));
 
-jest.mock('next/router', () => ({
-  useRouter: () => ({ query: {}, replace: jest.fn() }),
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/notifications',
 }));
 
 const setTitleMock = jest.fn();

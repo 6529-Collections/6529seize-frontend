@@ -1,7 +1,7 @@
-import { NextGenCollection } from "../../../../../../entities/INextgen";
-import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
-import { Transaction } from "../../../../../../entities/ITransaction";
-import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
+import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import { NextGenCollection } from "@/entities/INextgen";
+import { Transaction } from "@/entities/ITransaction";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageStatsActivityWalletTableRow from "./row/UserPageStatsActivityWalletTableRow";
 
 export default function UserPageStatsActivityWalletTable({

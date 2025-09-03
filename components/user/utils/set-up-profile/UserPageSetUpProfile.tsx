@@ -3,18 +3,18 @@
 import { useContext, useEffect, useState } from "react";
 import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 
-import { useRouter } from "next/router";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import UserSettingsClassification from "@/components/user/settings/UserSettingsClassification";
+import UserSettingsPrimaryWallet from "@/components/user/settings/UserSettingsPrimaryWallet";
+import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
+import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
-import { AuthContext } from "../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPost } from "../../../../services/api/common-api";
-import UserSettingsUsername from "../../settings/UserSettingsUsername";
-import UserSettingsClassification from "../../settings/UserSettingsClassification";
-import UserSettingsPrimaryWallet from "../../settings/UserSettingsPrimaryWallet";
-import UserSettingsSave from "../../settings/UserSettingsSave";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import { ApiProfileClassification } from "../../../../generated/models/ApiProfileClassification";
+import { usePathname, useRouter } from "next/navigation";
 export default function UserPageSetUpProfile({
   profile,
 }: {
@@ -23,6 +23,7 @@ export default function UserPageSetUpProfile({
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
+  const pathname = usePathname();
 
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
@@ -69,11 +70,15 @@ export default function UserPageSetUpProfile({
         type: "success",
       });
 
-      const newPath = router.pathname.replace(
-        "[user]",
-        updatedProfile?.handle!?.toLowerCase()
-      );
-      await router.replace(newPath);
+      const newPath = (() => {
+        const parts = pathname?.split("/") ?? [];
+        if (parts.length > 1) {
+          parts[1] = (updatedProfile?.handle ?? "").toLowerCase();
+          return parts.join("/");
+        }
+        return `/` + (updatedProfile?.handle ?? "").toLowerCase();
+      })();
+      router.replace(newPath, { scroll: false });
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: null,

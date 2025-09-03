@@ -45,9 +45,8 @@ export const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({
   parts: [{ 
     part_id: 1, 
     content: 'Original content', 
-    media: [], 
+    media: [],
     quoted_drop: null,
-    replies_count: 0,
     quotes_count: 0
   }],
   parts_count: 1,
@@ -62,7 +61,7 @@ export const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({
   context_profile_context: null,
   subscribed_actions: [],
   is_signed: false,
-  reply_to: null,
+  reply_to: undefined,
   rank: null,
   drop_type: ApiDropType.Chat,
   type: 'FULL' as any,
