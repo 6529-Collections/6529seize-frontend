@@ -558,7 +558,8 @@ export default function MemeLabComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <a href={`/meme-lab/${nft.id}`} className="decoration-none scale-hover">
           <Container fluid>
             <Row className={isConnected ? styles.nftImagePadding : ""}>
@@ -566,9 +567,9 @@ export default function MemeLabComponent() {
                 nft={nft}
                 animation={false}
                 height={300}
-                balance={balancesLoaded ? getBalance(nft.id) : -1}
+                showOwnedIfLoggedIn={true}
+                showUnseizedIfLoggedIn={true}
                 showThumbnail={true}
-                showUnseized={isConnected}
               />
             </Row>
             <Row>
@@ -624,7 +625,8 @@ export default function MemeLabComponent() {
                 className={styles.collectionLink}
                 href={`/meme-lab/collection/${encodeURIComponent(
                   collection.replace(" ", "-")
-                )}`}>
+                )}`}
+              >
                 view
               </a>
             </h4>
