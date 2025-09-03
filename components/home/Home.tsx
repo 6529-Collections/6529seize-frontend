@@ -1,16 +1,15 @@
 "use client";
 
+import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import { NextGenCollection } from "@/entities/INextgen";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import {
-  isEmptyObject,
-} from "@/helpers/Helpers";
+import { isEmptyObject } from "@/helpers/Helpers";
 import dynamic from "next/dynamic";
-import { Col, Container, Row } from "react-bootstrap";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
-import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
-import LatestDropSection from "./LatestDropSection";
 import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+import MemeCalendarOverview from "../schedule/MemeCalendarOverview";
+import LatestDropSection from "./LatestDropSection";
 
 const LatestActivity = dynamic(
   () => import("@/components/latest-activity/LatestActivity"),
@@ -24,10 +23,16 @@ export default function Home({
   readonly featuredNft: NFTWithMemesExtendedData;
   readonly featuredNextgen: NextGenCollection;
 }) {
-
   return (
     <>
       <LatestDropSection featuredNft={featuredNft} />
+      <Container className="py-5">
+        <Row>
+          <Col>
+            <MemeCalendarOverview displayTz="local" showViewAll />
+          </Col>
+        </Row>
+      </Container>
       {featuredNextgen && !isEmptyObject(featuredNextgen) && (
         <Container className="pt-3 pb-5">
           <Row>
@@ -41,7 +46,7 @@ export default function Home({
                   featuredNextgen.name
                 )}`}
                 className="tw-no-underline">
-                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#222] hover:tw-border-[#222]max-[800px]:tw-text-[12px]">
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
                   View Collection
                 </span>
               </Link>
