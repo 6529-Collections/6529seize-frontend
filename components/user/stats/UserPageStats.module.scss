@@ -26,19 +26,6 @@
   border-bottom: 1px solid rgb(55, 55, 61) !important;
 }
 
-.collectedAccordionTable {
-  border: none;
-  color: rgb(147, 147, 159);
-  margin-bottom: 0;
-  th,
-  td {
-    color: rgb(147, 147, 159);
-    border-bottom: 0px;
-    padding: 0.3rem 0.2rem;
-    white-space: nowrap;
-  }
-}
-
 .collectedAccordionTableValue {
   text-align: right;
   color: white !important;
@@ -46,4 +33,17 @@
 
 .fadedColor {
   color: rgb(147, 147, 159);
+}
+
+.collectedAccordionTable {
+  border: none;
+  color: rgb(147, 147, 159) !important;
+  margin-bottom: 0;
+  th,
+  td {
+    color: rgb(147, 147, 159) !important;
+    border-bottom: 0px;
+    padding: 0.3rem 0.2rem !important;
+    white-space: nowrap;
+  }
 }
