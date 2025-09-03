@@ -1,5 +1,6 @@
-import Drops from "../../drops/view/Drops";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import Drops from "@/components/drops/view/Drops";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 export default function UserPageDrops({
   profile,
 }: {
