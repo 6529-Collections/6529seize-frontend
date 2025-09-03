@@ -43,20 +43,8 @@ jest.mock("@/hooks/useIdentity", () => ({
 }));
 
 jest.mock("@/helpers/server.helpers", () => ({
-  getCommonHeaders: jest.fn(() => ({})),
   getUserProfile: jest.fn(() => Promise.resolve(aliceUser)),
   userPageNeedsRedirect: jest.fn(() => false),
-}));
-
-jest.mock("next/router", () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-    pathname: "/",
-    query: {},
-    asPath: "/",
-  }),
 }));
 
 jest.mock("@/components/memelab/MemeLab", () => ({

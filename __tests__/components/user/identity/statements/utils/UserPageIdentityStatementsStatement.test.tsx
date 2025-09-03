@@ -1,11 +1,10 @@
-import { render, screen, act } from "@testing-library/react";
+import UserPageIdentityStatementsStatement from "@/components/user/identity/statements/utils/UserPageIdentityStatementsStatement";
+import { STATEMENT_TYPE } from "@/helpers/Types";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageIdentityStatementsStatement from "../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatement";
-import { STATEMENT_TYPE } from "../../../../../../helpers/Types";
-import { useRouter } from "next/router";
 
 jest.mock(
-  "../../../../../../components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton",
+  "@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton",
   () => ({
     __esModule: true,
     default: () => <div data-testid="delete-button" />,
@@ -24,9 +23,6 @@ const mockCopyToClipboard = jest.fn();
 jest.mock("react-use", () => ({
   useCopyToClipboard: () => [null, mockCopyToClipboard],
 }));
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
-
-const mockedUseRouter = useRouter as jest.Mock;
 
 function setMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
@@ -42,7 +38,6 @@ function setMatchMedia(matches: boolean) {
 describe("UserPageIdentityStatementsStatement", () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockedUseRouter.mockReturnValue({ isReady: true });
     setMatchMedia(false);
   });
 

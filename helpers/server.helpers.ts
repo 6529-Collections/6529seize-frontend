@@ -96,14 +96,3 @@ export const getInitialRatersParams = ({
   orderBy: ProfileRatersParamsOrderBy.RATING,
   handleOrWallet,
 });
-
-export const getCommonHeaders = (req: any): Record<string, string> => {
-  const authCookie = req?.req.cookies["x-6529-auth"] ?? null;
-  const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
-  return {
-    ...(authCookie ? { "x-6529-auth": authCookie } : {}),
-    ...(walletAuthCookie
-      ? { Authorization: `Bearer ${walletAuthCookie}` }
-      : {}),
-  };
-};
