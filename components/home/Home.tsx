@@ -8,6 +8,7 @@ import { isEmptyObject } from "@/helpers/Helpers";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+import MemeCalendarOverview from "../schedule/MemeCalendarOverview";
 import LatestDropSection from "./LatestDropSection";
 
 const LatestActivity = dynamic(
@@ -25,6 +26,13 @@ export default function Home({
   return (
     <>
       <LatestDropSection featuredNft={featuredNft} />
+      <Container className="py-5">
+        <Row>
+          <Col>
+            <MemeCalendarOverview displayTz="local" showViewAll />
+          </Col>
+        </Row>
+      </Container>
       {featuredNextgen && !isEmptyObject(featuredNextgen) && (
         <Container className="pt-3 pb-5">
           <Row>
