@@ -142,7 +142,8 @@ export default function SubscriptionsReportComponent() {
               <Link
                 href={`/${connectedProfile.normalised_handle}/subscriptions`}
                 className="decoration-none"
-                aria-label="Learn more about The Memes subscriptions">
+                aria-label="Learn more about The Memes subscriptions"
+              >
                 <button className="tw-p-2 tw-bg-primary-500 hover:tw-bg-primary-600 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out">
                   My Subscriptions
                 </button>
@@ -151,7 +152,8 @@ export default function SubscriptionsReportComponent() {
             <Link
               href="/about/subscriptions"
               className="decoration-hover-underline"
-              aria-label="Learn more about The Memes subscriptions">
+              aria-label="Learn more about The Memes subscriptions"
+            >
               Learn More
             </Link>
           </div>
@@ -190,7 +192,8 @@ export default function SubscriptionsReportComponent() {
                       index % 2 === 0
                         ? "tw-bg-iron-800 hover:tw-bg-iron-700"
                         : "tw-bg-iron-900 hover:tw-bg-iron-700"
-                    }>
+                    }
+                  >
                     <SubscriptionDayDetails date={dates[index]} count={count} />
                   </tr>
                 ))}
@@ -234,7 +237,8 @@ export default function SubscriptionsReportComponent() {
                       index % 2 === 0
                         ? "tw-bg-iron-800 hover:tw-bg-iron-700"
                         : "tw-bg-iron-900 hover:tw-bg-iron-700"
-                    }>
+                    }
+                  >
                     <RedeemedSubscriptionDetails count={count} />
                   </tr>
                 ))}
@@ -249,7 +253,8 @@ export default function SubscriptionsReportComponent() {
         <div
           className="tw-text-center tw-pt-2 tw-pb-3"
           aria-live="polite"
-          aria-atomic="true">
+          aria-atomic="true"
+        >
           <Pagination
             page={redeemedPage}
             pageSize={PAGE_SIZE}
@@ -302,6 +307,7 @@ function RedeemedSubscriptionDetails(
         <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
           <div className="tw-w-[50px] tw-h-[50px] tw-flex tw-items-center tw-justify-center tw-shrink-0">
             <Image
+              unoptimized
               src={props.count.image_url}
               alt={props.count.name || "Meme card"}
               width={0}
@@ -313,7 +319,8 @@ function RedeemedSubscriptionDetails(
             <Link
               href={`/the-memes/${props.count.token_id}`}
               className="decoration-hover-underline tw-text-white"
-              aria-label={`View The Memes card #${props.count.token_id} - ${props.count.name}`}>
+              aria-label={`View The Memes card #${props.count.token_id} - ${props.count.name}`}
+            >
               #{props.count.token_id} - {props.count.name}
             </Link>
             <span className="tw-text-gray-400 tw-text-sm">

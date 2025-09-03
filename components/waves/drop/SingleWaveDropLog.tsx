@@ -32,6 +32,7 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
 
   const avatar = log.invoker.pfp ? (
     <Image
+      unoptimized
       src={getScaledImageUri(log.invoker.pfp, ImageScale.W_AUTO_H_50)}
       alt="User profile picture"
       width={isMobile ? 28 : 24}

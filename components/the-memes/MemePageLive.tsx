@@ -55,7 +55,8 @@ export function MemePageLiveRightMenu(props: {
         sm={{ span: 12 }}
         md={{ span: 6 }}
         lg={{ span: 6 }}
-        className="pt-2">
+        className="pt-2"
+      >
         <Container className="p-0">
           <Row>
             <Col>
@@ -219,7 +220,8 @@ export function MemePageLiveRightMenu(props: {
                 <Link
                   href={distributionPlanLink}
                   target={props.nft.has_distribution ? "_self" : "_blank"}
-                  rel="noreferrer">
+                  rel="noreferrer"
+                >
                   Distribution Plan
                 </Link>
               </Col>
@@ -310,6 +312,7 @@ export function MemePageLiveSubMenu(props: {
         <Row className="pt-3">
           <Col>
             <Image
+              unoptimized
               width="0"
               height="0"
               style={{ width: "250px", height: "auto" }}
@@ -329,6 +332,7 @@ export function MemePageLiveSubMenu(props: {
           <Col className="d-flex flex-wrap align-items-center justify-content-between">
             <h1 className="mb-0 pt-2">
               <Image
+                unoptimized
                 width="0"
                 height="0"
                 style={{ width: "250px", height: "auto", float: "left" }}
@@ -340,7 +344,8 @@ export function MemePageLiveSubMenu(props: {
               <span className="d-flex align-items-center gap-2 pt-2">
                 <Dropdown
                   className={styles.rememesSortDropdown}
-                  drop={"down-centered"}>
+                  drop={"down-centered"}
+                >
                   <Dropdown.Toggle>
                     Sort: {selectedRememeSorting}
                   </Dropdown.Toggle>
@@ -352,7 +357,8 @@ export function MemePageLiveSubMenu(props: {
                           setRememesPage(1);
                           setRememesTotalResults(0);
                           setSelectedRememeSorting(s);
-                        }}>
+                        }}
+                      >
                         {s}
                       </Dropdown.Item>
                     ))}
@@ -411,10 +417,12 @@ export function MemePageLiveSubMenu(props: {
                     xs={{ span: 6 }}
                     sm={{ span: 4 }}
                     md={{ span: 3 }}
-                    lg={{ span: 3 }}>
+                    lg={{ span: 3 }}
+                  >
                     <Link
                       href={`/rememes/${rememe.contract}/${rememe.id}`}
-                      className="decoration-none scale-hover">
+                      className="decoration-none scale-hover"
+                    >
                       <Container fluid className="no-padding">
                         <Row>
                           <Col>
