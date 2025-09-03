@@ -1,30 +1,31 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import UserPageProxy, { ProxyMode } from "../../../../components/user/proxy/UserPageProxy";
-import { useRouter } from "next/router";
-import { AuthContext } from "../../../../components/auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
+import UserPageProxy, {
+  ProxyMode,
+} from "@/components/user/proxy/UserPageProxy";
+import { fireEvent, render, screen } from "@testing-library/react";
 
-jest.mock("../../../../components/user/proxy/list/ProxyList", () => (props: any) => (
+jest.mock("@/components/user/proxy/list/ProxyList", () => (props: any) => (
   <div data-testid="list">
     <button onClick={() => props.onModeChange(ProxyMode.CREATE)}>create</button>
     <span data-testid="isself">{String(props.isSelf)}</span>
   </div>
 ));
 
-jest.mock("../../../../components/user/proxy/create/ProxyCreate", () => (props: any) => (
+jest.mock("@/components/user/proxy/create/ProxyCreate", () => (props: any) => (
   <div data-testid="create">
     <button onClick={() => props.onModeChange(ProxyMode.LIST)}>list</button>
   </div>
 ));
 
-jest.mock("../../../../hooks/useIdentity", () => ({
-  useIdentity: () => ({ profile: { id: "1", handle: "alice", query: "alice" } }),
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: () => ({
+    profile: { id: "1", handle: "alice", query: "alice" },
+  }),
 }));
 
-jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn(() => ({ data: [], isFetching: false })) }));
-
-jest.mock("next/router", () => ({ useRouter: jest.fn() }));
-const useRouterMock = useRouter as jest.Mock;
-useRouterMock.mockReturnValue({ query: { user: "alice" } });
+jest.mock("@tanstack/react-query", () => ({
+  useQuery: jest.fn(() => ({ data: [], isFetching: false })),
+}));
 
 const auth = { connectedProfile: { id: "1" }, activeProfileProxy: null } as any;
 
