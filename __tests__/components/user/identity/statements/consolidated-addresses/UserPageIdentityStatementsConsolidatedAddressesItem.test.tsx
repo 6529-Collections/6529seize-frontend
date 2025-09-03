@@ -1,13 +1,13 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
-import { DELEGATION_ABI } from "../../../../../../abis";
-import { AuthContext } from "../../../../../../components/auth/Auth";
-import { PRIMARY_ADDRESS_USE_CASE } from "../../../../../../components/delegation/delegation-constants";
-import UserPageIdentityStatementsConsolidatedAddressesItem from "../../../../../../components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItem";
+import { DELEGATION_ABI } from "@/abis";
+import { AuthContext } from "@/components/auth/Auth";
+import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/delegation-constants";
+import UserPageIdentityStatementsConsolidatedAddressesItem from "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItem";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
-} from "../../../../../../constants";
+} from "@/constants";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 jest.useFakeTimers();
 
@@ -18,10 +18,8 @@ jest.mock("react-use", () => ({
   useCopyToClipboard: () => [null, mockCopy],
 }));
 
-jest.mock("next/router", () => ({ useRouter: () => ({ isReady: true }) }));
-
 jest.mock(
-  "../../../../../../components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItemPrimary",
+  "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItemPrimary",
   () => ({
     __esModule: true,
     default: ({ assignPrimary }: any) => (
@@ -61,13 +59,11 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (window as any).open = jest.fn();
-    (window as any).matchMedia = jest
-      .fn()
-      .mockReturnValue({
-        matches: true,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-      });
+    (window as any).matchMedia = jest.fn().mockReturnValue({
+      matches: true,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+    });
   });
 
   it("opens external links", () => {

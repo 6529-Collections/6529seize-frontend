@@ -19,11 +19,9 @@ import {
 } from "@/components/nextGen/nextgen_helpers";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
-import { isEmptyObject, numberWithCommas } from "@/helpers/Helpers";
-import { getCommonHeaders } from "@/helpers/server.helpers";
+import { numberWithCommas } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
-import { commonApiFetch } from "@/services/api/common-api";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -384,32 +382,4 @@ export function NextGenCollectionHead(
   useSetTitle(props.collection.name);
 
   return <></>;
-}
-
-export async function getServerSideCollection(req: any, path?: string) {
-  const collectionId = req.query.collection;
-  const headers = getCommonHeaders(req);
-  const collection = await commonApiFetch<NextGenCollection>({
-    endpoint: `nextgen/collections/${collectionId}`,
-    headers: headers,
-  });
-
-  if (isEmptyObject(collection)) {
-    return {
-      notFound: true,
-      props: {},
-    };
-  }
-
-  return {
-    props: {
-      collection: collection,
-      metadata: {
-        title: path ? `${path} | ${collection.name}` : collection.name,
-        ogImage: collection.image,
-        description: "NextGen",
-        twitterCard: "summary_large_image",
-      },
-    },
-  };
 }

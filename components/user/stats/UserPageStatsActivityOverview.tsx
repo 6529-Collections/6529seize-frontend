@@ -1,20 +1,20 @@
 "use client";
 
-import styles from "./UserPageStats.module.scss";
-import { numberWithCommas } from "../../../helpers/Helpers";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import { Accordion, Container, Row, Col, Table } from "react-bootstrap";
+import { Fragment, useEffect, useState } from "react";
+import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
 import {
   AggregatedActivity,
   AggregatedActivityMemes,
 } from "../../../entities/IAggregatedActivity";
-import { Fragment, useEffect, useState } from "react";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { numberWithCommas } from "../../../helpers/Helpers";
 import { commonApiFetch } from "../../../services/api/common-api";
+import { getStatsPath } from "./UserPageStats";
+import styles from "./UserPageStats.module.scss";
 import {
   UserPageStatsTableHead,
   UserPageStatsTableHr,
 } from "./UserPageStatsTableShared";
-import { getStatsPath } from "./UserPageStats";
 
 function printEthValue(value: number | undefined) {
   if (value === undefined) {
@@ -100,150 +100,150 @@ function UserPageStatsActivityOverviewTotals({
                   <tbody>
                     <UserPageStatsTableHr span={6} />
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Airdrops</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.airdrops)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.airdrops_memes)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.airdrops_nextgen)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.airdrops_gradients)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.airdrops_memelab)}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Transfers In</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_in)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_in_memes)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_in_nextgen)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_in_gradients)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_in_memelab)}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Mints</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.primary_purchases_count)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.primary_purchases_count_memes
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.primary_purchases_count_nextgen
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.primary_purchases_count_gradients
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.primary_purchases_count_memelab
                         )}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Mints (ETH)</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.primary_purchases_value)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.primary_purchases_value_memes)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(
                           activity?.primary_purchases_value_nextgen
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(
                           activity?.primary_purchases_value_gradients
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(
                           activity?.primary_purchases_value_memelab
                         )}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Purchases</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.secondary_purchases_count)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.secondary_purchases_count_memes
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.secondary_purchases_count_nextgen
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.secondary_purchases_count_gradients
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(
                           activity?.secondary_purchases_count_memelab
                         )}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Purchases (ETH)</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.secondary_purchases_value)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(
                           activity?.secondary_purchases_value_memes
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(
                           activity?.secondary_purchases_value_nextgen
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(
                           activity?.secondary_purchases_value_gradients
                         )}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(
                           activity?.secondary_purchases_value_memelab
                         )}
@@ -251,82 +251,82 @@ function UserPageStatsActivityOverviewTotals({
                     </tr>
                     <UserPageStatsTableHr span={6} />
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Transfers Out</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_out)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_out_memes)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_out_nextgen)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_out_gradients)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.transfers_out_memelab)}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Burns</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.burns)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.burns_memes)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.burns_nextgen)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.burns_gradients)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.burns_memelab)}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Sales</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.sales_count)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.sales_count_memes)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.sales_count_nextgen)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.sales_count_gradients)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {numberWithCommas(activity?.sales_count_memelab)}
                       </td>
                     </tr>
                     <tr>
-                      <td>
+                      <td className="!tw-text-[#93939f]">
                         <b>Sales (ETH)</b>
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.sales_value)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.sales_value_memes)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.sales_value_nextgen)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.sales_value_gradients)}
                       </td>
-                      <td className={styles.collectedAccordionTableValue}>
+                      <td className="tw-text-right !tw-text-[#fff]">
                         {printEthValue(activity?.sales_value_memelab)}
                       </td>
                     </tr>
@@ -361,16 +361,30 @@ function UserPageStatsActivityOverviewMemes({
                     <thead>
                       <tr>
                         <th colSpan={1}></th>
-                        <th className="text-right">Transfers In</th>
-                        <th className="text-right">Airdrops</th>
-                        <th className="text-right">Mints</th>
-                        <th className="text-right">Mints (ETH)</th>
-                        <th className="text-right">Purchases</th>
-                        <th className="text-right">Purchases (ETH)</th>
-                        <th className="text-right">Transfers Out</th>
-                        <th className="text-right">Burns</th>
-                        <th className="text-right">Sales</th>
-                        <th className="text-right">Sales (ETH)</th>
+                        <th className="text-right !tw-text-[#93939f]">
+                          Transfers In
+                        </th>
+                        <th className="text-right !tw-text-[#93939f]">
+                          Airdrops
+                        </th>
+                        <th className="text-right !tw-text-[#93939f]">Mints</th>
+                        <th className="text-right !tw-text-[#93939f]">
+                          Mints (ETH)
+                        </th>
+                        <th className="text-right !tw-text-[#93939f]">
+                          Purchases
+                        </th>
+                        <th className="text-right !tw-text-[#93939f]">
+                          Purchases (ETH)
+                        </th>
+                        <th className="text-right !tw-text-[#93939f]">
+                          Transfers Out
+                        </th>
+                        <th className="text-right !tw-text-[#93939f]">Burns</th>
+                        <th className="text-right !tw-text-[#93939f]">Sales</th>
+                        <th className="text-right !tw-text-[#93939f]">
+                          Sales (ETH)
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -379,41 +393,43 @@ function UserPageStatsActivityOverviewMemes({
                           key={`stats-activity-memes-${activity.season}`}>
                           <UserPageStatsTableHr span={11} />
                           <tr>
-                            <td>Season {activity.season}</td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="!tw-text-[#93939f]">
+                              Season {activity.season}
+                            </td>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {numberWithCommas(activity.transfers_in)}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {numberWithCommas(activity.airdrops)}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {numberWithCommas(
                                 activity.primary_purchases_count
                               )}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {printEthValue(activity.primary_purchases_value)}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {numberWithCommas(
                                 activity.secondary_purchases_count
                               )}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {printEthValue(
                                 activity.secondary_purchases_value
                               )}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {numberWithCommas(activity.transfers_out)}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {numberWithCommas(activity.burns)}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {numberWithCommas(activity.sales_count)}
                             </td>
-                            <td className={styles.collectedAccordionTableValue}>
+                            <td className="tw-text-right !tw-text-[#fff]">
                               {printEthValue(activity.sales_value)}
                             </td>
                           </tr>
