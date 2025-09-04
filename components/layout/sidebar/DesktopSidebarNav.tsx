@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -38,7 +38,6 @@ type NavItem = {
 
 function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
   const pathname = usePathname();
-  const { showWaves } = useAuth();
   const { address } = useSeizeConnectContext();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -55,17 +54,13 @@ function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
       href: "/",
       icon: HomeIcon,
     },
-    ...(showWaves
-      ? [
-          {
-            type: "route" as const,
-            name: "Waves",
-            href: "/waves",
-            icon: WavesIcon,
-            iconSizeClass: "tw-size-6",
-          },
-        ]
-      : []),
+    {
+      type: "route",
+      name: "Waves",
+      href: "/waves",
+      icon: WavesIcon,
+      iconSizeClass: "tw-size-6",
+    },
     {
       type: "route",
       name: "Messages",
@@ -90,16 +85,6 @@ function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
       href: "/network",
       icon: UsersIcon,
     },
-    ...(address
-      ? [
-          {
-            type: "route" as const,
-            name: "Profile",
-            href: `/${address}`,
-            icon: UserIcon,
-          },
-        ]
-      : []),
   ];
 
   // Expandable sections

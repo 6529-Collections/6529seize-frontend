@@ -1,56 +1,53 @@
 "use client";
 
-import React, { ReactNode } from "react";
-import { motion } from "framer-motion";
-import DesktopSidebar from "./sidebar/DesktopSidebar";
-import { useSidebarState, SidebarProvider } from "@/hooks/useSidebarState";
+import React, { ReactNode, useCallback } from "react";
+import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../header/HeaderPlaceholder";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import Breadcrumb from "../breadcrumb/Breadcrumb";
+import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
+import { useHeaderContext } from "../../contexts/HeaderContext";
+import { usePathname } from "next/navigation";
+
+const Header = dynamic(() => import("../header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 interface DesktopLayoutProps {
   readonly children: ReactNode;
+  readonly isSmall?: boolean;
 }
 
-const DesktopLayoutContent = ({ children }: DesktopLayoutProps) => {
-  const { isMainSidebarCollapsed, toggleMainSidebar } = useSidebarState();
+const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
+  const { registerRef } = useLayout();
+  const { setHeaderRef } = useHeaderContext();
 
-  return (
-    <div className="tw-relative tw-min-h-dvh tw-w-full">
-      <div
-        className={`tailwind-scope  tw-fixed tw-inset-y-0 tw-left-0 tw-w-72 tw-z-30
-          tw-transform-gpu tw-will-change-transform
-          tw-transition-transform tw-duration-300 tw-ease-out
-          motion-reduce:tw-transition-none ${
-            isMainSidebarCollapsed ? "-tw-translate-x-56" : "tw-translate-x-0"
-          }`}
-      >
-        <DesktopSidebar isCollapsed={isMainSidebarCollapsed} onToggle={toggleMainSidebar} />
-      </div>
-      <main
-        className={`tw-min-h-dvh ${
-          isMainSidebarCollapsed ? "tw-pl-16" : "tw-pl-72"
-        }`}
-      >
-        <motion.div
-          layout
-          initial={false}
-          transition={{
-            type: "spring",
-            stiffness: 420,
-            damping: 34,
-            mass: 0.9,
-          }}
-        >
-          {children}
-        </motion.div>
-      </main>
-    </div>
+  const breadcrumbs = useBreadcrumbs();
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+  const isStreamView = pathname?.startsWith("/my-stream");
+
+  const headerWrapperRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      registerRef("header", node);
+      setHeaderRef(node);
+    },
+    [registerRef, setHeaderRef]
   );
-};
 
-const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   return (
-    <SidebarProvider>
-      <DesktopLayoutContent>{children}</DesktopLayoutContent>
-    </SidebarProvider>
+    <>
+      <div
+        ref={headerWrapperRef}
+        className={`${
+          isStreamView ? "tw-sticky tw-top-0 tw-z-50 tw-bg-black" : ""
+        }`}>
+        <Header isSmall={isSmall} />
+        {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />}
+      </div>
+      <main>{children}</main>
+    </>
   );
 };
 

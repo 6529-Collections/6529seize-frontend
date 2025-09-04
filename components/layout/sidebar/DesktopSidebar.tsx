@@ -56,10 +56,10 @@ function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
         </div>
 
         {/* Navigation section */}
-        <DesktopSidebarNav isCollapsed={isCollapsed} />
+        {/* <DesktopSidebarNav isCollapsed={isCollapsed} /> */}
 
         {/* User section */}
-        <DesktopSidebarUser isCollapsed={isCollapsed} />
+        {/* <DesktopSidebarUser isCollapsed={isCollapsed} /> */}
       </div>
 
       {/* Global tooltip for navigation items when collapsed */}
@@ -68,12 +68,11 @@ function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
         place="right"
         offset={16}
         opacity={1}
-        style={{
+        style={{ 
           pointerEvents: "none",
           filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))",
           padding: "4px 8px",
-          background:
-            "linear-gradient(to bottom right, rgb(64, 64, 64), rgb(38, 38, 38))",
+          background: "linear-gradient(to bottom right, rgb(64, 64, 64), rgb(38, 38, 38))",
           color: "white",
           fontSize: "13px",
           fontWeight: "500",
@@ -81,7 +80,7 @@ function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           border: "1px solid rgb(64, 64, 64)",
           backdropFilter: "blur(4px)",
-          zIndex: 9999,
+          zIndex: 9999
         }}
         noArrow={false}
         variant="dark"

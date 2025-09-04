@@ -31,7 +31,7 @@ export default function CreateWaveModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-4xl tw-max-h-[90vh] tw-overflow-hidden tw-shadow-2xl"
+            className="tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-7xl tw-max-h-[90vh] tw-overflow-hidden tw-shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}

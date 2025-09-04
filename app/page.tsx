@@ -24,7 +24,7 @@ export default async function Home() {
 
   return (
     <main className={styles.main}>
-      <HomePage featuredNft={featuredNft} featuredNextgen={featuredNextgen} />
+      {/* <HomePage featuredNft={featuredNft} featuredNextgen={featuredNextgen} /> */}
     </main>
   );
 }

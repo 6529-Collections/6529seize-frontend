@@ -7,7 +7,6 @@ import { useLayout, LayoutProvider } from "../../brain/my-stream/layout/LayoutCo
 import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 import Image from "next/image";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import ClientOnly from "../../client-only/ClientOnly";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesBrain from "../WavesBrain";
 
@@ -21,66 +20,105 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
 
-  const shouldShowContent = useMemo(
-    () => showWaves && spaces.measurementsComplete,
-    [showWaves, spaces.measurementsComplete]
-  );
+  // Determine the exact state we're in - simplified and clear
+  const contentState = useMemo(() => {
+    // Not authenticated at all - check this FIRST before any loading states
+    if (!isAuthenticated) {
+      return 'not-authenticated';
+    }
+    
+    // Only check fetching if we're authenticated
+    if (fetchingProfile) {
+      return 'loading';
+    }
+    
+    // Authenticated but no profile
+    if (!connectedProfile?.handle) {
+      return 'needs-profile';
+    }
+    
+    // Profile exists but waves not enabled (proxy or other reason)
+    if (!showWaves) {
+      return 'not-available';
+    }
+    
+    // Everything ready but still measuring layout
+    if (!spaces.measurementsComplete) {
+      return 'measuring';
+    }
+    
+    // All good, show content
+    return 'ready';
+  }, [isAuthenticated, fetchingProfile, connectedProfile, showWaves, spaces.measurementsComplete]);
 
   const connectPrompt = useMemo(() => {
-    if (!isAuthenticated) {
-      return (
-        <>
+    switch (contentState) {
+      case 'not-authenticated':
+        return (
+          <>
+            <h1 className="tw-text-xl tw-font-bold">
+              This content is only available to connected wallets.
+            </h1>
+            <p className="tw-text-base tw-text-gray-400">
+              Connect your wallet to continue.
+            </p>
+            <HeaderUserConnect />
+          </>
+        );
+      case 'needs-profile':
+        return (
+          <>
+            <h1 className="tw-text-xl tw-font-bold">
+              You need to set up a profile to continue.
+            </h1>
+            <UserSetUpProfileCta />
+          </>
+        );
+      case 'not-available':
+        return (
           <h1 className="tw-text-xl tw-font-bold">
-            This content is only available to connected wallets.
+            This content is not available.
           </h1>
-          <p className="tw-text-base tw-text-gray-400">
-            Connect your wallet to continue.
-          </p>
-          <HeaderUserConnect />
-        </>
+        );
+      case 'loading':
+      case 'measuring':
+        // Don't show any text for loading states - let the waves content handle its own loading UI
+        return null;
+      default:
+        return null;
+    }
+  }, [contentState]);
+
+  const content = useMemo(() => {
+    if (contentState === 'ready') {
+      return (
+        <div className="tw-flex-1" id="waves-content">
+          <WavesBrain>
+            <div className={containerClassName}>{children}</div>
+          </WavesBrain>
+        </div>
       );
     }
-
-    if (!connectedProfile?.handle && !fetchingProfile) {
-      return (
-        <>
-          <h1 className="tw-text-xl tw-font-bold">
-            You need to set up a profile to continue.
-          </h1>
-          <UserSetUpProfileCta />
-        </>
-      );
-    }
-
+    
     return (
-      <h1 className="tw-text-xl tw-font-bold tw-animate-pulse">Loading...</h1>
-    );
-  }, [isAuthenticated, connectedProfile, fetchingProfile]);
-
-  const content = shouldShowContent ? (
-    <div className="tw-flex-1" id="waves-content">
-      <WavesBrain>
-        <div className={containerClassName}>{children}</div>
-      </WavesBrain>
-    </div>
-  ) : (
-    <div
-      id="waves-connect"
-      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6">
-      <Image
-        priority
-        loading="eager"
-        src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
-        alt="Waves"
-        width={304}
-        height={450}
-        className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
-      />
-      <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-        {connectPrompt}
+      <div
+        id="waves-connect"
+        className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6">
+        <Image
+          priority
+          loading="eager"
+          src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+          alt="Waves"
+          width={304}
+          height={450}
+          className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+        />
+        <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+          {connectPrompt}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }, [contentState, connectPrompt, containerClassName, children]);
 
   return (
     <>
@@ -88,7 +126,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
-        <ClientOnly>{content}</ClientOnly>
+        {content}
       </div>
     </>
   );

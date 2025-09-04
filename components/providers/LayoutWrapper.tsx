@@ -15,26 +15,26 @@ export default function LayoutWrapper({
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
 
+  const isSmall = pathname?.startsWith("/my-stream");
   const isAccessOrRestricted =
     pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
 
   const content = useMemo(() => {
     return isApp ? (
-      <MobileLayout>
-        {children}
-        <FooterWrapper />
-      </MobileLayout>
+      <MobileLayout>{children}</MobileLayout>
     ) : (
-      <DesktopLayout>
-        {children}
-        <FooterWrapper />
-      </DesktopLayout>
+      <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
     );
-  }, [isApp, children]);
+  }, [isApp, isSmall, children]);
 
   if (isAccessOrRestricted) {
     return <>{children}</>;
   }
 
-  return content;
+  return (
+    <>
+      {content}
+      <FooterWrapper />
+    </>
+  );
 }
