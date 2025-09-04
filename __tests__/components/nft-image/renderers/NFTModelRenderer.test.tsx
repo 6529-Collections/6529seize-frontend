@@ -7,20 +7,46 @@ import { BaseNFT } from '../../../../entities/INFT';
 // Mock @google/model-viewer
 jest.mock('@google/model-viewer', () => {});
 
-// Mock NFTImageBalance
+// Mock useAuth hook
+jest.mock('../../../../components/auth/Auth', () => ({
+  useAuth: jest.fn(() => ({
+    connectedProfile: {
+      consolidation_key: 'test-consolidation-key',
+      primary_wallet: '0x123'
+    }
+  }))
+}));
+
+// Mock useNftBalance hook
+jest.mock('../../../../hooks/useNftBalance', () => ({
+  useNftBalance: jest.fn(() => ({
+    balance: 1,
+    isLoading: false,
+    error: null
+  }))
+}));
+
+// Mock NFTImageBalance with realistic behavior
 jest.mock('../../../../components/nft-image/NFTImageBalance', () => {
-  return function MockNFTImageBalance({ balance, showOwned, showUnseized, height }: any) {
+  return function MockNFTImageBalance({ contract, tokenId, showOwnedIfLoggedIn, showUnseizedIfLoggedIn, height }: any) {
+    // Use the mocked hook values
+    const { useNftBalance } = require('../../../../hooks/useNftBalance');
+    const { useAuth } = require('../../../../components/auth/Auth');
+    
+    const { balance } = useNftBalance();
+    const { connectedProfile } = useAuth();
+    
     return (
-      <div data-testid="nft-image-balance" data-height={height}>
+      <div data-testid="nft-image-balance" data-contract={contract} data-token-id={tokenId} data-height={height}>
         {balance > 0 && (
           <span data-testid="seized-text">
-            SEIZED{!showOwned ? ` x${balance}` : ""}
+            SEIZED{!showOwnedIfLoggedIn && connectedProfile ? ` x${balance}` : ""}
           </span>
         )}
-        {showUnseized && balance === 0 && (
+        {showUnseizedIfLoggedIn && connectedProfile && balance === 0 && (
           <span data-testid="unseized-text">UNSEIZED</span>
         )}
-        {showUnseized && balance === -1 && (
+        {showUnseizedIfLoggedIn && connectedProfile && balance === -1 && (
           <span data-testid="loading-text">...</span>
         )}
       </div>
@@ -67,8 +93,8 @@ const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT => ({
 const createDefaultProps = (overrides: Partial<BaseRendererProps> = {}): BaseRendererProps => ({
   nft: createMockNFT(),
   height: 300,
-  balance: 1,
-  showUnseized: false,
+  showOwnedIfLoggedIn: false,
+  showUnseizedIfLoggedIn: false,
   heightStyle: 'height-300',
   imageStyle: 'image-style',
   bgStyle: 'bg-style',
@@ -76,6 +102,20 @@ const createDefaultProps = (overrides: Partial<BaseRendererProps> = {}): BaseRen
 });
 
 describe('NFTModelRenderer', () => {
+  beforeEach(() => {
+    // Reset mocks before each test
+    const { useNftBalance } = require('../../../../hooks/useNftBalance');
+    const { useAuth } = require('../../../../components/auth/Auth');
+    
+    // Set default mock return values
+    useNftBalance.mockReturnValue({ balance: 1, isLoading: false, error: null });
+    useAuth.mockReturnValue({
+      connectedProfile: {
+        consolidation_key: 'test-consolidation-key',
+        primary_wallet: '0x123'
+      }
+    });
+  });
   describe('Basic Rendering', () => {
     it('renders NFTModel component with correct structure', () => {
       const props = createDefaultProps();
@@ -163,24 +203,30 @@ describe('NFTModelRenderer', () => {
 
   describe('NFTImageBalance Integration', () => {
     it('passes correct props to NFTImageBalance', () => {
+      const mockNft = createMockNFT({ contract: '0xabc123', id: 42 });
       const props = createDefaultProps({
-        balance: 5,
-        showOwned: true,
-        showUnseized: true,
+        nft: mockNft,
+        showOwnedIfLoggedIn: true,
+        showUnseizedIfLoggedIn: true,
         height: 650,
       });
       render(<NFTModelRenderer {...props} />);
       
       const balance = screen.getByTestId('nft-image-balance');
       expect(balance).toBeInTheDocument();
+      expect(balance).toHaveAttribute('data-contract', '0xabc123');
+      expect(balance).toHaveAttribute('data-token-id', '42');
       expect(balance).toHaveAttribute('data-height', '650');
       expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED');
     });
 
-    it('shows balance with quantity when showOwned is false', () => {
+    it('shows balance with quantity when showOwnedIfLoggedIn is false', () => {
+      // Mock the balance hook to return 3
+      const { useNftBalance } = require('../../../../hooks/useNftBalance');
+      useNftBalance.mockReturnValue({ balance: 3, isLoading: false, error: null });
+      
       const props = createDefaultProps({
-        balance: 3,
-        showOwned: false,
+        showOwnedIfLoggedIn: false,
       });
       render(<NFTModelRenderer {...props} />);
       
@@ -188,9 +234,12 @@ describe('NFTModelRenderer', () => {
     });
 
     it('shows unseized state correctly', () => {
+      // Mock the balance hook to return 0
+      const { useNftBalance } = require('../../../../hooks/useNftBalance');
+      useNftBalance.mockReturnValue({ balance: 0, isLoading: false, error: null });
+      
       const props = createDefaultProps({
-        balance: 0,
-        showUnseized: true,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTModelRenderer {...props} />);
       
@@ -198,9 +247,12 @@ describe('NFTModelRenderer', () => {
     });
 
     it('shows loading state for balance -1', () => {
+      // Mock the balance hook to return -1 (loading state)
+      const { useNftBalance } = require('../../../../hooks/useNftBalance');
+      useNftBalance.mockReturnValue({ balance: -1, isLoading: true, error: null });
+      
       const props = createDefaultProps({
-        balance: -1,
-        showUnseized: true,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTModelRenderer {...props} />);
       
@@ -213,6 +265,68 @@ describe('NFTModelRenderer', () => {
       
       const balance = screen.getByTestId('nft-image-balance');
       expect(balance).toHaveAttribute('data-height', '300');
+    });
+  });
+
+  describe('NFT Type Filtering', () => {
+    it('renders BaseNFT with metadata correctly', () => {
+      const baseNFT = createMockNFT({ 
+        metadata: { animation: 'https://example.com/model.glb' } 
+      });
+      const props = createDefaultProps({ nft: baseNFT });
+      
+      render(<NFTModelRenderer {...props} />);
+      
+      const modelElement = screen.getByTestId('nft-model');
+      expect(modelElement).toBeInTheDocument();
+    });
+
+    it('returns null for NFTLite (without metadata)', () => {
+      const nftLite = {
+        id: 1,
+        contract: '0x123',
+        name: 'NFTLite without metadata',
+        icon: 'https://example.com/icon.png',
+        thumbnail: 'https://example.com/thumb.png',
+        scaled: 'https://example.com/scaled.png',
+        image: 'https://example.com/image.png',
+        animation: 'https://example.com/model.glb',
+        // No metadata property - this makes it an NFTLite
+      };
+      
+      const props = createDefaultProps({ nft: nftLite as any });
+      const { container } = render(<NFTModelRenderer {...props} />);
+      
+      // Should render null (empty container)
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByTestId('nft-model')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nft-image-balance')).not.toBeInTheDocument();
+    });
+
+    it('renders BaseNFT even with undefined metadata (key exists)', () => {
+      // Note: BaseNFT always has metadata key, even if undefined
+      // The component only checks for presence of metadata key, not its value
+      const baseNFTWithUndefinedMetadata = createMockNFT({ metadata: undefined });
+      const props = createDefaultProps({ nft: baseNFTWithUndefinedMetadata });
+      
+      render(<NFTModelRenderer {...props} />);
+      
+      // Should still render because 'metadata' key exists in BaseNFT
+      const modelElement = screen.getByTestId('nft-model');
+      expect(modelElement).toBeInTheDocument();
+    });
+
+    it('renders BaseNFT even with null metadata (key exists)', () => {
+      // Note: BaseNFT always has metadata key, even if null
+      // The component only checks for presence of metadata key, not its value
+      const baseNFTWithNullMetadata = createMockNFT({ metadata: null });
+      const props = createDefaultProps({ nft: baseNFTWithNullMetadata });
+      
+      render(<NFTModelRenderer {...props} />);
+      
+      // Should still render because 'metadata' key exists in BaseNFT
+      const modelElement = screen.getByTestId('nft-model');
+      expect(modelElement).toBeInTheDocument();
     });
   });
 
@@ -237,7 +351,11 @@ describe('NFTModelRenderer', () => {
     });
 
     it('handles zero balance correctly', () => {
-      const props = createDefaultProps({ balance: 0 });
+      // Mock the balance hook to return 0
+      const { useNftBalance } = require('../../../../hooks/useNftBalance');
+      useNftBalance.mockReturnValue({ balance: 0, isLoading: false, error: null });
+      
+      const props = createDefaultProps();
       render(<NFTModelRenderer {...props} />);
       
       const balance = screen.getByTestId('nft-image-balance');
@@ -247,9 +365,12 @@ describe('NFTModelRenderer', () => {
     });
 
     it('handles negative balance correctly', () => {
+      // Mock the balance hook to return -1 (loading state)
+      const { useNftBalance } = require('../../../../hooks/useNftBalance');
+      useNftBalance.mockReturnValue({ balance: -1, isLoading: true, error: null });
+      
       const props = createDefaultProps({ 
-        balance: -1,
-        showUnseized: true,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTModelRenderer {...props} />);
       
@@ -259,9 +380,12 @@ describe('NFTModelRenderer', () => {
     });
 
     it('handles large balance numbers correctly', () => {
+      // Mock the balance hook to return a large number
+      const { useNftBalance } = require('../../../../hooks/useNftBalance');
+      useNftBalance.mockReturnValue({ balance: 999999, isLoading: false, error: null });
+      
       const props = createDefaultProps({
-        balance: 999999,
-        showOwned: false,
+        showOwnedIfLoggedIn: false,
       });
       render(<NFTModelRenderer {...props} />);
       
@@ -286,10 +410,13 @@ describe('NFTModelRenderer', () => {
     });
 
     it('propagates balance-related props to NFTImageBalance', () => {
+      // Mock the balance hook to return 7
+      const { useNftBalance } = require('../../../../hooks/useNftBalance');
+      useNftBalance.mockReturnValue({ balance: 7, isLoading: false, error: null });
+      
       const props = createDefaultProps({
-        balance: 7,
-        showOwned: true,
-        showUnseized: false,
+        showOwnedIfLoggedIn: true,
+        showUnseizedIfLoggedIn: false,
         height: 650,
       });
       render(<NFTModelRenderer {...props} />);
@@ -300,19 +427,19 @@ describe('NFTModelRenderer', () => {
       
       // Verify the mocked balance shows correct text
       const seizedText = screen.getByTestId('seized-text');
-      expect(seizedText).toHaveTextContent('SEIZED'); // showOwned=true, so no quantity
+      expect(seizedText).toHaveTextContent('SEIZED'); // showOwnedIfLoggedIn=true, so no quantity
     });
 
     it('handles optional props correctly', () => {
       const propsWithoutOptionals: BaseRendererProps = {
         nft: createMockNFT(),
         height: 300,
-        balance: 1,
-        showUnseized: false,
+        showOwnedIfLoggedIn: false,
+        showUnseizedIfLoggedIn: false,
         heightStyle: 'height-300',
         imageStyle: 'image-style',
         bgStyle: 'bg-style',
-        // id, showOwned are optional and not provided
+        // id is optional and not provided
       };
       
       expect(() => {
