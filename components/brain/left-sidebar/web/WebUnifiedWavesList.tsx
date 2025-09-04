@@ -2,8 +2,7 @@
 
 import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import React, { useEffect, useRef } from "react";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
@@ -80,21 +79,21 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   const isInitialLoad = isFetching && !haveWaves;
 
   return (
-    <div className="tw-mb-4">
+    <div className="tw-mb-4 tw-pt-5 tw-bg-iron-950">
       {/* Title row with + button */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-mb-3 tw-px-1">
-        <h2 className="tw-text-lg tw-font-semibold tw-text-iron-50">Waves</h2>
+      <div className="tw-flex tw-items-center tw-justify-between tw-px-4">
+        <h2 className="tw-text-lg tw-font-semibold tw-text-iron-50 tw-mb-0">Waves</h2>
         {!isApp && (
           <Link
             href="/waves?create=wave"
-            className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-200 tw-no-underline"
+            className="tw-group tw-text-iron-300 desktop-hover:hover:tw-text-white tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 desktop-hover:hover:tw-from-iron-750 desktop-hover:hover:tw-to-iron-850 desktop-hover:hover:tw-border-iron-650"
             aria-label="Create a new wave">
-            <FontAwesomeIcon icon={faPlus} className="tw-size-4" />
+            <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
           </Link>
         )}
       </div>
       
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
+      <div className="tw-h-full tw-bg-iron-950 tw-py-4">
         <div className="tw-flex-1">
         {isInitialLoad ? (
           <UnifiedWavesListLoader isFetchingNextPage={false} />

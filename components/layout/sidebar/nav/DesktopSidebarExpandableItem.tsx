@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import React from "react";
+import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import type { SidebarSection } from "@/components/navigation/navTypes";
+import DesktopSidebarNavItem from "./DesktopSidebarNavItem";
+import { SidebarSection } from "@/components/navigation/navTypes";
 
-interface DesktopSidebarSectionProps {
+interface DesktopSidebarExpandableItemProps {
   readonly section: SidebarSection;
   readonly expanded: boolean;
   readonly onToggle: () => void;
@@ -13,108 +14,87 @@ interface DesktopSidebarSectionProps {
   readonly pathname: string | null;
 }
 
-const baseRowClassesExpanded =
-  "tw-w-full tw-text-base tw-no-underline tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-group tw-justify-start tw-px-3 tw-h-11 tw-transition-all tw-duration-300";
-
-const baseRowClassesCollapsed =
-  "tw-w-full tw-no-underline tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-group tw-h-11 tw-transition-all tw-duration-300";
-
-const navStateClasses = (active?: boolean) =>
-  active
-    ? "tw-bg-iron-800 tw-text-white desktop-hover:hover:tw-text-white"
-    : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
-
-const itemClasses = (active?: boolean) =>
-  `tw-group tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-transition-all tw-duration-300 tw-px-3 tw-py-2.5 ${
-    active ? "tw-bg-iron-800 tw-text-white" : "tw-text-[#E5E5E5] hover:tw-bg-[#1A1A1A] hover:tw-text-white"
-  }`;
-
 export default function DesktopSidebarExpandableItem({
   section,
   expanded,
   onToggle,
   collapsed,
   pathname,
-}: DesktopSidebarSectionProps) {
-  // Determine active state similar to primary items
-  const sectionActive =
-    expanded ||
-    (pathname?.startsWith(section.items[0]?.href || "") ?? false) ||
-    (section.key === "tools" && (pathname?.startsWith("/tools") ?? false)) ||
-    (section.key === "about" && (pathname?.startsWith("/about") ?? false));
+}: DesktopSidebarExpandableItemProps) {
+  // Helper to check active routes
+  const isActiveRoute = (href: string) =>
+    pathname === href || pathname?.startsWith(href + "/");
+  
+  // Check if any item in this section is active
+  const sectionHasActiveItem = 
+    section.items.some(item => isActiveRoute(item.href)) ||
+    section.subsections?.some(subsection => 
+      subsection.items.some(item => isActiveRoute(item.href))
+    ) || false;
 
-  // Collapsed: render as a single icon-only row linking to the first item
-  if (collapsed) {
-    const href = section.items[0]?.href || "#";
-    return (
-      <li>
-        <Link
-          href={href}
-          className={`${baseRowClassesCollapsed} ${navStateClasses(sectionActive)}`}
-          title={section.name}
-        >
-          <section.icon aria-hidden="true" className="tw-h-6 tw-w-6 tw-shrink-0" />
-        </Link>
-      </li>
-    );
-  }
-
-  // Expanded: render a header with chevron and nested items when open
   return (
-    <div className="tw-hidden lg:tw-block">
-      <button
-        type="button"
+    <>
+      {/* Section row using DesktopSidebarNavItem */}
+      <DesktopSidebarNavItem
         onClick={onToggle}
-        className={`${baseRowClassesExpanded} ${navStateClasses(sectionActive)} tw-bg-transparent tw-border-0 tw-justify-between`}
-        aria-expanded={expanded}
-        aria-controls={`${section.key}-section`}
-        aria-label={`${expanded ? "Collapse" : "Expand"} ${section.name} section`}
-      >
-        <div className="tw-flex tw-gap-4 tw-items-center tw-justify-start">
-          <section.icon aria-hidden="true" className="tw-h-6 tw-w-6 tw-shrink-0" />
-          <span className="tw-hidden lg:tw-block">{section.name}</span>
-        </div>
-        <ChevronRightIcon
-          className={`tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-300 tw-hidden lg:tw-block ${
-            expanded ? "tw-rotate-90" : ""
-          }`}
-        />
-      </button>
+        icon={section.icon}
+        label={section.name}
+        active={expanded || sectionHasActiveItem}
+        collapsed={collapsed}
+        ariaExpanded={expanded}
+        ariaControls={`section-${section.key}`}
+        rightSlot={
+          !collapsed && (
+            <ChevronRightIcon
+              className={`tw-h-4 tw-w-4 tw-shrink-0 tw-ml-auto tw-transition-transform tw-duration-200 ${
+                expanded ? "tw-rotate-90" : ""
+              }`}
+            />
+          )
+        }
+      />
 
-      {expanded && (
-        <ul role="list" className="tw-mt-1 tw-space-y-1" id={`${section.key}-section`}>
-          {section.items.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <li key={item.name} className="tw-ml-6">
-                <Link href={item.href} className={itemClasses(active)}>
-                  {item.name}
-                </Link>
-              </li>
-            );
-          })}
-
-          {section.subsections?.map((sub) => (
-            <li key={sub.name} className="tw-ml-6">
-              <div className="tw-text-xs tw-font-semibold tw-text-[#E5E5E5] tw-px-2 tw-py-1 tw-mt-4">
-                {sub.name}
-              </div>
-              <ul role="list" className="tw-space-y-1">
-                {sub.items.map((item) => {
-                  const active = pathname === item.href;
-                  return (
-                    <li key={item.name}>
-                      <Link href={item.href} className={itemClasses(active)}>
-                        {item.name}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </li>
+      {/* Section Children - Only render when expanded */}
+      {expanded && !collapsed && (
+        <div 
+          id={`section-${section.key}`}
+          className="tw-ml-6 tw-mt-2 tw-space-y-1"
+          role="group"
+        >
+          {/* Direct items */}
+          {section.items.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 tw-transition-colors tw-duration-200 tw-border tw-border-transparent desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-border-iron-700 tw-no-underline"
+              aria-current={isActiveRoute(item.href) ? "page" : undefined}
+            >
+              {item.name}
+            </Link>
           ))}
-        </ul>
+
+          {/* Subsections */}
+          {section.subsections?.map((subsection) => (
+            <div key={subsection.name} className="tw-mt-4">
+              <div className="tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-wider">
+                {subsection.name}
+              </div>
+              <div className="tw-space-y-1">
+                {subsection.items.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 tw-transition-colors tw-duration-200 tw-border tw-border-transparent desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-border-iron-700 tw-no-underline"
+                    aria-current={isActiveRoute(item.href) ? "page" : undefined}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
-    </div>
+    </>
   );
 }

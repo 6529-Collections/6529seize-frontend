@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import React from "react";
+import Link from "next/link";
 
 type IconComp = React.ComponentType<{ className?: string }>;
 
@@ -13,23 +13,23 @@ interface SidebarPrimaryItemProps {
   readonly label: string;
   readonly active?: boolean;
   readonly collapsed?: boolean;
-  readonly title?: string;
   readonly ariaExpanded?: boolean;
   readonly ariaControls?: string;
+  readonly rightSlot?: React.ReactNode;
 }
 
-const baseClassesExpanded =
-  "tw-w-full tw-text-base tw-no-underline tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-group tw-justify-start tw-px-3 tw-h-11 tw-transition-all tw-duration-300";
+const baseClasses =
+  "tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-500 focus:tw-ring-offset-2 tw-font-medium";
 
-const baseClassesCollapsed =
-  "tw-w-full tw-no-underline tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-group tw-h-11 tw-transition-all tw-duration-300";
+const expandedClasses = "tw-justify-start tw-px-3 tw-gap-4";
+const collapsedClasses = "tw-justify-center tw-px-2";
 
 const stateClasses = (active?: boolean) =>
   active
-    ? "tw-bg-iron-800 tw-text-white desktop-hover:hover:tw-text-white"
-    : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
+    ? "tw-text-white desktop-hover:hover:tw-text-white"
+    : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
 
-export default function DesktopSidebarNavItem({
+function DesktopSidebarNavItem({
   href,
   onClick,
   icon: Icon,
@@ -37,18 +37,24 @@ export default function DesktopSidebarNavItem({
   label,
   active,
   collapsed,
-  title,
   ariaExpanded,
   ariaControls,
+  rightSlot,
 }: SidebarPrimaryItemProps) {
-  const classes = `${collapsed ? baseClassesCollapsed : baseClassesExpanded} ${stateClasses(active)}`;
-  
+  const layoutClasses = collapsed ? collapsedClasses : expandedClasses;
+  const classes = `${baseClasses} ${layoutClasses} ${stateClasses(active)}`;
+
   const content = (
     <>
       {Icon && (
         <Icon className={`tw-h-6 tw-w-6 tw-shrink-0 ${iconSizeClass || ""}`} />
       )}
-      {!collapsed && <span className="tw-hidden lg:tw-block">{label}</span>}
+      {!collapsed && (
+        <>
+          <span className="tw-hidden lg:tw-block">{label}</span>
+          {rightSlot}
+        </>
+      )}
     </>
   );
 
@@ -57,9 +63,10 @@ export default function DesktopSidebarNavItem({
       <Link
         href={href}
         className={classes}
-        title={title || label}
-        aria-expanded={ariaExpanded}
-        aria-controls={ariaControls}
+        aria-label={collapsed ? label : undefined}
+        aria-current={active ? "page" : undefined}
+        data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+        data-tooltip-content={collapsed ? label : undefined}
       >
         {content}
       </Link>
@@ -70,12 +77,16 @@ export default function DesktopSidebarNavItem({
     <button
       type="button"
       onClick={onClick}
-      className={`${classes} tw-bg-transparent tw-border-0`}
-      title={title || label}
+      className={classes}
+      aria-label={collapsed ? label : undefined}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}
+      data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+      data-tooltip-content={collapsed ? label : undefined}
     >
       {content}
     </button>
   );
 }
+
+export default React.memo(DesktopSidebarNavItem);

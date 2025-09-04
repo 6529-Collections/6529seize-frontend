@@ -14,7 +14,6 @@ interface Collection {
 
 interface CollectionsSubmenuProps {
   isOpen: boolean;
-  onExpandSidebar: () => void;
   sidebarCollapsed: boolean;
 }
 
@@ -54,7 +53,6 @@ const collections: Collection[] = [
 
 function CollectionsSubmenu({
   isOpen,
-  onExpandSidebar,
   sidebarCollapsed,
 }: CollectionsSubmenuProps) {
   const pathname = usePathname();

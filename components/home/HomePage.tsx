@@ -57,15 +57,15 @@ export default function HomePage({
           >
             <button
               onClick={() => setActiveTab("feed")}
-              className={`tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
+              className={`tw-no-underline tw-flex tw-items-center tw-justify-center tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
                 activeTab === "feed" ? "tw-pointer-events-none" : ""
               }`}
             >
               <div
                 className={
                   activeTab === "feed"
-                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-4 tw-px-1"
-                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-5 tw-px-1"
+                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-5 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
                 }
               >
                 My Feed
@@ -80,8 +80,8 @@ export default function HomePage({
               <div
                 className={
                   activeTab === "latest"
-                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-4 tw-px-1"
-                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-5 tw-px-1"
+                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-5 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
                 }
               >
                 Latest Drop
@@ -91,7 +91,7 @@ export default function HomePage({
         </div>
       </div>
 
-      <div className="tw-h-full tw-px-6">
+      <div className="tw-h-full tw-px-6 tw-bg-iron-950">
         {activeTab === "feed" ? (
           <div className="tw-h-full tw-overflow-hidden">
             <HomeFeed />

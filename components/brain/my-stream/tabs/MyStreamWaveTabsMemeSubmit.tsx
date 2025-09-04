@@ -34,6 +34,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   wave,
   handleMemesSubmit,
 }) => {
+  
   // Get wave information including participation status
   const waveInfo = useWave(wave);
   
@@ -58,6 +59,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   if (!waveInfo) {
     return null;
   }
+
 
   // Determine submission status
   const submissionStatus = waveInfo.participation.status;
@@ -89,7 +91,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       : "Submissions will open soon";
 
     return (
-      <InfoButton disabled={true} title={tooltipText}>
+      <InfoButton disabled={true} title={tooltipText} variant="info">
         <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
         <span>Submissions Open {countdown}</span>
       </InfoButton>
@@ -101,7 +103,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     const tooltipText = "You don't have permission to submit to this wave";
     
     return (
-      <InfoButton disabled={true} title={tooltipText}>
+      <InfoButton disabled={true} title={tooltipText} variant="muted">
         <PermissionIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
         <span>Not Eligible to Submit</span>
       </InfoButton>
@@ -117,7 +119,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     const tooltipText = `You have already submitted the maximum allowed (${submissionText})`;
 
     return (
-      <InfoButton disabled={true} title={tooltipText}>
+      <InfoButton disabled={true} title={tooltipText} variant="muted">
         <LimitIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
         <span>
           {maxSubmissions === 1

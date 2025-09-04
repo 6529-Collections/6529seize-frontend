@@ -12,6 +12,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { useSidebarState } from "../../hooks/useSidebarState";
 
 interface Props {
   readonly children: ReactNode;
@@ -24,6 +25,9 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
 
   // Access layout context for pre-calculated styles
   const { contentContainerStyle } = useLayout();
+  
+  // Get global sidebar state
+  const { isRightSidebarOpen } = useSidebarState();
 
   const dropId = searchParams?.get('drop') ?? undefined;
   const waveId = searchParams?.get('wave') ?? undefined;
@@ -55,7 +59,7 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
     drop &&
     drop?.id?.toLowerCase() === dropId?.toLowerCase();
 
-  const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full tw-px-3 tw-max-w-full tw-mx-auto`;
+  const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto`;
 
   return (
     <div className="tw-relative tw-flex tw-flex-col">
@@ -66,10 +70,14 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
           transition={{ duration: 0.3 }}
           style={{ transition: "none" }}>
           <div
-            className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-w-full tw-overflow-hidden"
+            className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-w-full tw-overflow-hidden"
             style={contentContainerStyle}>
-            <WebBrainLeftSidebar activeWaveId={waveId} />
-            <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-max-w-4xl tw-mx-auto">
+            {/* Only show WebBrainLeftSidebar when right sidebar is closed */}
+            {!isRightSidebarOpen && <WebBrainLeftSidebar activeWaveId={waveId} />}
+            
+            <div className={`tw-flex-grow tw-flex tw-flex-col tw-h-full ${
+              isRightSidebarOpen ? "tw-pr-80" : ""
+            }`}>
               {children}
               {isDropOpen && (
                 <div
@@ -90,6 +98,23 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
           </div>
         </motion.div>
       </div>
+      
+      {/* Right sidebar */}
+      {isRightSidebarOpen && waveId && (
+        <div
+          className="tw-fixed tw-inset-y-0 tw-right-0 tw-w-80 tw-z-30
+            tw-transform-gpu tw-will-change-transform
+            tw-transition-transform tw-duration-300 tw-ease-out
+            motion-reduce:tw-transition-none tw-translate-x-0
+            tw-bg-iron-950 tw-border-l tw-border-iron-800 tw-border-solid"
+        >
+          <div className="tw-p-4 tw-text-white tw-h-full tw-overflow-y-auto">
+            <h2 className="tw-text-lg tw-font-semibold tw-mb-4">Wave Information</h2>
+            <p className="tw-text-iron-300 tw-mb-2">Wave ID: {waveId}</p>
+            <p className="tw-text-iron-300">Right sidebar content for wave information will go here.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

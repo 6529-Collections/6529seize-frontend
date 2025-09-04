@@ -27,14 +27,14 @@ export const TabToggle: React.FC<TabToggleProps> = ({
         <button
           key={option.key}
           onClick={() => onSelect(option.key)}
-          className={`tw-whitespace-nowrap tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 tw-relative ${
+          className={`tw-whitespace-nowrap tw-px-2 tw-py-3 tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 tw-relative ${
             fullWidth
               ? "tw-flex-1 tw-text-center tw-justify-center tw-flex"
               : ""
           } ${
             activeKey === option.key
-              ? "tw-text-primary-300  tw-border-primary-400"
-              : "tw-text-iron-400 hover:tw-text-iron-200 tw-border-transparent"
+              ? "tw-text-white tw-border-primary-400"
+              : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 tw-border-transparent"
           }`}
         >
           {option.label}

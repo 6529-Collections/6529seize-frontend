@@ -13,6 +13,7 @@ import React, {
 export interface SidebarState {
   isMainSidebarCollapsed: boolean;
   isCollectionsSubmenuOpen: boolean;
+  isRightSidebarOpen: boolean;
 }
 
 export interface SidebarActions {
@@ -24,6 +25,9 @@ export interface SidebarActions {
   closeCollectionsSubmenu: () => void;
   handleCollectionsClick: () => void;
   handleChevronLeftClick: () => void;
+  toggleRightSidebar: () => void;
+  openRightSidebar: () => void;
+  closeRightSidebar: () => void;
 }
 
 export interface UseSidebarStateReturn extends SidebarState, SidebarActions {
@@ -43,6 +47,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : false;
   });
   const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   // Persist main sidebar state to localStorage
   useEffect(() => {
@@ -51,9 +56,15 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     }
   }, [isMainSidebarCollapsed]);
 
-  // Main sidebar actions
+  // Main sidebar actions with mutual exclusion
   const toggleMainSidebar = useCallback(() => {
-    setIsMainSidebarCollapsed((prev: boolean) => !prev);
+    setIsMainSidebarCollapsed((prev: boolean) => {
+      if (prev) {
+        // Expanding main sidebar: close right sidebar
+        setIsRightSidebarOpen(false);
+      }
+      return !prev;
+    });
   }, []);
 
   const collapseMainSidebar = useCallback(() => {
@@ -62,6 +73,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 
   const expandMainSidebar = useCallback(() => {
     setIsMainSidebarCollapsed(false);
+    setIsRightSidebarOpen(false);
   }, []);
 
   // Collections submenu actions
@@ -77,12 +89,35 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     setIsCollectionsSubmenuOpen(false);
   }, []);
 
+  // Right sidebar actions with mutual exclusion
+  const toggleRightSidebar = useCallback(() => {
+    setIsRightSidebarOpen((prev: boolean) => {
+      if (!prev) {
+        // Opening right sidebar: collapse left sidebar
+        setIsMainSidebarCollapsed(true);
+        setIsCollectionsSubmenuOpen(false);
+      }
+      return !prev;
+    });
+  }, []);
+
+  const openRightSidebar = useCallback(() => {
+    setIsRightSidebarOpen(true);
+    setIsMainSidebarCollapsed(true);
+    setIsCollectionsSubmenuOpen(false);
+  }, []);
+
+  const closeRightSidebar = useCallback(() => {
+    setIsRightSidebarOpen(false);
+  }, []);
+
   // Specific interaction handlers
   const handleCollectionsClick = useCallback(() => {
     if (!isCollectionsSubmenuOpen) {
-      // Opening submenu: collapse main sidebar and show submenu
+      // Opening submenu: collapse main sidebar, close right sidebar, and show submenu
       setIsCollectionsSubmenuOpen(true);
       setIsMainSidebarCollapsed(true);
+      setIsRightSidebarOpen(false);
     } else {
       // Closing submenu: just close it, don't change main sidebar
       setIsCollectionsSubmenuOpen(false);
@@ -104,6 +139,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     // State
     isMainSidebarCollapsed,
     isCollectionsSubmenuOpen,
+    isRightSidebarOpen,
     canBothSidebarsBeVisible,
     
     // Basic actions
@@ -113,6 +149,9 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     toggleCollectionsSubmenu,
     openCollectionsSubmenu,
     closeCollectionsSubmenu,
+    toggleRightSidebar,
+    openRightSidebar,
+    closeRightSidebar,
     
     // Specific interaction handlers
     handleCollectionsClick,
@@ -120,6 +159,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   }), [
     isMainSidebarCollapsed,
     isCollectionsSubmenuOpen,
+    isRightSidebarOpen,
     canBothSidebarsBeVisible,
     toggleMainSidebar,
     collapseMainSidebar,
@@ -127,6 +167,9 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     toggleCollectionsSubmenu,
     openCollectionsSubmenu,
     closeCollectionsSubmenu,
+    toggleRightSidebar,
+    openRightSidebar,
+    closeRightSidebar,
     handleCollectionsClick,
     handleChevronLeftClick,
   ]);
