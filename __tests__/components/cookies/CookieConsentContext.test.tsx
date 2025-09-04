@@ -1,10 +1,10 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import Cookies from "js-cookie";
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import {
   CookieConsentProvider,
   useCookieConsent,
 } from "../../../components/cookies/CookieConsentContext";
-import Cookies from "js-cookie";
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
@@ -21,15 +21,6 @@ jest.mock("../../../services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
-}));
-
-jest.mock("next/router", () => ({
-  useRouter: () => ({
-    pathname: "/",
-    push: jest.fn(),
-    replace: jest.fn(),
-    query: {},
-  }),
 }));
 
 // Mock AuthContext

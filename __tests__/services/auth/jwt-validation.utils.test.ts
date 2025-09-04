@@ -645,6 +645,7 @@ describe('jwt-validation.utils', () => {
         target_id: 'target-1',
         created_by: { id: createdById },
         granted_by: { id: 'granter-1' },
+        granted_to: { id: 'granted-to' },
         actions: [],
         credit_amount: 0,
         credit_spent: 0,

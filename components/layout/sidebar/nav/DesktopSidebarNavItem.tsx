@@ -19,15 +19,15 @@ interface SidebarPrimaryItemProps {
 }
 
 const baseClasses =
-  "tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-500 focus:tw-ring-offset-2 tw-font-medium";
+  "tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium";
 
 const expandedClasses = "tw-justify-start tw-px-3 tw-gap-4";
 const collapsedClasses = "tw-justify-center tw-px-2";
 
 const stateClasses = (active?: boolean) =>
   active
-    ? "tw-text-white desktop-hover:hover:tw-text-white"
-    : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
+    ? "tw-text-white desktop-hover:hover:tw-text-white tw-bg-transparent active:tw-bg-transparent"
+    : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent";
 
 function DesktopSidebarNavItem({
   href,
@@ -65,8 +65,9 @@ function DesktopSidebarNavItem({
         className={classes}
         aria-label={collapsed ? label : undefined}
         aria-current={active ? "page" : undefined}
-        data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-        data-tooltip-content={collapsed ? label : undefined}
+        data-tooltip-id="sidebar-tooltip"
+        data-tooltip-content={label}
+        data-tooltip-hidden={!collapsed}
       >
         {content}
       </Link>
@@ -81,8 +82,9 @@ function DesktopSidebarNavItem({
       aria-label={collapsed ? label : undefined}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}
-      data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-      data-tooltip-content={collapsed ? label : undefined}
+      data-tooltip-id="sidebar-tooltip"
+      data-tooltip-content={label}
+      data-tooltip-hidden={!collapsed}
     >
       {content}
     </button>

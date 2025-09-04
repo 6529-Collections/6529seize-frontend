@@ -2,7 +2,9 @@
 
 import React, { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebBrainLeftSidebar";
+import BrainRightSidebar, { SidebarTab } from "../brain/right-sidebar/BrainRightSidebar";
+import WebLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
+import BrainLeftSidebar from "../brain/left-sidebar/BrainLeftSidebar";
 import { ContentTabProvider } from "../brain/ContentTabContext";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
@@ -28,6 +30,8 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
   
   // Get global sidebar state
   const { isRightSidebarOpen } = useSidebarState();
+
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
   const dropId = searchParams?.get('drop') ?? undefined;
   const waveId = searchParams?.get('wave') ?? undefined;
@@ -72,8 +76,8 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
           <div
             className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-w-full tw-overflow-hidden"
             style={contentContainerStyle}>
-            {/* Only show WebBrainLeftSidebar when right sidebar is closed */}
-            {!isRightSidebarOpen && <WebBrainLeftSidebar activeWaveId={waveId} />}
+            {/* Only show BrainLeftSidebar when right sidebar is closed */}
+            {!isRightSidebarOpen && <BrainLeftSidebar activeWaveId={waveId} />}
             
             <div className={`tw-flex-grow tw-flex tw-flex-col tw-h-full ${
               isRightSidebarOpen ? "tw-pr-80" : ""
@@ -100,20 +104,14 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
       </div>
       
       {/* Right sidebar */}
-      {isRightSidebarOpen && waveId && (
-        <div
-          className="tw-fixed tw-inset-y-0 tw-right-0 tw-w-80 tw-z-30
-            tw-transform-gpu tw-will-change-transform
-            tw-transition-transform tw-duration-300 tw-ease-out
-            motion-reduce:tw-transition-none tw-translate-x-0
-            tw-bg-iron-950 tw-border-l tw-border-iron-800 tw-border-solid"
-        >
-          <div className="tw-p-4 tw-text-white tw-h-full tw-overflow-y-auto">
-            <h2 className="tw-text-lg tw-font-semibold tw-mb-4">Wave Information</h2>
-            <p className="tw-text-iron-300 tw-mb-2">Wave ID: {waveId}</p>
-            <p className="tw-text-iron-300">Right sidebar content for wave information will go here.</p>
-          </div>
-        </div>
+      {isRightSidebarOpen && !isDropOpen && waveId && (
+        <BrainRightSidebar
+          key="right-sidebar"
+          waveId={waveId}
+          onDropClick={onDropClick}
+          activeTab={sidebarTab}
+          setActiveTab={setSidebarTab}
+        />
       )}
     </div>
   );

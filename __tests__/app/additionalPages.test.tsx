@@ -7,8 +7,6 @@ import BalladOfGhosts from "@/app/museum/6529-fund-szn1/ballad-of-ghosts/page";
 import DeadRingers from "@/app/museum/6529-fund-szn1/dead-ringers/page";
 import GenesisPage from "@/app/museum/6529-fund-szn1/genesis/page";
 import { AuthContext } from "@/components/auth/Auth";
-import { getServerSideProps as getGroupsProps } from "@/pages/[user]/groups";
-import { getServerSideProps as getStatsProps } from "@/pages/[user]/stats";
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 
@@ -45,20 +43,8 @@ jest.mock("@/hooks/useIdentity", () => ({
 }));
 
 jest.mock("@/helpers/server.helpers", () => ({
-  getCommonHeaders: jest.fn(() => ({})),
   getUserProfile: jest.fn(() => Promise.resolve(aliceUser)),
   userPageNeedsRedirect: jest.fn(() => false),
-}));
-
-jest.mock("next/router", () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-    pathname: "/",
-    query: {},
-    asPath: "/",
-  }),
 }));
 
 jest.mock("@/components/memelab/MemeLab", () => ({
@@ -95,38 +81,6 @@ describe("additional static pages render", () => {
       </TestProvider>
     );
     expect(screen.getByText(/Consolidation Mapping Tool/i)).toBeInTheDocument();
-  });
-
-  it("getServerSideProps for groups returns props", async () => {
-    const result = await getGroupsProps(
-      { query: { user: aliceUser.handle } } as any,
-      null as any,
-      null as any
-    );
-    expect(result.props.profile).toEqual(aliceUser);
-    expect(result.props.metadata.title).toEqual(`${aliceUser.handle} | Groups`);
-    expect(result.props.metadata.description).toEqual(
-      `Level ${
-        aliceUser.level
-      } / TDH: ${aliceUser.tdh.toLocaleString()} / Rep: ${aliceUser.rep.toLocaleString()}`
-    );
-    expect(result.props.metadata.ogImage).toEqual(aliceUser.pfp);
-  });
-
-  it("getServerSideProps for stats returns props", async () => {
-    const result = await getStatsProps(
-      { query: { user: aliceUser.handle } } as any,
-      null as any,
-      null as any
-    );
-    expect(result.props.profile).toEqual(aliceUser);
-    expect(result.props.metadata.title).toEqual(`${aliceUser.handle} | Stats`);
-    expect(result.props.metadata.description).toEqual(
-      `Level ${
-        aliceUser.level
-      } / TDH: ${aliceUser.tdh.toLocaleString()} / Rep: ${aliceUser.rep.toLocaleString()}`
-    );
-    expect(result.props.metadata.ogImage).toEqual(aliceUser.pfp);
   });
 
   it("renders Open Metaverse page", () => {

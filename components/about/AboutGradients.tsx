@@ -14,6 +14,7 @@ export default function AboutGradients() {
       <Row className="pt-2 pb-2">
         <Col className="pt-3 pb-3 text-center">
           <Image
+            unoptimized
             loading="eager"
             priority
             width="0"

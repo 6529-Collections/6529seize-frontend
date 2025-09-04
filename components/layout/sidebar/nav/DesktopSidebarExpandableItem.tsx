@@ -66,7 +66,11 @@ export default function DesktopSidebarExpandableItem({
             <Link
               key={item.name}
               href={item.href}
-              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 tw-transition-colors tw-duration-200 tw-border tw-border-transparent desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-border-iron-700 tw-no-underline"
+              className={`tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-transition-colors tw-duration-200 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+                isActiveRoute(item.href)
+                  ? "tw-text-white desktop-hover:hover:tw-text-white"
+                  : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+              }`}
               aria-current={isActiveRoute(item.href) ? "page" : undefined}
             >
               {item.name}
@@ -84,7 +88,11 @@ export default function DesktopSidebarExpandableItem({
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 tw-transition-colors tw-duration-200 tw-border tw-border-transparent desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-border-iron-700 tw-no-underline"
+                    className={`tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-transition-colors tw-duration-200 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+                      isActiveRoute(item.href)
+                        ? "tw-text-white desktop-hover:hover:tw-text-white"
+                        : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+                    }`}
                     aria-current={isActiveRoute(item.href) ? "page" : undefined}
                   >
                     {item.name}

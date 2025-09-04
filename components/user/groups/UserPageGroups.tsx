@@ -1,11 +1,11 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
+import GroupsList from "@/components/groups/page/list/GroupsList";
+import { GroupsRequestParams } from "@/entities/IGroup";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
-import GroupsList from "../../groups/page/list/GroupsList";
-import { AuthContext } from "../../auth/Auth";
-import { GroupsRequestParams } from "../../../entities/IGroup";
-import { useRouter } from "next/router";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function UserPageGroups({
   profile,
 }: {

@@ -17,6 +17,7 @@ export default function UserPageHeaderPfp({
   if (profile.pfp) {
     return (
       <Image
+        unoptimized
         src={getScaledImageUri(profile.pfp, ImageScale.W_200_H_200)}
         alt="Profile picture"
         width="176"

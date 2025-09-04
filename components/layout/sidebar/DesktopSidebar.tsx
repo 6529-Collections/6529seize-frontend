@@ -17,7 +17,7 @@ function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
   return (
     <div className="tw-group tw-fixed tw-inset-y-0 tw-left-0 tw-w-72 tw-pt-4 tw-h-full tw-bg-black tw-border-r tw-border-iron-800 tw-border-solid">
       <div
-        className={`tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${
+        className={`tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${
           isCollapsed ? "tw-ml-auto tw-w-16" : "tw-w-72"
         }`}
       >
@@ -63,19 +63,30 @@ function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
       </div>
 
       {/* Global tooltip for navigation items when collapsed */}
-      {isCollapsed && (
-        <Tooltip
-          id="sidebar-tooltip"
-          place="right"
-          offset={8}
-          float
-          delayShow={60}
-          delayHide={0}
-          opacity={1}
-          className="tw-bg-iron-900 tw-text-white tw-text-sm tw-rounded-md tw-px-2.5 tw-py-1.5 tw-shadow-lg"
-          style={{ pointerEvents: "none", zIndex: 9999 }}
-        />
-      )}
+      <Tooltip
+        id="sidebar-tooltip"
+        place="right"
+        offset={16}
+        opacity={1}
+        style={{
+          pointerEvents: "none",
+          filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))",
+          padding: "4px 8px",
+          background:
+            "linear-gradient(to bottom right, rgb(64, 64, 64), rgb(38, 38, 38))",
+          color: "white",
+          fontSize: "13px",
+          fontWeight: "500",
+          borderRadius: "6px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          border: "1px solid rgb(64, 64, 64)",
+          backdropFilter: "blur(4px)",
+          zIndex: 9999,
+        }}
+        noArrow={false}
+        variant="dark"
+        border="1px solid rgba(64, 64, 64, 0.3)"
+      />
     </div>
   );
 }

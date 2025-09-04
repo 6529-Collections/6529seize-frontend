@@ -17,6 +17,7 @@ export default function AboutMemes() {
       <Row className="pt-2 pb-2">
         <Col className="pt-3 pb-3 text-center">
           <Image
+            unoptimized
             loading="eager"
             priority
             width="0"
@@ -90,7 +91,8 @@ export default function AboutMemes() {
             <a
               href={`/about/${AboutSection.FAQ}`}
               target="_blank"
-              rel="noreferrer">
+              rel="noreferrer"
+            >
               6529.io/about/faq
             </a>
           </p>
@@ -105,7 +107,8 @@ export default function AboutMemes() {
             <a
               href={`/about/${AboutSection.MINTING}`}
               target="_blank"
-              rel="noreferrer">
+              rel="noreferrer"
+            >
               6529.io/about/minting
             </a>
           </p>

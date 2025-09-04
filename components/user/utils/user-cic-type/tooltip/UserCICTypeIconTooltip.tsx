@@ -1,27 +1,19 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { CICType, RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
+import { ProfileRatersParamsOrderBy, RateMatter } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { amIUser, cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import {
-  CICType,
-  RateMatter,
-  RatingWithProfileInfoAndLevel,
-} from "../../../../../entities/IProfile";
+import { CIC_META } from "../../user-cic-status/UserCICStatus";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
-import {
-  amIUser,
-  cicToType,
-  formatNumberWithCommas,
-} from "../../../../../helpers/Helpers";
-import { CIC_META } from "../../user-cic-status/UserCICStatus";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Page } from "../../../../../helpers/Types";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { SortDirection } from "../../../../../entities/ISort";
-import { ProfileRatersParamsOrderBy } from "../../raters-table/wrapper/ProfileRatersTableWrapper";
-import { commonApiFetch } from "../../../../../services/api/common-api";
 export default function UserCICTypeIconTooltip({
   profile,
 }: {

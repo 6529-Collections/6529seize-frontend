@@ -13,6 +13,7 @@ export default function ErrorComponent() {
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen">
       <Image
+        unoptimized
         width="0"
         height="0"
         style={{ height: "auto", width: "100px" }}

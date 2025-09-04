@@ -1,14 +1,13 @@
 "use client";
 
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import { RatingStats } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useEffect, useState } from "react";
-import { RatingStats } from "../../../../entities/IProfile";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
-import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
-import { useRouter } from "next/router";
 import { Tooltip } from "react-tooltip";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 export default function UserPageRepsItem({
   rep,
   profile,
@@ -18,14 +17,13 @@ export default function UserPageRepsItem({
   readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
 }) {
-  const router = useRouter();
   const isPositiveRating = rep.rating > 0;
   const [isEditRepModalOpen, setIsEditRepModalOpen] = useState<boolean>(false);
 
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, [router.isReady]);
+  }, []);
 
   return (
     <>
@@ -47,12 +45,10 @@ export default function UserPageRepsItem({
               isPositiveRating ? "tw-text-green" : "tw-text-red"
             } tw-whitespace-nowrap tw-font-medium tw-text-sm sm:tw-text-md`}>
             <>
-              <span 
-                data-tooltip-id={`rep-${rep.category}-${rep.rating}`}
-              >
+              <span data-tooltip-id={`rep-${rep.category}-${rep.rating}`}>
                 {formatNumberWithCommas(rep.rating)}
               </span>
-              {(!isTouchScreen && !!rep.rater_contribution) ? (
+              {!isTouchScreen && !!rep.rater_contribution ? (
                 <Tooltip
                   id={`rep-${rep.category}-${rep.rating}`}
                   place="top"
@@ -60,8 +56,7 @@ export default function UserPageRepsItem({
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}
-                >
+                  }}>
                   My Rep: {formatNumberWithCommas(rep.rater_contribution)}
                 </Tooltip>
               ) : null}

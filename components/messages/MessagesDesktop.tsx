@@ -2,7 +2,7 @@
 
 import React, { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebBrainLeftSidebar";
+import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 import { ContentTabProvider } from "../brain/ContentTabContext";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";

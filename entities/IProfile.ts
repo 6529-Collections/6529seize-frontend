@@ -1,3 +1,4 @@
+import { ProfileActivityLogType, RateMatter } from "@/enums";
 import { AcceptActionRequestActionEnum } from "../generated/models/AcceptActionRequest";
 import { ApiProfileClassification } from "../generated/models/ApiProfileClassification";
 import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
@@ -56,29 +57,6 @@ export interface CicStatement {
   statement_value: string;
   crated_at: Date;
   updated_at: Date | null;
-}
-
-export enum ProfileActivityLogType {
-  RATING_EDIT = "RATING_EDIT",
-  HANDLE_EDIT = "HANDLE_EDIT",
-  CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
-  SOCIALS_EDIT = "SOCIALS_EDIT",
-  CONTACTS_EDIT = "CONTACTS_EDIT",
-  SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
-  NFT_ACCOUNTS_EDIT = "NFT_ACCOUNTS_EDIT",
-  GENERAL_CIC_STATEMENT_EDIT = "GENERAL_CIC_STATEMENT_EDIT",
-  BANNER_1_EDIT = "BANNER_1_EDIT",
-  BANNER_2_EDIT = "BANNER_2_EDIT",
-  PFP_EDIT = "PFP_EDIT",
-  PROFILE_ARCHIVED = "PROFILE_ARCHIVED",
-  PROXY_CREATED = "PROXY_CREATED",
-  PROXY_ACTION_CREATED = "PROXY_ACTION_CREATED",
-  PROXY_ACTION_STATE_CHANGED = "PROXY_ACTION_STATE_CHANGED",
-  PROXY_ACTION_CHANGED = "PROXY_ACTION_CHANGED",
-  DROP_COMMENT = "DROP_COMMENT",
-  DROP_RATING_EDIT = "DROP_RATING_EDIT",
-  DROP_CREATED = "DROP_CREATED",
-  PROXY_DROP_RATING_EDIT = "PROXY_DROP_RATING_EDIT",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -319,22 +297,6 @@ export type ProfileActivityLog =
   | ProfileActivityLogDropRatingEdit
   | ProfileActivityLogDropCreated
   | ProfileActivityLogProxyDropRatingEdit;
-
-export enum RateMatter {
-  NIC = "NIC",
-  REP = "REP",
-  DROP_REP = "DROP_REP",
-}
-
-interface ProfilesMatterRating {
-  readonly rater_handle: string;
-  readonly matter: RateMatter;
-  readonly matter_category: string;
-  readonly rating: number;
-  readonly rater_cic_rating: number;
-  readonly rater_tdh: number;
-  readonly last_modified: Date;
-}
 
 export interface CommunityMemberMinimal {
   readonly profile_id: string | null;

@@ -33,6 +33,7 @@ const HeaderSearchModalItemMedia = memo(
     return (
       <div className="tw-flex-shrink-0">
         <Image
+          unoptimized
           priority
           loading="eager"
           width={36}

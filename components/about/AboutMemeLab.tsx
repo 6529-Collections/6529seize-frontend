@@ -7,6 +7,7 @@ export default function AboutMemeLab() {
       <Row>
         <Col className="pt-2 pb-4">
           <Image
+            unoptimized
             loading="eager"
             priority
             width="0"

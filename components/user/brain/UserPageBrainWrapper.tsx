@@ -1,19 +1,21 @@
 "use client";
 
-import { useRouter } from "next/router";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import UserPageDrops from "./UserPageDrops";
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useParams, useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
-import { AuthContext } from "../../auth/Auth";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import { useIdentity } from "../../../hooks/useIdentity";
+import UserPageDrops from "./UserPageDrops";
+
 export default function UserPageBrainWrapper({
   profile: initialProfile,
 }: {
   readonly profile: ApiIdentity;
 }) {
+  const params = useParams();
   const router = useRouter();
-  const user = (router.query.user as string).toLowerCase();
+  const user = (params?.user as string)?.toLowerCase();
 
   const { address } = useSeizeConnectContext();
   const { connectedProfile, activeProfileProxy, showWaves } =
