@@ -14,7 +14,6 @@ import {
 import { MEMELAB_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
-import { NftOwner } from "@/entities/IOwner";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/enums";
 import {
@@ -460,21 +459,12 @@ export default function MemeLabComponent() {
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
-  const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
-  const [balancesLoaded, setBalancesLoaded] = useState(false);
+
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [labArtists, setLabArtists] = useState<string[]>([]);
   const [labCollections, setLabCollections] = useState<string[]>([]);
 
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
-
-  function getBalance(id: number) {
-    const balance = nftBalances.find((b) => b.token_id === id);
-    if (balance) {
-      return balance.balance;
-    }
-    return 0;
-  }
 
   useEffect(() => {
     const nftsUrl = `${process.env.API_ENDPOINT}/api/lab_extended_data`;
@@ -502,22 +492,6 @@ export default function MemeLabComponent() {
       }
     });
   }, []);
-
-  useEffect(() => {
-    const consolidationKey =
-      connectedProfile?.consolidation_key ??
-      connectedProfile?.wallets?.[0]?.wallet;
-    if (consolidationKey) {
-      fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${consolidationKey}?contract=${MEMELAB_CONTRACT}`
-      ).then((owners: NftOwner[]) => {
-        setNftBalances(owners);
-        setBalancesLoaded(true);
-      });
-    } else {
-      setNftBalances([]);
-    }
-  }, [connectedProfile]);
 
   useEffect(() => {
     if (nfts && nfts.length > 0) {
