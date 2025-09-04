@@ -1,18 +1,15 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { BrainLeftSidebarViewChange } from "../BrainLeftSidebarViewChange";
 import BrainLeftSidebarSearchWave from "../search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "../waves/BrainLeftSidebarWaves";
-import { TabToggle } from "../../../common/TabToggle";
 import { useContentTab } from "../../ContentTabContext";
 import { MyStreamWaveTab } from "../../../../types/waves.types";
 import DirectMessagesList from "../../direct-messages/DirectMessagesList";
-import { useSearchParams } from "next/navigation";
-import { useUnreadIndicator } from "../../../../hooks/useUnreadIndicator";
+import { usePathname } from "next/navigation";
 import { useAuth } from "../../../auth/Auth";
-import { useWaveData } from "../../../../hooks/useWaveData";
-import { useWave } from "../../../../hooks/useWave";
+import { TabToggle } from "../../../common/TabToggle";
 
 interface WebLeftSidebarProps {
   readonly activeWaveId: string | null | undefined;
@@ -22,69 +19,20 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
   activeWaveId,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   const { connectedProfile } = useAuth();
-  const searchParams = useSearchParams();
-
-  // Get wave data to determine if it's a DM
-  const { data: currentWave } = useWaveData({
-    waveId: activeWaveId || null,
-    onWaveNotFound: () => {},
-  });
-  const { isDm } = useWave(currentWave);
 
   // Get content tab state from context
   const { activeContentTab, setActiveContentTab, availableTabs } =
     useContentTab();
 
-  // Sidebar tab state: 'waves' or 'messages'
-  const [sidebarTab, setSidebarTab] = useState<"waves" | "messages">(() => {
-    if (typeof window === "undefined") return "waves";
-    return (
-      (localStorage.getItem("sidebarTab") as "waves" | "messages") || "waves"
-    );
-  });
-
-  // Auto-switch tab based on active wave type
-  useEffect(() => {
-    if (activeWaveId && currentWave) {
-      if (isDm) {
-        setSidebarTab("messages");
-      } else {
-        setSidebarTab("waves");
-      }
-    }
-  }, [activeWaveId, isDm, currentWave]);
-
-  // Get unread indicator for messages
-  const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
-    type: "messages",
-    handle: connectedProfile?.handle ?? null,
-  });
-
-  // keep tab in sync with url ?view=
-  const viewParam = searchParams?.get('view');
-  useEffect(() => {
-    if (viewParam === "messages") {
-      setSidebarTab("messages");
-    } else {
-      // default to waves when param is 'waves' or absent
-      setSidebarTab("waves");
-    }
-  }, [viewParam]);
-
-  useEffect(() => {
-    localStorage.setItem("sidebarTab", sidebarTab);
-  }, [sidebarTab]);
+  // Determine content type based on current route - URL-based instead of TabToggle
+  const isMessagesView = pathname?.startsWith("/messages");
+  const currentView = isMessagesView ? "messages" : "waves";
 
   // Instead of calculating height, we'll use flex properties to fill parent container
   const sidebarStyle = useMemo(() => {
-    // Since parent container has proper height constraint,
-    // We can rely on flex properties to fill available space
-
-    // Remove explicit height calculation
-    // Use minHeight for safety but let parent container constrain
     const minHeight = "100%";
-
     return { minHeight };
   }, []);
 
@@ -106,19 +54,6 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
     }));
   }, [availableTabs, tabLabels]);
 
-  // Create tab options with indicators
-  const sidebarTabOptions = useMemo(
-    () => [
-      { key: "waves", label: "Waves" },
-      {
-        key: "messages",
-        label: "Messages",
-        hasIndicator: hasUnreadMessages,
-      },
-    ],
-    [hasUnreadMessages]
-  );
-
   return (
     <div
       ref={scrollContainerRef}
@@ -139,20 +74,14 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
         )}
 
         {/* Search field shared */}
-        <BrainLeftSidebarSearchWave listType={sidebarTab} />
+        <BrainLeftSidebarSearchWave listType={currentView} />
 
         <div className="tw-flex tw-flex-col tw-gap-y-2">
-          {/* Tab switcher with indicator support */}
-          <TabToggle
-            options={sidebarTabOptions}
-            activeKey={sidebarTab}
-            onSelect={(k) => setSidebarTab(k as "waves" | "messages")}
-          />
-
-          {sidebarTab === "waves" && (
+          {/* URL-based content rendering - NO TabToggle */}
+          {currentView === "waves" && (
             <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
           )}
-          {sidebarTab === "messages" && (
+          {currentView === "messages" && (
             <DirectMessagesList scrollContainerRef={scrollContainerRef} />
           )}
         </div>

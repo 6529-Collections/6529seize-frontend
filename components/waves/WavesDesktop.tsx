@@ -3,7 +3,6 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BrainRightSidebar, { SidebarTab } from "../brain/right-sidebar/BrainRightSidebar";
-import WebLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 import BrainLeftSidebar from "../brain/left-sidebar/BrainLeftSidebar";
 import { ContentTabProvider } from "../brain/ContentTabContext";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -15,6 +14,7 @@ import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { useSidebarState } from "../../hooks/useSidebarState";
+import WebLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 
 interface Props {
   readonly children: ReactNode;
@@ -76,8 +76,8 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
           <div
             className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-w-full tw-overflow-hidden"
             style={contentContainerStyle}>
-            {/* Only show BrainLeftSidebar when right sidebar is closed */}
-            {!isRightSidebarOpen && <BrainLeftSidebar activeWaveId={waveId} />}
+            {/* Only show WebLeftSidebar when right sidebar is closed */}
+            {!isRightSidebarOpen && <WebLeftSidebar activeWaveId={waveId} />}
             
             <div className={`tw-flex-grow tw-flex tw-flex-col tw-h-full ${
               isRightSidebarOpen ? "tw-pr-80" : ""
