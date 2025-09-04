@@ -257,13 +257,14 @@ export default function MemeLabPageComponent({
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className={`${styles.nftImageWrapper} pt-2 pb-5`}>
+                  className={`${styles.nftImageWrapper} pt-2 pb-5`}
+                >
                   <NFTImage
                     nft={nft}
                     animation={true}
                     height={650}
-                    balance={nftBalance}
-                    showUnseized={!!connectedProfile}
+                    showOwnedIfLoggedIn={true}
+                    showUnseizedIfLoggedIn={true}
                   />
                 </Col>
                 {activeTab === MEME_FOCUS.LIVE && <>{printLive()}</>}
@@ -295,7 +296,8 @@ export default function MemeLabPageComponent({
           sm={{ span: 12 }}
           md={{ span: 6 }}
           lg={{ span: 6 }}
-          className="pt-2">
+          className="pt-2"
+        >
           <Container className="p-0">
             <Row className="pt-3">
               <Col>
@@ -322,7 +324,8 @@ export default function MemeLabPageComponent({
                         <Link
                           href={`/meme-lab/collection/${encodeURIComponent(
                             nftMeta.metadata_collection.replaceAll(" ", "-")
-                          )}`}>
+                          )}`}
+                        >
                           {nftMeta.metadata_collection}
                         </Link>
                       </td>
@@ -336,7 +339,8 @@ export default function MemeLabPageComponent({
                               <Link
                                 href={addProtocol(w)}
                                 target="_blank"
-                                rel="noreferrer">
+                                rel="noreferrer"
+                              >
                                 {w}
                               </Link>
                               &nbsp;&nbsp;
@@ -607,7 +611,8 @@ export default function MemeLabPageComponent({
         xs={{ span: 12 }}
         sm={{ span: 12 }}
         md={{ span: 6 }}
-        lg={{ span: 6 }}>
+        lg={{ span: 6 }}
+      >
         <Container className="p-0">
           <Row>
             {wallets.length === 0 && (
@@ -717,7 +722,8 @@ export default function MemeLabPageComponent({
                   interval={null}
                   indicators={false}
                   wrap={false}
-                  onSlide={carouselHandlerSlide}>
+                  onSlide={carouselHandlerSlide}
+                >
                   <Carousel.Item className="text-center">
                     <div className="pt-4 pb-3">
                       {nft.metadata.animation_details.format}
@@ -726,10 +732,10 @@ export default function MemeLabPageComponent({
                       nft={nft}
                       animation={true}
                       height={650}
-                      balance={0}
                       transparentBG={true}
                       showOriginal={true}
-                      showUnseized={false}
+                      showUnseizedIfLoggedIn={false}
+                      showOwnedIfLoggedIn={false}
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
@@ -741,10 +747,10 @@ export default function MemeLabPageComponent({
                       nft={nft}
                       animation={false}
                       height={650}
-                      balance={0}
                       transparentBG={true}
                       showOriginal={true}
-                      showUnseized={false}
+                      showUnseizedIfLoggedIn={false}
+                      showOwnedIfLoggedIn={false}
                       id="the-art-fullscreen-img"
                     />
                   </Carousel.Item>
@@ -758,10 +764,10 @@ export default function MemeLabPageComponent({
                     nft={nft}
                     animation={false}
                     height={650}
-                    balance={0}
+                    showOwnedIfLoggedIn={false}
+                    showUnseizedIfLoggedIn={false}
                     transparentBG={true}
                     showOriginal={true}
-                    showUnseized={false}
                     id="the-art-fullscreen-img"
                   />
                 </>
@@ -786,7 +792,8 @@ export default function MemeLabPageComponent({
                             className={styles.arweaveLink}
                             href={nft.metadata.image}
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noreferrer"
+                          >
                             {nft.metadata.image}
                           </Link>
                           <Download
@@ -809,7 +816,8 @@ export default function MemeLabPageComponent({
                                   : nft.metadata.animation_url
                               }
                               target="_blank"
-                              rel="noreferrer">
+                              rel="noreferrer"
+                            >
                               {nft.metadata.animation
                                 ? nft.metadata.animation
                                 : nft.metadata.animation_url}
@@ -838,7 +846,8 @@ export default function MemeLabPageComponent({
                 xs={{ span: 12 }}
                 sm={{ span: 6 }}
                 md={{ span: 6 }}
-                lg={{ span: 6 }}>
+                lg={{ span: 6 }}
+              >
                 <Container>
                   <Row>
                     <Col>
@@ -895,7 +904,8 @@ export default function MemeLabPageComponent({
                   xs={{ span: 12 }}
                   sm={{ span: 6 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}>
+                  lg={{ span: 6 }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -943,7 +953,8 @@ export default function MemeLabPageComponent({
                     <Col
                       dangerouslySetInnerHTML={{
                         __html: parseNftDescriptionToHtml(nft.description),
-                      }}></Col>
+                      }}
+                    ></Col>
                   </Row>
                 </Container>
               </Col>
@@ -1066,17 +1077,20 @@ export default function MemeLabPageComponent({
             xs={{ span: 7 }}
             sm={{ span: 7 }}
             md={{ span: 9 }}
-            lg={{ span: 10 }}>
+            lg={{ span: 10 }}
+          >
             <h3>Card Activity</h3>
           </Col>
           <Col
             xs={{ span: 5 }}
             sm={{ span: 5 }}
             md={{ span: 3 }}
-            lg={{ span: 2 }}>
+            lg={{ span: 2 }}
+          >
             <Dropdown
               className={styles.activityFilterDropdown}
-              drop={"down-centered"}>
+              drop={"down-centered"}
+            >
               <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
               <Dropdown.Menu>
                 {Object.values(TypeFilter).map((filter) => (
@@ -1085,7 +1099,8 @@ export default function MemeLabPageComponent({
                     onClick={() => {
                       setActivityPage(1);
                       setActivityTypeFilter(filter);
-                    }}>
+                    }}
+                  >
                     {filter}
                   </Dropdown.Item>
                 ))}

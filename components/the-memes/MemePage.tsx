@@ -180,13 +180,14 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}
-                    className={`${styles.nftImageWrapper} pt-2 pb-5`}>
+                    className={`${styles.nftImageWrapper} pt-2 pb-5`}
+                  >
                     <NFTImage
                       nft={nft}
                       animation={true}
                       height={650}
-                      balance={nftBalance}
-                      showUnseized={connectedWallets.length > 0}
+                      showOwnedIfLoggedIn={false}
+                      showUnseizedIfLoggedIn={true}
                     />
                   </Col>
                   <MemePageLiveRightMenu
@@ -269,7 +270,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                   <Col>
                     <h2 className="float-left">
                       <Link
-                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
+                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                      >
                         SZN{nftMeta.season}
                       </Link>
                     </h2>
