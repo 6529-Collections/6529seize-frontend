@@ -18,7 +18,7 @@ interface UseActivityFiltersReturn {
 }
 
 export function useActivityFilters(): UseActivityFiltersReturn {
-  const [typeFilter, setTypeFilterState] = useState<TypeFilter>(TypeFilter.ALL);
+  const [typeFilterState, setTypeFilterState] = useState<TypeFilter>(TypeFilter.ALL);
   const [selectedContractState, setSelectedContractState] =
     useState<ContractFilter>(ContractFilter.ALL);
 
@@ -41,7 +41,7 @@ export function useActivityFilters(): UseActivityFiltersReturn {
   };
 
   return {
-    typeFilter,
+    typeFilter: typeFilterState,
     selectedContract: selectedContractState,
     setTypeFilter,
     setSelectedContract,
