@@ -11,26 +11,24 @@ import { useCallback, useEffect, useState, memo, useRef } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { A11y, Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { NextGenCollection } from "../../../../entities/INextgen";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { useIntersectionObserver } from "../../../../hooks/scroll/useIntersectionObserver";
-import { commonApiFetch } from "../../../../services/api/common-api";
 import { formatNameForUrl } from "../../nextgen_helpers";
 import styles from "../NextGen.module.scss";
 import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
+import { useTokenSlideshow } from "./hooks/useTokenSlideshow";
 
 interface Props {
   readonly collection: NextGenCollection;
 }
 
-const FETCH_SIZE = 50;
-const DISPLAY_BUFFER = 20;
-const FETCH_TRIGGER = 10;
-
 // Memoized image component to prevent re-downloads on parent re-renders
 const MemoizedTokenImage = memo(NextGenTokenImage);
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
+  const { displayTokens, onSlideChange } = useTokenSlideshow(props.collection.id);
+  
   const getSlidesPerView = useCallback(() => {
     if (window.innerWidth > 1200) {
       return 4;
@@ -40,11 +38,6 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     return 1;
   }, []);
 
-  const [allTokens, setAllTokens] = useState<NextGenToken[]>([]);
-  const [displayTokens, setDisplayTokens] = useState<NextGenToken[]>([]);
-  const [currentSlide, setCurrentSlide] = useState<number>(2);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMoreOnServer, setHasMoreOnServer] = useState(false);
   const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
   const [isInViewport, setIsInViewport] = useState(false);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
@@ -81,51 +74,6 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
     }
   }, [isInViewport, swiperInstance]);
 
-  const fetchMoreTokens = useCallback(async () => {
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: any;
-      data: NextGenToken[];
-    }>({
-      endpoint: `nextgen/collections/${props.collection.id}/tokens?page_size=${FETCH_SIZE}&page=${currentPage}&sort=random`,
-    }).then((response) => {
-      setAllTokens((prev) => [...prev, ...response.data]);
-      setHasMoreOnServer(response.next);
-    });
-  }, [props.collection.id, currentPage]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchMoreTokens();
-  }, [fetchMoreTokens]);
-
-  // Update displayTokens when allTokens changes
-  useEffect(() => {
-    if (allTokens.length > 0 && displayTokens.length === 0) {
-      setDisplayTokens(allTokens.slice(0, DISPLAY_BUFFER));
-    }
-  }, [allTokens, displayTokens.length]);
-
-  // Handle scrolling - expand display or fetch more
-  useEffect(() => {
-    const remainingInDisplay = displayTokens.length - currentSlide;
-    const remainingInAll = allTokens.length - displayTokens.length;
-
-    // Need to expand displayTokens?
-    if (remainingInDisplay <= 5 && remainingInAll > 0) {
-      const newDisplayLength = Math.min(
-        displayTokens.length + 10,
-        allTokens.length
-      );
-      setDisplayTokens(allTokens.slice(0, newDisplayLength));
-    }
-
-    // Need to fetch more from server?
-    if (remainingInAll <= FETCH_TRIGGER && hasMoreOnServer) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  }, [currentSlide, displayTokens.length, allTokens, hasMoreOnServer]);
 
   return (
     <Container fluid className={styles.slideshowContainer} ref={slideshowRef}>
@@ -166,7 +114,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   pagination={{ clickable: true }}
                   onSwiper={setSwiperInstance}
                   onSlideChange={(swiper) => {
-                    setCurrentSlide(swiper.realIndex);
+                    onSlideChange(swiper.realIndex);
                   }}
                 >
                   {displayTokens.length > 1 && (
