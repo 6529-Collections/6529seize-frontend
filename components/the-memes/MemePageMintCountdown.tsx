@@ -69,12 +69,41 @@ export default function MemePageMintCountdown(
     );
   }
 
-  // Hide if ended or finalized
-  if (
-    manifoldClaim.status === ManifoldClaimStatus.ENDED ||
-    manifoldClaim.isFinalized
-  ) {
-    return <></>;
+  // Show ended/finalized states
+  if (manifoldClaim.status === ManifoldClaimStatus.ENDED) {
+    return (
+      <Container className="no-padding pb-3">
+        <Row>
+          <Col>
+            <div className={styles.countdownContainer}>
+              <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center">
+                <h4 className="mb-3">Mint Phase Complete</h4>
+                <p className="mb-1">This mint phase has ended.</p>
+                <p>Thank you for participating!</p>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  if (manifoldClaim.isFinalized) {
+    return (
+      <Container className="no-padding pb-3">
+        <Row>
+          <Col>
+            <div className={styles.countdownContainer}>
+              <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center">
+                <h4 className="mb-3">✅ Mint Complete - Sold Out!</h4>
+                <p className="mb-1">All NFTs have been successfully minted.</p>
+                <p>Thank you for participating!</p>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+    );
   }
 
   const getTitle = () => {
