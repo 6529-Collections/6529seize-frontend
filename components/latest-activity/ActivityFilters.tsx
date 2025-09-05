@@ -5,11 +5,11 @@ import styles from "./LatestActivity.module.scss";
 import { TypeFilter, ContractFilter } from "../../hooks/useActivityData";
 
 interface ActivityFiltersProps {
-  typeFilter: TypeFilter;
-  selectedContract: ContractFilter;
-  onTypeFilterChange: (filter: TypeFilter) => void;
-  onContractFilterChange: (contract: ContractFilter) => void;
-  isMobile: boolean;
+  readonly typeFilter: TypeFilter;
+  readonly selectedContract: ContractFilter;
+  readonly onTypeFilterChange: (filter: TypeFilter) => void;
+  readonly onContractFilterChange: (contract: ContractFilter) => void;
+  readonly isMobile: boolean;
 }
 
 export default function ActivityFilters({
@@ -25,14 +25,16 @@ export default function ActivityFilters({
       md={6}
       className={`d-flex align-items-center gap-4 ${
         isMobile ? "justify-content-center" : "justify-content-end"
-      }`}>
+      }`}
+    >
       <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
         <Dropdown.Toggle>Collection: {selectedContract}</Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(ContractFilter).map((contract) => (
             <Dropdown.Item
               key={contract}
-              onClick={() => onContractFilterChange(contract)}>
+              onClick={() => onContractFilterChange(contract)}
+            >
               {contract}
             </Dropdown.Item>
           ))}
@@ -44,7 +46,8 @@ export default function ActivityFilters({
           {Object.values(TypeFilter).map((filter) => (
             <Dropdown.Item
               key={filter}
-              onClick={() => onTypeFilterChange(filter)}>
+              onClick={() => onTypeFilterChange(filter)}
+            >
               {filter}
             </Dropdown.Item>
           ))}

@@ -104,7 +104,6 @@ export function useManifoldClaim(
   const [refetchInterval, setRefetchInterval] = useState<number>(5000);
 
   const getStatus = useCallback((start: number, end: number) => {
-    // return ManifoldClaimStatus.ENDED;
     const now = Date.now() / 1000;
     if (now < start) {
       return ManifoldClaimStatus.UPCOMING;

@@ -10,9 +10,9 @@ import { NFT } from "../../entities/INFT";
 import { NextGenCollection } from "../../entities/INextgen";
 
 interface ActivityTableProps {
-  activity: Transaction[];
-  nfts: NFT[];
-  nextgenCollections: NextGenCollection[];
+  readonly activity: Transaction[];
+  readonly nfts: NFT[];
+  readonly nextgenCollections: NextGenCollection[];
 }
 
 export default function ActivityTable({
