@@ -38,14 +38,27 @@ export function useActivityData(
   initialPage: number,
   pageSize: number,
   typeFilter: TypeFilter,
-  selectedContract: ContractFilter
+  selectedContract: ContractFilter,
+  initialData?: {
+    activity: Transaction[];
+    totalResults: number;
+  }
 ): UseActivityDataReturn {
-  const [activity, setActivity] = useState<Transaction[]>([]);
+  const [activity, setActivity] = useState<Transaction[]>(initialData?.activity || []);
   const [page, setPage] = useState(initialPage);
-  const [totalResults, setTotalResults] = useState(0);
+  const [totalResults, setTotalResults] = useState(initialData?.totalResults || 0);
   const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
+    // Skip initial fetch if we have initial data and filters are at defaults
+    const hasInitialData = initialData && initialData.activity.length > 0;
+    const isDefaultFilters = typeFilter === TypeFilter.ALL && selectedContract === ContractFilter.ALL;
+    const isInitialPage = page === initialPage;
+    
+    if (hasInitialData && isDefaultFilters && isInitialPage) {
+      return; // Use initial data, no fetch needed
+    }
+    
     setFetching(true);
     let url = `${process.env.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
     
@@ -84,7 +97,7 @@ export function useActivityData(
       setActivity(response.data);
       setFetching(false);
     });
-  }, [page, typeFilter, selectedContract, pageSize]);
+  }, [page, typeFilter, selectedContract, pageSize, initialData, initialPage]);
 
   return {
     activity,

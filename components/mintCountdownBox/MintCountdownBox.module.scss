@@ -14,6 +14,17 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 0.5rem;
+
+  // Fixed heights for different viewports
+  height: 230px; // Mobile
+  
+  @media (min-width: 768px) {
+    height: 250px; // Tablet/Desktop
+  }
+  
+  @media (min-width: 1200px) {
+    height: 250px; // Large Desktop
+  }
 }
 
 .mintBtn {

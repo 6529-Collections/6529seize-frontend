@@ -1,18 +1,16 @@
 import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenCollection } from "../../../../entities/INextgen";
+import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import styles from "../NextGen.module.scss";
-import { fetchInitialTokens } from "./hooks/fetchInitialTokens";
 import SlideshowHeader from "./hooks/SlideshowHeader";
 import TokenSlideshow from "./hooks/TokenSlideshow";
 
 interface Props {
   readonly collection: NextGenCollection;
+  readonly initialTokens?: NextGenToken[];
 }
 
-export default async function NextGenCollectionSlideshow(props: Readonly<Props>) {
-  // Fetch initial tokens on the server for faster first paint
-  const initialTokens = await fetchInitialTokens(props.collection.id);
+export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
 
   return (
     <Container fluid className={styles.slideshowContainer}>
@@ -22,7 +20,7 @@ export default async function NextGenCollectionSlideshow(props: Readonly<Props>)
             <SlideshowHeader collectionName={props.collection.name} />
             <TokenSlideshow 
               collectionId={props.collection.id}
-              initialTokens={initialTokens}
+              initialTokens={props.initialTokens}
             />
           </Container>
         </Col>

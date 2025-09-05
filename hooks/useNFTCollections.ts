@@ -14,13 +14,23 @@ interface UseNFTCollectionsReturn {
   loading: boolean;
 }
 
-export function useNFTCollections(): UseNFTCollectionsReturn {
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [nextgenCollections, setNextgenCollections] = useState<NextGenCollection[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useNFTCollections(
+  initialCollections?: {
+    nfts: NFT[];
+    nextgenCollections: NextGenCollection[];
+  }
+): UseNFTCollectionsReturn {
+  const [nfts, setNfts] = useState<NFT[]>(initialCollections?.nfts || []);
+  const [nextgenCollections, setNextgenCollections] = useState<NextGenCollection[]>(initialCollections?.nextgenCollections || []);
+  const [loading, setLoading] = useState(!initialCollections);
 
   // Fetch Memes and Gradients collections
   useEffect(() => {
+    // Skip fetch if we have initial data
+    if (initialCollections && initialCollections.nfts.length > 0) {
+      return;
+    }
+    
     fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
       (memeResponse: DBResponse) => {
         setNfts(memeResponse.data);
@@ -32,10 +42,15 @@ export function useNFTCollections(): UseNFTCollectionsReturn {
         });
       }
     );
-  }, []);
+  }, [initialCollections]);
 
   // Fetch NextGen collections
   useEffect(() => {
+    // Skip fetch if we have initial data
+    if (initialCollections && initialCollections.nextgenCollections.length > 0) {
+      return;
+    }
+    
     commonApiFetch<{
       count: number;
       page: number;
@@ -46,7 +61,7 @@ export function useNFTCollections(): UseNFTCollectionsReturn {
     }).then((response) => {
       setNextgenCollections(response.data);
     });
-  }, []);
+  }, [initialCollections]);
 
   return {
     nfts,
