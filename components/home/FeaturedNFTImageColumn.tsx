@@ -1,22 +1,13 @@
-
-
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
-import { useAuth } from "@/components/auth/Auth";
 import NFTImage from "../nft-image/NFTImage";
 
 interface Props {
   readonly featuredNft: NFTWithMemesExtendedData;
-  readonly nftBalance: number;
 }
 
-export default function FeaturedNFTImageColumn({
-  featuredNft,
-  nftBalance,
-}: Props) {
-  const { connectedProfile } = useAuth();
-
+export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
   return (
     <Col
       className="pt-3 pb-3 d-flex align-items-center justify-content-center"
@@ -28,26 +19,21 @@ export default function FeaturedNFTImageColumn({
       <Container className="no-padding">
         <Row>
           {featuredNft.animation || featuredNft.metadata.animation ? (
-            <span className={connectedProfile ? "tw-pb-[35px]" : ""}>
-              <NFTImage
-                nft={featuredNft}
-                animation={true}
-                height={650}
-                balance={nftBalance}
-                showUnseized={!!connectedProfile}
-              />
-            </span>
+            <NFTImage
+              nft={featuredNft}
+              animation={true}
+              height={650}
+              showOwnedIfLoggedIn={true}
+              showUnseizedIfLoggedIn={true}
+            />
           ) : (
-            <Link
-              href={`/the-memes/${featuredNft.id}`}
-              className={connectedProfile ? "tw-pb-[35px]" : ""}
-            >
+            <Link href={`/the-memes/${featuredNft.id}`}>
               <NFTImage
                 nft={featuredNft}
                 animation={true}
                 height={650}
-                balance={nftBalance}
-                showUnseized={!!connectedProfile}
+                showOwnedIfLoggedIn={true}
+                showUnseizedIfLoggedIn={true}
               />
             </Link>
           )}

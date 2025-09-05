@@ -8,6 +8,7 @@ export const mockGradientNFT = (overrides: Partial<any> = {}) => ({
   owner_display: 'TestOwner',
   boosted_tdh: 100,
   tdh_rank: 1,
+  tdh__raw: 50,
   mint_date: '2023-01-01',
   ...overrides,
 });

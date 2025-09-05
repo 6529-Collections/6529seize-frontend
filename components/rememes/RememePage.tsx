@@ -84,9 +84,9 @@ export function printMemeReferences(
                               nft={nft}
                               animation={false}
                               height={300}
-                              balance={0}
+                              showOwnedIfLoggedIn={false}
+                              showUnseizedIfLoggedIn={false}
                               showThumbnail={true}
-                              showUnseized={false}
                             />
                           </Col>
                         </Row>
