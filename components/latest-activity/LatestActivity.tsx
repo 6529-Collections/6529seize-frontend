@@ -4,20 +4,15 @@ import styles from "./LatestActivity.module.scss";
 import homeStyles from "@/styles/Home.module.scss";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { Transaction } from "../../entities/ITransaction";
 import Pagination from "../pagination/Pagination";
 import LatestActivityRow from "./LatestActivityRow";
-import { NFT } from "../../entities/INFT";
 import { areEqualAddresses, isNextgenContract } from "../../helpers/Helpers";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import DotLoader from "../dotLoader/DotLoader";
-import { commonApiFetch } from "../../services/api/common-api";
-import { NextGenCollection } from "../../entities/INextgen";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../constants";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../nextGen/nextgen_contracts";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import { useActivityData, TypeFilter, ContractFilter } from "../../hooks/useActivityData";
+import { useActivityFilters } from "../../hooks/useActivityFilters";
+import { useNFTCollections } from "../../hooks/useNFTCollections";
 
 interface Props {
   page: number;
@@ -25,106 +20,26 @@ interface Props {
   showMore?: boolean;
 }
 
-export enum TypeFilter {
-  ALL = "All",
-  AIRDROPS = "Airdrops",
-  MINTS = "Mints",
-  SALES = "Sales",
-  TRANSFERS = "Transfers",
-  BURNS = "Burns",
-}
-
-enum ContractFilter {
-  ALL = "All",
-  MEMES = "Memes",
-  NEXTGEN = "NextGen",
-  GRADIENTS = "Gradients",
-}
 
 export default function LatestActivity(props: Readonly<Props>) {
   const isMobile = useIsMobileScreen();
-  const [activity, setActivity] = useState<Transaction[]>([]);
-  const [page, setPage] = useState(props.page);
+  
+  const { typeFilter, selectedContract, setTypeFilter, setSelectedContract } = useActivityFilters();
+  
+  const {
+    activity,
+    totalResults,
+    fetching,
+    page,
+    setPage,
+  } = useActivityData(props.page, props.pageSize, typeFilter, selectedContract);
+
+  const { nfts, nextgenCollections } = useNFTCollections();
+
   const [showViewAll, setShowViewAll] = useState(false);
 
   useEffect(() => {
     setShowViewAll(!window.location.pathname.includes("nft-activity"));
-  }, []);
-  const [totalResults, setTotalResults] = useState(0);
-
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [nextgenCollections, setNextgenCollections] = useState<
-    NextGenCollection[]
-  >([]);
-
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>(TypeFilter.ALL);
-  const [selectedContract, setSelectedContract] = useState<ContractFilter>(
-    ContractFilter.ALL
-  );
-  const [fetching, setFetching] = useState(false);
-
-  useEffect(() => {
-    setFetching(true);
-    let url = `${process.env.API_ENDPOINT}/api/transactions?page_size=${props.pageSize}&page=${page}`;
-    switch (typeFilter) {
-      case TypeFilter.SALES:
-        url += `&filter=sales`;
-        break;
-      case TypeFilter.TRANSFERS:
-        url += `&filter=transfers`;
-        break;
-      case TypeFilter.AIRDROPS:
-        url += `&filter=airdrops`;
-        break;
-      case TypeFilter.MINTS:
-        url += `&filter=mints`;
-        break;
-      case TypeFilter.BURNS:
-        url += `&filter=burns`;
-        break;
-    }
-    switch (selectedContract) {
-      case ContractFilter.MEMES:
-        url += `&contract=${MEMES_CONTRACT}`;
-        break;
-      case ContractFilter.NEXTGEN:
-        url += `&contract=${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`;
-        break;
-      case ContractFilter.GRADIENTS:
-        url += `&contract=${GRADIENT_CONTRACT}`;
-        break;
-    }
-    fetchUrl(url).then((response: DBResponse) => {
-      setTotalResults(response.count);
-      setActivity(response.data);
-      setFetching(false);
-    });
-  }, [page, typeFilter, selectedContract]);
-
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
-      (memeResponse: DBResponse) => {
-        setNfts(memeResponse.data);
-        fetchAllPages(
-          `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
-        ).then((gradients: NFT[]) => {
-          setNfts([...memeResponse.data, ...gradients]);
-        });
-      }
-    );
-  }, []);
-
-  useEffect(() => {
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: any;
-      data: NextGenCollection[];
-    }>({
-      endpoint: `nextgen/collections`,
-    }).then((response) => {
-      setNextgenCollections(response.data);
-    });
   }, []);
 
   return (
@@ -159,10 +74,7 @@ export default function LatestActivity(props: Readonly<Props>) {
               {Object.values(ContractFilter).map((contract) => (
                 <Dropdown.Item
                   key={contract}
-                  onClick={() => {
-                    setPage(1);
-                    setSelectedContract(contract);
-                  }}>
+                  onClick={() => setSelectedContract(contract, () => setPage(1))}>
                   {contract}
                 </Dropdown.Item>
               ))}
@@ -174,10 +86,7 @@ export default function LatestActivity(props: Readonly<Props>) {
               {Object.values(TypeFilter).map((filter) => (
                 <Dropdown.Item
                   key={filter}
-                  onClick={() => {
-                    setPage(1);
-                    setTypeFilter(filter);
-                  }}>
+                  onClick={() => setTypeFilter(filter, () => setPage(1))}>
                   {filter}
                 </Dropdown.Item>
               ))}

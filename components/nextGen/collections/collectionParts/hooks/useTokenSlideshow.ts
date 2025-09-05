@@ -13,13 +13,16 @@ interface UseTokenSlideshowReturn {
   onSlideChange: (slideIndex: number) => void;
 }
 
-export function useTokenSlideshow(collectionId: number): UseTokenSlideshowReturn {
-  const [allTokens, setAllTokens] = useState<NextGenToken[]>([]);
+export function useTokenSlideshow(
+  collectionId: number,
+  initialTokens: NextGenToken[] = []
+): UseTokenSlideshowReturn {
+  const [allTokens, setAllTokens] = useState<NextGenToken[]>(initialTokens);
   const [displayTokens, setDisplayTokens] = useState<NextGenToken[]>([]);
   const [currentSlide, setCurrentSlide] = useState<number>(2);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreOnServer, setHasMoreOnServer] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(initialTokens.length === 0);
 
   const fetchMoreTokens = useCallback(async () => {
     commonApiFetch<{
@@ -36,10 +39,12 @@ export function useTokenSlideshow(collectionId: number): UseTokenSlideshowReturn
     });
   }, [collectionId, currentPage]);
 
-  // Initial fetch
+  // Initial fetch (skip if we have initial tokens)
   useEffect(() => {
-    fetchMoreTokens();
-  }, [fetchMoreTokens]);
+    if (initialTokens.length === 0) {
+      fetchMoreTokens();
+    }
+  }, [fetchMoreTokens, initialTokens.length]);
 
   // Update displayTokens when allTokens changes
   useEffect(() => {
