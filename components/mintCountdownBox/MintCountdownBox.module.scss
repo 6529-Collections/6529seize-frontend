@@ -38,3 +38,46 @@
     color: black;
   }
 }
+
+// Skeleton loading styles
+.loadingState {
+  opacity: 0.7;
+}
+
+.skeletonText {
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  
+  &.skeletonTitle {
+    height: 20px;
+    width: 60%;
+    margin-bottom: 1rem;
+  }
+  
+  &.skeletonCountdown {
+    height: 24px;
+    width: 80%;
+    margin-bottom: 1rem;
+  }
+}
+
+.skeletonButton {
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  height: 40px;
+  width: 100px;
+  border: 2px solid #666;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
