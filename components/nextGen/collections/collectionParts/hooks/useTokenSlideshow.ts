@@ -80,7 +80,7 @@ export function useTokenSlideshow(
   return {
     displayTokens,
     isLoading,
-    hasMore: hasMoreOnServer,
+    hasMore: Boolean(hasMoreOnServer),
     onSlideChange,
   };
 }

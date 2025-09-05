@@ -70,6 +70,15 @@ const mockCollection = {
   id: "test-collection" 
 } as any;
 
+const mockInitialActivityData = {
+  activity: [],
+  totalResults: 0,
+  nfts: [],
+  nextgenCollections: []
+} as any;
+
+const mockInitialTokens = [] as any;
+
 
 const TestProvider: React.FC<{ 
   children: React.ReactNode;
@@ -97,7 +106,12 @@ describe("Home component", () => {
   it("displays featured NFT information correctly", async () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -116,7 +130,12 @@ describe("Home component", () => {
   it("shows NextGen collection when provided", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -130,7 +149,12 @@ describe("Home component", () => {
   it("hides NextGen section when no collection provided", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={null} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={null} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -143,7 +167,12 @@ describe("Home component", () => {
   it("includes latest activity section", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -160,7 +189,12 @@ describe("Home component", () => {
 
     render(
       <TestProvider>
-        <Home featuredNft={incompleteNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={incompleteNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -179,7 +213,12 @@ describe("Home component error scenarios", () => {
     expect(() => {
       render(
         <TestProvider>
-          <Home featuredNft={null as any} featuredNextgen={mockCollection} />
+          <Home 
+            featuredNft={null as any} 
+            featuredNextgen={mockCollection} 
+            initialActivityData={mockInitialActivityData}
+            initialTokens={mockInitialTokens}
+          />
         </TestProvider>
       );
     }).toThrow();
@@ -190,7 +229,12 @@ describe("Home component error scenarios", () => {
   it("works correctly without NextGen collection", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={undefined as any} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={undefined as any} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
