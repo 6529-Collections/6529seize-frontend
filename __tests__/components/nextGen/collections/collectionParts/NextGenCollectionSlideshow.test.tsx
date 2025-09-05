@@ -1,214 +1,81 @@
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import NextGenCollectionSlideshow from "../../../../../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
+import { NextGenCollection, NextGenToken } from "../../../../../entities/INextgen";
 
-// Mock IntersectionObserver
-const mockIntersectionObserver = jest.fn();
-mockIntersectionObserver.mockReturnValue({
-  observe: jest.fn(),
-  disconnect: jest.fn(),
-  unobserve: jest.fn(),
-});
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: mockIntersectionObserver,
-});
-Object.defineProperty(global, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: mockIntersectionObserver,
-});
-
-// Mock ResizeObserver
-Object.defineProperty(window, 'ResizeObserver', {
-  writable: true,
-  configurable: true,
-  value: jest.fn().mockImplementation(() => ({
-    observe: jest.fn(),
-    unobserve: jest.fn(),
-    disconnect: jest.fn(),
-  })),
-});
-
-jest.mock("../../../../../services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
-}));
-
-jest.mock("../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage", () => ({
-  NextGenTokenImage: ({ token }: any) => (
-    <div data-testid="token-image">{token.name}</div>
-  ),
-}));
-
-const mockSwiperInstance = {
-  autoplay: {
-    start: jest.fn(),
-    stop: jest.fn(),
-  },
-  realIndex: 0,
-};
-
-jest.mock("swiper/react", () => {
-  const React = require("react");
-  return {
-    Swiper: ({ children, onSwiper }: any) => {
-      React.useEffect(() => {
-        if (onSwiper) {
-          onSwiper(mockSwiperInstance);
-        }
-      }, [onSwiper]);
-      return <div data-testid="swiper">{children}</div>;
-    },
-    SwiperSlide: ({ children }: any) => <div data-testid="slide">{children}</div>,
-    useSwiper: () => mockSwiperInstance,
+// Mock the child components
+jest.mock("../../../../../components/nextGen/collections/collectionParts/hooks/SlideshowHeader", () => {
+  return function MockSlideshowHeader({ collectionName }: { collectionName: string }) {
+    return <div data-testid="slideshow-header">Header for {collectionName}</div>;
   };
 });
 
-jest.mock("../../../../../hooks/useCapacitor", () => () => ({ isCapacitor: false }));
+jest.mock("../../../../../components/nextGen/collections/collectionParts/hooks/TokenSlideshow", () => {
+  return function MockTokenSlideshow({ collectionId, initialTokens }: { collectionId: number; initialTokens?: any[] }) {
+    return (
+      <div data-testid="token-slideshow">
+        Collection ID: {collectionId}
+        {initialTokens && <div data-testid="initial-tokens">Initial tokens: {initialTokens.length}</div>}
+      </div>
+    );
+  };
+});
 
-jest.mock("../../../../../hooks/scroll/useIntersectionObserver", () => ({
-  useIntersectionObserver: jest.fn(),
-}));
+const mockCollection: NextGenCollection = {
+  id: 1,
+  name: "Test Collection",
+} as NextGenCollection;
 
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import { useIntersectionObserver } from "../../../../../hooks/scroll/useIntersectionObserver";
-
-const collection = { id: 1, name: "Test Collection" } as any;
-const tokens = [
+const mockTokens: NextGenToken[] = [
   { id: 1, name: "Token1", token_id: 1 },
   { id: 2, name: "Token2", token_id: 2 },
   { id: 3, name: "Token3", token_id: 3 },
-];
+] as NextGenToken[];
 
 describe("NextGenCollectionSlideshow", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (commonApiFetch as jest.Mock).mockResolvedValue({ 
-      data: tokens, 
-      next: false, 
-      count: tokens.length, 
-      page: 1 
-    });
-    (useIntersectionObserver as jest.Mock).mockImplementation((_ref, _options, callback) => {
-      // Simulate component being in viewport by default
-      React.useEffect(() => {
-        if (callback) {
-          callback({ isIntersecting: true });
-        }
-      }, []);
-    });
-    mockSwiperInstance.autoplay.start.mockClear();
-    mockSwiperInstance.autoplay.stop.mockClear();
-  });
-
-  it("loads tokens and renders slides", async () => {
-    await act(async () => {
-      render(<NextGenCollectionSlideshow collection={collection} />);
-    });
-
-    expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: `nextgen/collections/${collection.id}/tokens?page_size=50&page=1&sort=random`,
-    });
-
-    await waitFor(() => {
-      const tokenImages = screen.getAllByTestId("token-image");
-      expect(tokenImages.length).toBeGreaterThan(0);
-    });
+  it("renders slideshow container with Bootstrap classes", () => {
+    const { container } = render(<NextGenCollectionSlideshow collection={mockCollection} />);
     
-    const slides = screen.getAllByTestId("slide");
-    expect(slides.length).toBeGreaterThan(0);
+    // Should render the main container structure 
+    const fluidContainer = container.querySelector(".container-fluid");
+    expect(fluidContainer).toBeInTheDocument();
   });
 
-  it("renders autoplay toggle button when multiple tokens exist", async () => {
-    await act(async () => {
-      render(<NextGenCollectionSlideshow collection={collection} />);
-    });
+  it("renders slideshow header with collection name", () => {
+    render(<NextGenCollectionSlideshow collection={mockCollection} />);
+    
+    const header = screen.getByTestId("slideshow-header");
+    expect(header).toBeInTheDocument();
+    expect(header).toHaveTextContent("Header for Test Collection");
+  });
 
-    await waitFor(() => {
-      const tokenImages = screen.getAllByTestId("token-image");
-      expect(tokenImages.length).toBeGreaterThan(1);
-    });
+  it("renders token slideshow with collection ID", () => {
+    render(<NextGenCollectionSlideshow collection={mockCollection} />);
+    
+    const slideshow = screen.getByTestId("token-slideshow");
+    expect(slideshow).toBeInTheDocument();
+    expect(slideshow).toHaveTextContent("Collection ID: 1");
+  });
 
-    // Button should be rendered because there are multiple tokens
-    const autoplayButtons = screen.queryAllByRole("img", { hidden: true });
-    const pauseButton = autoplayButtons.find(button => 
-      button.getAttribute('data-icon') === 'pause-circle' || 
-      button.closest('div')?.textContent?.includes('pause') ||
-      button.getAttribute('aria-hidden') === 'true'
+  it("passes initial tokens to slideshow when provided", () => {
+    render(
+      <NextGenCollectionSlideshow 
+        collection={mockCollection} 
+        initialTokens={mockTokens} 
+      />
     );
     
-    expect(pauseButton).toBeTruthy();
+    const slideshow = screen.getByTestId("token-slideshow");
+    expect(slideshow).toBeInTheDocument();
+    expect(screen.getByTestId("initial-tokens")).toHaveTextContent("Initial tokens: 3");
   });
 
-  it("handles autoplay control through viewport visibility", async () => {
-    let intersectionCallback: any;
-    (useIntersectionObserver as jest.Mock).mockImplementation((_ref, _options, callback) => {
-      intersectionCallback = callback;
-    });
-
-    await act(async () => {
-      render(<NextGenCollectionSlideshow collection={collection} />);
-    });
-
-    // Component stops autoplay initially when swiper is created
-    await waitFor(() => {
-      expect(mockSwiperInstance.autoplay.stop).toHaveBeenCalled();
-    });
-
-    // Reset mock to track subsequent calls
-    mockSwiperInstance.autoplay.stop.mockClear();
-    mockSwiperInstance.autoplay.start.mockClear();
-
-    // Simulate entering viewport
-    if (intersectionCallback) {
-      act(() => {
-        intersectionCallback({ isIntersecting: true });
-      });
-    }
-
-    await waitFor(() => {
-      expect(mockSwiperInstance.autoplay.start).toHaveBeenCalled();
-    });
-
-    // Simulate leaving viewport
-    if (intersectionCallback) {
-      act(() => {
-        intersectionCallback({ isIntersecting: false });
-      });
-    }
-
-    await waitFor(() => {
-      expect(mockSwiperInstance.autoplay.stop).toHaveBeenCalled();
-    });
-  });
-
-  it("renders view all link with correct href", async () => {
-    await act(async () => {
-      render(<NextGenCollectionSlideshow collection={collection} />);
-    });
-
-    const viewAllLink = screen.getByText("View All").closest('a');
-    expect(viewAllLink).toHaveAttribute('href', '/nextgen/collection/test-collection/art');
-  });
-
-  it("handles empty token list gracefully", async () => {
-    (commonApiFetch as jest.Mock).mockResolvedValueOnce({ 
-      data: [], 
-      next: false, 
-      count: 0, 
-      page: 1 
-    });
-
-    await act(async () => {
-      render(<NextGenCollectionSlideshow collection={collection} />);
-    });
-
-    // Should not crash and should render swiper container
-    expect(screen.getByTestId("swiper")).toBeInTheDocument();
+  it("does not pass initial tokens when not provided", () => {
+    render(<NextGenCollectionSlideshow collection={mockCollection} />);
     
-    // Should not have any token images
-    expect(screen.queryAllByTestId("token-image")).toHaveLength(0);
+    const slideshow = screen.getByTestId("token-slideshow");
+    expect(slideshow).toBeInTheDocument();
+    expect(screen.queryByTestId("initial-tokens")).not.toBeInTheDocument();
   });
 });
 

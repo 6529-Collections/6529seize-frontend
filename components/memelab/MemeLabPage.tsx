@@ -5,7 +5,7 @@ import styles from "./MemeLab.module.scss";
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import Download from "@/components/download/Download";
-import { TypeFilter } from "@/components/latest-activity/LatestActivity";
+import { TypeFilter } from "@/hooks/useActivityData";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
 import NFTImage from "@/components/nft-image/NFTImage";

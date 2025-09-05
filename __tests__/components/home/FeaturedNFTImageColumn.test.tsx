@@ -72,7 +72,7 @@ describe('FeaturedNFTImageColumn', () => {
 
       const col = container.querySelector('[class*="col"]');
       expect(col).toBeInTheDocument();
-      expect(col).toHaveClass('pt-3', 'pb-3', 'd-flex', 'align-items-center', 'justify-content-center');
+      expect(col).toHaveClass('pt-3', 'pb-3', 'd-flex', 'align-items-start', 'justify-content-center');
     });
 
     it('should render Container with no-padding class', () => {
@@ -393,7 +393,7 @@ describe('FeaturedNFTImageColumn', () => {
       );
 
       const col = container.querySelector('[class*="col"]');
-      expect(col).toHaveClass('d-flex', 'align-items-center', 'justify-content-center');
+      expect(col).toHaveClass('d-flex', 'align-items-start', 'justify-content-center');
     });
 
     it('should apply correct padding classes to Col', () => {

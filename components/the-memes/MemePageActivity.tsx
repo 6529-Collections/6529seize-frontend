@@ -5,7 +5,7 @@ import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import { NFT } from "../../entities/INFT";
 import { numberWithCommas } from "../../helpers/Helpers";
 import { useEffect, useState } from "react";
-import { TypeFilter } from "../latest-activity/LatestActivity";
+import { TypeFilter } from "../../hooks/useActivityData";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
