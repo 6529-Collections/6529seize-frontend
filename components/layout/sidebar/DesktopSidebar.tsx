@@ -1,25 +1,64 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Tooltip } from "react-tooltip";
+import { usePathname } from "next/navigation";
 import DesktopSidebarNav from "./DesktopSidebarNav";
 import DesktopSidebarUser from "./DesktopSidebarUser";
+import CollectionsSubmenu from "./CollectionsSubmenu";
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 
 interface DesktopSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  isCollectionsSubmenuOpen?: boolean;
+  onCollectionsSubmenuToggle?: (open: boolean) => void;
 }
 
-function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
+function DesktopSidebar({ 
+  isCollapsed, 
+  onToggle,
+  isCollectionsSubmenuOpen = false,
+  onCollectionsSubmenuToggle
+}: DesktopSidebarProps) {
+  const pathname = usePathname();
+  
+  // Use prop-based state if provided, otherwise use local state
+  const [localIsCollectionsOpen, setLocalIsCollectionsOpen] = useState(false);
+  const isCollectionsOpen = onCollectionsSubmenuToggle ? isCollectionsSubmenuOpen : localIsCollectionsOpen;
+  const setIsCollectionsOpen = onCollectionsSubmenuToggle || setLocalIsCollectionsOpen;
+
+  // Check if we're on a collections page
+  useEffect(() => {
+    const collectionsPages = [
+      "/the-memes",
+      "/meme-lab",
+      "/gradients",
+      "/6529-gradient",
+      "/nextgen",
+    ];
+    const isOnCollectionsPage = collectionsPages.some((page) =>
+      pathname?.startsWith(page)
+    );
+
+    // Auto-open submenu when navigating to a collections page (only on initial navigation)
+    if (isOnCollectionsPage && !isCollectionsOpen) {
+      setIsCollectionsOpen(true);
+    }
+  }, [pathname]); // Remove isCollectionsOpen from deps to prevent infinite loop
+
+  const handleCollectionsClick = () => {
+    // Always toggle the submenu when Collections is clicked
+    setIsCollectionsOpen(!isCollectionsOpen);
+  };
   return (
-    <div className="tw-group tw-fixed tw-inset-y-0 tw-left-0 tw-w-72 tw-pt-4 tw-h-full tw-bg-black tw-border-r tw-border-iron-800 tw-border-solid">
+    <div className={`tw-group tw-fixed tw-inset-y-0 tw-left-0 tw-pt-4 tw-h-full tw-bg-black tw-border-r tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 ${
+      isCollapsed ? "tw-w-16" : "tw-w-72"
+    }`}>
       <div
-        className={`tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${
-          isCollapsed ? "tw-ml-auto tw-w-16" : "tw-w-72"
-        }`}
+        className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
       >
         {/* Header/Logo section */}
         <div
@@ -56,10 +95,15 @@ function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
         </div>
 
         {/* Navigation section */}
-        {/* <DesktopSidebarNav isCollapsed={isCollapsed} /> */}
+        <DesktopSidebarNav 
+          isCollapsed={isCollapsed} 
+          onExpandSidebar={isCollapsed ? onToggle : undefined}
+          isCollectionsOpen={isCollectionsOpen}
+          onCollectionsClick={handleCollectionsClick}
+        />
 
         {/* User section */}
-        {/* <DesktopSidebarUser isCollapsed={isCollapsed} /> */}
+        <DesktopSidebarUser isCollapsed={isCollapsed} />
       </div>
 
       {/* Global tooltip for navigation items when collapsed */}
@@ -85,6 +129,16 @@ function DesktopSidebar({ isCollapsed, onToggle }: DesktopSidebarProps) {
         noArrow={false}
         variant="dark"
         border="1px solid rgba(64, 64, 64, 0.3)"
+      />
+      
+      {/* Collections Submenu Panel */}
+      <CollectionsSubmenu
+        isOpen={isCollectionsOpen}
+        sidebarCollapsed={isCollapsed}
+        onExpandSidebar={() => {
+          if (isCollapsed) onToggle();
+        }}
+        onClose={() => setIsCollectionsOpen(false)}
       />
     </div>
   );

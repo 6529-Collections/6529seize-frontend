@@ -7,6 +7,9 @@ import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import HeaderUserConnect from "../header/user/HeaderUserConnect";
+import Image from "next/image";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -20,6 +23,7 @@ export default function HomePage({
   const { isApp } = useDeviceInfo();
   const [activeTab, setActiveTab] = useState<"feed" | "latest">("feed");
   const { registerRef } = useLayout();
+  const { isAuthenticated } = useSeizeConnectContext();
 
   // Local ref for tabs
   const tabsRef = useRef<HTMLDivElement | null>(null);
@@ -41,7 +45,7 @@ export default function HomePage({
   }
 
   return (
-    <div className="tw-h-full tw-bg-iron-950">
+    <div className="tw-h-full tw-bg-black">
       {/* Tab Navigation */}
       <div
         ref={setTabsRef}
@@ -91,10 +95,34 @@ export default function HomePage({
         </div>
       </div>
 
-      <div className="tw-h-full tw-px-6 tw-bg-iron-950">
+      <div className="tw-h-full tw-px-6">
         {activeTab === "feed" ? (
           <div className="tw-h-full tw-overflow-hidden">
-            <HomeFeed />
+            {isAuthenticated ? (
+              <HomeFeed />
+            ) : (
+              <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6">
+                <Image
+                  unoptimized
+                  priority
+                  loading="eager"
+                  src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+                  alt="Brain"
+                  width={304}
+                  height={450}
+                  className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+                />
+                <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+                  <h1 className="tw-text-xl tw-font-bold">
+                    This content is only available to connected wallets.
+                  </h1>
+                  <p className="tw-text-base tw-text-gray-400">
+                    Connect your wallet to continue.
+                  </p>
+                  <HeaderUserConnect />
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <Home featuredNft={featuredNft} featuredNextgen={featuredNextgen} />

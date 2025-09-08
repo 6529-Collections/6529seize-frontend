@@ -34,7 +34,7 @@ export default function LayoutWrapper({
   return (
     <>
       {content}
-      <FooterWrapper />
+      {/* <FooterWrapper /> */}
     </>
   );
 }

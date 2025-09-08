@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface Collection {
   id: string;
@@ -15,6 +15,8 @@ interface Collection {
 interface CollectionsSubmenuProps {
   isOpen: boolean;
   sidebarCollapsed: boolean;
+  onExpandSidebar?: () => void;
+  onClose?: () => void;
 }
 
 // Memoized collections array to prevent unnecessary re-renders
@@ -54,6 +56,8 @@ const collections: Collection[] = [
 function CollectionsSubmenu({
   isOpen,
   sidebarCollapsed,
+  onExpandSidebar,
+  onClose,
 }: CollectionsSubmenuProps) {
   const pathname = usePathname();
   const [activeCollection, setActiveCollection] = useState<string>("memes");
@@ -66,6 +70,7 @@ function CollectionsSubmenu({
   // Optimize collection click handler
   const handleCollectionClick = useCallback((collectionId: string) => {
     setActiveCollection(collectionId);
+    // Don't close submenu - keep it open for navigation between collections
   }, []);
 
   useEffect(() => {
@@ -80,33 +85,37 @@ function CollectionsSubmenu({
 
   // Calculate positioning based on sidebar state
   const submenuPositioning = useMemo(() => {
-    const baseClasses = "tw-fixed tw-top-0 tw-bottom-0 tw-w-64 tw-bg-iron-900 tw-border-r tw-border-iron-800 tw-z-40 tw-shadow-xl tw-transition-all tw-duration-300";
-    const leftPosition = sidebarCollapsed ? 'tw-left-16' : 'tw-left-16 lg:tw-left-80';
+    const baseClasses =
+      "tw-fixed tw-top-0 tw-bottom-0 tw-w-64 tw-bg-iron-950 tw-border-r tw-border-iron-800 tw-z-40 tw-shadow-xl tw-transition-all tw-duration-300";
+    const leftPosition = sidebarCollapsed ? "tw-left-16" : "tw-left-72";
     return `${baseClasses} ${leftPosition}`;
   }, [sidebarCollapsed]);
 
   if (!isOpen) return null;
 
   return (
-    <aside 
+    <aside
       className={submenuPositioning}
       role="complementary"
       aria-label="Collections submenu"
       id="collections-submenu"
     >
       {/* Header */}
-      <header className="tw-flex tw-items-center tw-justify-between tw-px-6 tw-py-4 tw-border-b tw-border-iron-800">
-        <h2 className="tw-text-white tw-font-semibold tw-text-lg">
+      <header className="tw-flex tw-items-center tw-justify-between tw-px-6 tw-py-5 tw-border-b tw-border-iron-800">
+        <span className="tw-text-white tw-font-semibold tw-text-xl tw-tracking-tight">
           Collections
-        </h2>
+        </span>
         <button
-          onClick={onExpandSidebar}
-          className="tw-p-1 tw-rounded-lg tw-text-iron-400 hover:tw-text-white hover:tw-bg-iron-800 tw-transition-colors tw-bg-transparent tw-border-0"
-          title="Expand main menu"
-          aria-label="Expand main sidebar"
+          onClick={onClose}
+          className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 desktop-hover:hover:tw-from-iron-750 desktop-hover:hover:tw-to-iron-850 desktop-hover:hover:tw-border-iron-650"
+          title="Close collections menu"
+          aria-label="Close collections menu"
           type="button"
         >
-          <ChevronLeftIcon className="tw-h-5 tw-w-5" aria-hidden="true" />
+          <XMarkIcon
+            className="tw-h-4 tw-w-4 tw-text-iron-200 group-hover:tw-text-white tw-transition-transform tw-duration-200"
+            aria-hidden="true"
+          />
         </button>
       </header>
 
@@ -120,25 +129,14 @@ function CollectionsSubmenu({
                 <Link
                   href={collection.href}
                   onClick={() => handleCollectionClick(collection.id)}
-                  className={`tw-flex tw-flex-col tw-px-3 tw-py-2.5 tw-rounded-lg tw-transition-all tw-duration-200 tw-no-underline tw-focus:tw-outline-none tw-focus:tw-ring-2 tw-focus:tw-ring-primary-400 tw-focus:tw-ring-offset-2 tw-focus:tw-ring-offset-iron-900 ${
+                  className={`tw-flex tw-items-center tw-px-3 tw-py-2.5 tw-border-solid tw-border-r-0 tw-border-y-0 tw-transition-all tw-duration-200 tw-no-underline tw-focus:tw-outline-none tw-focus:tw-ring-2 tw-focus:tw-ring-primary-400 tw-focus:tw-ring-offset-2 tw-focus:tw-ring-offset-iron-900 ${
                     isActive
-                      ? "tw-bg-primary-500/20 tw-text-primary-400"
-                      : "tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-white"
+                      ? "tw-text-white tw-border-l-2 tw-border-white"
+                      : "tw-text-iron-500 hover:tw-text-white tw-border-l-2 tw-border-transparent"
                   }`}
                   aria-current={isActive ? "page" : undefined}
-                  aria-describedby={collection.description ? `${collection.id}-description` : undefined}
                 >
                   <span className="tw-font-medium">{collection.name}</span>
-                  {collection.description && (
-                    <span
-                      id={`${collection.id}-description`}
-                      className={`tw-text-xs tw-mt-0.5 ${
-                        isActive ? "tw-text-primary-400/80" : "tw-text-iron-500"
-                      }`}
-                    >
-                      {collection.description}
-                    </span>
-                  )}
                 </Link>
               </li>
             );

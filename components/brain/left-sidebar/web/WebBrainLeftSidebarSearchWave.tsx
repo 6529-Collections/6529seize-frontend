@@ -56,7 +56,7 @@ const WebBrainLeftSidebarSearchWave: React.FC<WebBrainLeftSidebarSearchWaveProps
         onFocus={() => onFocusChange(true)}
       />
       <BrainLeftSidebarSearchWaveDropdown
-        isOpen={isOpen}
+        open={isOpen}
         searchCriteria={searchCriteria}
         onClose={handleClose}
         listType={listType}

@@ -25,6 +25,9 @@ import { SidebarSection } from "@/components/navigation/navTypes";
 
 interface DesktopSidebarNavProps {
   isCollapsed: boolean;
+  onExpandSidebar?: () => void;
+  isCollectionsOpen?: boolean;
+  onCollectionsClick?: () => void;
 }
 
 type NavItem = {
@@ -36,15 +39,19 @@ type NavItem = {
   iconSizeClass?: string;
 };
 
-function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
+function DesktopSidebarNav({ 
+  isCollapsed, 
+  onExpandSidebar,
+  isCollectionsOpen = false,
+  onCollectionsClick
+}: DesktopSidebarNavProps) {
   const pathname = usePathname();
   const { address } = useSeizeConnectContext();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
-  // Local state for expandable sections and collections submenu
+  // Local state for expandable sections
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
-  const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
 
   // Primary navigation items
   const navItems: NavItem[] = [
@@ -76,7 +83,7 @@ function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
     {
       type: "action",
       name: "Collections",
-      onClick: () => setIsCollectionsOpen((v) => !v),
+      onClick: onCollectionsClick || (() => {}),
       icon: Squares2X2Icon,
     },
     {
@@ -217,8 +224,19 @@ function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
 
   // Active state logic
   const isActive = (item: NavItem): boolean => {
-    if (item.type === "action") {
-      return item.name === "Collections" && isCollectionsOpen;
+    if (item.type === "action" && item.name === "Collections") {
+      // Collections should be active if submenu is open OR if we're on a collections page
+      const collectionsPages = [
+        "/the-memes",
+        "/meme-lab",
+        "/gradients",
+        "/6529-gradient",
+        "/nextgen",
+      ];
+      const isOnCollectionsPage = collectionsPages.some((page) =>
+        pathname?.startsWith(page)
+      );
+      return isCollectionsOpen || isOnCollectionsPage;
     }
     if (item.href === "/") {
       return pathname === "/";
@@ -240,23 +258,7 @@ function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
     );
   };
 
-  // Auto-open collections submenu when on collections pages
-  useEffect(() => {
-    const collectionsPages = [
-      "/the-memes",
-      "/meme-lab",
-      "/gradients",
-      "/6529-gradient",
-      "/nextgen",
-    ];
-    const shouldAutoOpenCollections = collectionsPages.some((page) =>
-      pathname?.startsWith(page)
-    );
-
-    if (shouldAutoOpenCollections && !isCollectionsOpen) {
-      setIsCollectionsOpen(true);
-    }
-  }, [pathname, isCollectionsOpen]);
+  // Collections state is now managed by parent component
 
   return (
     <nav
@@ -288,17 +290,7 @@ function DesktopSidebarNav({ isCollapsed }: DesktopSidebarNavProps) {
                 ariaControls={item.name === "Collections" ? "collections-submenu" : undefined}
               />
 
-              {/* Collections submenu - only show in expanded mode */}
-              {item.name === "Collections" &&
-                isCollectionsOpen &&
-                !isCollapsed && (
-                  <div id="collections-submenu" className="tw-ml-6 tw-mt-1">
-                    <CollectionsSubmenu
-                      isOpen={isCollectionsOpen}
-                      sidebarCollapsed={isCollapsed}
-                    />
-                  </div>
-                )}
+              {/* Collections submenu is rendered as a separate panel, not embedded here */}
             </li>
           );
         })}
