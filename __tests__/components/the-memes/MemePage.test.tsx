@@ -18,7 +18,10 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(() => Promise.resolve({})),
+  commonApiFetch: jest.fn(() => Promise.resolve({
+    memes: [{ id: 1, tdh: 100 }],
+    memes_ranks: [{ id: 1, rank: 1 }],
+  })),
 }));
 
 jest.mock("@/components/the-memes/MemePageLive", () => ({
@@ -69,12 +72,19 @@ jest.mock("@/components/nft-navigation/NftNavigation", () => () => (
   <div data-testid="nft-navigation" />
 ));
 
-const replaceMock = jest.fn();
+const mockPush = jest.fn();
+const mockSearchParams = {
+  get: jest.fn().mockReturnValue(null),
+};
+
+const useSearchParamsMock = require("next/navigation").useSearchParams;
+useSearchParamsMock.mockReturnValue(mockSearchParams);
+
 (useRouter as jest.Mock).mockReturnValue({
   query: { id: "1" },
   isReady: true,
-  push: jest.fn(),
-  replace: replaceMock,
+  push: mockPush,
+  replace: jest.fn(),
 });
 
 const nftMeta = {
@@ -202,7 +212,8 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 describe("MemePage tab navigation", () => {
   beforeEach(() => {
-    replaceMock.mockClear();
+    mockPush.mockClear();
+    mockSearchParams.get.mockReturnValue(null);
   });
 
   it.each([
@@ -220,7 +231,7 @@ describe("MemePage tab navigation", () => {
         expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
       );
 
-      replaceMock.mockClear();
+      mockPush.mockClear();
       const btn = screen.getByRole("button", { name: label });
       await userEvent.click(btn);
 
@@ -229,13 +240,244 @@ describe("MemePage tab navigation", () => {
       });
 
       if (label !== "Live") {
-        const pushMock = (useRouter as jest.Mock).mock.results[0].value.push;
-        expect(pushMock).toHaveBeenLastCalledWith(
+        expect(mockPush).toHaveBeenLastCalledWith(
           `/the-memes/1?focus=${focus}`
         );
-      } else {
-        expect(replaceMock).not.toHaveBeenCalled();
       }
     }
   );
+});
+
+describe("MemePage search params handling", () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+    mockSearchParams.get.mockClear();
+  });
+
+  it("defaults to LIVE focus when no focus param", async () => {
+    mockSearchParams.get.mockReturnValue(null);
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByTestId("live-right")).toBeInTheDocument();
+    });
+  });
+
+  it("sets focus from valid search param", async () => {
+    mockSearchParams.get.mockReturnValue(MEME_FOCUS.ACTIVITY);
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByTestId("activity")).toBeInTheDocument();
+    });
+  });
+
+  it("ignores invalid focus param and defaults to LIVE", async () => {
+    mockSearchParams.get.mockReturnValue("invalid-focus");
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByTestId("live-right")).toBeInTheDocument();
+    });
+  });
+
+  it("updates URL when activeTab changes", async () => {
+    renderPage();
+    
+    await waitFor(() =>
+      expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
+    );
+
+    const artButton = screen.getByRole("button", { name: "The Art" });
+    await userEvent.click(artButton);
+
+    expect(mockPush).toHaveBeenCalledWith(`/the-memes/1?focus=${MEME_FOCUS.THE_ART}`);
+  });
+});
+
+describe("MemePage API interactions", () => {
+  beforeEach(() => {
+    (fetchUrl as jest.Mock).mockClear();
+  });
+
+  it("fetches NFT metadata on mount", async () => {
+    renderPage();
+    
+    expect(fetchUrl).toHaveBeenCalledWith(
+      `${process.env.API_ENDPOINT}/api/memes_extended_data?id=1`
+    );
+  });
+
+  it("fetches NFT data after metadata loads", async () => {
+    renderPage();
+    
+    await waitFor(() => {
+      expect(fetchUrl).toHaveBeenCalledWith(
+        expect.stringContaining("/api/nfts?id=1&contract=")
+      );
+    });
+  });
+
+  it("handles empty metadata response", async () => {
+    (fetchUrl as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes("memes_extended_data")) {
+        return Promise.resolve({ data: [] });
+      }
+      return Promise.resolve({ data: [nft] });
+    });
+
+    renderPage();
+    
+    // Should not make the second NFT call when metadata is empty
+    await waitFor(() => {
+      const calls = (fetchUrl as jest.Mock).mock.calls;
+      const nftCalls = calls.filter(call => call[0].includes("/api/nfts?"));
+      expect(nftCalls).toHaveLength(0);
+    });
+  });
+});
+
+describe("MemePage wallet integration", () => {
+  beforeEach(() => {
+    (fetchUrl as jest.Mock).mockClear();
+  });
+
+  it("fetches transactions for connected wallets", async () => {
+    const mockProfile = {
+      id: "test-id",
+      handle: "test-handle",
+      normalised_handle: "test-handle",
+      pfp: null,
+      cic: 0,
+      rep: 0,
+      level: 1,
+      tdh: 0,
+      consolidation_key: "test-key",
+      display: "Test User",
+      primary_wallet: "0x123",
+      banner1: null,
+      banner2: null,
+      classification: "PSEUDONYM" as any,
+      sub_classification: null,
+      wallets: [
+        { wallet: "0x123", ens: null, wallet_displayed: "0x123", is_primary: true },
+        { wallet: "0x456", ens: null, wallet_displayed: "0x456", is_primary: false }
+      ],
+    };
+
+    const mockAuthContext = {
+      connectedProfile: mockProfile,
+      fetchingProfile: false,
+      connectionStatus: "CONNECTED" as any,
+      receivedProfileProxies: [],
+      activeProfileProxy: null,
+      showWaves: false,
+      requestAuth: jest.fn().mockResolvedValue({ success: true }),
+      setToast: jest.fn(),
+      setActiveProfileProxy: jest.fn(),
+      setTitle: jest.fn(),
+      title: "Test Title",
+    };
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <MemePage nftId="1" />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      const calls = (fetchUrl as jest.Mock).mock.calls;
+      const transactionCalls = calls.filter(call => call[0].includes("/api/transactions"));
+      expect(transactionCalls.length).toBeGreaterThan(0);
+      expect(transactionCalls[0][0]).toContain("wallet=0x123,0x456");
+    });
+  });
+
+  it("clears balance when no wallets connected", async () => {
+    const mockProfile = {
+      id: "test-id",
+      handle: "test-handle",
+      normalised_handle: "test-handle",
+      pfp: null,
+      cic: 0,
+      rep: 0,
+      level: 1,
+      tdh: 0,
+      consolidation_key: "test-key",
+      display: "Test User",
+      primary_wallet: null,
+      banner1: null,
+      banner2: null,
+      classification: "PSEUDONYM" as any,
+      sub_classification: null,
+      wallets: [],
+    };
+
+    const mockAuthContext = {
+      connectedProfile: mockProfile,
+      fetchingProfile: false,
+      connectionStatus: "CONNECTED" as any,
+      receivedProfileProxies: [],
+      activeProfileProxy: null,
+      showWaves: false,
+      requestAuth: jest.fn().mockResolvedValue({ success: true }),
+      setToast: jest.fn(),
+      setActiveProfileProxy: jest.fn(),
+      setTitle: jest.fn(),
+      title: "Test Title",
+    };
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <MemePage nftId="1" />
+      </AuthContext.Provider>
+    );
+
+    // Should not make transactions call
+    await waitFor(() => {
+      const calls = (fetchUrl as jest.Mock).mock.calls;
+      const transactionCalls = calls.filter(call => call[0].includes("/api/transactions"));
+      expect(transactionCalls).toHaveLength(0);
+    });
+  });
+});
+
+describe("MemePage loading states", () => {
+  it("renders without crashing during loading", () => {
+    (fetchUrl as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
+    
+    renderPage();
+    
+    // Should render title and basic structure even while loading
+    expect(screen.getByText("Memes")).toBeInTheDocument();
+  });
+
+  it("shows content only after metadata and NFT load", async () => {
+    // Reset the mock to return proper data
+    (fetchUrl as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes("memes_extended_data")) {
+        return Promise.resolve({ data: [nftMeta] });
+      }
+      if (url.includes("nfts")) {
+        return Promise.resolve({ data: [nft] });
+      }
+      return Promise.resolve({ data: [] });
+    });
+    
+    renderPage();
+    
+    // Wait for data to load and content to render
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
+    }, { timeout: 3000 });
+  });
+});
+
+describe("MemePage navigation integration", () => {
+  it("displays season and card information when data loads", async () => {
+    renderPage();
+    
+    await waitFor(() => {
+      expect(screen.getByText(/SZN1/)).toBeInTheDocument();
+      expect(screen.getByText(/Card 1/)).toBeInTheDocument();
+      expect(screen.getByText("Meme")).toBeInTheDocument();
+    }, { timeout: 5000 });
+  });
 });

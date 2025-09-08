@@ -4,20 +4,30 @@ import NFTHTMLRenderer from '../../../../components/nft-image/renderers/NFTHTMLR
 import { BaseRendererProps } from '../../../../components/nft-image/types/renderer-props';
 import { BaseNFT } from '../../../../entities/INFT';
 
-// Mock NFTImageBalance
+// Mock NFTImageBalance to match new interface
 jest.mock('../../../../components/nft-image/NFTImageBalance', () => {
-  return function MockNFTImageBalance({ balance, showOwned, showUnseized, height }: any) {
+  return function MockNFTImageBalance({ contract, tokenId, showOwnedIfLoggedIn, showUnseizedIfLoggedIn, height }: any) {
+    // Mock the balance behavior - in real component this comes from useNftBalance hook
+    // For testing, we'll simulate different balance states based on tokenId
+    const mockBalance = tokenId === 999 ? -1 : tokenId === 0 ? 0 : tokenId;
+    const mockConnectedProfile = tokenId !== 888; // Simulate logged in state
+    
     return (
-      <div data-testid="nft-image-balance" data-height={height}>
-        {balance > 0 && (
+      <div 
+        data-testid="nft-image-balance" 
+        data-height={height}
+        data-contract={contract}
+        data-token-id={tokenId}
+      >
+        {mockBalance > 0 && (
           <span data-testid="seized-text">
-            SEIZED{!showOwned ? ` x${balance}` : ""}
+            SEIZED{!showOwnedIfLoggedIn && mockConnectedProfile ? ` x${mockBalance}` : ""}
           </span>
         )}
-        {showUnseized && balance === 0 && (
+        {showUnseizedIfLoggedIn && mockConnectedProfile && mockBalance === 0 && (
           <span data-testid="unseized-text">UNSEIZED</span>
         )}
-        {showUnseized && balance === -1 && (
+        {showUnseizedIfLoggedIn && mockConnectedProfile && mockBalance === -1 && (
           <span data-testid="loading-text">...</span>
         )}
       </div>
@@ -27,7 +37,7 @@ jest.mock('../../../../components/nft-image/NFTImageBalance', () => {
 
 const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT => ({
   id: 1,
-  contract: '0x123',
+  contract: '0x33fd426905f149f8376e227d6c231748',
   token_id: '1',
   name: 'Test HTML NFT',
   image: 'https://example.com/image.png',
@@ -59,8 +69,8 @@ const createMockNFTLite = (overrides: any = {}) => ({
 const createDefaultProps = (overrides: Partial<BaseRendererProps> = {}): BaseRendererProps => ({
   nft: createMockNFT(),
   height: 300,
-  balance: 1,
-  showUnseized: false,
+  showOwnedIfLoggedIn: false,
+  showUnseizedIfLoggedIn: false,
   heightStyle: 'height-300',
   imageStyle: 'image-style',
   bgStyle: 'bg-style',
@@ -235,35 +245,50 @@ describe('NFTHTMLRenderer', () => {
   });
 
   describe('NFTImageBalance Integration', () => {
-    it('passes correct props to NFTImageBalance', () => {
-      const props = createDefaultProps({
-        balance: 5,
-        showOwned: true,
-        showUnseized: true,
-        height: 650,
+    it('renders NFTImageBalance with correct contract and tokenId', () => {
+      const nft = createMockNFT({
+        contract: '0xabcdef123456',
+        id: 42,
       });
+      const props = createDefaultProps({ nft, height: 650 });
       render(<NFTHTMLRenderer {...props} />);
       
       const balance = screen.getByTestId('nft-image-balance');
       expect(balance).toBeInTheDocument();
       expect(balance).toHaveAttribute('data-height', '650');
-      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED');
+      expect(balance).toHaveAttribute('data-contract', '0xabcdef123456');
+      expect(balance).toHaveAttribute('data-token-id', '42');
     });
 
-    it('shows balance with quantity when showOwned is false', () => {
-      const props = createDefaultProps({
-        balance: 3,
-        showOwned: false,
+    it('passes showOwnedIfLoggedIn prop correctly', () => {
+      const nft = createMockNFT({ id: 5 }); // Will show balance with quantity
+      const props = createDefaultProps({ 
+        nft,
+        showOwnedIfLoggedIn: false, // Should show quantity
       });
       render(<NFTHTMLRenderer {...props} />);
       
-      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED x3');
+      // With showOwnedIfLoggedIn=false and tokenId=5, mock shows "SEIZED x5"
+      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED x5');
     });
 
-    it('shows unseized state correctly', () => {
+    it('hides quantity when showOwnedIfLoggedIn is true', () => {
+      const nft = createMockNFT({ id: 3 }); 
+      const props = createDefaultProps({ 
+        nft,
+        showOwnedIfLoggedIn: true, // Should hide quantity
+      });
+      render(<NFTHTMLRenderer {...props} />);
+      
+      // With showOwnedIfLoggedIn=true, mock shows just "SEIZED"
+      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED');
+    });
+
+    it('shows unseized state when showUnseizedIfLoggedIn is true', () => {
+      const nft = createMockNFT({ id: 0 }); // Mock returns balance 0 for id=0
       const props = createDefaultProps({
-        balance: 0,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTHTMLRenderer {...props} />);
       
@@ -271,9 +296,10 @@ describe('NFTHTMLRenderer', () => {
     });
 
     it('shows loading state for balance -1', () => {
+      const nft = createMockNFT({ id: 999 }); // Mock returns balance -1 for id=999
       const props = createDefaultProps({
-        balance: -1,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTHTMLRenderer {...props} />);
       
@@ -290,15 +316,16 @@ describe('NFTHTMLRenderer', () => {
   });
 
   describe('Edge Cases and Error Handling', () => {
-    it('crashes when metadata is missing (IMPLEMENTATION BUG)', () => {
+    it('crashes when metadata is undefined (IMPLEMENTATION BUG)', () => {
       const nft = createMockNFT({ metadata: undefined });
       const props = createDefaultProps({ nft, id: 'test-iframe' });
       
-      // This currently crashes because the component tries to access
-      // props.nft.metadata.animation when metadata is undefined
+      // The getSrc function has a bug - it checks "metadata" in nft but doesn't check if metadata is null/undefined
+      // Line 10: const hasAnimation = hasMetadata && nft.metadata.animation;
+      // This will crash when nft.metadata is undefined despite hasMetadata being true
       expect(() => {
         render(<NFTHTMLRenderer {...props} />);
-      }).toThrow('Cannot read properties of undefined (reading \'animation\')');
+      }).toThrow("Cannot read properties of undefined (reading 'animation')");
     });
 
     it('handles empty metadata object gracefully', () => {
@@ -349,7 +376,8 @@ describe('NFTHTMLRenderer', () => {
     });
 
     it('handles zero balance correctly', () => {
-      const props = createDefaultProps({ balance: 0 });
+      const nft = createMockNFT({ id: 0 }); // Mock returns balance 0 for id=0
+      const props = createDefaultProps({ nft });
       render(<NFTHTMLRenderer {...props} />);
       
       const balance = screen.getByTestId('nft-image-balance');
@@ -358,10 +386,11 @@ describe('NFTHTMLRenderer', () => {
       expect(screen.queryByTestId('seized-text')).not.toBeInTheDocument();
     });
 
-    it('handles negative balance correctly', () => {
+    it('handles loading balance correctly', () => {
+      const nft = createMockNFT({ id: 999 }); // Mock returns balance -1 for id=999
       const props = createDefaultProps({ 
-        balance: -1,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTHTMLRenderer {...props} />);
       
@@ -472,11 +501,12 @@ describe('NFTHTMLRenderer', () => {
       expect(wrapper).toHaveClass('test-bg');
     });
 
-    it('propagates balance-related props to NFTImageBalance', () => {
+    it('propagates authentication-related props to NFTImageBalance', () => {
+      const nft = createMockNFT({ id: 7 });
       const props = createDefaultProps({
-        balance: 7,
-        showOwned: true,
-        showUnseized: false,
+        nft,
+        showOwnedIfLoggedIn: true,
+        showUnseizedIfLoggedIn: false,
         height: 650,
       });
       render(<NFTHTMLRenderer {...props} />);
@@ -484,22 +514,23 @@ describe('NFTHTMLRenderer', () => {
       const balance = screen.getByTestId('nft-image-balance');
       expect(balance).toBeInTheDocument();
       expect(balance).toHaveAttribute('data-height', '650');
+      expect(balance).toHaveAttribute('data-token-id', '7');
       
       // Verify the mocked balance shows correct text
       const seizedText = screen.getByTestId('seized-text');
-      expect(seizedText).toHaveTextContent('SEIZED'); // showOwned=true, so no quantity
+      expect(seizedText).toHaveTextContent('SEIZED'); // showOwnedIfLoggedIn=true, so no quantity
     });
 
     it('handles optional props correctly', () => {
       const propsWithoutOptionals: BaseRendererProps = {
         nft: createMockNFT(),
         height: 300,
-        balance: 1,
-        showUnseized: false,
+        showOwnedIfLoggedIn: false,
+        showUnseizedIfLoggedIn: false,
         heightStyle: 'height-300',
         imageStyle: 'image-style',
         bgStyle: 'bg-style',
-        // id, showOwned are optional and not provided
+        // id is optional and not provided
       };
       
       expect(() => {

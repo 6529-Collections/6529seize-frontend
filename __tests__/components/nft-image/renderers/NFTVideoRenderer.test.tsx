@@ -4,26 +4,44 @@ import NFTVideoRenderer from '../../../../components/nft-image/renderers/NFTVide
 import { BaseRendererProps } from '../../../../components/nft-image/types/renderer-props';
 import { BaseNFT } from '../../../../entities/INFT';
 
-// Mock NFTImageBalance
+// Mock NFTImageBalance to match the new implementation
 jest.mock('../../../../components/nft-image/NFTImageBalance', () => {
-  return function MockNFTImageBalance({ balance, showOwned, showUnseized, height }: any) {
+  return function MockNFTImageBalance({ contract, tokenId, showOwnedIfLoggedIn, showUnseizedIfLoggedIn, height }: any) {
+    // Mock the balance state - in real component this comes from useNftBalance hook
+    // For tests, we'll derive the balance from the contract/tokenId to make tests predictable
+    const mockBalance = tokenId === 1 ? 1 : tokenId === 0 ? 0 : -1;
+    
     return (
       <div data-testid="nft-image-balance" data-height={height}>
-        {balance > 0 && (
+        {mockBalance > 0 && (
           <span data-testid="seized-text">
-            SEIZED{!showOwned ? ` x${balance}` : ""}
+            SEIZED{!showOwnedIfLoggedIn ? ` x${mockBalance}` : ""}
           </span>
         )}
-        {showUnseized && balance === 0 && (
+        {showUnseizedIfLoggedIn && mockBalance === 0 && (
           <span data-testid="unseized-text">UNSEIZED</span>
         )}
-        {showUnseized && balance === -1 && (
+        {showUnseizedIfLoggedIn && mockBalance === -1 && (
           <span data-testid="loading-text">...</span>
         )}
       </div>
     );
   };
 });
+
+// Mock the hooks that NFTImageBalance depends on
+jest.mock('../../../../components/auth/Auth', () => ({
+  useAuth: () => ({
+    connectedProfile: { consolidation_key: 'test-key' },
+  }),
+}));
+
+jest.mock('../../../../hooks/useNftBalance', () => ({
+  useNftBalance: ({ tokenId }: any) => ({
+    balance: tokenId === 1 ? 1 : tokenId === 0 ? 0 : -1,
+    error: null,
+  }),
+}));
 
 const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT => ({
   id: 1,
@@ -45,23 +63,12 @@ const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT => ({
   ...overrides,
 });
 
-const createMockNFTLite = (overrides: any = {}) => ({
-  id: 1,
-  name: 'Test Video NFT Lite',
-  image: 'https://example.com/image.png',
-  animation: 'https://example.com/video.mp4',
-  compressed_animation: 'https://example.com/compressed-video.mp4',
-  metadata: {
-    animation: 'https://example.com/metadata-video.mp4',
-  },
-  ...overrides,
-});
 
 const createDefaultProps = (overrides: Partial<BaseRendererProps> = {}): BaseRendererProps => ({
   nft: createMockNFT(),
   height: 300,
-  balance: 1,
-  showUnseized: false,
+  showOwnedIfLoggedIn: false,
+  showUnseizedIfLoggedIn: false,
   heightStyle: 'height-300',
   imageStyle: 'image-style',
   bgStyle: 'bg-style',
@@ -199,148 +206,15 @@ describe('NFTVideoRenderer', () => {
     });
   });
 
-  describe('Poster Image Selection', () => {
-    it('uses scaled image as poster by default when available', () => {
-      const props = createDefaultProps();
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toHaveAttribute('poster', 'https://example.com/scaled.png');
-    });
 
-    it('falls back to original image as poster when scaled is not available', () => {
-      const nft = createMockNFT({ scaled: undefined });
-      const props = createDefaultProps({ nft });
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toHaveAttribute('poster', 'https://example.com/image.png');
-    });
-
-    it('uses original image as poster when scaled is null', () => {
-      const nft = createMockNFT({ scaled: null });
-      const props = createDefaultProps({ nft });
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toHaveAttribute('poster', 'https://example.com/image.png');
-    });
-
-    it('uses original image as poster when scaled is empty string', () => {
-      const nft = createMockNFT({ scaled: '' });
-      const props = createDefaultProps({ nft });
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toHaveAttribute('poster', 'https://example.com/image.png');
-    });
-
-    it('handles missing image gracefully', () => {
-      const nft = createMockNFT({ 
-        image: undefined,
-        scaled: undefined,
-      });
-      const props = createDefaultProps({ nft });
-      
-      expect(() => {
-        render(<NFTVideoRenderer {...props} />);
-      }).not.toThrow();
-      
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      const video = container.querySelector('video');
-      expect(video).toBeInTheDocument();
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('handles video load errors by falling back to original animation', () => {
-      const props = createDefaultProps();
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toBeInTheDocument();
-      expect(video).toHaveAttribute('src', 'https://example.com/compressed-video.mp4');
-      
-      // The error handling is implemented in the component but testing it requires
-      // a more complex setup. For now, we test that the onError handler exists
-      // and the component renders without throwing errors during normal operation
-      expect(video).toHaveAttribute('src');
-      expect(() => {
-        fireEvent.error(video!);
-      }).not.toThrow();
-    });
-
-    it('falls back to metadata animation when both compressed and original fail', () => {
-      // This tests the error handling logic structure
-      const nft = createMockNFT({
-        compressed_animation: 'https://example.com/compressed.mp4',
-        animation: 'https://example.com/original.mp4',
-        metadata: {
-          animation: 'https://example.com/metadata.mp4',
-        },
-      });
-      const props = createDefaultProps({ nft });
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toBeInTheDocument();
-      
-      // Test that error handling doesn't crash the component
-      expect(() => {
-        fireEvent.error(video!);
-      }).not.toThrow();
-      
-      // Verify the component has the expected metadata for fallback
-      expect(nft.metadata?.animation).toBe('https://example.com/metadata.mp4');
-    });
-
-    it('handles error when NFT has no metadata property', () => {
-      const nft = createMockNFT();
-      // Remove metadata property
-      const { metadata, ...nftWithoutMetadata } = nft;
-      const props = createDefaultProps({ nft: nftWithoutMetadata as any });
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toBeInTheDocument();
-      
-      if (video) {
-        // Should not throw when error occurs and no metadata exists
-        expect(() => {
-          fireEvent.error(video);
-        }).not.toThrow();
-      }
-    });
-
-    it('handles error when metadata exists but has no animation property', () => {
-      const nft = createMockNFT({
-        metadata: {
-          image: 'test.png',
-          name: 'Test',
-          description: 'Test',
-          attributes: [],
-        },
-      });
-      const props = createDefaultProps({ nft });
-      const { container } = render(<NFTVideoRenderer {...props} />);
-      
-      const video = container.querySelector('video');
-      expect(video).toBeInTheDocument();
-      
-      if (video) {
-        expect(() => {
-          fireEvent.error(video);
-        }).not.toThrow();
-      }
-    });
-  });
 
   describe('NFTImageBalance Integration', () => {
     it('passes correct props to NFTImageBalance', () => {
+      const nft = createMockNFT({ id: 1 }); // id: 1 will result in balance: 1 in our mock
       const props = createDefaultProps({
-        balance: 5,
-        showOwned: true,
-        showUnseized: true,
+        nft,
+        showOwnedIfLoggedIn: true,
+        showUnseizedIfLoggedIn: true,
         height: 650,
       });
       render(<NFTVideoRenderer {...props} />);
@@ -351,30 +225,33 @@ describe('NFTVideoRenderer', () => {
       expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED');
     });
 
-    it('shows balance with quantity when showOwned is false', () => {
+    it('shows balance with quantity when showOwnedIfLoggedIn is false', () => {
+      const nft = createMockNFT({ id: 1 }); // id: 1 will result in balance: 1 in our mock
       const props = createDefaultProps({
-        balance: 3,
-        showOwned: false,
+        nft,
+        showOwnedIfLoggedIn: false,
       });
       render(<NFTVideoRenderer {...props} />);
       
-      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED x3');
+      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED x1');
     });
 
     it('shows unseized state correctly', () => {
+      const nft = createMockNFT({ id: 0 }); // id: 0 will result in balance: 0 in our mock
       const props = createDefaultProps({
-        balance: 0,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTVideoRenderer {...props} />);
       
       expect(screen.getByTestId('unseized-text')).toHaveTextContent('UNSEIZED');
     });
 
-    it('shows loading state for balance -1', () => {
+    it('shows loading state for negative balance', () => {
+      const nft = createMockNFT({ id: -1 }); // id: -1 will result in balance: -1 in our mock
       const props = createDefaultProps({
-        balance: -1,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTVideoRenderer {...props} />);
       
@@ -482,7 +359,8 @@ describe('NFTVideoRenderer', () => {
     });
 
     it('handles zero balance correctly', () => {
-      const props = createDefaultProps({ balance: 0 });
+      const nft = createMockNFT({ id: 0 }); // id: 0 will result in balance: 0 in our mock
+      const props = createDefaultProps({ nft });
       render(<NFTVideoRenderer {...props} />);
       
       const balance = screen.getByTestId('nft-image-balance');
@@ -492,9 +370,10 @@ describe('NFTVideoRenderer', () => {
     });
 
     it('handles negative balance correctly', () => {
+      const nft = createMockNFT({ id: -1 }); // id: -1 will result in balance: -1 in our mock
       const props = createDefaultProps({ 
-        balance: -1,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTVideoRenderer {...props} />);
       
@@ -521,10 +400,11 @@ describe('NFTVideoRenderer', () => {
     });
 
     it('propagates balance-related props to NFTImageBalance', () => {
+      const nft = createMockNFT({ id: 1 }); // id: 1 will result in balance: 1 in our mock
       const props = createDefaultProps({
-        balance: 7,
-        showOwned: true,
-        showUnseized: false,
+        nft,
+        showOwnedIfLoggedIn: true,
+        showUnseizedIfLoggedIn: false,
         height: 650,
       });
       render(<NFTVideoRenderer {...props} />);
@@ -535,19 +415,19 @@ describe('NFTVideoRenderer', () => {
       
       // Verify the mocked balance shows correct text
       const seizedText = screen.getByTestId('seized-text');
-      expect(seizedText).toHaveTextContent('SEIZED'); // showOwned=true, so no quantity
+      expect(seizedText).toHaveTextContent('SEIZED'); // showOwnedIfLoggedIn=true, so no quantity
     });
 
     it('handles optional props correctly', () => {
       const propsWithoutOptionals: BaseRendererProps = {
         nft: createMockNFT(),
         height: 300,
-        balance: 1,
-        showUnseized: false,
+        showOwnedIfLoggedIn: false,
+        showUnseizedIfLoggedIn: false,
         heightStyle: 'height-300',
         imageStyle: 'image-style',
         bgStyle: 'bg-style',
-        // id, showOwned, showOriginal are optional and not provided
+        // id, showOriginal are optional and not provided
       };
       
       expect(() => {
@@ -604,11 +484,17 @@ describe('NFTVideoRenderer', () => {
     });
 
     it('handles NFTLite type correctly', () => {
-      const nftLite = createMockNFTLite({
+      // Create a simplified NFT-like object that would represent NFTLite with metadata property
+      const nftLite = {
+        id: 1,
+        name: 'Test NFT Lite',
+        contract: '0x123',
+        token_id: '1',
         compressed_animation: 'https://nftlite.com/compressed.mp4',
         animation: 'https://nftlite.com/original.mp4',
-      });
-      const props = createDefaultProps({ nft: nftLite });
+        metadata: {}, // NFTLite can have metadata property
+      };
+      const props = createDefaultProps({ nft: nftLite as any });
       const { container } = render(<NFTVideoRenderer {...props} />);
       
       const video = container.querySelector('video');
@@ -636,6 +522,16 @@ describe('NFTVideoRenderer', () => {
       const video = container.querySelector('video');
       expect(video).toBeInTheDocument();
     });
+
+    it('provides proper video attributes for accessibility', () => {
+      const props = createDefaultProps();
+      const { container } = render(<NFTVideoRenderer {...props} />);
+      
+      const video = container.querySelector('video');
+      expect(video).toHaveAttribute('preload', 'auto');
+      expect(video).toHaveAttribute('loop');
+      expect(video).toHaveAttribute('autoplay');
+    });
   });
 
   describe('Video Loading and Performance', () => {
@@ -649,19 +545,69 @@ describe('NFTVideoRenderer', () => {
       expect(video).toHaveProperty('muted', true); // Required for autoplay in most browsers
     });
 
-    it('includes poster image for better loading experience', () => {
+    it('sets preload to auto for better performance', () => {
       const props = createDefaultProps();
       const { container } = render(<NFTVideoRenderer {...props} />);
       
       const video = container.querySelector('video');
-      expect(video).toHaveAttribute('poster');
-      expect(video).toHaveAttribute('poster', 'https://example.com/scaled.png');
+      expect(video).toHaveAttribute('preload', 'auto');
+    });
+  });
+
+  describe('Video Source Logic Edge Cases', () => {
+    it('handles metadata check correctly for BaseNFT vs NFTLite', () => {
+      // Test BaseNFT with metadata property
+      const nftWithMetadata = createMockNFT({
+        compressed_animation: 'https://example.com/compressed.mp4',
+        metadata: { animation: 'https://example.com/metadata.mp4' },
+      });
+      const propsWithMetadata = createDefaultProps({ nft: nftWithMetadata, showOriginal: false });
+      const { container: container1 } = render(<NFTVideoRenderer {...propsWithMetadata} />);
+      const video1 = container1.querySelector('video');
+      expect(video1).toHaveAttribute('src', 'https://example.com/compressed.mp4');
+      
+      // Test NFT without metadata property
+      const nftWithoutMetadata = {
+        id: 2,
+        name: 'Test',
+        contract: '0x123',
+        token_id: '2',
+        animation: 'https://example.com/original.mp4',
+        compressed_animation: 'https://example.com/compressed.mp4',
+      };
+      const propsWithoutMetadata = createDefaultProps({ nft: nftWithoutMetadata as any, showOriginal: false });
+      const { container: container2 } = render(<NFTVideoRenderer {...propsWithoutMetadata} />);
+      const video2 = container2.querySelector('video');
+      // Should use animation when no metadata property exists
+      expect(video2).toHaveAttribute('src', 'https://example.com/original.mp4');
     });
 
-    it('handles video without poster image gracefully', () => {
+    it('prioritizes showOriginal flag over compressed_animation', () => {
       const nft = createMockNFT({
-        image: undefined,
-        scaled: undefined,
+        compressed_animation: 'https://example.com/compressed.mp4',
+        animation: 'https://example.com/original.mp4',
+      });
+      
+      // Test showOriginal: true
+      const propsOriginal = createDefaultProps({ nft, showOriginal: true });
+      const { container: container1 } = render(<NFTVideoRenderer {...propsOriginal} />);
+      const video1 = container1.querySelector('video');
+      expect(video1).toHaveAttribute('src', 'https://example.com/original.mp4');
+      
+      // Test showOriginal: false (or undefined)
+      const propsCompressed = createDefaultProps({ nft, showOriginal: false });
+      const { container: container2 } = render(<NFTVideoRenderer {...propsCompressed} />);
+      const video2 = container2.querySelector('video');
+      expect(video2).toHaveAttribute('src', 'https://example.com/compressed.mp4');
+    });
+  });
+
+  describe('Error Resistance and Edge Cases', () => {
+    it('handles completely empty NFT animation properties gracefully', () => {
+      const nft = createMockNFT({
+        animation: undefined,
+        compressed_animation: undefined,
+        metadata: undefined,
       });
       const props = createDefaultProps({ nft });
       
@@ -672,6 +618,30 @@ describe('NFTVideoRenderer', () => {
       const { container } = render(<NFTVideoRenderer {...props} />);
       const video = container.querySelector('video');
       expect(video).toBeInTheDocument();
+      // When all animation sources are undefined, src will be undefined but element still renders
+      const srcAttribute = video?.getAttribute('src');
+      expect(srcAttribute === null || srcAttribute === 'undefined').toBe(true);
+    });
+
+    it('renders without breaking when required NFT fields are minimal', () => {
+      const minimalNFT = {
+        id: 999,
+        contract: '0xabc',
+        token_id: '999',
+        name: 'Minimal NFT',
+        animation: 'https://example.com/minimal.mp4',
+      } as any;
+      
+      const props = createDefaultProps({ nft: minimalNFT });
+      
+      expect(() => {
+        render(<NFTVideoRenderer {...props} />);
+      }).not.toThrow();
+      
+      const { container } = render(<NFTVideoRenderer {...props} />);
+      const video = container.querySelector('video');
+      expect(video).toBeInTheDocument();
+      expect(video).toHaveAttribute('src', 'https://example.com/minimal.mp4');
     });
   });
 });

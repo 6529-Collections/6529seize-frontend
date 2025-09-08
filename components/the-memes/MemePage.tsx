@@ -162,8 +162,18 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         <Container className="p-0">
           {nft && (
             <Row>
-              <Col>
-                <MemePageMintCountdown nft_id={nft.id} />
+              <Col
+                xs={{ span: 12 }}
+                sm={{ span: 12 }}
+                md={{ span: 12 }}
+                lg={{ span: 6 }}
+              >
+                <MemePageMintCountdown
+                  nft_id={nft.id}
+                  hide_mint_btn={false}
+                  is_full_width={false}
+                  show_only_if_active={true}
+                />
               </Col>
             </Row>
           )}
@@ -180,13 +190,14 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}
-                    className={`${styles.nftImageWrapper} pt-2 pb-5`}>
+                    className={`${styles.nftImageWrapper} pt-2 pb-5`}
+                  >
                     <NFTImage
                       nft={nft}
                       animation={true}
                       height={650}
-                      balance={nftBalance}
-                      showUnseized={connectedWallets.length > 0}
+                      showOwnedIfLoggedIn={false}
+                      showUnseizedIfLoggedIn={true}
                     />
                   </Col>
                   <MemePageLiveRightMenu
@@ -269,7 +280,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                   <Col>
                     <h2 className="float-left">
                       <Link
-                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
+                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                      >
                         SZN{nftMeta.season}
                       </Link>
                     </h2>

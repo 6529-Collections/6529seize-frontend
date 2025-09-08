@@ -6,7 +6,21 @@ import { BaseNFT } from '../../../../entities/INFT';
 
 // Mock next/image
 jest.mock('next/image', () => {
-  return function MockImage({ alt, onError, src, priority, loading, fetchPriority, style, className, id, width, height, ...props }: any) {
+  return function MockImage({ 
+    alt, 
+    onError, 
+    src, 
+    priority, 
+    loading, 
+    fetchPriority, 
+    style, 
+    className, 
+    id, 
+    width, 
+    height,
+    unoptimized,
+    ...props 
+  }: any) {
     const mockCurrentTarget = {
       src,
       get src() { return this._src || src; },
@@ -24,6 +38,7 @@ jest.mock('next/image', () => {
         data-loading={loading}
         data-priority={priority ? 'true' : 'false'}
         data-fetch-priority={fetchPriority}
+        data-unoptimized={unoptimized ? 'true' : 'false'}
         onError={(e) => {
           Object.defineProperty(e, 'currentTarget', {
             value: mockCurrentTarget,
@@ -42,18 +57,28 @@ jest.mock('next/image', () => {
 
 // Mock NFTImageBalance
 jest.mock('../../../../components/nft-image/NFTImageBalance', () => {
-  return function MockNFTImageBalance({ balance, showOwned, showUnseized }: any) {
+  return function MockNFTImageBalance({ 
+    contract, 
+    tokenId, 
+    showOwnedIfLoggedIn, 
+    showUnseizedIfLoggedIn, 
+    height 
+  }: any) {
+    // Mock the balance logic - simulate different states
+    const mockBalance = tokenId === 1 ? 5 : tokenId === 2 ? 0 : tokenId === 3 ? -1 : 1;
+    const isLoggedIn = true; // Mock logged in state
+    
     return (
       <div data-testid="nft-image-balance">
-        {balance > 0 && (
+        {mockBalance > 0 && isLoggedIn && (
           <span data-testid="seized-text">
-            SEIZED{!showOwned ? ` x${balance}` : ""}
+            SEIZED{!showOwnedIfLoggedIn ? ` x${mockBalance}` : ""}
           </span>
         )}
-        {showUnseized && balance === 0 && (
+        {showUnseizedIfLoggedIn && isLoggedIn && mockBalance === 0 && (
           <span data-testid="unseized-text">UNSEIZED</span>
         )}
-        {showUnseized && balance === -1 && (
+        {showUnseizedIfLoggedIn && isLoggedIn && mockBalance === -1 && (
           <span data-testid="loading-text">...</span>
         )}
       </div>
@@ -81,8 +106,8 @@ const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT => ({
 const createDefaultProps = (overrides: Partial<BaseRendererProps> = {}): BaseRendererProps => ({
   nft: createMockNFT(),
   height: 300,
-  balance: 1,
-  showUnseized: false,
+  showOwnedIfLoggedIn: false,
+  showUnseizedIfLoggedIn: false,
   heightStyle: 'height-300',
   imageStyle: 'image-style',
   bgStyle: 'bg-style',
@@ -256,9 +281,8 @@ describe('NFTImageRenderer', () => {
   describe('NFTImageBalance Integration', () => {
     it('passes correct props to NFTImageBalance', () => {
       const props = createDefaultProps({
-        balance: 5,
-        showOwned: true,
-        showUnseized: true,
+        showOwnedIfLoggedIn: true,
+        showUnseizedIfLoggedIn: true,
         height: 650,
       });
       render(<NFTImageRenderer {...props} />);
@@ -268,20 +292,21 @@ describe('NFTImageRenderer', () => {
       expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED');
     });
 
-    it('shows balance with quantity when showOwned is false', () => {
+    it('shows balance with quantity when showOwnedIfLoggedIn is false', () => {
       const props = createDefaultProps({
-        balance: 3,
-        showOwned: false,
+        showOwnedIfLoggedIn: false,
+        showUnseizedIfLoggedIn: false,
       });
       render(<NFTImageRenderer {...props} />);
       
-      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED x3');
+      expect(screen.getByTestId('seized-text')).toHaveTextContent('SEIZED x5');
     });
 
     it('shows unseized state correctly', () => {
+      const nft = createMockNFT({ id: 2 }); // This will trigger balance 0 in mock
       const props = createDefaultProps({
-        balance: 0,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTImageRenderer {...props} />);
       
@@ -289,9 +314,10 @@ describe('NFTImageRenderer', () => {
     });
 
     it('shows loading state for balance -1', () => {
+      const nft = createMockNFT({ id: 3 }); // This will trigger balance -1 in mock
       const props = createDefaultProps({
-        balance: -1,
-        showUnseized: true,
+        nft,
+        showUnseizedIfLoggedIn: true,
       });
       render(<NFTImageRenderer {...props} />);
       

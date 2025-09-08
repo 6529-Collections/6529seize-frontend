@@ -71,7 +71,7 @@ export default function WaveDropsAll({
     isAtBottom,
     shouldPinToBottom,
     scrollIntent,
-    scrollToVisualBottom
+    scrollToVisualBottom,
   } = useScrollBehavior();
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
@@ -163,7 +163,11 @@ export default function WaveDropsAll({
     if (!isScrolling) return;
 
     const timeoutId = setTimeout(() => {
-      console.warn('Scroll operation timed out after', SCROLL_OPERATION_TIMEOUT, 'ms, clearing isScrolling state');
+      console.warn(
+        "Scroll operation timed out after",
+        SCROLL_OPERATION_TIMEOUT,
+        "ms, clearing isScrolling state"
+      );
       scrollOperationLockRef.current = false;
       setIsScrolling(false);
       // Also abort any ongoing operation
@@ -210,21 +214,15 @@ export default function WaveDropsAll({
       if (!init) setInit(true);
 
       const lastDrop = currentMessages.drops[0];
-      if (lastDrop.id.startsWith("temp-")) {
-        if (shouldPinToBottom) {
-          setTimeout(() => {
-            scrollToVisualBottom();
-          }, 100);
-        } else if (scrollIntent === 'reading') {
-          // User is reading older messages, just set the serial for later navigation
-          setSerialNo(lastDrop.serial_no);
-        }
+      if (lastDrop.id.startsWith("temp-") && shouldPinToBottom) {
+        setTimeout(() => {
+          scrollToVisualBottom();
+        }, 100);
       }
     }
   }, [
     waveMessages,
     shouldPinToBottom,
-    scrollIntent,
     scrollToVisualBottom,
     init,
   ]); // Keep dependencies, logic uses ref
@@ -299,7 +297,7 @@ export default function WaveDropsAll({
     } catch (error) {
       // Log error but don't throw - we want to clean up gracefully
       if (!signal.aborted) {
-        console.warn('Scroll operation failed:', error);
+        console.warn("Scroll operation failed:", error);
       }
     } finally {
       // Always reset both locks, regardless of success/failure/cancellation
@@ -313,7 +311,7 @@ export default function WaveDropsAll({
     isScrolling,
     waitAndRevealDrop,
     smoothScrollWithRetries,
-    dropId
+    dropId,
   ]);
 
   useEffect(() => {
@@ -399,12 +397,16 @@ export default function WaveDropsAll({
         <WaveDropsReverseContainer
           ref={scrollContainerRef}
           isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
-          hasNextPage={!!waveMessages?.hasNextPage && (waveMessages?.drops?.length ?? 0) >= 25}
+          hasNextPage={
+            !!waveMessages?.hasNextPage &&
+            (waveMessages?.drops?.length ?? 0) >= 25
+          }
           onTopIntersection={handleTopIntersection}
           onUserScroll={() => {
             // The useScrollBehavior hook now handles all scroll intent logic
             // This callback can be used for additional scroll-based features if needed
-          }}>
+          }}
+        >
           <DropsList
             scrollContainerRef={scrollContainerRef}
             onReplyClick={setSerialNo}
@@ -423,7 +425,7 @@ export default function WaveDropsAll({
             key="drops-list" // Add a stable key to help React with reconciliation
           />
           {/* Bottom anchor for robust scroll detection */}
-          <div ref={bottomAnchorRef} style={{ height: '1px' }} />
+          <div ref={bottomAnchorRef} style={{ height: "1px" }} />
         </WaveDropsReverseContainer>
         <WaveDropsScrollBottomButton
           isAtBottom={isAtBottom}
@@ -431,10 +433,12 @@ export default function WaveDropsAll({
         />
 
         <div
-          className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${typingMessage
-            ? "tw-opacity-100 tw-visible"
-            : "tw-opacity-0 tw-invisible tw-hidden"
-            }`}>
+          className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${
+            typingMessage
+              ? "tw-opacity-100 tw-visible"
+              : "tw-opacity-0 tw-invisible tw-hidden"
+          }`}
+        >
           <div className="tw-flex tw-items-center tw-gap-x-0.5">
             <FontAwesomeIcon
               icon={faCircle}

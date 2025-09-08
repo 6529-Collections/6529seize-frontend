@@ -9,6 +9,27 @@ import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/enums";
 import { render, screen } from "@testing-library/react";
 
+// Mock helper functions
+jest.mock("@/helpers/Helpers", () => ({
+  printMintDate: jest.fn((date: Date | string) => {
+    if (!date) return "-";
+    return "Jan 1, 2023 (1 year ago)";
+  }),
+  numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
+  getValuesForVolumeType: jest.fn((volumeType: VolumeType, nft: any) => {
+    switch (volumeType) {
+      case VolumeType.HOURS_24:
+        return nft.total_volume_last_24_hours || 0;
+      case VolumeType.DAYS_7:
+        return nft.total_volume_last_7_days || 0;
+      case VolumeType.DAYS_30:
+        return nft.total_volume_last_1_month || 0;
+      default:
+        return nft.total_volume || 0;
+    }
+  }),
+}));
+
 jest.mock("@/components/the-memes/TheMemes", () => ({
   SortButton: ({ sort, select }: any) => (
     <button data-testid={`sort-${sort}`} onClick={select} />

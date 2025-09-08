@@ -3,14 +3,19 @@ import userEvent from "@testing-library/user-event";
 import {
   MemePageLiveSubMenu,
   MemePageLiveRightMenu,
-} from "../components/the-memes/MemePageLive";
-import { NFT, MemesExtendedData, Rememe } from "../entities/INFT";
-import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
+} from "@/components/the-memes/MemePageLive";
+import { NFT, MemesExtendedData, Rememe } from "@/entities/INFT";
+import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img alt={props.alt ?? ""} {...props} />
+  default: ({ unoptimized, priority, ...props }: any) => (
+    <img 
+      alt={props.alt ?? ""} 
+      {...props}
+      data-unoptimized={unoptimized}
+      data-priority={priority}
+    />
   ),
 }));
 jest.mock("next/link", () => ({
@@ -21,22 +26,22 @@ jest.mock("next/link", () => ({
     </a>
   ),
 }));
-jest.mock("../components/nft-image/RememeImage", () => ({
+jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
 }));
-jest.mock("../components/nftAttributes/NftStats", () => ({
+jest.mock("@/components/nftAttributes/NftStats", () => ({
   __esModule: true,
   NftPageStats: () => <tr data-testid="nft-stats" />,
 }));
 
 const mockFetchUrl = jest.fn();
-jest.mock("../services/6529api", () => ({
+jest.mock("@/services/6529api", () => ({
   __esModule: true,
   fetchUrl: (url: string) => mockFetchUrl(url),
 }));
 
-jest.mock("../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   __esModule: true,
   commonApiFetch: jest.fn((opts: { endpoint: string }) => {
     if (opts.endpoint === "policies/country-check") {

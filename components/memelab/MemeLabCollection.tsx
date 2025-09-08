@@ -132,19 +132,21 @@ export default function LabCollection({
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <Link
           href={`/meme-lab/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid>
             <Row className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
                 nft={nft}
                 animation={false}
                 height={300}
-                balance={getBalance(nft.id)}
+                showOwnedIfLoggedIn={true}
+                showUnseizedIfLoggedIn={true}
                 showThumbnail={true}
-                showUnseized={!!connectedProfile}
               />
             </Row>
             <Row>
@@ -196,7 +198,8 @@ export default function LabCollection({
                         <a
                           href={addProtocol(w)}
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           {w}
                         </a>
                         &nbsp;&nbsp;

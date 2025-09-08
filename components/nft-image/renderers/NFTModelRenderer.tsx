@@ -1,6 +1,7 @@
 "use client";
 
 import { Col } from "react-bootstrap";
+
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import NFTModel from "../NFTModel";
@@ -16,9 +17,10 @@ export default function NFTModelRenderer(props: Readonly<BaseRendererProps>) {
     <Col
       className={`${styles.nftAnimation} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
       <NFTImageBalance 
-        balance={props.balance}
-        showOwned={props.showOwned}
-        showUnseized={props.showUnseized}
+        showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
+        showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
+        contract={props.nft.contract}
+        tokenId={props.nft.id}
         height={props.height}
       />
       <NFTModel nft={props.nft} id={props.id} />

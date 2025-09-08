@@ -14,6 +14,17 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 0.5rem;
+
+  // Fixed heights for different viewports
+  height: 150px; // Mobile
+  
+  @media (min-width: 768px) {
+    height: 150px; // Tablet/Desktop
+  }
+  
+  @media (min-width: 1200px) {
+    height: 180px; // Large Desktop
+  }
 }
 
 .mintBtn {
@@ -25,5 +36,51 @@
   &:hover {
     background-color: white;
     color: black;
+  }
+}
+
+// Skeleton loading styles
+.loadingState {
+  opacity: 0.7;
+}
+
+.skeletonText {
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  
+  &.skeletonTitle {
+    height: 20px;
+    width: 60%;
+    margin-bottom: 1rem;
+  }
+  
+  &.skeletonCountdown {
+    height: 24px;
+    width: 80%;
+    
+    @media (min-width: 1200px) {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+.skeletonButton {
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  height: 40px;
+  width: 100px;
+  border: 2px solid #666;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }
