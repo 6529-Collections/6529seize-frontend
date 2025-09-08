@@ -63,6 +63,8 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
               nft_id={featuredNft.id}
               setClaim={setManifoldClaim}
               is_full_width={true}
+              hide_mint_btn={false}
+              show_only_if_active={false}
             />
           </Col>
         </Row>

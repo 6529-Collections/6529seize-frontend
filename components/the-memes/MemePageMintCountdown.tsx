@@ -23,9 +23,10 @@ import { Tooltip } from "react-tooltip";
 export default function MemePageMintCountdown(
   props: Readonly<{
     nft_id: number;
-    hide_mint_btn?: boolean;
+    hide_mint_btn: boolean;
     setClaim?: (claim: ManifoldClaim) => void;
-    is_full_width?: boolean;
+    is_full_width: boolean;
+    show_only_if_active: boolean;
   }>
 ) {
   const manifoldClaim = useManifoldClaim(
@@ -43,6 +44,11 @@ export default function MemePageMintCountdown(
       props.setClaim(manifoldClaim);
     }
   }, [manifoldClaim, props.setClaim]);
+
+  // Return null if show_only_if_active is true and status isn't active
+  if (props.show_only_if_active && manifoldClaim?.status !== ManifoldClaimStatus.ACTIVE) {
+    return null;
+  }
 
   // Show skeleton loading state
   if (!manifoldClaim) {
