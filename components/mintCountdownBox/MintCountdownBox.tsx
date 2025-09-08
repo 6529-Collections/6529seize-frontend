@@ -39,7 +39,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
               md={12}>
               <Link href={btn.link} target={btn.target} rel="noreferrer">
                 <button
-                  className={`pt-2 pb-2 btn-block seize-btn no-wrap ${styles.mintBtn}`}>
+                  className={`pt-2 pb-2 btn-block no-wrap ${styles.mintBtn}`}>
                   {btn.label}
                 </button>
               </Link>
