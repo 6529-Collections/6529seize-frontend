@@ -22,9 +22,6 @@ jest.mock("@/components/mintCountdownBox/MintCountdownBox", () => {
       <div data-testid="mint-countdown-box">
         <div data-testid="countdown-title">{props.title}</div>
         <div data-testid="countdown-date">{props.date}</div>
-        {props.additional_elements && (
-          <div data-testid="additional-elements">{props.additional_elements}</div>
-        )}
         {!props.hide_mint_btn && props.buttons?.map((btn: any, index: number) => (
           <button key={index} data-testid="mint-button">
             {btn.label}
@@ -81,7 +78,14 @@ describe("MemePageMintCountdown", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue(null);
 
-      const { container } = render(<MemePageMintCountdown nft_id={1} />);
+      const { container } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(container.querySelector("[class*='loadingState']")).toBeInTheDocument();
       expect(container.querySelector("[class*='skeletonText']")).toBeInTheDocument();
@@ -92,7 +96,14 @@ describe("MemePageMintCountdown", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue(null);
 
-      const { container } = render(<MemePageMintCountdown nft_id={1} />);
+      const { container } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(container.querySelector("[class*='skeletonButton']")).toBeInTheDocument();
     });
@@ -101,7 +112,14 @@ describe("MemePageMintCountdown", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue(null);
 
-      const { container } = render(<MemePageMintCountdown nft_id={1} hide_mint_btn={true} />);
+      const { container } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={true}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(container.querySelector("[class*='skeletonButton']")).not.toBeInTheDocument();
     });
@@ -115,7 +133,14 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ENDED,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByText("Mint Phase Complete")).toBeInTheDocument();
       expect(screen.getByText("This mint phase has ended.")).toBeInTheDocument();
@@ -133,7 +158,14 @@ describe("MemePageMintCountdown", () => {
         isFinalized: true,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByText("✅ Mint Complete - Sold Out!")).toBeInTheDocument();
       expect(screen.getByText("All NFTs have been successfully minted.")).toBeInTheDocument();
@@ -152,7 +184,14 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.UPCOMING,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByTestId("countdown-title")).toHaveTextContent("Public Phase Starts In");
       expect(screen.getByTestId("countdown-date")).toHaveTextContent("90");
@@ -167,7 +206,14 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByTestId("countdown-title")).toHaveTextContent("Public Phase Ends In");
       expect(screen.getByTestId("countdown-date")).toHaveTextContent("200");
@@ -185,7 +231,14 @@ describe("MemePageMintCountdown", () => {
         startDate: 90,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByTestId("countdown-title")).toHaveTextContent("Custom Phase Name Starts In");
     });
@@ -200,7 +253,14 @@ describe("MemePageMintCountdown", () => {
         startDate: 90,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByTestId("countdown-title")).toHaveTextContent(`${ManifoldPhase.ALLOWLIST} Starts In`);
     });
@@ -220,7 +280,14 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.queryByTestId("mint-button")).not.toBeInTheDocument();
     });
@@ -238,7 +305,14 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByTestId("mint-button")).toBeInTheDocument();
       expect(screen.getByTestId("mint-button")).toHaveTextContent("Mint");
@@ -251,7 +325,14 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.getByTestId("mint-button")).toBeInTheDocument();
       expect(screen.getByTestId("mint-button")).toHaveTextContent("Mint");
@@ -264,14 +345,21 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      render(<MemePageMintCountdown nft_id={1} hide_mint_btn={true} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={true}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
       expect(screen.queryByTestId("mint-button")).not.toBeInTheDocument();
     });
   });
 
-  describe("Additional Elements", () => {
-    it("shows allowlist disclaimer when in allowlist phase", () => {
+  describe("Allowlist Info Tooltip", () => {
+    it("shows info icon with tooltip when in allowlist phase", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue({
         ...baseClaim,
@@ -279,14 +367,26 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      const { container } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
-      expect(screen.getByTestId("additional-elements")).toHaveTextContent(
-        "* The timer above displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
+      // Check for FontAwesome info icon
+      const infoIcon = container.querySelector('[data-icon="circle-info"]');
+      expect(infoIcon).toBeInTheDocument();
+      expect(infoIcon).toHaveAttribute('data-tooltip-id', 'allowlist-info');
+      expect(infoIcon).toHaveAttribute(
+        'data-tooltip-content', 
+        'The timer above displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist.'
       );
     });
 
-    it("does not show additional elements when not in allowlist phase", () => {
+    it("does not show info icon when not in allowlist phase", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue({
         ...baseClaim,
@@ -294,9 +394,17 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      render(<MemePageMintCountdown nft_id={1} />);
+      const { container } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
 
-      expect(screen.queryByTestId("additional-elements")).not.toBeInTheDocument();
+      const infoIcon = container.querySelector('[data-icon="circle-info"]');
+      expect(infoIcon).not.toBeInTheDocument();
     });
   });
 
@@ -310,7 +418,15 @@ describe("MemePageMintCountdown", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue(mockClaim);
 
-      render(<MemePageMintCountdown nft_id={1} setClaim={setClaim} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+          setClaim={setClaim}
+        />
+      );
 
       expect(setClaim).toHaveBeenCalledWith(mockClaim);
     });
@@ -324,7 +440,14 @@ describe("MemePageMintCountdown", () => {
       mockUseManifoldClaim.mockReturnValue(mockClaim);
 
       expect(() => {
-        render(<MemePageMintCountdown nft_id={1} />);
+        render(
+          <MemePageMintCountdown 
+            nft_id={1} 
+            hide_mint_btn={false}
+            is_full_width={false}
+            show_only_if_active={false}
+          />
+        );
       }).not.toThrow();
     });
 
@@ -333,9 +456,95 @@ describe("MemePageMintCountdown", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue(null);
 
-      render(<MemePageMintCountdown nft_id={1} setClaim={setClaim} />);
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+          setClaim={setClaim}
+        />
+      );
 
       expect(setClaim).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Show Only If Active Logic", () => {
+    it("returns null when show_only_if_active is true and status is not ACTIVE", () => {
+      mockUseCapacitor.mockReturnValue({ isIos: false } as any);
+      mockUseManifoldClaim.mockReturnValue({
+        ...baseClaim,
+        status: ManifoldClaimStatus.UPCOMING,
+      });
+
+      const { container } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={true}
+        />
+      );
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it("returns null when show_only_if_active is true and status is ENDED", () => {
+      mockUseCapacitor.mockReturnValue({ isIos: false } as any);
+      mockUseManifoldClaim.mockReturnValue({
+        ...baseClaim,
+        status: ManifoldClaimStatus.ENDED,
+      });
+
+      const { container } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={true}
+        />
+      );
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it("renders component when show_only_if_active is true and status is ACTIVE", () => {
+      mockUseCapacitor.mockReturnValue({ isIos: false } as any);
+      mockUseManifoldClaim.mockReturnValue({
+        ...baseClaim,
+        status: ManifoldClaimStatus.ACTIVE,
+      });
+
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={true}
+        />
+      );
+
+      expect(screen.getByTestId("mint-countdown-box")).toBeInTheDocument();
+    });
+
+    it("renders component regardless of status when show_only_if_active is false", () => {
+      mockUseCapacitor.mockReturnValue({ isIos: false } as any);
+      mockUseManifoldClaim.mockReturnValue({
+        ...baseClaim,
+        status: ManifoldClaimStatus.UPCOMING,
+      });
+
+      render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
+
+      expect(screen.getByTestId("mint-countdown-box")).toBeInTheDocument();
     });
   });
 
@@ -347,10 +556,24 @@ describe("MemePageMintCountdown", () => {
         status: ManifoldClaimStatus.ACTIVE,
       });
 
-      const { rerender } = render(<MemePageMintCountdown nft_id={1} />);
+      const { rerender } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
       expect(screen.getByTestId("mint-countdown-box")).toBeInTheDocument();
 
-      rerender(<MemePageMintCountdown nft_id={1} is_full_width={true} />);
+      rerender(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={true}
+          show_only_if_active={false}
+        />
+      );
       expect(screen.getByTestId("mint-countdown-box")).toBeInTheDocument();
     });
 
@@ -358,11 +581,25 @@ describe("MemePageMintCountdown", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
       mockUseManifoldClaim.mockReturnValue(null);
 
-      const { container, rerender } = render(<MemePageMintCountdown nft_id={1} />);
+      const { container, rerender } = render(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={false}
+          show_only_if_active={false}
+        />
+      );
       let colElement = container.querySelector(".col");
       expect(colElement).toBeInTheDocument();
 
-      rerender(<MemePageMintCountdown nft_id={1} is_full_width={true} />);
+      rerender(
+        <MemePageMintCountdown 
+          nft_id={1} 
+          hide_mint_btn={false}
+          is_full_width={true}
+          show_only_if_active={false}
+        />
+      );
       colElement = container.querySelector(".col");
       expect(colElement).toBeInTheDocument();
     });

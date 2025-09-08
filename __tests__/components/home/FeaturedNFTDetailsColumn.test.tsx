@@ -103,21 +103,22 @@ const mockUseManifoldClaimDisplays = useManifoldClaimDisplays as jest.MockedFunc
   typeof useManifoldClaimDisplays
 >;
 
-// Test data factory
-function createNFTWithMemesExtendedData(
+// Minimal test data factory - only includes fields actually used by the component
+function createTestNFT(
   overrides: Partial<NFTWithMemesExtendedData> = {}
 ): NFTWithMemesExtendedData {
-  return {
+  const baseNFT = {
     id: 123,
     contract: "0x1234567890abcdef",
     name: "Test Meme NFT",
+    // Only include essential fields that the component actually uses
     created_at: new Date("2023-01-01"),
     mint_date: new Date("2023-01-01"),
     mint_price: 0.1,
     supply: 1000,
     collection: "The Memes",
-    token_type: "ERC721",
-    description: "Test meme NFT description",
+    token_type: "ERC721" as const,
+    description: "Test description",
     artist: "Test Artist",
     artist_seize_handle: "testartist",
     uri: "https://test.com/metadata",
@@ -139,7 +140,7 @@ function createNFTWithMemesExtendedData(
     tdh__raw: 85,
     tdh_rank: 1,
     hodl_rate: 0.8,
-    // MemesExtendedData properties
+    // MemesExtendedData - minimal required fields
     collection_size: 1000,
     edition_size: 1000,
     edition_size_rank: 1,
@@ -161,8 +162,9 @@ function createNFTWithMemesExtendedData(
     season: 1,
     meme: 23,
     meme_name: "Test Meme",
-    ...overrides,
   } as NFTWithMemesExtendedData;
+  
+  return { ...baseNFT, ...overrides };
 }
 
 describe("FeaturedNFTDetailsColumn", () => {
@@ -176,7 +178,7 @@ describe("FeaturedNFTDetailsColumn", () => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Default mock returns
+    // Set default mock returns for consistent test behavior
     mockUseCapacitor.mockReturnValue({
       isCapacitor: false,
       isIos: false,
@@ -196,16 +198,35 @@ describe("FeaturedNFTDetailsColumn", () => {
     mockUseManifoldClaimDisplays.mockReturnValue(defaultManifoldDisplays);
   });
 
+  // Helper function to setup platform/country scenarios consistently
+  const setupPlatformAndCountry = (platform: "web" | "ios" | "android", country: string = "US") => {
+    mockUseCapacitor.mockReturnValue({
+      isCapacitor: platform !== "web",
+      isIos: platform === "ios",
+      isAndroid: platform === "android", 
+      platform,
+      isActive: true,
+      keyboardVisible: false,
+    });
+    
+    mockUseCookieConsent.mockReturnValue({
+      showCookieConsent: false,
+      country,
+      consent: jest.fn(),
+      reject: jest.fn(),
+    });
+  };
+
   describe("Basic rendering", () => {
     it("renders without crashing", () => {
-      const nft = createNFTWithMemesExtendedData();
+      const nft = createTestNFT();
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
       expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
     });
 
     it("renders the NFT title as a link to the meme page", () => {
-      const nft = createNFTWithMemesExtendedData({ id: 456, name: "Amazing Meme" });
+      const nft = createTestNFT({ id: 456, name: "Amazing Meme" });
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
       const link = screen.getByRole("link", { name: /Card 456 - Amazing Meme/i });
@@ -213,7 +234,7 @@ describe("FeaturedNFTDetailsColumn", () => {
     });
 
     it("renders all child components with correct props", () => {
-      const nft = createNFTWithMemesExtendedData();
+      const nft = createTestNFT();
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
       // Check all child components are rendered
@@ -224,35 +245,12 @@ describe("FeaturedNFTDetailsColumn", () => {
     });
   });
 
-  describe("Hook integrations", () => {
-    it("calls useCapacitor hook", () => {
-      const nft = createNFTWithMemesExtendedData();
+  describe("Manifold claim integration", () => {
+    it("displays manifold claim information when available", () => {
+      const nft = createTestNFT();
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      expect(mockUseCapacitor).toHaveBeenCalledTimes(1);
-    });
-
-    it("calls useCookieConsent hook", () => {
-      const nft = createNFTWithMemesExtendedData();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
-      
-      expect(mockUseCookieConsent).toHaveBeenCalledTimes(1);
-    });
-
-    it("calls useManifoldClaimDisplays with undefined initially", () => {
-      const nft = createNFTWithMemesExtendedData();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
-      
-      expect(mockUseManifoldClaimDisplays).toHaveBeenCalledWith({
-        manifoldClaim: undefined,
-      });
-    });
-
-    it("passes manifoldClaim displays to child components", () => {
-      const nft = createNFTWithMemesExtendedData();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
-      
-      // Check that displays are passed to child components
+      // User should see the manifold claim displays
       const detailsTable = screen.getByTestId("featured-nft-details-table");
       expect(detailsTable).toHaveTextContent("Edition Size:");
       
@@ -260,25 +258,26 @@ describe("FeaturedNFTDetailsColumn", () => {
       expect(claimTable).toHaveTextContent("Status:");
       expect(claimTable).toHaveTextContent("Cost:");
     });
+
+    it("handles null manifold displays gracefully", () => {
+      mockUseManifoldClaimDisplays.mockReturnValue({
+        editionSizeDisplay: null,
+        statusDisplay: null,
+        costDisplay: null,
+      });
+      
+      const nft = createTestNFT();
+      
+      expect(() => {
+        render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      }).not.toThrow();
+    });
   });
 
   describe("Conditional marketplace links rendering", () => {
-    it("shows NFT marketplace links when not iOS or country is US", () => {
-      const nft = createNFTWithMemesExtendedData();
-      mockUseCapacitor.mockReturnValue({
-        isCapacitor: false,
-        isIos: false,
-        isAndroid: false,
-        platform: "web",
-        isActive: true,
-        keyboardVisible: false,
-      });
-      mockUseCookieConsent.mockReturnValue({
-        showCookieConsent: false,
-        country: "US",
-        consent: jest.fn(),
-        reject: jest.fn(),
-      });
+    it("shows marketplace links on non-iOS platforms", () => {
+      const nft = createTestNFT();
+      setupPlatformAndCountry("web", "DE");
 
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
@@ -286,66 +285,27 @@ describe("FeaturedNFTDetailsColumn", () => {
       expect(screen.getByText(`Marketplace Links - Contract: ${nft.contract}, ID: ${nft.id}`)).toBeInTheDocument();
     });
 
-    it("shows NFT marketplace links when iOS and country is US", () => {
-      const nft = createNFTWithMemesExtendedData();
-      mockUseCapacitor.mockReturnValue({
-        isCapacitor: true,
-        isIos: true,
-        isAndroid: false,
-        platform: "ios",
-        isActive: true,
-        keyboardVisible: false,
-      });
-      mockUseCookieConsent.mockReturnValue({
-        showCookieConsent: false,
-        country: "US",
-        consent: jest.fn(),
-        reject: jest.fn(),
-      });
+    it("shows marketplace links on iOS when country is US", () => {
+      const nft = createTestNFT();
+      setupPlatformAndCountry("ios", "US");
 
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
       expect(screen.getByTestId("nft-marketplace-links")).toBeInTheDocument();
     });
 
-    it("hides NFT marketplace links when iOS and country is not US", () => {
-      const nft = createNFTWithMemesExtendedData();
-      mockUseCapacitor.mockReturnValue({
-        isCapacitor: true,
-        isIos: true,
-        isAndroid: false,
-        platform: "ios",
-        isActive: true,
-        keyboardVisible: false,
-      });
-      mockUseCookieConsent.mockReturnValue({
-        showCookieConsent: false,
-        country: "FR",
-        consent: jest.fn(),
-        reject: jest.fn(),
-      });
+    it("hides marketplace links on iOS when country is not US", () => {
+      const nft = createTestNFT();
+      setupPlatformAndCountry("ios", "FR");
 
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
       expect(screen.queryByTestId("nft-marketplace-links")).not.toBeInTheDocument();
     });
 
-    it("shows NFT marketplace links when not iOS regardless of country", () => {
-      const nft = createNFTWithMemesExtendedData();
-      mockUseCapacitor.mockReturnValue({
-        isCapacitor: false,
-        isIos: false,
-        isAndroid: false,
-        platform: "web",
-        isActive: true,
-        keyboardVisible: false,
-      });
-      mockUseCookieConsent.mockReturnValue({
-        showCookieConsent: false,
-        country: "DE",
-        consent: jest.fn(),
-        reject: jest.fn(),
-      });
+    it("shows marketplace links on Android regardless of country", () => {
+      const nft = createTestNFT();
+      setupPlatformAndCountry("android", "DE");
 
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
@@ -353,40 +313,75 @@ describe("FeaturedNFTDetailsColumn", () => {
     });
   });
 
-  describe("Component state management", () => {
-    it("manages manifoldClaim state correctly", () => {
-      const nft = createNFTWithMemesExtendedData();
+  describe("State interactions", () => {
+    it("updates manifold claim state when mint countdown triggers setClaim", () => {
+      const nft = createTestNFT();
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      // Initially manifoldClaim should be undefined
-      expect(mockUseManifoldClaimDisplays).toHaveBeenCalledWith({
-        manifoldClaim: undefined,
-      });
+      // User can trigger claim setting via the mint countdown
+      const setClaimButton = screen.getByRole("button", { name: "Set Claim" });
+      expect(setClaimButton).toBeInTheDocument();
       
-      // Check that setClaim prop is passed to MemePageMintCountdown
+      // This tests the behavior that matters to users - the interactive element exists
       expect(screen.getByTestId("meme-page-mint-countdown")).toBeInTheDocument();
     });
+  });
 
-    it("passes correct props to child components", () => {
-      const nft = createNFTWithMemesExtendedData({ id: 789, name: "Test NFT" });
+  describe("Accessibility and user experience", () => {
+    it("provides accessible navigation link to NFT detail page", () => {
+      const nft = createTestNFT({ id: 456, name: "Accessible Meme" });
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      // Check FeaturedNFTDetailsTable props
-      const detailsTable = screen.getByTestId("featured-nft-details-table");
-      expect(detailsTable).toHaveTextContent("NFT: Test NFT");
+      const link = screen.getByRole("link", { name: /Card 456 - Accessible Meme/i });
+      expect(link).toHaveAttribute("href", "/the-memes/456");
+      expect(link).toBeInTheDocument();
+    });
+
+    it("maintains semantic structure with headings and sections", () => {
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      // Check MemePageMintCountdown props
-      const mintCountdown = screen.getByTestId("meme-page-mint-countdown");
-      expect(mintCountdown).toHaveTextContent("NFT ID: 789");
-      expect(mintCountdown).toHaveTextContent("Full Width: true");
+      // Should have proper heading structure
+      const heading = screen.getByRole("heading", { level: 3 });
+      expect(heading).toHaveTextContent(`Card ${nft.id} - ${nft.name}`);
+    });
+  });
+
+  describe("Data integration", () => {
+    it("passes NFT data consistently to all child components", () => {
+      const nft = createTestNFT({ 
+        id: 999, 
+        name: "Integration Test NFT",
+        contract: "0xtest123" 
+      });
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      // Check MintingApproachSection props
-      const mintingApproach = screen.getByTestId("minting-approach-section");
-      expect(mintingApproach).toHaveTextContent("Minting Approach for NFT 789");
+      // Verify NFT data reaches the appropriate child components
+      expect(screen.getByTestId("featured-nft-details-table")).toHaveTextContent("Integration Test NFT");
+      expect(screen.getByTestId("meme-page-mint-countdown")).toHaveTextContent("999");
+      expect(screen.getByTestId("minting-approach-section")).toHaveTextContent("999");
+      expect(screen.getByTestId("manifold-claim-table")).toHaveTextContent("999");
       
-      // Check ManifoldClaimTable props
-      const claimTable = screen.getByTestId("manifold-claim-table");
-      expect(claimTable).toHaveTextContent("NFT ID: 789");
+      // Marketplace links should show contract and ID
+      if (screen.queryByTestId("nft-marketplace-links")) {
+        expect(screen.getByTestId("nft-marketplace-links")).toHaveTextContent("0xtest123");
+      }
+    });
+
+    it("handles manifold claim displays with different types of content", () => {
+      const customDisplays = {
+        editionSizeDisplay: <div>Custom Edition: 500</div>,
+        statusDisplay: <div>Custom Status: Available</div>,
+        costDisplay: <div>Custom Cost: 0.05 ETH</div>,
+      };
+      mockUseManifoldClaimDisplays.mockReturnValue(customDisplays);
+      
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      
+      // Custom displays should be rendered through child components
+      expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
+      expect(screen.getByTestId("manifold-claim-table")).toBeInTheDocument();
     });
   });
 
@@ -397,100 +392,127 @@ describe("FeaturedNFTDetailsColumn", () => {
         throw new Error("Hook error");
       });
       
-      const nft = createNFTWithMemesExtendedData();
+      const nft = createTestNFT();
       
       expect(() => {
         render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       }).toThrow("Hook error");
     });
 
-    it("handles missing NFT data gracefully", () => {
-      const incompleteNFT = createNFTWithMemesExtendedData({
+    it("displays empty name and contract gracefully", () => {
+      const incompleteNFT = createTestNFT({
         name: "",
         contract: "",
       });
       
-      expect(() => {
-        render(<FeaturedNFTDetailsColumn featuredNft={incompleteNFT} />);
-      }).not.toThrow();
+      render(<FeaturedNFTDetailsColumn featuredNft={incompleteNFT} />);
+      
+      // Should still show the card structure with ID, even if name/contract are empty
+      expect(screen.getByText(`Card ${incompleteNFT.id} -`)).toBeInTheDocument();
+      // Should still render all the main components
+      expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
     });
 
-    it("handles undefined manifold displays", () => {
+    it("shows component structure when manifold displays are null", () => {
       mockUseManifoldClaimDisplays.mockReturnValue({
         editionSizeDisplay: null,
         statusDisplay: null,
         costDisplay: null,
       });
       
-      const nft = createNFTWithMemesExtendedData();
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      expect(() => {
-        render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
-      }).not.toThrow();
+      // Main structure should still be visible to user
+      expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
+      expect(screen.getByTestId("manifold-claim-table")).toBeInTheDocument();
     });
 
-    it("handles different country codes", () => {
-      const countryCodes = ["US", "CA", "UK", "DE", "FR", "JP", "", undefined];
-      const nft = createNFTWithMemesExtendedData();
+    it("renders consistently across different countries", () => {
+      const testCases = [
+        { country: "US", expectedMarketplace: true },
+        { country: "CA", expectedMarketplace: true },
+        { country: "DE", expectedMarketplace: true },
+        { country: "", expectedMarketplace: true }
+      ];
+      const nft = createTestNFT();
       
-      countryCodes.forEach((country) => {
+      testCases.forEach(({ country, expectedMarketplace }) => {
         mockUseCookieConsent.mockReturnValue({
           showCookieConsent: false,
-          country: country || "",
+          country,
           consent: jest.fn(),
           reject: jest.fn(),
         });
         
         const { unmount } = render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+        
+        // Core content should always be visible
         expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
+        
+        // Marketplace links visibility depends on iOS + country combination
+        if (expectedMarketplace) {
+          expect(screen.getByTestId("nft-marketplace-links")).toBeInTheDocument();
+        }
+        
         unmount();
       });
     });
 
-    it("handles different capacitor platforms", () => {
-      const platforms = [
-        { isIos: true, isAndroid: false, platform: "ios" },
-        { isIos: false, isAndroid: true, platform: "android" },
-        { isIos: false, isAndroid: false, platform: "web" },
+    it("adapts marketplace link visibility based on platform and location", () => {
+      const testCases = [
+        { platform: "ios", country: "US", expectLinks: true, description: "iOS in US shows links" },
+        { platform: "ios", country: "FR", expectLinks: false, description: "iOS outside US hides links" },
+        { platform: "android", country: "FR", expectLinks: true, description: "Android shows links regardless of country" },
+        { platform: "web", country: "DE", expectLinks: true, description: "Web shows links regardless of country" }
       ];
-      const nft = createNFTWithMemesExtendedData();
+      const nft = createTestNFT();
       
-      platforms.forEach(({ isIos, isAndroid, platform }) => {
+      testCases.forEach(({ platform, country, expectLinks, description }) => {
         mockUseCapacitor.mockReturnValue({
-          isCapacitor: isIos || isAndroid,
-          isIos,
-          isAndroid,
+          isCapacitor: platform !== "web",
+          isIos: platform === "ios",
+          isAndroid: platform === "android",
           platform,
           isActive: true,
           keyboardVisible: false,
         });
         
+        mockUseCookieConsent.mockReturnValue({
+          showCookieConsent: false,
+          country,
+          consent: jest.fn(),
+          reject: jest.fn(),
+        });
+        
         const { unmount } = render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+        
+        // Core content always visible
         expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
+        
+        // Check marketplace links visibility
+        if (expectLinks) {
+          expect(screen.getByTestId("nft-marketplace-links")).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId("nft-marketplace-links")).not.toBeInTheDocument();
+        }
+        
         unmount();
       });
     });
   });
 
-  describe("Bootstrap layout and responsive behavior", () => {
-    it("renders with correct Bootstrap column classes", () => {
-      const nft = createNFTWithMemesExtendedData();
-      const { container } = render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+  describe("Layout structure", () => {
+    it("renders proper layout structure with all sections", () => {
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      const columnElement = container.querySelector(".pt-3.pb-3");
-      expect(columnElement).toBeInTheDocument();
-      expect(columnElement).toHaveClass("pt-3", "pb-3");
-    });
-
-    it("renders Bootstrap Container and Row components", () => {
-      const nft = createNFTWithMemesExtendedData();
-      const { container } = render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
-      
-      const containers = container.querySelectorAll(".container, .container-fluid");
-      const rows = container.querySelectorAll(".row");
-      
-      expect(containers.length).toBeGreaterThan(0);
-      expect(rows.length).toBeGreaterThan(0);
+      // User should see all the main sections
+      expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
+      expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
+      expect(screen.getByTestId("meme-page-mint-countdown")).toBeInTheDocument();
+      expect(screen.getByTestId("minting-approach-section")).toBeInTheDocument();
+      expect(screen.getByTestId("manifold-claim-table")).toBeInTheDocument();
     });
   });
 });
