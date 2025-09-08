@@ -150,7 +150,7 @@ export default function MemePageMintCountdown(
                 <FontAwesomeIcon
                   icon={faInfoCircle}
                   data-tooltip-id="allowlist-info"
-                  data-tooltip-content="The timer above displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
+                  data-tooltip-content="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
                   style={{
                     position: "absolute",
                     top: "10px",

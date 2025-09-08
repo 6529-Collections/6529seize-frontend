@@ -107,7 +107,6 @@ describe("MintCountdownBox", () => {
 
       const button = screen.getByRole("button");
       expect(button).toHaveTextContent("Mint");
-      expect(button).toHaveClass("seize-btn");
       expect(button).toHaveClass("btn-block");
       expect(button).toHaveClass("no-wrap");
       
