@@ -53,14 +53,25 @@ function DesktopSidebar({
     // Always toggle the submenu when Collections is clicked
     setIsCollectionsOpen(!isCollectionsOpen);
   };
+  
   return (
-    <div className={`tw-group tw-fixed tw-inset-y-0 tw-left-0 tw-pt-4 tw-h-full tw-bg-black tw-border-r tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 ${
-      isCollapsed ? "tw-w-16" : "tw-w-72"
-    }`}>
+    <>
+      {/* Backdrop for mobile overlay */}
+      {!isCollapsed && (
+        <div 
+          className="xl:tw-hidden tw-fixed tw-inset-0 tw-bg-black/50 tw-z-20"
+          onClick={onToggle}
+        />
+      )}
+      
+      {/* Main sidebar */}
+      <div className={`tw-group tw-fixed tw-inset-y-0 tw-left-0 tw-pt-4 tw-h-full tw-bg-black tw-border-r tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 tw-z-[9999] ${
+        isCollapsed ? "tw-w-16" : "tw-w-72"
+      }`}>
       <div
         className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
       >
-        {/* Header/Logo section */}
+        {/* Header/Logo section - stack vertically when collapsed */}
         <div
           className={`tw-flex tw-shrink-0 ${
             isCollapsed
@@ -79,11 +90,11 @@ function DesktopSidebar({
             />
           </Link>
 
-          {/* Collapse toggle */}
+          {/* Toggle button - below logo when collapsed, beside logo when expanded */}
           <button
             type="button"
             onClick={onToggle}
-            className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 desktop-hover:hover:tw-from-iron-750 desktop-hover:hover:tw-to-iron-850 desktop-hover:hover:tw-border-iron-650"
+            className="tw-flex tw-group tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 desktop-hover:hover:tw-from-iron-750 desktop-hover:hover:tw-to-iron-850 desktop-hover:hover:tw-border-iron-650"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <ChevronDoubleLeftIcon
@@ -141,6 +152,7 @@ function DesktopSidebar({
         onClose={() => setIsCollectionsOpen(false)}
       />
     </div>
+    </>
   );
 }
 

@@ -6,10 +6,14 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
 import HomePage from "@/components/home/HomePage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { fetchInitialActivityData } from "@/components/latest-activity/fetchInitialActivityData";
+import { fetchInitialTokens } from "@/components/nextGen/collections/collectionParts/hooks/fetchInitialTokens";
 
-export default async function Home() {
+export default async function Page() {
   const headers = await getAppCommonHeaders();
-  const [featuredNft, featuredNextgen] = await Promise.all([
+  
+  // First, fetch featured data and activity data in parallel
+  const [featuredNft, featuredNextgen, initialActivityData] = await Promise.all([
     commonApiFetch<NFTWithMemesExtendedData>({
       endpoint: `memes_latest`,
       headers,
@@ -18,11 +22,22 @@ export default async function Home() {
       endpoint: `nextgen/featured`,
       headers,
     }),
+    fetchInitialActivityData(1, 12),
   ]);
+
+  // Then fetch initial tokens for the featured NextGen collection
+  const initialTokens = featuredNextgen?.id ? await fetchInitialTokens(featuredNextgen.id) : [];
+
+
 
   return (
     <main className={styles.main}>
-      <HomePage featuredNft={featuredNft} featuredNextgen={featuredNextgen} />
+      <HomePage 
+        featuredNft={featuredNft} 
+        featuredNextgen={featuredNextgen}
+        initialActivityData={initialActivityData}
+        initialTokens={initialTokens}
+      />
     </main>
   );
 }

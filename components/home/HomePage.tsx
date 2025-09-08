@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import { NextGenCollection } from "@/entities/INextgen";
+import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -10,15 +10,20 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import Image from "next/image";
+import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
   readonly featuredNextgen: NextGenCollection;
+  readonly initialActivityData: InitialActivityData;
+  readonly initialTokens: NextGenToken[];
 }
 
 export default function HomePage({
   featuredNft,
   featuredNextgen,
+  initialActivityData,
+  initialTokens,
 }: HomePageProps) {
   const { isApp } = useDeviceInfo();
   const [activeTab, setActiveTab] = useState<"feed" | "latest">("feed");
@@ -125,7 +130,12 @@ export default function HomePage({
             )}
           </div>
         ) : (
-          <Home featuredNft={featuredNft} featuredNextgen={featuredNextgen} />
+          <Home 
+            featuredNft={featuredNft} 
+            featuredNextgen={featuredNextgen}
+            initialActivityData={initialActivityData}
+            initialTokens={initialTokens}
+          />
         )}
       </div>
     </div>

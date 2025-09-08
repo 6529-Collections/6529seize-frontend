@@ -51,7 +51,7 @@ function DesktopSidebarNavItem({
       )}
       {!collapsed && (
         <>
-          <span className="tw-hidden lg:tw-block">{label}</span>
+          <span className="tw-block">{label}</span>
           {rightSlot}
         </>
       )}

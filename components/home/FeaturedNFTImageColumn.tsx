@@ -10,7 +10,7 @@ interface Props {
 export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
   return (
     <Col
-      className="pt-3 pb-3 d-flex align-items-center justify-content-center"
+      className="pt-3 pb-3 d-flex align-items-start justify-content-center"
       xs={{ span: 12 }}
       sm={{ span: 12 }}
       md={{ span: 6 }}

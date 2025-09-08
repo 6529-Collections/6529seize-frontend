@@ -25,7 +25,13 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
   // const { setHeaderRef } = useHeaderContext();
   const pathname = usePathname();
   
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // Start collapsed on small screens
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1280;
+    }
+    return false;
+  });
   const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
 
   // Collections pages that should show the submenu
@@ -62,20 +68,21 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
 
   return (
     <>
+      {/* Sidebar - always visible, minimum tw-w-16 */}
       <DesktopSidebar
         isCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isCollectionsSubmenuOpen={isCollectionsSubmenuOpen}
         onCollectionsSubmenuToggle={setIsCollectionsSubmenuOpen}
       />
+
+      {/* Main content with responsive margins */}
       <div
-        className="tw-transition-all tw-duration-300 tw-ease-out"
-        style={{
-          marginLeft: `${
-            (isSidebarCollapsed ? 64 : 288) + 
-            (isCollectionsSubmenuOpen && isOnCollectionsPage ? 256 : 0)
-          }px`
-        }}
+        className={`tw-transition-all tw-duration-300 tw-ease-out ${
+          isSidebarCollapsed ? "tw-ml-16" : "tw-ml-16 xl:tw-ml-72"
+        } ${
+          isCollectionsSubmenuOpen && isOnCollectionsPage ? "xl:tw-ml-[32rem]" : ""
+        }`}
       >
         {/* <div
           ref={headerWrapperRef}

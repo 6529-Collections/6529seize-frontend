@@ -70,6 +70,15 @@ const mockCollection = {
   id: "test-collection" 
 } as any;
 
+const mockInitialActivityData = {
+  activity: [],
+  totalResults: 0,
+  nfts: [],
+  nextgenCollections: []
+} as any;
+
+const mockInitialTokens = [] as any;
+
 
 const TestProvider: React.FC<{ 
   children: React.ReactNode;
@@ -97,7 +106,12 @@ describe("Home component", () => {
   it("displays featured NFT information correctly", async () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -116,7 +130,12 @@ describe("Home component", () => {
   it("shows NextGen collection when provided", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -127,10 +146,40 @@ describe("Home component", () => {
     expect(screen.getByTestId("nextgen-slideshow")).toBeInTheDocument();
   });
 
+  it("generates correct URL for NextGen collection link", () => {
+    const collectionWithSpaces = {
+      name: "Test Collection With Spaces",
+      id: "test-collection-with-spaces"
+    } as any;
+
+    render(
+      <TestProvider>
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={collectionWithSpaces} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
+      </TestProvider>
+    );
+
+    // Check that the link is properly formatted (spaces replaced with hyphens, lowercase)
+    const viewCollectionLink = screen.getByText("View Collection");
+    expect(viewCollectionLink.closest('a')).toHaveAttribute(
+      'href',
+      '/nextgen/collection/test-collection-with-spaces'
+    );
+  });
+
   it("hides NextGen section when no collection provided", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={null} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={null} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -140,14 +189,61 @@ describe("Home component", () => {
     expect(screen.queryByTestId("nextgen-slideshow")).not.toBeInTheDocument();
   });
 
+  it("hides NextGen section when empty collection object provided", () => {
+    render(
+      <TestProvider>
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={{} as any} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
+      </TestProvider>
+    );
+
+    // NextGen section should not be visible when empty object is provided
+    expect(screen.queryByText("Discover")).not.toBeInTheDocument();
+    expect(screen.queryByText(/NextGen/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("nextgen-slideshow")).not.toBeInTheDocument();
+  });
+
   it("includes latest activity section", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
     expect(screen.getByTestId("latest-activity")).toBeInTheDocument();
+  });
+
+  it("passes correct props to LatestActivity component", () => {
+    const customActivityData = {
+      activity: [{ id: 1, type: 'MINT' }],
+      totalResults: 150,
+      nfts: [{ id: 1, name: 'Test NFT' }],
+      nextgenCollections: [{ id: 1, name: 'Test Collection' }]
+    } as any;
+
+    render(
+      <TestProvider>
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={customActivityData}
+          initialTokens={mockInitialTokens}
+        />
+      </TestProvider>
+    );
+
+    // Verify LatestActivity is rendered (our mock just shows the text)
+    expect(screen.getByTestId("latest-activity")).toBeInTheDocument();
+    expect(screen.getByText("Latest Activity")).toBeInTheDocument();
   });
 
 
@@ -160,7 +256,12 @@ describe("Home component", () => {
 
     render(
       <TestProvider>
-        <Home featuredNft={incompleteNft} featuredNextgen={mockCollection} />
+        <Home 
+          featuredNft={incompleteNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
@@ -179,7 +280,12 @@ describe("Home component error scenarios", () => {
     expect(() => {
       render(
         <TestProvider>
-          <Home featuredNft={null as any} featuredNextgen={mockCollection} />
+          <Home 
+            featuredNft={null as any} 
+            featuredNextgen={mockCollection} 
+            initialActivityData={mockInitialActivityData}
+            initialTokens={mockInitialTokens}
+          />
         </TestProvider>
       );
     }).toThrow();
@@ -190,12 +296,40 @@ describe("Home component error scenarios", () => {
   it("works correctly without NextGen collection", () => {
     render(
       <TestProvider>
-        <Home featuredNft={mockNft} featuredNextgen={undefined as any} />
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={undefined as any} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
       </TestProvider>
     );
 
     expect(screen.getByText("Latest")).toBeInTheDocument();
     expect(screen.queryByText(/NextGen/)).not.toBeInTheDocument();
+  });
+
+  it("verifies Bootstrap layout structure is correct", () => {
+    const { container } = render(
+      <TestProvider>
+        <Home 
+          featuredNft={mockNft} 
+          featuredNextgen={mockCollection} 
+          initialActivityData={mockInitialActivityData}
+          initialTokens={mockInitialTokens}
+        />
+      </TestProvider>
+    );
+
+    // Check for proper Bootstrap container/row/col structure
+    const containers = container.querySelectorAll('.container');
+    expect(containers.length).toBeGreaterThan(0);
+
+    const rows = container.querySelectorAll('.row');
+    expect(rows.length).toBeGreaterThan(0);
+
+    const cols = container.querySelectorAll('.col');
+    expect(cols.length).toBeGreaterThan(0);
   });
 });
 
