@@ -16,23 +16,10 @@ interface WaveDropActionsDownloadProps {
 export default function WaveDropActionsDownload({
   drop,
 }: WaveDropActionsDownloadProps) {
+  // All hooks must be called before any early returns
   const { percentage, download, cancel, isInProgress } = useDownloader();
   const [isCompleted, setIsCompleted] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Find first media (any type) in drop parts
-  const media = drop.parts?.find((part) => part.media && part.media.length > 0)
-    ?.media?.[0];
-
-  // Only render if any media exists
-  if (!media?.url) {
-    return null;
-  }
-
-  const startDownload = async () => {
-    const fileName = getDownloadFileName(drop, media);
-    download(media.url, fileName);
-  };
 
   useEffect(() => {
     if (percentage === 100) {
@@ -54,6 +41,20 @@ export default function WaveDropActionsDownload({
       }
     };
   }, []);
+
+  // Find first media (any type) in drop parts
+  const media = drop.parts?.find((part) => part.media && part.media.length > 0)
+    ?.media?.[0];
+
+  // Early returns after all hooks are established
+  if (!media?.url) {
+    return null;
+  }
+
+  const startDownload = async () => {
+    const fileName = getDownloadFileName(drop, media);
+    download(media.url, fileName);
+  };
 
   const renderContent = () => {
     if (isCompleted) {
