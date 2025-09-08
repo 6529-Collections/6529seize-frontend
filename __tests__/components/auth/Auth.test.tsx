@@ -14,7 +14,7 @@ jest.mock("react-toastify", () => ({
   Slide: () => null,
 }));
 
-// Wagmi mock removed - using useSecureSign instead
+// Using useSecureSign instead of legacy Wagmi hooks
 
 jest.mock("../../../services/api/common-api", () => ({
   commonApiFetch: jest.fn(() => Promise.resolve({ id: "1", handle: "user", query: "user" })),
@@ -27,7 +27,7 @@ jest.mock("../../../services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(() => null),
 }));
 
-// JWT decode mock removed - using jwt-validation.utils instead
+// Using jwt-validation.utils instead of direct jwt-decode
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(() => ({ data: undefined })),
@@ -87,6 +87,13 @@ jest.mock("../../../utils/role-validation", () => ({
   validateRoleForAuthentication: jest.fn((proxy) => proxy?.created_by?.id || null),
 }));
 
+jest.mock("../../../hooks/useIdentity", () => ({
+  useIdentity: jest.fn(() => ({ 
+    profile: null, 
+    isLoading: false 
+  })),
+}));
+
 // Mock TitleContext
 mockTitleContextModule();
 
@@ -108,6 +115,7 @@ jest.mock("../../../components/auth/SeizeConnectContext", () => ({
 const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<typeof commonApiFetch>;
 const { commonApiPost } = require("../../../services/api/common-api");
 const mockCommonApiPost = commonApiPost as jest.MockedFunction<typeof commonApiPost>;
+const mockUseIdentity = require("../../../hooks/useIdentity").useIdentity as jest.MockedFunction<any>;
 
 // Test helper components
 function ShowWaves() {
@@ -136,6 +144,9 @@ describe("Auth component", () => {
     mockCommonApiFetch.mockResolvedValue({ id: "1", handle: "user", query: "user" });
     mockCommonApiPost.mockResolvedValue({ token: 'jwt-token', refresh_token: 'refresh-token' });
     
+    // Reset useIdentity mock
+    mockUseIdentity.mockReturnValue({ profile: null, isLoading: false });
+    
     // Mock console.error to prevent error output during tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -150,11 +161,7 @@ describe("Auth component", () => {
   );
 
   describe("Basic functionality", () => {
-    // Note: Title functionality has been moved to TitleContext
-    // This test is no longer applicable as Auth doesn't manage titles anymore
-    it.skip("updates title when setTitle called - moved to TitleContext", async () => {
-      // Title management is now handled by TitleContext, not Auth
-    });
+    // Title management moved to TitleContext - test removed as obsolete
 
     it("requestAuth shows toast when no address", async () => {
       walletAddress = null;
@@ -178,6 +185,12 @@ describe("Auth component", () => {
     });
 
     it("returns showWaves true when wallet and profile", async () => {
+      // Set up profile mock to return a profile with handle
+      mockUseIdentity.mockReturnValue({ 
+        profile: { id: "1", handle: "testuser", query: "testuser" }, 
+        isLoading: false 
+      });
+      
       render(
         <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
           <Auth>
@@ -204,7 +217,7 @@ describe("Auth component", () => {
     });
   });
 
-  describe("Race Condition Prevention", () => {
+  describe("Race Condition Prevention and Abort Controller", () => {
     const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
 
     it("should prevent authentication bypass via rapid address changes", async () => {
@@ -261,6 +274,111 @@ describe("Auth component", () => {
       // Immediate validation should be used (not setTimeout)
       expect(mockValidateAuthImmediate).toHaveBeenCalled();
     });
+
+    it("should pass abort signal to validateAuthImmediate for operation cancellation", async () => {
+      mockValidateAuthImmediate.mockImplementation(async ({ params }) => {
+        // Verify that an abort signal is provided with required properties
+        expect(params.abortSignal).toHaveProperty('aborted', false);
+        expect(params.abortSignal).toHaveProperty('addEventListener');
+        expect(params.abortSignal).toHaveProperty('removeEventListener');
+        expect(params.operationId).toMatch(/^auth-\d+-/);
+        return { validationCompleted: true, wasCancelled: false, shouldShowModal: false };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('auth-component')).toBeInTheDocument();
+      });
+
+      // Verify abort signal and operation ID are passed correctly
+      expect(mockValidateAuthImmediate).toHaveBeenCalledWith(expect.objectContaining({
+        params: expect.objectContaining({
+          abortSignal: expect.objectContaining({
+            aborted: false,
+            addEventListener: expect.any(Function),
+            removeEventListener: expect.any(Function)
+          }),
+          operationId: expect.stringMatching(/^auth-\d+-/)
+        })
+      }));
+    });
+
+    it("should handle cancelled operations gracefully", async () => {
+      // Simulate a cancelled operation
+      mockValidateAuthImmediate.mockResolvedValueOnce({ validationCompleted: false, wasCancelled: true, shouldShowModal: false });
+
+      render(
+        <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('auth-component')).toBeInTheDocument();
+      });
+
+      // Should not show error messages for cancelled operations
+      const { toast } = require("react-toastify");
+      expect(toast).not.toHaveBeenCalled();
+    });
+
+    it("should cleanup abort controllers on component unmount", async () => {
+      const { unmount } = render(
+        <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('auth-component')).toBeInTheDocument();
+      });
+
+      // Unmount should trigger cleanup without errors
+      expect(() => unmount()).not.toThrow();
+    });
+
+    it("should generate unique operation IDs for concurrent operations", async () => {
+      let operationIds: string[] = [];
+      
+      mockValidateAuthImmediate.mockImplementation(async ({ params }) => {
+        operationIds.push(params.operationId);
+        return { validationCompleted: true, wasCancelled: false, shouldShowModal: false };
+      });
+
+      // Render Auth component
+      const { unmount } = render(
+        <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('auth-component')).toBeInTheDocument();
+      });
+
+      // Wait for validation to be called and check operation ID format
+      await waitFor(() => {
+        expect(operationIds.length).toBeGreaterThan(0);
+      });
+
+      // Check that operation IDs follow the expected pattern
+      expect(operationIds[0]).toMatch(/^auth-\d+-[a-z0-9]+/);
+
+      unmount();
+    });
   });
 
   describe("Secure Authentication Flow", () => {
@@ -269,7 +387,7 @@ describe("Auth component", () => {
 
     it("should call validateAuthImmediate on component mount with wallet connected", async () => {
       mockGetAuthJwt.mockReturnValue('test-jwt-token');
-      mockValidateAuthImmediate.mockResolvedValue({ wasCancelled: false });
+      mockValidateAuthImmediate.mockResolvedValue({ validationCompleted: true, wasCancelled: false, shouldShowModal: false });
 
       render(
         <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
@@ -297,7 +415,7 @@ describe("Auth component", () => {
       mockGetAuthJwt.mockReturnValue(null);
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onShowSignModal(true);
-        return { wasCancelled: false };
+        return { validationCompleted: true, wasCancelled: false, shouldShowModal: true };
       });
 
       render(
@@ -339,7 +457,7 @@ describe("Auth component", () => {
     const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
 
     it("should show toast notification using setToast function", async () => {
-      mockValidateAuthImmediate.mockResolvedValue({ wasCancelled: false });
+      mockValidateAuthImmediate.mockResolvedValue({ validationCompleted: true, wasCancelled: false, shouldShowModal: false });
       
       const Child = () => {
         const { setToast } = React.useContext(AuthContext);
@@ -372,9 +490,11 @@ describe("Auth component", () => {
     const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
     
     it("should provide correct context values", async () => {
-      mockValidateAuthImmediate.mockResolvedValue({ wasCancelled: false });
+      mockValidateAuthImmediate.mockResolvedValue({ validationCompleted: true, wasCancelled: false, shouldShowModal: false });
       const mockProfile = { id: "1", handle: "testuser", query: "testuser" };
-      mockCommonApiFetch.mockResolvedValue(mockProfile);
+      
+      // Mock useIdentity to return the profile immediately
+      mockUseIdentity.mockReturnValue({ profile: mockProfile, isLoading: false });
 
       let contextValues: any = {};
       const Child = () => {
@@ -394,7 +514,7 @@ describe("Auth component", () => {
         expect(screen.getByTestId('context-consumer')).toBeInTheDocument();
       });
 
-      // Wait for profile to be fetched and context to update
+      // Wait for context to be populated with the mocked profile
       await waitFor(() => {
         expect(contextValues.connectedProfile).not.toBeNull();
       });
@@ -405,7 +525,7 @@ describe("Auth component", () => {
         setToast: expect.any(Function),
         setActiveProfileProxy: expect.any(Function),
         connectedProfile: mockProfile,
-        fetchingProfile: expect.any(Boolean),
+        fetchingProfile: false, // Since we mocked isLoading as false
         receivedProfileProxies: expect.any(Array),
         activeProfileProxy: null,
         showWaves: expect.any(Boolean),
@@ -418,9 +538,11 @@ describe("Auth component", () => {
     const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
     
     it("should fetch and set connected profile when address is provided", async () => {
-      mockValidateAuthImmediate.mockResolvedValue({ wasCancelled: false });
+      mockValidateAuthImmediate.mockResolvedValue({ validationCompleted: true, wasCancelled: false, shouldShowModal: false });
       const mockProfile = { id: "1", handle: "testuser", query: "testuser" };
-      mockCommonApiFetch.mockResolvedValue(mockProfile);
+      
+      // Mock useIdentity to simulate profile fetching
+      mockUseIdentity.mockReturnValue({ profile: mockProfile, isLoading: false });
 
       let contextValues: any = {};
       const Child = () => {
@@ -440,14 +562,13 @@ describe("Auth component", () => {
         expect(screen.getByTestId('profile-consumer')).toBeInTheDocument();
       });
 
-      // Should fetch profile for the connected address
-      await waitFor(() => {
-        expect(mockCommonApiFetch).toHaveBeenCalledWith({
-          endpoint: `identities/${walletAddress}`
-        });
+      // The useIdentity hook should be called with the wallet address
+      expect(mockUseIdentity).toHaveBeenCalledWith({
+        handleOrWallet: walletAddress,
+        initialProfile: null,
       });
 
-      // Profile should eventually be set in context
+      // Profile should be available in context from the mocked hook
       await waitFor(() => {
         expect(contextValues.connectedProfile).toEqual(mockProfile);
       });
@@ -455,7 +576,9 @@ describe("Auth component", () => {
 
     it("should clear profile when address is null", async () => {
       walletAddress = null;
-      // No need to mock validateAuthImmediate as it won't be called without address
+      
+      // Mock useIdentity to return null when no address
+      mockUseIdentity.mockReturnValue({ profile: null, isLoading: false });
       
       let contextValues: any = {};
       const Child = () => {
@@ -484,7 +607,7 @@ describe("Auth component", () => {
       const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onShowSignModal(true);
-        return { wasCancelled: false };
+        return { validationCompleted: true, wasCancelled: false, shouldShowModal: true };
       });
 
       render(
@@ -511,7 +634,7 @@ describe("Auth component", () => {
       
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onShowSignModal(true);
-        return { wasCancelled: false };
+        return { validationCompleted: true, wasCancelled: false, shouldShowModal: true };
       });
 
       render(
@@ -534,11 +657,101 @@ describe("Auth component", () => {
     });
   });
 
+  describe("Authentication Integration", () => {
+    const { toast } = require("react-toastify");
 
+    it("should show error when wallet not connected", async () => {
+      walletAddress = null;
+      
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return <button onClick={() => requestAuth()} data-testid="test-no-wallet">Test No Wallet</button>;
+      };
 
+      render(
+        <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
 
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('test-no-wallet'));
+      
+      expect(toast).toHaveBeenCalledWith(
+        "Please connect your wallet",
+        expect.objectContaining({ type: "error" })
+      );
+    });
+  });
 
+  describe("Toast Functionality", () => {
+    it("should show toast using setToast with error type", async () => {
+      const Child = () => {
+        const { setToast } = React.useContext(AuthContext);
+        
+        const triggerErrorToast = () => {
+          setToast({
+            message: "Test error message",
+            type: "error"
+          });
+        };
 
+        return <button onClick={triggerErrorToast} data-testid="test-error-toast">Test Error Toast</button>;
+      };
 
+      render(
+        <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      const { toast } = require("react-toastify");
+      
+      await user.click(screen.getByTestId('test-error-toast'));
+      
+      expect(toast).toHaveBeenCalledWith(
+        "Test error message",
+        expect.objectContaining({ type: "error" })
+      );
+    });
+
+    it("should show toast using setToast with success type", async () => {
+      const Child = () => {
+        const { setToast } = React.useContext(AuthContext);
+        
+        const triggerSuccessToast = () => {
+          setToast({
+            message: "Test success message",
+            type: "success"
+          });
+        };
+
+        return <button onClick={triggerSuccessToast} data-testid="test-success-toast">Test Success Toast</button>;
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      const { toast } = require("react-toastify");
+      
+      await user.click(screen.getByTestId('test-success-toast'));
+      
+      expect(toast).toHaveBeenCalledWith(
+        "Test success message",
+        expect.objectContaining({ type: "success" })
+      );
+    });
+  });
 
 });

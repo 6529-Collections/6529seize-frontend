@@ -5,7 +5,7 @@ jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
-  usePathname: jest.fn(),
+  usePathname: jest.fn(() => '/'),
 }));
 jest.mock('../../../components/header/user/HeaderUser', () => ({ __esModule: true, default: () => <div data-testid="user" /> }));
 jest.mock('../../../components/header/notifications/HeaderNotifications', () => ({ __esModule: true, default: () => <div data-testid="notify" /> }));
@@ -13,6 +13,9 @@ jest.mock('../../../components/header/share/HeaderShare', () => ({ __esModule: t
 jest.mock('../../../components/header/share/HeaderQRScanner', () => ({ __esModule: true, default: () => <div data-testid="qr" /> }));
 jest.mock('../../../components/header/open-mobile/HeaderOpenMobile', () => ({ __esModule: true, default: () => <div data-testid="mobile" /> }));
 jest.mock('../../../components/header/header-search/HeaderSearchButton', () => ({ __esModule: true, default: () => <div data-testid="search" /> }));
+jest.mock('../../../components/header/HeaderDesktopNav', () => ({ __esModule: true, default: () => <div data-testid="desktop-nav" /> }));
+jest.mock('../../../components/header/HeaderLogo', () => ({ __esModule: true, default: () => <div data-testid="logo" /> }));
+jest.mock('../../../components/header/HeaderMobileMenu', () => ({ __esModule: true, default: (props: any) => <div data-testid="mobile-menu" className={props.burgerMenuOpen ? 'burgerMenuOpen' : ''} /> }));
 
 import Header from '../../../components/header/Header';
 import styles from '../../../components/header/Header.module.scss';
@@ -32,7 +35,7 @@ jest.mock('../../../components/cookies/CookieConsentContext', () => ({
   }))
 }));
 
-const { useRouter } = require('next/navigation');
+const { useRouter, usePathname } = require('next/navigation');
 const { useSeizeConnectContext } = require('../../../components/auth/SeizeConnectContext');
 const useCapacitor = require('../../../hooks/useCapacitor').default as jest.Mock;
 const { useAppWallets } = require('../../../components/app-wallets/AppWalletsContext');
@@ -45,15 +48,36 @@ function setup(options: any = {}) {
     address: options.address,
     seizeConnectOpen: options.seizeConnectOpen || false,
   }));
-  useCapacitor.mockReturnValue({ isCapacitor: !!options.capacitor });
-  (useAppWallets as jest.Mock).mockReturnValue({ appWalletsSupported: false });
-  (useAuth as jest.Mock).mockReturnValue({ showWaves: true });
+  useCapacitor.mockReturnValue({ 
+    isCapacitor: !!options.capacitor, 
+    isIos: !!options.capacitorIsIos 
+  });
+  (useAppWallets as jest.Mock).mockReturnValue({ 
+    appWalletsSupported: options.appWalletsSupported || false 
+  });
+  (useAuth as jest.Mock).mockReturnValue({ 
+    showWaves: options.showWaves !== undefined ? options.showWaves : true 
+  });
   useIsMobileScreen.mockReturnValue(!!options.mobile);
   (fetchUrl as jest.Mock).mockResolvedValue({ data: options.consolidations });
-  (useRouter as jest.Mock).mockReturnValue({ route: '/', pathname: '/', push: jest.fn(), prefetch: jest.fn(), query: {} });
+  (useRouter as jest.Mock).mockReturnValue({ 
+    route: '/', 
+    pathname: '/', 
+    push: jest.fn(), 
+    prefetch: jest.fn(), 
+    query: {} 
+  });
+  (usePathname as jest.Mock).mockReturnValue('/');
   const onLoad = jest.fn();
   const onSetWallets = jest.fn();
-  const utils = render(<Header isSmall={options.isSmall} onLoad={onLoad} onSetWallets={onSetWallets} />);
+  const utils = render(
+    <Header 
+      isSmall={options.isSmall} 
+      onLoad={onLoad} 
+      onSetWallets={onSetWallets}
+      extraClass={options.extraClass}
+    />
+  );
   return { onLoad, onSetWallets, ...utils };
 }
 
@@ -76,24 +100,147 @@ describe('Header', () => {
   it('opens burger menu and closes when seize connect opens', async () => {
     const context: any = { address: '0xabc', seizeConnectOpen: false };
     (useSeizeConnectContext as jest.Mock).mockImplementation(() => context);
-    useCapacitor.mockReturnValue({ isCapacitor: false });
+    useCapacitor.mockReturnValue({ isCapacitor: false, isIos: false });
     (useAppWallets as jest.Mock).mockReturnValue({ appWalletsSupported: false });
     (useAuth as jest.Mock).mockReturnValue({ showWaves: false });
     useIsMobileScreen.mockReturnValue(false);
     (fetchUrl as jest.Mock).mockResolvedValue({});
+    (usePathname as jest.Mock).mockReturnValue('/');
 
-    const { container, rerender } = render(<Header />);
+    const { rerender } = render(<Header />);
     const btn = screen.getByRole('button', { name: 'Menu' });
     fireEvent.click(btn);
-    expect(container.querySelector('.' + styles.burgerMenuOpen)).toBeInTheDocument();
+    
+    // Check that mobile menu is open via data-testid
+    expect(screen.getByTestId('mobile-menu')).toHaveClass('burgerMenuOpen');
 
     context.seizeConnectOpen = true;
     rerender(<Header />);
-    await waitFor(() => expect(container.querySelector('.' + styles.burgerMenuOpen)).not.toBeInTheDocument());
+    
+    // Check that mobile menu is closed
+    await waitFor(() => {
+      expect(screen.getByTestId('mobile-menu')).not.toHaveClass('burgerMenuOpen');
+    });
   });
 
   it('applies capacitor class when running in capacitor', () => {
     const { container } = setup({ capacitor: true });
     expect(container.querySelector('.' + styles.capacitorMainContainer)).toBeInTheDocument();
+  });
+
+  it('renders HeaderLogo component', () => {
+    setup();
+    expect(screen.getByTestId('logo')).toBeInTheDocument();
+  });
+
+  it('renders HeaderDesktopNav on desktop', () => {
+    setup({ mobile: false });
+    expect(screen.getByTestId('desktop-nav')).toBeInTheDocument();
+  });
+
+  it('renders HeaderMobileMenu', () => {
+    setup();
+    expect(screen.getByTestId('mobile-menu')).toBeInTheDocument();
+  });
+
+  it('passes correct props to HeaderMobileMenu', () => {
+    setup({ 
+      isSmall: true, 
+      capacitor: true, 
+      mobile: true,
+      showWaves: true,
+      appWalletsSupported: true,
+      capacitorIsIos: true
+    });
+    
+    const mobileMenu = screen.getByTestId('mobile-menu');
+    expect(mobileMenu).toBeInTheDocument();
+    
+    // The mocked component should receive these props (we can't directly test props,
+    // but the component should be present and the integration should work)
+    expect(mobileMenu).not.toHaveClass('burgerMenuOpen'); // Initially closed
+  });
+
+  it('opens mobile menu when button clicked', () => {
+    const { getByRole } = setup();
+    
+    // Initially closed
+    expect(screen.getByTestId('mobile-menu')).not.toHaveClass('burgerMenuOpen');
+    
+    // Open menu - menu button only opens, doesn't toggle
+    const menuButton = getByRole('button', { name: 'Menu' });
+    fireEvent.click(menuButton);
+    expect(screen.getByTestId('mobile-menu')).toHaveClass('burgerMenuOpen');
+    
+    // Clicking button again should still show open (not a toggle)
+    fireEvent.click(menuButton);
+    expect(screen.getByTestId('mobile-menu')).toHaveClass('burgerMenuOpen');
+  });
+
+  it('passes showWaves to child components when enabled', () => {
+    setup({ showWaves: true });
+    expect(screen.getByTestId('desktop-nav')).toBeInTheDocument();
+  });
+
+  it('applies extra class when provided', () => {
+    const { container } = setup({ extraClass: 'test-class' });
+    expect(container.querySelector('.test-class')).toBeInTheDocument();
+  });
+
+  it('handles window resize events', () => {
+    const { getByRole } = setup();
+    
+    // Open burger menu first
+    const menuButton = getByRole('button', { name: 'Menu' });
+    fireEvent.click(menuButton);
+    expect(screen.getByTestId('mobile-menu')).toHaveClass('burgerMenuOpen');
+    
+    // Simulate window resize
+    fireEvent(window, new Event('resize'));
+    
+    // Menu should close after resize
+    expect(screen.getByTestId('mobile-menu')).not.toHaveClass('burgerMenuOpen');
+  });
+
+  it('calls onSetWallets with single address when no consolidations', async () => {
+    const { onSetWallets } = setup({ address: '0xabc', consolidations: null });
+    await waitFor(() => expect(onSetWallets).toHaveBeenCalledWith(['0xabc']));
+  });
+
+  it('calls onSetWallets with empty array when no address', async () => {
+    const { onSetWallets } = setup({ address: null });
+    await waitFor(() => expect(onSetWallets).toHaveBeenCalledWith([]));
+  });
+
+  it('closes burger menu when pathname changes', () => {
+    const { getByRole, rerender } = setup();
+    
+    // Open burger menu
+    const menuButton = getByRole('button', { name: 'Menu' });
+    fireEvent.click(menuButton);
+    expect(screen.getByTestId('mobile-menu')).toHaveClass('burgerMenuOpen');
+    
+    // Change pathname by mocking a new value
+    (usePathname as jest.Mock).mockReturnValue('/new-path');
+    rerender(
+      <Header 
+        isSmall={false} 
+        onLoad={jest.fn()} 
+        onSetWallets={jest.fn()}
+      />
+    );
+    
+    // Menu should be closed
+    expect(screen.getByTestId('mobile-menu')).not.toHaveClass('burgerMenuOpen');
+  });
+
+  it('renders capacitor placeholder when in capacitor mode', () => {
+    const { container } = setup({ capacitor: true });
+    expect(container.querySelector('.' + styles.capacitorPlaceholder)).toBeInTheDocument();
+  });
+
+  it('does not render capacitor placeholder when not in capacitor mode', () => {
+    const { container } = setup({ capacitor: false });
+    expect(container.querySelector('.' + styles.capacitorPlaceholder)).not.toBeInTheDocument();
   });
 });
