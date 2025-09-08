@@ -1,28 +1,59 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { Tooltip } from "react-tooltip";
+import { useEffect, useRef, useState } from "react";
 import useDownloader from "react-use-downloader";
-import {
-  ArrowDownTrayIcon,
-  CheckCircleIcon,
-} from "@heroicons/react/24/outline";
+import { Tooltip } from "react-tooltip";
+import { ArrowDownTrayIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
-interface WaveDropActionsDownloadProps {
-  readonly drop: ExtendedDrop;
+interface Props {
+  href: string;
+  name: string;
+  extension: string;
+  showProgress?: boolean;
+  className?: string;
+  tooltipId?: string;
 }
 
-export default function WaveDropActionsDownload({
-  drop,
-}: WaveDropActionsDownloadProps) {
-  // All hooks must be called before any early returns
+export const getFileInfoFromUrl = (
+  url: string | undefined
+): { name: string; extension: string } | null => {
+  try {
+    if (!url) {
+      return null;
+    }
+    const { pathname } = new URL(url);
+    const decodedPath = decodeURIComponent(pathname);
+    const filename = decodedPath.split("/").pop() ?? "file";
+
+    const lastDot = filename.lastIndexOf(".");
+    if (lastDot > 0 && lastDot < filename.length - 1) {
+      return {
+        name: filename.slice(0, lastDot),
+        extension: filename.slice(lastDot + 1),
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+export default function WaveDropActionsDownload(props: Readonly<Props>) {
   const { percentage, download, cancel, isInProgress } = useDownloader();
+  const showProgress = props.showProgress ?? true;
+
   const [isCompleted, setIsCompleted] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  async function startDownload() {
+    const filename = props.extension
+      ? `${props.name}.${props.extension}`
+      : props.name;
+    download(props.href, filename);
+  }
+
   useEffect(() => {
-    if (percentage === 100) {
+    if (percentage === 100 && showProgress) {
       setIsCompleted(true);
       if (completionTimeoutRef.current) {
         clearTimeout(completionTimeoutRef.current);
@@ -32,7 +63,7 @@ export default function WaveDropActionsDownload({
         completionTimeoutRef.current = null;
       }, 1500);
     }
-  }, [percentage]);
+  }, [percentage, showProgress]);
 
   useEffect(() => {
     return () => {
@@ -42,63 +73,44 @@ export default function WaveDropActionsDownload({
     };
   }, []);
 
-  // Find first media (any type) in drop parts
-  const media = drop.parts?.find((part) => part.media && part.media.length > 0)
-    ?.media?.[0];
-
-  // Early returns after all hooks are established
-  if (!media?.url) {
-    return null;
-  }
-
-  const startDownload = async () => {
-    const fileName = getDownloadFileName(drop, media);
-    const extension = getFileExtension(media);
-    const fullFileName = extension ? `${fileName}.${extension}` : fileName;
-    download(media.url, fullFileName);
-  };
-
-  const renderContent = () => {
-    if (isCompleted) {
-      return (
-        <CheckCircleIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 tw-text-emerald-600" />
-      );
-    }
-
-    if (!isInProgress) {
-      return (
-        <ArrowDownTrayIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300" />
-      );
-    }
-
-    return (
-      <svg
-        className="tw-w-5 tw-h-5 tw-text-iron-500 tw-animate-spin tw-flex-shrink-0"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="tw-opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="tw-opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        />
-      </svg>
-    );
-  };
-
   const getTooltipText = () => {
     if (isCompleted) return "Downloaded!";
-    if (isInProgress) return `Downloading ${percentage}%`;
+    if (isInProgress && showProgress) return `Downloading ${percentage}%`;
     return "Download media";
+  };
+
+  const renderIcon = () => {
+    if (isCompleted) {
+      return (
+        <CheckCircleIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-emerald-600" />
+      );
+    }
+    if (isInProgress && showProgress) {
+      return (
+        <svg
+          className="tw-w-5 tw-h-5 tw-text-iron-500 tw-animate-spin tw-flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24">
+          <circle
+            className="tw-opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="tw-opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+      );
+    }
+    return (
+      <ArrowDownTrayIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5" />
+    );
   };
 
   return (
@@ -114,34 +126,23 @@ export default function WaveDropActionsDownload({
           }
         }}
         disabled={isCompleted}
-        aria-label="Download media"
-        data-tooltip-id={`download-media-${drop.id}`}
-      >
-        {renderContent()}
+        aria-label="Download file"
+        data-tooltip-id={props.tooltipId ?? undefined}
+        type="button">
+        {renderIcon()}
       </button>
-
-      <Tooltip
-        id={`download-media-${drop.id}`}
-        place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        <span className="tw-text-xs">{getTooltipText()}</span>
-      </Tooltip>
+      {props.tooltipId && (
+        <Tooltip
+          id={props.tooltipId}
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+          }}>
+          <span className="tw-text-xs">{getTooltipText()}</span>
+        </Tooltip>
+      )}
     </>
   );
-}
-
-function getDownloadFileName(drop: ExtendedDrop, media: any): string {
-  // Simple naming pattern like Download.tsx - just use serial number
-  return `media-${drop.serial_no}`;
-}
-
-function getFileExtension(media: any): string {
-  // Extract extension from URL, same logic as Download.tsx getFileInfoFromUrl
-  const urlExtension = media.url?.match(/\.([^./?]+)(?:[?#]|$)/)?.[1];
-  return urlExtension || 'file';
 }
