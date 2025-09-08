@@ -15,7 +15,7 @@ export interface NavSection {
 export interface NavDropdown {
   title: string;
   condition?: (context: NavContext) => boolean;
-  className?: string;
+  className?: string | ((context: NavContext) => string);
   items?: NavLink[];
   sections?: NavSection[];
   hasDividerAfter?: boolean;
