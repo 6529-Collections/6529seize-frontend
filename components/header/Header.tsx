@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  faBars,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -57,7 +55,6 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
   const [showBurgerMenuBrain, setShowBurgerMenuBrain] = useState(false);
-
 
   let containerClassName = styles.mainContainer;
   let rowClassName = styles.headerRow;
@@ -132,8 +129,6 @@ export default function Header(props: Readonly<Props>) {
       setBurgerMenuOpen(false);
     }
   }, [seizeConnectOpen]);
-
-
 
   return (
     <>
