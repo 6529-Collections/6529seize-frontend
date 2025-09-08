@@ -37,9 +37,12 @@ export default function NFTImageBalance({
         <span
           className={`${styles.balance}  ${
             height === 650 ? styles.balanceBigger : ""
-          }`}
+          } `}
         >
-          <span>SEIZED{!showOwnedIfLoggedIn && connectedProfile ? ` x${nftBalance}` : ""}</span>
+          <span>
+            SEIZED
+            {!showOwnedIfLoggedIn && connectedProfile ? ` x${nftBalance}` : ""}
+          </span>
         </span>
       )}
       {showUnseizedIfLoggedIn && connectedProfile && nftBalance === 0 && (

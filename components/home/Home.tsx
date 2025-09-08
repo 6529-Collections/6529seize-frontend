@@ -35,17 +35,14 @@ export default function Home({
                 href={`/nextgen/collection/${formatNameForUrl(
                   featuredNextgen.name
                 )}`}
-                className="tw-no-underline"
               >
-                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#222] hover:tw-border-[#222]max-[800px]:tw-text-[12px]">
-                  View Collection
-                </span>
+                View Collection
               </Link>
             </Col>
           </Row>
           <Row className="pat-3">
             <Col>
-              <NextGenCollectionSlideshow 
+              <NextGenCollectionSlideshow
                 collection={featuredNextgen}
                 initialTokens={initialTokens}
               />
@@ -56,9 +53,9 @@ export default function Home({
       <Container>
         <Row className="pt-3">
           <Col xs={12} sm={12} md={12} lg={12}>
-            <LatestActivity 
-              page={1} 
-              pageSize={12} 
+            <LatestActivity
+              page={1}
+              pageSize={12}
               showMore={false}
               initialActivity={initialActivityData.activity}
               initialTotalResults={initialActivityData.totalResults}

@@ -31,7 +31,7 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
 
   return (
     <Col
-      className="pt-3 pb-3"
+      className="pt-4 pb-3"
       xs={{ span: 12 }}
       sm={{ span: 12 }}
       md={{ span: 6 }}
@@ -63,6 +63,8 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
               nft_id={featuredNft.id}
               setClaim={setManifoldClaim}
               is_full_width={true}
+              hide_mint_btn={false}
+              show_only_if_active={false}
             />
           </Col>
         </Row>
