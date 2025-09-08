@@ -162,7 +162,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         <Container className="p-0">
           {nft && (
             <Row>
-              <Col>
+              <Col xs={{ span: 12 }} sm={{ span: 12 }} md={{ span: 12 }} lg={{ span: 6 }}>
                 <MemePageMintCountdown nft_id={nft.id} />
               </Col>
             </Row>
