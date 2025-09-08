@@ -15,6 +15,7 @@ import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
+import WaveDropActionsDownload from "./WaveDropActionsDownload";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
@@ -62,6 +63,7 @@ export default function WaveDropActions({
           />
           <WaveDropActionsCopyLink drop={drop} />
           <WaveDropActionsOpen drop={drop} />
+          <WaveDropActionsDownload drop={drop} />
           {onEdit && drop.drop_type !== ApiDropType.Participatory && <WaveDropActionsEdit drop={drop} onEdit={onEdit} />}
           {canDelete && <WaveDropActionsOptions drop={drop} />}
           <WaveDropActionsAddReaction drop={drop} />
