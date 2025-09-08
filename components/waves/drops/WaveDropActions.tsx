@@ -15,7 +15,8 @@ import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
-import WaveDropActionsDownload, { getFileInfoFromUrl } from "./WaveDropActionsDownload";
+import WaveDropActionsDownload from "./WaveDropActionsDownload";
+import { getFileInfoFromUrl } from "../../../helpers/file.helpers";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
