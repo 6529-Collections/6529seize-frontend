@@ -3,9 +3,9 @@ import Link from "next/link";
 import styles from "./Header.module.scss";
 
 interface HeaderLogoProps {
-  isSmall?: boolean;
-  isCapacitor: boolean;
-  isMobile: boolean;
+  readonly isSmall?: boolean;
+  readonly isCapacitor: boolean;
+  readonly isMobile: boolean;
 }
 
 export default function HeaderLogo({

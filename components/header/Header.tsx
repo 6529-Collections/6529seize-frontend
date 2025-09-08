@@ -216,7 +216,7 @@ export default function Header(props: Readonly<Props>) {
                               appWalletsSupported={appWalletsSupported}
                               capacitorIsIos={capacitor.isIos}
                               country={country}
-                              pathname={pathname}
+                              pathname={pathname ?? undefined}
                             />
                             <HeaderUser />
                             {showWaves && <HeaderNotifications />}

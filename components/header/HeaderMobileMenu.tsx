@@ -15,25 +15,25 @@ import HeaderQRScanner from "./share/HeaderQRScanner";
 import HeaderUser from "./user/HeaderUser";
 
 interface HeaderMobileMenuProps {
-  burgerMenuOpen: boolean;
-  setBurgerMenuOpen: (open: boolean) => void;
-  showBurgerMenuCollections: boolean;
-  setShowBurgerMenuCollections: (show: boolean) => void;
-  showBurgerMenuAbout: boolean;
-  setShowBurgerMenuAbout: (show: boolean) => void;
-  showBurgerMenuCommunity: boolean;
-  setShowBurgerMenuCommunity: (show: boolean) => void;
-  showBurgerMenuTools: boolean;
-  setShowBurgerMenuTools: (show: boolean) => void;
-  showBurgerMenuBrain: boolean;
-  setShowBurgerMenuBrain: (show: boolean) => void;
-  isSmall?: boolean;
-  isCapacitor: boolean;
-  isMobile: boolean;
-  showWaves: boolean;
-  appWalletsSupported: boolean;
-  capacitorIsIos: boolean;
-  country: string;
+  readonly burgerMenuOpen: boolean;
+  readonly setBurgerMenuOpen: (open: boolean) => void;
+  readonly showBurgerMenuCollections: boolean;
+  readonly setShowBurgerMenuCollections: (show: boolean) => void;
+  readonly showBurgerMenuAbout: boolean;
+  readonly setShowBurgerMenuAbout: (show: boolean) => void;
+  readonly showBurgerMenuCommunity: boolean;
+  readonly setShowBurgerMenuCommunity: (show: boolean) => void;
+  readonly showBurgerMenuTools: boolean;
+  readonly setShowBurgerMenuTools: (show: boolean) => void;
+  readonly showBurgerMenuBrain: boolean;
+  readonly setShowBurgerMenuBrain: (show: boolean) => void;
+  readonly isSmall?: boolean;
+  readonly isCapacitor: boolean;
+  readonly isMobile: boolean;
+  readonly showWaves: boolean;
+  readonly appWalletsSupported: boolean;
+  readonly capacitorIsIos: boolean;
+  readonly country: string;
 }
 
 export default function HeaderMobileMenu({
@@ -274,10 +274,7 @@ export default function HeaderMobileMenu({
                 "Wallet Architecture",
                 "/delegation/wallet-architecture"
               )}
-              {printMobileRow(
-                "Delegation FAQs",
-                "/delegation/delegation-faq"
-              )}
+              {printMobileRow("Delegation FAQs", "/delegation/delegation-faq")}
               {printMobileRow(
                 "Consolidation Use Cases",
                 "/delegation/consolidation-use-cases"
@@ -346,10 +343,7 @@ export default function HeaderMobileMenu({
                 `/about/${AboutSection.NAKAMOTO_THRESHOLD}`
               )}
               {printMobileRow("Meme Lab", `/about/${AboutSection.MEME_LAB}`)}
-              {printMobileRow(
-                "Gradients",
-                `/about/${AboutSection.GRADIENTS}`
-              )}
+              {printMobileRow("Gradients", `/about/${AboutSection.GRADIENTS}`)}
               {printMobileHr()}
               {printMobileRow("GDRC1", `/about/${AboutSection.GDRC1}`)}
               {printMobileHr()}

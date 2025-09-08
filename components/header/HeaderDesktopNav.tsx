@@ -8,11 +8,11 @@ import HeaderDesktopLink from "./HeaderDesktopLink";
 import { getDesktopNavigation, toolsBottomItems, type NavContext } from "./HeaderNavConfig";
 
 interface HeaderDesktopNavProps {
-  showWaves: boolean;
-  appWalletsSupported: boolean;
-  capacitorIsIos: boolean;
-  country: string;
-  pathname?: string;
+  readonly showWaves: boolean;
+  readonly appWalletsSupported: boolean;
+  readonly capacitorIsIos: boolean;
+  readonly country: string;
+  readonly pathname?: string;
 }
 
 export default function HeaderDesktopNav({
