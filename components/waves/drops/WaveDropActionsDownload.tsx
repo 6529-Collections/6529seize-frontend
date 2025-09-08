@@ -53,7 +53,9 @@ export default function WaveDropActionsDownload({
 
   const startDownload = async () => {
     const fileName = getDownloadFileName(drop, media);
-    download(media.url, fileName);
+    const extension = getFileExtension(media);
+    const fullFileName = extension ? `${fileName}.${extension}` : fileName;
+    download(media.url, fullFileName);
   };
 
   const renderContent = () => {
@@ -134,31 +136,12 @@ export default function WaveDropActionsDownload({
 }
 
 function getDownloadFileName(drop: ExtendedDrop, media: any): string {
-  const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
-    drop.title;
-  const author = drop.author?.handle;
-  const wave = drop.wave?.name;
+  // Simple naming pattern like Download.tsx - just use serial number
+  return `media-${drop.serial_no}`;
+}
 
-  // Get file extension from URL
+function getFileExtension(media: any): string {
+  // Extract extension from URL, same logic as Download.tsx getFileInfoFromUrl
   const urlExtension = media.url?.match(/\.([^./?]+)(?:[?#]|$)/)?.[1];
-
-  let fileName = title || `media-${drop.serial_no}`;
-
-  // Clean filename for downloads
-  fileName = fileName.replace(/[^a-zA-Z0-9\s-_]/g, "").trim();
-
-  if (wave) {
-    fileName += ` - ${wave}`;
-  }
-  if (author) {
-    fileName += ` by @${author}`;
-  }
-
-  // Add extension
-  if (urlExtension) {
-    fileName += `.${urlExtension}`;
-  }
-
-  return fileName;
+  return urlExtension || 'file';
 }
