@@ -24,7 +24,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
   return (
     <Container className={styles.countdownContainer}>
       <Row>
-        <Col sm={12} md={props.is_full_width ? 12 : 6} className="pt-2 pb-2">
+        <Col sm={12} md={12} className="pt-2 pb-2">
           <DateCountdown
             title={props.title}
             date={new Date(props.date * 1000)}
@@ -36,10 +36,10 @@ export default function MintCountdownBox(props: Readonly<Props>) {
               className="pt-2 pb-2"
               key={btn.link}
               sm={12}
-              md={props.is_full_width ? 12 : 6}>
+              md={12}>
               <Link href={btn.link} target={btn.target} rel="noreferrer">
                 <button
-                  className={`pt-2 pb-2 btn-block seize-btn no-wrap ${styles.mintBtn}`}>
+                  className={`pt-2 pb-2 btn-block no-wrap ${styles.mintBtn}`}>
                   {btn.label}
                 </button>
               </Link>
