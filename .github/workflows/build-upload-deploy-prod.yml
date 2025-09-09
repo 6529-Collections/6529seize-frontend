@@ -32,8 +32,16 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm install --also=dev
+      - name: Install dependencies with verification
+        run: npm ci
+
+      - name: Security audit
+        run: |
+          npm audit --audit-level=high --production
+          if [ $? -ne 0 ]; then
+            echo "❌ High-severity vulnerabilities detected"
+            exit 1
+          fi
 
       - name: Build App
         env:
