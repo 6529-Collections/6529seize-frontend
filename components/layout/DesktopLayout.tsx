@@ -1,14 +1,11 @@
 "use client";
 
-import React, { ReactNode, useState, useEffect, useMemo } from "react";
-// import dynamic from "next/dynamic";
-// import HeaderPlaceholder from "../header/HeaderPlaceholder";
-// import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-// import Breadcrumb from "../breadcrumb/Breadcrumb";
-// import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
-// import { useHeaderContext } from "../../contexts/HeaderContext";
+import React, { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import DesktopSidebar from "./sidebar/DesktopSidebar";
+import { useSidebarController } from "../../hooks/useSidebarController";
+import { useCollectionsSubmenu } from "../../hooks/useCollectionsSubmenu";
+import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 
 // const Header = dynamic(() => import("../header/Header"), {
 //   ssr: false,
@@ -20,39 +17,25 @@ interface DesktopLayoutProps {
   readonly isSmall?: boolean;
 }
 
-const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
-  // const { registerRef } = useLayout();
-  // const { setHeaderRef } = useHeaderContext();
+const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   const pathname = usePathname();
-  
-  // Start collapsed on small screens
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 1280;
-    }
-    return false;
-  });
-  const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
+  const {
+    isMobile,
+    isCollapsed,
+    isOffcanvasOpen,
+    toggleCollapsed,
+    closeOffcanvas,
+    sidebarWidth,
+  } = useSidebarController();
 
-  // Collections pages that should show the submenu
-  const collectionsPages = [
-    "/the-memes",
-    "/meme-lab",
-    "/gradients",
-    "/6529-gradient",
-    "/nextgen",
-  ];
+  const { isSubmenuOpen, toggleSubmenu, isOnCollectionsPage } =
+    useCollectionsSubmenu(pathname, isMobile);
 
-  const isOnCollectionsPage = useMemo(() => {
-    return collectionsPages.some((page) => pathname?.startsWith(page));
-  }, [pathname]);
-
-  // Update submenu state when navigating to/from collection pages
-  useEffect(() => {
-    if (isOnCollectionsPage) {
-      setIsCollectionsSubmenuOpen(true);
-    }
-  }, [isOnCollectionsPage]);
+  // Calculate main content offset (always account for sidebar width)
+  const mainOffset =
+    isOnCollectionsPage && isSubmenuOpen && !isMobile
+      ? `calc(${sidebarWidth} + ${SIDEBAR_WIDTHS.SUBMENU})`
+      : sidebarWidth;
 
   // Commented out for now - will be used when header is re-enabled
   // const breadcrumbs = useBreadcrumbs();
@@ -67,34 +50,27 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
   // );
 
   return (
-    <>
-      {/* Sidebar - always visible, minimum tw-w-16 */}
-      <DesktopSidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        isCollectionsSubmenuOpen={isCollectionsSubmenuOpen}
-        onCollectionsSubmenuToggle={setIsCollectionsSubmenuOpen}
-      />
-
-      {/* Main content with responsive margins */}
-      <div
-        className={`tw-transition-all tw-duration-300 tw-ease-out ${
-          isSidebarCollapsed ? "tw-ml-16" : "tw-ml-16 xl:tw-ml-72"
-        } ${
-          isCollectionsSubmenuOpen && isOnCollectionsPage ? "xl:tw-ml-[32rem]" : ""
-        }`}
-      >
-        {/* <div
-          ref={headerWrapperRef}
-          className={`${
-            isStreamView ? "tw-sticky tw-top-0 tw-z-50 tw-bg-black" : ""
-          }`}>
-         <Header isSmall={isSmall} /> 
-        {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />} 
-        </div> */}
-        <main>{children}</main>
+    <div>
+      <div className="tailwind-scope">
+        <DesktopSidebar
+          isCollapsed={isCollapsed}
+          onToggle={toggleCollapsed}
+          isCollectionsSubmenuOpen={isSubmenuOpen}
+          onCollectionsSubmenuToggle={toggleSubmenu}
+          isMobile={isMobile}
+          isOffcanvasOpen={isOffcanvasOpen}
+          onCloseOffcanvas={closeOffcanvas}
+          sidebarWidth={sidebarWidth}
+        />
       </div>
-    </>
+
+      <main
+        className="tw-transition-all tw-duration-300 tw-ease-out"
+        style={{ marginLeft: mainOffset }}
+      >
+        {children}
+      </main>
+    </div>
   );
 };
 

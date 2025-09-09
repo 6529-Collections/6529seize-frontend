@@ -13,7 +13,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { useSidebarState } from "../../hooks/useSidebarState";
+import { useSidebarState, SidebarProvider } from "../../hooks/useSidebarState";
 import WebLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 
 interface Props {
@@ -118,9 +118,11 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
 };
 
 const WavesDesktopWithProvider: React.FC<Props> = (props) => (
-  <ContentTabProvider>
-    <WavesDesktop {...props} />
-  </ContentTabProvider>
+  <SidebarProvider>
+    <ContentTabProvider>
+      <WavesDesktop {...props} />
+    </ContentTabProvider>
+  </SidebarProvider>
 );
 
 export default WavesDesktopWithProvider;

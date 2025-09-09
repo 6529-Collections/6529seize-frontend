@@ -24,13 +24,14 @@ export default function DesktopSidebarExpandableItem({
   // Helper to check active routes
   const isActiveRoute = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
-  
+
   // Check if any item in this section is active
-  const sectionHasActiveItem = 
-    section.items.some(item => isActiveRoute(item.href)) ||
-    section.subsections?.some(subsection => 
-      subsection.items.some(item => isActiveRoute(item.href))
-    ) || false;
+  const sectionHasActiveItem =
+    section.items.some((item) => isActiveRoute(item.href)) ||
+    section.subsections?.some((subsection) =>
+      subsection.items.some((item) => isActiveRoute(item.href))
+    ) ||
+    false;
 
   return (
     <>
@@ -39,7 +40,7 @@ export default function DesktopSidebarExpandableItem({
         onClick={onToggle}
         icon={section.icon}
         label={section.name}
-        active={expanded || sectionHasActiveItem}
+        active={sectionHasActiveItem}
         collapsed={collapsed}
         ariaExpanded={expanded}
         ariaControls={`section-${section.key}`}
@@ -56,20 +57,16 @@ export default function DesktopSidebarExpandableItem({
 
       {/* Section Children - Only render when expanded */}
       {expanded && !collapsed && (
-        <div 
-          id={`section-${section.key}`}
-          className="tw-ml-6 tw-mt-2 tw-space-y-1"
-          role="group"
-        >
+        <div id={`section-${section.key}`} className="tw-mt-2" role="group">
           {/* Direct items */}
           {section.items.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className={`tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-transition-colors tw-duration-200 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+              className={` desktop-hover:hover:tw-bg-iron-900 tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-11 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-justify-start tw-pr-3 tw-pl-12 ${
                 isActiveRoute(item.href)
                   ? "tw-text-white desktop-hover:hover:tw-text-white"
-                  : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+                  : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-text-white"
               }`}
               aria-current={isActiveRoute(item.href) ? "page" : undefined}
             >
@@ -79,16 +76,16 @@ export default function DesktopSidebarExpandableItem({
 
           {/* Subsections */}
           {section.subsections?.map((subsection) => (
-            <div key={subsection.name} className="tw-mt-4">
-              <div className="tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-wider">
+            <div key={subsection.name}>
+              <div className="tw-pl-12 tw-pt-5 tw-mt-2 tw-flex tw-items-end tw-text-xs tw-font-medium tw-text-iron-600 tw-uppercase tw-tracking-wider tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
                 {subsection.name}
               </div>
-              <div className="tw-space-y-1">
+              <div className="tw-mt-2">
                 {subsection.items.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-transition-colors tw-duration-200 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+                    className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-11 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-justify-start tw-pr-3 tw-pl-12 tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent ${
                       isActiveRoute(item.href)
                         ? "tw-text-white desktop-hover:hover:tw-text-white"
                         : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"

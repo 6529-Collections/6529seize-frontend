@@ -19,7 +19,7 @@ interface SidebarPrimaryItemProps {
 }
 
 const baseClasses =
-  "tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium";
+  "tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base";
 
 const expandedClasses = "tw-justify-start tw-px-3 tw-gap-4";
 const collapsedClasses = "tw-justify-center tw-px-2";

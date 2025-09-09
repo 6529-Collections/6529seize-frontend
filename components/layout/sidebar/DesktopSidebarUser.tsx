@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useState, memo } from "react";
+import React, { useState, memo, useRef } from "react";
+import { useClickAway } from "react-use";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
-import { EllipsisVerticalIcon, ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
+import {
+  EllipsisVerticalIcon,
+  ArrowRightEndOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 import DropPfp from "@/components/drops/create/utils/DropPfp";
 import { DropPartSize } from "@/components/drops/view/part/DropPart";
 import HeaderUserProxyDropdown from "@/components/header/user/proxy/HeaderUserProxyDropdown";
@@ -21,6 +25,8 @@ interface DesktopSidebarUserProps {
 
 function DesktopSidebarUser({ isCollapsed }: DesktopSidebarUserProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  useClickAway(containerRef, () => setShowUserMenu(false));
   const { address, seizeConnect } = useSeizeConnectContext();
 
   const { profile, isLoading } = useIdentity({
@@ -28,27 +34,32 @@ function DesktopSidebarUser({ isCollapsed }: DesktopSidebarUserProps) {
     initialProfile: null,
   });
 
-  const containerClasses = `tw-mt-auto tw-relative ${
+  const containerClasses = `tw-mt-auto tw-relative tw-w-full ${
     isCollapsed ? "tw-px-2 tw-pb-3" : "tw-px-4 tw-pb-4"
   }`;
 
-  // If no address, show connect button
   if (!address) {
     return (
       <div className={containerClasses}>
         {isCollapsed ? (
-          <PrimaryButton
-            onClicked={() => seizeConnect()}
-            loading={false}
-            disabled={false}
-            title="Connect Wallet"
-            padding="tw-p-2"
+          <div
+            data-tooltip-id="sidebar-tooltip"
+            data-tooltip-content="Connect Wallet"
           >
-            <ArrowRightEndOnRectangleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-          </PrimaryButton>
+            <PrimaryButton
+              onClicked={() => seizeConnect()}
+              loading={false}
+              disabled={false}
+              title="Connect Wallet"
+              padding="tw-p-2"
+            >
+              <ArrowRightEndOnRectangleIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+            </PrimaryButton>
+          </div>
         ) : (
-          // Full button when expanded
-          <HeaderUserConnect />
+          <div className="[&>button]:tw-w-full">
+            <HeaderUserConnect />
+          </div>
         )}
       </div>
     );
@@ -84,7 +95,7 @@ function DesktopSidebarUser({ isCollapsed }: DesktopSidebarUserProps) {
 
   // Authenticated user
   return (
-    <div className={containerClasses}>
+    <div className={containerClasses} ref={containerRef}>
       <button
         onClick={() => setShowUserMenu((prev) => !prev)}
         className={`tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900 ${
@@ -95,6 +106,8 @@ function DesktopSidebarUser({ isCollapsed }: DesktopSidebarUserProps) {
         aria-label="Open user menu"
         aria-expanded={showUserMenu}
         aria-controls="user-menu"
+        data-tooltip-id={isCollapsed ? "sidebar-tooltip" : undefined}
+        data-tooltip-content={isCollapsed ? displayHandle : undefined}
       >
         <DropPfp pfpUrl={profile.pfp} size={DropPartSize.MEDIUM} />
         {!isCollapsed && (

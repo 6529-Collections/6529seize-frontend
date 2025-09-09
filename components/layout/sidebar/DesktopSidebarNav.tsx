@@ -3,11 +3,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { AboutSection } from "@/enums";
-import CollectionsSubmenu from "./CollectionsSubmenu";
+import { useRouter } from "next/navigation";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
@@ -15,9 +14,8 @@ import Squares2X2Icon from "@/components/common/icons/Squares2X2Icon";
 import BellIcon from "@/components/common/icons/BellIcon";
 import UsersIcon from "@/components/common/icons/UsersIcon";
 import {
-  UserIcon,
-  WrenchScrewdriverIcon,
-  InformationCircleIcon,
+  WrenchIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import DesktopSidebarNavItem from "./nav/DesktopSidebarNavItem";
 import DesktopSidebarExpandableItem from "./nav/DesktopSidebarExpandableItem";
@@ -25,7 +23,6 @@ import { SidebarSection } from "@/components/navigation/navTypes";
 
 interface DesktopSidebarNavProps {
   isCollapsed: boolean;
-  onExpandSidebar?: () => void;
   isCollectionsOpen?: boolean;
   onCollectionsClick?: () => void;
 }
@@ -39,14 +36,13 @@ type NavItem = {
   iconSizeClass?: string;
 };
 
-function DesktopSidebarNav({ 
-  isCollapsed, 
-  onExpandSidebar,
+function DesktopSidebarNav({
+  isCollapsed,
   isCollectionsOpen = false,
-  onCollectionsClick
+  onCollectionsClick,
 }: DesktopSidebarNavProps) {
   const pathname = usePathname();
-  const { address } = useSeizeConnectContext();
+  const router = useRouter();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
@@ -83,12 +79,16 @@ function DesktopSidebarNav({
     {
       type: "action",
       name: "Collections",
-      onClick: onCollectionsClick || (() => {}),
+      onClick: () => {
+        // Navigate to default collection (The Memes) and open submenu
+        router.push("/the-memes");
+        onCollectionsClick?.();
+      },
       icon: Squares2X2Icon,
     },
     {
       type: "route",
-      name: "Community",
+      name: "Network",
       href: "/network",
       icon: UsersIcon,
     },
@@ -99,7 +99,7 @@ function DesktopSidebarNav({
     {
       key: "tools",
       name: "Tools",
-      icon: WrenchScrewdriverIcon,
+      icon: WrenchIcon,
       items: [
         { name: "API", href: "/tools/api" },
         { name: "EMMA", href: "/emma" },
@@ -146,7 +146,7 @@ function DesktopSidebarNav({
     {
       key: "about",
       name: "About",
-      icon: InformationCircleIcon,
+      icon: DocumentTextIcon,
       items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
       subsections: [
         {
@@ -286,11 +286,15 @@ function DesktopSidebarNav({
                 label={item.name}
                 active={active}
                 collapsed={isCollapsed}
-                ariaExpanded={item.name === "Collections" ? isCollectionsOpen : undefined}
-                ariaControls={item.name === "Collections" ? "collections-submenu" : undefined}
+                ariaExpanded={
+                  item.name === "Collections" ? isCollectionsOpen : undefined
+                }
+                ariaControls={
+                  item.name === "Collections"
+                    ? "collections-submenu"
+                    : undefined
+                }
               />
-
-              {/* Collections submenu is rendered as a separate panel, not embedded here */}
             </li>
           );
         })}

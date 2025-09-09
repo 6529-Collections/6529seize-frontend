@@ -26,7 +26,7 @@ export default function HomePage({
   initialTokens,
 }: HomePageProps) {
   const { isApp } = useDeviceInfo();
-  const [activeTab, setActiveTab] = useState<"feed" | "latest">("feed");
+  const [activeTab, setActiveTab] = useState<"feed" | "latest">("latest");
   const { registerRef } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();
 
@@ -54,7 +54,7 @@ export default function HomePage({
       {/* Tab Navigation */}
       <div
         ref={setTabsRef}
-        className="tw-px-6 tw-sticky tw-top-0 tw-z-50 tw-overflow-hidden tw-bg-iron-950/80 tw-backdrop-blur-sm tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
+        className="tw-px-6 tw-sticky tw-top-0 tw-z-50 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
       >
         <div
           className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
@@ -100,13 +100,13 @@ export default function HomePage({
         </div>
       </div>
 
-      <div className="tw-h-full tw-px-6">
+      <div className="tw-h-full tw-px-4">
         {activeTab === "feed" ? (
-          <div className="tw-h-full tw-overflow-hidden">
+          <div className="tw-h-full tw-overflow-hidden tailwind-scope">
             {isAuthenticated ? (
               <HomeFeed />
             ) : (
-              <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6">
+              <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[85dvh]">
                 <Image
                   unoptimized
                   priority
@@ -130,8 +130,8 @@ export default function HomePage({
             )}
           </div>
         ) : (
-          <Home 
-            featuredNft={featuredNft} 
+          <Home
+            featuredNft={featuredNft}
             featuredNextgen={featuredNextgen}
             initialActivityData={initialActivityData}
             initialTokens={initialTokens}
