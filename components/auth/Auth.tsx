@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState, useMemo, useCallback, u
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "../../hooks/useSecureSign";
+import { useIdentity } from "../../hooks/useIdentity";
 import {
   getAuthJwt,
   removeAuthJwt,
@@ -108,8 +109,10 @@ export default function Auth({
   const { signMessage, isSigningPending, reset: resetSigning } = useSecureSign();
   const [showSignModal, setShowSignModal] = useState(false);
 
-  const [connectedProfile, setConnectedProfile] = useState<ApiIdentity>();
-  const [fetchingProfile, setFetchingProfile] = useState(false);
+  const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity({
+    handleOrWallet: address,
+    initialProfile: null,
+  });
 
   // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -124,22 +127,6 @@ export default function Auth({
     setAuthLoadingState('idle');
   }, []);
 
-  useEffect(() => {
-    if (address) {
-      setFetchingProfile(true);
-      commonApiFetch<ApiIdentity>({
-        endpoint: `identities/${address}`,
-      })
-        .then((profile) => {
-          setConnectedProfile(profile);
-        })
-        .finally(() => {
-          setFetchingProfile(false);
-        });
-    } else {
-      setConnectedProfile(undefined);
-    }
-  }, [address]);
 
   const { data: profileProxies } = useQuery<ApiProfileProxy[]>({
     queryKey: [
@@ -565,26 +552,9 @@ export default function Auth({
     }
   };
 
-  const getShowWaves = (): boolean => {
-    if (!connectedProfile?.handle) {
-      return false;
-    }
-
-    if (activeProfileProxy) {
-      return false;
-    }
-
-    if (!address) {
-      return false;
-    }
-    return true;
-  };
-
-  const [showWaves, setShowWaves] = useState(getShowWaves());
-
-  useEffect(() => {
-    setShowWaves(getShowWaves());
-  }, [connectedProfile, activeProfileProxy, address]);
+  const showWaves = useMemo(() => {
+    return !!connectedProfile?.handle && !activeProfileProxy && !!address;
+  }, [connectedProfile?.handle, activeProfileProxy, address]);
 
   // Computed modal visibility to prevent flickering during rapid state changes
   const shouldShowSignModal = useMemo(() => {
