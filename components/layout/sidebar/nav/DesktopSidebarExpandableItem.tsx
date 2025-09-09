@@ -14,7 +14,7 @@ interface DesktopSidebarExpandableItemProps {
   readonly pathname: string | null;
 }
 
-export default function DesktopSidebarExpandableItem({
+function DesktopSidebarExpandableItem({
   section,
   expanded,
   onToggle,
@@ -103,3 +103,5 @@ export default function DesktopSidebarExpandableItem({
     </>
   );
 }
+
+export default React.memo(DesktopSidebarExpandableItem);

@@ -4,8 +4,7 @@ import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesLis
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import WebUnifiedWavesListWaves, {
@@ -76,22 +75,8 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <div className="tw-mb-4">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
-        {!isApp && (
-          <div className="tw-px-4 tw-mb-4 tw-w-full">
-            <Link
-              href="/waves?create=wave"
-              className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300">
-              <FontAwesomeIcon
-                icon={faPlus}
-                className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
-              />
-              <span className="tw-text-xs tw-font-semibold">Create Wave</span>
-            </Link>
-          </div>
-        )}
-
+    <div>
+      <div className="tw-h-full tw-bg-iron-950 tw-py-4">
         <div className="tw-w-full">
           {/* Unified Waves List */}
           <WebUnifiedWavesListWaves

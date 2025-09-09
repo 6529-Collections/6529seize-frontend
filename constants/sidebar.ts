@@ -6,11 +6,6 @@ export const SIDEBAR_WIDTHS = {
 
 export const SIDEBAR_BREAKPOINT = 768; // md breakpoint
 
-export const SIDEBAR_CSS_VARS = {
-  width: '--sidebar-width',
-  offset: '--main-offset',
-} as const;
-
 export const COLLECTIONS_ROUTES = [
   '/the-memes',
   '/meme-lab', 

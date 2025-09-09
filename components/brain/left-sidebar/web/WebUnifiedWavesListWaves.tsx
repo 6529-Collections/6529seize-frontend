@@ -1,14 +1,26 @@
 "use client";
 
-import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
+import React, {
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
 import SectionHeader from "../waves/SectionHeader";
-import JoinedToggle from "../waves/JoinedToggle";
+import WavesFilterToggle from "../waves/WavesFilterToggle";
 import {
   useVirtualizedWaves,
   VirtualItem,
 } from "../../../../hooks/useVirtualizedWaves";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import CreateWaveModal from "../../../waves/create-wave/CreateWaveModal";
+import { useAuth } from "../../../auth/Auth";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 
 // Lightweight type guard that checks essential properties only
 function isValidWave(wave: unknown): wave is MinimalWave {
@@ -48,133 +60,185 @@ interface WebUnifiedWavesListWavesProps {
 const WebUnifiedWavesListWaves = forwardRef<
   WebUnifiedWavesListWavesHandle,
   WebUnifiedWavesListWavesProps
->(({ waves, onHover, hideHeaders = false, hideToggle = false, hidePin = false, scrollContainerRef }, ref) => {
-  const listContainerRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+>(
+  (
+    {
+      waves,
+      onHover,
+      hideHeaders = false,
+      hideToggle = false,
+      hidePin = false,
+      scrollContainerRef,
+    },
+    ref
+  ) => {
+    const listContainerRef = useRef<HTMLDivElement>(null);
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    const { connectedProfile } = useAuth();
+    const { isApp } = useDeviceInfo();
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  useImperativeHandle(ref, () => ({
-    sentinelRef,
-  }));
+    useImperativeHandle(ref, () => ({
+      sentinelRef,
+    }));
 
-  // Split waves into pinned and regular
-  const { pinnedWaves, regularWaves } = useMemo(() => {
-    const pinned: MinimalWave[] = [];
-    const regular: MinimalWave[] = [];
-    
-    waves.forEach((wave) => {
-      if (wave.isPinned) {
-        pinned.push(wave);
-      } else {
-        regular.push(wave);
-      }
-    });
-    
-    return { pinnedWaves: pinned, regularWaves: regular };
-  }, [waves]);
+    // Split waves into pinned and regular
+    const { pinnedWaves, regularWaves } = useMemo(() => {
+      const pinned: MinimalWave[] = [];
+      const regular: MinimalWave[] = [];
 
-  // Use virtualization hook for regular waves  
-  const virtual = useVirtualizedWaves<MinimalWave>(
-    regularWaves,
-    "web-unified-waves-regular",
-    scrollContainerRef || listContainerRef,
-    listContainerRef,
-    WAVE_ROW_HEIGHT,
-    5 // overscan
-  );
+      waves.forEach((wave) => {
+        if (wave.isPinned) {
+          pinned.push(wave);
+        } else {
+          regular.push(wave);
+        }
+      });
 
-  return (
-    <div className="tw-flex tw-flex-col">
-      {/* Always show "All Waves" header with toggle when not hidden */}
-      {!hideHeaders && (
-        <SectionHeader
-          label="All Waves"
-          rightContent={hideToggle ? undefined : <JoinedToggle />}
-        />
-      )}
+      return { pinnedWaves: pinned, regularWaves: regular };
+    }, [waves]);
 
-      {/* Conditionally show pinned section */}
-      {!hideHeaders && pinnedWaves.length > 0 && (
-        <>
-          <section
-            className="tw-flex tw-flex-col tw-mb-3"
-            aria-label="Pinned waves"
-          >
-            {pinnedWaves
-              .filter((wave): wave is MinimalWave => {
-                if (!isValidWave(wave)) {
-                  console.warn("Invalid pinned wave object", wave);
-                  return false;
-                }
-                return true;
-              })
-              .map((wave) => (
-                <div key={wave.id}>
-                  <WebBrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin}
-                  />
-                </div>
-              ))}
-          </section>
-        </>
-      )}
+    // Use virtualization hook for regular waves
+    const virtual = useVirtualizedWaves<MinimalWave>(
+      regularWaves,
+      "web-unified-waves-regular",
+      scrollContainerRef || listContainerRef,
+      listContainerRef,
+      WAVE_ROW_HEIGHT,
+      5 // overscan
+    );
 
-      {/* Conditionally show regular waves or maintain structure */}
-      {regularWaves.length > 0 ? (
-        <section
-          ref={listContainerRef}
-          style={{
-            height: virtual.totalHeight,
-            position: "relative",
-          }}
-          aria-label="Regular waves list"
-        >
-          {virtual.virtualItems.map((v: VirtualItem) => {
-            if (v.index === regularWaves.length) {
-              return (
-                <div
-                  key="sentinel"
-                  ref={sentinelRef}
-                  style={{
-                    position: "absolute",
-                    width: "100%",
-                    top: v.start,
-                    height: v.size,
-                  }}
-                />
-              );
-            }
-            const wave = regularWaves[v.index];
-            if (!isValidWave(wave)) {
-              console.warn("Invalid wave object at index", v.index, wave);
-              return null;
-            }
-            return (
-              <div
-                key={wave.id}
+    return (
+      <>
+        <div className="tw-flex tw-flex-col">
+          {/* Waves header with create button */}
+          {!hideHeaders && (
+            <SectionHeader
+              label="Waves"
+              rightContent={
+                !isApp && connectedProfile ? (
+                  <PrimaryButton
+                    onClicked={() => setIsCreateModalOpen(true)}
+                    loading={false}
+                    disabled={false}
+                    padding="tw-px-2.5 tw-py-2.5"
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      className="tw-size-3 tw-flex-shrink-0"
+                    />
+                  </PrimaryButton>
+                ) : undefined
+              }
+            />
+          )}
+
+          {/* Waves filter toggle on its own row */}
+          {!hideHeaders && !hideToggle && (
+            <div className="tw-pb-3 tw-mt-2 tw-flex tw-px-4">
+              <WavesFilterToggle />
+            </div>
+          )}
+
+          <div className="tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0">
+            {/* Conditionally show pinned section */}
+            {!hideHeaders && pinnedWaves.length > 0 && (
+              <>
+                <section
+                  className="tw-flex tw-flex-col tw-mb-3"
+                  aria-label="Pinned waves"
+                >
+                  {pinnedWaves
+                    .filter((wave): wave is MinimalWave => {
+                      if (!isValidWave(wave)) {
+                        console.warn("Invalid pinned wave object", wave);
+                        return false;
+                      }
+                      return true;
+                    })
+                    .map((wave) => (
+                      <div key={wave.id}>
+                        <WebBrainLeftSidebarWave
+                          wave={wave}
+                          onHover={onHover}
+                          showPin={!hidePin}
+                        />
+                      </div>
+                    ))}
+                </section>
+              </>
+            )}
+
+            {/* Conditionally show regular waves or maintain structure */}
+            {regularWaves.length > 0 ? (
+              <section
+                ref={listContainerRef}
                 style={{
-                  position: "absolute",
-                  width: "100%",
-                  top: v.start,
-                  height: v.size,
+                  height: virtual.totalHeight,
+                  position: "relative",
                 }}
+                aria-label="Regular waves list"
               >
-                <WebBrainLeftSidebarWave
-                  wave={wave}
-                  onHover={onHover}
-                  showPin={!hidePin}
-                />
-              </div>
-            );
-          })}
-        </section>
-      ) : (
-        <div ref={listContainerRef} style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }} />
-      )}
-    </div>
-  );
-});
+                {virtual.virtualItems.map((v: VirtualItem) => {
+                  if (v.index === regularWaves.length) {
+                    return (
+                      <div
+                        key="sentinel"
+                        ref={sentinelRef}
+                        style={{
+                          position: "absolute",
+                          width: "100%",
+                          top: v.start,
+                          height: v.size,
+                        }}
+                      />
+                    );
+                  }
+                  const wave = regularWaves[v.index];
+                  if (!isValidWave(wave)) {
+                    console.warn("Invalid wave object at index", v.index, wave);
+                    return null;
+                  }
+                  return (
+                    <div
+                      key={wave.id}
+                      style={{
+                        position: "absolute",
+                        width: "100%",
+                        top: v.start,
+                        height: v.size,
+                      }}
+                    >
+                      <WebBrainLeftSidebarWave
+                        wave={wave}
+                        onHover={onHover}
+                        showPin={!hidePin}
+                      />
+                    </div>
+                  );
+                })}
+              </section>
+            ) : (
+              <div
+                ref={listContainerRef}
+                style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Create Wave Modal */}
+        {connectedProfile && (
+          <CreateWaveModal
+            isOpen={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+            profile={connectedProfile}
+          />
+        )}
+      </>
+    );
+  }
+);
 
 WebUnifiedWavesListWaves.displayName = "WebUnifiedWavesListWaves";
 export default WebUnifiedWavesListWaves;

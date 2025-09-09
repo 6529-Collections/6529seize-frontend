@@ -36,6 +36,179 @@ type NavItem = {
   iconSizeClass?: string;
 };
 
+// Primary navigation items (stable, defined outside component)
+const createNavItems = (router: any, onCollectionsClick?: () => void): NavItem[] => [
+  {
+    type: "route",
+    name: "Home",
+    href: "/",
+    icon: HomeIcon,
+  },
+  {
+    type: "route",
+    name: "Waves",
+    href: "/waves",
+    icon: WavesIcon,
+    iconSizeClass: "tw-size-6",
+  },
+  {
+    type: "route",
+    name: "Messages",
+    href: "/messages",
+    icon: ChatBubbleIcon,
+  },
+  {
+    type: "route",
+    name: "Notifications",
+    href: "/notifications",
+    icon: BellIcon,
+  },
+  {
+    type: "action",
+    name: "Collections",
+    onClick: () => {
+      // Navigate to default collection (The Memes) and open submenu
+      router.push("/the-memes");
+      onCollectionsClick?.();
+    },
+    icon: Squares2X2Icon,
+  },
+  {
+    type: "route",
+    name: "Network",
+    href: "/network",
+    icon: UsersIcon,
+  },
+];
+
+// Expandable sections factory (stable, defined outside component)  
+const createSections = (capacitor: any, country: string): SidebarSection[] => [
+  {
+    key: "tools",
+    name: "Tools",
+    icon: WrenchIcon,
+    items: [
+      { name: "API", href: "/tools/api" },
+      { name: "EMMA", href: "/emma" },
+      { name: "Block Finder", href: "/meme-blocks" },
+      { name: "Open Data", href: "/open-data" },
+    ],
+    subsections: [
+      {
+        name: "NFT Delegation",
+        items: [
+          {
+            name: "Delegation Center",
+            href: "/delegation/delegation-center",
+          },
+          {
+            name: "Wallet Architecture",
+            href: "/delegation/wallet-architecture",
+          },
+          { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
+          {
+            name: "Consolidation Use Cases",
+            href: "/delegation/consolidation-use-cases",
+          },
+          { name: "Wallet Checker", href: "/delegation/wallet-checker" },
+        ],
+      },
+      {
+        name: "The Memes Tools",
+        items: [
+          ...(!capacitor.isIos || country === "US"
+            ? [
+                {
+                  name: "Memes Subscriptions",
+                  href: "/tools/subscriptions-report",
+                },
+              ]
+            : []),
+          { name: "Memes Accounting", href: "/meme-accounting" },
+          { name: "Memes Gas", href: "/meme-gas" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "about",
+    name: "About",
+    icon: DocumentTextIcon,
+    items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
+    subsections: [
+      {
+        name: "NFTs",
+        items: [
+          { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
+          ...(!capacitor.isIos || country === "US"
+            ? [
+                {
+                  name: "Subscriptions",
+                  href: `/about/${AboutSection.SUBSCRIPTIONS}`,
+                },
+              ]
+            : []),
+          {
+            name: "Memes Calendar",
+            href: `/about/${AboutSection.MEMES_CALENDAR}`,
+          },
+          { name: "Minting", href: `/about/${AboutSection.MINTING}` },
+          {
+            name: "Nakamoto Threshold",
+            href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+          },
+          { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
+          { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
+        ],
+      },
+      {
+        name: "NFT Delegation",
+        items: [
+          {
+            name: "About NFTD",
+            href: `/about/${AboutSection.NFT_DELEGATION}`,
+          },
+          {
+            name: "Primary Address",
+            href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
+          },
+        ],
+      },
+      {
+        name: "6529 Capital",
+        items: [
+          { name: "About 6529 Capital", href: "/capital" },
+          { name: "Company Portfolio", href: "/capital/company-portfolio" },
+          { name: "NFT Fund", href: "/capital/fund" },
+        ],
+      },
+      {
+        name: "Support",
+        items: [
+          { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
+          { name: "Apply", href: `/about/${AboutSection.APPLY}` },
+          { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
+        ],
+      },
+      {
+        name: "Resources",
+        items: [
+          {
+            name: "Data Decentralization",
+            href: `/about/${AboutSection.DATA_DECENTR}`,
+          },
+          { name: "ENS", href: `/about/${AboutSection.ENS}` },
+          { name: "License", href: `/about/${AboutSection.LICENSE}` },
+          {
+            name: "Release Notes",
+            href: `/about/${AboutSection.RELEASE_NOTES}`,
+          },
+        ],
+      },
+    ],
+  },
+];
+
 function DesktopSidebarNav({
   isCollapsed,
   isCollectionsOpen = false,
@@ -49,178 +222,16 @@ function DesktopSidebarNav({
   // Local state for expandable sections
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  // Primary navigation items
-  const navItems: NavItem[] = [
-    {
-      type: "route",
-      name: "Home",
-      href: "/",
-      icon: HomeIcon,
-    },
-    {
-      type: "route",
-      name: "Waves",
-      href: "/waves",
-      icon: WavesIcon,
-      iconSizeClass: "tw-size-6",
-    },
-    {
-      type: "route",
-      name: "Messages",
-      href: "/messages",
-      icon: ChatBubbleIcon,
-    },
-    {
-      type: "route",
-      name: "Notifications",
-      href: "/notifications",
-      icon: BellIcon,
-    },
-    {
-      type: "action",
-      name: "Collections",
-      onClick: () => {
-        // Navigate to default collection (The Memes) and open submenu
-        router.push("/the-memes");
-        onCollectionsClick?.();
-      },
-      icon: Squares2X2Icon,
-    },
-    {
-      type: "route",
-      name: "Network",
-      href: "/network",
-      icon: UsersIcon,
-    },
-  ];
+  // Memoized navigation data to prevent unnecessary re-renders
+  const navItems = useMemo(() => 
+    createNavItems(router, onCollectionsClick), 
+    [router, onCollectionsClick]
+  );
 
-  // Expandable sections
-  const sections: SidebarSection[] = [
-    {
-      key: "tools",
-      name: "Tools",
-      icon: WrenchIcon,
-      items: [
-        { name: "API", href: "/tools/api" },
-        { name: "EMMA", href: "/emma" },
-        { name: "Block Finder", href: "/meme-blocks" },
-        { name: "Open Data", href: "/open-data" },
-      ],
-      subsections: [
-        {
-          name: "NFT Delegation",
-          items: [
-            {
-              name: "Delegation Center",
-              href: "/delegation/delegation-center",
-            },
-            {
-              name: "Wallet Architecture",
-              href: "/delegation/wallet-architecture",
-            },
-            { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
-            {
-              name: "Consolidation Use Cases",
-              href: "/delegation/consolidation-use-cases",
-            },
-            { name: "Wallet Checker", href: "/delegation/wallet-checker" },
-          ],
-        },
-        {
-          name: "The Memes Tools",
-          items: [
-            ...(!capacitor.isIos || country === "US"
-              ? [
-                  {
-                    name: "Memes Subscriptions",
-                    href: "/tools/subscriptions-report",
-                  },
-                ]
-              : []),
-            { name: "Memes Accounting", href: "/meme-accounting" },
-            { name: "Memes Gas", href: "/meme-gas" },
-          ],
-        },
-      ],
-    },
-    {
-      key: "about",
-      name: "About",
-      icon: DocumentTextIcon,
-      items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
-      subsections: [
-        {
-          name: "NFTs",
-          items: [
-            { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
-            ...(!capacitor.isIos || country === "US"
-              ? [
-                  {
-                    name: "Subscriptions",
-                    href: `/about/${AboutSection.SUBSCRIPTIONS}`,
-                  },
-                ]
-              : []),
-            {
-              name: "Memes Calendar",
-              href: `/about/${AboutSection.MEMES_CALENDAR}`,
-            },
-            { name: "Minting", href: `/about/${AboutSection.MINTING}` },
-            {
-              name: "Nakamoto Threshold",
-              href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-            },
-            { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
-            { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
-          ],
-        },
-        {
-          name: "NFT Delegation",
-          items: [
-            {
-              name: "About NFTD",
-              href: `/about/${AboutSection.NFT_DELEGATION}`,
-            },
-            {
-              name: "Primary Address",
-              href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
-            },
-          ],
-        },
-        {
-          name: "6529 Capital",
-          items: [
-            { name: "About 6529 Capital", href: "/capital" },
-            { name: "Company Portfolio", href: "/capital/company-portfolio" },
-            { name: "NFT Fund", href: "/capital/fund" },
-          ],
-        },
-        {
-          name: "Support",
-          items: [
-            { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
-            { name: "Apply", href: `/about/${AboutSection.APPLY}` },
-            { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
-          ],
-        },
-        {
-          name: "Resources",
-          items: [
-            {
-              name: "Data Decentralization",
-              href: `/about/${AboutSection.DATA_DECENTR}`,
-            },
-            { name: "ENS", href: `/about/${AboutSection.ENS}` },
-            { name: "License", href: `/about/${AboutSection.LICENSE}` },
-            {
-              name: "Release Notes",
-              href: `/about/${AboutSection.RELEASE_NOTES}`,
-            },
-          ],
-        },
-      ],
-    },
-  ];
+  const sections = useMemo(() => 
+    createSections(capacitor, country), 
+    [capacitor, country]
+  );
 
   // Active state logic
   const isActive = (item: NavItem): boolean => {
@@ -257,8 +268,6 @@ function DesktopSidebarNav({
         : [...prev, sectionKey]
     );
   };
-
-  // Collections state is now managed by parent component
 
   return (
     <nav
