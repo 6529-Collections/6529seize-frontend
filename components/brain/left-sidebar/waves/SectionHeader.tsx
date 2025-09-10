@@ -19,7 +19,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
         {icon && (
           <FontAwesomeIcon icon={icon} className="tw-size-3 tw-text-iron-400" />
         )}
-        <span className="tw-text-lg tw-font-semibold tw-tracking-tight tw-text-iron-50">
+        <span className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
           {label}
         </span>
       </div>

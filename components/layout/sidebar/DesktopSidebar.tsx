@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Tooltip } from "react-tooltip";
+import Tooltip from "../../common/Tooltip";
 import DesktopSidebarNav from "./DesktopSidebarNav";
 import DesktopSidebarUser from "./DesktopSidebarUser";
 import CollectionsSubmenu from "./CollectionsSubmenu";
@@ -54,7 +54,7 @@ function DesktopSidebar({
     >
       <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         <div
-          className={`tw-flex tw-shrink-0 tw-pt-2.5 ${
+          className={`tw-flex tw-shrink-0 tw-pt-3 ${
             isVisuallyCollapsed
               ? "tw-flex-col tw-items-center tw-gap-y-4 tw-px-2"
               : "tw-items-center tw-justify-between tw-px-4"
@@ -76,14 +76,15 @@ function DesktopSidebar({
           <button
             type="button"
             onClick={onToggle}
-            className="tw-flex tw-group tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 desktop-hover:hover:tw-from-iron-750 desktop-hover:hover:tw-to-iron-850 desktop-hover:hover:tw-border-iron-650"
+            className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm tw-flex-shrink-0"
             aria-label={
               isVisuallyCollapsed ? "Expand sidebar" : "Collapse sidebar"
             }
             aria-expanded={!isVisuallyCollapsed}
           >
             <ChevronDoubleLeftIcon
-              className={`tw-h-4 tw-w-4 tw-text-iron-200 group-hover:tw-text-white tw-transition-transform tw-duration-200 ${
+              strokeWidth={3}
+              className={`tw-h-4 tw-w-4 tw-text-iron-300 group-hover:hover:tw-text-iron-200 tw-transition-all tw-duration-200 ${
                 isVisuallyCollapsed ? "tw-rotate-180" : ""
               }`}
             />
@@ -109,29 +110,7 @@ function DesktopSidebar({
   );
 
   // Tooltip - rendered as sibling for proper z-index handling
-  const tooltip = (
-    <Tooltip
-      id="sidebar-tooltip"
-      place="right"
-      offset={16}
-      opacity={1}
-      style={{
-        pointerEvents: "none",
-        filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))",
-        padding: "4px 8px",
-        background:
-          "linear-gradient(to bottom right, rgb(64, 64, 64), rgb(38, 38, 38))",
-        color: "white",
-        fontSize: "13px",
-        fontWeight: "500",
-        borderRadius: "6px",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-        backdropFilter: "blur(4px)",
-        zIndex: 9999,
-      }}
-      border="1px solid rgb(64, 64, 64)"
-    />
-  );
+  const tooltip = <Tooltip id="sidebar-tooltip" variant="sidebar" />;
 
   // Mobile off-canvas: overlay behavior
   if (isMobile && isOffcanvasOpen) {

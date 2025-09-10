@@ -21,6 +21,7 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import CreateWaveModal from "../../../waves/create-wave/CreateWaveModal";
 import { useAuth } from "../../../auth/Auth";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import Tooltip from "../../../common/Tooltip";
 
 // Lightweight type guard that checks essential properties only
 function isValidWave(wave: unknown): wave is MinimalWave {
@@ -117,17 +118,22 @@ const WebUnifiedWavesListWaves = forwardRef<
               label="Waves"
               rightContent={
                 !isApp && connectedProfile ? (
-                  <PrimaryButton
-                    onClicked={() => setIsCreateModalOpen(true)}
-                    loading={false}
-                    disabled={false}
-                    padding="tw-px-2.5 tw-py-2.5"
+                  <div 
+                    data-tooltip-id="create-wave-tooltip"
+                    data-tooltip-content="Create wave"
                   >
-                    <FontAwesomeIcon
-                      icon={faPlus}
-                      className="tw-size-3 tw-flex-shrink-0"
-                    />
-                  </PrimaryButton>
+                    <PrimaryButton
+                      onClicked={() => setIsCreateModalOpen(true)}
+                      loading={false}
+                      disabled={false}
+                      padding="tw-px-2 tw-py-2"
+                    >
+                      <FontAwesomeIcon
+                        icon={faPlus}
+                        className="tw-size-4 tw-flex-shrink-0"
+                      />
+                    </PrimaryButton>
+                  </div>
                 ) : undefined
               }
             />
@@ -135,17 +141,17 @@ const WebUnifiedWavesListWaves = forwardRef<
 
           {/* Waves filter toggle on its own row */}
           {!hideHeaders && !hideToggle && (
-            <div className="tw-pb-3 tw-mt-2 tw-flex tw-px-4">
+            <div className="tw-pb-3 tw-mt-4 tw-flex tw-px-4">
               <WavesFilterToggle />
             </div>
           )}
 
-          <div className="tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0">
+          <div>
             {/* Conditionally show pinned section */}
             {!hideHeaders && pinnedWaves.length > 0 && (
               <>
                 <section
-                  className="tw-flex tw-flex-col tw-mb-3"
+                  className="tw-flex tw-flex-col"
                   aria-label="Pinned waves"
                 >
                   {pinnedWaves
@@ -168,7 +174,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                 </section>
               </>
             )}
-
+            <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3"></div>
             {/* Conditionally show regular waves or maintain structure */}
             {regularWaves.length > 0 ? (
               <section
@@ -235,6 +241,9 @@ const WebUnifiedWavesListWaves = forwardRef<
             profile={connectedProfile}
           />
         )}
+        
+        {/* Tooltip */}
+        <Tooltip id="create-wave-tooltip" />
       </>
     );
   }

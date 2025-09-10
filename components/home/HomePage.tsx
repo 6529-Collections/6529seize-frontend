@@ -54,7 +54,7 @@ export default function HomePage({
       {/* Tab Navigation */}
       <div
         ref={setTabsRef}
-        className="tw-px-6 tw-sticky tw-top-0 tw-z-50 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
+        className="tailwind-scope tw-px-6 tw-sticky tw-top-0 tw-z-50 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
       >
         <div
           className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"

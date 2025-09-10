@@ -71,7 +71,7 @@ const WavesView: React.FC = () => {
         Select a Wave
       </h2>
       <p className="tw-text-iron-400 tw-max-w-md tw-mb-6">
-        Choose a wave from the sidebar to view its content and participate in the discussion.
+        Choose a wave to view its content and participate in the discussion.
       </p>
       
       {!isApp && connectedProfile && (

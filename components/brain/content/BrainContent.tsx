@@ -7,6 +7,7 @@ import BrainContentInput from "./input/BrainContentInput";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { useAndroidKeyboard } from "../../../hooks/useAndroidKeyboard";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
 
 // Create breakpoint hook with the same values as tailwind classes
 // lg:tw-hidden is applied at min-width 1024px
@@ -31,8 +32,9 @@ const BrainContent: React.FC<BrainContentProps> = ({
   // Android keyboard handling - only apply when input is visible
   const { getContainerStyle } = useAndroidKeyboard();
 
-  // Get current breakpoint
+  // Get current breakpoint and device info
   const breakpoint = useBreakpoint();
+  const { isApp } = useDeviceInfo();
 
   // Local refs for component-specific needs
   const pinnedElementRef = useRef<HTMLDivElement | null>(null);
@@ -49,8 +51,8 @@ const BrainContent: React.FC<BrainContentProps> = ({
     [registerRef]
   );
 
-  // Only render the pinned waves on mobile (S breakpoint)
-  const shouldShowPinnedWaves = breakpoint === "S";
+  // Only show pinned waves in mobile apps, not mobile browsers
+  const shouldShowPinnedWaves = breakpoint === "S" && isApp;
 
   // Only apply Android keyboard adjustments when input is visible
   const containerStyle = activeDrop ? getContainerStyle({}, keyboardAdjustment) : {};

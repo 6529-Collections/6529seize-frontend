@@ -76,7 +76,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
 
   return (
     <div>
-      <div className="tw-h-full tw-bg-iron-950 tw-py-4">
+      <div className="tw-h-full tw-bg-iron-950 tw-py-1">
         <div className="tw-w-full">
           {/* Unified Waves List */}
           <WebUnifiedWavesListWaves

@@ -29,12 +29,19 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
   const { contentContainerStyle } = useLayout();
   
   // Get global sidebar state
-  const { isRightSidebarOpen } = useSidebarState();
+  const { isRightSidebarOpen, closeRightSidebar } = useSidebarState();
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
   const dropId = searchParams?.get('drop') ?? undefined;
   const waveId = searchParams?.get('wave') ?? undefined;
+
+  // Auto-close right sidebar when no wave is selected
+  useEffect(() => {
+    if (!waveId && isRightSidebarOpen) {
+      closeRightSidebar();
+    }
+  }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
@@ -76,11 +83,11 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
           <div
             className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-w-full tw-overflow-hidden"
             style={contentContainerStyle}>
-            {/* Only show WebLeftSidebar when right sidebar is closed */}
-            {!isRightSidebarOpen && <WebLeftSidebar activeWaveId={waveId} />}
+            {/* Show WebLeftSidebar when right sidebar is closed OR when no wave is selected */}
+            {(!isRightSidebarOpen || !waveId) && <WebLeftSidebar activeWaveId={waveId} />}
             
             <div className={`tw-flex-grow tw-flex tw-flex-col tw-h-full ${
-              isRightSidebarOpen ? "tw-pr-80" : ""
+              isRightSidebarOpen && waveId ? "tw-pr-[20.5rem]" : ""
             }`}>
               {children}
               {isDropOpen && (

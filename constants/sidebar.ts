@@ -4,7 +4,7 @@ export const SIDEBAR_WIDTHS = {
   SUBMENU: '16rem',       // Collections submenu width
 } as const;
 
-export const SIDEBAR_BREAKPOINT = 768; // md breakpoint
+export const SIDEBAR_BREAKPOINT = 1024; // lg breakpoint
 
 export const COLLECTIONS_ROUTES = [
   '/the-memes',

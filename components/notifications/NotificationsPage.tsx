@@ -13,7 +13,7 @@ export default function NotificationsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[60vh] tw-p-6">
+      <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[95vh] tw-p-6">
         <Image
           unoptimized
           priority
@@ -39,7 +39,9 @@ export default function NotificationsPage() {
 
   return (
     <div className="tw-h-full tw-bg-black">
-      <Notifications activeDrop={activeDrop} setActiveDrop={setActiveDrop} />
+      <div className="tw-px-6">
+        <Notifications activeDrop={activeDrop} setActiveDrop={setActiveDrop} />
+      </div>
     </div>
   );
 }

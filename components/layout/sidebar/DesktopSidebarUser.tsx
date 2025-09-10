@@ -122,7 +122,7 @@ function DesktopSidebarUser({ isCollapsed }: DesktopSidebarUserProps) {
               </div>
               <UserLevel level={profile.level} size="xxs" asSpan={true} />
             </div>
-            <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300 group-hover:tw-text-white" />
+            <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400 group-hover:tw-text-white" />
           </>
         )}
       </button>

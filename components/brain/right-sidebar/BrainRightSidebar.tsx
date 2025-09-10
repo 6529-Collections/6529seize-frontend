@@ -53,7 +53,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       className="tw-fixed tw-inset-y-0 tw-right-0 tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col
         tw-w-[20.5rem] 
         lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100
-        lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none"
+        lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0"
     >
       <div
         className="tw-text-iron-500 tw-text-sm tw-overflow-y-auto 

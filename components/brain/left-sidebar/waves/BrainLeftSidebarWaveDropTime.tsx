@@ -22,7 +22,7 @@ const BrainLeftSidebarWaveDropTime: React.FC<
     };
   }, []);
 
-  return <span className="tw-text-iron-400">{getTimeAgoShort(time)}</span>;
+  return <span className="tw-text-iron-300">{getTimeAgoShort(time)}</span>;
 };
 
 export default BrainLeftSidebarWaveDropTime;

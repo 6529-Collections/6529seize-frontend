@@ -9,8 +9,14 @@ import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 import { useWave } from "../../../../hooks/useWave";
 import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
 import { Time } from "../../../../helpers/time";
-import { calculateTimeLeft, TimeLeft } from "../../../../helpers/waves/time.utils";
+import {
+  calculateTimeLeft,
+  TimeLeft,
+} from "../../../../helpers/waves/time.utils";
 import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
+import { useSidebarState } from "../../../../hooks/useSidebarState";
+import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
+import WavePicture from "../../../waves/WavePicture";
 
 interface MyStreamWaveTabsMemeProps {
   readonly wave: ApiWave;
@@ -21,8 +27,8 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
 }) => {
   // Get the active tab and utilities from global context
   const { activeContentTab, setActiveContentTab } = useContentTab();
+  const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
   const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
-
 
   // Wave hooks for countdown functionality
   const {
@@ -104,30 +110,57 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     <>
       {" "}
       <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3  tw-bg-iron-950">
-        {/* Title and Submit button */}
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4 tw-px-6">
-          <div className="tw-flex tw-items-center tw-gap-x-4 tw-justify-between tw-w-full">
-            <h1 className="tw-text-2xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0">
+        {/* Title, toggle button and submit button */}
+        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4 tw-px-6 tw-pt-4">
+          <div className="tw-flex tw-items-center tw-gap-x-3">
+            <div className="tw-size-9 tw-flex-shrink-0 tw-ring-2 tw-ring-white/10 tw-rounded-full">
+              <WavePicture
+                name={wave.name}
+                picture={wave.picture}
+                contributors={wave.contributors_overview.map((c) => ({
+                  pfp: c.contributor_pfp,
+                }))}
+              />
+            </div>
+            <h1 className="tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0">
               {wave.name}
             </h1>
-            {/* Next winner announcement for memes and rank waves, only if there's an upcoming decision */}
-            {(isMemesWave || isRankWave) && nextDecisionTime && (
-              <CompactTimeCountdown timeLeft={timeLeft} />
-            )}
           </div>
-          <div className="tw-flex-shrink-0">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
             <MyStreamWaveTabsMemeSubmit
               handleMemesSubmit={handleMemesSubmit}
               wave={wave}
             />
+            {/* Right sidebar toggle button */}
+            <button
+              type="button"
+              onClick={toggleRightSidebar}
+              className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm tw-flex-shrink-0"
+              aria-label="Toggle right sidebar"
+            >
+              <ChevronDoubleLeftIcon
+                strokeWidth={3}
+                className={`tw-h-4 tw-w-4 tw-text-iron-300 group-hover:hover:tw-text-iron-200 tw-transition-all tw-duration-200 ${
+                  isRightSidebarOpen ? "tw-rotate-180" : "tw-rotate-0"
+                }`}
+              />
+            </button>
           </div>
         </div>
 
-        <MyStreamWaveDesktopTabs
-          activeTab={activeContentTab}
-          wave={wave}
-          setActiveTab={setActiveContentTab}
-        />
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+          <MyStreamWaveDesktopTabs
+            activeTab={activeContentTab}
+            wave={wave}
+            setActiveTab={setActiveContentTab}
+          />
+          {/* Next winner announcement for memes and rank waves, only if there's an upcoming decision */}
+          {(isMemesWave || isRankWave) && nextDecisionTime && (
+            <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4 md:tw-px-6">
+              <CompactTimeCountdown timeLeft={timeLeft} />
+            </div>
+          )}
+        </div>
       </div>
       <MemesArtSubmissionModal
         isOpen={isMemesModalOpen}

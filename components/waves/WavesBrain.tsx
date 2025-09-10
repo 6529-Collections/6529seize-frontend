@@ -1,14 +1,12 @@
 import { ReactNode } from "react";
-import { createBreakpoint } from "react-use";
 import WavesMobile from "./WavesMobile";
 import WavesDesktop from "./WavesDesktop";
-
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 export default function WavesBrain({ children }: { readonly children: ReactNode }) {
-  const breakpoint = useBreakpoint();
+  const { isApp } = useDeviceInfo();
 
-  return breakpoint === "S" ? (
+  return isApp ? (
     <WavesMobile>{children}</WavesMobile>
   ) : (
     <WavesDesktop>{children}</WavesDesktop>
