@@ -10,7 +10,6 @@ import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useRouter } from "next/navigation";
 import DropPartContent from "./DropPartContent";
-import DropContentWrapper from "../../../waves/drops/DropContentWrapper";
 
 export enum DropPartSize {
   SMALL = "SMALL",
@@ -186,16 +185,14 @@ const DropPart = memo(
                     </svg>
                   </button>
                 )}
-                <DropContentWrapper>
-                  <DropPartContent
-                    mentionedUsers={mentionedUsers}
-                    referencedNfts={referencedNfts}
-                    partContent={partContent}
-                    onQuoteClick={onQuoteClick}
-                    partMedias={partMedias}
-                    currentPartCount={currentPartCount ?? 0}
-                  />
-                </DropContentWrapper>
+                <DropPartContent
+                  mentionedUsers={mentionedUsers}
+                  referencedNfts={referencedNfts}
+                  partContent={partContent}
+                  onQuoteClick={onQuoteClick}
+                  partMedias={partMedias}
+                  currentPartCount={currentPartCount ?? 0}
+                />
                 {onNextPart && isStorm && (
                   <button
                     className={`${
