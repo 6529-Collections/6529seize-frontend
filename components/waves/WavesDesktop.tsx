@@ -83,12 +83,10 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
           <div
             className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-w-full tw-overflow-hidden"
             style={contentContainerStyle}>
-            {/* Show WebLeftSidebar when right sidebar is closed OR when no wave is selected */}
-            {(!isRightSidebarOpen || !waveId) && <WebLeftSidebar activeWaveId={waveId} />}
+            {/* Always show WebLeftSidebar */}
+            <WebLeftSidebar activeWaveId={waveId} />
             
-            <div className={`tw-flex-grow tw-flex tw-flex-col tw-h-full ${
-              isRightSidebarOpen && waveId ? "tw-pr-[20.5rem]" : ""
-            }`}>
+            <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
               {children}
               {isDropOpen && (
                 <div
@@ -110,15 +108,24 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
         </motion.div>
       </div>
       
-      {/* Right sidebar */}
+      {/* Overlay backdrop when right sidebar is open */}
       {isRightSidebarOpen && !isDropOpen && waveId && (
-        <BrainRightSidebar
-          key="right-sidebar"
-          waveId={waveId}
-          onDropClick={onDropClick}
-          activeTab={sidebarTab}
-          setActiveTab={setSidebarTab}
-        />
+        <>
+          <div
+            className="tw-fixed tw-inset-0 tw-bg-black/50 tw-z-50"
+            onClick={closeRightSidebar}
+            role="button"
+            aria-label="Close sidebar overlay"
+          />
+          {/* Right sidebar */}
+          <BrainRightSidebar
+            key="right-sidebar"
+            waveId={waveId}
+            onDropClick={onDropClick}
+            activeTab={sidebarTab}
+            setActiveTab={setSidebarTab}
+          />
+        </>
       )}
     </div>
   );

@@ -34,37 +34,19 @@ export interface UseSidebarStateReturn extends SidebarState, SidebarActions {
   canBothSidebarsBeVisible: boolean;
 }
 
-const MAIN_SIDEBAR_COLLAPSED_KEY = "desktop-sidebar-collapsed";
-
 // Create the context
 const SidebarContext = createContext<UseSidebarStateReturn | null>(null);
 
 // Provider component
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [isMainSidebarCollapsed, setIsMainSidebarCollapsed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const saved = localStorage.getItem(MAIN_SIDEBAR_COLLAPSED_KEY);
-    return saved ? JSON.parse(saved) : false;
-  });
+  // Default to collapsed (true) with no persistence
+  const [isMainSidebarCollapsed, setIsMainSidebarCollapsed] = useState(true);
   const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
-  // Persist main sidebar state to localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(MAIN_SIDEBAR_COLLAPSED_KEY, JSON.stringify(isMainSidebarCollapsed));
-    }
-  }, [isMainSidebarCollapsed]);
-
-  // Main sidebar actions with mutual exclusion
+  // Main sidebar actions (no mutual exclusion)
   const toggleMainSidebar = useCallback(() => {
-    setIsMainSidebarCollapsed((prev: boolean) => {
-      if (prev) {
-        // Expanding main sidebar: close right sidebar
-        setIsRightSidebarOpen(false);
-      }
-      return !prev;
-    });
+    setIsMainSidebarCollapsed((prev: boolean) => !prev);
   }, []);
 
   const collapseMainSidebar = useCallback(() => {
@@ -73,7 +55,6 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 
   const expandMainSidebar = useCallback(() => {
     setIsMainSidebarCollapsed(false);
-    setIsRightSidebarOpen(false);
   }, []);
 
   // Collections submenu actions
@@ -89,22 +70,13 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     setIsCollectionsSubmenuOpen(false);
   }, []);
 
-  // Right sidebar actions with mutual exclusion
+  // Right sidebar actions (no mutual exclusion)
   const toggleRightSidebar = useCallback(() => {
-    setIsRightSidebarOpen((prev: boolean) => {
-      if (!prev) {
-        // Opening right sidebar: collapse left sidebar
-        setIsMainSidebarCollapsed(true);
-        setIsCollectionsSubmenuOpen(false);
-      }
-      return !prev;
-    });
+    setIsRightSidebarOpen((prev: boolean) => !prev);
   }, []);
 
   const openRightSidebar = useCallback(() => {
     setIsRightSidebarOpen(true);
-    setIsMainSidebarCollapsed(true);
-    setIsCollectionsSubmenuOpen(false);
   }, []);
 
   const closeRightSidebar = useCallback(() => {

@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { SIDEBAR_WIDTHS, SIDEBAR_BREAKPOINT } from "../constants/sidebar";
 
-const LS_KEY = "sidebar-collapsed";
-
 export function useSidebarController() {
   // Media query for desktop vs mobile breakpoint
   const mql = useMemo(() => {
@@ -16,11 +14,8 @@ export function useSidebarController() {
     typeof window !== "undefined" ? window.innerWidth < SIDEBAR_BREAKPOINT : false
   );
 
-  // Desktop preference (read once, cached in memory)
-  const [hasDesktopCollapsedPreference, setHasDesktopCollapsedPreference] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem(LS_KEY) === "true";
-  });
+  // Desktop state - default to collapsed (true) with no persistence
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(true);
 
   // Off-canvas overlay state (mobile expanded view)
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
@@ -28,8 +23,8 @@ export function useSidebarController() {
   // Derived collapsed state (pure function of inputs)
   const isCollapsed = useMemo(() => {
     if (isMobile) return true; // Mobile always collapsed when not off-canvas
-    return hasDesktopCollapsedPreference; // Desktop: use preference (default false = expanded)
-  }, [isMobile, hasDesktopCollapsedPreference]);
+    return isDesktopCollapsed; // Desktop: use current state (default true = collapsed)
+  }, [isMobile, isDesktopCollapsed]);
 
   // React to breakpoint changes
   useEffect(() => {
@@ -52,18 +47,8 @@ export function useSidebarController() {
       // Mobile: toggle off-canvas overlay
       setIsOffcanvasOpen(prev => !prev);
     } else {
-      // Desktop: toggle preference and persist to localStorage
-      setHasDesktopCollapsedPreference((prev) => {
-        const newPreference = !prev;
-        
-        if (newPreference) {
-          localStorage.setItem(LS_KEY, "true");
-        } else {
-          localStorage.removeItem(LS_KEY);
-        }
-        
-        return newPreference;
-      });
+      // Desktop: toggle state (no persistence)
+      setIsDesktopCollapsed(prev => !prev);
     }
   }, [isMobile]);
 
