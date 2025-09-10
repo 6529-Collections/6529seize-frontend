@@ -26,7 +26,7 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
     { day: 2, startHour: 17, endHour: 0 }, // Tuesday 5pm-midnight
     { day: 4, startHour: 17, endHour: 0 }, // Thursday 5pm-midnight  
     { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight
-  ]
+  ];
 
   const { isActive } = useBlackoutSchedule({
     timezone: "Europe/Tallinn",
