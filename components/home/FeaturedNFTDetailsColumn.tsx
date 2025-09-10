@@ -11,6 +11,7 @@ import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
 import MintingApproachSection from "./MintingApproachSection";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useEstonianBlackoutSchedule } from "@/hooks/useEstonianBlackoutSchedule";
 import { useState } from "react";
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
+  const { isActive } = useEstonianBlackoutSchedule();
 
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
 
@@ -64,7 +66,7 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
               setClaim={setManifoldClaim}
               is_full_width={true}
               hide_mint_btn={false}
-              show_only_if_active={false}
+              show_only_if_active={isActive}
             />
           </Col>
         </Row>
