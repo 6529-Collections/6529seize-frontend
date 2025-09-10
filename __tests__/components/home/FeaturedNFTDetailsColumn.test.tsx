@@ -4,11 +4,13 @@ import { NFTWithMemesExtendedData } from "../../../entities/INFT";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useCookieConsent } from "../../../components/cookies/CookieConsentContext";
 import { useManifoldClaimDisplays } from "../../../hooks/useManifoldClaimDisplays";
+import { useBlackoutSchedule } from "../../../hooks/useBlackoutSchedule";
 
 // Mock all dependencies
 jest.mock("../../../hooks/useCapacitor");
 jest.mock("../../../components/cookies/CookieConsentContext");
 jest.mock("../../../hooks/useManifoldClaimDisplays");
+jest.mock("../../../hooks/useBlackoutSchedule");
 
 // Mock child components
 jest.mock("next/link", () => ({
@@ -79,19 +81,33 @@ jest.mock("../../../components/the-memes/MemePageMintCountdown", () => ({
     nft_id,
     setClaim,
     is_full_width,
+    hide_mint_btn,
+    show_only_if_active,
   }: {
     nft_id: number;
     setClaim: (claim: any) => void;
     is_full_width: boolean;
-  }) => (
-    <div data-testid="meme-page-mint-countdown">
-      <div>NFT ID: {nft_id}</div>
-      <div>Full Width: {is_full_width.toString()}</div>
-      <button onClick={() => setClaim({ id: 1, status: "active" })}>
-        Set Claim
-      </button>
-    </div>
-  ),
+    hide_mint_btn: boolean;
+    show_only_if_active: boolean;
+  }) => {
+    // If show_only_if_active is false, don't render the component
+    // This simulates the conditional rendering in the real component
+    if (show_only_if_active === false) {
+      return null;
+    }
+    
+    return (
+      <div data-testid="meme-page-mint-countdown">
+        <div>NFT ID: {nft_id}</div>
+        <div>Full Width: {is_full_width.toString()}</div>
+        <div>Hide Mint Button: {hide_mint_btn.toString()}</div>
+        <div>Show Only If Active: {show_only_if_active.toString()}</div>
+        <button onClick={() => setClaim({ id: 1, status: "active" })}>
+          Set Claim
+        </button>
+      </div>
+    );
+  },
 }));
 
 // Type-safe mock functions
@@ -101,6 +117,9 @@ const mockUseCookieConsent = useCookieConsent as jest.MockedFunction<
 >;
 const mockUseManifoldClaimDisplays = useManifoldClaimDisplays as jest.MockedFunction<
   typeof useManifoldClaimDisplays
+>;
+const mockUseBlackoutSchedule = useBlackoutSchedule as jest.MockedFunction<
+  typeof useBlackoutSchedule
 >;
 
 // Minimal test data factory - only includes fields actually used by the component
@@ -184,6 +203,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       isIos: false,
       isAndroid: false,
       platform: "web",
+      orientation: "portrait",
       isActive: true,
       keyboardVisible: false,
     });
@@ -196,6 +216,10 @@ describe("FeaturedNFTDetailsColumn", () => {
     });
 
     mockUseManifoldClaimDisplays.mockReturnValue(defaultManifoldDisplays);
+    
+    mockUseBlackoutSchedule.mockReturnValue({
+      isActive: true, // Default to active (not in blackout)
+    });
   });
 
   // Helper function to setup platform/country scenarios consistently
@@ -205,6 +229,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       isIos: platform === "ios",
       isAndroid: platform === "android", 
       platform,
+      orientation: "portrait",
       isActive: true,
       keyboardVisible: false,
     });
@@ -468,12 +493,13 @@ describe("FeaturedNFTDetailsColumn", () => {
       ];
       const nft = createTestNFT();
       
-      testCases.forEach(({ platform, country, expectLinks, description }) => {
+      testCases.forEach(({ platform, country, expectLinks }) => {
         mockUseCapacitor.mockReturnValue({
           isCapacitor: platform !== "web",
           isIos: platform === "ios",
           isAndroid: platform === "android",
           platform,
+          orientation: "portrait",
           isActive: true,
           keyboardVisible: false,
         });
@@ -502,8 +528,104 @@ describe("FeaturedNFTDetailsColumn", () => {
     });
   });
 
+  describe("Blackout schedule integration", () => {
+    it("calls useBlackoutSchedule with correct Estonian timezone configuration", () => {
+      mockUseBlackoutSchedule.mockReturnValue({
+        isActive: true,
+      });
+      
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      
+      // Verify the hook is called with the correct Estonian configuration
+      expect(mockUseBlackoutSchedule).toHaveBeenCalledWith({
+        timezone: "Europe/Tallinn",
+        schedule: [
+          { day: 2, startHour: 17, endHour: 0 }, // Tuesday 5pm-midnight
+          { day: 4, startHour: 17, endHour: 0 }, // Thursday 5pm-midnight  
+          { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight
+        ]
+      });
+    });
+
+    it("shows mint countdown when blackout is active (isActive: true)", () => {
+      mockUseBlackoutSchedule.mockReturnValue({
+        isActive: true,
+      });
+      
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      
+      // MemePageMintCountdown should be visible when blackout is active
+      expect(screen.getByTestId("meme-page-mint-countdown")).toBeInTheDocument();
+      expect(screen.getByText("Show Only If Active: true")).toBeInTheDocument();
+    });
+
+    it("hides mint countdown when blackout is inactive (isActive: false)", () => {
+      mockUseBlackoutSchedule.mockReturnValue({
+        isActive: false,
+      });
+      
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      
+      // MemePageMintCountdown should be hidden when blackout is inactive
+      expect(screen.queryByTestId("meme-page-mint-countdown")).not.toBeInTheDocument();
+      
+      // But other components should still be visible
+      expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
+      expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
+      expect(screen.getByTestId("minting-approach-section")).toBeInTheDocument();
+      expect(screen.getByTestId("manifold-claim-table")).toBeInTheDocument();
+    });
+
+    it("passes isActive value correctly to MemePageMintCountdown as show_only_if_active prop", () => {
+      const testCases = [
+        { isActive: true, expectedVisible: true },
+        { isActive: false, expectedVisible: false },
+      ];
+      
+      const nft = createTestNFT();
+      
+      testCases.forEach(({ isActive, expectedVisible }) => {
+        mockUseBlackoutSchedule.mockReturnValue({ isActive });
+        
+        const { unmount } = render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+        
+        if (expectedVisible) {
+          expect(screen.getByTestId("meme-page-mint-countdown")).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId("meme-page-mint-countdown")).not.toBeInTheDocument();
+        }
+        
+        unmount();
+      });
+    });
+
+    it("ensures MemePageMintCountdown receives all required props including blackout schedule state", () => {
+      mockUseBlackoutSchedule.mockReturnValue({
+        isActive: true,
+      });
+      
+      const nft = createTestNFT({ id: 555 });
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      
+      const countdown = screen.getByTestId("meme-page-mint-countdown");
+      
+      // Verify all props are passed correctly
+      expect(countdown).toHaveTextContent("NFT ID: 555");
+      expect(countdown).toHaveTextContent("Full Width: true");
+      expect(countdown).toHaveTextContent("Hide Mint Button: false");
+      expect(countdown).toHaveTextContent("Show Only If Active: true");
+    });
+  });
+
   describe("Layout structure", () => {
-    it("renders proper layout structure with all sections", () => {
+    it("renders proper layout structure with all sections when blackout is active", () => {
+      mockUseBlackoutSchedule.mockReturnValue({
+        isActive: true,
+      });
+      
       const nft = createTestNFT();
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
@@ -511,6 +633,22 @@ describe("FeaturedNFTDetailsColumn", () => {
       expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
       expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
       expect(screen.getByTestId("meme-page-mint-countdown")).toBeInTheDocument();
+      expect(screen.getByTestId("minting-approach-section")).toBeInTheDocument();
+      expect(screen.getByTestId("manifold-claim-table")).toBeInTheDocument();
+    });
+
+    it("renders proper layout structure without mint countdown when blackout is inactive", () => {
+      mockUseBlackoutSchedule.mockReturnValue({
+        isActive: false,
+      });
+      
+      const nft = createTestNFT();
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      
+      // User should see most sections but not the mint countdown
+      expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
+      expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
+      expect(screen.queryByTestId("meme-page-mint-countdown")).not.toBeInTheDocument();
       expect(screen.getByTestId("minting-approach-section")).toBeInTheDocument();
       expect(screen.getByTestId("manifold-claim-table")).toBeInTheDocument();
     });
