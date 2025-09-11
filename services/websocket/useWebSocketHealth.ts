@@ -22,6 +22,10 @@ export function useWebSocketHealth() {
     const healthCheck = setInterval(() => {
       const currentToken = getAuthJwt();
       
+      // ATOMIC REFERENCE UPDATE: Capture previous value before any logic
+      const previousToken = lastTokenRef.current;
+      lastTokenRef.current = currentToken;
+      
       /**
        * ATOMIC WEBSOCKET HEALTH LOGIC
        * Each health check performs exactly ONE action to prevent redundant connections:
@@ -35,12 +39,10 @@ export function useWebSocketHealth() {
       } else if (currentToken && status === WebSocketStatus.DISCONNECTED) {
         // Priority 2: Have token but disconnected -> connect
         connect(currentToken);
-      } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== lastTokenRef.current) {
+      } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
         // Priority 3: Token changed while connected -> reconnect
         connect(currentToken);
       }
-      
-      lastTokenRef.current = currentToken;
     }, 10000); // 10 seconds - balanced frequency
 
     return () => clearInterval(healthCheck);
