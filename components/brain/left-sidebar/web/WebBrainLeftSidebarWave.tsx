@@ -9,6 +9,7 @@ import WavePicture from "../../../waves/WavePicture";
 import BrainLeftSidebarWaveDropTime from "../waves/BrainLeftSidebarWaveDropTime";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWavePin from "../waves/BrainLeftSidebarWavePin";
+import { formatAddress } from "../../../../helpers/Helpers";
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -103,7 +104,18 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
           </div>
         </div>
         <div className="tw-flex-1">
-          <div className="tw-text-sm -tw-mt-0.5 tw-mb-0.5">{wave.name}</div>
+          <div className="tw-text-sm -tw-mt-0.5 tw-mb-0.5">
+            {(() => {
+              if (wave.type === ApiWaveType.Chat && wave.name.includes("id-0x")) {
+                const match = wave.name.match(/(.*id-)(0x[a-fA-F0-9]{40})(.*)/);
+                if (match) {
+                  const [, prefix, address, suffix] = match;
+                  return `${prefix}${formatAddress(address)}${suffix}`;
+                }
+              }
+              return wave.name;
+            })()}
+          </div>
           {!!wave.newDropsCount.latestDropTimestamp && (
             <div className="tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>

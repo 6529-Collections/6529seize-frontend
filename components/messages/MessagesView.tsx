@@ -4,6 +4,11 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
+import PrimaryButton from "../utils/button/PrimaryButton";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModal";
+import { useAuth } from "../auth/Auth";
 import {
   ActiveDropAction,
   ActiveDropState,
@@ -15,7 +20,9 @@ const MessagesView: React.FC = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const { connectedProfile } = useAuth();
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const waveId = searchParams?.get('wave') || null;
@@ -65,18 +72,41 @@ const MessagesView: React.FC = () => {
       <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
         Select a Conversation
       </h2>
-      <p className="tw-text-iron-400 tw-max-w-md">
+      <p className="tw-text-iron-400 tw-max-w-md tw-mb-6">
         Choose a direct message conversation from the sidebar to view messages and continue the discussion.
       </p>
+      <PrimaryButton
+        onClicked={() => setIsCreateModalOpen(true)}
+        loading={false}
+        disabled={false}
+        padding="tw-px-4 tw-py-2"
+      >
+        <FontAwesomeIcon
+          icon={faPaperPlane}
+          className="tw-size-4 tw-flex-shrink-0 tw-mr-2"
+        />
+        <span>New Direct Message</span>
+      </PrimaryButton>
     </div>
   );
 
   return (
-    <BrainContent
-      activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}>
-      {component}
-    </BrainContent>
+    <>
+      <BrainContent
+        activeDrop={activeDrop}
+        onCancelReplyQuote={onCancelReplyQuote}>
+        {component}
+      </BrainContent>
+      
+      {/* Create Direct Message Modal */}
+      {connectedProfile && (
+        <CreateDirectMessageModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          profile={connectedProfile}
+        />
+      )}
+    </>
   );
 };
 

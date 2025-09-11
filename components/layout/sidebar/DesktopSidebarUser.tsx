@@ -106,8 +106,6 @@ function DesktopSidebarUser({ isCollapsed }: DesktopSidebarUserProps) {
         aria-label="Open user menu"
         aria-expanded={showUserMenu}
         aria-controls="user-menu"
-        data-tooltip-id={isCollapsed ? "sidebar-tooltip" : undefined}
-        data-tooltip-content={isCollapsed ? displayHandle : undefined}
       >
         <DropPfp pfpUrl={profile.pfp} size={DropPartSize.MEDIUM} />
         {!isCollapsed && (
