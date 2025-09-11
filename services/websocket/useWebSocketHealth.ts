@@ -22,7 +22,6 @@ export function useWebSocketHealth() {
   useEffect(() => {
     const currentToken = getAuthJwt();
     const previousToken = lastTokenRef.current;
-    lastTokenRef.current = currentToken;
     
     // Atomic WebSocket health logic
     if (!currentToken && status !== WebSocketStatus.DISCONNECTED) {
@@ -32,6 +31,9 @@ export function useWebSocketHealth() {
     } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
       connect(currentToken);
     }
+    
+    // Update reference AFTER authentication logic completes
+    lastTokenRef.current = currentToken;
   }, [connect, disconnect, status]); // RESPONSIVE: Handle status changes
 
   // Effect 2: Stable periodic monitoring
@@ -39,7 +41,6 @@ export function useWebSocketHealth() {
     const performPeriodicHealthCheck = () => {
       const currentToken = getAuthJwt();
       const previousToken = lastTokenRef.current;
-      lastTokenRef.current = currentToken;
       
       // Get fresh references to avoid stale closures
       const { status: currentStatus, connect: currentConnect, disconnect: currentDisconnect } = useWebSocket();
@@ -52,6 +53,9 @@ export function useWebSocketHealth() {
       } else if (currentToken && currentStatus !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
         currentConnect(currentToken);
       }
+      
+      // Update reference AFTER authentication logic completes
+      lastTokenRef.current = currentToken;
     };
 
     const healthCheck = setInterval(performPeriodicHealthCheck, 10000);
