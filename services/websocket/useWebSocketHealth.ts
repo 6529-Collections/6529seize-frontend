@@ -22,16 +22,22 @@ export function useWebSocketHealth() {
     const healthCheck = setInterval(() => {
       const currentToken = getAuthJwt();
       
-      // Simple decision logic:
-      if (currentToken && status === WebSocketStatus.DISCONNECTED) {
-        // Have token but not connected -> connect
-        connect(currentToken);
-      } else if (currentToken && currentToken !== lastTokenRef.current) {
-        // Token changed -> reconnect with new token
-        connect(currentToken);
-      } else if (!currentToken && status !== WebSocketStatus.DISCONNECTED) {
-        // No token but connected -> disconnect
+      /**
+       * ATOMIC WEBSOCKET HEALTH LOGIC
+       * Each health check performs exactly ONE action to prevent redundant connections:
+       * Priority 1: Disconnect when no token (clean state)
+       * Priority 2: Connect when token exists but disconnected
+       * Priority 3: Reconnect when token changes while connected
+       */
+      if (!currentToken && status !== WebSocketStatus.DISCONNECTED) {
+        // Priority 1: No token but connected -> disconnect
         disconnect();
+      } else if (currentToken && status === WebSocketStatus.DISCONNECTED) {
+        // Priority 2: Have token but disconnected -> connect
+        connect(currentToken);
+      } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== lastTokenRef.current) {
+        // Priority 3: Token changed while connected -> reconnect
+        connect(currentToken);
       }
       
       lastTokenRef.current = currentToken;
