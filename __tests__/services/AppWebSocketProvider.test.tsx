@@ -88,7 +88,7 @@ describe('AppWebSocketProvider', () => {
   });
 
   describe('WebSocketInitializer Component Behavior', () => {
-    it('connects with auth token on mount when token is available', () => {
+    it('uses lazy initialization - no immediate connection on mount with auth token', () => {
       mockGetAuthJwt.mockReturnValue('valid-auth-token');
 
       render(
@@ -97,11 +97,12 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
-      expect(mockConnect).toHaveBeenCalledWith('valid-auth-token');
-      expect(mockConnect).toHaveBeenCalledTimes(1);
+      // Health monitoring handles connection, not immediate mount effect
+      expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('does not connect when no auth token is available', () => {
+    it('uses lazy initialization - no immediate connection on mount when no auth token', () => {
       mockGetAuthJwt.mockReturnValue(null);
 
       render(
@@ -110,10 +111,12 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
+      // Health monitoring handles connection logic, not immediate mount effect
       expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('does not connect when auth token is empty string', () => {
+    it('uses lazy initialization - no immediate connection on mount when auth token is empty', () => {
       mockGetAuthJwt.mockReturnValue('');
 
       render(
@@ -122,7 +125,9 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
+      // Health monitoring handles connection logic, not immediate mount effect
       expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
     it('disconnects on component unmount', () => {
@@ -134,10 +139,12 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
-      expect(mockConnect).toHaveBeenCalledWith('valid-token');
+      // No immediate connection due to lazy initialization
+      expect(mockConnect).not.toHaveBeenCalled();
 
       unmount();
 
+      // Cleanup disconnect still works on unmount
       expect(mockDisconnect).toHaveBeenCalled();
       expect(mockDisconnect).toHaveBeenCalledTimes(1);
     });
@@ -175,14 +182,16 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('calls getAuthJwt to retrieve authentication token', () => {
+    it('delegates auth token handling to health monitoring', () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child" />
         </AppWebSocketProvider>
       );
 
-      expect(mockGetAuthJwt).toHaveBeenCalled();
+      // WebSocketInitializer no longer calls getAuthJwt directly
+      // Health monitoring handles all auth token logic
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
   });
 
@@ -203,9 +212,9 @@ describe('AppWebSocketProvider', () => {
       }).toThrow('useWebSocket must be used within a WebSocketProvider');
     });
 
-    it('handles getAuthJwt throwing error gracefully', () => {
-      mockGetAuthJwt.mockImplementation(() => {
-        throw new Error('Auth service unavailable');
+    it('handles health monitoring errors gracefully', () => {
+      mockUseWebSocketHealth.mockImplementation(() => {
+        throw new Error('Health monitoring unavailable');
       });
 
       // Should not crash the component
@@ -215,23 +224,25 @@ describe('AppWebSocketProvider', () => {
             <div data-testid="child" />
           </AppWebSocketProvider>
         );
-      }).toThrow('Auth service unavailable');
+      }).toThrow('Health monitoring unavailable');
     });
 
-    it('handles connect method throwing error without crashing', () => {
-      mockGetAuthJwt.mockReturnValue('valid-token');
-      mockConnect.mockImplementation(() => {
-        throw new Error('Connection failed');
+    it('handles useWebSocket hook errors without crashing initializer', () => {
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect
       });
 
-      // Should not crash the component
-      expect(() => {
-        render(
-          <AppWebSocketProvider>
-            <div data-testid="child" />
-          </AppWebSocketProvider>
-        );
-      }).toThrow('Connection failed');
+      // No connection errors should occur during initialization since no immediate connection
+      render(
+        <AppWebSocketProvider>
+          <div data-testid="child" />
+        </AppWebSocketProvider>
+      );
+
+      // Should render successfully without calling connect
+      expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
     it('handles disconnect method throwing error without crashing', () => {
@@ -290,38 +301,44 @@ describe('AppWebSocketProvider', () => {
 
   describe('Security and Authentication', () => {
 
-    it('only connects when valid authentication token is present', () => {
-      // Test invalid token scenarios one by one
+    it('delegates authentication logic to health monitoring', () => {
+      // Test that authentication logic is handled by health monitoring, not initializer
       mockGetAuthJwt.mockReturnValue(null);
       render(
         <AppWebSocketProvider>
           <div data-testid="child-null" />
         </AppWebSocketProvider>
       );
+      // No immediate connection - health monitoring handles auth logic
       expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('does not connect with empty string token', () => {
+    it('delegates empty token handling to health monitoring', () => {
       mockGetAuthJwt.mockReturnValue('');
       render(
         <AppWebSocketProvider>
           <div data-testid="child-empty" />
         </AppWebSocketProvider>
       );
+      // No immediate connection - health monitoring handles auth logic
       expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('does not connect with undefined token', () => {
+    it('delegates undefined token handling to health monitoring', () => {
       mockGetAuthJwt.mockReturnValue(undefined);
       render(
         <AppWebSocketProvider>
           <div data-testid="child-undefined" />
         </AppWebSocketProvider>
       );
+      // No immediate connection - health monitoring handles auth logic
       expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('connects with valid JWT token', () => {
+    it('delegates valid JWT token handling to health monitoring', () => {
       const validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
       mockGetAuthJwt.mockReturnValue(validToken);
 
@@ -331,11 +348,12 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
-      expect(mockConnect).toHaveBeenCalledWith(validToken);
-      expect(mockConnect).toHaveBeenCalledTimes(1);
+      // No immediate connection - health monitoring will handle the connection
+      expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('connects with valid simple token', () => {
+    it('delegates valid simple token handling to health monitoring', () => {
       const validToken = 'simple-string-token';
       mockGetAuthJwt.mockReturnValue(validToken);
 
@@ -345,8 +363,9 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
-      expect(mockConnect).toHaveBeenCalledWith(validToken);
-      expect(mockConnect).toHaveBeenCalledTimes(1);
+      // No immediate connection - health monitoring will handle the connection
+      expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
   });
 });

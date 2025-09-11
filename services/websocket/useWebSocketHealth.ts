@@ -18,8 +18,8 @@ export function useWebSocketHealth() {
   const lastTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Check connection health every 10 seconds
-    const healthCheck = setInterval(() => {
+    // IMMEDIATE INITIAL CHECK: Don't wait 10 seconds for first connection attempt
+    const performHealthCheck = () => {
       const currentToken = getAuthJwt();
       
       // ATOMIC REFERENCE UPDATE: Capture previous value before any logic
@@ -43,7 +43,13 @@ export function useWebSocketHealth() {
         // Priority 3: Token changed while connected -> reconnect
         connect(currentToken);
       }
-    }, 10000); // 10 seconds - balanced frequency
+    };
+
+    // IMMEDIATE CHECK: Perform initial health check immediately
+    performHealthCheck();
+    
+    // PERIODIC CHECKS: Check connection health every 10 seconds
+    const healthCheck = setInterval(performHealthCheck, 10000);
 
     return () => clearInterval(healthCheck);
   }, [connect, disconnect, status]);

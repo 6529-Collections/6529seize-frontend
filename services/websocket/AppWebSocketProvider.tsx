@@ -8,28 +8,31 @@ import { useWebSocket } from "./useWebSocket";
 import { useWebSocketHealth } from "./useWebSocketHealth";
 
 /**
- * WebSocket connection initializer with health monitoring
+ * WebSocket connection initializer with coordinated health monitoring
  *
- * Handles initial connection and continuous health monitoring
+ * LAZY INITIALIZATION PATTERN:
+ * - Does NOT connect immediately on mount
+ * - Delegates all connection management to useWebSocketHealth()
+ * - Health monitoring handles auth token detection and initial connection
+ * - Provides cleanup on unmount
+ * 
+ * This prevents double initialization where both immediate connection
+ * AND health monitoring could connect simultaneously on startup.
  */
 function WebSocketInitializer() {
-  const { connect, disconnect } = useWebSocket();
+  const { disconnect } = useWebSocket();
 
-  // Initial connection on mount
+  // LAZY INITIALIZATION: Let health monitoring handle initial connection
+  // Health monitoring will check auth token and connect if needed
+  useWebSocketHealth();
+
+  // Only handle cleanup on unmount - no initial connection logic
   useEffect(() => {
-    const authToken = getAuthJwt();
-    if (authToken) {
-      connect(authToken);
-    }
-
     // Disconnect on unmount
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
-
-  // Continuous health monitoring
-  useWebSocketHealth();
+  }, [disconnect]);
 
   return null; // This component doesn't render anything
 }
