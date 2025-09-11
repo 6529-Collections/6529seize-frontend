@@ -46,7 +46,7 @@ export default function MemePageMintCountdown(
   }, [manifoldClaim, props.setClaim]);
 
   // Return null if show_only_if_active is true and status isn't active
-  if (props.show_only_if_active && manifoldClaim?.status !== ManifoldClaimStatus.ACTIVE) {
+  if (props.show_only_if_active && manifoldClaim?.status === ManifoldClaimStatus.ENDED) {
     return null;
   }
 
@@ -139,7 +139,7 @@ export default function MemePageMintCountdown(
   };
 
   const showAllowlistInfo = manifoldClaim.phase === ManifoldPhase.ALLOWLIST;
-  
+
   return (
     <Container className="no-padding pb-3">
       <Row>
@@ -161,8 +161,8 @@ export default function MemePageMintCountdown(
                     zIndex: 10
                   }}
                 />
-                <Tooltip 
-                  id="allowlist-info" 
+                <Tooltip
+                  id="allowlist-info"
                   place="left"
                   opacity={1}
                   style={{

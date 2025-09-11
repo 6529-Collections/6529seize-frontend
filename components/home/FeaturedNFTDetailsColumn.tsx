@@ -11,6 +11,8 @@ import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
 import MintingApproachSection from "./MintingApproachSection";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useBlackoutSchedule } from "@/hooks/useBlackoutSchedule";
+import type { BlackoutWindow } from "@/hooks/useBlackoutSchedule";
 import { useState } from "react";
 
 interface Props {
@@ -20,6 +22,17 @@ interface Props {
 export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
+  const SCHEDULE: BlackoutWindow[] = [
+    { day: 0, startHour: 0, endHour: 0 },  // Sunday all day
+    { day: 2, startHour: 17, endHour: 0 }, // Tuesday 5pm-midnight
+    { day: 4, startHour: 17, endHour: 0 }, // Thursday 5pm-midnight  
+    { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight
+  ];
+
+  const { isActive } = useBlackoutSchedule({
+    timezone: "Europe/Bucharest",
+    schedule: SCHEDULE
+  });
 
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
 
@@ -64,7 +77,7 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
               setClaim={setManifoldClaim}
               is_full_width={true}
               hide_mint_btn={false}
-              show_only_if_active={false}
+              show_only_if_active={isActive}
             />
           </Col>
         </Row>
