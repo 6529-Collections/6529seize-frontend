@@ -70,7 +70,7 @@ const WavesView: React.FC = () => {
       <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
         Select a Wave
       </h2>
-      <p className="tw-text-iron-400 tw-max-w-md tw-mb-6">
+      <p className="tw-text-iron-400 tw-max-w-md tw-mb-6 tw-text-sm sm:tw-text-base">
         Choose a wave to view its content and participate in the discussion.
       </p>
       

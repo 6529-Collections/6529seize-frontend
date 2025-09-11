@@ -56,6 +56,7 @@ interface WebUnifiedWavesListWavesProps {
   readonly hideToggle?: boolean;
   readonly hidePin?: boolean;
   readonly scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
+  readonly basePath?: string;
 }
 
 const WebUnifiedWavesListWaves = forwardRef<
@@ -70,6 +71,7 @@ const WebUnifiedWavesListWaves = forwardRef<
       hideToggle = false,
       hidePin = false,
       scrollContainerRef,
+      basePath = "/waves",
     },
     ref
   ) => {
@@ -168,6 +170,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                           wave={wave}
                           onHover={onHover}
                           showPin={!hidePin}
+                          basePath={basePath}
                         />
                       </div>
                     ))}
@@ -219,6 +222,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                         wave={wave}
                         onHover={onHover}
                         showPin={!hidePin}
+                        basePath={basePath}
                       />
                     </div>
                   );

@@ -17,7 +17,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3 tw-bg-black">
+    <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3 tw-bg-iron-950">
       {/* Wave name header with toggle button */}
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-6 tw-py-3">
         <div className="tw-flex tw-items-center tw-gap-x-3">

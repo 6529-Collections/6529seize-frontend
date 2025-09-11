@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useRef, useEffect, useContext } from "react";
-import UnifiedWavesListWaves, {
-  UnifiedWavesListWavesHandle,
-} from "../waves/UnifiedWavesListWaves";
+import WebUnifiedWavesListWaves, {
+  WebUnifiedWavesListWavesHandle,
+} from "./WebUnifiedWavesListWaves";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
-import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
+import PrimaryButton from "../../../utils/button/PrimaryButton";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
+import { CREATE_DIRECT_MESSAGE_SEARCH_PATH } from "../../../waves/Waves";
+import Tooltip from "../../../common/Tooltip";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import { AuthContext } from "../../../auth/Auth";
 import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
@@ -25,9 +30,10 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
+  const router = useRouter();
 
   // Moved all hooks to the top level, before any conditional logic
-  const listRef = useRef<UnifiedWavesListWavesHandle>(null);
+  const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
   const { directMessages, registerWave } = useMyStream();
 
@@ -59,7 +65,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     };
 
     const observer = new IntersectionObserver(cb, {
-      root: listRef.current?.containerRef.current,
+      root: scrollContainerRef?.current,
       rootMargin: "100px",
     });
 
@@ -67,9 +73,9 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
     return () => observer.disconnect();
   }, [
-    listRef.current?.sentinelRef.current,
     directMessages.hasNextPage,
     directMessages.isFetchingNextPage,
+    scrollContainerRef,
   ]);
 
   const haveDirectMessages = directMessages.list.length > 0;
@@ -133,15 +139,34 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   }
 
   return (
-    <div className="tw-mb-4">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
-        {!isApp && (
-          <div className="tw-px-4 tw-mb-4 tw-w-full">
-            <BrainLeftSidebarCreateADirectMessageButton />
-          </div>
-        )}
+    <div className="tw-h-full tw-flex tw-flex-col">
+      <div className="tw-flex-1 tw-bg-black tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4 tw-flex tw-flex-col">
+        {/* Messages header with create button */}
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-4">
+          <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
+            Messages
+          </span>
+          {!isApp && (
+            <div 
+              data-tooltip-id="create-dm-tooltip"
+              data-tooltip-content="New direct message"
+            >
+              <PrimaryButton
+                onClicked={() => router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH)}
+                loading={false}
+                disabled={false}
+                padding="tw-px-2 tw-py-2"
+              >
+                <FontAwesomeIcon
+                  icon={faPaperPlane}
+                  className="tw-size-4 tw-flex-shrink-0"
+                />
+              </PrimaryButton>
+            </div>
+          )}
+        </div>
 
-        <div className="tw-w-full">
+        <div className="tw-flex-1 tw-w-full tw-flex tw-flex-col">
           {isInitialLoad ? (
             <UnifiedWavesListLoader
               isFetching={true}
@@ -155,7 +180,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
               emptyMessage="No direct messages yet"
             />
           ) : (
-            <UnifiedWavesListWaves
+            <WebUnifiedWavesListWaves
               ref={listRef}
               waves={directMessages.list}
               onHover={registerWave}
@@ -163,6 +188,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
               hideToggle={true}
               hideHeaders={true}
               hidePin={true}
+              basePath="/messages"
             />
           )}
 
@@ -172,6 +198,9 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
           />
         </div>
       </div>
+      
+      {/* Tooltip */}
+      <Tooltip id="create-dm-tooltip" />
     </div>
   );
 };

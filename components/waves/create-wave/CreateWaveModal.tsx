@@ -31,7 +31,7 @@ export default function CreateWaveModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-7xl tw-max-h-[90vh] tw-overflow-hidden tw-shadow-2xl"
+            className="tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-5xl tw-max-h-[90vh] tw-overflow-hidden tw-shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -49,8 +49,8 @@ export default function CreateWaveModal({
             </div>
 
             {/* Modal Content */}
-            <div className="tw-overflow-y-auto tw-max-h-[calc(90vh-80px)]">
-              <div className="tw-p-6">
+            <div className="tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(90vh-80px)]">
+              <div className="tw-px-6 tw-pb-8">
                 <CreateWave profile={profile} onBack={onClose} />
               </div>
             </div>

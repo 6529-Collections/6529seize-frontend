@@ -9,9 +9,7 @@ interface WebLeftSidebarProps {
   readonly activeWaveId: string | null | undefined;
 }
 
-const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
-  activeWaveId,
-}) => {
+const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({ activeWaveId }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -31,17 +29,13 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
         className="tw-flex tw-flex-col tw-overflow-y-auto tw-w-80 tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40"
         style={sidebarStyle}
       >
-      <div className="tw-flex-1 tw-px-4 md:tw-px-2 lg:tw-px-0 tw-gap-y-4 tw-flex-col tw-flex">
-        <div className="tw-flex tw-flex-col tw-gap-y-2">
-          {!isMessagesView && (
-            <WebBrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
-          )}
-          {isMessagesView && (
-            <WebDirectMessagesList scrollContainerRef={scrollContainerRef} />
-          )}
-        </div>
+        {!isMessagesView && (
+          <WebBrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
+        )}
+        {isMessagesView && (
+          <WebDirectMessagesList scrollContainerRef={scrollContainerRef} />
+        )}
       </div>
-    </div>
     </div>
   );
 };

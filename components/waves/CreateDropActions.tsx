@@ -85,8 +85,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     className={`tw-flex-shrink-0 ${
                       isRequiredMetadataMissing
                         ? "tw-text-[#FEDF89]"
-                        : "tw-text-iron-400"
-                    } tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700/80 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
+                        : "tw-text-iron-300"
+                    } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/80 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
                     data-tooltip-id="add-metadata-tooltip">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -129,8 +129,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       className={`tw-flex-shrink-0 ${
                         isRequiredMediaMissing
                           ? "tw-text-[#FEDF89]"
-                          : "tw-text-iron-400"
-                      } tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
+                          : "tw-text-iron-300"
+                      } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
                       data-tooltip-id="upload-file-tooltip">
                       <input
                         type="file"
@@ -174,7 +174,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       <button
                         onClick={() => setShowGifPicker(true)}
                         aria-label="Add GIF"
-                        className={`tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
+                        className={`tw-flex-shrink-0 tw-text-iron-300 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
                         data-tooltip-id="add-gif-tooltip">
                         <svg
                           className="tw-flex-shrink-0 tw-size-5"
@@ -235,7 +235,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   isRequiredMetadataMissing || isRequiredMediaMissing
                     ? "tw-text-[#FEDF89]"
                     : "tw-text-iron-400"
-                } tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}>
+                } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"

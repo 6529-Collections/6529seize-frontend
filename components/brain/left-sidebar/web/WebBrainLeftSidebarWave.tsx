@@ -14,12 +14,14 @@ interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean;
+  readonly basePath?: string;
 }
 
 const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   wave,
   onHover,
   showPin = true,
+  basePath = "/waves",
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,11 +31,11 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   const getHref = (waveId: string) => {
     const currentWaveId = searchParams?.get("wave") ?? undefined;
     if (currentWaveId === waveId) {
-      return "/waves";
+      return basePath;
     }
     const params = new URLSearchParams();
     params.set("wave", waveId);
-    return `/waves?${params.toString()}`;
+    return `${basePath}?${params.toString()}`;
   };
 
   const haveNewDrops = wave.newDropsCount.count > 0;

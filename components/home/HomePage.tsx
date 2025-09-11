@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -30,15 +30,9 @@ export default function HomePage({
   const { registerRef } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();
 
-  // Local ref for tabs
-  const tabsRef = useRef<HTMLDivElement | null>(null);
-
   // Callback ref for registration with LayoutContext
   const setTabsRef = useCallback(
     (element: HTMLDivElement | null) => {
-      // Update local ref
-      tabsRef.current = element;
-      // Register with LayoutContext
       registerRef("tabs", element);
     },
     [registerRef]
