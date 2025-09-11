@@ -4,12 +4,12 @@ import { NextGenCollection } from "@/entities/INextgen";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
-import Home from "@/components/home/Home";
+import HomePage from "@/components/home/HomePage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { fetchInitialActivityData } from "@/components/latest-activity/fetchInitialActivityData";
 import { fetchInitialTokens } from "@/components/nextGen/collections/collectionParts/hooks/fetchInitialTokens";
 
-export default async function HomePage() {
+export default async function Page() {
   const headers = await getAppCommonHeaders();
   
   // First, fetch featured data and activity data in parallel
@@ -32,7 +32,7 @@ export default async function HomePage() {
 
   return (
     <main className={styles.main}>
-      <Home 
+      <HomePage 
         featuredNft={featuredNft} 
         featuredNextgen={featuredNextgen}
         initialActivityData={initialActivityData}

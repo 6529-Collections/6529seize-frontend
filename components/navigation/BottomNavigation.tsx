@@ -30,9 +30,9 @@ export const items: NavItemData[] = [
     iconSizeClass: "tw-size-6",
   },
   {
-    kind: "view",
+    kind: "route",
     name: "Messages",
-    viewKey: "messages",
+    href: "/messages",
     icon: "messages",
     iconComponent: ChatBubbleIcon,
   },

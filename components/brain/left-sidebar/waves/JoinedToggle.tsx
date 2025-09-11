@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo } from "react";
-import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
 

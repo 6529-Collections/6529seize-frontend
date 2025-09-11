@@ -40,7 +40,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   }, []);
 
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-pr-2`;
+    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-px-6`;
   }, []);
 
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
@@ -81,10 +81,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
       {/* Main content container */}
-      <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-pt-2">
-        {/* Time section */}
+      {/* <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-pt-2">
+        
         <WaveLeaderboardTime wave={wave} />
-      </div>
+      </div> */}
 
       {/* Sticky tabs/filters section */}
       <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
