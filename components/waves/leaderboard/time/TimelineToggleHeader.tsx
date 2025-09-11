@@ -52,11 +52,11 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
       return (
         <span className="tw-inline-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-2.5 tw-px-3 tw-py-1.5 tw-rounded-md tw-text-xs tw-bg-gradient-to-r tw-from-iron-800/90 tw-to-iron-700/70 group-hover:tw-from-iron-700/60 group-hover:tw-to-iron-600/40 tw-border tw-border-iron-600/40 group-hover:tw-border-iron-600/30 tw-border-solid tw-shadow-sm group-hover:tw-shadow-none tw-transition-all tw-duration-300 tw-ease-out">
           <span className="tw-font-bold tw-bg-gradient-to-r tw-from-amber-200 tw-via-amber-100 tw-to-amber-200/90 tw-bg-clip-text tw-text-transparent tw-whitespace-nowrap">
-            Congrats to all SZN 11 winners!
+            Congrats to all SZN 12 winners!
           </span>
           <span className="tw-text-iron-500">•</span>
           <span className="tw-text-iron-300 tw-font-medium tw-whitespace-nowrap">
-            SZN 12 starts:{" "}
+            SZN 13 starts:{" "}
             {(() => {
               const mintingDate =
                 wave && waveData ? waveData.pauses.calculateMintingDate(nextDecisionTime) : null;
