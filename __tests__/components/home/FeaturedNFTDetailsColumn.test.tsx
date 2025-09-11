@@ -529,7 +529,7 @@ describe("FeaturedNFTDetailsColumn", () => {
   });
 
   describe("Blackout schedule integration", () => {
-    it("calls useBlackoutSchedule with correct Estonian timezone configuration", () => {
+    it("calls useBlackoutSchedule with correct Eastern European timezone configuration", () => {
       mockUseBlackoutSchedule.mockReturnValue({
         isActive: true,
       });
@@ -537,10 +537,11 @@ describe("FeaturedNFTDetailsColumn", () => {
       const nft = createTestNFT();
       render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
       
-      // Verify the hook is called with the correct Estonian configuration
+      // Verify the hook is called with the correct Eastern European configuration
       expect(mockUseBlackoutSchedule).toHaveBeenCalledWith({
-        timezone: "Europe/Tallinn",
+        timezone: "Europe/Bucharest",
         schedule: [
+          { day: 0, startHour: 0, endHour: 0 },  // Sunday all day
           { day: 2, startHour: 17, endHour: 0 }, // Tuesday 5pm-midnight
           { day: 4, startHour: 17, endHour: 0 }, // Thursday 5pm-midnight  
           { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight

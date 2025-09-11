@@ -24,6 +24,14 @@ const ESTONIAN_SCHEDULE: BlackoutWindow[] = [
   { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight
 ];
 
+// Updated schedule with Sunday full day blackout (current production config)
+const EASTERN_EUROPEAN_SCHEDULE: BlackoutWindow[] = [
+  { day: 0, startHour: 0, endHour: 0 },  // Sunday all day
+  { day: 2, startHour: 17, endHour: 0 }, // Tuesday 5pm-midnight
+  { day: 4, startHour: 17, endHour: 0 }, // Thursday 5pm-midnight  
+  { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight
+];
+
 describe("useBlackoutSchedule", () => {
   // Test the basic blackout window logic first (pure functions)
   describe("isWithinBlackoutWindow", () => {
@@ -473,6 +481,228 @@ describe("useBlackoutSchedule", () => {
       }
       
       Date.prototype.toLocaleString = originalToLocaleString;
+    });
+  });
+
+  describe("full day blackout scenarios", () => {
+    describe("Sunday full day blackout (startHour: 0, endHour: 0)", () => {
+      const sundayFullDaySchedule: BlackoutWindow[] = [
+        { day: DAYS.SUNDAY, startHour: 0, endHour: 0 } // Sunday all day
+      ];
+
+      it("should be in blackout for all hours of Sunday", () => {
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Test every hour of Sunday (0-23)
+        for (let hour = 0; hour <= 23; hour++) {
+          const timeString = hour < 10 ? `1/7/2024, ${hour}:00:00 AM` : 
+                           hour === 12 ? '1/7/2024, 12:00:00 PM' :
+                           hour < 12 ? `1/7/2024, ${hour}:00:00 AM` :
+                           hour === 12 ? '1/7/2024, 12:00:00 PM' :
+                           `1/7/2024, ${hour === 12 ? 12 : hour - 12}:00:00 PM`;
+          
+          Date.prototype.toLocaleString = jest.fn().mockReturnValue(timeString); // Sunday
+          expect(getCurrentBlackoutStatus("UTC", sundayFullDaySchedule)).toBe(true);
+        }
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+
+      it("should NOT be in blackout for other days", () => {
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Test Monday through Saturday
+        const testDays = [
+          { date: '1/8/2024, 12:00:00 PM', day: 'Monday' },
+          { date: '1/9/2024, 12:00:00 PM', day: 'Tuesday' },
+          { date: '1/10/2024, 12:00:00 PM', day: 'Wednesday' },
+          { date: '1/11/2024, 12:00:00 PM', day: 'Thursday' },
+          { date: '1/12/2024, 12:00:00 PM', day: 'Friday' },
+          { date: '1/13/2024, 12:00:00 PM', day: 'Saturday' }
+        ];
+        
+        testDays.forEach(({ date }) => {
+          Date.prototype.toLocaleString = jest.fn().mockReturnValue(date);
+          expect(getCurrentBlackoutStatus("UTC", sundayFullDaySchedule)).toBe(false);
+        });
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+
+      it("correctly handles Sunday blackout with Eastern European timezone", () => {
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Test various Sunday times in Eastern European timezone
+        const sundayTimes = [
+          '1/7/2024, 12:00:00 AM', // Midnight
+          '1/7/2024, 6:00:00 AM',  // Early morning
+          '1/7/2024, 12:00:00 PM', // Noon
+          '1/7/2024, 6:00:00 PM',  // Evening
+          '1/7/2024, 11:59:00 PM'  // Just before midnight
+        ];
+        
+        sundayTimes.forEach(timeString => {
+          Date.prototype.toLocaleString = jest.fn().mockReturnValue(timeString);
+          expect(getCurrentBlackoutStatus("Europe/Bucharest", sundayFullDaySchedule)).toBe(true);
+        });
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+    });
+
+    describe("Eastern European schedule with Sunday blackout", () => {
+      it("has correct schedule configuration", () => {
+        expect(EASTERN_EUROPEAN_SCHEDULE).toEqual([
+          { day: 0, startHour: 0, endHour: 0 },  // Sunday all day
+          { day: 2, startHour: 17, endHour: 0 }, // Tuesday 5pm-midnight
+          { day: 4, startHour: 17, endHour: 0 }, // Thursday 5pm-midnight  
+          { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight
+        ]);
+      });
+
+      it("works with production schedule - Sunday blackout scenarios", () => {
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Sunday morning - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/7/2024, 9:00:00 AM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(true);
+        
+        // Sunday evening - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/7/2024, 8:00:00 PM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(true);
+        
+        // Sunday midnight - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/7/2024, 11:59:00 PM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(true);
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+
+      it("works with production schedule - non-blackout scenarios", () => {
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Monday morning - should NOT be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/8/2024, 9:00:00 AM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(false);
+        
+        // Tuesday early afternoon - should NOT be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/9/2024, 2:00:00 PM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(false);
+        
+        // Friday evening - should NOT be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/12/2024, 8:00:00 PM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(false);
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+
+      it("works with production schedule - partial day blackout scenarios", () => {
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Tuesday evening - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/9/2024, 8:00:00 PM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(true);
+        
+        // Thursday evening - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/11/2024, 10:00:00 PM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(true);
+        
+        // Saturday evening - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/13/2024, 11:30:00 PM');
+        expect(getCurrentBlackoutStatus("Europe/Bucharest", EASTERN_EUROPEAN_SCHEDULE)).toBe(true);
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+    });
+
+    describe("full day blackout edge cases", () => {
+      it("handles multiple full day blackouts correctly", () => {
+        const weekendFullBlackout: BlackoutWindow[] = [
+          { day: DAYS.SATURDAY, startHour: 0, endHour: 0 }, // Saturday all day
+          { day: DAYS.SUNDAY, startHour: 0, endHour: 0 }    // Sunday all day
+        ];
+        
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Saturday should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/13/2024, 3:00:00 PM');
+        expect(getCurrentBlackoutStatus("UTC", weekendFullBlackout)).toBe(true);
+        
+        // Sunday should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/7/2024, 3:00:00 PM');
+        expect(getCurrentBlackoutStatus("UTC", weekendFullBlackout)).toBe(true);
+        
+        // Monday should NOT be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/8/2024, 3:00:00 PM');
+        expect(getCurrentBlackoutStatus("UTC", weekendFullBlackout)).toBe(false);
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+
+      it("handles mixed full-day and partial-day blackouts", () => {
+        const mixedSchedule: BlackoutWindow[] = [
+          { day: DAYS.SUNDAY, startHour: 0, endHour: 0 },   // Sunday all day
+          { day: DAYS.MONDAY, startHour: 9, endHour: 17 },  // Monday 9am-5pm
+          { day: DAYS.WEDNESDAY, startHour: 0, endHour: 0 } // Wednesday all day
+        ];
+        
+        const originalToLocaleString = Date.prototype.toLocaleString;
+        
+        // Sunday all day - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/7/2024, 3:00:00 PM');
+        expect(getCurrentBlackoutStatus("UTC", mixedSchedule)).toBe(true);
+        
+        // Monday during work hours - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/8/2024, 12:00:00 PM');
+        expect(getCurrentBlackoutStatus("UTC", mixedSchedule)).toBe(true);
+        
+        // Monday evening - should NOT be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/8/2024, 7:00:00 PM');
+        expect(getCurrentBlackoutStatus("UTC", mixedSchedule)).toBe(false);
+        
+        // Tuesday - should NOT be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/9/2024, 12:00:00 PM');
+        expect(getCurrentBlackoutStatus("UTC", mixedSchedule)).toBe(false);
+        
+        // Wednesday all day - should be in blackout
+        Date.prototype.toLocaleString = jest.fn().mockReturnValue('1/10/2024, 1:00:00 AM');
+        expect(getCurrentBlackoutStatus("UTC", mixedSchedule)).toBe(true);
+        
+        Date.prototype.toLocaleString = originalToLocaleString;
+      });
+    });
+
+    describe("isWithinBlackoutWindow full day scenarios", () => {
+      it("correctly identifies full day blackout windows", () => {
+        const fullDayWindow = { day: DAYS.MONDAY, startHour: 0, endHour: 0 };
+        
+        // All hours of Monday should be in blackout
+        for (let hour = 0; hour <= 23; hour++) {
+          expect(isWithinBlackoutWindow(DAYS.MONDAY, hour, fullDayWindow)).toBe(true);
+        }
+        
+        // Other days should not be in blackout
+        for (let day = 0; day <= 6; day++) {
+          if (day !== DAYS.MONDAY) {
+            expect(isWithinBlackoutWindow(day, 12, fullDayWindow)).toBe(false);
+          }
+        }
+      });
+
+      it("distinguishes between full day (0,0) and no blackout (same non-zero)", () => {
+        const fullDayWindow = { day: DAYS.MONDAY, startHour: 0, endHour: 0 };
+        const noBlackoutWindow = { day: DAYS.MONDAY, startHour: 10, endHour: 10 };
+        
+        // Full day blackout: 0,0 should cover all hours
+        expect(isWithinBlackoutWindow(DAYS.MONDAY, 12, fullDayWindow)).toBe(true);
+        expect(isWithinBlackoutWindow(DAYS.MONDAY, 0, fullDayWindow)).toBe(true);
+        expect(isWithinBlackoutWindow(DAYS.MONDAY, 23, fullDayWindow)).toBe(true);
+        
+        // Same start/end non-zero: should not blackout anything
+        expect(isWithinBlackoutWindow(DAYS.MONDAY, 10, noBlackoutWindow)).toBe(false);
+        expect(isWithinBlackoutWindow(DAYS.MONDAY, 9, noBlackoutWindow)).toBe(false);
+        expect(isWithinBlackoutWindow(DAYS.MONDAY, 11, noBlackoutWindow)).toBe(false);
+      });
     });
   });
 });

@@ -22,15 +22,16 @@ interface Props {
 export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const ESTONIAN_SCHEDULE: BlackoutWindow[] = [
+  const SCHEDULE: BlackoutWindow[] = [
+    { day: 0, startHour: 0, endHour: 0 },  // Sunday all day
     { day: 2, startHour: 17, endHour: 0 }, // Tuesday 5pm-midnight
     { day: 4, startHour: 17, endHour: 0 }, // Thursday 5pm-midnight  
     { day: 6, startHour: 17, endHour: 0 }  // Saturday 5pm-midnight
   ];
 
   const { isActive } = useBlackoutSchedule({
-    timezone: "Europe/Tallinn",
-    schedule: ESTONIAN_SCHEDULE
+    timezone: "Europe/Bucharest",
+    schedule: SCHEDULE
   });
 
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
