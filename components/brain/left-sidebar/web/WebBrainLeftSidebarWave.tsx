@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
@@ -40,6 +40,17 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   };
 
   const haveNewDrops = wave.newDropsCount.count > 0;
+
+  const formattedWaveName = useMemo(() => {
+    if (wave.type === ApiWaveType.Chat && wave.name.includes("id-0x")) {
+      const match = wave.name.match(/(.*id-)(0x[a-fA-F0-9]{40})(.*)/);
+      if (match) {
+        const [, prefix, address, suffix] = match;
+        return `${prefix}${formatAddress(address)}${suffix}`;
+      }
+    }
+    return wave.name;
+  }, [wave.name, wave.type]);
 
   const onWaveHover = (waveId: string) => {
     const currentWaveId = searchParams?.get("wave") ?? undefined;
@@ -105,16 +116,7 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
         </div>
         <div className="tw-flex-1">
           <div className="tw-text-sm -tw-mt-0.5 tw-mb-0.5">
-            {(() => {
-              if (wave.type === ApiWaveType.Chat && wave.name.includes("id-0x")) {
-                const match = wave.name.match(/(.*id-)(0x[a-fA-F0-9]{40})(.*)/);
-                if (match) {
-                  const [, prefix, address, suffix] = match;
-                  return `${prefix}${formatAddress(address)}${suffix}`;
-                }
-              }
-              return wave.name;
-            })()}
+            {formattedWaveName}
           </div>
           {!!wave.newDropsCount.latestDropTimestamp && (
             <div className="tw-text-xs tw-text-iron-500">

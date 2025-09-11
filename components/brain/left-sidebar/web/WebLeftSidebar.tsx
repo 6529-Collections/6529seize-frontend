@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import React, { useRef } from "react";
 import WebBrainLeftSidebarWaves from "./WebBrainLeftSidebarWaves";
 import WebDirectMessagesList from "./WebDirectMessagesList";
 import { usePathname } from "next/navigation";
@@ -15,29 +15,19 @@ import { usePathname } from "next/navigation";
  * - Uses an internal scroll container to enable inertia scrolling and custom
  *   scrollbars without managing explicit heights; relies on parent layout flex.
  */
-interface WebLeftSidebarProps {
-  readonly activeWaveId: string | null | undefined;
-}
-
-const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({ activeWaveId }) => {
+const WebLeftSidebar: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   // Determine content type based on current route/context - WEB SPECIFIC LOGIC
   const isMessagesView = pathname?.startsWith("/messages");
 
-  // Instead of calculating height, we'll use flex properties to fill parent container
-  const sidebarStyle = useMemo(() => {
-    const minHeight = "100%";
-    return { minHeight };
-  }, []);
-
   return (
     <div className="tw-relative tw-w-80 tw-h-full">
       <div
         ref={scrollContainerRef}
         className="tw-flex tw-flex-col tw-overflow-y-auto tw-w-80 tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40"
-        style={sidebarStyle}
+        style={{ minHeight: "100%" }}
       >
         {!isMessagesView && (
           <WebBrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />

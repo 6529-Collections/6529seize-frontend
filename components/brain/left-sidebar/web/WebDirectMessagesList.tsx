@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useContext } from "react";
+import React, { useRef, useContext } from "react";
 import WebUnifiedWavesListWaves, {
   WebUnifiedWavesListWavesHandle,
 } from "./WebUnifiedWavesListWaves";
@@ -19,6 +19,7 @@ import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import Image from "next/image";
 import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -34,49 +35,17 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
-  const hasFetchedRef = useRef(false);
   const { directMessages, registerWave } = useMyStream();
 
-  // Reset the fetch flag when dependencies change
-  useEffect(() => {
-    hasFetchedRef.current = false;
-  }, [directMessages.hasNextPage, directMessages.isFetchingNextPage]);
-
-  useEffect(() => {
-    const node = listRef.current?.sentinelRef.current;
-    if (
-      !node ||
-      !directMessages.hasNextPage ||
-      directMessages.isFetchingNextPage
-    )
-      return;
-
-    const cb = (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (
-        entry.isIntersecting &&
-        directMessages.hasNextPage &&
-        !directMessages.isFetchingNextPage &&
-        !hasFetchedRef.current
-      ) {
-        hasFetchedRef.current = true;
-        directMessages.fetchNextPage();
-      }
-    };
-
-    const observer = new IntersectionObserver(cb, {
-      root: scrollContainerRef?.current,
-      rootMargin: "100px",
-    });
-
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [
+  // Use the custom hook for infinite scroll
+  useInfiniteScroll(
     directMessages.hasNextPage,
     directMessages.isFetchingNextPage,
+    directMessages.fetchNextPage,
     scrollContainerRef,
-  ]);
+    listRef.current?.sentinelRef || { current: null },
+    "100px"
+  );
 
   const haveDirectMessages = directMessages.list.length > 0;
   const isEmpty = !directMessages.isFetching && !haveDirectMessages;

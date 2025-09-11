@@ -4,7 +4,8 @@ import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesLis
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import WebUnifiedWavesListWaves, {
@@ -36,43 +37,15 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   // Refs to the scroll container and sentinel
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
 
-  // Track if we've triggered a fetch to avoid multiple triggers
-  const hasFetchedRef = useRef(false);
-
-  // Reset the fetch flag when dependencies change
-  useEffect(() => {
-    hasFetchedRef.current = false;
-  }, [hasNextPage, isFetchingNextPage]);
-
-  // Set up intersection observer for infinite scrolling
-  useEffect(() => {
-    const node = listRef.current?.sentinelRef.current;
-    if (!node || !hasNextPage || isFetchingNextPage) return;
-
-    const cb = (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (
-        entry.isIntersecting &&
-        hasNextPage &&
-        !isFetchingNextPage &&
-        !hasFetchedRef.current
-      ) {
-        hasFetchedRef.current = true;
-        fetchNextPage();
-      }
-    };
-
-    const observer = new IntersectionObserver(cb, {
-      root: listRef.current?.sentinelRef.current?.parentElement,
-      rootMargin: "100px",
-    });
-
-    observer.observe(node);
-
-    return () => {
-      observer.unobserve(node);
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  // Use the custom hook for infinite scroll
+  useInfiniteScroll(
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    scrollContainerRef,
+    listRef.current?.sentinelRef || { current: null },
+    "100px"
+  );
 
   return (
     <div>
