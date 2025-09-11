@@ -3,6 +3,20 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { SIDEBAR_WIDTHS, SIDEBAR_BREAKPOINT } from "../constants/sidebar";
 
+/**
+ * useSidebarController
+ *
+ * Controls the main (left) sidebar responsive behavior and visual state.
+ * - Determines mobile vs desktop using a `matchMedia` query at `SIDEBAR_BREAKPOINT`.
+ * - Manages desktop collapsed state (default: collapsed) without persistence.
+ * - Manages mobile off‑canvas open state (overlay panel on small screens).
+ * - Exposes memoized actions and a computed `sidebarWidth` used by layouts.
+ *
+ * Notes
+ * - Cleans up media query listeners on unmount.
+ * - ESC key handling and focus management for the off‑canvas panel are handled
+ *   by the sidebar component, not this hook.
+ */
 export function useSidebarController() {
   // Media query for desktop vs mobile breakpoint
   const mql = useMemo(() => {

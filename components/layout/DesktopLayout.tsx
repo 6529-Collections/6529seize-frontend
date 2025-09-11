@@ -12,6 +12,21 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 //   loading: () => <HeaderPlaceholder />,
 // });
 
+/**
+ * DesktopLayout
+ *
+ * Top‑level web layout that renders the persistent left sidebar and positions
+ * main content based on responsive sidebar state.
+ *
+ * Responsibilities
+ * - Uses `useSidebarController` to derive mobile/desktop, collapsed vs off‑canvas,
+ *   and the computed `sidebarWidth`.
+ * - Integrates Collections submenu via `useCollectionsSubmenu` and offsets
+ *   main content when both sidebar and submenu are visible on desktop.
+ * - Delegates off‑canvas overlay behavior and accessibility to `DesktopSidebar`.
+ *
+ * This component does not manage routing; it simply offsets and renders children.
+ */
 interface DesktopLayoutProps {
   readonly children: ReactNode;
   readonly isSmall?: boolean;

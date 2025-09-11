@@ -14,6 +14,19 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { useSidebarState } from "../../hooks/useSidebarState";
 
+/**
+ * SharedDesktopLayout
+ *
+ * High‑level page layout that composes left sidebar (optional), main content,
+ * and a right sidebar overlay driven by query params and global sidebar state.
+ *
+ * Routing & State
+ * - Reads `drop` and `wave` from the URL to control the full‑screen drop overlay
+ *   and whether the right sidebar is shown.
+ * - Uses `useSidebarState` for right sidebar open/close state; automatically
+ *   closes it when `wave` is missing.
+ * - Applies `contentContainerStyle` from LayoutContext for height calculations.
+ */
 interface SharedDesktopLayoutProps {
   readonly children: ReactNode;
   readonly defaultPath?: string; // "/waves" or "/messages"

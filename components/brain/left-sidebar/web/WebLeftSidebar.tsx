@@ -5,6 +5,16 @@ import WebBrainLeftSidebarWaves from "./WebBrainLeftSidebarWaves";
 import WebDirectMessagesList from "./WebDirectMessagesList";
 import { usePathname } from "next/navigation";
 
+/**
+ * WebLeftSidebar
+ *
+ * Web‑specific left sidebar content. Chooses between Waves and Direct Messages
+ * sections based on the current pathname ("/messages" routes show DMs).
+ *
+ * Rendering
+ * - Uses an internal scroll container to enable inertia scrolling and custom
+ *   scrollbars without managing explicit heights; relies on parent layout flex.
+ */
 interface WebLeftSidebarProps {
   readonly activeWaveId: string | null | undefined;
 }
