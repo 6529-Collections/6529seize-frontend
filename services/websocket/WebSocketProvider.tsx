@@ -19,6 +19,7 @@ import {
   WebSocketStatus,
 } from "./WebSocketTypes";
 import { WsMessageType } from "../../helpers/Types";
+import { getAuthJwt } from "../auth/auth.utils";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
@@ -184,7 +185,12 @@ export function WebSocketProvider({
           // Only attempt reconnect for unexpected closure (not code 1000)
           // and if this wasn't a manual disconnect
           if (event.code !== 1000 && !isManualDisconnectRef.current) {
-            attemptReconnect();
+            // Get fresh token before reconnecting
+            const freshToken = getAuthJwt() || reconnectTokenRef.current;
+            if (freshToken) {
+              reconnectTokenRef.current = freshToken; // Update stored token
+              attemptReconnect();
+            }
           } else {
             // Reset reconnect attempts for intentional disconnects
             reconnectAttemptsRef.current = 0;

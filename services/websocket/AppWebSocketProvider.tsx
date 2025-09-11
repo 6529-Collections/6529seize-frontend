@@ -5,16 +5,17 @@ import { WebSocketProvider } from "./WebSocketProvider";
 import { DEFAULT_WEBSOCKET_CONFIG, WebSocketConfig } from "./index";
 import { getAuthJwt } from "../auth/auth.utils";
 import { useWebSocket } from "./useWebSocket";
+import { useWebSocketHealth } from "./useWebSocketHealth";
 
 /**
- * WebSocket connection initializer component
+ * WebSocket connection initializer with health monitoring
  *
- * Connects to WebSocket using auth token when available
+ * Handles initial connection and continuous health monitoring
  */
 function WebSocketInitializer() {
   const { connect, disconnect } = useWebSocket();
 
-  // Connect on mount with auth token if available
+  // Initial connection on mount
   useEffect(() => {
     const authToken = getAuthJwt();
     if (authToken) {
@@ -26,6 +27,9 @@ function WebSocketInitializer() {
       disconnect();
     };
   }, [connect, disconnect]);
+
+  // Continuous health monitoring
+  useWebSocketHealth();
 
   return null; // This component doesn't render anything
 }
