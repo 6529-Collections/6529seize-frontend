@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { WebSocketProvider } from "./WebSocketProvider";
 import { DEFAULT_WEBSOCKET_CONFIG, WebSocketConfig } from "./index";
-import { getAuthJwt } from "../auth/auth.utils";
 import { useWebSocket } from "./useWebSocket";
 import { useWebSocketHealth } from "./useWebSocketHealth";
 

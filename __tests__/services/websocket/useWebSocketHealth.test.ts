@@ -61,10 +61,38 @@ describe('useWebSocketHealth', () => {
   });
 
   describe('Initialization', () => {
-    it('should initialize health monitoring without immediate action', () => {
+    it('should perform immediate health check on initialization', () => {
+      mockGetAuthJwt.mockReturnValue('test-token');
+      
       renderHook(() => useWebSocketHealth());
       
-      // Should not connect or disconnect immediately
+      // Should connect immediately due to immediate health check
+      expect(mockConnect).toHaveBeenCalledWith('test-token');
+      expect(mockConnect).toHaveBeenCalledTimes(1);
+      expect(mockDisconnect).not.toHaveBeenCalled();
+    });
+
+    it('should perform immediate disconnect when no token on initialization', () => {
+      mockGetAuthJwt.mockReturnValue(null);
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        status: WebSocketStatus.CONNECTED,
+      });
+      
+      renderHook(() => useWebSocketHealth());
+      
+      // Should disconnect immediately due to immediate health check
+      expect(mockDisconnect).toHaveBeenCalledTimes(1);
+      expect(mockConnect).not.toHaveBeenCalled();
+    });
+
+    it('should not take action when already in correct state on initialization', () => {
+      mockGetAuthJwt.mockReturnValue(null);
+      
+      renderHook(() => useWebSocketHealth());
+      
+      // Should not connect or disconnect when no token and already disconnected
       expect(mockConnect).not.toHaveBeenCalled();
       expect(mockDisconnect).not.toHaveBeenCalled();
     });
@@ -83,13 +111,24 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
+      // Should connect immediately on initialization
+      expect(mockConnect).toHaveBeenCalledWith('test-token-123');
+      expect(mockConnect).toHaveBeenCalledTimes(1);
+      expect(mockDisconnect).not.toHaveBeenCalled();
+      
+      // Should not connect again on timer if already connected and token unchanged
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        status: WebSocketStatus.CONNECTED,
+      });
+      
       act(() => {
         jest.advanceTimersByTime(10000); // Advance 10 seconds
       });
       
-      expect(mockConnect).toHaveBeenCalledWith('test-token-123');
+      // Should be called only once immediately (interval doesn't trigger redundant connections)
       expect(mockConnect).toHaveBeenCalledTimes(1);
-      expect(mockDisconnect).not.toHaveBeenCalled();
     });
 
     it('should reconnect when token changes', () => {
@@ -154,12 +193,23 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
+      // Should disconnect immediately on initialization
+      expect(mockDisconnect).toHaveBeenCalledTimes(1);
+      expect(mockConnect).not.toHaveBeenCalled();
+      
+      // Should not disconnect again on timer if already disconnected
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        status: WebSocketStatus.DISCONNECTED,
+      });
+      
       act(() => {
         jest.advanceTimersByTime(10000);
       });
       
+      // Should be called only once immediately (interval doesn't trigger redundant disconnections)
       expect(mockDisconnect).toHaveBeenCalledTimes(1);
-      expect(mockConnect).not.toHaveBeenCalled();
     });
 
     it('should disconnect when no token and currently connecting', () => {
@@ -172,12 +222,23 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
+      // Should disconnect immediately on initialization
+      expect(mockDisconnect).toHaveBeenCalledTimes(1);
+      expect(mockConnect).not.toHaveBeenCalled();
+      
+      // Should not disconnect again on timer if already disconnected
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        status: WebSocketStatus.DISCONNECTED,
+      });
+      
       act(() => {
         jest.advanceTimersByTime(10000);
       });
       
+      // Should be called only once immediately (interval doesn't trigger redundant disconnections)
       expect(mockDisconnect).toHaveBeenCalledTimes(1);
-      expect(mockConnect).not.toHaveBeenCalled();
     });
 
     it('should not disconnect when no token and already disconnected', () => {
@@ -213,12 +274,9 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
-      // First health check - token1
-      act(() => {
-        jest.advanceTimersByTime(10000);
-      });
-      
+      // Immediate health check on initialization - token1
       expect(mockConnect).toHaveBeenCalledWith('token1');
+      expect(mockConnect).toHaveBeenCalledTimes(1);
       
       // Change to token2
       tokenIndex = 1;
@@ -233,6 +291,7 @@ describe('useWebSocketHealth', () => {
       });
       
       expect(mockConnect).toHaveBeenCalledWith('token2');
+      expect(mockConnect).toHaveBeenCalledTimes(2);
       
       // Change to token3
       tokenIndex = 2;
@@ -268,40 +327,40 @@ describe('useWebSocketHealth', () => {
   });
 
   describe('Health Check Interval', () => {
-    it('should perform health checks every 10 seconds', () => {
+    it('should perform health checks every 10 seconds after immediate check', () => {
       mockGetAuthJwt.mockReturnValue('test-token');
       
       renderHook(() => useWebSocketHealth());
       
-      // No calls initially
-      expect(mockConnect).not.toHaveBeenCalled();
-      
-      // After 9 seconds - still no calls
-      act(() => {
-        jest.advanceTimersByTime(9000);
-      });
-      expect(mockConnect).not.toHaveBeenCalled();
-      
-      // After 10 seconds - first call
-      act(() => {
-        jest.advanceTimersByTime(1000);
-      });
+      // Immediate check on initialization
+      expect(mockConnect).toHaveBeenCalledWith('test-token');
       expect(mockConnect).toHaveBeenCalledTimes(1);
       
-      // After another 10 seconds - status is now CONNECTED, but token hasn't changed
+      // Mock status as connected now
       mockUseWebSocket.mockReturnValue({
         connect: mockConnect,
         disconnect: mockDisconnect,
         status: WebSocketStatus.CONNECTED,
       });
       
+      // After 9 seconds - no additional calls
+      act(() => {
+        jest.advanceTimersByTime(9000);
+      });
+      expect(mockConnect).toHaveBeenCalledTimes(1);
+      
+      // After 10 seconds - timer check, but should not connect again since connected and token unchanged
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(mockConnect).toHaveBeenCalledTimes(1); // Only initial call
+      
+      // After another 10 seconds - still no additional calls since token unchanged and already connected
       act(() => {
         jest.advanceTimersByTime(10000);
       });
       
-      // Since status is CONNECTED and token hasn't changed, should not connect again
-      // But the hook will still call connect because the token exists and was different from lastTokenRef
-      expect(mockConnect).toHaveBeenCalledTimes(2);
+      expect(mockConnect).toHaveBeenCalledTimes(1); // Only initial call
     });
 
     it('should continue health checks after multiple intervals', () => {
@@ -309,11 +368,11 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
-      // Simulate multiple intervals with token changes
-      act(() => {
-        jest.advanceTimersByTime(10000); // First check
-      });
+      // Immediate check on initialization
+      expect(mockConnect).toHaveBeenCalledWith('test-token');
+      expect(mockConnect).toHaveBeenCalledTimes(1);
       
+      // Mock connected status and change token
       mockGetAuthJwt.mockReturnValue('new-token');
       mockUseWebSocket.mockReturnValue({
         connect: mockConnect,
@@ -322,7 +381,7 @@ describe('useWebSocketHealth', () => {
       });
       
       act(() => {
-        jest.advanceTimersByTime(10000); // Second check
+        jest.advanceTimersByTime(10000); // First timer check with new token
       });
       
       expect(mockConnect).toHaveBeenCalledTimes(2);
@@ -353,12 +412,23 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
+      // Should disconnect immediately on initialization
+      expect(mockDisconnect).toHaveBeenCalledTimes(1);
+      expect(mockConnect).not.toHaveBeenCalled();
+      
+      // Mock status as disconnected now
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        status: WebSocketStatus.DISCONNECTED,
+      });
+      
       act(() => {
         jest.advanceTimersByTime(10000);
       });
       
+      // Should be called only once immediately (interval doesn't trigger redundant disconnections)
       expect(mockDisconnect).toHaveBeenCalledTimes(1);
-      expect(mockConnect).not.toHaveBeenCalled();
     });
 
     it('should handle whitespace-only token as no token', () => {
@@ -386,29 +456,31 @@ describe('useWebSocketHealth', () => {
       
       mockGetAuthJwt.mockReturnValue('test-token');
       
-      const { rerender } = renderHook(() => useWebSocketHealth());
+      renderHook(() => useWebSocketHealth());
       
-      // Change the mock to return new functions
+      // Should use original connect function on immediate check
+      expect(mockConnect).toHaveBeenCalledWith('test-token');
+      expect(mockConnect).toHaveBeenCalledTimes(1);
+      
+      // Change the mock to return new functions and status as connected
       mockUseWebSocket.mockReturnValue({
         connect: mockConnect2,
         disconnect: mockDisconnect2,
-        status: WebSocketStatus.DISCONNECTED,
+        status: WebSocketStatus.CONNECTED,
       });
-      
-      rerender();
       
       act(() => {
         jest.advanceTimersByTime(10000);
       });
       
-      // Should use the new connect function
-      expect(mockConnect2).toHaveBeenCalledWith('test-token');
-      expect(mockConnect).not.toHaveBeenCalled();
+      // Should not call new connect since already connected and token unchanged
+      expect(mockConnect2).not.toHaveBeenCalled();
+      expect(mockConnect).toHaveBeenCalledTimes(1); // Only initial call
     });
   });
 
   describe('Error Scenarios', () => {
-    it('should propagate errors from getAuthJwt', () => {
+    it('should propagate errors from getAuthJwt on immediate check', () => {
       mockGetAuthJwt.mockImplementation(() => {
         throw new Error('Auth service unavailable');
       });
@@ -419,7 +491,25 @@ describe('useWebSocketHealth', () => {
         status: WebSocketStatus.CONNECTED,
       });
       
+      // Error should propagate immediately during initialization
+      expect(() => {
+        renderHook(() => useWebSocketHealth());
+      }).toThrow('Auth service unavailable');
+    });
+
+    it('should propagate errors from getAuthJwt on timer', () => {
+      // Start with working auth
+      mockGetAuthJwt.mockReturnValue('test-token');
+      
       renderHook(() => useWebSocketHealth());
+      
+      // Immediate check should work
+      expect(mockConnect).toHaveBeenCalledWith('test-token');
+      
+      // Now make auth fail
+      mockGetAuthJwt.mockImplementation(() => {
+        throw new Error('Auth service unavailable');
+      });
       
       // Error should propagate when timer fires
       act(() => {
@@ -429,25 +519,21 @@ describe('useWebSocketHealth', () => {
       });
     });
 
-    it('should propagate errors from connect function', () => {
+    it('should propagate errors from connect function on immediate check', () => {
       mockGetAuthJwt.mockReturnValue('test-token');
       mockConnect.mockImplementation(() => {
         throw new Error('Connection failed');
       });
       
-      renderHook(() => useWebSocketHealth());
-      
-      // The connect error should propagate
-      act(() => {
-        expect(() => {
-          jest.advanceTimersByTime(10000);
-        }).toThrow('Connection failed');
-      });
+      // The connect error should propagate immediately during initialization
+      expect(() => {
+        renderHook(() => useWebSocketHealth());
+      }).toThrow('Connection failed');
       
       expect(mockConnect).toHaveBeenCalledWith('test-token');
     });
 
-    it('should propagate errors from disconnect function', () => {
+    it('should propagate errors from disconnect function on immediate check', () => {
       mockGetAuthJwt.mockReturnValue(null);
       mockDisconnect.mockImplementation(() => {
         throw new Error('Disconnect failed');
@@ -459,16 +545,61 @@ describe('useWebSocketHealth', () => {
         status: WebSocketStatus.CONNECTED,
       });
       
-      renderHook(() => useWebSocketHealth());
-      
-      // The disconnect error should propagate
-      act(() => {
-        expect(() => {
-          jest.advanceTimersByTime(10000);
-        }).toThrow('Disconnect failed');
-      });
+      // The disconnect error should propagate immediately during initialization
+      expect(() => {
+        renderHook(() => useWebSocketHealth());
+      }).toThrow('Disconnect failed');
       
       expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Interval Management and Memory Leaks', () => {
+    it('should create only one interval regardless of status changes', () => {
+      renderHook(() => useWebSocketHealth());
+      
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      
+      // Simulate status changes that previously caused leaks
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        status: WebSocketStatus.CONNECTING,
+      });
+      
+      act(() => { jest.advanceTimersByTime(1000); });
+      
+      mockUseWebSocket.mockReturnValue({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        status: WebSocketStatus.CONNECTED,
+      });
+      
+      act(() => { jest.advanceTimersByTime(1000); });
+      
+      // Verify no additional intervals created
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should clean up single interval on unmount without leaks', () => {
+      const { unmount } = renderHook(() => useWebSocketHealth());
+      
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      unmount();
+      expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle rapid status changes without creating multiple intervals', () => {
+      renderHook(() => useWebSocketHealth());
+      const initialCount = setIntervalSpy.mock.calls.length;
+      
+      // Simulate rapid status changes
+      [WebSocketStatus.CONNECTING, WebSocketStatus.CONNECTED, WebSocketStatus.DISCONNECTED].forEach(status => {
+        mockUseWebSocket.mockReturnValue({ connect: mockConnect, disconnect: mockDisconnect, status });
+        act(() => { jest.advanceTimersByTime(100); });
+      });
+      
+      expect(setIntervalSpy).toHaveBeenCalledTimes(initialCount);
     });
   });
 
@@ -488,6 +619,11 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
+      // Immediate check should do nothing when no token and already disconnected
+      expect(mockConnect).not.toHaveBeenCalled();
+      expect(mockDisconnect).not.toHaveBeenCalled();
+      
+      // Timer check should also do nothing
       act(() => {
         jest.advanceTimersByTime(10000);
       });
@@ -515,12 +651,9 @@ describe('useWebSocketHealth', () => {
       
       renderHook(() => useWebSocketHealth());
       
-      // First check - connect with initial token
-      act(() => {
-        jest.advanceTimersByTime(10000);
-      });
-      
+      // Immediate check - connect with initial token
       expect(mockConnect).toHaveBeenCalledWith('initial-token');
+      expect(mockConnect).toHaveBeenCalledTimes(1);
       
       // Mock connected status
       mockUseWebSocket.mockReturnValue({

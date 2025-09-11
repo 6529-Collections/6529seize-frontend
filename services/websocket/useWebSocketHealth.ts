@@ -8,49 +8,53 @@ import { WebSocketStatus } from "./WebSocketTypes";
 /**
  * WebSocket health monitoring hook
  * 
- * Monitors connection health every 10 seconds and ensures:
- * - Connects when token is available but disconnected
- * - Reconnects when token changes
- * - Disconnects when no token is available
+ * ARCHITECTURE:
+ * - Immediate Health Checks: Triggered by status changes for responsive connection management
+ * - Periodic Health Checks: Stable 10-second interval for ongoing monitoring
+ * - Memory Safe: Single interval prevents leaks during status transitions
+ * - Fresh References: Periodic checks use current WebSocket context to avoid stale closures
  */
 export function useWebSocketHealth() {
   const { connect, disconnect, status } = useWebSocket();
   const lastTokenRef = useRef<string | null>(null);
 
+  // Effect 1: Immediate health checks on status changes
   useEffect(() => {
-    // IMMEDIATE INITIAL CHECK: Don't wait 10 seconds for first connection attempt
-    const performHealthCheck = () => {
+    const currentToken = getAuthJwt();
+    const previousToken = lastTokenRef.current;
+    lastTokenRef.current = currentToken;
+    
+    // Atomic WebSocket health logic
+    if (!currentToken && status !== WebSocketStatus.DISCONNECTED) {
+      disconnect();
+    } else if (currentToken && status === WebSocketStatus.DISCONNECTED) {
+      connect(currentToken);
+    } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
+      connect(currentToken);
+    }
+  }, [connect, disconnect, status]); // RESPONSIVE: Handle status changes
+
+  // Effect 2: Stable periodic monitoring
+  useEffect(() => {
+    const performPeriodicHealthCheck = () => {
       const currentToken = getAuthJwt();
-      
-      // ATOMIC REFERENCE UPDATE: Capture previous value before any logic
       const previousToken = lastTokenRef.current;
       lastTokenRef.current = currentToken;
       
-      /**
-       * ATOMIC WEBSOCKET HEALTH LOGIC
-       * Each health check performs exactly ONE action to prevent redundant connections:
-       * Priority 1: Disconnect when no token (clean state)
-       * Priority 2: Connect when token exists but disconnected
-       * Priority 3: Reconnect when token changes while connected
-       */
-      if (!currentToken && status !== WebSocketStatus.DISCONNECTED) {
-        // Priority 1: No token but connected -> disconnect
-        disconnect();
-      } else if (currentToken && status === WebSocketStatus.DISCONNECTED) {
-        // Priority 2: Have token but disconnected -> connect
-        connect(currentToken);
-      } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
-        // Priority 3: Token changed while connected -> reconnect
-        connect(currentToken);
+      // Get fresh references to avoid stale closures
+      const { status: currentStatus, connect: currentConnect, disconnect: currentDisconnect } = useWebSocket();
+      
+      // Same atomic logic with fresh references
+      if (!currentToken && currentStatus !== WebSocketStatus.DISCONNECTED) {
+        currentDisconnect();
+      } else if (currentToken && currentStatus === WebSocketStatus.DISCONNECTED) {
+        currentConnect(currentToken);
+      } else if (currentToken && currentStatus !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
+        currentConnect(currentToken);
       }
     };
 
-    // IMMEDIATE CHECK: Perform initial health check immediately
-    performHealthCheck();
-    
-    // PERIODIC CHECKS: Check connection health every 10 seconds
-    const healthCheck = setInterval(performHealthCheck, 10000);
-
+    const healthCheck = setInterval(performPeriodicHealthCheck, 10000);
     return () => clearInterval(healthCheck);
-  }, [connect, disconnect, status]);
+  }, []); // STABLE: Empty dependency prevents interval recreation
 }
