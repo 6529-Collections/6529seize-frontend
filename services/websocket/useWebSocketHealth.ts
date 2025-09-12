@@ -15,13 +15,19 @@ import { WebSocketStatus } from "./WebSocketTypes";
  * - Fresh References: Periodic checks use current WebSocket context to avoid stale closures
  */
 export function useWebSocketHealth() {
-  const { connect, disconnect, status } = useWebSocket();
+  const webSocketState = useWebSocket();
+  const { connect, disconnect, status } = webSocketState;
   const lastTokenRef = useRef<string | null>(null);
+  const webSocketStateRef = useRef(webSocketState);
+  
+  // Keep ref updated with current WebSocket state
+  webSocketStateRef.current = webSocketState;
 
   // Effect 1: Immediate health checks on status changes
   useEffect(() => {
     const currentToken = getAuthJwt();
     const previousToken = lastTokenRef.current;
+    lastTokenRef.current = currentToken;
     
     // Atomic WebSocket health logic
     if (!currentToken && status !== WebSocketStatus.DISCONNECTED) {
@@ -31,9 +37,6 @@ export function useWebSocketHealth() {
     } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
       connect(currentToken);
     }
-    
-    // Update reference AFTER authentication logic completes
-    lastTokenRef.current = currentToken;
   }, [connect, disconnect, status]); // RESPONSIVE: Handle status changes
 
   // Effect 2: Stable periodic monitoring
@@ -41,9 +44,11 @@ export function useWebSocketHealth() {
     const performPeriodicHealthCheck = () => {
       const currentToken = getAuthJwt();
       const previousToken = lastTokenRef.current;
+      lastTokenRef.current = currentToken;
       
-      // Get fresh references to avoid stale closures
-      const { status: currentStatus, connect: currentConnect, disconnect: currentDisconnect } = useWebSocket();
+      // Get fresh references to avoid stale closures - FIXED: Use ref to access current state
+      const currentWebSocketState = webSocketStateRef.current;
+      const { status: currentStatus, connect: currentConnect, disconnect: currentDisconnect } = currentWebSocketState;
       
       // Same atomic logic with fresh references
       if (!currentToken && currentStatus !== WebSocketStatus.DISCONNECTED) {
@@ -53,9 +58,6 @@ export function useWebSocketHealth() {
       } else if (currentToken && currentStatus !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
         currentConnect(currentToken);
       }
-      
-      // Update reference AFTER authentication logic completes
-      lastTokenRef.current = currentToken;
     };
 
     const healthCheck = setInterval(performPeriodicHealthCheck, 10000);
