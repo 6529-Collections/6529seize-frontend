@@ -40,7 +40,11 @@ const WavesView: React.FC = () => {
   };
 
   useEffect(() => {
-    setActiveDrop(null);
+    // Use functional update to avoid unnecessary re-renders
+    setActiveDrop(prevActiveDrop => {
+      // Only update if there's actually an active drop to clear
+      return prevActiveDrop !== null ? null : prevActiveDrop;
+    });
   }, [serialisedWaveId]);
 
   const onReply = (param: DropInteractionParams) => {
