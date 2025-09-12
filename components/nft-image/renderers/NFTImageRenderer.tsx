@@ -1,5 +1,7 @@
-import { Col } from "react-bootstrap";
+"use client";
+
 import Image from "next/image";
+import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import { BaseRendererProps } from "../types/renderer-props";
@@ -24,8 +26,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <Col
       xs={12}
-      className={`mb-2 text-center d-flex align-items-center justify-content-center ${styles.imageWrapper} ${props.heightStyle} ${props.bgStyle}`}
-    >
+      className={`mb-2 text-center d-flex align-items-center justify-content-center ${styles.imageWrapper} ${props.heightStyle} ${props.bgStyle}`}>
       <Image
         loading="eager"
         priority
