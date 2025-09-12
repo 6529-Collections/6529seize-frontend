@@ -43,6 +43,17 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         id={props.id ?? `image-${props.nft.id}`}
         src={src}
         alt={props.nft.name}
+        onError={({ currentTarget }) => {
+          if (currentTarget.src === props.nft.thumbnail) {
+            currentTarget.src = props.nft.scaled
+              ? props.nft.scaled
+              : props.nft.image;
+          } else if (currentTarget.src === props.nft.scaled) {
+            currentTarget.src = props.nft.image;
+          } else if ("metadata" in props.nft) {
+            currentTarget.src = props.nft.metadata.image;
+          }
+        }}
       />
       <NFTImageBalance
         showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}

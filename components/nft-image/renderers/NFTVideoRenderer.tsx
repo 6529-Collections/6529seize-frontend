@@ -25,13 +25,23 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         preload="auto"
         src={
           !props.showOriginal &&
-          "metadata" in props.nft &&
-          props.nft.compressed_animation
+            "metadata" in props.nft &&
+            props.nft.compressed_animation
             ? props.nft.compressed_animation
             : props.nft.animation
         }
         className={props.imageStyle}
-   
+        onError={({ currentTarget }) => {
+          if (
+            "metadata" in props.nft &&
+            currentTarget.src === props.nft.compressed_animation
+          ) {
+            currentTarget.src = props.nft.animation;
+          } else if ("metadata" in props.nft) {
+            currentTarget.src = props.nft.metadata.animation;
+          }
+        }}
+
       ></video>
     </Col>
   );
