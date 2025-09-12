@@ -37,7 +37,7 @@ export function useWebSocketHealth() {
     } else if (currentToken && status !== WebSocketStatus.DISCONNECTED && currentToken !== previousToken) {
       connect(currentToken);
     }
-  }, [connect, disconnect, status]); // RESPONSIVE: Handle status changes
+  }, [connect, disconnect]); // FIXED: Removed status to prevent reactive behavior
 
   // Effect 2: Stable periodic monitoring
   useEffect(() => {

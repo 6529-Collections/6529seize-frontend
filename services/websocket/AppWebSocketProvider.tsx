@@ -9,20 +9,20 @@ import { useWebSocketHealth } from "./useWebSocketHealth";
 /**
  * WebSocket connection initializer with coordinated health monitoring
  *
- * LAZY INITIALIZATION PATTERN:
- * - Does NOT connect immediately on mount
+ * EAGER INITIALIZATION PATTERN:
+ * - Connects IMMEDIATELY on mount when auth token exists
  * - Delegates all connection management to useWebSocketHealth()
- * - Health monitoring handles auth token detection and initial connection
+ * - Health monitoring detects auth token and connects during first render cycle
  * - Provides cleanup on unmount
  * 
- * This prevents double initialization where both immediate connection
- * AND health monitoring could connect simultaneously on startup.
+ * This ensures immediate connectivity for authenticated users while
+ * maintaining centralized connection management through health monitoring.
  */
 function WebSocketInitializer() {
   const { disconnect } = useWebSocket();
 
-  // LAZY INITIALIZATION: Let health monitoring handle initial connection
-  // Health monitoring will check auth token and connect if needed
+  // EAGER INITIALIZATION: Health monitoring handles immediate connection
+  // Health monitoring will check auth token and connect immediately if needed
   useWebSocketHealth();
 
   // Only handle cleanup on unmount - no initial connection logic
