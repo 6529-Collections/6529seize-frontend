@@ -5,6 +5,8 @@ import {
   faCaretRight,
   faChevronDown,
   faChevronUp,
+  faCircleQuestion,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
@@ -913,6 +915,7 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [jumpMint, setJumpMint] = useState<string>("");
   const [autoOpenYmd, setAutoOpenYmd] = useState<string | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
   const seasonNumber = displayedSeasonNumberFromIndex(seasonIndex);
   const yearNumber = displayedYearNumberFromIndex(seasonIndex);
   const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
@@ -1024,7 +1027,27 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
       ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 1000 * (n - 1), 0, 1)));
   return (
-    <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
+    <div className="tw-relative tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
+      <button
+        type="button"
+        aria-label="Toggle calendar info"
+        className="tw-absolute tw-top-2 tw-right-2 tw-text-gray-400 hover:tw-text-white"
+        onClick={() => setShowInfo((s) => !s)}
+      >
+        <FontAwesomeIcon icon={showInfo ? faXmark : faCircleQuestion} />
+      </button>
+      <div
+        className={`tw-overflow-hidden tw-transition-all tw-duration-300 tw-mb-4 ${showInfo ? "tw-max-h-96" : "tw-max-h-0"}`}
+      >
+        <div className="tw-bg-gray-900 tw-border tw-border-gray-700 tw-rounded-md tw-p-4 tw-text-sm tw-space-y-1">
+          <p><span className="tw-font-bold">SZN</span> - traditional calendar quarter system - 3 months each</p>
+          <p><span className="tw-font-bold">YEAR</span> - 4 SZN in 1 year (also tradish system)</p>
+          <p><span className="tw-font-bold">EPOCH</span> - 4 YEARS (16 seasons)</p>
+          <p><span className="tw-font-bold">PERIOD</span> - 5 EPOCH (or 20 years or 80 seasons)</p>
+          <p><span className="tw-font-bold">ERA</span> - 5 PERIODS (or 20 epochs or 100 years or 400 seasons)</p>
+          <p><span className="tw-font-bold">EON</span> - 10 ERAS (or 100 periods or 1000 years or 4000 seasons)</p>
+        </div>
+      </div>
       {/* Division (zoom) selector buttons */}
       <div className="tw-mb-8 tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-6 tw-gap-2">
         {(

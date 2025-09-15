@@ -82,16 +82,26 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
           name: "NFT Delegation",
           hasDivider: true,
           items: [
-            { name: "Delegation Center", path: "/delegation/delegation-center" },
-            { name: "Wallet Architecture", path: "/delegation/wallet-architecture" },
+            {
+              name: "Delegation Center",
+              path: "/delegation/delegation-center",
+            },
+            {
+              name: "Wallet Architecture",
+              path: "/delegation/wallet-architecture",
+            },
             { name: "Delegation FAQs", path: "/delegation/delegation-faq" },
-            { name: "Consolidation Use Cases", path: "/delegation/consolidation-use-cases" },
+            {
+              name: "Consolidation Use Cases",
+              path: "/delegation/consolidation-use-cases",
+            },
             { name: "Wallet Checker", path: "/delegation/wallet-checker" },
           ],
         },
         {
           name: "The Memes Tools",
           items: [
+            { name: "Memes Calendar", path: "/meme-calendar" },
             {
               name: "Memes Subscriptions",
               path: "/tools/subscriptions-report",
@@ -106,11 +116,9 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
     },
     {
       title: "About",
-      className: (_context) => 
+      className: (_context) =>
         _context.pathname?.includes("/about") ? "active" : "",
-      items: [
-        { name: "GDRC1", path: `/about/${AboutSection.GDRC1}` },
-      ],
+      items: [{ name: "GDRC1", path: `/about/${AboutSection.GDRC1}` }],
       sections: [
         {
           name: "NFTs",
@@ -121,9 +129,11 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
               path: `/about/${AboutSection.SUBSCRIPTIONS}`,
               condition: (ctx) => !ctx.capacitorIsIos || ctx.country === "US",
             },
-            { name: "Memes Calendar", path: `/about/${AboutSection.MEMES_CALENDAR}` },
             { name: "Minting", path: `/about/${AboutSection.MINTING}` },
-            { name: "Nakamoto Threshold", path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}` },
+            {
+              name: "Nakamoto Threshold",
+              path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+            },
             { name: "Meme Lab", path: `/about/${AboutSection.MEME_LAB}` },
             { name: "Gradient", path: `/about/${AboutSection.GRADIENTS}` },
           ],
@@ -132,8 +142,14 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
         {
           name: "NFT Delegation",
           items: [
-            { name: "About NFTD", path: `/about/${AboutSection.NFT_DELEGATION}` },
-            { name: "Primary Address", path: `/about/${AboutSection.PRIMARY_ADDRESS}` },
+            {
+              name: "About NFTD",
+              path: `/about/${AboutSection.NFT_DELEGATION}`,
+            },
+            {
+              name: "Primary Address",
+              path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
+            },
           ],
         },
         {
@@ -155,10 +171,16 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
         {
           name: "Resources",
           items: [
-            { name: "Data Decentralization", path: `/about/${AboutSection.DATA_DECENTR}` },
+            {
+              name: "Data Decentralization",
+              path: `/about/${AboutSection.DATA_DECENTR}`,
+            },
             { name: "ENS", path: `/about/${AboutSection.ENS}` },
             { name: "License", path: `/about/${AboutSection.LICENSE}` },
-            { name: "Release Notes", path: `/about/${AboutSection.RELEASE_NOTES}` },
+            {
+              name: "Release Notes",
+              path: `/about/${AboutSection.RELEASE_NOTES}`,
+            },
           ],
         },
       ],

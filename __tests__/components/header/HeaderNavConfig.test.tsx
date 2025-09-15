@@ -1,224 +1,307 @@
-import { getDesktopNavigation, toolsBottomItems, type NavContext } from '../../../components/header/HeaderNavConfig';
-import { AboutSection } from '@/enums';
+import { AboutSection } from "@/enums";
+import {
+  getDesktopNavigation,
+  toolsBottomItems,
+  type NavContext,
+} from "../../../components/header/HeaderNavConfig";
 
-describe('HeaderNavConfig', () => {
+describe("HeaderNavConfig", () => {
   const mockContext: NavContext = {
     showWaves: true,
     appWalletsSupported: true,
     capacitorIsIos: false,
-    country: 'US',
-    pathname: '/'
+    country: "US",
+    pathname: "/",
   };
 
-  describe('getDesktopNavigation', () => {
-    it('returns all main navigation sections', () => {
+  describe("getDesktopNavigation", () => {
+    it("returns all main navigation sections", () => {
       const navigation = getDesktopNavigation(mockContext);
-      
+
       expect(navigation).toHaveLength(5);
-      expect(navigation.map(item => item.title)).toEqual([
-        'Brain',
-        'Collections',
-        'Network',
-        'Tools',
-        'About'
+      expect(navigation.map((item) => item.title)).toEqual([
+        "Brain",
+        "Collections",
+        "Network",
+        "Tools",
+        "About",
       ]);
     });
 
-    it('Brain section condition returns false when showWaves is false', () => {
+    it("Brain section condition returns false when showWaves is false", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
-        showWaves: false
+        showWaves: false,
       });
-      
-      const brainSection = navigation.find(item => item.title === 'Brain');
+
+      const brainSection = navigation.find((item) => item.title === "Brain");
       expect(brainSection).toBeDefined();
-      expect(brainSection?.condition?.({
-        ...mockContext,
-        showWaves: false
-      })).toBe(false);
+      expect(
+        brainSection?.condition?.({
+          ...mockContext,
+          showWaves: false,
+        })
+      ).toBe(false);
     });
 
-    it('Brain section condition returns true when showWaves is true', () => {
+    it("Brain section condition returns true when showWaves is true", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
-        showWaves: true
+        showWaves: true,
       });
-      
-      const brainSection = navigation.find(item => item.title === 'Brain');
+
+      const brainSection = navigation.find((item) => item.title === "Brain");
       expect(brainSection).toBeDefined();
       expect(brainSection?.condition?.(mockContext)).toBe(true);
       expect(brainSection?.items).toEqual([
-        { name: 'My Stream', path: '/my-stream' },
-        { name: 'Waves', path: '/waves' }
+        { name: "My Stream", path: "/my-stream" },
+        { name: "Waves", path: "/waves" },
       ]);
     });
 
-    it('filters App Wallets when appWalletsSupported is false', () => {
+    it("filters App Wallets when appWalletsSupported is false", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
-        appWalletsSupported: false
+        appWalletsSupported: false,
       });
-      
-      const toolsSection = navigation.find(item => item.title === 'Tools');
-      const appWalletsLink = toolsSection?.items?.find(item => item.name === 'App Wallets');
-      expect(appWalletsLink?.condition?.({
-        ...mockContext,
-        appWalletsSupported: false
-      })).toBe(false);
+
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+      const appWalletsLink = toolsSection?.items?.find(
+        (item) => item.name === "App Wallets"
+      );
+      expect(
+        appWalletsLink?.condition?.({
+          ...mockContext,
+          appWalletsSupported: false,
+        })
+      ).toBe(false);
     });
 
-    it('includes App Wallets when appWalletsSupported is true', () => {
+    it("includes App Wallets when appWalletsSupported is true", () => {
       const navigation = getDesktopNavigation(mockContext);
-      
-      const toolsSection = navigation.find(item => item.title === 'Tools');
-      const appWalletsLink = toolsSection?.items?.find(item => item.name === 'App Wallets');
+
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+      const appWalletsLink = toolsSection?.items?.find(
+        (item) => item.name === "App Wallets"
+      );
       expect(appWalletsLink?.condition?.(mockContext)).toBe(true);
     });
 
-    it('filters Memes Subscriptions on iOS for non-US countries', () => {
+    it("filters Memes Subscriptions on iOS for non-US countries", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
         capacitorIsIos: true,
-        country: 'CA'
+        country: "CA",
       });
-      
-      const toolsSection = navigation.find(item => item.title === 'Tools');
-      const memesToolsSection = toolsSection?.sections?.find(section => section.name === 'The Memes Tools');
-      const subscriptionsLink = memesToolsSection?.items.find(item => item.name === 'Memes Subscriptions');
-      
-      expect(subscriptionsLink?.condition?.({
-        ...mockContext,
-        capacitorIsIos: true,
-        country: 'CA'
-      })).toBe(false);
+
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+      const memesToolsSection = toolsSection?.sections?.find(
+        (section) => section.name === "The Memes Tools"
+      );
+
+      const memesCalendarLink = memesToolsSection?.items.find(
+        (item) => item.name === "Memes Calendar"
+      );
+      expect(
+        memesCalendarLink?.condition?.({
+          ...mockContext,
+          capacitorIsIos: true,
+          country: "US",
+        })
+      ).toBe(false);
+
+      const subscriptionsLink = memesToolsSection?.items.find(
+        (item) => item.name === "Memes Subscriptions"
+      );
+
+      expect(
+        subscriptionsLink?.condition?.({
+          ...mockContext,
+          capacitorIsIos: true,
+          country: "CA",
+        })
+      ).toBe(false);
     });
 
-    it('includes Memes Subscriptions on iOS for US country', () => {
+    it("includes Memes Subscriptions on iOS for US country", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
         capacitorIsIos: true,
-        country: 'US'
+        country: "US",
       });
-      
-      const toolsSection = navigation.find(item => item.title === 'Tools');
-      const memesToolsSection = toolsSection?.sections?.find(section => section.name === 'The Memes Tools');
-      const subscriptionsLink = memesToolsSection?.items.find(item => item.name === 'Memes Subscriptions');
-      
-      expect(subscriptionsLink?.condition?.({
-        ...mockContext,
-        capacitorIsIos: true,
-        country: 'US'
-      })).toBe(true);
+
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+      const memesToolsSection = toolsSection?.sections?.find(
+        (section) => section.name === "The Memes Tools"
+      );
+      const subscriptionsLink = memesToolsSection?.items.find(
+        (item) => item.name === "Memes Subscriptions"
+      );
+
+      expect(
+        subscriptionsLink?.condition?.({
+          ...mockContext,
+          capacitorIsIos: true,
+          country: "US",
+        })
+      ).toBe(true);
     });
 
-    it('includes Memes Subscriptions on non-iOS devices regardless of country', () => {
+    it("includes Memes Subscriptions on non-iOS devices regardless of country", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
         capacitorIsIos: false,
-        country: 'CA'
+        country: "CA",
       });
-      
-      const toolsSection = navigation.find(item => item.title === 'Tools');
-      const memesToolsSection = toolsSection?.sections?.find(section => section.name === 'The Memes Tools');
-      const subscriptionsLink = memesToolsSection?.items.find(item => item.name === 'Memes Subscriptions');
-      
-      expect(subscriptionsLink?.condition?.({
-        ...mockContext,
-        capacitorIsIos: false,
-        country: 'CA'
-      })).toBe(true);
+
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+      const memesToolsSection = toolsSection?.sections?.find(
+        (section) => section.name === "The Memes Tools"
+      );
+      const subscriptionsLink = memesToolsSection?.items.find(
+        (item) => item.name === "Memes Subscriptions"
+      );
+
+      expect(
+        subscriptionsLink?.condition?.({
+          ...mockContext,
+          capacitorIsIos: false,
+          country: "CA",
+        })
+      ).toBe(true);
     });
 
-    it('applies About subscriptions filtering correctly', () => {
+    it("applies About subscriptions filtering correctly", () => {
       // Test iOS + non-US country scenario for About section subscriptions
       const navigation = getDesktopNavigation({
         ...mockContext,
         capacitorIsIos: true,
-        country: 'DE'
+        country: "DE",
       });
-      
-      const aboutSection = navigation.find(item => item.title === 'About');
-      const nftsSection = aboutSection?.sections?.find(section => section.name === 'NFTs');
-      const subscriptionsLink = nftsSection?.items.find(item => item.name === 'Subscriptions');
-      
-      expect(subscriptionsLink?.condition?.({
-        ...mockContext,
-        capacitorIsIos: true,
-        country: 'DE'
-      })).toBe(false);
+
+      const aboutSection = navigation.find((item) => item.title === "About");
+      const nftsSection = aboutSection?.sections?.find(
+        (section) => section.name === "NFTs"
+      );
+      const subscriptionsLink = nftsSection?.items.find(
+        (item) => item.name === "Subscriptions"
+      );
+
+      expect(
+        subscriptionsLink?.condition?.({
+          ...mockContext,
+          capacitorIsIos: true,
+          country: "DE",
+        })
+      ).toBe(false);
     });
 
-    it('returns About section with correct className function', () => {
+    it("returns About section with correct className function", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
-        pathname: '/about/memes'
+        pathname: "/about/memes",
       });
-      
-      const aboutSection = navigation.find(item => item.title === 'About');
-      expect(typeof aboutSection?.className).toBe('function');
-      
+
+      const aboutSection = navigation.find((item) => item.title === "About");
+      expect(typeof aboutSection?.className).toBe("function");
+
       // Test the className function
-      const classNameFn = aboutSection?.className as (context: NavContext) => string;
-      expect(classNameFn({
-        ...mockContext,
-        pathname: '/about/memes'
-      })).toBe('active');
-      
-      expect(classNameFn({
-        ...mockContext,
-        pathname: '/waves'
-      })).toBe('');
+      const classNameFn = aboutSection?.className as (
+        context: NavContext
+      ) => string;
+      expect(
+        classNameFn({
+          ...mockContext,
+          pathname: "/about/memes",
+        })
+      ).toBe("active");
+
+      expect(
+        classNameFn({
+          ...mockContext,
+          pathname: "/waves",
+        })
+      ).toBe("");
     });
 
-    it('includes correct AboutSection enum values in paths', () => {
+    it("includes correct AboutSection enum values in paths", () => {
       const navigation = getDesktopNavigation(mockContext);
-      const aboutSection = navigation.find(item => item.title === 'About');
-      
+      const aboutSection = navigation.find((item) => item.title === "About");
+
       // Test main items
-      expect(aboutSection?.items?.[0].path).toBe(`/about/${AboutSection.GDRC1}`);
-      
+      expect(aboutSection?.items?.[0].path).toBe(
+        `/about/${AboutSection.GDRC1}`
+      );
+
       // Test NFTs section paths
-      const nftsSection = aboutSection?.sections?.find(section => section.name === 'NFTs');
-      expect(nftsSection?.items.some(item => item.path === `/about/${AboutSection.MEMES}`)).toBe(true);
-      expect(nftsSection?.items.some(item => item.path === `/about/${AboutSection.SUBSCRIPTIONS}`)).toBe(true);
-      expect(nftsSection?.items.some(item => item.path === `/about/${AboutSection.MEMES_CALENDAR}`)).toBe(true);
-      expect(nftsSection?.items.some(item => item.path === `/about/${AboutSection.MINTING}`)).toBe(true);
-      expect(nftsSection?.items.some(item => item.path === `/about/${AboutSection.NAKAMOTO_THRESHOLD}`)).toBe(true);
-      expect(nftsSection?.items.some(item => item.path === `/about/${AboutSection.MEME_LAB}`)).toBe(true);
-      expect(nftsSection?.items.some(item => item.path === `/about/${AboutSection.GRADIENTS}`)).toBe(true);
+      const nftsSection = aboutSection?.sections?.find(
+        (section) => section.name === "NFTs"
+      );
+      expect(
+        nftsSection?.items.some(
+          (item) => item.path === `/about/${AboutSection.MEMES}`
+        )
+      ).toBe(true);
+      expect(
+        nftsSection?.items.some(
+          (item) => item.path === `/about/${AboutSection.SUBSCRIPTIONS}`
+        )
+      ).toBe(true);
+      expect(
+        nftsSection?.items.some(
+          (item) => item.path === `/about/${AboutSection.MINTING}`
+        )
+      ).toBe(true);
+      expect(
+        nftsSection?.items.some(
+          (item) => item.path === `/about/${AboutSection.NAKAMOTO_THRESHOLD}`
+        )
+      ).toBe(true);
+      expect(
+        nftsSection?.items.some(
+          (item) => item.path === `/about/${AboutSection.MEME_LAB}`
+        )
+      ).toBe(true);
+      expect(
+        nftsSection?.items.some(
+          (item) => item.path === `/about/${AboutSection.GRADIENTS}`
+        )
+      ).toBe(true);
     });
 
-    it('includes Tools section hasDividerAfter property', () => {
+    it("includes Tools section hasDividerAfter property", () => {
       const navigation = getDesktopNavigation(mockContext);
-      const toolsSection = navigation.find(item => item.title === 'Tools');
-      
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+
       expect(toolsSection?.hasDividerAfter).toBe(true);
     });
 
-    it('includes NFT Delegation section with hasDivider property', () => {
+    it("includes NFT Delegation section with hasDivider property", () => {
       const navigation = getDesktopNavigation(mockContext);
-      const toolsSection = navigation.find(item => item.title === 'Tools');
-      const nftDelegationSection = toolsSection?.sections?.find(section => section.name === 'NFT Delegation');
-      
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+      const nftDelegationSection = toolsSection?.sections?.find(
+        (section) => section.name === "NFT Delegation"
+      );
+
       expect(nftDelegationSection?.hasDivider).toBe(true);
     });
   });
 
-  describe('toolsBottomItems', () => {
-    it('includes all expected bottom items', () => {
+  describe("toolsBottomItems", () => {
+    it("includes all expected bottom items", () => {
       expect(toolsBottomItems).toHaveLength(4);
       expect(toolsBottomItems).toEqual([
-        { name: 'API', path: '/tools/api' },
-        { name: 'EMMA', path: '/emma' },
-        { name: 'Block Finder', path: '/meme-blocks' },
-        { name: 'Open Data', path: '/open-data' }
+        { name: "API", path: "/tools/api" },
+        { name: "EMMA", path: "/emma" },
+        { name: "Block Finder", path: "/meme-blocks" },
+        { name: "Open Data", path: "/open-data" },
       ]);
     });
 
-    it('contains valid path formats', () => {
-      toolsBottomItems.forEach(item => {
+    it("contains valid path formats", () => {
+      toolsBottomItems.forEach((item) => {
         expect(item.path).toMatch(/^\//);
-        expect(typeof item.name).toBe('string');
+        expect(typeof item.name).toBe("string");
         expect(item.name.length).toBeGreaterThan(0);
       });
     });

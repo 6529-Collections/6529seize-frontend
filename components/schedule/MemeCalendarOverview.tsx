@@ -36,7 +36,7 @@ export default function MemeCalendarOverview({
           <span className="font-lightest">The Memes</span> Minting Calendar
         </h1>
         {showViewAll && (
-          <Link href={`/memes-minting`} className="tw-no-underline">
+          <Link href={`/meme-calendar`} className="tw-no-underline">
             <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
               View Full Calendar
             </span>

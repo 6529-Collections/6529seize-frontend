@@ -10,7 +10,7 @@ export default function MemeCalendarDetails() {
       {/* Back to Calendar */}
       <div className="tw-flex tw-mb-3">
         <Link
-          href="/memes-minting"
+          href="/meme-calendar"
           className="tw-no-underline tw-flex tw-items-center tw-gap-2">
           <FontAwesomeIcon icon={faArrowLeft} />
           Memes Minting Calendar
