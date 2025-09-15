@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 
 interface Collection {
   id: string;
@@ -71,9 +72,7 @@ function CollectionsSubmenu({
   const handleCollectionClick = useCallback((collection: Collection) => {
     setActiveCollection(collection.id);
     // Persist only the base collection route for future nav from main icon
-    try {
-      localStorage.setItem("lastCollectionBase", collection.href);
-    } catch {}
+    safeLocalStorage.setItem("lastCollectionBase", collection.href);
     // Keep submenu open for quick switching
   }, []);
 
