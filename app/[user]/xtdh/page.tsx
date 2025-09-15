@@ -1,21 +1,10 @@
-import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserPageXTDH from "@/components/user/xtdh/UserPageXTDH";
+import { redirect } from "next/navigation";
 
-function XTDHTab({ profile }: { readonly profile: ApiIdentity }) {
-  return (
-    <div className="tailwind-scope">
-      <UserPageXTDH profile={profile} />
-    </div>
-  );
+export default async function Page({
+  params,
+}: {
+  readonly params: Promise<{ user: string }>;
+}) {
+  const { user } = await params;
+  redirect(`/${user}/xtdh/overview`);
 }
-
-const { Page, generateMetadata } = createUserTabPage({
-  subroute: "xtdh",
-  metaLabel: "xTDH",
-  Tab: XTDHTab,
-});
-
-export default Page;
-export { generateMetadata };
-
