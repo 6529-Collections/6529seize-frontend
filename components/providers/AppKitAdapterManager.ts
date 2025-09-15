@@ -82,7 +82,7 @@ export class AppKitAdapterManager {
     });
 
     const connectors: CreateConnectorFn[] = [...appWalletConnectors];
-    // connectors.push(this.buildCoinbaseMobileWallet());
+    connectors.push(this.buildCoinbaseMobileWallet());
 
     // Create adapter with all connectors
     const wagmiAdapter = new WagmiAdapter({
