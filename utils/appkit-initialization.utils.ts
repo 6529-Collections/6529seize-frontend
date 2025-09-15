@@ -108,5 +108,6 @@ function buildAppKitConfig(adapter: WagmiAdapter) {
     },
     enableOnramp: false,
     enableSwaps: false,
+    coinbasePreference: "eoaOnly" as const,
   };
 }
