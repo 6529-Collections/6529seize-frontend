@@ -64,8 +64,15 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   //   [registerRef, setHeaderRef]
   // );
 
+  // Expose app left rail width as a CSS custom property for page-level sidebars
+  const rootStyle: React.CSSProperties = {
+    ["--left-rail" as any]: sidebarWidth,
+    // Prevent horizontal scrollbars when pushing content on small desktop
+    ...(isMobile && isOffcanvasOpen ? { overflowX: "hidden" } : {}),
+  };
+
   return (
-    <div>
+    <div style={rootStyle}>
       <div className="tailwind-scope">
         <DesktopSidebar
           isCollapsed={isCollapsed}
@@ -81,7 +88,11 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
 
       <main
         className="tw-transition-all tw-duration-300 tw-ease-out"
-        style={{ marginLeft: mainOffset }}
+        style={
+          isMobile && isOffcanvasOpen
+            ? ({ transform: `translateX(${sidebarWidth})` } as React.CSSProperties)
+            : ({ marginLeft: mainOffset } as React.CSSProperties)
+        }
       >
         {children}
       </main>

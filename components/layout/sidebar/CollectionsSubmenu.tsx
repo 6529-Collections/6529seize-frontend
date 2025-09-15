@@ -28,18 +28,6 @@ const collections: Collection[] = [
     description: "The complete Memes collection",
   },
   {
-    id: "memelab",
-    name: "Meme Lab",
-    href: "/meme-lab",
-    description: "Experimental Meme Lab collection",
-  },
-  {
-    id: "gradients",
-    name: "Gradients",
-    href: "/gradients",
-    description: "Gradients collection",
-  },
-  {
     id: "6529gradient",
     name: "6529 Gradient",
     href: "/6529-gradient",
@@ -50,6 +38,18 @@ const collections: Collection[] = [
     name: "NextGen",
     href: "/nextgen",
     description: "NextGen art collection",
+  },
+  {
+    id: "memelab",
+    name: "Meme Lab",
+    href: "/meme-lab",
+    description: "Experimental Meme Lab collection",
+  },
+  {
+    id: "rememes",
+    name: "ReMemes",
+    href: "/rememes",
+    description: "ReMemes collection",
   },
 ];
 
@@ -68,9 +68,13 @@ function CollectionsSubmenu({
   }, [pathname]);
 
   // Optimize collection click handler
-  const handleCollectionClick = useCallback((collectionId: string) => {
-    setActiveCollection(collectionId);
-    // Don't close submenu - keep it open for navigation between collections
+  const handleCollectionClick = useCallback((collection: Collection) => {
+    setActiveCollection(collection.id);
+    // Persist only the base collection route for future nav from main icon
+    try {
+      localStorage.setItem("lastCollectionBase", collection.href);
+    } catch {}
+    // Keep submenu open for quick switching
   }, []);
 
   useEffect(() => {
@@ -128,7 +132,7 @@ function CollectionsSubmenu({
               <li key={collection.id} role="listitem">
                 <Link
                   href={collection.href}
-                  onClick={() => handleCollectionClick(collection.id)}
+                  onClick={() => handleCollectionClick(collection)}
                   className={`tw-flex tw-items-center tw-px-3 tw-py-2.5 tw-border-solid tw-border-r-0 tw-border-y-0 tw-transition-all tw-duration-200 tw-no-underline tw-focus:tw-outline-none tw-focus:tw-ring-2 tw-focus:tw-ring-primary-400 tw-focus:tw-ring-offset-2 tw-focus:tw-ring-offset-iron-900 ${
                     isActive
                       ? "tw-text-white tw-border-l-2 tw-border-white"

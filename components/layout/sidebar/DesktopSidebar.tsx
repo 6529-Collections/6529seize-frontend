@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Tooltip from "../../common/Tooltip";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 import DesktopSidebarNav from "./DesktopSidebarNav";
 import DesktopSidebarUser from "./DesktopSidebarUser";
 import CollectionsSubmenu from "./CollectionsSubmenu";
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useIdentity } from "../../../hooks/useIdentity";
 
 interface DesktopSidebarProps {
   isCollapsed: boolean;
@@ -30,6 +32,15 @@ function DesktopSidebar({
   onCloseOffcanvas,
   sidebarWidth,
 }: DesktopSidebarProps) {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { address } = useSeizeConnectContext();
+  const { profile } = useIdentity({
+    handleOrWallet: address || "",
+    initialProfile: null,
+  });
+
+  const onToggleUserMenu = () => setShowUserMenu(!showUserMenu);
+
   // ESC key closes off-canvas overlay
   useEffect(() => {
     if (!isMobile || !isOffcanvasOpen) return;
@@ -48,11 +59,11 @@ function DesktopSidebar({
   // Sidebar content
   const inner = (
     <div
-      className="tw-group tw-inset-y-0 tw-left-0 tw-h-full tw-bg-black tw-border-r tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-z-[9999]"
+      className="tw-relative tw-z-50 tw-h-full  tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-white/20 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
       style={{ width: sidebarWidth }}
       aria-label="Primary sidebar"
     >
-      <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-flex tw-flex-col tw-h-full">
         <div
           className={`tw-flex tw-shrink-0 tw-pt-3 ${
             isVisuallyCollapsed
@@ -77,10 +88,10 @@ function DesktopSidebar({
             type="button"
             onClick={onToggle}
             className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm tw-flex-shrink-0"
-            aria-label={
-              isVisuallyCollapsed ? "Expand sidebar" : "Collapse sidebar"
-            }
+            aria-label={isVisuallyCollapsed ? "Expand" : "Collapse"}
             aria-expanded={!isVisuallyCollapsed}
+            data-tooltip-id="sidebar-tooltip"
+            data-tooltip-content={isVisuallyCollapsed ? "Expand" : "Collapse"}
           >
             <ChevronDoubleLeftIcon
               strokeWidth={3}
@@ -91,45 +102,88 @@ function DesktopSidebar({
           </button>
         </div>
 
-        <DesktopSidebarNav
-          isCollapsed={isVisuallyCollapsed}
-          isCollectionsOpen={isCollectionsSubmenuOpen}
-          onCollectionsClick={handleCollectionsClick}
-        />
+        <div className="tw-flex-1">
+          <DesktopSidebarNav
+            isCollapsed={isVisuallyCollapsed}
+            isCollectionsOpen={isCollectionsSubmenuOpen}
+            onCollectionsClick={handleCollectionsClick}
+          />
+        </div>
 
-        <DesktopSidebarUser isCollapsed={isVisuallyCollapsed} />
+        <DesktopSidebarUser
+          isCollapsed={isVisuallyCollapsed}
+          showUserMenu={showUserMenu}
+          onToggleUserMenu={onToggleUserMenu}
+          profile={profile}
+        />
       </div>
 
       <CollectionsSubmenu
         isOpen={isCollectionsSubmenuOpen}
         sidebarCollapsed={isVisuallyCollapsed}
-        onExpandSidebar={() => !isVisuallyCollapsed && null}
+        onExpandSidebar={() => {}}
         onClose={() => onCollectionsSubmenuToggle(false)}
       />
     </div>
   );
 
   // Tooltip - rendered as sibling for proper z-index handling
-  const tooltip = <Tooltip id="sidebar-tooltip" variant="sidebar" />;
+  // Inline styling copied from the old common/Tooltip.tsx (variant: "sidebar")
+  const isTouchDevice = (() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return (
+        "ontouchstart" in window ||
+        (navigator as any)?.maxTouchPoints > 0 ||
+        window.matchMedia?.("(pointer: coarse)").matches
+      );
+    } catch {
+      return false;
+    }
+  })();
+
+  const sidebarTooltip = !isTouchDevice ? (
+    <ReactTooltip
+      id="sidebar-tooltip"
+      place="right"
+      offset={16}
+      opacity={1}
+      style={{
+        padding: "4px 8px",
+        background: "#37373E", // iron-700 solid background
+        color: "white",
+        fontSize: "13px",
+        fontWeight: 500,
+        borderRadius: "6px",
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        zIndex: 9999,
+        pointerEvents: "none",
+      }}
+      border="1px solid #4C4C55" // iron-650 border
+    />
+  ) : null;
 
   // Mobile off-canvas: overlay behavior
   if (isMobile && isOffcanvasOpen) {
     return (
       <>
         <div
-          className="tw-fixed tw-inset-0 tw-bg-black/50 tw-z-[9998]"
+          className="tw-fixed tw-inset-0 tw-bg-black/60 tw-z-[70]"
           onClick={onCloseOffcanvas}
           role="button"
           aria-label="Close menu overlay"
         />
         <div
-          className="tw-fixed tw-inset-y-0 tw-left-0 tw-z-[9999]"
+          className={`tw-fixed tw-inset-y-0 tw-left-0 ${
+            // Keep sidebar above overlay and content; raise further when user menu is open
+            showUserMenu ? "tw-z-[120]" : "tw-z-[80]"
+          }`}
           role="dialog"
           aria-modal="true"
         >
           {inner}
         </div>
-        {tooltip}
+        {sidebarTooltip}
       </>
     );
   }
@@ -137,8 +191,15 @@ function DesktopSidebar({
   // Always visible sidebar (collapsed by default on mobile, responsive on desktop)
   return (
     <>
-      <div className="tw-fixed tw-inset-y-0 tw-left-0">{inner}</div>
-      {tooltip}
+      <div
+        className={`tw-fixed tw-inset-y-0 tw-left-0 ${
+          // Keep sidebar above base content; raise above right-sidebar when user menu is open
+          showUserMenu ? "tw-z-[120]" : "tw-z-40"
+        }`}
+      >
+        {inner}
+      </div>
+      {sidebarTooltip}
     </>
   );
 }

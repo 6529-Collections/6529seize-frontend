@@ -9,7 +9,7 @@ export const SIDEBAR_BREAKPOINT = 1024; // lg breakpoint
 export const COLLECTIONS_ROUTES = [
   '/the-memes',
   '/meme-lab', 
-  '/gradients',
+  '/rememes',
   '/6529-gradient',
   '/nextgen',
 ] as const;

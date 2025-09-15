@@ -66,7 +66,7 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
   ) : (
     <div
       id="messages-connect"
-      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6">
+      className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[85dvh]">
       <Image
         priority
         loading="eager"

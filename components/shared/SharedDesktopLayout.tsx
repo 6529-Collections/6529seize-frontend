@@ -103,7 +103,7 @@ const SharedDesktopLayout: React.FC<SharedDesktopLayoutProps> = ({
             style={contentContainerStyle}
           >
             {/* Conditionally show left sidebar */}
-            {showLeftSidebar && <WebBrainLeftSidebar activeWaveId={waveId} />}
+            {showLeftSidebar && <WebBrainLeftSidebar />}
             
             <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0">
               {children}
@@ -132,7 +132,7 @@ const SharedDesktopLayout: React.FC<SharedDesktopLayoutProps> = ({
       {isRightSidebarOpen && !isDropOpen && waveId && (
         <>
           <div
-            className="tw-fixed tw-inset-0 tw-bg-black/50 tw-z-50"
+            className="tw-fixed tw-inset-0 tw-bg-black/60 tw-z-50"
             onClick={closeRightSidebar}
             role="button"
             aria-label="Close sidebar overlay"

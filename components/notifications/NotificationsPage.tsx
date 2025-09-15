@@ -6,14 +6,20 @@ import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import Image from "next/image";
 import Notifications from "../brain/notifications/Notifications";
 import { ActiveDropState } from "../../types/dropInteractionTypes";
+import BrainContent from "../brain/content/BrainContent";
+import { SidebarProvider } from "../../hooks/useSidebarState";
 
 export default function NotificationsPage() {
   const { isAuthenticated } = useSeizeConnectContext();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
 
+  const onCancelReplyQuote = () => {
+    setActiveDrop(null);
+  };
+
   if (!isAuthenticated) {
     return (
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[95vh] tw-p-6">
+      <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[85dvh]">
         <Image
           unoptimized
           priority
@@ -38,10 +44,20 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="tw-h-full tw-bg-black">
-      <div className="tw-px-6">
-        <Notifications activeDrop={activeDrop} setActiveDrop={setActiveDrop} />
+    <SidebarProvider>
+      <div className="tw-h-full tw-bg-black tailwind-scope">
+        <div className="tw-h-full tw-px-2 lg:tw-px-8">
+          <BrainContent
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+          >
+            <Notifications
+              activeDrop={activeDrop}
+              setActiveDrop={setActiveDrop}
+            />
+          </BrainContent>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

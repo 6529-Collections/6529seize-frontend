@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -26,9 +26,16 @@ export default function HomePage({
   initialTokens,
 }: HomePageProps) {
   const { isApp } = useDeviceInfo();
-  const [activeTab, setActiveTab] = useState<"feed" | "latest">("latest");
-  const { registerRef } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();
+  const [activeTab, setActiveTab] = useState<"feed" | "latest">(
+    isAuthenticated ? "feed" : "latest"
+  );
+  const { registerRef } = useLayout();
+
+  // Update active tab when authentication state changes
+  useEffect(() => {
+    setActiveTab(isAuthenticated ? "feed" : "latest");
+  }, [isAuthenticated]);
 
   // Callback ref for registration with LayoutContext
   const setTabsRef = useCallback(
@@ -44,7 +51,7 @@ export default function HomePage({
   }
 
   return (
-    <div className="tw-h-full tw-bg-black">
+    <div className="tw-h-full  tw-min-h-screen tw-bg-black">
       {/* Tab Navigation */}
       <div
         ref={setTabsRef}
@@ -96,7 +103,7 @@ export default function HomePage({
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-h-full tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-8">
+          <div className="tw-h-full tw-overflow-hidden tailwind-scope tw-px-2 xl:tw-px-8">
             {isAuthenticated ? (
               <HomeFeed />
             ) : (

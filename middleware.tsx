@@ -96,18 +96,46 @@ export async function middleware(req: NextRequest) {
 
     const { pathname } = req.nextUrl;
 
-    // Handle my-stream to messages redirect for desktop users
-    if (pathname === "/my-stream") {
+    // Handle all my-stream redirects for desktop users
+    if (pathname.startsWith("/my-stream")) {
       const userAgent = req.headers.get("user-agent") || "";
       const isCapacitorApp = userAgent.includes("Capacitor");
-      
+
       if (!isCapacitorApp) {
-        const view = req.nextUrl.searchParams.get("view");
-        if (view === "messages") {
+        const url = req.nextUrl.clone();
+
+        // Handle /my-stream/notifications
+        if (pathname === "/my-stream/notifications") {
+          url.pathname = "/notifications";
+          url.search = ""; // notifications doesn't need params from my-stream
+          return NextResponse.redirect(url, 301);
+        }
+
+        // Handle base /my-stream with all params
+        if (pathname === "/my-stream") {
+          const view = req.nextUrl.searchParams.get("view");
+
+          // Handle messages view
+          if (view === "messages") {
+            const wave = req.nextUrl.searchParams.get("wave");
+            url.pathname = "/messages";
+            url.search = wave ? `?wave=${wave}` : "";
+            return NextResponse.redirect(url, 301);
+          }
+
+          // Default: redirect to /waves with all params preserved
           const wave = req.nextUrl.searchParams.get("wave");
-          const url = req.nextUrl.clone();
-          url.pathname = "/messages";
-          url.search = wave ? `?wave=${wave}` : "";
+          const serialNo = req.nextUrl.searchParams.get("serialNo");
+
+          url.pathname = "/waves";
+          const params = new URLSearchParams();
+          if (wave) params.set("wave", wave);
+          if (serialNo) {
+            // Remove trailing slash from serialNo if present
+            const cleanSerialNo = serialNo.replace(/\/$/, "");
+            params.set("drop", cleanSerialNo);
+          }
+          url.search = params.toString() ? `?${params.toString()}` : "";
           return NextResponse.redirect(url, 301);
         }
       }

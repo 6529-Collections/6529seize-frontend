@@ -11,7 +11,7 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { CREATE_DIRECT_MESSAGE_SEARCH_PATH } from "../../../waves/Waves";
-import Tooltip from "../../../common/Tooltip";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import { AuthContext } from "../../../auth/Auth";
 import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
@@ -171,7 +171,40 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       </div>
       
       {/* Tooltip */}
-      <Tooltip id="create-dm-tooltip" />
+      {(() => {
+        const isTouch = (() => {
+          if (typeof window === "undefined") return false;
+          try {
+            return (
+              "ontouchstart" in window ||
+              (navigator as any)?.maxTouchPoints > 0 ||
+              window.matchMedia?.("(pointer: coarse)").matches
+            );
+          } catch {
+            return false;
+          }
+        })();
+        if (isTouch) return null;
+        return (
+          <ReactTooltip
+            id="create-dm-tooltip"
+            place="bottom"
+            offset={8}
+            opacity={1}
+            style={{
+              padding: "6px 10px",
+              background: "#37373E", // iron-700
+              color: "white",
+              fontSize: "12px",
+              fontWeight: 500,
+              borderRadius: "6px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              zIndex: 10000,
+            }}
+            border="1px solid #4C4C55" // iron-650
+          />
+        );
+      })()}
       
       {/* Create Direct Message Modal */}
       {connectedProfile && (

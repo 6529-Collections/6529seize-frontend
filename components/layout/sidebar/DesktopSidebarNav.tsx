@@ -7,6 +7,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { AboutSection } from "@/enums";
 import { useRouter } from "next/navigation";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
@@ -17,9 +18,11 @@ import {
   WrenchIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import { UserIcon } from "@heroicons/react/24/outline";
 import DesktopSidebarNavItem from "./nav/DesktopSidebarNavItem";
 import DesktopSidebarExpandableItem from "./nav/DesktopSidebarExpandableItem";
 import { SidebarSection } from "@/components/navigation/navTypes";
+import { COLLECTIONS_ROUTES } from "@/constants/sidebar";
 
 interface DesktopSidebarNavProps {
   isCollapsed: boolean;
@@ -37,48 +40,82 @@ type NavItem = {
 };
 
 // Primary navigation items (stable, defined outside component)
-const createNavItems = (router: any, onCollectionsClick?: () => void): NavItem[] => [
+const createNavItems = (
+  router: any,
+  onCollectionsClick: (() => void) | undefined,
+  pathname: string | null,
+  profilePath?: string | null
+): NavItem[] => [
   {
-    type: "route",
+    type: "route" as const,
     name: "Home",
     href: "/",
     icon: HomeIcon,
   },
   {
-    type: "route",
+    type: "route" as const,
     name: "Waves",
     href: "/waves",
     icon: WavesIcon,
     iconSizeClass: "tw-size-6",
   },
   {
-    type: "route",
+    type: "route" as const,
     name: "Messages",
     href: "/messages",
     icon: ChatBubbleIcon,
   },
   {
-    type: "route",
+    type: "route" as const,
     name: "Notifications",
     href: "/notifications",
     icon: BellIcon,
   },
   {
-    type: "action",
+    type: "action" as const,
     name: "Collections",
     onClick: () => {
-      // Navigate to default collection (The Memes) and open submenu
-      router.push("/the-memes");
-      onCollectionsClick?.();
+      const isOnCollectionsPage = COLLECTIONS_ROUTES.some((base) =>
+        (pathname || "").startsWith(base)
+      );
+      if (isOnCollectionsPage) {
+        // Already on a collections page: just toggle/open the submenu in place
+        onCollectionsClick?.();
+        return;
+      }
+      // Not on collections: navigate to the last stored base (or default)
+      const getLast = () => {
+        try {
+          const val = localStorage.getItem("lastCollectionBase");
+          if (val && COLLECTIONS_ROUTES.some((b) => b === val)) return val;
+        } catch {}
+        return "/the-memes";
+      };
+      const target = getLast();
+      if (!pathname || !pathname.startsWith(target)) {
+        router.push(target);
+      }
+      // Do not open submenu here; rely on auto-open on collections pages
     },
     icon: Squares2X2Icon,
   },
   {
-    type: "route",
+    type: "route" as const,
     name: "Network",
     href: "/network",
     icon: UsersIcon,
   },
+  // Conditionally include Profile when a wallet is connected
+  ...(profilePath
+    ? [
+        {
+          type: "route" as const,
+          name: "Profile",
+          href: profilePath,
+          icon: UserIcon,
+        },
+      ]
+    : []),
 ];
 
 // Expandable sections factory (stable, defined outside component)  
@@ -218,14 +255,22 @@ function DesktopSidebarNav({
   const router = useRouter();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
+  const { address } = useSeizeConnectContext();
+  const { connectedProfile } = useAuth();
 
   // Local state for expandable sections
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   // Memoized navigation data to prevent unnecessary re-renders
-  const navItems = useMemo(() => 
-    createNavItems(router, onCollectionsClick), 
-    [router, onCollectionsClick]
+  const profilePath = useMemo(() => {
+    if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
+    if (address) return `/${address}`;
+    return null;
+  }, [connectedProfile?.handle, address]);
+
+  const navItems = useMemo(
+    () => createNavItems(router, onCollectionsClick, pathname || null, profilePath),
+    [router, onCollectionsClick, pathname, profilePath]
   );
 
   const sections = useMemo(() => 
@@ -240,7 +285,7 @@ function DesktopSidebarNav({
       const collectionsPages = [
         "/the-memes",
         "/meme-lab",
-        "/gradients",
+        "/rememes",
         "/6529-gradient",
         "/nextgen",
       ];
@@ -257,6 +302,9 @@ function DesktopSidebarNav({
     }
     if (item.name === "Waves") {
       return pathname?.startsWith("/waves") || false;
+    }
+    if (item.name === "Profile" && profilePath) {
+      return pathname?.startsWith(profilePath) || false;
     }
     return pathname === item.href;
   };

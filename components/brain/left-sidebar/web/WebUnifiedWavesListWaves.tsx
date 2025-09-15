@@ -21,7 +21,7 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import CreateWaveModal from "../../../waves/create-wave/CreateWaveModal";
 import { useAuth } from "../../../auth/Auth";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
-import Tooltip from "../../../common/Tooltip";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 
 // Lightweight type guard that checks essential properties only
 function isValidWave(wave: unknown): wave is MinimalWave {
@@ -247,7 +247,40 @@ const WebUnifiedWavesListWaves = forwardRef<
         )}
         
         {/* Tooltip */}
-        <Tooltip id="create-wave-tooltip" />
+        {(() => {
+          const isTouch = (() => {
+            if (typeof window === "undefined") return false;
+            try {
+              return (
+                "ontouchstart" in window ||
+                (navigator as any)?.maxTouchPoints > 0 ||
+                window.matchMedia?.("(pointer: coarse)").matches
+              );
+            } catch {
+              return false;
+            }
+          })();
+          if (isTouch) return null;
+          return (
+            <ReactTooltip
+              id="create-wave-tooltip"
+              place="bottom"
+              offset={8}
+              opacity={1}
+              style={{
+                padding: "6px 10px",
+                background: "#37373E", // iron-700
+                color: "white",
+                fontSize: "12px",
+                fontWeight: 500,
+                borderRadius: "6px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                zIndex: 10000,
+              }}
+              border="1px solid #4C4C55" // iron-650
+            />
+          );
+        })()}
       </>
     );
   }
