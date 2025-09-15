@@ -238,8 +238,8 @@ export class AppKitAdapterManager {
       appName: "6529.io",
       appLogoUrl:
         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-      enableMobileWalletLink: true,
-      version: "3",
+      version: "4",
+      preference: "eoaOnly",
     });
   }
 
