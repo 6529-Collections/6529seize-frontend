@@ -1,5 +1,5 @@
+import MemesMintingCalendar from "@/components/meme-calendar/MemesMintingCalendar";
 import { getAppMetadata } from "@/components/providers/metadata";
-import MemesMintingCalendar from "@/components/schedule/MemesMintingCalendar"; // + add
 import type { Metadata } from "next";
 import { Col, Container, Row } from "react-bootstrap";
 

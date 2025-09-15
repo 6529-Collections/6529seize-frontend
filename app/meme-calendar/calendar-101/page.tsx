@@ -1,6 +1,7 @@
+import MemeCalendarDetails from "@/components/meme-calendar/MemeCalendarDetails";
 import { getAppMetadata } from "@/components/providers/metadata";
-import MemeCalendarDetails from "@/components/schedule/MemeCalendarDetails";
 import type { Metadata } from "next";
+import { Col, Container, Row } from "react-bootstrap";
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({ title: "Memes Minting Calendar 101" });
@@ -8,8 +9,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function MemesMintingPage() {
   return (
-    <div className="tw-container tw-mx-auto tw-my-6">
-      <MemeCalendarDetails />
-    </div>
+    <Container className="tw-pt-6 tw-pb-8">
+      <Row>
+        <Col>
+          <MemeCalendarDetails />
+        </Col>
+      </Row>
+    </Container>
   );
 }

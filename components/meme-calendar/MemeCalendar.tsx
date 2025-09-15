@@ -5,8 +5,9 @@ import {
   faCaretRight,
   faChevronDown,
   faChevronUp,
-  faCircleQuestion,
-  faXmark,
+  faCrosshairs,
+  faInfoCircle,
+  faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
@@ -325,6 +326,9 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
                   }`}>
                   {day}
                 </span>
+                <span className="tw-text-xs tw-font-medium tw-mt-0.5">
+                  &nbsp;
+                </span>
               </div>
             );
           }
@@ -375,7 +379,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               type="button"
               id={`meme-cell-${ymd(cellDateUtcDay)}`}
               key={ymd(cellDateUtcDay)}
-              className="tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-cursor-pointer hover:tw-bg-[#eee] hover:tw-text-black"
+              className="tw-bg-transparent tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-none tw-border-b-2 tw-cursor-pointer hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
                 borderColor: "#222222",
                 borderBottomStyle: "solid",
@@ -383,15 +387,13 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               data-tooltip-id="meme-tooltip"
               data-tooltip-html={tooltipHtml}
               data-tooltip-class-name={tooltipClassName}
-              onClick={() => onSelectDay?.(cellDateUtcDay)}
-            >
+              onClick={() => onSelectDay?.(cellDateUtcDay)}>
               <span
                 className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
                   isToday
                     ? "tw-bg-[#20fa59] tw-text-black tw-font-semibold"
                     : ""
-                }`}
-              >
+                }`}>
                 {day}
               </span>
               {mintLabel && (
@@ -1024,28 +1026,9 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
     n === 0
       ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 1000 * (n - 1), 0, 1)));
+
   return (
-    <div className="tw-relative tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
-      <button
-        type="button"
-        aria-label="Toggle calendar info"
-        className="tw-absolute tw-top-2 tw-right-2 tw-text-gray-400 hover:tw-text-white"
-        onClick={() => setShowInfo((s) => !s)}
-      >
-        <FontAwesomeIcon icon={showInfo ? faXmark : faCircleQuestion} />
-      </button>
-      <div
-        className={`tw-overflow-hidden tw-transition-all tw-duration-300 tw-mb-4 ${showInfo ? "tw-max-h-96" : "tw-max-h-0"}`}
-      >
-        <div className="tw-bg-gray-900 tw-border tw-border-gray-700 tw-rounded-md tw-p-4 tw-text-sm tw-space-y-1">
-          <p><span className="tw-font-bold">SZN</span> - traditional calendar quarter system - 3 months each</p>
-          <p><span className="tw-font-bold">YEAR</span> - 4 SZN in 1 year (also tradish system)</p>
-          <p><span className="tw-font-bold">EPOCH</span> - 4 YEARS (16 seasons)</p>
-          <p><span className="tw-font-bold">PERIOD</span> - 5 EPOCH (or 20 years or 80 seasons)</p>
-          <p><span className="tw-font-bold">ERA</span> - 5 PERIODS (or 20 epochs or 100 years or 400 seasons)</p>
-          <p><span className="tw-font-bold">EON</span> - 10 ERAS (or 100 periods or 1000 years or 4000 seasons)</p>
-        </div>
-      </div>
+    <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
       {/* Division (zoom) selector buttons */}
       <div className="tw-mb-8 tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-6 tw-gap-2">
         {(
@@ -1189,17 +1172,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               // TODO: should we change to season or keep current view
               // setZoomLevel("season");
             }}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 16 16"
-              className="tw-w-4 tw-h-4"
-              fill="currentColor"
-              aria-hidden="true">
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-              <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12" />
-              <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8" />
-              <path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
-            </svg>
+            <FontAwesomeIcon icon={faCrosshairs} />
           </button>
 
           {/* More */}
@@ -1207,10 +1180,25 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
             className="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
             aria-label="More features"
             title="More features"
-            onClick={() => setShowAdvanced((v) => !v)}>
+            onClick={() => {
+              setShowAdvanced((v) => !v);
+              setShowInfo(false);
+            }}>
             <FontAwesomeIcon
               icon={showAdvanced ? faChevronUp : faChevronDown}
             />
+          </button>
+
+          {/* Info */}
+          <button
+            className="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
+            aria-label="Info"
+            title="Info"
+            onClick={() => {
+              setShowInfo((v) => !v);
+              setShowAdvanced(false);
+            }}>
+            <FontAwesomeIcon icon={showInfo ? faXmarkCircle : faInfoCircle} />
           </button>
         </div>
       </div>
@@ -1327,10 +1315,52 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
         </div>
       </div>
 
+      <div
+        className={
+          "tw-rounded-md tw-bg-black tw-border tw-border-solid tw-border-[#222222] " +
+          "tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out tw-origin-top " +
+          (showInfo
+            ? "tw-opacity-100 tw-max-h-[320px] tw-scale-y-100 tw-py-5 tw-px-3"
+            : "tw-opacity-0 tw-max-h-0 tw-scale-y-95 tw-pointer-events-none")
+        }
+        aria-hidden={!showInfo}>
+        <div className="tw-py-2">
+          <span className="tw-font-bold">Minting Days</span> - Monday /
+          Wednesday / Friday
+        </div>
+        <div className="tw-py-2">
+          <span className="tw-font-bold">SZN</span> - Traditional calendar
+          quarter system / 3 months each{" "}
+          <span className="tw-text-gray-500">~ 39 mints</span>
+        </div>
+        <div className="tw-py-2">
+          <span className="tw-font-bold">YEAR</span> - 4 SZNs in 1 YEAR{" "}
+          <span className="tw-text-gray-500">~ 156 mints</span>
+        </div>
+        <div className="tw-py-2">
+          <span className="tw-font-bold">EPOCH</span> - 4 YEARs / 16 SZNs{" "}
+          <span className="tw-text-gray-500">~ 626 mints</span>
+        </div>
+        <div className="tw-py-2">
+          <span className="tw-font-bold">PERIOD</span> - 5 EPOCHs / 20 YEARs /
+          80 SZNs <span className="tw-text-gray-500">~ 3,130 mints</span>
+        </div>
+        <div className="tw-py-2">
+          <span className="tw-font-bold">ERA</span> - 5 PERIODs / 20 EPOCHs /
+          100 YEARs / 400 SZNs{" "}
+          <span className="tw-text-gray-500">~ 15,650 mints</span>
+        </div>
+        <div className="tw-py-2">
+          <span className="tw-font-bold">EON</span> - 10 ERAs / 100 PERIODs /
+          1,000 YEARs / 4000 SZNs{" "}
+          <span className="tw-text-gray-500">~ 156,500 mints</span>
+        </div>
+      </div>
+
       {/* Calendar view */}
       <div>{renderView()}</div>
 
-      {/* Global tooltip for mint days */}
+      {/* Global tooltip for mints */}
       <Tooltip
         id="meme-tooltip"
         clickable

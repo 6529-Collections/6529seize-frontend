@@ -1,4 +1,4 @@
-import { formatToFullDivision } from "@/components/schedule/meme-calendar.helpers";
+import { formatToFullDivision } from "@/components/meme-calendar/meme-calendar.helpers";
 
 describe("formatToFullDivision", () => {
   it("includes date ranges for all divisions", () => {
@@ -15,4 +15,3 @@ describe("formatToFullDivision", () => {
     expect(lines[5]).toMatch(/^Eon/);
   });
 });
-
