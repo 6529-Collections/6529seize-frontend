@@ -9,10 +9,14 @@ export type OutgoingGrantRowData = {
 };
 
 export default function OutgoingGrantRow({ row }: { readonly row: OutgoingGrantRowData }) {
+  const allocation =
+    typeof row.allocationPerDay === "number"
+      ? formatNumberWithCommasOrDash(Math.floor(row.allocationPerDay))
+      : row.allocationPerDay;
   return (
     <tr className="tw-border-t tw-border-iron-800">
       <td className="tw-py-2 tw-text-iron-200">{row.targetLabel}</td>
-      <td className="tw-py-2 tw-text-iron-200">{row.allocationPerDay}</td>
+      <td className="tw-py-2 tw-text-iron-200">{allocation}</td>
       <td className="tw-py-2 tw-text-iron-200">{row.status}</td>
       <td className="tw-py-2 tw-text-iron-200">{row.updatedAt}</td>
       <td className="tw-py-2">
@@ -27,4 +31,4 @@ export default function OutgoingGrantRow({ row }: { readonly row: OutgoingGrantR
     </tr>
   );
 }
-
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";

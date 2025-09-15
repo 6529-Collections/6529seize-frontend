@@ -1,0 +1,13 @@
+[
+  {
+    "id": "g1",
+    "chain": "eth-mainnet",
+    "contract": "0x1234...abcd",
+    "scope": "COLLECTION",
+    "tokenCount": null,
+    "allocationPerDay": 0.02,
+    "status": "Active",
+    "updatedAt": "2025-09-12T12:00:00Z"
+  }
+]
+

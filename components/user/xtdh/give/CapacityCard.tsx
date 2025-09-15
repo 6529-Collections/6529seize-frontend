@@ -1,6 +1,7 @@
 "use client";
 
 import XTDHCard from "../ui/XTDHCard";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 
 export default function CapacityCard({
   allocatedPerDay,
@@ -15,7 +16,8 @@ export default function CapacityCard({
 }) {
   const pct = Number.isFinite(progress as number) ? Math.max(0, Math.min(100, progress as number)) : 0;
 
-  const asValue = (v: number | null, suffix = "") => (v == null ? "—" : `${v}${suffix}`);
+  const asValue = (v: number | null, suffix = "") =>
+    v == null ? "—" : `${formatNumberWithCommasOrDash(Math.floor(v))}${suffix}`;
 
   return (
     <XTDHCard title="xTDH Capacity">
@@ -40,4 +42,3 @@ export default function CapacityCard({
     </XTDHCard>
   );
 }
-

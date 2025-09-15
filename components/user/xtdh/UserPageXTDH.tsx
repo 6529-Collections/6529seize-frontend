@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import XTDHTabs from "./ui/XTDHTabs";
 import XTDHOverview from "./overview/XTDHOverview";
 import XTDHGive from "./give/XTDHGive";
 import XTDHReceive from "./receive/XTDHReceive";
 import XTDHHistory from "./history/XTDHHistory";
+import XTDHHeaderStats from "./header/XTDHHeaderStats";
 import type { ReceiveFilter, Summary, XtdhInnerTab, XtdhSelectedTarget } from "./types";
 import { XtdhInnerTab as TabId } from "./types";
 
@@ -16,20 +17,39 @@ export default function UserPageXTDH({ profile }: { profile: ApiIdentity }) {
   const [amountPerDay, setAmountPerDay] = useState<string>("");
   const [receiveFilter, setReceiveFilter] = useState<ReceiveFilter>("ALL");
 
-  const summary: Summary = useMemo(() => {
-    const base = null;
-    const mult = 0.1; // example default until wired
-    const xtdh = base != null && mult != null ? +(base * mult).toFixed(4) : null;
-    const total = base != null && xtdh != null ? +(base + xtdh).toFixed(4) : null;
-    return {
-      baseRatePerDay: base,
-      multiplier: mult,
-      xtdhRatePerDay: xtdh,
-      totalRatePerDay: total,
-      allocatedRatePerDay: null,
-      incomingRatePerDay: null,
+  const [summary, setSummary] = useState<Summary>({
+    baseRatePerDay: null,
+    multiplier: null,
+    xtdhRatePerDay: null,
+    totalRatePerDay: null,
+    allocatedRatePerDay: null,
+    incomingRatePerDay: null,
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/stubs/xtdh/summary.json", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return;
+        const base = typeof profile?.tdh_rate === "number" ? profile.tdh_rate : (data.baseRatePerDay ?? null);
+        const multiplier = data.multiplier ?? 0.1;
+        const xtdh = base != null && multiplier != null ? +(base * multiplier).toFixed(4) : null;
+        const total = base != null && xtdh != null ? +(base + xtdh).toFixed(4) : null;
+        setSummary({
+          baseRatePerDay: base,
+          multiplier,
+          xtdhRatePerDay: xtdh,
+          totalRatePerDay: total,
+          allocatedRatePerDay: data.allocatedRatePerDay ?? null,
+          incomingRatePerDay: data.incomingRatePerDay ?? null,
+        });
+      })
+      .catch(() => void 0);
+    return () => {
+      mounted = false;
     };
-  }, []);
+  }, [profile?.tdh_rate]);
 
   const handleAllocateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,10 +63,7 @@ export default function UserPageXTDH({ profile }: { profile: ApiIdentity }) {
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
-      <div className="tw-flex tw-items-baseline tw-justify-between">
-        <h2 className="tw-text-iron-100 tw-text-xl lg:tw-text-2xl tw-font-semibold">xTDH Control Center</h2>
-        <div className="tw-text-iron-400 tw-text-sm">{profile?.handle || profile?.display || "Identity"}</div>
-      </div>
+      <XTDHHeaderStats summary={summary} />
 
       <XTDHTabs active={tab} onChange={setTab} />
 

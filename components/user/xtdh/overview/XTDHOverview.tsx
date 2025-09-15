@@ -4,7 +4,10 @@ import XTDHCard from "../ui/XTDHCard";
 import XTDHStat from "../ui/XTDHStat";
 import type { Summary } from "../types";
 
-const asValue = (v: number | null, suffix = "") => (v == null ? "—" : `${v}${suffix}`);
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+
+const asValue = (v: number | null, suffix = "") =>
+  v == null ? "—" : `${formatNumberWithCommasOrDash(Math.floor(v))}${suffix}`;
 
 export default function XTDHOverview({ summary }: { readonly summary: Summary }) {
   return (
@@ -59,4 +62,3 @@ export default function XTDHOverview({ summary }: { readonly summary: Summary })
     </div>
   );
 }
-

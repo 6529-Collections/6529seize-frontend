@@ -1,0 +1,11 @@
+[
+  {
+    "id": "r1",
+    "grantor": "0xABCD...1234",
+    "target": "Pebbles (ERC721)",
+    "sharePerDay": 0.03,
+    "status": "Active",
+    "since": "2025-08-01T00:00:00Z"
+  }
+]
+

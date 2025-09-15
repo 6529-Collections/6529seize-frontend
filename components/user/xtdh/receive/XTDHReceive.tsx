@@ -2,9 +2,11 @@
 
 import XTDHCard from "../ui/XTDHCard";
 import XTDHStat from "../ui/XTDHStat";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import type { ReceiveFilter, Summary } from "../types";
 
-const asValue = (v: number | null, suffix = "") => (v == null ? "—" : `${v}${suffix}`);
+const asValue = (v: number | null, suffix = "") =>
+  v == null ? "—" : `${formatNumberWithCommasOrDash(Math.floor(v))}${suffix}`;
 
 export default function XTDHReceive({
   summary,
@@ -83,4 +85,3 @@ export default function XTDHReceive({
     </>
   );
 }
-
