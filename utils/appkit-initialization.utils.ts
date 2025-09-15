@@ -108,6 +108,5 @@ function buildAppKitConfig(adapter: WagmiAdapter) {
     },
     enableOnramp: false,
     enableSwaps: false,
-    coinbasePreference: "smartWalletOnly" as const,
   };
 }
