@@ -9,10 +9,11 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <Col
       className={`${styles.nftAnimation} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
-      <NFTImageBalance 
-        balance={props.balance}
-        showOwned={props.showOwned}
-        showUnseized={props.showUnseized}
+      <NFTImageBalance
+        showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
+        showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
+        contract={props.nft.contract}
+        tokenId={props.nft.id}
         height={props.height}
       />
       <video
@@ -22,21 +23,22 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         controls
         loop
         playsInline
+        preload="auto"
         src={
-          !props.showOriginal && "metadata" in props.nft && props.nft.compressed_animation
+          !props.showOriginal &&
+          "metadata" in props.nft &&
+          props.nft.compressed_animation
             ? props.nft.compressed_animation
             : props.nft.animation
         }
         className={props.imageStyle}
-        poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
         onError={({ currentTarget }) => {
           if (
             "metadata" in props.nft &&
-            props.nft.compressed_animation &&
             currentTarget.src === props.nft.compressed_animation
           ) {
             currentTarget.src = props.nft.animation;
-          } else if ("metadata" in props.nft && props.nft.metadata.animation) {
+          } else if ("metadata" in props.nft) {
             currentTarget.src = props.nft.metadata.animation;
           }
         }}></video>

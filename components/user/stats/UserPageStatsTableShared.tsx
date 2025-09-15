@@ -5,11 +5,11 @@ export function UserPageStatsTableHead() {
     <thead>
       <tr>
         <th></th>
-        <th className="text-right">Total</th>
-        <th className="text-right">Memes</th>
-        <th className="text-right">NextGen</th>
-        <th className="text-right">Gradient</th>
-        <th className="text-right">Meme Lab</th>
+        <th className="text-right !tw-text-[#93939f]">Total</th>
+        <th className="text-right !tw-text-[#93939f]">Memes</th>
+        <th className="text-right !tw-text-[#93939f]">NextGen</th>
+        <th className="text-right !tw-text-[#93939f]">Gradient</th>
+        <th className="text-right !tw-text-[#93939f]">Meme Lab</th>
       </tr>
     </thead>
   );
@@ -23,7 +23,7 @@ export function UserPageStatsTableHr(
   return (
     <tr>
       <td colSpan={props.span} className={styles.collectedAccordionTableHr}>
-        <hr className="mb-1 mt-1" />
+        <hr className="mb-1 mt-1 tw-border-[#93939f]" />
       </td>
     </tr>
   );

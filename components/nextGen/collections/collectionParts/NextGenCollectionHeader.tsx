@@ -19,11 +19,9 @@ import {
 } from "@/components/nextGen/nextgen_helpers";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
-import { isEmptyObject, numberWithCommas } from "@/helpers/Helpers";
-import { getCommonHeaders } from "@/helpers/server.helpers";
+import { numberWithCommas } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
-import { commonApiFetch } from "@/services/api/common-api";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -69,7 +67,8 @@ export function NextGenBackToCollectionPageLink(
   return (
     <Link
       href={link}
-      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
+      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2"
+    >
       <FontAwesomeIcon icon={faArrowCircleLeft} className={styles.backIcon} />
       {content}
     </Link>
@@ -121,9 +120,11 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
-            )}/mint`}>
+            )}/mint`}
+          >
             <button
-              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}>
+              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}
+            >
               {getButtonLabel()}
             </button>
           </Link>
@@ -185,7 +186,8 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getAllowlistClassName()}`}>
+          } ${getAllowlistClassName()}`}
+        >
           ALLOWLIST {alStatus}
         </span>
       )}
@@ -193,7 +195,8 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getPublicStatusClassName()}`}>
+          } ${getPublicStatusClassName()}`}
+        >
           PUBLIC PHASE {publicStatus}
         </span>
       )}
@@ -246,8 +249,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
                 }
                 target="_blank"
-                rel="noreferrer">
+                rel="noreferrer"
+              >
                 <Image
+                  unoptimized
                   className={styles.marketplace}
                   src="/opensea.png"
                   alt="opensea"
@@ -258,8 +263,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getBlurCollectionLink()}
                 target="_blank"
-                rel="noreferrer">
+                rel="noreferrer"
+              >
                 <Image
+                  unoptimized
                   className={styles.marketplace}
                   src="/blur.png"
                   alt="blur"
@@ -270,8 +277,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getMagicEdenCollectionLink()}
                 target="_blank"
-                rel="noreferrer">
+                rel="noreferrer"
+              >
                 <Image
+                  unoptimized
                   className={styles.marketplace}
                   src="/magiceden.png"
                   alt="magiceden"
@@ -310,7 +319,8 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           <Col
             className="pt-3 d-flex flex-column align-items-center"
             sm={12}
-            md={6}>
+            md={6}
+          >
             <NextGenCountdown collection={props.collection} />
           </Col>
         )}
@@ -384,32 +394,4 @@ export function NextGenCollectionHead(
   useSetTitle(props.collection.name);
 
   return <></>;
-}
-
-export async function getServerSideCollection(req: any, path?: string) {
-  const collectionId = req.query.collection;
-  const headers = getCommonHeaders(req);
-  const collection = await commonApiFetch<NextGenCollection>({
-    endpoint: `nextgen/collections/${collectionId}`,
-    headers: headers,
-  });
-
-  if (isEmptyObject(collection)) {
-    return {
-      notFound: true,
-      props: {},
-    };
-  }
-
-  return {
-    props: {
-      collection: collection,
-      metadata: {
-        title: path ? `${path} | ${collection.name}` : collection.name,
-        ogImage: collection.image,
-        description: "NextGen",
-        twitterCard: "summary_large_image",
-      },
-    },
-  };
 }

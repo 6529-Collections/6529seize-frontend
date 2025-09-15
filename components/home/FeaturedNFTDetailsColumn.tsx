@@ -1,0 +1,90 @@
+"use client";
+import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import useCapacitor from "@/hooks/useCapacitor";
+import { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import ManifoldClaimTable from "./ManifoldClaimTable";
+import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
+import MintingApproachSection from "./MintingApproachSection";
+import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useState } from "react";
+
+interface Props {
+  readonly featuredNft: NFTWithMemesExtendedData;
+}
+
+export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
+  const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
+
+  const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
+
+  const {
+    editionSizeDisplay: manifoldClaimEditionSizeDisplay,
+    statusDisplay: manifoldClaimstatusDisplay,
+    costDisplay: manifoldClaimCostDisplay,
+  } = useManifoldClaimDisplays({ manifoldClaim });
+
+  return (
+    <Col
+      className="pt-4 pb-3"
+      xs={{ span: 12 }}
+      sm={{ span: 12 }}
+      md={{ span: 6 }}
+      lg={{ span: 6 }}
+    >
+      <Container>
+        <Row>
+          <Col>
+            <u>
+              <h3>
+                <Link href={`/the-memes/${featuredNft.id}`}>
+                  Card {featuredNft.id} - {featuredNft.name}
+                </Link>
+              </h3>
+            </u>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <FeaturedNFTDetailsTable
+              nft={featuredNft}
+              editionSizeDisplay={manifoldClaimEditionSizeDisplay}
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <MemePageMintCountdown
+              nft_id={featuredNft.id}
+              setClaim={setManifoldClaim}
+              is_full_width={true}
+              hide_mint_btn={false}
+              show_only_if_active={false}
+            />
+          </Col>
+        </Row>
+        <MintingApproachSection nftId={featuredNft.id} />
+        <ManifoldClaimTable
+          statusDisplay={manifoldClaimstatusDisplay}
+          costDisplay={manifoldClaimCostDisplay}
+          nft={featuredNft}
+        />
+        {(!capacitor.isIos || country === "US") && (
+          <Row className="pt-3">
+            <Col>
+              <NFTMarketplaceLinks
+                contract={featuredNft.contract}
+                id={featuredNft.id}
+              />
+            </Col>
+          </Row>
+        )}
+      </Container>
+    </Col>
+  );
+}

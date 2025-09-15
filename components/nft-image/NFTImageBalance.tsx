@@ -1,27 +1,54 @@
+"use client";
+
+import { useAuth } from "../auth/Auth";
 import styles from "./NFTImage.module.scss";
+import { useNftBalance } from "../../hooks/useNftBalance";
 
 interface Props {
-  readonly balance: number;
-  readonly showOwned?: boolean;
-  readonly showUnseized: boolean;
+  readonly contract: string;
+  readonly tokenId: number;
+  readonly showOwnedIfLoggedIn: boolean;
+  readonly showUnseizedIfLoggedIn: boolean;
   readonly height: 300 | 650 | "full";
 }
 
-export default function NFTImageBalance({ balance, showOwned, showUnseized, height }: Props) {
+export default function NFTImageBalance({
+  contract,
+  tokenId,
+  showOwnedIfLoggedIn,
+  showUnseizedIfLoggedIn,
+  height,
+}: Props) {
+  const { connectedProfile } = useAuth();
+
+  const { balance: nftBalance, error } = useNftBalance({
+    consolidationKey: connectedProfile?.consolidation_key ?? null,
+    contract,
+    tokenId,
+  });
+
+  if (error) {
+    console.error("Failed to fetch NFT balance:", error);
+  }
+
   return (
     <>
-      {balance > 0 && (
+      {nftBalance > 0 && (
         <span
           className={`${styles.balance}  ${
             height === 650 ? styles.balanceBigger : ""
-          }`}>
-          <span>SEIZED{!showOwned ? ` x${balance}` : ""}</span>
+          } `}
+        >
+          <span>
+            SEIZED
+            {!showOwnedIfLoggedIn && connectedProfile ? ` x${nftBalance}` : ""}
+          </span>
         </span>
       )}
-      {showUnseized && balance === 0 && (
+      {showUnseizedIfLoggedIn && connectedProfile && nftBalance === 0 && (
         <span className={`${styles.balance}`}>UNSEIZED</span>
       )}
-      {showUnseized && balance === -1 && (
+      {showUnseizedIfLoggedIn && connectedProfile && nftBalance === -1 && (
         <span className={`${styles.balance}`}>...</span>
       )}
     </>

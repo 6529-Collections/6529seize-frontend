@@ -14,6 +14,7 @@ export default function BuidlPage() {
         <Row>
           <Col>
             <Image
+              unoptimized
               src="/SummerGlasses.svg"
               width={100}
               height={100}

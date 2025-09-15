@@ -1,27 +1,25 @@
-"use client";
-
 import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
-import { NextGenCollection } from "@/entities/INextgen";
+import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { isEmptyObject } from "@/helpers/Helpers";
-import dynamic from "next/dynamic";
+import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import LatestActivity from "../latest-activity/LatestActivity";
 import MemeCalendarOverview from "../schedule/MemeCalendarOverview";
 import LatestDropSection from "./LatestDropSection";
-
-const LatestActivity = dynamic(
-  () => import("@/components/latest-activity/LatestActivity"),
-  { ssr: false }
-);
 
 export default function Home({
   featuredNft,
   featuredNextgen,
+  initialActivityData,
+  initialTokens,
 }: {
   readonly featuredNft: NFTWithMemesExtendedData;
   readonly featuredNextgen: NextGenCollection;
+  readonly initialActivityData: InitialActivityData;
+  readonly initialTokens: NextGenToken[];
 }) {
   return (
     <>
@@ -44,17 +42,17 @@ export default function Home({
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   featuredNextgen.name
-                )}`}
-                className="tw-no-underline">
-                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
-                  View Collection
-                </span>
+                )}`}>
+                View Collection
               </Link>
             </Col>
           </Row>
           <Row className="pat-3">
             <Col>
-              <NextGenCollectionSlideshow collection={featuredNextgen} />
+              <NextGenCollectionSlideshow
+                collection={featuredNextgen}
+                initialTokens={initialTokens}
+              />
             </Col>
           </Row>
         </Container>
@@ -62,7 +60,15 @@ export default function Home({
       <Container>
         <Row className="pt-3">
           <Col xs={12} sm={12} md={12} lg={12}>
-            <LatestActivity page={1} pageSize={12} showMore={false} />
+            <LatestActivity
+              page={1}
+              pageSize={12}
+              showMore={false}
+              initialActivity={initialActivityData.activity}
+              initialTotalResults={initialActivityData.totalResults}
+              initialNfts={initialActivityData.nfts}
+              initialNextgenCollections={initialActivityData.nextgenCollections}
+            />
           </Col>
         </Row>
       </Container>

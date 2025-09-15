@@ -26,7 +26,7 @@
 
 .nftSubscriptionsTable {
   td {
-    color: rgb(147, 147, 159);
+    color: #ddd !important;
     border-top: 1px solid rgb(55, 55, 61) !important;
     border-bottom: 1px solid rgb(55, 55, 61) !important;
     padding: 10px 20px;
@@ -70,7 +70,7 @@
 }
 
 .sendBtn {
-  padding-top: 2px;
-  padding-bottom: 2px;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
   width: 100%;
 }

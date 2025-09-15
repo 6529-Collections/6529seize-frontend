@@ -1,5 +1,3 @@
-"use client";
-
 import styles from "./NFTImage.module.scss";
 import { BaseNFT, NFTLite } from "../../entities/INFT";
 import { getMediaType } from "./utils/media-type";
@@ -14,42 +12,42 @@ interface Props {
   showThumbnail?: boolean;
   showOriginal?: boolean;
   height: 300 | 650 | "full";
-  balance: number;
-  showOwned?: boolean;
+  targetProfile?: string;
+  showOwnedIfLoggedIn: boolean;
+  showUnseizedIfLoggedIn: boolean;
   transparentBG?: boolean;
   id?: string;
-  showUnseized: boolean;
 }
 
 export default function NFTImage(props: Readonly<Props>) {
   const styleConfig = {
     height: {
-      "full": { heightStyle: "", imageStyle: styles.heightFull },
+      full: { heightStyle: "", imageStyle: styles.heightFull },
       650: { heightStyle: "", imageStyle: styles.height650 },
-      300: { heightStyle: styles.height300, imageStyle: "" }
-    }
+      300: { heightStyle: styles.height300, imageStyle: "" },
+    },
   };
 
   const { heightStyle, imageStyle } = styleConfig.height[props.height];
   const bgStyle = props.transparentBG ? styles.transparentBG : "";
-  
+
   const mediaType = getMediaType(props.nft, props.animation);
-  
+
   const rendererProps = {
     ...props,
     heightStyle,
     imageStyle,
-    bgStyle
+    bgStyle,
   };
 
   switch (mediaType) {
-    case 'html':
+    case "html":
       return <NFTHTMLRenderer {...rendererProps} />;
-    case 'glb':
+    case "glb":
       return <NFTModelRenderer {...rendererProps} />;
-    case 'video':
+    case "video":
       return <NFTVideoRenderer {...rendererProps} />;
-    case 'image':
+    case "image":
     default:
       return <NFTImageRenderer {...rendererProps} />;
   }

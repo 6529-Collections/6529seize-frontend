@@ -1,10 +1,16 @@
-import { Col } from "react-bootstrap";
+"use client";
+
 import Image from "next/image";
+import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import { BaseRendererProps } from "../types/renderer-props";
 
-function getSrc(nft: BaseRendererProps['nft'], showThumbnail: boolean, showOriginal: boolean): string {
+function getSrc(
+  nft: BaseRendererProps["nft"],
+  showThumbnail: boolean,
+  showOriginal: boolean
+): string {
   if (showThumbnail) {
     return nft.thumbnail;
   } else if (nft.scaled && !showOriginal) {
@@ -27,6 +33,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         width="0"
         height="0"
         fetchPriority="high"
+        unoptimized
         className={props.imageStyle}
         style={{
           height: "auto",
@@ -36,6 +43,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         }}
         id={props.id ?? `image-${props.nft.id}`}
         src={src}
+        alt={props.nft.name}
         onError={({ currentTarget }) => {
           if (currentTarget.src === props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled
@@ -47,12 +55,12 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
             currentTarget.src = props.nft.metadata.image;
           }
         }}
-        alt={props.nft.name}
       />
-      <NFTImageBalance 
-        balance={props.balance}
-        showOwned={props.showOwned}
-        showUnseized={props.showUnseized}
+      <NFTImageBalance
+        showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
+        showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
+        contract={props.nft.contract}
+        tokenId={props.nft.id}
         height={props.height}
       />
     </Col>

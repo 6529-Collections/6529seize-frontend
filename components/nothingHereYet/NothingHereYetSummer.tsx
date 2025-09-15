@@ -4,6 +4,7 @@ export default function NothingHereYetSummer() {
   return (
     <>
       <Image
+        unoptimized
         priority
         loading="eager"
         width="0"

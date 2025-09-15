@@ -71,10 +71,12 @@ export function printMemeReferences(
                     xs={{ span: 6 }}
                     sm={{ span: 4 }}
                     md={{ span: 3 }}
-                    lg={{ span: 3 }}>
+                    lg={{ span: 3 }}
+                  >
                     <a
                       href={`/${routerPath}/${nft.id}`}
-                      className="decoration-none scale-hover">
+                      className="decoration-none scale-hover"
+                    >
                       <Container fluid className="no-padding">
                         <Row>
                           <Col>
@@ -82,9 +84,9 @@ export function printMemeReferences(
                               nft={nft}
                               animation={false}
                               height={300}
-                              balance={0}
+                              showOwnedIfLoggedIn={false}
+                              showUnseizedIfLoggedIn={false}
                               showThumbnail={true}
-                              showUnseized={false}
                             />
                           </Col>
                         </Row>
@@ -258,8 +260,10 @@ export default function RememePage(props: Readonly<Props>) {
                       className={styles.userLink}
                       href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
                       target="_blank"
-                      rel="noreferrer">
+                      rel="noreferrer"
+                    >
                       <Image
+                        unoptimized
                         width="0"
                         height="0"
                         style={{ width: "30px", height: "auto" }}
@@ -277,7 +281,8 @@ export default function RememePage(props: Readonly<Props>) {
                     <Col>
                       <a
                         className={styles.userLink}
-                        href={rememe.contract_opensea_data.externalUrl}>
+                        href={rememe.contract_opensea_data.externalUrl}
+                      >
                         <FontAwesomeIcon
                           icon={faGlobe}
                           className={styles.globeIcon}
@@ -294,8 +299,10 @@ export default function RememePage(props: Readonly<Props>) {
                         className={styles.userLink}
                         href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
                         target="_blank"
-                        rel="noreferrer">
+                        rel="noreferrer"
+                      >
                         <Image
+                          unoptimized
                           width="0"
                           height="0"
                           style={{ width: "30px", height: "auto" }}
@@ -380,7 +387,8 @@ export default function RememePage(props: Readonly<Props>) {
           href={parseIpfsUrl(s)}
           target="_blank"
           rel="noreferrer"
-          className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
+          className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}
+        >
           {s}
           <FontAwesomeIcon icon={faExternalLink} className={styles.linkIcon} />
         </a>
@@ -404,7 +412,8 @@ export default function RememePage(props: Readonly<Props>) {
                         href={rememe.token_uri}
                         target="_blank"
                         rel="noreferrer"
-                        className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
+                        className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}
+                      >
                         {rememe.token_uri}
                         <FontAwesomeIcon
                           icon={faExternalLink}
@@ -431,7 +440,8 @@ export default function RememePage(props: Readonly<Props>) {
               xs={12}
               dangerouslySetInnerHTML={{
                 __html: parseNftDescriptionToHtml(rememe.metadata.description),
-              }}></Col>
+              }}
+            ></Col>
           </Row>
           <Row className="pt-4">
             <Col xs={12}>
@@ -493,6 +503,7 @@ export default function RememePage(props: Readonly<Props>) {
             <Row className="pt-2 pb-2">
               <Col>
                 <Image
+                  unoptimized
                   loading={"eager"}
                   width="0"
                   height="0"
@@ -521,7 +532,8 @@ export default function RememePage(props: Readonly<Props>) {
                           activeTab === k ? styles.tabActive : ""
                         }`}
                         key={`${k}-tab`}
-                        onClick={() => setActiveTab(k)}>
+                        onClick={() => setActiveTab(k)}
+                      >
                         {k}
                       </span>
                     ))}

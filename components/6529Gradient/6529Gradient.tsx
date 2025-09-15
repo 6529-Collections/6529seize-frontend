@@ -101,10 +101,12 @@ export default function GradientsComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <a
           href={`/6529-gradient/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid className="no-padding">
             <Row>
               <Col>
@@ -112,9 +114,8 @@ export default function GradientsComponent() {
                   nft={nft}
                   animation={false}
                   height={300}
-                  balance={0}
-                  showOwned={false}
-                  showUnseized={false}
+                  showOwnedIfLoggedIn={false}
+                  showUnseizedIfLoggedIn={false}
                   showThumbnail={true}
                 />
               </Col>
@@ -204,14 +205,16 @@ export default function GradientsComponent() {
                     onClick={() => setSort(Sort.ID)}
                     className={`${styles.sort} ${
                       sort != Sort.ID ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     ID
                   </span>
                   <span
                     onClick={() => setSort(Sort.TDH)}
                     className={`${styles.sort} ${
                       sort != Sort.TDH ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     TDH
                   </span>
                 </Col>

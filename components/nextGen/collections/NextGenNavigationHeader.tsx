@@ -62,7 +62,8 @@ export default function NextGenNavigationHeader(
             }
             window.location.href = href;
           }
-        }}>
+        }}
+      >
         {viewHeader}
       </button>
     );
@@ -77,9 +78,11 @@ export default function NextGenNavigationHeader(
         style={{
           height: isMobile ? "auto" : "90px",
           paddingTop: isMobile ? "20px" : "0",
-        }}>
+        }}
+      >
         <div className="d-flex align-items-center gap-3 flex-wrap">
           <Image
+            unoptimized
             priority
             width="0"
             height="0"
@@ -106,7 +109,8 @@ export default function NextGenNavigationHeader(
             isMobile
               ? "justify-content-center pt-3 pb-3"
               : "justify-content-end"
-          }`}>
+          }`}
+        >
           <span className="d-flex gap-4">
             {printView(undefined)}
             {printView(NextgenView.COLLECTIONS)}
