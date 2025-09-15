@@ -3,21 +3,42 @@
 import XTDHCard from "../ui/XTDHCard";
 import type { Summary } from "../types";
 import XTDHHeaderStats from "../header/XTDHHeaderStats";
+import { useXtdhSummary } from "@/hooks/useXtdh";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function XTDHOverview({
-  summary,
+  profile,
   onGoGive,
   onGoReceive,
 }: {
-  readonly summary: Summary;
+  readonly profile: ApiIdentity;
   readonly onGoGive: () => void;
   readonly onGoReceive: () => void;
 }) {
+  const { data: summary } = useXtdhSummary(
+    typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
+  );
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
-      <XTDHHeaderStats summary={summary} />
+      <XTDHHeaderStats summary={
+        summary ?? {
+          baseRatePerDay: null,
+          multiplier: null,
+          xtdhRatePerDay: null,
+          totalRatePerDay: null,
+          allocatedRatePerDay: null,
+          incomingRatePerDay: null,
+        }
+      } />
 
-      <NextActions summary={summary} onGoGive={onGoGive} onGoReceive={onGoReceive} />
+      <NextActions summary={summary ?? {
+        baseRatePerDay: null,
+        multiplier: null,
+        xtdhRatePerDay: null,
+        totalRatePerDay: null,
+        allocatedRatePerDay: null,
+        incomingRatePerDay: null,
+      }} onGoGive={onGoGive} onGoReceive={onGoReceive} />
 
       <XTDHCard title="What is xTDH?">
         <div className="tw-text-iron-300 tw-text-sm tw-space-y-2">

@@ -1,33 +1,31 @@
 "use client";
 
+import { useState } from "react";
 import XTDHCard from "../ui/XTDHCard";
 import XTDHStat from "../ui/XTDHStat";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
-import type { ReceiveFilter, Summary, XtdhIncomingRow } from "../types";
+import type { ReceiveFilter } from "../types";
+import { useXtdhIncomingGrants, useXtdhSummary } from "@/hooks/useXtdh";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 const asValue = (v: number | null, suffix = "") =>
   v == null ? "—" : `${formatNumberWithCommasOrDash(Math.floor(v))}${suffix}`;
 
-export default function XTDHReceive({
-  summary,
-  filter,
-  onFilterChange,
-  rows,
-  loading,
-}: {
-  readonly summary: Summary;
-  readonly filter: ReceiveFilter;
-  readonly onFilterChange: (f: ReceiveFilter) => void;
-  readonly rows: XtdhIncomingRow[];
-  readonly loading?: boolean;
-}) {
+export default function XTDHReceive({ profile }: { readonly profile: ApiIdentity }) {
+  const [filter, setFilter] = useState<ReceiveFilter>("ALL");
+  const { data: summary } = useXtdhSummary(
+    typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
+  );
+  const { data: incoming, isLoading, isFetching } = useXtdhIncomingGrants();
+  const rows = incoming?.rows ?? [];
+  const loading = isLoading || isFetching;
   return (
     <>
       <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-5 tw-gap-4">
         <div className="lg:tw-col-span-2">
           <XTDHCard title="Incoming xTDH Summary">
             <div className="tw-grid tw-grid-cols-2 tw-gap-4">
-              <XTDHStat label="Incoming xTDH / day" value={asValue(summary.incomingRatePerDay)} />
+              <XTDHStat label="Incoming xTDH / day" value={asValue(summary?.incomingRatePerDay ?? null)} />
               <XTDHStat label="Sources (Active)" value="—" />
             </div>
             <div className="tw-text-iron-400 tw-text-xs tw-mt-3">
@@ -41,7 +39,7 @@ export default function XTDHReceive({
               {(["ALL", "ACTIVE", "PENDING"] as ReceiveFilter[]).map((f) => (
                 <button
                   key={f}
-                  onClick={() => onFilterChange(f)}
+                  onClick={() => setFilter(f)}
                   className={`tw-text-xs tw-rounded tw-border tw-px-2 tw-py-1 tw-transition ${
                     filter === f
                       ? "tw-bg-primary-600 tw-border-primary-600 tw-text-white"
