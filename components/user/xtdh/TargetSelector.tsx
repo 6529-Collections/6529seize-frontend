@@ -1,17 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
-export type XtdhTargetScope = "COLLECTION" | "TOKENS";
-export type XtdhStandard = "ERC721" | "ERC1155" | "UNKNOWN";
-
-export type XtdhSelectedTarget = {
-  chain: string; // e.g., "eth-mainnet"
-  contractAddress: string;
-  standard: XtdhStandard;
-  scope: XtdhTargetScope;
-  tokenIds: string[]; // empty when scope=COLLECTION (for now)
-};
+import type {
+  XtdhSelectedTarget,
+  XtdhStandard,
+  XtdhTargetScope,
+} from "./types";
 
 export default function TargetSelector({
   onChange,
@@ -255,4 +249,3 @@ function TokenSelectionSummary({ count, onClear }: { count: number; onClear: () 
     </div>
   );
 }
-
