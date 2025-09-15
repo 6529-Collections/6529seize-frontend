@@ -3,7 +3,7 @@
 import XTDHCard from "../ui/XTDHCard";
 import XTDHStat from "../ui/XTDHStat";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
-import type { ReceiveFilter, Summary } from "../types";
+import type { ReceiveFilter, Summary, XtdhIncomingRow } from "../types";
 
 const asValue = (v: number | null, suffix = "") =>
   v == null ? "—" : `${formatNumberWithCommasOrDash(Math.floor(v))}${suffix}`;
@@ -12,10 +12,14 @@ export default function XTDHReceive({
   summary,
   filter,
   onFilterChange,
+  rows,
+  loading,
 }: {
   readonly summary: Summary;
   readonly filter: ReceiveFilter;
   readonly onFilterChange: (f: ReceiveFilter) => void;
+  readonly rows: XtdhIncomingRow[];
+  readonly loading?: boolean;
 }) {
   return (
     <>
@@ -66,18 +70,38 @@ export default function XTDHReceive({
               </tr>
             </thead>
             <tbody>
-              <tr className="tw-border-t tw-border-iron-800">
-                <td className="tw-py-2 tw-text-iron-200">—</td>
-                <td className="tw-py-2 tw-text-iron-200">—</td>
-                <td className="tw-py-2 tw-text-iron-200">—</td>
-                <td className="tw-py-2 tw-text-iron-200">—</td>
-                <td className="tw-py-2 tw-text-iron-200">—</td>
-                <td className="tw-py-2">
-                  <button className="tw-text-iron-300 tw-text-xs" disabled>
-                    View
-                  </button>
-                </td>
-              </tr>
+              {loading ? (
+                <tr className="tw-border-t tw-border-iron-800">
+                  <td className="tw-py-3 tw-text-iron-300" colSpan={6}>
+                    Loading…
+                  </td>
+                </tr>
+              ) : rows.length ? (
+                rows
+                  .filter((r) =>
+                    filter === "ALL" ? true : r.status.toLowerCase() === filter.toLowerCase()
+                  )
+                  .map((r) => (
+                    <tr key={r.id} className="tw-border-t tw-border-iron-800">
+                      <td className="tw-py-2 tw-text-iron-200">{r.grantorLabel}</td>
+                      <td className="tw-py-2 tw-text-iron-200">{r.targetLabel}</td>
+                      <td className="tw-py-2 tw-text-iron-200">{formatNumberWithCommasOrDash(Math.floor(r.sharePerDay))}</td>
+                      <td className="tw-py-2 tw-text-iron-200">{r.status}</td>
+                      <td className="tw-py-2 tw-text-iron-200">{new Date(r.since).toLocaleDateString()}</td>
+                      <td className="tw-py-2">
+                        <button className="tw-text-iron-300 tw-text-xs" disabled>
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+              ) : (
+                <tr className="tw-border-t tw-border-iron-800">
+                  <td className="tw-py-3 tw-text-iron-300" colSpan={6}>
+                    No incoming xTDH.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

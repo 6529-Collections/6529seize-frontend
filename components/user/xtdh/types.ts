@@ -27,3 +27,11 @@ export type XtdhSelectedTarget = {
   tokenIds: string[]; // empty when scope=COLLECTION (for now)
 };
 
+export type XtdhIncomingRow = {
+  id: string;
+  grantorLabel: string;
+  targetLabel: string;
+  sharePerDay: number;
+  status: string;
+  since: string;
+};

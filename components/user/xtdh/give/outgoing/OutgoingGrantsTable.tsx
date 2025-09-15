@@ -3,6 +3,7 @@
 import XTDHCard from "../../ui/XTDHCard";
 import OutgoingGrantRow, { OutgoingGrantRowData } from "./OutgoingGrantRow";
 import OutgoingEmptyState from "./OutgoingEmptyState";
+import { useMemo, useState } from "react";
 
 export default function OutgoingGrantsTable({
   rows,
@@ -11,8 +12,28 @@ export default function OutgoingGrantsTable({
   readonly rows: OutgoingGrantRowData[];
   readonly loading?: boolean;
 }) {
+  const [filter, setFilter] = useState<"ALL" | "ACTIVE">("ALL");
+  const visibleRows = useMemo(() => {
+    if (filter === "ALL") return rows;
+    return rows.filter((r) => (r.status || "").toLowerCase() === "active");
+  }, [rows, filter]);
   return (
     <XTDHCard title="Active Grants (Outgoing)">
+      <div className="tw-flex tw-gap-2 tw-mb-2">
+        {["ALL", "ACTIVE"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f as any)}
+            className={`tw-text-xs tw-rounded tw-border tw-px-2 tw-py-1 tw-transition ${
+              filter === f
+                ? "tw-bg-primary-600 tw-border-primary-600 tw-text-white"
+                : "tw-bg-iron-900 tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800"
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
       <div className="tw-overflow-x-auto">
         <table className="tw-min-w-full tw-text-sm">
           <thead>
@@ -31,8 +52,8 @@ export default function OutgoingGrantsTable({
                   Loading…
                 </td>
               </tr>
-            ) : rows.length ? (
-              rows.map((r) => <OutgoingGrantRow key={r.id} row={r} />)
+            ) : visibleRows.length ? (
+              visibleRows.map((r) => <OutgoingGrantRow key={r.id} row={r} />)
             ) : (
               <OutgoingEmptyState />
             )}
@@ -42,4 +63,3 @@ export default function OutgoingGrantsTable({
     </XTDHCard>
   );
 }
-
