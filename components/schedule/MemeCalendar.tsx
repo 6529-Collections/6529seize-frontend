@@ -180,51 +180,42 @@ function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
 
 // Props types
 interface MonthProps {
-  date: Date;
-  onSelectDay?: (date: Date) => void;
-  autoOpenYmd?: string;
-  displayTz: DisplayTz;
+  readonly date: Date;
+  readonly onSelectDay?: (date: Date) => void;
+  readonly autoOpenYmd?: string;
+  readonly displayTz: DisplayTz;
 }
 interface SeasonViewProps {
-  seasonIndex: number;
-  onSelectDay?: (date: Date) => void;
-  autoOpenYmd?: string;
-  displayTz: DisplayTz;
+  readonly seasonIndex: number;
+  readonly onSelectDay?: (date: Date) => void;
+  readonly autoOpenYmd?: string;
+  readonly displayTz: DisplayTz;
 }
 interface YearViewProps {
-  seasonIndex: number;
-  onSelectSeason: (seasonIndex: number) => void;
-  onZoomToSeason: () => void;
+  readonly seasonIndex: number;
+  readonly onSelectSeason: (seasonIndex: number) => void;
+  readonly onZoomToSeason: () => void;
 }
 interface EpochViewProps {
-  seasonIndex: number;
-  onSelectSeason: (seasonIndex: number) => void;
-  onSelectYear: (yearNumber: number) => void;
-  onZoomToYear: () => void;
+  readonly seasonIndex: number;
+  readonly onSelectSeason: (seasonIndex: number) => void;
+  readonly onSelectYear: (yearNumber: number) => void;
+  readonly onZoomToYear: () => void;
 }
 interface PeriodViewProps {
-  seasonIndex: number;
-  onSelectSeason: (seasonIndex: number) => void;
-  onSelectYear: (yearNumber: number) => void;
-  onSelectEpoch: (epochNumber: number) => void;
-  onZoomToEpoch: () => void;
+  readonly seasonIndex: number;
+  readonly onSelectEpoch: (epochNumber: number) => void;
+  readonly onZoomToEpoch: () => void;
 }
 interface EraViewProps {
-  seasonIndex: number;
-  onSelectSeason: (seasonIndex: number) => void;
-  onSelectYear: (yearNumber: number) => void;
-  onSelectEpoch: (epochNumber: number) => void;
-  onSelectPeriod: (periodNumber: number) => void;
-  onZoomToPeriod: () => void;
+  readonly seasonIndex: number;
+  readonly onSelectPeriod: (periodNumber: number) => void;
+  readonly onZoomToPeriod: () => void;
 }
 interface EonViewProps {
-  seasonIndex: number;
-  onSelectSeason: (seasonIndex: number) => void;
-  onSelectYear: (yearNumber: number) => void;
-  onSelectEpoch: (epochNumber: number) => void;
-  onSelectPeriod: (periodNumber: number) => void;
-  onSelectEra: (eraNumber: number) => void;
-  onZoomToEra: () => void;
+  readonly seasonIndex: number;
+  readonly onSelectEra: (eraNumber: number) => void;
+  readonly onZoomToEra: () => void;
 }
 
 /**
@@ -285,7 +276,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           if (day === null) {
             return (
               <div
-                key={idx}
+                key={`empty-${year}-${month}-${idx}`}
                 className="tw-invisible tw-pointer-events-none"></div>
             );
           }
@@ -299,9 +290,9 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           const isMintDay = isHistoricalMintDay || isScheduledMintDay;
 
           // For label: if multiple historical mints, show a range (#1-#3). Otherwise single #.
-          let mintLabel: string | undefined = undefined;
-          let mintInstantUtc: Date | undefined = undefined;
-          let mintNumber: number | undefined = undefined;
+          let mintLabel: string | undefined;
+          let mintInstantUtc: Date | undefined;
+          let mintNumber: number | undefined;
 
           if (isHistoricalMintDay) {
             const first = historical[0];
@@ -323,7 +314,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           if (!isMintDay) {
             return (
               <div
-                key={idx}
+                key={ymd(cellDateUtcDay)}
                 className="tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-text-gray-400"
                 style={{ borderColor: "#222222", borderBottomStyle: "solid" }}>
                 <span
@@ -374,15 +365,16 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
                 <div style="margin-bottom:12px">${oneLine}</div>
                 ${invites}
               </div>`;
-            if (mintInstantUtc && mintInstantUtc.getTime() > now.getTime()) {
+            if (mintInstantUtc?.getTime() > now.getTime()) {
               tooltipClassName = "!tw-bg-[#eee]";
             }
           }
 
           return (
-            <div
+            <button
+              type="button"
               id={`meme-cell-${ymd(cellDateUtcDay)}`}
-              key={idx}
+              key={ymd(cellDateUtcDay)}
               className="tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-cursor-pointer hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
                 borderColor: "#222222",
@@ -391,13 +383,15 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               data-tooltip-id="meme-tooltip"
               data-tooltip-html={tooltipHtml}
               data-tooltip-class-name={tooltipClassName}
-              onClick={() => onSelectDay && onSelectDay(cellDateUtcDay)}>
+              onClick={() => onSelectDay?.(cellDateUtcDay)}
+            >
               <span
                 className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
                   isToday
                     ? "tw-bg-[#20fa59] tw-text-black tw-font-semibold"
                     : ""
-                }`}>
+                }`}
+              >
                 {day}
               </span>
               {mintLabel && (
@@ -405,7 +399,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
                   {mintLabel}
                 </span>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -477,7 +471,8 @@ function YearView({
 
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
-        <div
+        <button
+          type="button"
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-text-black"
           style={{
@@ -496,7 +491,7 @@ function YearView({
             {end.getUTCFullYear()}
           </div>
           <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
-        </div>
+        </button>
       </div>
     );
   }
@@ -513,7 +508,8 @@ function YearView({
       {seasons.map((s) => {
         const isCurrent = currentIdx === s.sIdx;
         return (
-          <div
+          <button
+            type="button"
             key={s.sIdx}
             className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
@@ -534,7 +530,7 @@ function YearView({
               {s.end.getUTCFullYear()}
             </div>
             <div className="tw-text-sm tw-mt-1">{s.label}</div>
-          </div>
+          </button>
         );
       })}
     </div>
@@ -562,7 +558,8 @@ function EpochView({
     const isCurrent = currentIdx === sIdx;
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
-        <div
+        <button
+          type="button"
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
@@ -577,7 +574,7 @@ function EpochView({
           <div className="tw-font-semibold">Year #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
           <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
-        </div>
+        </button>
       </div>
     );
   } else {
@@ -606,7 +603,8 @@ function EpochView({
             currentIdx >= y.seasonIndex &&
             currentIdx < y.seasonIndex + SEASONS_PER_YEAR;
           return (
-            <div
+            <button
+              type="button"
               key={toISO(y.start)}
               className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
@@ -627,7 +625,7 @@ function EpochView({
                 {y.end.getUTCFullYear()}
               </div>
               <div className="tw-text-sm tw-mt-1">{y.label}</div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -654,7 +652,8 @@ function PeriodView({
     const isCurrent = currentIdx === sIdx;
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
-        <div
+        <button
+          type="button"
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
@@ -668,7 +667,7 @@ function PeriodView({
           <div className="tw-font-semibold">Epoch #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
           <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
-        </div>
+        </button>
       </div>
     );
   } else {
@@ -697,7 +696,8 @@ function PeriodView({
             currentIdx >= ep.seasonIndex &&
             currentIdx < ep.seasonIndex + SEASONS_PER_EPOCH;
           return (
-            <div
+            <button
+              type="button"
               key={toISO(ep.start)}
               className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
@@ -718,7 +718,7 @@ function PeriodView({
                 {ep.end.getUTCFullYear()}
               </div>
               <div className="tw-text-sm tw-mt-1">{ep.label}</div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -743,7 +743,8 @@ function EraView({
     const isCurrent = currentIdx === sIdx;
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
-        <div
+        <button
+          type="button"
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
@@ -757,7 +758,7 @@ function EraView({
           <div className="tw-font-semibold">Period #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
           <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
-        </div>
+        </button>
       </div>
     );
   }
@@ -786,7 +787,8 @@ function EraView({
           currentIdx >= p.seasonIndex &&
           currentIdx < p.seasonIndex + SEASONS_PER_PERIOD;
         return (
-          <div
+          <button
+            type="button"
             key={toISO(p.start)}
             className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
@@ -807,7 +809,7 @@ function EraView({
               {p.end.getUTCFullYear()}
             </div>
             <div className="tw-text-sm tw-mt-1">{p.label}</div>
-          </div>
+          </button>
         );
       })}
     </div>
@@ -827,7 +829,8 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
     const isCurrent = currentIdx === sIdx;
     return (
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
-        <div
+        <button
+          type="button"
           key={sIdx}
           className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
@@ -841,7 +844,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
           <div className="tw-font-semibold">Era #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
           <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
-        </div>
+        </button>
       </div>
     );
   }
@@ -870,7 +873,8 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
           currentIdx >= er.seasonIndex &&
           currentIdx < er.seasonIndex + SEASONS_PER_ERA;
         return (
-          <div
+          <button
+            type="button"
             key={toISO(er.start)}
             className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
@@ -891,7 +895,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
               {er.end.getUTCFullYear()}
             </div>
             <div className="tw-text-sm tw-mt-1">{er.label}</div>
-          </div>
+          </button>
         );
       })}
     </div>
@@ -902,7 +906,11 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
  * Main MemeCalendar component (TypeScript). Manages state and renders
  * appropriate views based on zoom level.
  */
-export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
+interface MemeCalendarProps {
+  readonly displayTz: DisplayTz;
+}
+
+export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
       return getSeasonIndexForDate(new Date());
@@ -939,7 +947,6 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
         return (
           <SeasonView
             seasonIndex={seasonIndex}
-            onSelectDay={() => {}}
             autoOpenYmd={autoOpenYmd ?? undefined}
             displayTz={displayTz}
           />
@@ -965,8 +972,6 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
         return (
           <PeriodView
             seasonIndex={seasonIndex}
-            onSelectSeason={setSeasonIndex}
-            onSelectYear={selectYear}
             onSelectEpoch={selectEpoch}
             onZoomToEpoch={() => setZoomLevel("epoch")}
           />
@@ -975,9 +980,6 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
         return (
           <EraView
             seasonIndex={seasonIndex}
-            onSelectSeason={setSeasonIndex}
-            onSelectYear={selectYear}
-            onSelectEpoch={selectEpoch}
             onSelectPeriod={selectPeriod}
             onZoomToPeriod={() => setZoomLevel("period")}
           />
@@ -986,10 +988,6 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
         return (
           <EonView
             seasonIndex={seasonIndex}
-            onSelectSeason={setSeasonIndex}
-            onSelectYear={selectYear}
-            onSelectEpoch={selectEpoch}
-            onSelectPeriod={selectPeriod}
             onSelectEra={selectEra}
             onZoomToEra={() => setZoomLevel("era")}
           />
@@ -1229,9 +1227,12 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
         <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-8 tw-items-start md:tw-items-end">
           {/* Jump to month */}
           <div className="tw-flex tw-flex-col tw-gap-1 tw-w-full md:tw-w-auto">
-            <label className="tw-text-xs tw-font-medium">Jump to Date</label>
+            <label className="tw-text-xs tw-font-medium" htmlFor="jump-date">
+              Jump to Date
+            </label>
             <div className="tw-flex tw-items-center tw-gap-2">
               <input
+                id="jump-date"
                 type="month"
                 value={jumpValue}
                 onChange={(e) => {
@@ -1281,9 +1282,12 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
 
           {/* Jump to meme number */}
           <div className="tw-flex tw-flex-col tw-gap-1 tw-w-full md:tw-w-auto">
-            <label className="tw-text-xs tw-font-medium">Jump to Meme #</label>
+            <label className="tw-text-xs tw-font-medium" htmlFor="jump-meme">
+              Jump to Meme #
+            </label>
             <div className="tw-flex tw-items-center tw-gap-2">
               <input
+                id="jump-meme"
                 type="number"
                 min={1}
                 inputMode="numeric"

@@ -25,12 +25,12 @@ export default function MemesMintingCalendar() {
       {/* Global Local/UTC toggle */}
       <div className="tw-flex tw-justify-end">
         <div className="tw-inline-flex">
-          <Link href="/meme-calendar/calendar-101" title="Calendar Guide">
-            <button
-              className={`${baseBtn} tw-rounded-md tw-mr-2 tw-bg-transparent tw-no-underline`}
-              title="Calendar Guide">
-              Calendar Guide <FontAwesomeIcon icon={faQuestionCircle} />
-            </button>
+          <Link
+            href="/meme-calendar/calendar-101"
+            className={`${baseBtn} tw-rounded-md tw-mr-2 tw-bg-transparent tw-no-underline`}
+            title="Calendar Guide"
+          >
+            Calendar Guide <FontAwesomeIcon icon={faQuestionCircle} />
           </Link>
           <button
             className={`${baseBtn} ${

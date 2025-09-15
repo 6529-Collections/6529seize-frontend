@@ -22,13 +22,15 @@ import {
 /**
  * Layout wrapper: global Local/UTC toggle + two cards
  */
+interface MemeCalendarOverviewProps {
+  readonly displayTz: DisplayTz;
+  readonly showViewAll?: boolean;
+}
+
 export default function MemeCalendarOverview({
   displayTz,
   showViewAll = false,
-}: {
-  displayTz: DisplayTz;
-  showViewAll?: boolean;
-}) {
+}: MemeCalendarOverviewProps) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
       <div className="tw-h-full tw-flex tw-items-center tw-gap-3">
@@ -59,11 +61,13 @@ export default function MemeCalendarOverview({
  * Card 1 — Next mint: big number, date (single line governed by global toggle),
  * live countdown, calendar links.
  */
+interface MemeCalendarOverviewNextMintProps {
+  readonly displayTz: DisplayTz;
+}
+
 export function MemeCalendarOverviewNextMint({
   displayTz,
-}: {
-  displayTz: DisplayTz;
-}) {
+}: MemeCalendarOverviewNextMintProps) {
   const [now, setNow] = useState(new Date());
 
   // tick every second for countdown
@@ -151,11 +155,13 @@ export function MemeCalendarOverviewNextMint({
  * Card 2 — Upcoming mints for the current SZN.
  * Shows a table of remaining Mon/Wed/Fri date-times (timed, not all-day).
  */
+interface MemeCalendarOverviewUpcomingMintsProps {
+  readonly displayTz: DisplayTz;
+}
+
 export function MemeCalendarOverviewUpcomingMints({
   displayTz,
-}: {
-  displayTz: DisplayTz;
-}) {
+}: MemeCalendarOverviewUpcomingMintsProps) {
   const [now] = useState(new Date());
 
   const { seasonStart, seasonEndInclusive, seasonIndex, rows } = useMemo(() => {
