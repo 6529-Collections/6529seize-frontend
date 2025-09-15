@@ -463,9 +463,9 @@ export function formatMint(n: number): string {
 }
 export function formatFullDate(d: Date, mode: DisplayTz = "local"): string {
   return d.toLocaleDateString(undefined, {
-    weekday: "long",
+    weekday: "short",
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
     ...(mode === "utc" ? { timeZone: "UTC" } : {}),
   });
@@ -475,9 +475,9 @@ export const formatFullDateTime = (
   mode: DisplayTz = "local"
 ): string => {
   const s = d.toLocaleString(undefined, {
-    weekday: "long",
+    weekday: "short",
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
@@ -590,7 +590,7 @@ export function getRangeLabel(start: Date, end: Date): string {
   return `Memes #${startMint} - #${endMint}`;
 }
 
-export function formatToFullDivision(d: Date): string {
+export function formatToFullDivision(d: Date): React.ReactNode {
   const idx = getSeasonIndexForDate(d);
   const eon = displayedEonNumberFromIndex(idx);
   const era = displayedEraNumberFromIndex(idx);
@@ -598,5 +598,61 @@ export function formatToFullDivision(d: Date): string {
   const epoch = displayedEpochNumberFromIndex(idx);
   const year = displayedYearNumberFromIndex(idx);
   const szn = displayedSeasonNumberFromIndex(idx);
-  return `Eon ${eon} / Era ${era} / Period ${period} / Epoch ${epoch} / Year ${year} / SZN ${szn}`;
+
+  const fmt = (date: Date) =>
+    date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+  const range = (start: Date, end: Date) => `${fmt(start)} - ${fmt(end)}`;
+
+  const seasonStart = getSeasonStartDate(idx);
+  const seasonEnd = addMonths(seasonStart, 2);
+
+  const yearStart = new Date(Date.UTC(2023 + (year - 1), 0, 1));
+  const yearEnd = new Date(Date.UTC(2023 + year, 0, 0));
+
+  const epochStartYear = 2023 + 4 * (epoch - 1);
+  const epochStart = new Date(Date.UTC(epochStartYear, 0, 1));
+  const epochEnd = new Date(Date.UTC(epochStartYear + 4, 0, 0));
+
+  const periodStartYear = 2023 + 20 * (period - 1);
+  const periodStart = new Date(Date.UTC(periodStartYear, 0, 1));
+  const periodEnd = new Date(Date.UTC(periodStartYear + 20, 0, 0));
+
+  const eraStartYear = 2023 + 100 * (era - 1);
+  const eraStart = new Date(Date.UTC(eraStartYear, 0, 1));
+  const eraEnd = new Date(Date.UTC(eraStartYear + 100, 0, 0));
+
+  const eonStartYear = 2023 + 1000 * (eon - 1);
+  const eonStart = new Date(Date.UTC(eonStartYear, 0, 1));
+  const eonEnd = new Date(Date.UTC(eonStartYear + 1000, 0, 0));
+
+  return (
+    <table className="tw-inline-table tw-table-auto tw-w-auto tw-border-collapse">
+      <tbody>
+        {printDivision("SZN", szn, range(seasonStart, seasonEnd))}
+        {printDivision("Year", year, range(yearStart, yearEnd))}
+        {printDivision("Epoch", epoch, range(epochStart, epochEnd))}
+        {printDivision("Period", period, range(periodStart, periodEnd))}
+        {printDivision("Era", era, range(eraStart, eraEnd))}
+        {printDivision("Eon", eon, range(eonStart, eonEnd))}
+      </tbody>
+    </table>
+  );
+}
+
+function printDivision(label: string, number: number, range: string) {
+  return (
+    <tr>
+      <td className="tw-py-1 tw-font-semibold tw-pr-4 tw-whitespace-nowrap">
+        {label} {number}
+      </td>
+      <td className="tw-py-1 tw-whitespace-nowrap">
+        <span className="tw-text-gray-400">{range}</span>
+      </td>
+    </tr>
+  );
 }

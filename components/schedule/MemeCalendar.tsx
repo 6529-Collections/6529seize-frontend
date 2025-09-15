@@ -260,7 +260,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
   }, [autoOpenYmd, year, month]);
 
   return (
-    <div className="tw-p-2 tw-flex tw-flex-col tw-space-y-1 tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818]">
+    <div className="tw-p-2 tw-flex tw-flex-col tw-space-y-1 tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
       {/* Month title */}
       <div className="tw-text-center tw-font-semibold tw-text-sm">
         {monthName} {year}
@@ -477,9 +477,9 @@ function YearView({
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
         <div
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-text-black"
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-text-black"
           style={{
-            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
           }}
           onClick={() => {
@@ -513,9 +513,9 @@ function YearView({
         return (
           <div
             key={s.sIdx}
-            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
-              borderColor: isCurrent ? "#20fa59" : "#181818",
+              borderColor: isCurrent ? "#20fa59" : "#222222",
               borderWidth: isCurrent ? "2px" : "1px",
             }}
             onClick={() => {
@@ -562,9 +562,9 @@ function EpochView({
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
         <div
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
-            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
           }}
           onClick={() => {
@@ -606,9 +606,9 @@ function EpochView({
           return (
             <div
               key={toISO(y.start)}
-              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
-                borderColor: isCurrent ? "#20fa59" : "#181818",
+                borderColor: isCurrent ? "#20fa59" : "#222222",
                 borderWidth: isCurrent ? "2px" : "1px",
               }}
               onClick={() => {
@@ -654,9 +654,9 @@ function PeriodView({
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
         <div
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
-            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
           }}
           onClick={() => {
@@ -697,9 +697,9 @@ function PeriodView({
           return (
             <div
               key={toISO(ep.start)}
-              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
-                borderColor: isCurrent ? "#20fa59" : "#181818",
+                borderColor: isCurrent ? "#20fa59" : "#222222",
                 borderWidth: isCurrent ? "2px" : "1px",
               }}
               onClick={() => {
@@ -743,9 +743,9 @@ function EraView({
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
         <div
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
-            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
           }}
           onClick={() => {
@@ -786,9 +786,9 @@ function EraView({
         return (
           <div
             key={toISO(p.start)}
-            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
-              borderColor: isCurrent ? "#20fa59" : "#181818",
+              borderColor: isCurrent ? "#20fa59" : "#222222",
               borderWidth: isCurrent ? "2px" : "1px",
             }}
             onClick={() => {
@@ -827,9 +827,9 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
         <div
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
-            borderColor: isCurrent ? "#20fa59" : "#181818",
+            borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
           }}
           onClick={() => {
@@ -870,9 +870,9 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
         return (
           <div
             key={toISO(er.start)}
-            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#181818] hover:tw-bg-[#eee] hover:tw-text-black"
+            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
-              borderColor: isCurrent ? "#20fa59" : "#181818",
+              borderColor: isCurrent ? "#20fa59" : "#222222",
               borderWidth: isCurrent ? "2px" : "1px",
             }}
             onClick={() => {
@@ -1024,7 +1024,7 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
       ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 1000 * (n - 1), 0, 1)));
   return (
-    <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#181818]">
+    <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
       {/* Division (zoom) selector buttons */}
       <div className="tw-mb-8 tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-6 tw-gap-2">
         {(
@@ -1196,7 +1196,7 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
 
       <div
         className={
-          "tw-rounded-md tw-bg-black tw-border tw-border-solid tw-border-[#181818] " +
+          "tw-rounded-md tw-bg-black tw-border tw-border-solid tw-border-[#222222] " +
           "tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out tw-origin-top " +
           (showAdvanced
             ? "tw-opacity-100 tw-max-h-[320px] tw-scale-y-100 tw-py-5 tw-px-3"
@@ -1308,7 +1308,7 @@ export default function MemeCalendar({ displayTz }: { displayTz: DisplayTz }) {
         id="meme-tooltip"
         clickable
         openOnClick
-        className="tw-max-w-sm !tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#181818]"
+        className="tw-max-w-sm !tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222]"
       />
     </div>
   );

@@ -16,7 +16,7 @@ export default function MemeCalendarDetails() {
           Memes Minting Calendar
         </Link>
       </div>
-      <div className="tw-px-6 tw-py-6 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#181818]">
+      <div className="tw-px-6 tw-py-6 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
         <p className="tw-text-xl tw-font-bold tw-mb-3">
           Meme Calendar — How It Works
         </p>
