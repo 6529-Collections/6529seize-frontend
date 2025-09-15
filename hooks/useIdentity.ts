@@ -27,6 +27,7 @@ export function useIdentity({
       }),
     enabled: !!handleOrWallet,
     initialData: initialProfile ?? undefined,
+    retry: 3,
   });
 
   return { profile: profile ?? null, isLoading };

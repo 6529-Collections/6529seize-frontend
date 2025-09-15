@@ -382,7 +382,7 @@ describe("MemePageMintCountdown", () => {
       expect(infoIcon).toHaveAttribute('data-tooltip-id', 'allowlist-info');
       expect(infoIcon).toHaveAttribute(
         'data-tooltip-content', 
-        'The timer above displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist.'
+        'The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist.'
       );
     });
 

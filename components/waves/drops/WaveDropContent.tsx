@@ -1,7 +1,6 @@
 import React from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropPart from "./WaveDropPart";
-import DropContentWrapper from "./DropContentWrapper";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface WaveDropContentProps {
@@ -36,22 +35,20 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   isCompetitionDrop = false,
 }) => {
   return (
-    <DropContentWrapper parentContainerRef={parentContainerRef}>
-      <WaveDropPart
-        drop={drop}
-        activePartIndex={activePartIndex}
-        setActivePartIndex={setActivePartIndex}
-        onDropContentClick={onDropContentClick}
-        onQuoteClick={onQuoteClick}
-        onLongPress={onLongPress}
-        setLongPressTriggered={setLongPressTriggered}
-        isEditing={isEditing}
-        isSaving={isSaving}
-        onSave={onSave}
-        onCancel={onCancel}
-        isCompetitionDrop={isCompetitionDrop}
-      />
-    </DropContentWrapper>
+    <WaveDropPart
+      drop={drop}
+      activePartIndex={activePartIndex}
+      setActivePartIndex={setActivePartIndex}
+      onDropContentClick={onDropContentClick}
+      onQuoteClick={onQuoteClick}
+      onLongPress={onLongPress}
+      setLongPressTriggered={setLongPressTriggered}
+      isEditing={isEditing}
+      isSaving={isSaving}
+      onSave={onSave}
+      onCancel={onCancel}
+      isCompetitionDrop={isCompetitionDrop}
+    />
   );
 };
 

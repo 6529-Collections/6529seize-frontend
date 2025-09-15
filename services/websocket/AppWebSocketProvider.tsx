@@ -3,29 +3,35 @@
 import React, { useEffect } from "react";
 import { WebSocketProvider } from "./WebSocketProvider";
 import { DEFAULT_WEBSOCKET_CONFIG, WebSocketConfig } from "./index";
-import { getAuthJwt } from "../auth/auth.utils";
 import { useWebSocket } from "./useWebSocket";
+import { useWebSocketHealth } from "./useWebSocketHealth";
 
 /**
- * WebSocket connection initializer component
+ * WebSocket connection initializer with coordinated health monitoring
  *
- * Connects to WebSocket using auth token when available
+ * EAGER INITIALIZATION PATTERN:
+ * - Connects IMMEDIATELY on mount when auth token exists
+ * - Delegates all connection management to useWebSocketHealth()
+ * - Health monitoring detects auth token and connects during first render cycle
+ * - Provides cleanup on unmount
+ * 
+ * This ensures immediate connectivity for authenticated users while
+ * maintaining centralized connection management through health monitoring.
  */
 function WebSocketInitializer() {
-  const { connect, disconnect } = useWebSocket();
+  const { disconnect } = useWebSocket();
 
-  // Connect on mount with auth token if available
+  // EAGER INITIALIZATION: Health monitoring handles immediate connection
+  // Health monitoring will check auth token and connect immediately if needed
+  useWebSocketHealth();
+
+  // Only handle cleanup on unmount - no initial connection logic
   useEffect(() => {
-    const authToken = getAuthJwt();
-    if (authToken) {
-      connect(authToken);
-    }
-
     // Disconnect on unmount
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
+  }, [disconnect]);
 
   return null; // This component doesn't render anything
 }
