@@ -2,7 +2,7 @@
 
 import CapacityCard from "./CapacityCard";
 import AllocateSection from "./allocate/AllocateSection";
-import OutgoingGrantsTable from "./outgoing/OutgoingGrantsTable";
+import GivenGrantsTable from "./given/GivenGrantsTable";
 import { useXtdhGivenGrants, useXtdhSummary } from "@/hooks/useXtdh";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
@@ -40,8 +40,7 @@ export default function XTDHGiven({ profile }: { readonly profile: ApiIdentity }
         </div>
       </div>
 
-      <OutgoingGrantsTable rows={outgoing?.rows ?? []} loading={isLoading || isFetching} />
+      <GivenGrantsTable rows={outgoing?.rows ?? []} loading={isLoading || isFetching} />
     </>
   );
 }
-

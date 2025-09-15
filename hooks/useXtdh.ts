@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { Summary, XtdhIncomingRow } from "@/components/user/xtdh/types";
-import type { OutgoingGrantRowData } from "@/components/user/xtdh/give/outgoing/OutgoingGrantRow";
+import type { GivenGrantRowData } from "@/components/user/xtdh/give/given/GivenGrantRow";
 
 // Mappers shared across hooks to keep behavior identical across code paths
-function parseOutgoingRows(list: any[]): OutgoingGrantRowData[] {
+function parseGivenRows(list: any[]): GivenGrantRowData[] {
   return (list || []).map((o: any, idx: number) => ({
     id: o.id ?? String(idx),
     targetLabel: `${o.contract ?? ""} (${String(o.scope ?? "").toLowerCase()}${
@@ -48,7 +48,7 @@ export function useXtdhSummary(tdhRate: number | null | undefined) {
         base != null && multiplier != null ? +(base * multiplier).toFixed(4) : null;
       const total = base != null && xtdh != null ? +(base + xtdh).toFixed(4) : null;
 
-      const outgoingRows = parseOutgoingRows(outgoingList);
+      const outgoingRows = parseGivenRows(outgoingList);
       const allocatedRatePerDay = outgoingRows.reduce(
         (acc, r) => acc + (typeof r.allocationPerDay === "number" ? r.allocationPerDay : 0),
         0,
@@ -72,13 +72,13 @@ export function useXtdhSummary(tdhRate: number | null | undefined) {
 }
 
 export function useXtdhGivenGrants() {
-  return useQuery<{ rows: OutgoingGrantRowData[]; allocatedPerDay: number }>({
+  return useQuery<{ rows: GivenGrantRowData[]; allocatedPerDay: number }>({
     queryKey: [QueryKey.XTDH_GIVEN],
     queryFn: async () => {
       const res = await fetch("/stubs/xtdh/outgoing.json", { cache: "no-store" });
       const list = await res.json().catch(() => [] as any[]);
 
-      const rows: OutgoingGrantRowData[] = parseOutgoingRows(list);
+      const rows: GivenGrantRowData[] = parseGivenRows(list);
 
       const allocatedPerDay = rows.reduce(
         (acc, r) => acc + (typeof r.allocationPerDay === "number" ? r.allocationPerDay : 0),

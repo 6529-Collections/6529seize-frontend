@@ -1,15 +1,15 @@
 "use client";
 
 import XTDHCard from "../../ui/XTDHCard";
-import OutgoingGrantRow, { OutgoingGrantRowData } from "./OutgoingGrantRow";
-import OutgoingEmptyState from "./OutgoingEmptyState";
+import GivenGrantRow, { GivenGrantRowData } from "./GivenGrantRow";
+import GivenEmptyState from "./GivenEmptyState";
 import { useMemo, useState } from "react";
 
-export default function OutgoingGrantsTable({
+export default function GivenGrantsTable({
   rows,
   loading,
 }: {
-  readonly rows: OutgoingGrantRowData[];
+  readonly rows: GivenGrantRowData[];
   readonly loading?: boolean;
 }) {
   const [filter, setFilter] = useState<"ALL" | "ACTIVE">("ALL");
@@ -18,7 +18,7 @@ export default function OutgoingGrantsTable({
     return rows.filter((r) => (r.status || "").toLowerCase() === "active");
   }, [rows, filter]);
   return (
-    <XTDHCard title="Active Grants (Outgoing)">
+    <XTDHCard title="Active Grants (Given)">
       <div className="tw-flex tw-gap-2 tw-mb-2">
         {["ALL", "ACTIVE"].map((f) => (
           <button
@@ -53,9 +53,9 @@ export default function OutgoingGrantsTable({
                 </td>
               </tr>
             ) : visibleRows.length ? (
-              visibleRows.map((r) => <OutgoingGrantRow key={r.id} row={r} />)
+              visibleRows.map((r) => <GivenGrantRow key={r.id} row={r} />)
             ) : (
-              <OutgoingEmptyState />
+              <GivenEmptyState />
             )}
           </tbody>
         </table>

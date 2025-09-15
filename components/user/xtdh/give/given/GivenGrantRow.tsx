@@ -1,6 +1,6 @@
 "use client";
 
-export type OutgoingGrantRowData = {
+export type GivenGrantRowData = {
   id: string;
   targetLabel: string;
   allocationPerDay: number | string;
@@ -8,7 +8,7 @@ export type OutgoingGrantRowData = {
   updatedAt: string;
 };
 
-export default function OutgoingGrantRow({ row }: { readonly row: OutgoingGrantRowData }) {
+export default function GivenGrantRow({ row }: { readonly row: GivenGrantRowData }) {
   const allocation =
     typeof row.allocationPerDay === "number"
       ? formatNumberWithCommasOrDash(Math.floor(row.allocationPerDay))

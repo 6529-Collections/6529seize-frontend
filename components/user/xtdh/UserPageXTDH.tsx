@@ -9,11 +9,11 @@ import XTDHReceived from "./receive/XTDHReceived";
 import XTDHHistory from "./history/XTDHHistory";
 import type { ReceiveFilter, XtdhInnerTab } from "./types";
 import { XtdhInnerTab as TabId } from "./types";
- 
+
 
 export default function UserPageXTDH({ profile }: { profile: ApiIdentity }) {
   const [tab, setTab] = useState<XtdhInnerTab>(TabId.OVERVIEW);
-  // Children fetch their own data via hooks; no summary/rows needed here
+
 
 
   return (
