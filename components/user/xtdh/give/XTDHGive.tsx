@@ -1,28 +1,16 @@
 "use client";
 
-import type { Summary, XtdhSelectedTarget } from "../types";
+import type { Summary } from "../types";
 import CapacityCard from "./CapacityCard";
 import AllocateSection from "./allocate/AllocateSection";
 import OutgoingGrantsTable from "./outgoing/OutgoingGrantsTable";
 
 export default function XTDHGive({
   summary,
-  selectedTarget,
-  amountPerDay,
-  onTargetChange,
-  onAmountChange,
-  onReset,
-  onSubmit,
   rows,
   loading,
 }: {
   readonly summary: Summary;
-  readonly selectedTarget: XtdhSelectedTarget | null;
-  readonly amountPerDay: string;
-  readonly onTargetChange: (t: XtdhSelectedTarget | null) => void;
-  readonly onAmountChange: (v: string) => void;
-  readonly onReset: () => void;
-  readonly onSubmit: (e: React.FormEvent) => void;
   readonly rows: import("./outgoing/OutgoingGrantRow").OutgoingGrantRowData[];
   readonly loading?: boolean;
 }) {
@@ -44,15 +32,9 @@ export default function XTDHGive({
 
         <div className="lg:tw-col-span-3">
           <AllocateSection
-            selectedTarget={selectedTarget}
-            amountPerDay={amountPerDay}
-            onTargetChange={onTargetChange}
-            onAmountChange={onAmountChange}
-            onReset={onReset}
-            onSubmit={onSubmit}
-            submitDisabled={!selectedTarget || !amountPerDay}
             capacityPerDay={capacity}
             allocatedPerDay={allocated}
+            onAllocate={() => { /* kept for future wiring */ }}
           />
         </div>
       </div>

@@ -13,8 +13,6 @@ import type { OutgoingGrantRowData } from "./give/outgoing/OutgoingGrantRow";
 
 export default function UserPageXTDH({ profile }: { profile: ApiIdentity }) {
   const [tab, setTab] = useState<XtdhInnerTab>(TabId.OVERVIEW);
-  const [selectedTarget, setSelectedTarget] = useState<XtdhSelectedTarget | null>(null);
-  const [amountPerDay, setAmountPerDay] = useState<string>("");
   const [receiveFilter, setReceiveFilter] = useState<ReceiveFilter>("ALL");
   const [outgoingRows, setOutgoingRows] = useState<OutgoingGrantRowData[]>([]);
   const [incomingRows, setIncomingRows] = useState<XtdhIncomingRow[]>([]);
@@ -98,15 +96,6 @@ export default function UserPageXTDH({ profile }: { profile: ApiIdentity }) {
     };
   }, [profile?.tdh_rate]);
 
-  const handleAllocateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // No-op in skeleton; wire API here next
-  };
-
-  const handleReset = () => {
-    setSelectedTarget(null);
-    setAmountPerDay("");
-  };
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
@@ -120,17 +109,7 @@ export default function UserPageXTDH({ profile }: { profile: ApiIdentity }) {
         />
       )}
       {tab === TabId.GIVE && (
-        <XTDHGive
-          summary={summary}
-          selectedTarget={selectedTarget}
-          amountPerDay={amountPerDay}
-          onTargetChange={setSelectedTarget}
-          onAmountChange={setAmountPerDay}
-          onReset={handleReset}
-          onSubmit={handleAllocateSubmit}
-          rows={outgoingRows}
-          loading={loadingOutgoing}
-        />
+        <XTDHGive summary={summary} rows={outgoingRows} loading={loadingOutgoing} />
       )}
       {tab === TabId.RECEIVE && (
         <XTDHReceive
