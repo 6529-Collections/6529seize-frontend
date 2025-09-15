@@ -89,8 +89,8 @@ export enum QueryKey {
   WAVE_DECISIONS = "WAVE_DECISIONS",
   // XTDH (experimental/dummy-backed)
   XTDH_SUMMARY = "XTDH_SUMMARY",
-  XTDH_OUTGOING = "XTDH_OUTGOING",
-  XTDH_INCOMING = "XTDH_INCOMING",
+  XTDH_GIVEN = "XTDH_GIVEN",
+  XTDH_RECEIVED = "XTDH_RECEIVED",
 }
 
 interface InitProfileRatersParamsAndData {

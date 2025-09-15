@@ -5,31 +5,31 @@ import XTDHCard from "../ui/XTDHCard";
 import XTDHStat from "../ui/XTDHStat";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import type { ReceiveFilter } from "../types";
-import { useXtdhIncomingGrants, useXtdhSummary } from "@/hooks/useXtdh";
+import { useXtdhReceivedGrants, useXtdhSummary } from "@/hooks/useXtdh";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 const asValue = (v: number | null, suffix = "") =>
   v == null ? "—" : `${formatNumberWithCommasOrDash(Math.floor(v))}${suffix}`;
 
-export default function XTDHReceive({ profile }: { readonly profile: ApiIdentity }) {
+export default function XTDHReceived({ profile }: { readonly profile: ApiIdentity }) {
   const [filter, setFilter] = useState<ReceiveFilter>("ALL");
   const { data: summary } = useXtdhSummary(
     typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
   );
-  const { data: incoming, isLoading, isFetching } = useXtdhIncomingGrants();
+  const { data: incoming, isLoading, isFetching } = useXtdhReceivedGrants();
   const rows = incoming?.rows ?? [];
   const loading = isLoading || isFetching;
   return (
     <>
       <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-5 tw-gap-4">
         <div className="lg:tw-col-span-2">
-          <XTDHCard title="Incoming xTDH Summary">
+          <XTDHCard title="Received xTDH Summary">
             <div className="tw-grid tw-grid-cols-2 tw-gap-4">
-              <XTDHStat label="Incoming xTDH / day" value={asValue(summary?.incomingRatePerDay ?? null)} />
+              <XTDHStat label="Received xTDH / day" value={asValue(summary?.incomingRatePerDay ?? null)} />
               <XTDHStat label="Sources (Active)" value="—" />
             </div>
             <div className="tw-text-iron-400 tw-text-xs tw-mt-3">
-              Incoming xTDH accrues when you hold eligible assets and a grantor’s allocation is active and funded.
+              Received xTDH accrues when you hold eligible assets and a grantor’s allocation is active and funded.
             </div>
           </XTDHCard>
         </div>
@@ -54,7 +54,7 @@ export default function XTDHReceive({ profile }: { readonly profile: ApiIdentity
         </div>
       </div>
 
-      <XTDHCard title="Incoming xTDH (By Source)">
+      <XTDHCard title="Received xTDH (By Source)">
         <div className="tw-overflow-x-auto">
           <table className="tw-min-w-full tw-text-sm">
             <thead>
@@ -95,9 +95,7 @@ export default function XTDHReceive({ profile }: { readonly profile: ApiIdentity
                   ))
               ) : (
                 <tr className="tw-border-t tw-border-iron-800">
-                  <td className="tw-py-3 tw-text-iron-300" colSpan={6}>
-                    No incoming xTDH.
-                  </td>
+                  <td className="tw-py-3 tw-text-iron-300" colSpan={6}>No xTDH received.</td>
                 </tr>
               )}
             </tbody>
@@ -107,3 +105,4 @@ export default function XTDHReceive({ profile }: { readonly profile: ApiIdentity
     </>
   );
 }
+

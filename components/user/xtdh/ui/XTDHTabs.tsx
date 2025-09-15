@@ -11,8 +11,8 @@ export default function XTDHTabs({
 }) {
   const tabs = [
     { id: XtdhInnerTab.OVERVIEW, label: "Overview" },
-    { id: XtdhInnerTab.GIVE, label: "Give" },
-    { id: XtdhInnerTab.RECEIVE, label: "Receive" },
+    { id: XtdhInnerTab.GIVEN, label: "Given" },
+    { id: XtdhInnerTab.RECEIVED, label: "Received" },
     { id: XtdhInnerTab.HISTORY, label: "History" },
   ];
   return (
@@ -33,4 +33,3 @@ export default function XTDHTabs({
     </div>
   );
 }
-

@@ -9,8 +9,8 @@ export type Summary = {
 
 export enum XtdhInnerTab {
   OVERVIEW = "OVERVIEW",
-  GIVE = "GIVE",
-  RECEIVE = "RECEIVE",
+  GIVEN = "GIVEN",
+  RECEIVED = "RECEIVED",
   HISTORY = "HISTORY",
 }
 

@@ -71,9 +71,9 @@ export function useXtdhSummary(tdhRate: number | null | undefined) {
   });
 }
 
-export function useXtdhOutgoingGrants() {
+export function useXtdhGivenGrants() {
   return useQuery<{ rows: OutgoingGrantRowData[]; allocatedPerDay: number }>({
-    queryKey: [QueryKey.XTDH_OUTGOING],
+    queryKey: [QueryKey.XTDH_GIVEN],
     queryFn: async () => {
       const res = await fetch("/stubs/xtdh/outgoing.json", { cache: "no-store" });
       const list = await res.json().catch(() => [] as any[]);
@@ -92,9 +92,9 @@ export function useXtdhOutgoingGrants() {
   });
 }
 
-export function useXtdhIncomingGrants() {
+export function useXtdhReceivedGrants() {
   return useQuery<{ rows: XtdhIncomingRow[]; incomingPerDay: number }>({
-    queryKey: [QueryKey.XTDH_INCOMING],
+    queryKey: [QueryKey.XTDH_RECEIVED],
     queryFn: async () => {
       const res = await fetch("/stubs/xtdh/incoming.json", { cache: "no-store" });
       const list = await res.json().catch(() => [] as any[]);

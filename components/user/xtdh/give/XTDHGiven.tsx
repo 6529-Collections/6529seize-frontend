@@ -3,14 +3,14 @@
 import CapacityCard from "./CapacityCard";
 import AllocateSection from "./allocate/AllocateSection";
 import OutgoingGrantsTable from "./outgoing/OutgoingGrantsTable";
-import { useXtdhOutgoingGrants, useXtdhSummary } from "@/hooks/useXtdh";
+import { useXtdhGivenGrants, useXtdhSummary } from "@/hooks/useXtdh";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-export default function XTDHGive({ profile }: { readonly profile: ApiIdentity }) {
+export default function XTDHGiven({ profile }: { readonly profile: ApiIdentity }) {
   const { data: summary } = useXtdhSummary(
     typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
   );
-  const { data: outgoing, isLoading, isFetching } = useXtdhOutgoingGrants();
+  const { data: outgoing, isLoading, isFetching } = useXtdhGivenGrants();
 
   const base = typeof summary?.baseRatePerDay === "number" ? summary.baseRatePerDay : 0;
   const multiplier = typeof summary?.multiplier === "number" ? summary.multiplier : 0;
@@ -33,7 +33,9 @@ export default function XTDHGive({ profile }: { readonly profile: ApiIdentity })
           <AllocateSection
             capacityPerDay={capacity}
             allocatedPerDay={allocated}
-            onAllocate={() => { /* kept for future wiring */ }}
+            onAllocate={() => {
+              /* kept for future wiring */
+            }}
           />
         </div>
       </div>
@@ -42,3 +44,4 @@ export default function XTDHGive({ profile }: { readonly profile: ApiIdentity })
     </>
   );
 }
+
