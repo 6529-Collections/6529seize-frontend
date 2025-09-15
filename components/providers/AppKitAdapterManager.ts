@@ -85,7 +85,7 @@ export class AppKitAdapterManager {
 
     if (isCapacitor) {
       // For Capacitor, we need to add the Coinbase mobile wallet connector v3
-      // connectors.push(this.buildCoinbaseV3MobileWallet());
+      connectors.push(this.buildCoinbaseV3MobileWallet());
     }
 
     // Create adapter with all connectors

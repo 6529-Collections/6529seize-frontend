@@ -19,7 +19,6 @@ import { Capacitor } from "@capacitor/core";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WagmiProvider } from "wagmi";
-import { coinbaseWallet } from "wagmi/connectors";
 import { AppWallet, useAppWallets } from "../app-wallets/AppWalletsContext";
 import { useAuth } from "../auth/Auth";
 import { AppKitAdapterManager } from "./AppKitAdapterManager";
@@ -170,30 +169,6 @@ export default function WagmiSetup({
       // Don't throw here - let the component continue but notify the user
     }
   }, [currentAdapter, appWallets, appWalletPasswordModal, setToast]);
-
-  // Inject wallet connectors dynamically using hooks (simplified approach)
-  useEffect(() => {
-    if (!currentAdapter) return;
-    if (!isCapacitor) return;
-
-    const existingConnectors = currentAdapter.wagmiConfig.connectors;
-
-    const cbWallet = coinbaseWallet({
-      appName: "6529.io",
-      appLogoUrl:
-        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-      enableMobileWalletLink: true,
-      version: "3",
-    });
-
-    const cbConnector =
-      currentAdapter.wagmiConfig._internal.connectors.setup(cbWallet);
-
-    currentAdapter.wagmiConfig._internal.connectors.setState([
-      cbConnector,
-      ...existingConnectors,
-    ]);
-  }, [currentAdapter, isCapacitor]);
 
   // Show loading state until fully initialized
   if (!isMounted || !currentAdapter) {
