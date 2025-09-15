@@ -782,12 +782,9 @@ export const getMetadataForUserPage = (
   profile: ApiIdentity,
   path?: string
 ): PageSSRMetadata => {
-  let display = profile.handle ?? formatAddress(profile.display);
-  if (!display) {
-    display = profile.query ?? "";
-  }
+  const display = profile.handle ?? formatAddress(profile.display);
   return {
-    title: profile.handle + (path ? ` | ${path}` : ""),
+    title: display + (path ? ` | ${path}` : ""),
     ogImage: profile.pfp ?? "",
     description: `Level ${
       profile.level
