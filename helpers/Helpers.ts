@@ -1,4 +1,11 @@
-import { mainnet, sepolia, goerli } from "wagmi/chains";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
+import {
+  USER_PAGE_TAB_META,
+  UserPageTabType,
+} from "@/components/user/layout/UserPageTabs";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -6,20 +13,13 @@ import {
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
   ROYALTIES_PERCENTAGE,
-} from "../constants";
-import { BaseNFT, VolumeType } from "../entities/INFT";
-import { DateIntervalsSelection } from "../enums";
-import { CICType } from "../entities/IProfile";
-import {
-  USER_PAGE_TAB_META,
-  UserPageTabType,
-} from "../components/user/layout/UserPageTabs";
-import {
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "../components/nextGen/nextgen_contracts";
+} from "@/constants";
+import { BaseNFT, VolumeType } from "@/entities/INFT";
+import { CICType } from "@/entities/IProfile";
+import { DateIntervalsSelection } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { goerli, mainnet, sepolia } from "wagmi/chains";
 import { PageSSRMetadata, Period } from "./Types";
-import { ApiIdentity } from "../generated/models/ApiIdentity";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
 
@@ -782,8 +782,9 @@ export const getMetadataForUserPage = (
   profile: ApiIdentity,
   path?: string
 ): PageSSRMetadata => {
+  const display = profile.handle ?? formatAddress(profile.display);
   return {
-    title: profile.handle + (path ? ` | ${path}` : ""),
+    title: display + (path ? ` | ${path}` : ""),
     ogImage: profile.pfp ?? "",
     description: `Level ${
       profile.level
