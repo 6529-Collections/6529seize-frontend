@@ -3,8 +3,22 @@
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import type { Summary } from "../types";
 import { Tooltip } from "react-tooltip";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useXtdhSummary } from "@/hooks/useXtdh";
 
-export default function XTDHHeaderStats({ summary }: { readonly summary: Summary }) {
+export default function XTDHHeaderStats({ profile }: { readonly profile: ApiIdentity }) {
+  const { data: summaryData } = useXtdhSummary(
+    typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
+  );
+  const summary: Summary =
+    summaryData ?? {
+      baseRatePerDay: null,
+      multiplier: null,
+      xtdhRatePerDay: null,
+      totalRatePerDay: null,
+      allocatedRatePerDay: null,
+      incomingRatePerDay: null,
+    };
   const base = numberOrZero(summary.baseRatePerDay);
   const multiplier = summary.multiplier ?? 0;
   const capacity = base * multiplier; // xTDH capacity per day
