@@ -43,7 +43,7 @@ export class AppKitAdapterManager {
     this.requestPassword = requestPassword;
   }
 
-  createAdapter(appWallets: AppWallet[]): WagmiAdapter {
+  createAdapter(appWallets: AppWallet[], isCapacitor: boolean): WagmiAdapter {
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_007: appWallets must be an array");
     }
@@ -82,7 +82,11 @@ export class AppKitAdapterManager {
     });
 
     const connectors: CreateConnectorFn[] = [...appWalletConnectors];
-    connectors.push(this.buildCoinbaseMobileWallet());
+
+    if (isCapacitor) {
+      // For Capacitor, we need to add the Coinbase mobile wallet connector v3
+      connectors.push(this.buildCoinbaseV3MobileWallet());
+    }
 
     // Create adapter with all connectors
     const wagmiAdapter = new WagmiAdapter({
@@ -138,7 +142,10 @@ export class AppKitAdapterManager {
     return false;
   }
 
-  createAdapterWithCache(appWallets: AppWallet[]): WagmiAdapter {
+  createAdapterWithCache(
+    appWallets: AppWallet[],
+    isCapacitor: boolean
+  ): WagmiAdapter {
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_012: appWallets must be an array");
     }
@@ -157,7 +164,7 @@ export class AppKitAdapterManager {
       return cachedAdapter;
     }
 
-    const adapter = this.createAdapter(appWallets);
+    const adapter = this.createAdapter(appWallets, isCapacitor);
 
     // Maintain cache size limit and cleanup old adapters
     if (this.adapterCache.size >= this.maxCacheSize) {
@@ -233,7 +240,7 @@ export class AppKitAdapterManager {
     return sortedAddresses.join(",");
   }
 
-  private buildCoinbaseMobileWallet(): CreateConnectorFn {
+  private buildCoinbaseV3MobileWallet(): CreateConnectorFn {
     return coinbaseWallet({
       appName: "6529.io",
       appLogoUrl:

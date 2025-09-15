@@ -44,7 +44,7 @@ function createAdapter(
   );
 
   try {
-    return adapterManager.createAdapterWithCache(wallets);
+    return adapterManager.createAdapterWithCache(wallets, isCapacitor);
   } catch (error) {
     if (error instanceof AdapterError || error instanceof AdapterCacheError) {
       logErrorSecurely("[AppKitInitialization] Adapter creation failed", error);
@@ -108,6 +108,6 @@ function buildAppKitConfig(adapter: WagmiAdapter) {
     },
     enableOnramp: false,
     enableSwaps: false,
-    coinbasePreference: "eoaOnly" as const,
+    coinbasePreference: "smartWalletOnly" as const,
   };
 }
