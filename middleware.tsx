@@ -96,6 +96,23 @@ export async function middleware(req: NextRequest) {
 
     const { pathname } = req.nextUrl;
 
+    // Handle my-stream to messages redirect for desktop users
+    if (pathname === "/my-stream") {
+      const userAgent = req.headers.get("user-agent") || "";
+      const isCapacitorApp = userAgent.includes("Capacitor");
+      
+      if (!isCapacitorApp) {
+        const view = req.nextUrl.searchParams.get("view");
+        if (view === "messages") {
+          const wave = req.nextUrl.searchParams.get("wave");
+          const url = req.nextUrl.clone();
+          url.pathname = "/messages";
+          url.search = wave ? `?wave=${wave}` : "";
+          return NextResponse.redirect(url, 301);
+        }
+      }
+    }
+
     if (
       pathname.startsWith("/api") ||
       pathname.startsWith("/_next") ||

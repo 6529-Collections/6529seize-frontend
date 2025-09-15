@@ -31,9 +31,11 @@ import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function CreateWave({
   profile,
   onBack,
+  onSuccess,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
+  readonly onSuccess?: () => void;
 }) {
   const router = useRouter();
   const { isIos, keyboardVisible } = useCapacitor();
@@ -82,6 +84,7 @@ export default function CreateWave({
     onSuccess: (response) => {
       waitAndInvalidateDrops();
       onWaveCreated();
+      onSuccess?.();
       router.push(`/my-stream?wave=${response.id}`);
     },
     onError: (error) => {

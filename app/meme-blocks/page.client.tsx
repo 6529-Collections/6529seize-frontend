@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Poppins } from "next/font/google";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
 import BlockPickerDateSelect from "@/components/block-picker/BlockPickerDateSelect";
@@ -46,13 +45,6 @@ const BlockPickerTimeWindowToMilliseconds = {
   [BlockPickerTimeWindow.ONE_DAY]: 86400000,
   [BlockPickerTimeWindow.TWO_DAYS]: 172800000,
 };
-
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export default function BlockPickerClient() {
   const { setTitle } = useTitle();
@@ -129,7 +121,7 @@ export default function BlockPickerClient() {
   };
 
   return (
-    <div className={`tw-bg-neutral-900 ${poppins.className}`}>
+    <div className="tw-bg-neutral-900">
       <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <h1 className="tw-text-white pb-4">
           <span className="font-lightest">Meme</span> Blocks

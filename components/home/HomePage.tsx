@@ -94,9 +94,9 @@ export default function HomePage({
         </div>
       </div>
 
-      <div className="tw-h-full tw-px-4">
+      <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-h-full tw-overflow-hidden tailwind-scope">
+          <div className="tw-h-full tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-8">
             {isAuthenticated ? (
               <HomeFeed />
             ) : (

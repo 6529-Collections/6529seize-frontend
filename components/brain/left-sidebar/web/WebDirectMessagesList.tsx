@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useContext } from "react";
+import React, { useRef, useContext, useState } from "react";
 import WebUnifiedWavesListWaves, {
   WebUnifiedWavesListWavesHandle,
 } from "./WebUnifiedWavesListWaves";
@@ -20,9 +20,10 @@ import Image from "next/image";
 import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
+import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
 
 interface WebDirectMessagesListProps {
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
 }
 
 const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
@@ -32,6 +33,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
   const router = useRouter();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
@@ -42,8 +44,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     directMessages.hasNextPage,
     directMessages.isFetchingNextPage,
     directMessages.fetchNextPage,
-    scrollContainerRef,
-    listRef.current?.sentinelRef || { current: null },
+    scrollContainerRef as React.RefObject<HTMLElement>,
+    (listRef.current?.sentinelRef || { current: null }) as React.RefObject<HTMLElement>,
     "100px"
   );
 
@@ -121,7 +123,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
               data-tooltip-content="New direct message"
             >
               <PrimaryButton
-                onClicked={() => router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH)}
+                onClicked={() => setIsCreateModalOpen(true)}
                 loading={false}
                 disabled={false}
                 padding="tw-px-2 tw-py-2"
@@ -170,6 +172,15 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       
       {/* Tooltip */}
       <Tooltip id="create-dm-tooltip" />
+      
+      {/* Create Direct Message Modal */}
+      {connectedProfile && (
+        <CreateDirectMessageModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          profile={connectedProfile}
+        />
+      )}
     </div>
   );
 };

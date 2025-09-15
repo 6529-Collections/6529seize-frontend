@@ -8,7 +8,6 @@ const createFontMock = () => ({
 module.exports = {
   Inter: createFontMock,
   Roboto: createFontMock,
-  Poppins: createFontMock,
   Open_Sans: createFontMock,
   Lato: createFontMock,
   Montserrat: createFontMock,
