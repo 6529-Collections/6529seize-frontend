@@ -80,7 +80,6 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
       sections: [
         {
           name: "NFT Delegation",
-          hasDivider: true,
           items: [
             {
               name: "Delegation Center",

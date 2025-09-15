@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutApi() {
-  const nodeJsExample = `import { Wallet } from 'ethers';
+  const nodeJsAuthExample = `import { Wallet } from 'ethers';
 import fetch from 'node-fetch';
 
 export async function loginAndFetchFeed() {
@@ -64,6 +64,180 @@ export async function loginAndFetchFeed() {
   console.log('Feed:', feed);
 }`;
 
+
+  const nodeJsMediaDropExample = `import fetch from "node-fetch";
+import {readFile} from "fs/promises";
+import {extname} from "path";
+import mime from "mime-types";
+
+async function run() {
+    // 0) Authenticate and get token
+    // ...
+    // 1) read file
+    const filePath = "/Users/exampleuser/Desktop/example_picture.jpg";
+    const fileBytes = await readFile(filePath);
+    const fileName = filePath.split(/[\\\\/]/).pop();
+
+    const contentType = mime.lookup(extname(fileName)) || "application/octet-stream";
+    console.log(\`Read \${fileName} (\${fileBytes.length} bytes, \${contentType})\`);
+
+    // 2) start multipart
+    const {upload_id, key} = await startMultipartUpload({
+        token,
+        fileName,
+        contentType,
+    });
+    console.log("Started multipart:", {upload_id, key});
+
+    // 3) get part URL
+    const part_no = 1; // single-part example, but with larger files it might be worth to chunk them.
+    const uploadUrl = await getPartUploadUrl({token, upload_id, key, part_no});
+    console.log("Got pre-signed part URL");
+
+    // 4) PUT bytes to S3
+    const etag = await putPartToS3({uploadUrl, bytes: fileBytes, contentType});
+    console.log("Uploaded part, ETag:", etag);
+
+    // 5) complete
+    const mediaUrl = await completeMultipartUpload({
+        token,
+        upload_id,
+        key,
+        parts: [{part_no, etag}],
+    });
+    console.log("Multipart complete. media_url:", mediaUrl);
+
+    // 6) create drop
+    const drop = await createDrop({
+        token,
+        mediaUrl,
+        mimeType: contentType,
+        signerAddress: wallet.address,
+    });
+    console.log("Drop created:", drop);
+}
+
+async function startMultipartUpload({token, fileName, contentType}) {
+    const resp = await fetch("https://api.6529.io/api/drop-media/multipart-upload", {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            authorization: \`Bearer \${token}\`,
+            "content-type": "application/json",
+        },
+        body: JSON.stringify({
+            file_name: fileName,
+            content_type: contentType,
+        }),
+    });
+    if (!resp.ok) {
+        throw new Error(
+            \`startMultipartUpload failed: \${resp.status} \${resp.statusText} - \${await resp.text()}\`
+        );
+    }
+    return resp.json();
+}
+
+async function getPartUploadUrl({token, upload_id, key, part_no}) {
+    const resp = await fetch("https://api.6529.io/api/drop-media/multipart-upload/part", {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            authorization: \`Bearer \${token}\`,
+            "content-type": "application/json",
+        },
+        body: JSON.stringify({upload_id, key, part_no}),
+    });
+    if (!resp.ok) {
+        throw new Error(
+            \`getPartUploadUrl failed: \${resp.status} \${resp.statusText} - \${await resp.text()}\`
+        );
+    }
+    const {upload_url} = await resp.json();
+    return upload_url;
+}
+
+async function putPartToS3({uploadUrl, bytes, contentType}) {
+    const putResp = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+            "content-type": contentType,
+        },
+        body: bytes,
+    });
+    if (!putResp.ok) {
+        throw new Error(
+            \`S3 upload part failed: \${putResp.status} \${putResp.statusText} - \${await putResp.text()}\`
+        );
+    }
+    const rawETag = putResp.headers.get("etag") || putResp.headers.get("ETag");
+    const etag = rawETag?.replace(/^"+|"+$/g, "");
+    if (!etag) throw new Error("Missing ETag from S3 response");
+    return etag;
+}
+
+async function completeMultipartUpload({token, upload_id, key, parts}) {
+    const resp = await fetch("https://api.6529.io/api/drop-media/multipart-upload/completion", {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            authorization: \`Bearer \${token}\`,
+            "content-type": "application/json",
+        },
+        body: JSON.stringify({
+            upload_id,
+            key,
+            parts,
+        }),
+    });
+    if (!resp.ok) {
+        throw new Error(
+            \`completeMultipartUpload failed: \${resp.status} \${resp.statusText} - \${await resp.text()}\`
+        );
+    }
+    const json = await resp.json();
+    return json.media_url;
+}
+
+async function createDrop({token, mediaUrl, mimeType, signerAddress}) {
+    const body = {
+        title: null,
+        drop_type: "CHAT",
+        parts: [
+            {
+                content: null,
+                quoted_drop: null,
+                media: [{url: mediaUrl, mime_type: mimeType}],
+            },
+        ],
+        mentioned_users: [],
+        referenced_nfts: [],
+        metadata: [],
+        signature: null,
+        is_safe_signature: false,
+        signer_address: signerAddress,
+        wave_id: 'TARGET_WAVE_ID_GOES_HERE'
+    };
+
+    const resp = await fetch("https://api.6529.io/api/drops", {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            authorization: \`Bearer \${token}\`,
+            "content-type": "application/json",
+        },
+        body: JSON.stringify(body),
+    });
+    if (!resp.ok) {
+        throw new Error(\`Create drop failed: \${resp.status} \${resp.statusText} - \${await resp.text()}\`);
+    }
+    return await resp.json();
+}
+
+run().catch((err) => {
+    console.error("Error:", err);
+    process.exit(1);
+});`;
   return (
     <main className={styles.main}>
       <Container className="pt-4 pb-4">
@@ -189,7 +363,31 @@ export async function loginAndFetchFeed() {
             </ol>
             <p>Here's a full example in Node.js using ethers and node-fetch:</p>
 
-            <CodeExample code={nodeJsExample} />
+            <CodeExample code={nodeJsAuthExample} />
+          </Col>
+        </Row>
+        <Row className="pt-2">
+          <Col>
+            <p className="font-larger font-bolder">Creating drops with embedded media</p>
+
+            <p>Current API supports multipart upload</p>
+
+            <p>The flow works as follows:</p>
+
+            <ol>
+              <li>Read the file</li>
+              <li>Send the file name and mime type (not the file itself) to our API</li>
+              <li>Get back upload ID and temporary S3 key</li>
+              <li>Optional: Split the file to chunks/parts.</li>
+              <li>Get S3 upload URL for each part from our API</li>
+              <li>Upload each part to S3 using the signed urls gotten from previous steps and keep the ETags from responses</li>
+              <li>When all parts have finished uploading, complete the upload bt supplying the ETags to our API</li>
+              <li>Use the media URL from completion API response to create a drop</li>
+            </ol>
+
+            <p>Here's a full example in Node.js:</p>
+
+            <CodeExample code={nodeJsMediaDropExample} />
           </Col>
         </Row>
       </Container>
