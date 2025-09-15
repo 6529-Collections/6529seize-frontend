@@ -5,7 +5,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NavDropdown } from "react-bootstrap";
 import styles from "./Header.module.scss";
 import HeaderDesktopLink from "./HeaderDesktopLink";
-import { getDesktopNavigation, toolsBottomItems, type NavContext } from "./HeaderNavConfig";
+import {
+  getDesktopNavigation,
+  toolsBottomItems,
+  type NavContext,
+} from "./HeaderNavConfig";
 
 interface HeaderDesktopNavProps {
   readonly showWaves: boolean;
@@ -48,19 +52,17 @@ export default function HeaderDesktopNav({
   };
 
   const renderSection = (section: any) => (
-    <div key={section.name} className={styles.submenuContainer}>
+    <div key={section.name}>
       {section.hasDivider && <NavDropdown.Divider />}
-      <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-        {section.name}
-        <FontAwesomeIcon
-          icon={faChevronRight}
-          height={16}
-          width={16}
-        />
-      </div>
-      <div className={styles.nestedMenu}>
-        {section.items.map(renderNavLink)}
-        {section.hasDivider && <NavDropdown.Divider />}
+      <div className={styles.submenuContainer}>
+        <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+          {section.name}
+          <FontAwesomeIcon icon={faChevronRight} height={16} width={16} />
+        </div>
+        <div className={styles.nestedMenu}>
+          {section.items.map(renderNavLink)}
+          {section.hasDivider && <NavDropdown.Divider />}
+        </div>
       </div>
     </div>
   );
@@ -72,9 +74,10 @@ export default function HeaderDesktopNav({
 
     let className = `${styles.mainNavLink} ${styles.mainNavLinkPadding}`;
     if (dropdown.className) {
-      const dynamicClassName = typeof dropdown.className === 'function' 
-        ? dropdown.className(context) 
-        : dropdown.className;
+      const dynamicClassName =
+        typeof dropdown.className === "function"
+          ? dropdown.className(context)
+          : dropdown.className;
       if (dynamicClassName) {
         className += ` ${dynamicClassName}`;
       }
@@ -85,12 +88,11 @@ export default function HeaderDesktopNav({
         key={dropdown.title}
         title={dropdown.title}
         align="start"
-        className={className}
-      >
+        className={className}>
         {dropdown.items?.map(renderNavLink)}
-        
+
         {dropdown.sections?.map(renderSection)}
-        
+
         {dropdown.title === "Tools" && (
           <>
             {dropdown.hasDividerAfter && <NavDropdown.Divider />}
@@ -101,9 +103,5 @@ export default function HeaderDesktopNav({
     );
   };
 
-  return (
-    <>
-      {navigation.map(renderDropdown)}
-    </>
-  );
+  return <>{navigation.map(renderDropdown)}</>;
 }
