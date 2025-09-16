@@ -1,5 +1,3 @@
-import { commonApiFetch } from './common-api';
-
 export interface LinkPreviewMedia {
   readonly url?: string | null;
   readonly secureUrl?: string | null;
@@ -43,13 +41,30 @@ export const fetchLinkPreview = async (
     return cachedResponse;
   }
 
-  const requestPromise = commonApiFetch<LinkPreviewResponse>({
-    endpoint: 'open-graph',
-    params: { url: normalizedUrl },
-  }).catch((error) => {
-    linkPreviewCache.delete(normalizedUrl);
-    throw error;
-  });
+  const params = new URLSearchParams({ url: normalizedUrl });
+
+  const requestPromise = fetch(`/api/open-graph?${params.toString()}`, {
+    headers: { Accept: 'application/json' },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        let errorMessage = 'Failed to fetch link preview metadata.';
+        try {
+          const body = await response.json();
+          if (body && typeof body.error === 'string' && body.error) {
+            errorMessage = body.error;
+          }
+        } catch {
+          // ignore parse errors and use default message
+        }
+        throw new Error(errorMessage);
+      }
+      return response.json() as Promise<LinkPreviewResponse>;
+    })
+    .catch((error) => {
+      linkPreviewCache.delete(normalizedUrl);
+      throw error;
+    });
 
   linkPreviewCache.set(normalizedUrl, requestPromise);
 

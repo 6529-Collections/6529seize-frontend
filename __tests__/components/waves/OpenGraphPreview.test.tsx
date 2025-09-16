@@ -118,4 +118,23 @@ describe('OpenGraphPreview', () => {
     expect(screen.getByAltText('othersite.com')).toHaveAttribute('src', 'https://cdn.othersite.com/img.jpg');
     expect(screen.getByTestId('href-buttons')).toHaveTextContent('undefined');
   });
+
+  it('uses secureUrl fields when provided', () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue('/article');
+
+    render(
+      <OpenGraphPreview
+        href="https://example.com/article"
+        preview={{
+          title: 'Secure Image',
+          image: { secureUrl: 'https://cdn.example.com/secure.png' },
+        }}
+      />
+    );
+
+    expect(screen.getByAltText('Secure Image')).toHaveAttribute(
+      'src',
+      'https://cdn.example.com/secure.png'
+    );
+  });
 });

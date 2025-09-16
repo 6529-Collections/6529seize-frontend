@@ -46,6 +46,7 @@ const IMAGE_KEYS = [
   "thumbnail_url",
   "cover",
   "coverImage",
+  "secureUrl",
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
 
@@ -95,6 +96,7 @@ function extractImageFromValue(value: unknown): string | undefined {
     return (
       extractImageFromValue(record["url"]) ||
       extractImageFromValue(record["secure_url"]) ||
+      extractImageFromValue(record["secureUrl"]) ||
       extractImageFromValue(record["src"]) ||
       extractImageFromValue(record["href"]) ||
       extractImageFromValue(record["image"]) ||
@@ -181,6 +183,20 @@ function getRelativeHref(href: string): string | undefined {
   }
 
   return relative.startsWith("/") ? relative : undefined;
+}
+
+export function hasOpenGraphContent(
+  preview: OpenGraphPreviewData | null | undefined
+): boolean {
+  if (!preview) {
+    return false;
+  }
+
+  return Boolean(
+    readFirstString(preview, TITLE_KEYS) ||
+      readFirstString(preview, DESCRIPTION_KEYS) ||
+      extractImageUrl(preview)
+  );
 }
 
 export default function OpenGraphPreview({
