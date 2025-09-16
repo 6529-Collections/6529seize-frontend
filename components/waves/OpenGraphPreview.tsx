@@ -49,6 +49,7 @@ const IMAGE_KEYS = [
   "secureUrl",
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
+const CARD_MIN_HEIGHT_CLASS = "tw-min-h-[12rem]";
 
 function readFirstString(
   data: OpenGraphPreviewData | null | undefined,
@@ -213,7 +214,8 @@ export default function OpenGraphPreview({
     return (
       <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
         <div className="tw-flex-1 tw-min-w-0">
-          <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          <div
+            className={`tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 ${CARD_MIN_HEIGHT_CLASS}`}>
             <div
               className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
               data-testid="og-preview-skeleton">
@@ -240,7 +242,7 @@ export default function OpenGraphPreview({
       <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
         <div className="tw-flex-1 tw-min-w-0">
           <div
-            className="tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
+            className={`tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6 ${CARD_MIN_HEIGHT_CLASS}`}
             data-testid="og-preview-unavailable">
             <div className="tw-text-center tw-space-y-2">
               <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
@@ -265,7 +267,7 @@ export default function OpenGraphPreview({
     <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
       <div className="tw-flex-1 tw-min-w-0">
         <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          className={`tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 ${CARD_MIN_HEIGHT_CLASS}`}
           data-testid="og-preview-card">
           <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
             {imageUrl && (
