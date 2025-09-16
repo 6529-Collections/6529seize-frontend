@@ -14,17 +14,15 @@ import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
+import dynamic from "next/dynamic";
 
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-
-// Component definitions moved outside for better performance
-const BreakComponent = () => <br />;
 import DropListItemContentPart, {
   DropListItemContentPartProps,
 } from "../item/content/DropListItemContentPart";
 import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
-import { Tweet } from "react-tweet";
+import type { TweetProps } from "react-tweet";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
@@ -41,6 +39,25 @@ import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
 import DropItemChat from "../../../waves/drops/DropItemChat";
 import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
+
+const BreakComponent = () => <br />;
+
+const TweetEmbedSkeleton = () => (
+  <div
+    data-testid="tweet-embed-loading"
+    className="tw-flex tw-items-center tw-justify-center tw-w-full tw-min-h-[10rem] tw-rounded-lg tw-bg-iron-900/60 tw-animate-pulse tw-text-iron-300"
+  >
+    Loading tweet…
+  </div>
+);
+
+const TweetEmbed = dynamic<TweetProps>(
+  () => import("react-tweet").then((mod) => mod.Tweet),
+  {
+    ssr: false,
+    loading: TweetEmbedSkeleton,
+  }
+);
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -322,7 +339,7 @@ function DropPartMarkdown({
   const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
     <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
       <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
-        <Tweet id={result.tweetId} />
+        <TweetEmbed id={result.tweetId} />
       </div>
       <ChatItemHrefButtons href={result.href} />
     </div>
