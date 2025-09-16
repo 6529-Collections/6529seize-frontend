@@ -27,6 +27,9 @@ import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropRefere
 import { Tweet } from "react-tweet";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
+import OpenGraphPreview, {
+  OpenGraphPreviewData,
+} from "./OpenGraphPreview";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
@@ -247,6 +250,230 @@ function DropPartMarkdown({
     return gifRegex.test(href) ? href : null;
   };
 
+  const toOptionalString = (value: unknown): string | undefined => {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed ? trimmed : undefined;
+    }
+
+    return undefined;
+  };
+
+  const safeJsonParse = (value: string): unknown => {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  };
+
+  const safeHostname = (value: string): string | undefined => {
+    const candidates = [value, value.startsWith("http") ? value : `https://${value}`];
+
+    for (const candidate of candidates) {
+      try {
+        const parsed = new URL(candidate);
+        const hostname = parsed.hostname.replace(/^www\./, "");
+        if (hostname) {
+          return hostname;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    return undefined;
+  };
+
+  const resolveImageUrl = (value: unknown): string | undefined => {
+    if (!value) {
+      return undefined;
+    }
+
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed ? trimmed : undefined;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const url = resolveImageUrl(item);
+        if (url) {
+          return url;
+        }
+      }
+
+      return undefined;
+    }
+
+    if (typeof value === "object") {
+      const record = value as Record<string, unknown>;
+
+      return (
+        resolveImageUrl(record.url) ??
+        resolveImageUrl(record.src) ??
+        resolveImageUrl(record.href) ??
+        resolveImageUrl(record.source) ??
+        resolveImageUrl(record["secure_url"])
+      );
+    }
+
+    return undefined;
+  };
+
+  const pickString = (
+    source: Record<string, unknown>,
+    keys: string[]
+  ): string | undefined => {
+    for (const key of keys) {
+      const stringValue = toOptionalString(source[key]);
+      if (stringValue) {
+        return stringValue;
+      }
+    }
+
+    return undefined;
+  };
+
+  const normalizeOpenGraphPreview = (
+    raw: unknown
+  ): OpenGraphPreviewData | null => {
+    if (!raw) {
+      return null;
+    }
+
+    const value =
+      typeof raw === "string" ? safeJsonParse(raw) : raw;
+
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+
+    const record = value as Record<string, unknown>;
+
+    const title = pickString(record, ["title", "ogTitle", "og:title"]);
+    const description = pickString(record, [
+      "description",
+      "ogDescription",
+      "og:description",
+      "summary",
+    ]);
+    const siteName = pickString(record, [
+      "siteName",
+      "site_name",
+      "og:site_name",
+      "site",
+    ]);
+    const url = pickString(record, ["url", "ogUrl", "og:url", "canonicalUrl"]);
+    const domain =
+      pickString(record, ["domain", "host", "hostname"]) ??
+      (url ? safeHostname(url) : undefined);
+    const favicon = pickString(record, [
+      "favicon",
+      "icon",
+      "logo",
+      "appleTouchIcon",
+    ]);
+    const image = resolveImageUrl(
+      record.image ??
+        record.images ??
+        record["og:image"] ??
+        record["og:image:url"] ??
+        record["og:image:secure_url"] ??
+        record.imageUrl ??
+        record.image_url ??
+        record.thumbnail ??
+        record.previewImage
+    );
+
+    if (!title && !description && !image && !favicon && !siteName) {
+      return null;
+    }
+
+    return {
+      title,
+      description,
+      siteName,
+      url,
+      favicon,
+      image,
+      domain,
+    };
+  };
+
+  const extractOpenGraphPreview = (
+    node: ExtraProps["node"]
+  ): OpenGraphPreviewData | null => {
+    const data = (node as { data?: unknown })?.data;
+    if (!data || typeof data !== "object") {
+      return null;
+    }
+
+    const previewKeys = [
+      "openGraphPreview",
+      "openGraph",
+      "openGraphData",
+      "preview",
+      "previewData",
+      "linkPreview",
+      "seizeOpenGraphPreview",
+    ] as const;
+
+    for (const key of previewKeys) {
+      if (!Object.prototype.hasOwnProperty.call(data, key)) {
+        continue;
+      }
+
+      const value = (data as Record<string, unknown>)[key];
+      const normalized = normalizeOpenGraphPreview(value);
+      if (normalized) {
+        return normalized;
+      }
+    }
+
+    const hProperties = (data as Record<string, unknown>).hProperties;
+    if (hProperties && typeof hProperties === "object") {
+      const previewValue =
+        (hProperties as Record<string, unknown>)["data-og-preview"] ??
+        (hProperties as Record<string, unknown>)["data-open-graph-preview"] ??
+        (hProperties as Record<string, unknown>)["data-preview"];
+
+      const normalized = normalizeOpenGraphPreview(previewValue);
+      if (normalized) {
+        return normalized;
+      }
+    }
+
+    return null;
+  };
+
+  const parseOpenGraphLink = (
+    href: string,
+    node: ExtraProps["node"]
+  ): OpenGraphPreviewData | null => {
+    if (!node) {
+      return null;
+    }
+
+    if (
+      parseTwitterLink(href) ||
+      parseGifLink(href) ||
+      parseSeizeQuoteLink(href) ||
+      parseSeizeQueryLink(href, "/network", ["group"]) ||
+      parseSeizeQueryLink(href, "/my-stream", ["wave"], true) ||
+      parseSeizeQueryLink(href, "/my-stream", ["wave", "drop"], true)
+    ) {
+      return null;
+    }
+
+    const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
+    if (baseEndpoint && href.startsWith(baseEndpoint)) {
+      return null;
+    }
+
+    return extractOpenGraphPreview(node);
+  };
+
   const smartLinkHandlers: SmartLinkHandler<any>[] = [
     {
       parse: parseSeizeQuoteLink,
@@ -304,6 +531,13 @@ function DropPartMarkdown({
       if (result) {
         return render(result, href);
       }
+    }
+
+    const openGraphPreview = node
+      ? parseOpenGraphLink(href, node)
+      : null;
+    if (openGraphPreview) {
+      return <OpenGraphPreview href={href} preview={openGraphPreview} />;
     }
 
     return renderExternalOrInternalLink(href, props);
@@ -454,8 +688,15 @@ function DropPartMarkdown({
     for (const node of flattened) {
       const isValid = isValidElement(node);
       const src = isValid && (node.props as any)?.src;
-      const href = isValid && (node.props as any)?.href;
-      if (src || (href && isSmartLink(href))) {
+      const elementProps = isValid
+        ? (node.props as AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps)
+        : undefined;
+      const href = elementProps?.href;
+      const hasOpenGraphPreview =
+        href && elementProps?.node
+          ? !!parseOpenGraphLink(href, elementProps.node)
+          : false;
+      if (src || (href && (isSmartLink(href) || hasOpenGraphPreview))) {
         flushTextChunk();
         elements.push(node);
       } else {
