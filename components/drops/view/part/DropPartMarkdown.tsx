@@ -258,26 +258,30 @@ function DropPartMarkdown({
   ): { readonly videoId: string; readonly url: string } | null => {
     try {
       const url = new URL(href);
-      const host = url.hostname.replace(/^www\./i, "").toLowerCase();
-      const YOUTUBE_DOMAINS = [
-        "youtube.com",
-        "m.youtube.com"
-      ];
+      const normalizedHost = url.hostname.replace(/^www\./i, "").toLowerCase();
+      const isYoutubeDomain =
+        normalizedHost === "youtube.com" ||
+        normalizedHost === "youtube-nocookie.com" ||
+        normalizedHost.endsWith(".youtube.com");
 
       let videoId: string | null = null;
 
-      if (host === "youtu.be") {
+      if (normalizedHost === "youtu.be") {
         const pathSegments = url.pathname.split("/").filter(Boolean);
         videoId = pathSegments[0] ?? null;
-      } else if (YOUTUBE_DOMAINS.includes(host)) {
+      } else if (isYoutubeDomain) {
+        const pathSegments = url.pathname.split("/").filter(Boolean);
+
         if (url.pathname === "/watch" || url.pathname === "/watch/") {
           videoId = url.searchParams.get("v");
-        } else if (url.pathname.startsWith("/shorts/")) {
-          const segments = url.pathname.split("/").filter(Boolean);
-          videoId = segments[1] ?? null;
-        } else if (url.pathname.startsWith("/embed/")) {
-          const segments = url.pathname.split("/").filter(Boolean);
-          videoId = segments[1] ?? null;
+        } else if (pathSegments[0] === "shorts") {
+          videoId = pathSegments[1] ?? null;
+        } else if (pathSegments[0] === "embed") {
+          videoId = pathSegments[1] ?? null;
+        } else if (pathSegments[0] === "live") {
+          videoId = pathSegments[1] ?? null;
+        } else if (pathSegments[0] === "v") {
+          videoId = pathSegments[1] ?? null;
         }
       }
 
@@ -293,6 +297,25 @@ function DropPartMarkdown({
       return { videoId: trimmed, url: href };
     } catch {
       return null;
+    }
+  };
+
+  const getYoutubeFetchUrl = (href: string, videoId: string): string => {
+    try {
+      const url = new URL(href);
+      const canonical = new URL(`https://www.youtube.com/watch?v=${videoId}`);
+      const preservedParams = ["list", "index"] as const;
+
+      preservedParams.forEach((param) => {
+        const value = url.searchParams.get(param);
+        if (value) {
+          canonical.searchParams.set(param, value);
+        }
+      });
+
+      return canonical.toString();
+    } catch {
+      return `https://www.youtube.com/watch?v=${videoId}`;
     }
   };
 
@@ -476,7 +499,9 @@ function DropPartMarkdown({
       setHasError(false);
       setShowEmbed(false);
 
-      fetchYoutubePreview(href, abortController.signal)
+      const fetchUrl = getYoutubeFetchUrl(href, videoId);
+
+      fetchYoutubePreview(fetchUrl, abortController.signal)
         .then((data) => {
           if (!isActive) {
             return;
@@ -507,7 +532,7 @@ function DropPartMarkdown({
         isActive = false;
         abortController.abort();
       };
-    }, [href]);
+    }, [href, videoId]);
 
     const renderFallback = () =>
       renderExternalOrInternalLink(href, { ...fallbackProps });
