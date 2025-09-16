@@ -187,16 +187,19 @@ export default function TheMemesComponent() {
   const [nftBalancesTokenIds, setNftBalancesTokenIds] = useState<Set<number>>(
     new Set()
   );
-  const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
+  const [nftBalancesByTokenId, setNftBalancesByTokenId] = useState<
+    Map<number, number>
+  >(new Map());
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
+  const [nftsByMeme, setNftsByMeme] = useState<
+    Map<number, NFTWithMemesExtendedData[]>
+  >(new Map());
 
   function getBalance(id: number) {
-    const balance = nftBalances.find((b) => b.token_id === id);
-    if (balance) {
-      return balance.balance;
+    if (nftBalancesByTokenId.has(id)) {
+      return nftBalancesByTokenId.get(id) ?? 0;
     }
-    const isLoaded = nftBalancesTokenIds.has(id);
-    if (isLoaded) {
+    if (nftBalancesTokenIds.has(id)) {
       return 0;
     }
     return -1;
@@ -238,21 +241,43 @@ export default function TheMemesComponent() {
   }, [sort, sortDir, selectedSeason, volumeType]);
 
   useEffect(() => {
-    const myMemesMap = new Map<number, Meme>();
-    [...nfts].map((nftm) => {
-      myMemesMap.set(nftm.meme, {
-        meme: nftm.meme,
-        meme_name: nftm.meme_name,
-      });
+    const memesMap = new Map<
+      number,
+      { meme: Meme; items: NFTWithMemesExtendedData[] }
+    >();
+
+    nfts.forEach((nft) => {
+      const existing = memesMap.get(nft.meme);
+      if (existing) {
+        existing.items.push(nft);
+      } else {
+        memesMap.set(nft.meme, {
+          meme: { meme: nft.meme, meme_name: nft.meme_name },
+          items: [nft],
+        });
+      }
     });
-    const myMemes = Array.from(myMemesMap.values());
+
+    const sortedMemes = Array.from(memesMap.values()).map((value) => value.meme);
+
     if (sortDir === SortDirection.DESC) {
-      myMemes.sort((a, d) => d.meme - a.meme);
+      sortedMemes.sort((a, b) => b.meme - a.meme);
     } else {
-      myMemes.sort((a, d) => a.meme - d.meme);
+      sortedMemes.sort((a, b) => a.meme - b.meme);
     }
-    setNftMemes(myMemes);
-  }, [nfts]);
+
+    memesMap.forEach((value) => value.items.sort((a, b) => a.id - b.id));
+
+    setNftMemes(sortedMemes);
+    setNftsByMeme(
+      new Map(
+        Array.from(memesMap.entries()).map(([key, value]) => [
+          key,
+          value.items,
+        ])
+      )
+    );
+  }, [nfts, sortDir]);
 
   function fetchNfts() {
     if (!nftsNextPage) {
@@ -281,42 +306,82 @@ export default function TheMemesComponent() {
   }, [fetching, routerLoaded, nftsNextPage]);
 
   useEffect(() => {
-    const checkScrollPosition = () => {
-      const distanceFromBottom =
-        document.documentElement.scrollHeight -
-        window.innerHeight -
-        window.scrollY;
+    if (!nftsNextPage) {
+      return;
+    }
 
-      if (distanceFromBottom <= 400) {
-        setFetching(true);
+    let throttleTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const handleScroll = () => {
+      if (throttleTimeout) {
+        return;
       }
+
+      throttleTimeout = setTimeout(() => {
+        throttleTimeout = null;
+
+        const distanceFromBottom =
+          document.documentElement.scrollHeight -
+          window.innerHeight -
+          window.scrollY;
+
+        if (distanceFromBottom <= 400 && routerLoaded) {
+          setFetching((prevFetching) => (prevFetching ? prevFetching : true));
+        }
+      }, 200);
     };
 
-    window.addEventListener("scroll", checkScrollPosition);
+    window.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", checkScrollPosition);
-  }, []);
+    return () => {
+      if (throttleTimeout) {
+        clearTimeout(throttleTimeout);
+      }
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [routerLoaded, nftsNextPage]);
 
   useEffect(() => {
-    const newTokenIds = [...nfts]
-      .map((nft) => nft.id)
-      .filter((id) => !nftBalances.some((b) => b.token_id === id));
-    if (connectedConsolidationKey && newTokenIds.length > 0) {
-      fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${
-          connectedProfile?.consolidation_key
-        }?contract=${MEMES_CONTRACT}&token_id=${newTokenIds.join(",")}`
-      ).then((owners: NftOwner[]) => {
-        setNftBalances([...nftBalances, ...owners]);
-        setNftBalancesTokenIds(
-          new Set([...Array.from(nftBalancesTokenIds), ...newTokenIds])
-        );
-      });
+    if (!connectedConsolidationKey) {
+      return;
     }
-  }, [connectedConsolidationKey, nfts]);
+
+    const newTokenIds = nfts
+      .map((nft) => nft.id)
+      .filter((id) => !nftBalancesTokenIds.has(id));
+
+    if (newTokenIds.length === 0) {
+      return;
+    }
+
+    setNftBalancesTokenIds((previousTokenIds) => {
+      const updatedTokenIds = new Set(previousTokenIds);
+      newTokenIds.forEach((id) => updatedTokenIds.add(id));
+      return updatedTokenIds;
+    });
+
+    fetchAllPages(
+      `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${
+        connectedProfile?.consolidation_key
+      }?contract=${MEMES_CONTRACT}&token_id=${newTokenIds.join(",")}`
+    ).then((owners: NftOwner[]) => {
+      setNftBalancesByTokenId((previousBalances) => {
+        const updatedBalances = new Map(previousBalances);
+        owners.forEach((owner) => {
+          updatedBalances.set(owner.token_id, owner.balance);
+        });
+        newTokenIds.forEach((tokenId) => {
+          if (!updatedBalances.has(tokenId)) {
+            updatedBalances.set(tokenId, 0);
+          }
+        });
+        return updatedBalances;
+      });
+    });
+  }, [connectedConsolidationKey, connectedProfile, nfts, nftBalancesTokenIds]);
 
   useEffect(() => {
-    setNftBalances([]);
+    setNftBalancesByTokenId(new Map());
     setNftBalancesTokenIds(new Set());
     setConnectedConsolidationKey(
       connectedProfile?.consolidation_key ??
@@ -428,9 +493,7 @@ export default function TheMemesComponent() {
   }
 
   function getNftsForMeme(meme: Meme) {
-    return [...nfts].filter((n) =>
-      nfts.find((m) => n.id === m.id && m.meme === meme.meme)
-    );
+    return nftsByMeme.get(meme.meme) ?? [];
   }
 
   function printMemes() {
@@ -445,9 +508,7 @@ export default function TheMemesComponent() {
               </h4>
             </Col>
           </Col>
-          {[...memeNfts]
-            .sort((a, b) => a.id - b.id)
-            .map((nft) => printNft(nft))}
+          {memeNfts.map((nft) => printNft(nft))}
         </Row>
       );
     });

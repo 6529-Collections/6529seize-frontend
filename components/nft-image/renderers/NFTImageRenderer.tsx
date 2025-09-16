@@ -22,17 +22,18 @@ function getSrc(
 
 export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const src = getSrc(props.nft, !!props.showThumbnail, !!props.showOriginal);
+  const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
 
   return (
     <Col
       xs={12}
       className={`mb-2 text-center d-flex align-items-center justify-content-center ${styles.imageWrapper} ${props.heightStyle} ${props.bgStyle}`}>
       <Image
-        loading="eager"
-        priority
+        loading={shouldLazyLoad ? "lazy" : "eager"}
+        priority={!shouldLazyLoad}
         width="0"
         height="0"
-        fetchPriority="high"
+        fetchPriority={shouldLazyLoad ? "auto" : "high"}
         unoptimized
         className={props.imageStyle}
         style={{
