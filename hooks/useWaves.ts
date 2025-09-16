@@ -128,5 +128,7 @@ export function useWaves({
     hasNextPage: activeQuery.hasNextPage,
     fetchNextPage: activeQuery.fetchNextPage,
     status: activeQuery.status,
+    error: activeQuery.error,
+    refetch: activeQuery.refetch,
   };
 }
