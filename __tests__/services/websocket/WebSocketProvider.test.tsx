@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { WebSocketProvider } from '../../../services/websocket/WebSocketProvider';
+import { WebSocketProvider, calculateReconnectDelay } from '../../../services/websocket/WebSocketProvider';
 import { WebSocketContext } from '../../../services/websocket/WebSocketContext';
 import { WebSocketStatus, WebSocketConfig } from '../../../services/websocket/WebSocketTypes';
 import { WsMessageType } from '../../../helpers/Types';
@@ -61,11 +61,60 @@ class MockWebSocket {
   }
 }
 
+describe('calculateReconnectDelay', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('returns at least half of the exponential delay when jitter is minimal', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0);
+
+    const attempt = 2;
+    const initialDelay = 1000;
+    const maxDelay = 10000;
+    const baseDelay = initialDelay * Math.pow(1.5, attempt);
+
+    const delay = calculateReconnectDelay(attempt, initialDelay, maxDelay);
+
+    expect(delay).toBeCloseTo(baseDelay * 0.5);
+    expect(delay).toBeGreaterThanOrEqual(baseDelay * 0.5);
+  });
+
+  it('does not exceed 1.5x of the exponential delay before the cap', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.999);
+
+    const attempt = 2;
+    const initialDelay = 1000;
+    const maxDelay = 50000;
+    const baseDelay = initialDelay * Math.pow(1.5, attempt);
+    const expectedDelay = baseDelay * (0.5 + 0.999);
+
+    const delay = calculateReconnectDelay(attempt, initialDelay, maxDelay);
+
+    expect(delay).toBeCloseTo(expectedDelay);
+    expect(delay).toBeLessThanOrEqual(baseDelay * 1.5);
+  });
+
+  it('caps jittered delay at the configured maximum', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.999);
+
+    const attempt = 5;
+    const initialDelay = 1000;
+    const maxDelay = 8000;
+
+    const delay = calculateReconnectDelay(attempt, initialDelay, maxDelay);
+
+    expect(delay).toBe(maxDelay);
+  });
+});
+
 describe('WebSocketProvider', () => {
   let originalWs: any;
   let mockGetAuthJwt: jest.MockedFunction<typeof authUtils.getAuthJwt>;
-  
+  let randomSpy: jest.SpyInstance<number, []>;
+
   beforeEach(() => {
+    randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.5);
     originalWs = global.WebSocket;
     (global as any).WebSocket = jest.fn((url: string) => new MockWebSocket(url));
     (global as any).WebSocket.OPEN = 1;
@@ -75,13 +124,14 @@ describe('WebSocketProvider', () => {
     
     mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<typeof authUtils.getAuthJwt>;
     mockGetAuthJwt.mockReturnValue('fresh-token');
-    
+
     jest.clearAllMocks();
   });
-  
+
   afterEach(() => {
     (global as any).WebSocket = originalWs;
     jest.useRealTimers();
+    randomSpy.mockRestore();
   });
 
   const createWrapper = (config: WebSocketConfig) => ({ children }: { children: React.ReactNode }) => (
