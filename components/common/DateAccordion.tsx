@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +20,8 @@ export default function DateAccordion({
   children,
   showChevron = true,
 }: DateAccordionProps) {
+  const contentId = useId();
+
   return (
     <motion.div
       className="tw-bg-iron-900 tw-rounded-xl tw-ring-1 tw-ring-iron-700/50 tw-shadow-sm"
@@ -26,9 +29,12 @@ export default function DateAccordion({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div
+      <button
+        type="button"
         onClick={onToggle}
-        className="tw-px-5 tw-h-16 tw-cursor-pointer tw-flex tw-items-center tw-justify-between tw-w-full desktop-hover:hover:tw-bg-iron-800/50 tw-transition-colors tw-duration-200"
+        aria-expanded={isExpanded}
+        aria-controls={contentId}
+        className="tw-w-full tw-px-5 tw-h-16 tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-bg-transparent tw-border-0 tw-text-left tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800/50 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
           <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -52,7 +58,7 @@ export default function DateAccordion({
             </div>
           )}
         </div>
-      </div>
+      </button>
 
       <AnimatePresence>
         {isExpanded && (
@@ -61,6 +67,7 @@ export default function DateAccordion({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+            id={contentId}
           >
             {children}
           </motion.div>
