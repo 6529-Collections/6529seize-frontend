@@ -126,15 +126,3 @@ export default function CollectionTokenPicker({
     </div>
   );
 }
-
-function normalizeStandard(input: any): XtdhStandard {
-  const v = String(input || "").toUpperCase();
-  if (v.includes("1155")) return "ERC1155";
-  if (v.includes("721")) return "ERC721";
-  return "UNKNOWN";
-}
-
-function short(addr: string): string {
-  if (!addr?.startsWith("0x") || addr.length < 10) return addr;
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
