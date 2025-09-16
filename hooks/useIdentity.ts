@@ -28,6 +28,10 @@ export function useIdentity({
     enabled: !!handleOrWallet,
     initialData: initialProfile ?? undefined,
     retry: 3,
+    // Reduce redundant refetches when we already have fresh SSR data.
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   return { profile: profile ?? null, isLoading };

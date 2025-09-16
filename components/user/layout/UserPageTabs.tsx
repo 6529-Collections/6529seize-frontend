@@ -9,6 +9,7 @@ import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
   BRAIN = "BRAIN",
+  XTDH = "XTDH",
   REP = "REP",
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
@@ -34,7 +35,11 @@ export const USER_PAGE_TAB_META: Record<
     title: "Rep",
     route: "rep",
   },
-
+  [UserPageTabType.XTDH]: {
+    tab: UserPageTabType.XTDH,
+    title: "xTDH",
+    route: "xtdh",
+  },
   [UserPageTabType.IDENTITY]: {
     tab: UserPageTabType.IDENTITY,
     title: "Identity",

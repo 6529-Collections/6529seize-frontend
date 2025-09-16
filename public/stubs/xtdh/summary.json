@@ -1,0 +1,9 @@
+{
+  "baseRatePerDay": 1.23,
+  "multiplier": 0.1,
+  "xtdhRatePerDay": 0.123,
+  "totalRatePerDay": 1.353,
+  "allocatedRatePerDay": 0.05,
+  "incomingRatePerDay": 0.08
+}
+
