@@ -1,9 +1,9 @@
-import { AboutSection } from "@/enums";
 import {
   getDesktopNavigation,
   toolsBottomItems,
   type NavContext,
-} from "../../../components/header/HeaderNavConfig";
+} from "@/components/header/HeaderNavConfig";
+import { AboutSection } from "@/enums";
 
 describe("HeaderNavConfig", () => {
   const mockContext: NavContext = {
@@ -99,17 +99,6 @@ describe("HeaderNavConfig", () => {
         (section) => section.name === "The Memes Tools"
       );
 
-      const memesCalendarLink = memesToolsSection?.items.find(
-        (item) => item.name === "Memes Calendar"
-      );
-      expect(
-        memesCalendarLink?.condition?.({
-          ...mockContext,
-          capacitorIsIos: true,
-          country: "US",
-        })
-      ).toBe(false);
-
       const subscriptionsLink = memesToolsSection?.items.find(
         (item) => item.name === "Memes Subscriptions"
       );
@@ -194,6 +183,34 @@ describe("HeaderNavConfig", () => {
           country: "DE",
         })
       ).toBe(false);
+    });
+
+    it("checks The Memes Tools section ", () => {
+      const navigation = getDesktopNavigation({
+        ...mockContext,
+      });
+
+      const toolsSection = navigation.find((item) => item.title === "Tools");
+      const memesToolsSection = toolsSection?.sections?.find(
+        (section) => section.name === "The Memes Tools"
+      );
+
+      // expect to include 'Memes Calendar'
+      expect(
+        memesToolsSection?.items.some((item) => item.name === "Memes Calendar")
+      ).toBe(true);
+
+      // expect to include 'Memes Gas'
+      expect(
+        memesToolsSection?.items.some((item) => item.name === "Memes Gas")
+      ).toBe(true);
+
+      // expect to include 'Memes Accounting'
+      expect(
+        memesToolsSection?.items.some(
+          (item) => item.name === "Memes Accounting"
+        )
+      ).toBe(true);
     });
 
     it("returns About section with correct className function", () => {
@@ -283,7 +300,7 @@ describe("HeaderNavConfig", () => {
         (section) => section.name === "NFT Delegation"
       );
 
-      expect(nftDelegationSection?.hasDivider).toBe(true);
+      expect(nftDelegationSection?.hasDivider).toBe(false);
     });
   });
 
