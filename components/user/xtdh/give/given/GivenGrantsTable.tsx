@@ -1,17 +1,15 @@
 "use client";
 
 import XTDHCard from "../../ui/XTDHCard";
-import GivenGrantRow, { GivenGrantRowData } from "./GivenGrantRow";
+import GivenGrantRow from "./GivenGrantRow";
 import GivenEmptyState from "./GivenEmptyState";
 import { useMemo, useState } from "react";
+import { useXtdhGivenGrants } from "@/hooks/useXtdh";
 
-export default function GivenGrantsTable({
-  rows,
-  loading,
-}: {
-  readonly rows: GivenGrantRowData[];
-  readonly loading?: boolean;
-}) {
+export default function GivenGrantsTable() {
+  const { data, isLoading, isFetching } = useXtdhGivenGrants();
+  const rows = data?.rows ?? [];
+  const loading = isLoading || isFetching;
   const [filter, setFilter] = useState<"ALL" | "ACTIVE">("ALL");
   const visibleRows = useMemo(() => {
     if (filter === "ALL") return rows;

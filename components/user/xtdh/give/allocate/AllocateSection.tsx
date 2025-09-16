@@ -5,48 +5,46 @@ import AllocateForm from "./AllocateForm";
 import CollectionTokenPicker from "./CollectionTokenPicker";
 import { useState } from "react";
 import type { XtdhSelectedTarget } from "../../types";
-import type { XtdhSelectedTarget } from "../../types";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function AllocateSection({
-  capacityPerDay,
-  allocatedPerDay,
+  profile,
   onAllocate,
 }: {
-  readonly capacityPerDay: number;
-  readonly allocatedPerDay: number;
-  readonly onAllocate?: (payload: {
+  readonly profile: ApiIdentity;
+  readonly onAllocate: (payload: {
     target: XtdhSelectedTarget;
     amountPerDay: number;
   }) => void;
 }) {
   const [selectedTarget, setSelectedTarget] = useState<XtdhSelectedTarget | null>(null);
-  const [amountPerDay, setAmountPerDay] = useState<string>("");
 
   const handleReset = () => {
-    setAmountPerDay("");
     setSelectedTarget(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedTarget) return;
-    const n = Math.floor(Number(amountPerDay));
-    if (!Number.isFinite(n) || n <= 0) return;
-    onAllocate?.({ target: selectedTarget, amountPerDay: n });
-  };
   return (
     <XTDHCard title="Allocate xTDH">
       <div className="tw-flex tw-flex-col tw-gap-3">
         <CollectionTokenPicker value={selectedTarget} onChange={setSelectedTarget} />
         <AllocateForm
-          amountPerDay={amountPerDay}
-          onAmountChange={setAmountPerDay}
-          onReset={handleReset}
-          onSubmit={handleSubmit}
-          disabled={!selectedTarget || !amountPerDay}
-          capacityPerDay={capacityPerDay}
-          allocatedPerDay={allocatedPerDay}
+          profile={profile}
+          onSubmitAmount={(amountPerDay) => {
+            if (!selectedTarget) return;
+            onAllocate({ target: selectedTarget, amountPerDay });
+          }}
+          disabled={!selectedTarget}
+          helpers={undefined}
         />
+        <div className="tw-flex tw-justify-end">
+          <button
+            type="button"
+            className="tw-bg-iron-800 tw-text-iron-200 tw-rounded tw-px-3 tw-py-2 tw-border tw-border-iron-700 hover:tw-bg-iron-700 tw-transition"
+            onClick={handleReset}
+          >
+            Reset Selection
+          </button>
+        </div>
       </div>
     </XTDHCard>
   );

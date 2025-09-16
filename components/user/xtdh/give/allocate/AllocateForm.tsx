@@ -1,24 +1,30 @@
 "use client";
 
+import { useState } from "react";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useXtdhSummary } from "@/hooks/useXtdh";
+
 export default function AllocateForm({
-  amountPerDay,
-  onAmountChange,
-  onReset,
-  onSubmit,
-  disabled,
-  capacityPerDay,
-  allocatedPerDay,
+  profile,
+  onSubmitAmount,
+  disabled = false,
   helpers,
 }: {
-  readonly amountPerDay: string;
-  readonly onAmountChange: (v: string) => void;
-  readonly onReset: () => void;
-  readonly onSubmit: (e: React.FormEvent) => void;
-  readonly disabled: boolean;
-  readonly capacityPerDay: number;
-  readonly allocatedPerDay: number;
+  readonly profile: ApiIdentity;
+  readonly onSubmitAmount: (amountPerDay: number) => void;
+  readonly disabled?: boolean;
   readonly helpers?: string[];
 }) {
+  const { data: summary } = useXtdhSummary(
+    typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
+  );
+  const base = typeof summary?.baseRatePerDay === "number" ? summary.baseRatePerDay : 0;
+  const multiplier = typeof summary?.multiplier === "number" ? summary.multiplier : 0;
+  const capacityPerDay = base * multiplier;
+  const allocatedPerDay = typeof summary?.allocatedRatePerDay === "number" ? summary.allocatedRatePerDay : 0;
+
+  const [amountPerDay, setAmountPerDay] = useState<string>("");
+
   const remaining = Math.max(0, capacityPerDay - allocatedPerDay);
   const parsed = toNum(amountPerDay);
   const clamped = Math.max(0, Math.min(remaining, parsed));
@@ -26,7 +32,7 @@ export default function AllocateForm({
 
   const setQuick = (fraction: number) => {
     const v = Math.floor(remaining * fraction);
-    onAmountChange(String(v));
+    setAmountPerDay(String(v));
   };
 
   const fmt = (n: number) => new Intl.NumberFormat().format(Math.floor(n));
@@ -35,18 +41,28 @@ export default function AllocateForm({
     if (!amountPerDay || amountPerDay.trim() === "") return;
     const v = Math.floor(toNum(amountPerDay));
     const bounded = Math.max(0, Math.min(v, Math.floor(remaining)));
-    onAmountChange(String(bounded));
+    setAmountPerDay(String(bounded));
   };
 
   const onChangeAmount = (raw: string) => {
     const s = raw.trim();
     if (s === "") {
-      onAmountChange("");
+      setAmountPerDay("");
       return;
     }
     const n = Math.floor(toNum(s));
     const bounded = Math.max(0, Math.min(n, Math.floor(remaining)));
-    onAmountChange(String(bounded));
+    setAmountPerDay(String(bounded));
+  };
+
+  const onReset = () => setAmountPerDay("");
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (disabled) return;
+    if (over || clamped <= 0) return;
+    onSubmitAmount(Math.floor(clamped));
+    onReset();
   };
 
   return (

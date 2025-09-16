@@ -5,6 +5,8 @@ const ALCHEMY_CHAIN_BASE: Record<string, string> = {
   "eth-mainnet": "https://eth-mainnet.g.alchemy.com/nft/v3",
 };
 
+const CONTRACT_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+
 function getAlchemyKey(chain: string): string | undefined {
   // Try chain-specific env first, then fallback
   // Example: ALCHEMY_API_KEY_ETH_MAINNET or ALCHEMY_API_KEY
@@ -19,6 +21,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q");
     const chain = searchParams.get("chain") || "eth-mainnet";
+    const debug = process.env.NODE_ENV !== "production";
 
     if (!q || q.trim().length < 2) {
       return NextResponse.json({ error: "Query 'q' must be at least 2 chars" }, { status: 400 });
@@ -33,15 +36,155 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const url = `${base}/${apiKey}/searchContractMetadata?query=${encodeURIComponent(q)}`;
-    const res = await fetch(url, { next: { revalidate: 30 } });
-    if (!res.ok) {
-      const body = await res.text();
-      return NextResponse.json({ error: "Alchemy error", details: body }, { status: res.status });
+    const query = q.trim();
+    const isAddressQuery = CONTRACT_ADDRESS_REGEX.test(query);
+    const contractsMap = new Map<string, any>();
+
+    if (debug) {
+      console.log("[collections-search] incoming", { query, chain, isAddressQuery });
     }
-    const data = await res.json();
-    return NextResponse.json(data);
+
+    if (isAddressQuery) {
+      const directUrl = `${base}/${apiKey}/getContractMetadata?contractAddress=${query}`;
+      const directRes = await fetch(directUrl, { next: { revalidate: 60 } });
+      if (debug) {
+        console.log("[collections-search] direct lookup", {
+          url: directUrl,
+          status: directRes.status,
+        });
+      }
+      if (directRes.ok) {
+        const directData = await directRes.json();
+        if (debug) {
+          console.log("[collections-search] direct payload", {
+            keys: Object.keys(directData || {}),
+            contractKeys: Object.keys(directData?.contract || {}),
+            contractMetadataKeys: Object.keys(directData?.contractMetadata || {}),
+          });
+        }
+        const directContract = mapAlchemyContract(
+          directData?.contract ?? directData?.contractMetadata ?? directData ?? null,
+        );
+        if (directContract) {
+          contractsMap.set(directContract.address.toLowerCase(), directContract);
+          if (debug) {
+            console.log("[collections-search] direct match", {
+              address: directContract.address,
+              name: directContract.name,
+            });
+          }
+        }
+      } else if (directRes.status >= 400 && directRes.status < 500) {
+        // 4xx from direct lookup just means not found; we still try fuzzy search next.
+        if (debug) {
+          console.log("[collections-search] direct lookup not found", { status: directRes.status });
+        }
+      } else if (!directRes.ok) {
+        const body = await directRes.text();
+        if (debug) {
+          console.error("[collections-search] direct lookup error", { status: directRes.status, body });
+        }
+        return NextResponse.json({ error: "Alchemy error", details: body }, { status: directRes.status });
+      }
+    }
+
+    const searchUrl = `${base}/${apiKey}/searchContractMetadata?query=${encodeURIComponent(query)}`;
+    const searchRes = await fetch(searchUrl, { next: { revalidate: 30 } });
+    if (debug) {
+      console.log("[collections-search] fuzzy search", {
+        url: searchUrl,
+        status: searchRes.status,
+      });
+    }
+    if (!searchRes.ok) {
+      if (contractsMap.size > 0 && searchRes.status >= 400 && searchRes.status < 500) {
+        // We already have a direct match; tolerate fuzzy errors for keyword-only endpoints.
+        if (debug) {
+          console.log("[collections-search] returning direct-only results", { count: contractsMap.size });
+        }
+        return NextResponse.json({ contracts: Array.from(contractsMap.values()) });
+      }
+      const body = await searchRes.text();
+      if (debug) {
+        console.error("[collections-search] fuzzy search error", { status: searchRes.status, body });
+      }
+      return NextResponse.json({ error: "Alchemy error", details: body }, { status: searchRes.status });
+    }
+    const searchData = await searchRes.json();
+    if (debug) {
+      console.log("[collections-search] search payload", {
+        keys: Object.keys(searchData || {}),
+        contractsLength: Array.isArray(searchData?.contracts) ? searchData.contracts.length : 0,
+      });
+    }
+    const fromSearch = Array.isArray(searchData?.contracts) ? searchData.contracts : [];
+    for (const contract of fromSearch) {
+      const mapped = mapAlchemyContract(contract);
+      if (!mapped) continue;
+      const key = mapped.address.toLowerCase();
+      if (!contractsMap.has(key)) {
+        contractsMap.set(key, mapped);
+      }
+    }
+
+    if (debug) {
+      console.log("[collections-search] final results", {
+        count: contractsMap.size,
+        addresses: Array.from(contractsMap.values()).map((c) => c.address),
+      });
+    }
+
+    return NextResponse.json({ contracts: Array.from(contractsMap.values()) });
   } catch (err: any) {
+    console.error("[collections-search] unhandled error", err);
     return NextResponse.json({ error: err?.message || "Unknown error" }, { status: 500 });
   }
+}
+
+function mapAlchemyContract(contract: any): any | null {
+  if (!contract) return null;
+  const address =
+    contract?.address ||
+    contract?.contractAddress ||
+    contract?.contract?.address ||
+    contract?.contract?.contractAddress ||
+    contract?.contractMetadata?.address ||
+    contract?.contractMetadata?.contractAddress ||
+    contract?.contractMetadata?.contractDeployer?.contractAddresses?.[0] ||
+    contract?.contractMetadata?.contractDeployer?.address ||
+    contract?.contractDeployer?.contractAddresses?.[0] ||
+    contract?.contractDeployer?.address;
+  if (!address) return null;
+
+  const openSeaMetadata =
+    contract?.openSeaMetadata ||
+    contract?.contract?.openSeaMetadata ||
+    contract?.contractMetadata?.openSeaMetadata ||
+    null;
+
+  const spamInfo = contract?.spamInfo ?? null;
+  const name =
+    spamInfo?.name ||
+    contract?.name ||
+    openSeaMetadata?.collectionName ||
+    contract?.contractMetadata?.name ||
+    contract?.contract?.name ||
+    address;
+
+  const tokenType =
+    contract?.tokenType ||
+    contract?.contract?.tokenType ||
+    contract?.contractMetadata?.tokenType ||
+    null;
+
+  const contractDeployer = contract?.contractDeployer ?? null;
+
+  return {
+    address,
+    name,
+    tokenType,
+    openSeaMetadata,
+    spamInfo,
+    contractDeployer,
+  };
 }

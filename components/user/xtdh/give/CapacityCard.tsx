@@ -2,21 +2,28 @@
 
 import XTDHCard from "../ui/XTDHCard";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { useXtdhSummary } from "@/hooks/useXtdh";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function CapacityCard({
-  allocatedPerDay,
-  capacityPerDay,
-  remainingPerDay,
+  profile,
   helper,
 }: {
-  readonly allocatedPerDay: number | null;
-  readonly capacityPerDay?: number | null;
-  readonly remainingPerDay?: number | null;
+  readonly profile: ApiIdentity;
   readonly helper?: string;
 }) {
+  const { data: summary } = useXtdhSummary(
+    typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
+  );
+  const base = typeof summary?.baseRatePerDay === "number" ? summary.baseRatePerDay : 0;
+  const multiplier = typeof summary?.multiplier === "number" ? summary.multiplier : 0;
+  const capacityPerDay = base * multiplier;
+  const allocatedPerDay = typeof summary?.allocatedRatePerDay === "number" ? summary.allocatedRatePerDay : 0;
+  const remainingPerDay = Math.max(0, capacityPerDay - allocatedPerDay);
+
   const cap = toNum(capacityPerDay);
   const alloc = toNum(allocatedPerDay);
-  const remain = toNum(remainingPerDay ?? (cap - alloc));
+  const remain = toNum(remainingPerDay);
   const pct = cap > 0 ? Math.max(0, Math.min(100, (alloc / cap) * 100)) : 0;
 
   const asValue = (v: number | null, suffix = "") =>
