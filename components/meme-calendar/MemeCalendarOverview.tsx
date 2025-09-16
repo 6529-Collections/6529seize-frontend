@@ -12,7 +12,7 @@ import {
   getMintNumberForMintDate,
   getSeasonIndexForDate,
   getSeasonStartDate,
-  immediatelyNextMintInstantUTC,
+  getNextMintStart,
   isMintEligibleUtcDay,
   mintStartInstantUtcForMintDay,
   printCalendarInvites,
@@ -71,16 +71,16 @@ export function MemeCalendarOverviewNextMint({
   const [now, setNow] = useState(new Date());
   // Keep a stable target instant so we don't recompute calendar HTML every tick
   const [targetInstant, setTargetInstant] = useState(() =>
-    immediatelyNextMintInstantUTC(new Date())
+    getNextMintStart(new Date())
   );
 
   // tick every second for countdown and advance target when it actually changes
-  useEffect(() => {
+  useEffect(() => { 
     const t = setInterval(() => {
       setNow((prev) => {
         const current = new Date();
         // If the computed next mint instant has changed, update once
-        const computed = immediatelyNextMintInstantUTC(current);
+        const computed = getNextMintStart(current);
         if (computed.getTime() !== targetInstant.getTime()) {
           setTargetInstant(computed);
         }

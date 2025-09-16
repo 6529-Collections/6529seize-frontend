@@ -14,10 +14,13 @@ export const SZN1_RANGE = {
 } as const;
 export const SZN1_SEASON_INDEX = -13;
 
-// ---- UTC/DST-aware mint schedule ----
-const SUMMER_UTC_HOUR = 14; // 14:40 UTC in summer time
-const WINTER_UTC_HOUR = 15; // 15:40 UTC in winter time
-const MINT_UTC_MINUTE = 40;
+// ---- Eastern Time mint schedule ----
+const EASTERN_STANDARD_OFFSET_HOURS = -5; // UTC-5 during winter (EST)
+const EASTERN_DAYLIGHT_OFFSET_HOURS = -4; // UTC-4 during summer (EDT)
+const MINT_EASTERN_HOUR = 10;
+const MINT_EASTERN_MINUTE = 40;
+const MINT_END_EASTERN_HOUR = 10;
+const MINT_END_EASTERN_MINUTE = 0;
 
 // Atypical days where a mint did NOT happen even though it was a M/W/F
 // (store as UTC “day” timestamps)
@@ -109,25 +112,55 @@ export const FIRST_MINT_DATE: Date = (() => {
   return nextMintDateOnOrAfter(phase.startUtcDay);
 })();
 
-// ---- DST (EU style) detection in UTC ----
-function lastSundayUtc(year: number, monthIndex: number): Date {
-  // monthIndex 0..11
-  const lastOfMonth = new Date(Date.UTC(year, monthIndex + 1, 0));
-  const wd = lastOfMonth.getUTCDay(); // 0=Sun..6=Sat
-  return utcDate(year, monthIndex, lastOfMonth.getUTCDate() - wd);
+// ---- US Eastern Time DST helpers ----
+function getNthWeekdayOfMonthUtc(
+  year: number,
+  monthIndex: number,
+  weekday: number,
+  occurrence: number
+): number {
+  const firstOfMonth = new Date(Date.UTC(year, monthIndex, 1));
+  const firstDow = firstOfMonth.getUTCDay();
+  const offset = (weekday - firstDow + 7) % 7;
+  return 1 + offset + (occurrence - 1) * 7;
 }
-function isEuroSummerTimeUTC(d: Date): boolean {
-  const y = d.getUTCFullYear();
-  const dstStart = lastSundayUtc(y, 2); // March
-  const dstEnd = lastSundayUtc(y, 9); // October
-  const start = new Date(dstStart.getTime() + 60 * 60 * 1000); // 01:00Z
-  const end = new Date(dstEnd.getTime() + 60 * 60 * 1000); // 01:00Z
-  return d >= start && d < end;
+
+function isEasternDaylightTime(utcDay: Date): boolean {
+  const year = utcDay.getUTCFullYear();
+  const month = utcDay.getUTCMonth();
+  const day = utcDay.getUTCDate();
+
+  if (month < 2 || month > 10) {
+    return false;
+  }
+  if (month > 2 && month < 10) {
+    return true;
+  }
+
+  if (month === 2) {
+    const dstStartDay = getNthWeekdayOfMonthUtc(year, 2, 0, 2); // second Sunday in March
+    return day >= dstStartDay;
+  }
+
+  const dstEndDay = getNthWeekdayOfMonthUtc(year, 10, 0, 1); // first Sunday in November
+  return day < dstEndDay;
 }
-function getMintUtcHm(forDateUtc: Date): { hour: number; minute: number } {
-  return isEuroSummerTimeUTC(forDateUtc)
-    ? { hour: SUMMER_UTC_HOUR, minute: MINT_UTC_MINUTE }
-    : { hour: WINTER_UTC_HOUR, minute: MINT_UTC_MINUTE };
+
+function getEasternOffsetHours(utcDay: Date): number {
+  return isEasternDaylightTime(utcDay)
+    ? EASTERN_DAYLIGHT_OFFSET_HOURS
+    : EASTERN_STANDARD_OFFSET_HOURS;
+}
+
+function easternWallTimeToUtcInstant(
+  utcDay: Date,
+  hour: number,
+  minute: number
+): Date {
+  const offsetHours = getEasternOffsetHours(utcDay);
+  const out = new Date(utcDay);
+  out.setUTCHours(hour - offsetHours, minute, 0, 0);
+  return out;
 }
 
 // ---- Mint schedule helpers (Mon/Wed/Fri only, by UTC weekday) ----
@@ -162,10 +195,74 @@ export function prevMintDateOnOrBefore(d: Date): Date {
 }
 
 export function mintStartInstantUtcForMintDay(utcDay: Date): Date {
-  const { hour, minute } = getMintUtcHm(utcDay);
-  const out = new Date(utcDay);
-  out.setUTCHours(hour, minute, 0, 0);
-  return out;
+  return easternWallTimeToUtcInstant(
+    utcDay,
+    MINT_EASTERN_HOUR,
+    MINT_EASTERN_MINUTE
+  );
+}
+
+export function mintEndInstantUtcForMintDay(utcDay: Date): Date {
+  const nextDay = new Date(
+    Date.UTC(
+      utcDay.getUTCFullYear(),
+      utcDay.getUTCMonth(),
+      utcDay.getUTCDate() + 1
+    )
+  );
+  return easternWallTimeToUtcInstant(
+    nextDay,
+    MINT_END_EASTERN_HOUR,
+    MINT_END_EASTERN_MINUTE
+  );
+}
+
+function getMintWindowForMintDay(utcDay: Date): { start: Date; end: Date } {
+  return {
+    start: mintStartInstantUtcForMintDay(utcDay),
+    end: mintEndInstantUtcForMintDay(utcDay),
+  };
+}
+
+function getActiveMintWindow(
+  now: Date
+): { mintDayUtc: Date; start: Date; end: Date } | null {
+  const todayUtc = startOfUtcDay(now);
+  const candidates: Date[] = [];
+
+  const latestMint = prevMintDateOnOrBefore(todayUtc);
+  if (latestMint) {
+    candidates.push(latestMint);
+  }
+
+  const dayBefore = new Date(
+    Date.UTC(
+      todayUtc.getUTCFullYear(),
+      todayUtc.getUTCMonth(),
+      todayUtc.getUTCDate() - 1
+    )
+  );
+  if (+dayBefore >= +FIRST_MINT_DATE) {
+    const previousMint = prevMintDateOnOrBefore(dayBefore);
+    if (
+      previousMint &&
+      (!latestMint || previousMint.getTime() !== latestMint.getTime())
+    ) {
+      candidates.push(previousMint);
+    }
+  }
+
+  for (const mintDay of candidates) {
+    const window = getMintWindowForMintDay(mintDay);
+    if (
+      now.getTime() >= window.start.getTime() &&
+      now.getTime() < window.end.getTime()
+    ) {
+      return { mintDayUtc: mintDay, ...window };
+    }
+  }
+
+  return null;
 }
 
 export function immediatelyNextMintInstantUTC(now: Date): Date {
@@ -343,6 +440,105 @@ export function addMonths(date: Date, months: number): Date {
   return new Date(Date.UTC(y, m + months + 1, 0));
 }
 
+export function getRangeDatesByZoom(
+  zoom: ZoomLevel,
+  seasonIndex: number
+): { start: Date; end: Date } {
+  switch (zoom) {
+    case "season": {
+      if (isSznOneIndex(seasonIndex)) {
+        return {
+          start: new Date(SZN1_RANGE.start),
+          end: new Date(SZN1_RANGE.end),
+        };
+      }
+      const start = getSeasonStartDate(seasonIndex);
+      const end = addMonths(start, 2);
+      return { start, end };
+    }
+    case "year": {
+      const start = getSeasonStartDate(
+        Math.floor(seasonIndex / SEASONS_PER_YEAR) * SEASONS_PER_YEAR
+      );
+      const end = addMonths(start, 11);
+      return { start, end };
+    }
+    case "epoch": {
+      const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
+      if (epochNumber === 0) {
+        return {
+          start: new Date(SZN1_RANGE.start),
+          end: new Date(SZN1_RANGE.end),
+        };
+      }
+      const startYear = 2023 + 4 * (epochNumber - 1);
+      const start = new Date(Date.UTC(startYear, 0, 1));
+      const end = new Date(Date.UTC(startYear + 4, 0, 0));
+      return { start, end };
+    }
+    case "period": {
+      const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
+      if (periodNumber === 0) {
+        return {
+          start: new Date(SZN1_RANGE.start),
+          end: new Date(SZN1_RANGE.end),
+        };
+      }
+      const startYear = 2023 + 20 * (periodNumber - 1);
+      const start = new Date(Date.UTC(startYear, 0, 1));
+      const end = new Date(Date.UTC(startYear + 20, 0, 0));
+      return { start, end };
+    }
+    case "era": {
+      const eraNumber = displayedEraNumberFromIndex(seasonIndex);
+      if (eraNumber === 0) {
+        return {
+          start: new Date(SZN1_RANGE.start),
+          end: new Date(SZN1_RANGE.end),
+        };
+      }
+      const startYear = 2023 + 100 * (eraNumber - 1);
+      const start = new Date(Date.UTC(startYear, 0, 1));
+      const end = new Date(Date.UTC(startYear + 100, 0, 0));
+      return { start, end };
+    }
+    case "eon": {
+      const eonNumber = displayedEonNumberFromIndex(seasonIndex);
+      if (eonNumber === 0) {
+        return {
+          start: new Date(SZN1_RANGE.start),
+          end: new Date(SZN1_RANGE.end),
+        };
+      }
+      const startYear = 2023 + 1000 * (eonNumber - 1);
+      const start = new Date(Date.UTC(startYear, 0, 1));
+      const end = new Date(Date.UTC(startYear + 1000, 0, 0));
+      return { start, end };
+    }
+  }
+}
+
+export function getCardsRemainingUntilEndOf(
+  zoom: ZoomLevel,
+  now: Date = new Date()
+): number {
+  const todayUtc = startOfUtcDay(now);
+  const searchStart = new Date(
+    Date.UTC(
+      todayUtc.getUTCFullYear(),
+      todayUtc.getUTCMonth(),
+      todayUtc.getUTCDate() + 1
+    )
+  );
+  const nextMintDay = nextMintDateOnOrAfter(searchStart);
+  const seasonIndex = getSeasonIndexForDate(nextMintDay);
+  const { end } = getRangeDatesByZoom(zoom, seasonIndex);
+  const lastMintDay = prevMintDateOnOrBefore(end);
+  const startNumber = getMintNumberForMintDate(nextMintDay);
+  const endNumber = getMintNumberForMintDate(lastMintDay);
+  return Math.max(0, endNumber - startNumber + 1);
+}
+
 /**
  * Compute the ordinal mint number. If a non‑mint day is passed, snap forward to next mint day.
  */
@@ -350,6 +546,24 @@ export function getMintNumber(date: Date): number {
   const d = startOfUtcDay(date);
   const mintDay = isMintDayDate(d) ? d : nextMintDateOnOrAfter(d);
   return getMintNumberForMintDate(mintDay);
+}
+
+export function getNextMintStart(now: Date = new Date()): Date {
+  return immediatelyNextMintInstantUTC(now);
+}
+
+export function getNextMintNumber(now: Date = new Date()): number {
+  const active = getActiveMintWindow(now);
+  if (active) {
+    return getMintNumberForMintDate(active.mintDayUtc);
+  }
+  const nextMintInstant = getNextMintStart(now);
+  const nextMintDay = startOfUtcDay(nextMintInstant);
+  return getMintNumberForMintDate(nextMintDay);
+}
+
+export function isMintingActive(now: Date = new Date()): boolean {
+  return getActiveMintWindow(now) !== null;
 }
 
 // Inverse: mint number -> mint *instant* (UTC)
@@ -499,31 +713,26 @@ function ymdHmsUtc(d: Date): string {
 }
 export function createGoogleCalendarUrl(
   startInstantUtc: Date,
+  endInstantUtc: Date,
   title: string,
-  details: string,
-  durationMinutes = 60
+  details: string
 ): string {
-  const endUtc = new Date(
-    startInstantUtc.getTime() + durationMinutes * 60 * 1000
-  );
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: `${title} Minting`,
-    dates: `${ymdHmsUtc(startInstantUtc)}/${ymdHmsUtc(endUtc)}`,
+    dates: `${ymdHmsUtc(startInstantUtc)}/${ymdHmsUtc(endInstantUtc)}`,
     details,
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 export function createIcsDataUrl(
   startInstantUtc: Date,
+  endInstantUtc: Date,
   title: string,
-  description: string,
-  durationMinutes = 60
+  description: string
 ): string {
   const dtStart = ymdHmsUtc(startInstantUtc);
-  const dtEnd = ymdHmsUtc(
-    new Date(startInstantUtc.getTime() + durationMinutes * 60 * 1000)
-  );
+  const dtEnd = ymdHmsUtc(endInstantUtc);
   const uid = `meme-${dtStart}@6529.io`;
   const ics = [
     "BEGIN:VCALENDAR",
@@ -547,27 +756,23 @@ export function printCalendarInvites(
   dateOrInstant: Date,
   mintNumber: number,
   fontColor: string = "#fff",
-  size: number = 22,
-  durationMinutes = 60
+  size: number = 22
 ): string {
   // Normalize to mint instant in UTC
   const utcDay = startOfUtcDay(dateOrInstant);
-  const mintInstantUtc = isMintDayDate(utcDay)
+  const isEligibleMintDay = isMintEligibleUtcDay(utcDay);
+  const mintStartUtc = isEligibleMintDay
     ? mintStartInstantUtcForMintDay(utcDay)
     : new Date(dateOrInstant);
+  const mintEndUtc = mintEndInstantUtcForMintDay(utcDay);
 
   const title = `Meme ${formatMint(mintNumber)}`;
-  const fullLocal = formatFullDateTime(mintInstantUtc, "local");
-  const fullUtc = formatFullDateTime(mintInstantUtc, "utc");
+  const fullLocal = formatFullDateTime(mintStartUtc, "local");
+  const fullUtc = formatFullDateTime(mintStartUtc, "utc");
   const desc = `${title} — ${fullLocal} / ${fullUtc}\n\nhttps://6529.io/the-memes/mint`;
 
-  const gUrl = createGoogleCalendarUrl(
-    mintInstantUtc,
-    title,
-    desc,
-    durationMinutes
-  );
-  const icsUrl = createIcsDataUrl(mintInstantUtc, title, desc, durationMinutes);
+  const gUrl = createGoogleCalendarUrl(mintStartUtc, mintEndUtc, title, desc);
+  const icsUrl = createIcsDataUrl(mintStartUtc, mintEndUtc, title, desc);
 
   return `
     <div style="display:flex; gap:15px; align-items:center;">

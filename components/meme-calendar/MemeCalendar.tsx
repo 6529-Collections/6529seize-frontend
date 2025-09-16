@@ -24,12 +24,15 @@ import {
   formatFullDate,
   formatFullDateTime,
   formatMint,
+  getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
   getMonthWeeks,
+  getRangeDatesByZoom,
   getRangeLabel,
   getSeasonIndexForDate,
   getSeasonStartDate,
   isMintEligibleUtcDay,
+  isMintingActive,
   isSznOneIndex,
   mintStartInstantUtcForMintDay,
   printCalendarInvites,
@@ -55,98 +58,6 @@ import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";
  * navigate forwards/backwards. Tailwind classes are prefixed with
  * `tw-` - configure your Tailwind setup accordingly.
  */
-
-function getRangeDatesByZoom(
-  zoom: ZoomLevel,
-  seasonIndex: number
-): { start: Date; end: Date } {
-  switch (zoom) {
-    case "season": {
-      if (isSznOneIndex(seasonIndex)) {
-        const start = new Date(SZN1_RANGE.start);
-        const end = new Date(SZN1_RANGE.end);
-        return { start, end };
-      }
-      const start = getSeasonStartDate(seasonIndex);
-      const end = addMonths(start, 2); // inclusive 3 months
-      return { start, end };
-    }
-    case "year": {
-      const start = getSeasonStartDate(
-        Math.floor(seasonIndex / SEASONS_PER_YEAR) * SEASONS_PER_YEAR
-      );
-      const end = addMonths(start, 11); // inclusive 12 months
-      return { start, end };
-    }
-    case "epoch": {
-      const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
-      if (epochNumber === 0) {
-        // special: SZN1 epoch
-        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
-        return { start, end };
-      } else if (epochNumber >= 1) {
-        // start = Jan 1 of 2023 + 4*(epochNumber-1)
-        const startYear = 2023 + 4 * (epochNumber - 1);
-        const start = new Date(Date.UTC(startYear, 0, 1));
-        const end = new Date(Date.UTC(startYear + 4, 0, 0)); // Dec 31, 4 years later
-        return { start, end };
-      }
-      // fallback
-      const start = getSeasonStartDate(
-        Math.floor(seasonIndex / SEASONS_PER_EPOCH) * SEASONS_PER_EPOCH
-      );
-      const end = addMonths(start, 12 * 4 - 1);
-      return { start, end };
-    }
-    case "period": {
-      const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
-      if (periodNumber === 0) {
-        // special: SZN1 period
-        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
-        return { start, end };
-      } else if (periodNumber >= 1) {
-        // start = Jan 1 of 2023 + 20*(periodNumber-1)
-        const startYear = 2023 + 20 * (periodNumber - 1);
-        const start = new Date(Date.UTC(startYear, 0, 1));
-        const end = new Date(Date.UTC(startYear + 20, 0, 0)); // Dec 31, 19 years later
-        return { start, end };
-      }
-      const start = getSeasonStartDate(
-        Math.floor(seasonIndex / SEASONS_PER_PERIOD) * SEASONS_PER_PERIOD
-      );
-      const end = addMonths(start, 12 * 20 - 1);
-      return { start, end };
-    }
-    case "era": {
-      // Era 0: SZN1 only (Jun–Dec 2022). Era 1 starts Jan 2023 and spans 100 years.
-      const eraNumber = displayedEraNumberFromIndex(seasonIndex);
-      if (eraNumber === 0) {
-        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
-        return { start, end };
-      }
-      const startYear = 2023 + 100 * (eraNumber - 1);
-      const start = new Date(Date.UTC(startYear, 0, 1));
-      const end = new Date(Date.UTC(startYear + 100, 0, 0)); // Dec 31 (startYear+99)
-      return { start, end };
-    }
-    case "eon": {
-      // Eon 0: SZN1 only (Jun–Dec 2022). Eon 1 starts Jan 2023 and spans 1000 years.
-      const eonNumber = displayedEonNumberFromIndex(seasonIndex);
-      if (eonNumber === 0) {
-        const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-        const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
-        return { start, end };
-      }
-      const startYear = 2023 + 1000 * (eonNumber - 1);
-      const start = new Date(Date.UTC(startYear, 0, 1));
-      const end = new Date(Date.UTC(startYear + 1000, 0, 0)); // Dec 31 (startYear+999)
-      return { start, end };
-    }
-  }
-}
 
 function formatMonthYearShort(d: Date): string {
   return `${d.toLocaleString("default", {
@@ -912,6 +823,22 @@ interface MemeCalendarProps {
 }
 
 export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
+  const isActive = isMintingActive();
+  console.log("hi i am minting active", isActive);
+
+  const cardsUntilEndOfSeason = getCardsRemainingUntilEndOf("season");
+  console.log("cardsUntilEndOfSeason", cardsUntilEndOfSeason);
+  const cardsUntilEndOfYear = getCardsRemainingUntilEndOf("year");
+  console.log("cardsUntilEndOfYear", cardsUntilEndOfYear);
+  const cardsUntilEndOfEpoch = getCardsRemainingUntilEndOf("epoch");
+  console.log("cardsUntilEndOfEpoch", cardsUntilEndOfEpoch);
+  const cardsUntilEndOfPeriod = getCardsRemainingUntilEndOf("period");
+  console.log("cardsUntilEndOfPeriod", cardsUntilEndOfPeriod);
+  const cardsUntilEndOfEra = getCardsRemainingUntilEndOf("era");
+  console.log("cardsUntilEndOfEra", cardsUntilEndOfEra);
+  const cardsUntilEndOfEon = getCardsRemainingUntilEndOf("eon");
+  console.log("cardsUntilEndOfEon", cardsUntilEndOfEon);
+
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
       return getSeasonIndexForDate(new Date());
