@@ -1,11 +1,4 @@
-jest.mock("next/server", () => ({
-  NextRequest: class {},
-  NextResponse: {
-    json: jest.fn(),
-  },
-}));
-
-import { __TESTING__ } from "../../../app/api/open-graph/route";
+import { buildResponse } from "../../../app/api/open-graph/utils";
 
 describe("open-graph route helpers", () => {
   const baseUrl = new URL("https://example.com/article");
@@ -28,7 +21,7 @@ describe("open-graph route helpers", () => {
       </html>
     `;
 
-    const result = __TESTING__.buildResponse(baseUrl, html, "text/html");
+    const result = buildResponse(baseUrl, html, "text/html");
 
     expect(result.title).toBe("OG Title");
     expect(result.description).toBe("OG Description");
@@ -54,7 +47,7 @@ describe("open-graph route helpers", () => {
       </html>
     `;
 
-    const result = __TESTING__.buildResponse(baseUrl, html, null);
+    const result = buildResponse(baseUrl, html, null);
 
     expect(result.title).toBe("Plain Title");
     expect(result.description).toBe("Plain Description");
