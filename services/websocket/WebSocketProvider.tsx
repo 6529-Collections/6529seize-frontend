@@ -59,6 +59,9 @@ export function WebSocketProvider({
   // Subscriber map for message routing
   const subscribersRef = useRef<SubscriberMap>(new Map());
 
+  // Queue for messages that are pending until the socket is open
+  const pendingMessagesRef = useRef<WebSocketMessage<any>[]>([]);
+
   // Reconnection tracking
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -115,6 +118,7 @@ export function WebSocketProvider({
       console.warn(
         `WebSocket reconnect failed after ${reconnectAttemptsRef.current} attempts`
       );
+      pendingMessagesRef.current = [];
       return;
     }
 
@@ -173,6 +177,18 @@ export function WebSocketProvider({
 
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
+
+          // Flush any pending messages now that we're connected
+          if (pendingMessagesRef.current.length) {
+            pendingMessagesRef.current.forEach((pendingMessage) => {
+              try {
+                ws.send(JSON.stringify(pendingMessage));
+              } catch (error) {
+                console.error("Failed to send queued WebSocket message:", error);
+              }
+            });
+            pendingMessagesRef.current = [];
+          }
         };
 
         ws.onmessage = handleMessage;
@@ -228,6 +244,9 @@ export function WebSocketProvider({
     // Reset reconnect attempts
     reconnectAttemptsRef.current = 0;
 
+    // Clear pending messages when disconnecting intentionally
+    pendingMessagesRef.current = [];
+
     // Close the connection
     if (wsRef.current) {
       wsRef.current.close(1000, "Intentional disconnect");
@@ -270,10 +289,13 @@ export function WebSocketProvider({
    */
   const send = useCallback(<T,>(messageType: WsMessageType, data: T) => {
     const ws = wsRef.current;
+    const message: WebSocketMessage<T> = { type: messageType, ...data };
+
     if (!ws || ws.readyState !== WebSocket.OPEN) {
+      pendingMessagesRef.current.push(message as WebSocketMessage<any>);
       return;
     }
-    const message: WebSocketMessage<T> = { type: messageType, ...data };
+
     ws.send(JSON.stringify(message));
   }, []);
 
