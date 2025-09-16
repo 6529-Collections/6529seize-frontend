@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 
 import OpenGraphPreview, {
   hasOpenGraphContent,
@@ -10,7 +10,7 @@ import { fetchLinkPreview } from "../../services/api/link-preview-api";
 
 interface LinkPreviewCardProps {
   readonly href: string;
-  readonly renderFallback: () => JSX.Element;
+  readonly renderFallback: () => ReactElement;
 }
 
 type PreviewState =
