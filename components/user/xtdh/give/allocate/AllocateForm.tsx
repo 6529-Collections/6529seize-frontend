@@ -9,11 +9,13 @@ export default function AllocateForm({
   onSubmitAmount,
   disabled = false,
   helpers,
+  onCancel,
 }: {
   readonly profile: ApiIdentity;
   readonly onSubmitAmount: (amountPerDay: number) => void;
   readonly disabled?: boolean;
   readonly helpers?: string[];
+  readonly onCancel?: () => void;
 }) {
   const { data: summary } = useXtdhSummary(
     typeof profile?.tdh_rate === "number" ? profile.tdh_rate : null,
@@ -55,14 +57,12 @@ export default function AllocateForm({
     setAmountPerDay(String(bounded));
   };
 
-  const onReset = () => setAmountPerDay("");
-
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (disabled) return;
     if (over || clamped <= 0) return;
     onSubmitAmount(Math.floor(clamped));
-    onReset();
+    setAmountPerDay("");
   };
 
   return (
@@ -83,7 +83,7 @@ export default function AllocateForm({
         max={Math.max(0, Math.floor(remaining))}
         step={1}
         value={Math.floor(clamped)}
-        onChange={(e) => onAmountChange(e.target.value)}
+        onChange={(e) => onChangeAmount(e.target.value)}
         className="tw-w-full"
       />
       <div className="tw-flex tw-gap-2 tw-flex-wrap">
@@ -111,9 +111,12 @@ export default function AllocateForm({
         <button
           type="button"
           className="tw-bg-iron-800 tw-text-iron-200 tw-rounded tw-px-3 tw-py-2 tw-border tw-border-iron-700 hover:tw-bg-iron-700 tw-transition"
-          onClick={onReset}
+          onClick={() => {
+            setAmountPerDay("");
+            onCancel?.();
+          }}
         >
-          Reset
+          Cancel
         </button>
         <button
           type="submit"
