@@ -1,4 +1,3 @@
-jest.mock("next/font/google", () => ({ Poppins: () => () => null }));
 jest.mock(
   "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper",
   () => ({ __esModule: true, default: (p: any) => <>{p.children}</> })

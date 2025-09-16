@@ -22,49 +22,53 @@ export default function Home({
 }) {
   return (
     <>
-      <LatestDropSection featuredNft={featuredNft} />
-      {featuredNextgen && !isEmptyObject(featuredNextgen) && (
-        <Container className="pt-3 pb-5">
-          <Row>
-            <Col className="d-flex align-items-center gap-3">
-              <h1>
-                <span className="font-lightest">Discover</span> NextGen -{" "}
-                {featuredNextgen.name}{" "}
-              </h1>
-              <Link
-                href={`/nextgen/collection/${formatNameForUrl(
-                  featuredNextgen.name
-                )}`}
-              >
-                View Collection
-              </Link>
-            </Col>
-          </Row>
-          <Row className="pat-3">
-            <Col>
-              <NextGenCollectionSlideshow
-                collection={featuredNextgen}
-                initialTokens={initialTokens}
+      <div className="pb-4">
+        <LatestDropSection featuredNft={featuredNft} />
+        {featuredNextgen && !isEmptyObject(featuredNextgen) && (
+          <Container className="pt-3 pb-5">
+            <Row>
+              <Col className="d-flex align-items-center gap-3">
+                <h1>
+                  <span className="font-lightest">Discover</span> NextGen -{" "}
+                  {featuredNextgen.name}{" "}
+                </h1>
+                <Link
+                  href={`/nextgen/collection/${formatNameForUrl(
+                    featuredNextgen.name
+                  )}`}
+                >
+                  View Collection
+                </Link>
+              </Col>
+            </Row>
+            <Row className="pat-3">
+              <Col>
+                <NextGenCollectionSlideshow
+                  collection={featuredNextgen}
+                  initialTokens={initialTokens}
+                />
+              </Col>
+            </Row>
+          </Container>
+        )}
+        <Container>
+          <Row className="pt-3">
+            <Col xs={12} sm={12} md={12} lg={12}>
+              <LatestActivity
+                page={1}
+                pageSize={12}
+                showMore={false}
+                initialActivity={initialActivityData.activity}
+                initialTotalResults={initialActivityData.totalResults}
+                initialNfts={initialActivityData.nfts}
+                initialNextgenCollections={
+                  initialActivityData.nextgenCollections
+                }
               />
             </Col>
           </Row>
         </Container>
-      )}
-      <Container>
-        <Row className="pt-3">
-          <Col xs={12} sm={12} md={12} lg={12}>
-            <LatestActivity
-              page={1}
-              pageSize={12}
-              showMore={false}
-              initialActivity={initialActivityData.activity}
-              initialTotalResults={initialActivityData.totalResults}
-              initialNfts={initialActivityData.nfts}
-              initialNextgenCollections={initialActivityData.nextgenCollections}
-            />
-          </Col>
-        </Row>
-      </Container>
+      </div>
     </>
   );
 }

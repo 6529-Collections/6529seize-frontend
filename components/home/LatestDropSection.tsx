@@ -9,14 +9,7 @@ interface Props {
 
 export default function LatestDropSection({ featuredNft }: Props) {
   return (
-    <Container className="pt-4">
-      <Row>
-        <Col>
-          <h1>
-            <span className="font-lightest">Latest</span> Drop
-          </h1>
-        </Col>
-      </Row>
+    <Container className="tw-pt-2.5">
       <Row>
         <FeaturedNFTImageColumn featuredNft={featuredNft} />
         <FeaturedNFTDetailsColumn featuredNft={featuredNft} />

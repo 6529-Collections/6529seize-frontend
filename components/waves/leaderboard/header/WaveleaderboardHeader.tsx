@@ -35,7 +35,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4 tw-@container">
       <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto tw-bg-black">
-        <div className="tw-mb-2 tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
+        <div className="tw-mb-2 tw-mt-2 tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
           {isMemesWave && (
             <div className="tw-flex tw-items-center tw-gap-x-2">
               {/* Hide view toggle buttons on mobile (S breakpoint), show only on desktop (MD breakpoint) */}

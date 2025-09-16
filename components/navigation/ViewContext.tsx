@@ -68,13 +68,13 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         } else {
           router.push(item.href);
         }
-      } else if (item.viewKey === "waves" && lastVisitedWave) {
+      } else if (item.kind === "view" && item.viewKey === "waves" && lastVisitedWave) {
         router.push(`/my-stream?wave=${lastVisitedWave}`);
-      } else if (item.viewKey === "waves") {
+      } else if (item.kind === "view" && item.viewKey === "waves") {
         router.push("/my-stream?view=waves");
-      } else if (item.viewKey === "messages" && lastVisitedDm) {
+      } else if (item.kind === "view" && item.viewKey === "messages" && lastVisitedDm) {
         router.push(`/my-stream?wave=${lastVisitedDm}`);
-      } else if (item.viewKey === "messages") {
+      } else if (item.kind === "view" && item.viewKey === "messages") {
         router.push("/my-stream?view=messages");
       }
     },

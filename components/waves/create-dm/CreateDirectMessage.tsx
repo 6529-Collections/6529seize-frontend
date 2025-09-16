@@ -18,9 +18,11 @@ import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function CreateDirectMessage({
   profile,
   onBack,
+  onSuccess,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
+  readonly onSuccess?: () => void;
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
@@ -71,6 +73,7 @@ export default function CreateDirectMessage({
           .map((i) => i.primary_wallet ?? i.wallet)
           .filter((i) => i !== null),
       });
+      onSuccess?.();
       router.push(`/my-stream?view=messages&wave=${wave.id}`);
     } catch (error) {
       console.error(error);

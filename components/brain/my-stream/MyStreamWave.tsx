@@ -91,8 +91,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     <div
       className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
       key={stableWaveKey}>
-      {/* Don't render tab container for simple waves */}
-      {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
+      {/* Always render tab container - shows title area on all screen sizes */}
+      <MyStreamWaveTabs wave={wave} />
 
       <div className="tw-flex-grow tw-overflow-hidden">
         {components[activeContentTab]}
