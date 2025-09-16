@@ -46,7 +46,7 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
 
 export interface WebUnifiedWavesListWavesHandle {
-  sentinelRef: React.RefObject<HTMLDivElement | null>;
+  sentinelRef: React.RefObject<HTMLElement | null>;
 }
 
 interface WebUnifiedWavesListWavesProps {
@@ -55,7 +55,7 @@ interface WebUnifiedWavesListWavesProps {
   readonly hideHeaders?: boolean;
   readonly hideToggle?: boolean;
   readonly hidePin?: boolean;
-  readonly scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
+  readonly scrollContainerRef?: React.RefObject<HTMLElement | null>;
   readonly basePath?: string;
 }
 

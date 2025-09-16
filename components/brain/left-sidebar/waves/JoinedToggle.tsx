@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
+import CommonSwitch from "../../../utils/switch/CommonSwitch";
 
 // Pure helper function for authentication state logic (testable)
 const checkConnectedIdentity = (connectedHandle: string | null | undefined, activeProfileProxy: unknown): boolean => {

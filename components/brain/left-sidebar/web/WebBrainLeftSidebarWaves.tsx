@@ -3,7 +3,7 @@ import WebUnifiedWavesList from "./WebUnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
 interface WebBrainLeftSidebarWavesProps {
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
 }
 
 const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({

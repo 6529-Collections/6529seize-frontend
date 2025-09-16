@@ -79,7 +79,7 @@ interface UnifiedWavesListWavesProps {
   /** Whether to hide section headers (All Waves, Pinned) */
   readonly hideHeaders?: boolean;
   /** Reference to the scroll container for virtualization */
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
 }
 
 /**
@@ -88,7 +88,7 @@ interface UnifiedWavesListWavesProps {
  */
 export interface UnifiedWavesListWavesHandle {
   /** Reference to the main container element for virtualization */
-  readonly containerRef: React.RefObject<HTMLDivElement | null>;
+  readonly containerRef: React.RefObject<HTMLElement | null>;
   /** Reference to the sentinel element used for intersection observation */
   readonly sentinelRef: React.RefObject<HTMLDivElement | null>;
 }

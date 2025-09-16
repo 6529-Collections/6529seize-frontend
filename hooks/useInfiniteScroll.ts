@@ -4,8 +4,8 @@ export function useInfiniteScroll(
   hasNextPage: boolean | undefined,
   isFetchingNextPage: boolean,
   fetchNextPage: () => void,
-  scrollContainerRef: React.RefObject<HTMLElement>,
-  sentinelRef: React.RefObject<HTMLElement>,
+  scrollContainerRef: React.RefObject<HTMLElement | null>,
+  sentinelRef: React.RefObject<HTMLElement | null>,
   rootMargin = "100px"
 ) {
   const fetchingRef = useRef(false);

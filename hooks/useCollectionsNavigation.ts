@@ -25,7 +25,7 @@ export function useCollectionsNavigation() {
       // Not on collections: navigate to the last stored base (or default)
       const lastBase = safeLocalStorage.getItem("lastCollectionBase");
       const target =
-        lastBase && COLLECTIONS_ROUTES.includes(lastBase)
+        lastBase && COLLECTIONS_ROUTES.includes(lastBase as any)
           ? lastBase
           : "/the-memes";
 

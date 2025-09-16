@@ -20,7 +20,7 @@ interface WebUnifiedWavesListProps {
   readonly isFetching: boolean;
   readonly isFetchingNextPage: boolean;
   readonly onHover: (waveId: string) => void;
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
 }
 
 const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({

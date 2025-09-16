@@ -23,7 +23,7 @@ import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
 
 interface WebDirectMessagesListProps {
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
+  readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
 }
 
 const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
@@ -44,8 +44,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     directMessages.hasNextPage,
     directMessages.isFetchingNextPage,
     directMessages.fetchNextPage,
-    scrollContainerRef as React.RefObject<HTMLElement>,
-    (listRef.current?.sentinelRef || { current: null }) as React.RefObject<HTMLElement>,
+    scrollContainerRef,
+    listRef.current?.sentinelRef || { current: null },
     "100px"
   );
 
