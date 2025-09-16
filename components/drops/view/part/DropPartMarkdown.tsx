@@ -259,13 +259,17 @@ function DropPartMarkdown({
     try {
       const url = new URL(href);
       const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+      const YOUTUBE_DOMAINS = [
+        "youtube.com",
+        "m.youtube.com"
+      ];
 
       let videoId: string | null = null;
 
       if (host === "youtu.be") {
         const pathSegments = url.pathname.split("/").filter(Boolean);
         videoId = pathSegments[0] ?? null;
-      } else if (host.endsWith("youtube.com")) {
+      } else if (YOUTUBE_DOMAINS.includes(host)) {
         if (url.pathname === "/watch" || url.pathname === "/watch/") {
           videoId = url.searchParams.get("v");
         } else if (url.pathname.startsWith("/shorts/")) {
