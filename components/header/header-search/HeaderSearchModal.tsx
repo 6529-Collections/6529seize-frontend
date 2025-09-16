@@ -283,8 +283,12 @@ export default function HeaderSearchModal({
                     clipRule="evenodd"
                   />
                 </svg>
+                <label className="tw-sr-only" htmlFor="header-search-input">
+                  Search
+                </label>
                 <input
                   ref={inputRef}
+                  id="header-search-input"
                   type="text"
                   required
                   autoComplete="off"

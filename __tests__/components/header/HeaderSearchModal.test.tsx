@@ -80,6 +80,15 @@ describe("HeaderSearchModal", () => {
     jest.clearAllMocks();
   });
 
+  it("associates the search input with an accessible label", () => {
+    setup();
+    expect(
+      screen.getByRole("textbox", {
+        name: "Search",
+      })
+    ).toBeInTheDocument();
+  });
+
   it("calls onClose when escape is pressed", () => {
     const { onClose } = setup();
     escapeCb();
@@ -88,7 +97,7 @@ describe("HeaderSearchModal", () => {
 
   it("renders search results when query returns items", () => {
     setup();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox", { name: "Search" });
     fireEvent.change(input, { target: { value: "abc" } });
     expect(screen.getByTestId("item")).toBeInTheDocument();
   });
@@ -101,7 +110,7 @@ describe("HeaderSearchModal", () => {
 
   it("navigates on enter key", () => {
     const { push } = setup();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox", { name: "Search" });
     fireEvent.change(input, { target: { value: "alice" } });
     enterCb();
     expect(push).toHaveBeenCalled();
