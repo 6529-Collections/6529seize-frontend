@@ -417,7 +417,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/sabrinaxdoll"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Sabrina Khan
                                   </a>
                                 </b>
@@ -450,14 +450,14 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/tylerxhobbs"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Tyler Hobbs
                                   </a>
                                   , who dazzled the art scene with his{" "}
                                   <a
                                     href="https://tylerxhobbs.com/fidenza"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Fidenza
                                   </a>{" "}
                                   collection, we are left in the afterglow with
@@ -542,7 +542,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://www.youtube.com/watch?v=z9d1mxgZ0ag"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     sunflower
                                   </a>
                                   .{" "}
@@ -582,7 +582,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                 <a
                                   href="https://commons.wikimedia.org/wiki/File:Espiral_de_semillas_de_Girasol.jpg"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   source
                                 </a>
                                 )
@@ -620,7 +620,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                 <a
                                   href="https://momath.org/home/fibonacci-numbers-of-sunflower-seed-spirals/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   source
                                 </a>
                                 )
@@ -731,7 +731,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                 <a
                                   href="https://www.phimatrix.com/art-composition-golden-ratio/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   source)
                                 </a>
                               </p>
@@ -996,7 +996,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/punk6529"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     p
                                   </a>
                                 </span>
@@ -1263,7 +1263,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="/blog/a-tale-of-two-artists/"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     <b>
                                       A Tale of Two Artists: Van Gogh and XCOPY
                                     </b>
@@ -1312,7 +1312,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

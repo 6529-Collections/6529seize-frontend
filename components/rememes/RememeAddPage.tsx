@@ -378,7 +378,7 @@ export default function RememeAddPage() {
                                 : "https://6529.io"
                             }/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                           >
                             view
                           </a>

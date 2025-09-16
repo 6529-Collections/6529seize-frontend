@@ -424,7 +424,7 @@ Punk no background"
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Punk6529.png"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <span style={{ textDecoration: "underline" }}>
                                     Punk with background
                                   </span>
@@ -433,7 +433,7 @@ Punk no background"
                                 <a
                                   href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Punk6529-nobg.png"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <span style={{ textDecoration: "underline" }}>
                                     Punk no background
                                   </span>
@@ -477,28 +477,28 @@ Punk no background"
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-logo.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Black on white
                                   </a>
                                   <br />
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-logo-rev.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     White on black
                                   </a>
                                   <br />
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-Final-Logo.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Black no background
                                   </a>
                                   <br />
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-Final-Logo-rev.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     White no background
                                   </a>
                                   <br />
@@ -544,28 +544,28 @@ Punk no background"
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/OM-Logo-Black-white-bg.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Black on white
                                   </a>
                                   <br />
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/OM-Logo-White-black-bg.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     White on black
                                   </a>
                                   <br />
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/OM-Logo-Black-no-bg.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Black no background
                                   </a>
                                   <br />
                                   <a
                                     href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/OM-Logo-White-no-bg.png"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     White no background
                                   </a>
                                   <br />
@@ -938,7 +938,7 @@ Punk no background"
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

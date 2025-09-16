@@ -333,7 +333,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <a
             href="https://x.com/6529collections"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="font-color-h font-color-hover"
           >
             &#64;6529collections

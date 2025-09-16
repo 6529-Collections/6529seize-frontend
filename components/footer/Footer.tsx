@@ -2,8 +2,9 @@ import { AboutSection } from "@/enums";
 
 export default function Footer() {
   function printLink(href: string, text: string, newTab: boolean = false) {
+    const rel = newTab ? "noopener noreferrer" : "noreferrer";
     return (
-      <a href={href} target={newTab ? "_blank" : "_self"} rel="noreferrer">
+      <a href={href} target={newTab ? "_blank" : "_self"} rel={rel}>
         {text}
       </a>
     );
@@ -15,8 +16,9 @@ export default function Footer() {
     text: string,
     newTab: boolean = true
   ) {
+    const rel = newTab ? "noopener noreferrer" : "noreferrer";
     return (
-      <a href={href} target={newTab ? "_blank" : "_self"} rel="noreferrer">
+      <a href={href} target={newTab ? "_blank" : "_self"} rel={rel}>
         <img
           width="0"
           height="0"

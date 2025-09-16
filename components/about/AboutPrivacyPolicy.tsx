@@ -140,7 +140,7 @@ export default function AboutPrivacyPolicy() {
               <a
                 href={`/about/${AboutSection.COOKIE_POLICY}`}
                 target="_blank"
-                rel="noreferrer">
+                rel="noopener noreferrer">
                 Cookie Policy
               </a>
               . We may also store a record of your preferences in respect of the
@@ -299,7 +299,7 @@ export default function AboutPrivacyPolicy() {
               <a
                 href={`/about/${AboutSection.COOKIE_POLICY}`}
                 target="_blank"
-                rel="noreferrer">
+                rel="noopener noreferrer">
                 Cookie Policy
               </a>
               .
@@ -319,7 +319,7 @@ export default function AboutPrivacyPolicy() {
               <a
                 href={`http://www.allaboutdnt.com`}
                 target="_blank"
-                rel="noreferrer">
+                rel="noopener noreferrer">
                 http://www.allaboutdnt.com
               </a>
               .
@@ -390,7 +390,7 @@ export default function AboutPrivacyPolicy() {
               <a
                 href={`/about/${AboutSection.CONTACT_US}`}
                 target="_blank"
-                rel="noreferrer">
+                rel="noopener noreferrer">
                 contact us
               </a>
               . If we learn that we have collected personal information through
@@ -541,7 +541,7 @@ export default function AboutPrivacyPolicy() {
                 <a
                   href="mailto:privacy@6529.io"
                   target="_blank"
-                  rel="noreferrer">
+                  rel="noopener noreferrer">
                   privacy&#64;6529.io
                 </a>
               </li>

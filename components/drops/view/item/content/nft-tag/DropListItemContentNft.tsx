@@ -82,7 +82,8 @@ export default function DropListItemContentNft({
       onClick={(e) => e.stopPropagation()}
       href={nftHref}
       className="tw-no-underline"
-      target={target}>
+      target={target}
+      rel={target === "_blank" ? "noopener noreferrer" : undefined}>
       <div className="tw-mt-2 tw-gap-y-2 tw-flex tw-flex-col" ref={elementRef}>
         <div className="tw-w-full tw-h-64">
           {nft && (

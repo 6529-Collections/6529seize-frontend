@@ -172,7 +172,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   function printNft() {
     if (props.nft) {
       return (
-        <a href={getHref()} target="_blank" rel="noreferrer">
+        <a href={getHref()} target="_blank" rel="noopener noreferrer">
           <Image
             unoptimized
             width={0}
@@ -280,7 +280,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       <a
         href={`/nextgen/token/${props.tr.token_id}/provenance`}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         {collectionName} #{normalized.token_id}
         <Image
@@ -385,7 +385,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         <Link
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="tw-flex"
         >
           <FontAwesomeIcon

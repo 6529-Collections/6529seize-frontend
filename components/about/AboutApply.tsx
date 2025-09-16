@@ -337,7 +337,7 @@ export default function AboutApply() {
                     <a
                       href="mailto:collections@6529.io"
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="link-info"
                     >
                       collections@6529.io

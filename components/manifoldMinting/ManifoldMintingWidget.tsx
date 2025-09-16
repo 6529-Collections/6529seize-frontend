@@ -247,7 +247,7 @@ export default function ManifoldMintingWidget(
       <a
         href={getTransactionLink(MANIFOLD_NETWORK.id, hash)}
         target="_blank"
-        rel="noreferrer">
+        rel="noopener noreferrer">
         view trx
       </a>
     );

@@ -330,7 +330,7 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-rollover-link"
                                 href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank">
+                                target="_blank" rel="noopener noreferrer">
                                 Disney and DeeKay: Their Secret to Animation
                               </a>
                               <div className="fusion-rollover-sep" />
@@ -347,7 +347,7 @@ export default function AuthorLadysabrinaPage() {
                                 <a
                                   className="fusion-rollover-title-link"
                                   href="/blog/disney-deekay-their-secret-to-animation/"
-                                  target="_blank">
+                                  target="_blank" rel="noopener noreferrer">
                                   Disney and DeeKay: Their Secret to Animation{" "}
                                 </a>
                               </h4>
@@ -359,7 +359,7 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-link-wrapper"
                                 href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
+                                target="_blank" rel="noopener noreferrer"
                                 aria-label="Disney and DeeKay: Their Secret to Animation"
                               />
                             </div>
@@ -444,7 +444,7 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-rollover-link"
                                 href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank">
+                                target="_blank" rel="noopener noreferrer">
                                 FROM FIBONACCI TO FIDENZA
                               </a>
                               <div className="fusion-rollover-sep" />
@@ -461,7 +461,7 @@ export default function AuthorLadysabrinaPage() {
                                 <a
                                   className="fusion-rollover-title-link"
                                   href="/blog/from-fibonacci-to-fidenza/"
-                                  target="_blank">
+                                  target="_blank" rel="noopener noreferrer">
                                   FROM FIBONACCI TO FIDENZA{" "}
                                 </a>
                               </h4>
@@ -473,7 +473,7 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-link-wrapper"
                                 href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank"
+                                target="_blank" rel="noopener noreferrer"
                                 aria-label="FROM FIBONACCI TO FIDENZA"
                               />
                             </div>
@@ -559,7 +559,7 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-rollover-link"
                                 href="/blog/a-tale-of-two-artists/"
-                                target="_blank">
+                                target="_blank" rel="noopener noreferrer">
                                 A Tale of Two Artists – Van Gogh and XCOPY
                               </a>
                               <div className="fusion-rollover-sep" />
@@ -576,7 +576,7 @@ export default function AuthorLadysabrinaPage() {
                                 <a
                                   className="fusion-rollover-title-link"
                                   href="/blog/a-tale-of-two-artists/"
-                                  target="_blank">
+                                  target="_blank" rel="noopener noreferrer">
                                   A Tale of Two Artists – Van Gogh and XCOPY{" "}
                                 </a>
                               </h4>
@@ -588,7 +588,7 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-link-wrapper"
                                 href="/blog/a-tale-of-two-artists/"
-                                target="_blank"
+                                target="_blank" rel="noopener noreferrer"
                                 aria-label="A Tale of Two Artists – Van Gogh and XCOPY"
                               />
                             </div>
@@ -668,7 +668,7 @@ export default function AuthorLadysabrinaPage() {
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

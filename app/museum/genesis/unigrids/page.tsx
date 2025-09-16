@@ -839,7 +839,7 @@ Unigrids are collectible digital art pieces 100% stored on the Ethereum blockcha
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

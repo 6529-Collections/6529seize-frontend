@@ -134,8 +134,10 @@ describe("MintCountdownBox", () => {
       const links = screen.getAllByRole("link");
       expect(links[0]).toHaveAttribute("href", "/the-memes/mint");
       expect(links[0]).toHaveAttribute("target", "_self");
+      expect(links[0]).toHaveAttribute("rel", "noreferrer");
       expect(links[1]).toHaveAttribute("href", "https://external.com/mint");
       expect(links[1]).toHaveAttribute("target", "_blank");
+      expect(links[1]).toHaveAttribute("rel", "noopener noreferrer");
     });
 
     it("renders JSX Element as button label", () => {
@@ -452,7 +454,13 @@ describe("MintCountdownBox", () => {
       links.forEach(link => {
         expect(link).toBeVisible();
         expect(link).toHaveAttribute("href");
-        expect(link).toHaveAttribute("rel", "noreferrer");
+        const rel = link.getAttribute("rel");
+        expect(rel).toBeTruthy();
+        if (link.getAttribute("target") === "_blank") {
+          expect(rel).toBe("noopener noreferrer");
+        } else {
+          expect(rel).toBe("noreferrer");
+        }
       });
     });
 
