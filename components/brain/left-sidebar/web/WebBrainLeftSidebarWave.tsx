@@ -9,7 +9,7 @@ import WavePicture from "../../../waves/WavePicture";
 import BrainLeftSidebarWaveDropTime from "../waves/BrainLeftSidebarWaveDropTime";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWavePin from "../waves/BrainLeftSidebarWavePin";
-import { formatAddress } from "../../../../helpers/Helpers";
+import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -42,11 +42,20 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   const haveNewDrops = wave.newDropsCount.count > 0;
 
   const formattedWaveName = useMemo(() => {
-    if (wave.type === ApiWaveType.Chat && wave.name.includes("id-0x")) {
-      const match = wave.name.match(/(.*id-)(0x[a-fA-F0-9]{40})(.*)/);
-      if (match) {
-        const [, prefix, address, suffix] = match;
-        return `${prefix}${formatAddress(address)}${suffix}`;
+    if (wave.type === ApiWaveType.Chat) {
+      const marker = "id-";
+      const addressPrefix = `${marker}0x`;
+      const markerIndex = wave.name.indexOf(addressPrefix);
+
+      if (markerIndex !== -1) {
+        const prefix = wave.name.slice(0, markerIndex + marker.length);
+        const addressStart = markerIndex + marker.length;
+        const candidateAddress = wave.name.slice(addressStart, addressStart + 42);
+
+        if (isValidEthAddress(candidateAddress)) {
+          const suffix = wave.name.slice(addressStart + candidateAddress.length);
+          return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
+        }
       }
     }
     return wave.name;
