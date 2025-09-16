@@ -253,17 +253,21 @@ function DropPartMarkdown({
     return gifRegex.test(href) ? href : null;
   };
 
+  const matchesDomainOrSubdomain = (host: string, domain: string): boolean => {
+    return host === domain || host.endsWith(`.${domain}`);
+  };
+
   const parseYoutubeLink = (
     href: string
   ): { readonly videoId: string; readonly url: string } | null => {
     try {
       const url = new URL(href);
       const normalizedHost = url.hostname.replace(/^www\./i, "").toLowerCase();
-      const isYoutubeDomain =
-        normalizedHost === "youtube.com" ||
-        normalizedHost === "youtube-nocookie.com" ||
-        normalizedHost.endsWith(".youtube.com") ||
-        normalizedHost.endsWith(".youtube-nocookie.com");
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const isYoutubeDomain = youtubeDomains.some(
+        (domain) =>
+          normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+      );
 
       let videoId: string | null = null;
 
@@ -470,11 +474,13 @@ function DropPartMarkdown({
       }
 
       const hostname = parsed.hostname.toLowerCase();
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const twitterDomains = ["twitter.com", "x.com"];
+
       if (
         hostname === "youtu.be" ||
-        hostname.endsWith("youtube.com") ||
-        hostname.endsWith("twitter.com") ||
-        hostname.endsWith("x.com")
+        youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+        twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
       ) {
         return false;
       }

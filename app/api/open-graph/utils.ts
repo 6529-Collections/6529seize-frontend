@@ -1,5 +1,6 @@
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
+import { toASCII } from "node:punycode";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 
@@ -226,18 +227,48 @@ function isForbiddenAddress(address: string): boolean {
   return true;
 }
 
+function normalizeHostname(hostname: string): string {
+  try {
+    return toASCII(hostname.trim());
+  } catch {
+    return hostname.trim().toLowerCase();
+  }
+}
+
+function isSuspiciousIpFormat(host: string): boolean {
+  const lowerHost = host.toLowerCase();
+
+  if (/^0x[0-9a-f]+$/i.test(lowerHost)) {
+    return true;
+  }
+
+  if (/^0[0-7.]+$/.test(lowerHost)) {
+    return true;
+  }
+
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(lowerHost)) {
+    const segments = lowerHost.split(".");
+    return segments.some((segment) => segment.length > 1 && segment.startsWith("0"));
+  }
+
+  return false;
+}
+
 export async function ensureUrlIsPublic(url: URL): Promise<void> {
-  const hostname = url.hostname;
+  let hostname = url.hostname;
 
   if (!hostname) {
     throw new Error("URL host is required.");
   }
 
+  hostname = normalizeHostname(hostname);
   const lowerHost = hostname.toLowerCase();
   if (
     DISALLOWED_HOST_PATTERNS.some((pattern) => lowerHost === pattern) ||
     lowerHost.endsWith(".localhost") ||
-    lowerHost.endsWith(".local")
+    lowerHost.endsWith(".local") ||
+    isSuspiciousIpFormat(lowerHost) ||
+    lowerHost.startsWith("::ffff:")
   ) {
     throw new Error("URL host is not allowed.");
   }

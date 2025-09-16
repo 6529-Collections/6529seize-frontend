@@ -81,6 +81,12 @@ describe("open-graph route helpers", () => {
     ).rejects.toThrow("Resolved host is not reachable.");
   });
 
+  it("rejects hex-encoded IPv4 hosts", async () => {
+    await expect(
+      ensureUrlIsPublic(new URL("http://0x7f000001"))
+    ).rejects.toThrow("URL host is not allowed.");
+  });
+
   it("allows domains that resolve to public addresses", async () => {
     lookup.mockResolvedValueOnce([{ address: "93.184.216.34", family: 4 }]);
 

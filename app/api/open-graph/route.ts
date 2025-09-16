@@ -15,7 +15,9 @@ type CacheEntry = {
 
 const cache = new Map<string, CacheEntry>();
 
-async function fetchHtml(url: URL): Promise<{ html: string; contentType: string | null }> {
+async function fetchHtml(
+  url: URL
+): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -36,7 +38,7 @@ async function fetchHtml(url: URL): Promise<{ html: string; contentType: string 
 
     const contentType = response.headers.get("content-type");
     const html = await response.text();
-    return { html, contentType };
+    return { html, contentType, finalUrl: response.url };
   } finally {
     clearTimeout(timeout);
   }
@@ -68,7 +70,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { html, contentType } = await fetchHtml(targetUrl);
+    const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
+    await ensureUrlIsPublic(new URL(finalUrl));
     const data = buildResponse(targetUrl, html, contentType);
     const entry: CacheEntry = {
       data,
