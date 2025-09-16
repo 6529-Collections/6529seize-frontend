@@ -1,11 +1,17 @@
 @font-face {
   font-family: "Square One";
   font-display: swap;
-  src: url("../assets/square-one-2/SquareOne-p7jra.ttf");
+  src:
+    url("../assets/square-one-2/SquareOne-p7jra.woff2") format("woff2"),
+    url("../assets/square-one-2/SquareOne-p7jra.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "Montserrat";
   font-display: swap;
-  src: url("../assets/montserrat/Montserrat-VariableFont_wght.ttf");
+  src:
+    url("../assets/montserrat/Montserrat-VariableFont_wght.woff2")
+      format("woff2"),
+    url("../assets/montserrat/Montserrat-VariableFont_wght.ttf")
+      format("truetype");
 }
