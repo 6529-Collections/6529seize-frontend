@@ -29,7 +29,7 @@ const stateClasses = (active?: boolean) =>
     ? "tw-text-white desktop-hover:hover:tw-text-white tw-bg-transparent active:tw-bg-transparent"
     : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent";
 
-function DesktopSidebarNavItem({
+function WebSidebarNavItem({
   href,
   onClick,
   icon: Icon,
@@ -91,4 +91,4 @@ function DesktopSidebarNavItem({
   );
 }
 
-export default React.memo(DesktopSidebarNavItem);
+export default React.memo(WebSidebarNavItem);

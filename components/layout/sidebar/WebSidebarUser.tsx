@@ -19,19 +19,19 @@ import {
 } from "@/helpers/AllowlistToolHelpers";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
-interface DesktopSidebarUserProps {
+interface WebSidebarUserProps {
   isCollapsed: boolean;
   showUserMenu: boolean;
   onToggleUserMenu: () => void;
   profile: any;
 }
 
-function DesktopSidebarUser({
+function WebSidebarUser({
   isCollapsed,
   showUserMenu,
   onToggleUserMenu,
   profile: parentProfile,
-}: DesktopSidebarUserProps) {
+}: WebSidebarUserProps) {
   const { address, seizeConnect } = useSeizeConnectContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -94,7 +94,7 @@ function DesktopSidebarUser({
               : "tw-justify-start tw-px-3 tw-gap-x-3 tw-py-2"
           }`}
         >
-          <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-800 tw-animate-pulse" />
+          <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-800 tw-animate-pulse tw-flex-shrink-0" />
           {!isCollapsed && (
             <div className="tw-flex tw-flex-col tw-gap-y-2 tw-flex-1">
               <div className="tw-h-4 tw-w-24 tw-bg-iron-800 tw-rounded tw-animate-pulse" />
@@ -156,4 +156,4 @@ function DesktopSidebarUser({
   );
 }
 
-export default memo(DesktopSidebarUser);
+export default memo(WebSidebarUser);

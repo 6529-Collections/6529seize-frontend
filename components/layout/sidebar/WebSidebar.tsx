@@ -4,14 +4,14 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import DesktopSidebarNav from "./DesktopSidebarNav";
-import DesktopSidebarUser from "./DesktopSidebarUser";
+import WebSidebarNav from "./WebSidebarNav";
+import WebSidebarUser from "./WebSidebarUser";
 import CollectionsSubmenu from "./CollectionsSubmenu";
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../hooks/useIdentity";
 
-interface DesktopSidebarProps {
+interface WebSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   isCollectionsSubmenuOpen: boolean;
@@ -22,7 +22,7 @@ interface DesktopSidebarProps {
   sidebarWidth: string;
 }
 
-function DesktopSidebar({
+function WebSidebar({
   isCollapsed,
   onToggle,
   isCollectionsSubmenuOpen,
@@ -31,7 +31,7 @@ function DesktopSidebar({
   isOffcanvasOpen,
   onCloseOffcanvas,
   sidebarWidth,
-}: DesktopSidebarProps) {
+}: WebSidebarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { address } = useSeizeConnectContext();
   const { profile } = useIdentity({
@@ -103,14 +103,14 @@ function DesktopSidebar({
         </div>
 
         <div className="tw-flex-1">
-          <DesktopSidebarNav
+          <WebSidebarNav
             isCollapsed={isVisuallyCollapsed}
             isCollectionsOpen={isCollectionsSubmenuOpen}
             onCollectionsClick={handleCollectionsClick}
           />
         </div>
 
-        <DesktopSidebarUser
+        <WebSidebarUser
           isCollapsed={isVisuallyCollapsed}
           showUserMenu={showUserMenu}
           onToggleUserMenu={onToggleUserMenu}
@@ -204,4 +204,4 @@ function DesktopSidebar({
   );
 }
 
-export default DesktopSidebar;
+export default WebSidebar;

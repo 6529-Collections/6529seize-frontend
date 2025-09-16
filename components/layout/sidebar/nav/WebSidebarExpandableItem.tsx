@@ -3,10 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import DesktopSidebarNavItem from "./DesktopSidebarNavItem";
+import WebSidebarNavItem from "./WebSidebarNavItem";
 import { SidebarSection } from "@/components/navigation/navTypes";
 
-interface DesktopSidebarExpandableItemProps {
+interface WebSidebarExpandableItemProps {
   readonly section: SidebarSection;
   readonly expanded: boolean;
   readonly onToggle: () => void;
@@ -14,13 +14,13 @@ interface DesktopSidebarExpandableItemProps {
   readonly pathname: string | null;
 }
 
-function DesktopSidebarExpandableItem({
+function WebSidebarExpandableItem({
   section,
   expanded,
   onToggle,
   collapsed,
   pathname,
-}: DesktopSidebarExpandableItemProps) {
+}: WebSidebarExpandableItemProps) {
   // Helper to check active routes
   const isActiveRoute = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
@@ -35,8 +35,8 @@ function DesktopSidebarExpandableItem({
 
   return (
     <>
-      {/* Section row using DesktopSidebarNavItem */}
-      <DesktopSidebarNavItem
+      {/* Section row using WebSidebarNavItem */}
+      <WebSidebarNavItem
         onClick={onToggle}
         icon={section.icon}
         label={section.name}
@@ -104,4 +104,4 @@ function DesktopSidebarExpandableItem({
   );
 }
 
-export default React.memo(DesktopSidebarExpandableItem);
+export default React.memo(WebSidebarExpandableItem);

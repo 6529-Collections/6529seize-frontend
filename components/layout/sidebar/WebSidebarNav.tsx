@@ -17,8 +17,8 @@ import BellIcon from "@/components/common/icons/BellIcon";
 import UsersIcon from "@/components/common/icons/UsersIcon";
 import { WrenchIcon, DocumentTextIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { UserIcon } from "@heroicons/react/24/outline";
-import DesktopSidebarNavItem from "./nav/DesktopSidebarNavItem";
-import DesktopSidebarExpandableItem from "./nav/DesktopSidebarExpandableItem";
+import WebSidebarNavItem from "./nav/WebSidebarNavItem";
+import WebSidebarExpandableItem from "./nav/WebSidebarExpandableItem";
 import { SidebarSection } from "@/components/navigation/navTypes";
 import { COLLECTIONS_ROUTES } from "@/constants/sidebar";
 import { useKey } from "react-use";
@@ -26,7 +26,7 @@ import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimation
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 
-interface DesktopSidebarNavProps {
+interface WebSidebarNavProps {
   isCollapsed: boolean;
   isCollectionsOpen?: boolean;
   onCollectionsClick?: () => void;
@@ -41,11 +41,11 @@ type NavItem = {
   iconSizeClass?: string;
 };
 
-export default function DesktopSidebarNav({
+export default function WebSidebarNav({
   isCollapsed = false,
   isCollectionsOpen = false,
   onCollectionsClick,
-}: DesktopSidebarNavProps) {
+}: WebSidebarNavProps) {
   const pathname = usePathname();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -324,7 +324,7 @@ export default function DesktopSidebarNav({
             const active = item.name === "Search" ? false : isActive(item);
             return (
               <li key={item.name}>
-                <DesktopSidebarNavItem
+                <WebSidebarNavItem
                   href={item.href}
                   onClick={item.onClick}
                   icon={item.icon}
@@ -340,7 +340,7 @@ export default function DesktopSidebarNav({
           {/* Expandable sections */}
           {sections.map((section) => (
             <li key={section.key}>
-              <DesktopSidebarExpandableItem
+              <WebSidebarExpandableItem
                 section={section}
                 expanded={expandedSections.includes(section.key)}
                 onToggle={() => toggleSection(section.key)}

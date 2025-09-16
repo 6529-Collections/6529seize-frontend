@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import DesktopSidebar from "./sidebar/DesktopSidebar";
+import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { useCollectionsSubmenu } from "../../hooks/useCollectionsSubmenu";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
@@ -13,7 +13,7 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 // });
 
 /**
- * DesktopLayout
+ * WebLayout
  *
  * Top‑level web layout that renders the persistent left sidebar and positions
  * main content based on responsive sidebar state.
@@ -23,16 +23,16 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
  *   and the computed `sidebarWidth`.
  * - Integrates Collections submenu via `useCollectionsSubmenu` and offsets
  *   main content when both sidebar and submenu are visible on desktop.
- * - Delegates off‑canvas overlay behavior and accessibility to `DesktopSidebar`.
+ * - Delegates off‑canvas overlay behavior and accessibility to `WebSidebar`.
  *
  * This component does not manage routing; it simply offsets and renders children.
  */
-interface DesktopLayoutProps {
+interface WebLayoutProps {
   readonly children: ReactNode;
   readonly isSmall?: boolean;
 }
 
-const DesktopLayout = ({ children }: DesktopLayoutProps) => {
+const WebLayout = ({ children }: WebLayoutProps) => {
   const pathname = usePathname();
   const {
     isMobile,
@@ -74,7 +74,7 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   return (
     <div style={rootStyle}>
       <div className="tailwind-scope">
-        <DesktopSidebar
+        <WebSidebar
           isCollapsed={isCollapsed}
           onToggle={toggleCollapsed}
           isCollectionsSubmenuOpen={isSubmenuOpen}
@@ -100,4 +100,4 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   );
 };
 
-export default DesktopLayout;
+export default WebLayout;

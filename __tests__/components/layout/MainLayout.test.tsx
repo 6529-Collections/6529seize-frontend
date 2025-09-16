@@ -31,7 +31,7 @@ jest.mock("@/components/layout/MobileLayout", () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="mobile">{children}</div>,
 }));
-jest.mock("@/components/layout/DesktopLayout", () => ({
+jest.mock("@/components/layout/WebLayout", () => ({
   __esModule: true,
   default: ({ children, isSmall }: any) => (
     <div data-testid="desktop" data-small={isSmall ? "true" : "false"}>
