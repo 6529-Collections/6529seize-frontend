@@ -59,7 +59,7 @@ function DesktopSidebar({
   // Sidebar content
   const inner = (
     <div
-      className="tw-relative tw-z-50 tw-h-full  tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-white/20 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
+      className="tw-relative tw-z-50 tw-h-full  tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
       style={{ width: sidebarWidth }}
       aria-label="Primary sidebar"
     >
