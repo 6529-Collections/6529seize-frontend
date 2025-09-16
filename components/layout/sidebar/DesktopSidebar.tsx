@@ -65,7 +65,7 @@ function DesktopSidebar({
     >
       <div className="tw-flex tw-flex-col tw-h-full">
         <div
-          className={`tw-flex tw-shrink-0 tw-pt-3 ${
+          className={`tw-flex tw-shrink-0 tw-py-3 ${
             isVisuallyCollapsed
               ? "tw-flex-col tw-items-center tw-gap-y-4 tw-px-2"
               : "tw-items-center tw-justify-between tw-px-4"

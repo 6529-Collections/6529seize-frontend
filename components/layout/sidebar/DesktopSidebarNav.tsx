@@ -15,10 +15,7 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import Squares2X2Icon from "@/components/common/icons/Squares2X2Icon";
 import BellIcon from "@/components/common/icons/BellIcon";
 import UsersIcon from "@/components/common/icons/UsersIcon";
-import {
-  WrenchIcon,
-  DocumentTextIcon,
-} from "@heroicons/react/24/outline";
+import { WrenchIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { UserIcon } from "@heroicons/react/24/outline";
 import DesktopSidebarNavItem from "./nav/DesktopSidebarNavItem";
 import DesktopSidebarExpandableItem from "./nav/DesktopSidebarExpandableItem";
@@ -291,7 +288,9 @@ export default function DesktopSidebarNav({
 
   return (
     <nav
-      className="tw-h-full tw-overflow-y-auto tw-overflow-x-hidden custom-scrollbar"
+      className={`tw-flex tw-flex-1 tw-flex-col tw-mt-6 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden custom-scrollbar ${
+        isCollapsed ? "tw-px-2" : "tw-px-4"
+      }`}
       aria-label="Desktop navigation"
     >
       <ul className="tw-list-none tw-m-0 tw-p-0">
