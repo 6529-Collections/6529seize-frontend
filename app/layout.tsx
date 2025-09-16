@@ -35,7 +35,7 @@ export default function RootLayout({
     <html lang="en">
       <Head>
         <link rel="preconnect" href={process.env.API_ENDPOINT} />
-        <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
+        <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
       </Head>
       <body>
         <AwsRumProvider>

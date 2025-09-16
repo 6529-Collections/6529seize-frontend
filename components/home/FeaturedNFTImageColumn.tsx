@@ -25,6 +25,8 @@ export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
               height={650}
               showOwnedIfLoggedIn={true}
               showUnseizedIfLoggedIn={true}
+              priority
+              sizes="(max-width: 991px) 100vw, 50vw"
             />
           ) : (
             <Link href={`/the-memes/${featuredNft.id}`}>
@@ -34,6 +36,8 @@ export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
                 height={650}
                 showOwnedIfLoggedIn={true}
                 showUnseizedIfLoggedIn={true}
+                priority
+                sizes="(max-width: 991px) 100vw, 50vw"
               />
             </Link>
           )}

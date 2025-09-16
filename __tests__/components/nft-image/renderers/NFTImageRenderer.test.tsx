@@ -398,14 +398,22 @@ describe('NFTImageRenderer', () => {
   });
 
   describe('Performance Attributes', () => {
-    it('sets correct loading and priority attributes', () => {
+    it('defaults to deferred loading', () => {
       const props = createDefaultProps();
       render(<NFTImageRenderer {...props} />);
-      
+
       const image = screen.getByRole('img');
-      expect(image).toHaveAttribute('data-loading', 'eager');
+      expect(image).not.toHaveAttribute('data-loading');
+      expect(image).toHaveAttribute('data-priority', 'false');
+      expect(image).not.toHaveAttribute('data-fetch-priority');
+    });
+
+    it('respects explicit priority requests', () => {
+      const props = createDefaultProps({ priority: true });
+      render(<NFTImageRenderer {...props} />);
+
+      const image = screen.getByRole('img');
       expect(image).toHaveAttribute('data-priority', 'true');
-      expect(image).toHaveAttribute('data-fetch-priority', 'high');
     });
 
     it('applies correct responsive styling', () => {

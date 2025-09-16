@@ -6,8 +6,17 @@ import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import LatestDropSection from "./LatestDropSection";
 import Link from "next/link";
-import LatestActivity from "../latest-activity/LatestActivity";
+import dynamic from "next/dynamic";
 import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+
+const LatestActivity = dynamic(() => import("../latest-activity/LatestActivity"), {
+  ssr: false,
+  loading: () => (
+    <div className="pt-4" role="status" aria-live="polite" aria-busy="true">
+      Loading latest activity…
+    </div>
+  ),
+});
 
 export default function Home({
   featuredNft,
