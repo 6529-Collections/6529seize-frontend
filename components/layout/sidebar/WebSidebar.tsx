@@ -65,15 +65,17 @@ function WebSidebar({
     >
       <div className="tw-flex tw-flex-col tw-h-full">
         <div
-          className={`tw-flex tw-shrink-0 tw-py-3 ${
+          className={`tw-shrink-0 tw-py-3 ${
             isVisuallyCollapsed
-              ? "tw-flex-col tw-items-center tw-gap-y-4 tw-px-2"
-              : "tw-items-center tw-justify-between tw-px-4"
+              ? "tw-flex tw-flex-col tw-items-center tw-gap-y-3 tw-px-2"
+              : "tw-flex tw-items-center tw-justify-between tw-px-4"
           }`}
         >
           <Link
             href="/"
-            className={isVisuallyCollapsed ? "tw-mx-auto" : "tw-ml-1.5"}
+            className={`tw-inline-flex tw-items-center ${
+              isVisuallyCollapsed ? "" : "tw-ml-1.5"
+            }`}
           >
             <Image
               alt="6529Seize"
@@ -87,7 +89,9 @@ function WebSidebar({
           <button
             type="button"
             onClick={onToggle}
-            className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm tw-flex-shrink-0"
+            className={`tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm ${
+              isVisuallyCollapsed ? "tw-self-center" : ""
+            }`}
             aria-label={isVisuallyCollapsed ? "Expand" : "Collapse"}
             aria-expanded={!isVisuallyCollapsed}
             data-tooltip-id="sidebar-tooltip"

@@ -312,7 +312,7 @@ export default function WebSidebarNav({
   return (
     <>
       <nav
-        className={`tw-flex tw-flex-1 tw-flex-col tw-mt-6 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden custom-scrollbar ${
+        className={`tw-flex tw-flex-1 tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden custom-scrollbar ${
           isCollapsed ? "tw-px-2" : "tw-px-4"
         }`}
         aria-label="Desktop navigation"

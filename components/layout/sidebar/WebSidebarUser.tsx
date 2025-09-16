@@ -54,8 +54,8 @@ function WebSidebarUser({
 
   const profile = parentProfile || localProfile;
 
-  const containerClasses = `tw-mt-auto tw-relative tw-w-full tw-group ${
-    isCollapsed ? "tw-px-2 tw-py-3" : "tw-px-4 tw-py-4"
+  const containerClasses = `tw-mt-auto tw-relative tw-w-full tw-group tw-py-4 ${
+    isCollapsed ? "tw-px-2" : "tw-px-4"
   }`;
 
   if (!address) {
@@ -88,10 +88,10 @@ function WebSidebarUser({
     return (
       <div className={containerClasses}>
         <div
-          className={`tw-flex tw-items-center tw-w-full tw-rounded-xl ${
+          className={`tw-flex tw-items-center tw-w-full tw-rounded-xl tw-py-2 ${
             isCollapsed
-              ? "tw-justify-center tw-px-2 tw-py-2"
-              : "tw-justify-start tw-px-3 tw-gap-x-3 tw-py-2"
+              ? "tw-justify-center tw-px-2"
+              : "tw-justify-start tw-px-3 tw-gap-x-3"
           }`}
         >
           <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-800 tw-animate-pulse tw-flex-shrink-0" />
@@ -117,10 +117,10 @@ function WebSidebarUser({
       <button
         ref={buttonRef}
         onClick={onToggleUserMenu}
-        className={`tw-group/user tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900 ${
+        className={`tw-group/user  tw-py-2 tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900 ${
           isCollapsed
             ? "tw-justify-center tw-px-2"
-            : "tw-justify-start tw-px-3 tw-gap-x-3 tw-py-2"
+            : "tw-justify-start tw-px-3 tw-gap-x-3"
         }`}
         aria-label="Open user menu"
         aria-expanded={showUserMenu}
