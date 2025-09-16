@@ -69,41 +69,49 @@ export function MemeCalendarOverviewNextMint({
   displayTz,
 }: MemeCalendarOverviewNextMintProps) {
   const [now, setNow] = useState(new Date());
-
-  // tick every second for countdown
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const nextMintInstantUtc = useMemo(
-    () => immediatelyNextMintInstantUTC(now),
-    [now]
+  // Keep a stable target instant so we don't recompute calendar HTML every tick
+  const [targetInstant, setTargetInstant] = useState(() =>
+    immediatelyNextMintInstantUTC(new Date())
   );
 
-  // Mint number is based on the UTC *day* of that instant
-  const nextMintUtcDay = useMemo(
+  // tick every second for countdown and advance target when it actually changes
+  useEffect(() => {
+    const t = setInterval(() => {
+      setNow((prev) => {
+        const current = new Date();
+        // If the computed next mint instant has changed, update once
+        const computed = immediatelyNextMintInstantUTC(current);
+        if (computed.getTime() !== targetInstant.getTime()) {
+          setTargetInstant(computed);
+        }
+        return current;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, [targetInstant]);
+
+  const targetUtcDay = useMemo(
     () =>
       new Date(
         Date.UTC(
-          nextMintInstantUtc.getUTCFullYear(),
-          nextMintInstantUtc.getUTCMonth(),
-          nextMintInstantUtc.getUTCDate()
+          targetInstant.getUTCFullYear(),
+          targetInstant.getUTCMonth(),
+          targetInstant.getUTCDate()
         )
       ),
-    [nextMintInstantUtc]
+    [targetInstant]
   );
   const memeNo = useMemo(
-    () => getMintNumberForMintDate(nextMintUtcDay),
-    [nextMintUtcDay]
+    () => getMintNumberForMintDate(targetUtcDay),
+    [targetUtcDay]
   );
 
-  const diffMs = nextMintInstantUtc.getTime() - now.getTime();
+  const diffMs = targetInstant.getTime() - now.getTime();
   const diff = diffMs > 0 ? msToParts(diffMs) : { d: 0, h: 0, m: 0, s: 0 };
 
   const invitesHtml = useMemo(
-    () => printCalendarInvites(nextMintInstantUtc, memeNo),
-    [nextMintInstantUtc, memeNo]
+    () => printCalendarInvites(targetInstant, memeNo),
+    [memeNo, targetInstant]
   );
 
   return (
@@ -114,11 +122,9 @@ export function MemeCalendarOverviewNextMint({
           #{memeNo.toLocaleString()}
         </div>
         <div className="tw-text-lg tw-font-semibold">
-          {formatFullDateTime(nextMintInstantUtc, displayTz)}
+          {formatFullDateTime(targetInstant, displayTz)}
         </div>
-        <div className="tw-text-sm">
-          {formatToFullDivision(nextMintInstantUtc)}
-        </div>
+        <div className="tw-text-sm">{formatToFullDivision(targetInstant)}</div>
 
         <div className="tw-pt-2 tw-text-sm tw-text-gray-400">Minting in</div>
         <div className="tw-text-2xl tw-font-semibold">

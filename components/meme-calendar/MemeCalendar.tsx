@@ -3,7 +3,6 @@
 import {
   faCaretLeft,
   faCaretRight,
-  faChevronDown,
   faChevronUp,
   faCrosshairs,
   faInfoCircle,
@@ -1030,7 +1029,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
   return (
     <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
       {/* Division (zoom) selector buttons */}
-      <div className="tw-mb-8 tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-6 tw-gap-2">
+      <div className="tw-mb-8 tw-grid tw-grid-cols-3 lg:tw-grid-cols-[repeat(6,minmax(0,1fr))_auto] tw-gap-2">
         {(
           [
             ["season", `SZN ${seasonNumber}`],
@@ -1053,12 +1052,93 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
             {label}
           </button>
         ))}
+        <div className="tw-col-span-3 lg:tw-col-span-1 tw-flex tw-items-center tw-justify-end">
+          <FontAwesomeIcon
+            icon={showInfo ? faXmarkCircle : faInfoCircle}
+            className="tw-w-8 tw-h-8 tw-cursor-pointer"
+            onClick={() => setShowInfo((v) => !v)}
+          />
+        </div>
+      </div>
+
+      <div
+        className={
+          "tw-rounded-md tw-bg-black tw-border tw-border-solid tw-border-[#222222] " +
+          "tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out tw-origin-top " +
+          (showInfo
+            ? "tw-mb-8 tw-opacity-100 tw-scale-y-100 tw-py-5 tw-px-3"
+            : "tw-opacity-0 tw-max-h-0 tw-scale-y-95 tw-pointer-events-none")
+        }
+        aria-hidden={!showInfo}>
+        {/* Stack on small; side-by-side from md+ */}
+        <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-4 md:tw-gap-6">
+          {/* Left side grows on md+ */}
+          <div className="md:tw-flex-1">
+            {[
+              { label: "Minting Days", text: "Monday / Wednesday / Friday" },
+              {
+                label: "SZN",
+                text: "Traditional calendar quarter system / 3 months each",
+                note: "~ 39 mints",
+              },
+              { label: "YEAR", text: "4 SZNs in 1 YEAR", note: "~ 156 mints" },
+              {
+                label: "EPOCH",
+                text: "4 YEARs / 16 SZNs",
+                note: "~ 626 mints",
+              },
+              {
+                label: "PERIOD",
+                text: "5 EPOCHs / 20 YEARs / 80 SZNs",
+                note: "~ 3,130 mints",
+              },
+              {
+                label: "ERA",
+                text: "5 PERIODs / 20 EPOCHs / 100 YEARs / 400 SZNs",
+                note: "~ 15,650 mints",
+              },
+              {
+                label: "EON",
+                text: "10 ERAs / 100 PERIODs / 1,000 YEARs / 4000 SZNs",
+                note: "~ 156,500 mints",
+              },
+            ].map(({ label, text, note }) => (
+              <div key={label} className="tw-py-2">
+                <span className="tw-font-bold">{label}</span> - {text}{" "}
+                {note && <span className="tw-text-gray-500">{note}</span>}
+              </div>
+            ))}
+          </div>
+
+          {/* Right side: full width when stacked; fixed-ish width on md+ */}
+          <div className="tw-flex tw-flex-col tw-gap-3 tw-mt-2 md:tw-mt-0 md:tw-w-56">
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <div className="tw-bg-gray-100 tw-rounded-md tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center">
+                <FontAwesomeIcon
+                  icon={faCrosshairs}
+                  className="tw-w-4 tw-h-4 tw-text-gray-900"
+                />
+              </div>
+              <span>Jump to Today</span>
+            </div>
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <div className="tw-bg-gray-100 tw-rounded-md tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center">
+                <img
+                  src="/jump.svg"
+                  alt="Jump"
+                  className="tw-inline-block tw-w-4 tw-h-4"
+                />
+              </div>
+              <span>Jump to Date / Meme #</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Unified navigation based on selected division */}
       <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-mt-2">
         {/* Left half: Prev | Title+Range | Next */}
-        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0 md:tw-basis-1/3 md:tw-max-w-[35%]">
+        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0 md:tw-basis-2/3 md:tw-max-w-[40%]">
           <button
             className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-1.5 tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
             onClick={() => {
@@ -1158,7 +1238,6 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           </button>
         </div>
 
-        {/* Right half: action icons */}
         <div className="tw-flex tw-items-center tw-gap-2">
           {/* Today */}
           <button
@@ -1169,8 +1248,6 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               const now = new Date();
               const idx = getSeasonIndexForDate(now);
               setSeasonIndex(clampIndex(idx));
-              // TODO: should we change to season or keep current view
-              // setZoomLevel("season");
             }}>
             <FontAwesomeIcon icon={faCrosshairs} />
           </button>
@@ -1180,25 +1257,16 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
             className="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
             aria-label="More features"
             title="More features"
-            onClick={() => {
-              setShowAdvanced((v) => !v);
-              setShowInfo(false);
-            }}>
-            <FontAwesomeIcon
-              icon={showAdvanced ? faChevronUp : faChevronDown}
-            />
-          </button>
-
-          {/* Info */}
-          <button
-            className="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
-            aria-label="Info"
-            title="Info"
-            onClick={() => {
-              setShowInfo((v) => !v);
-              setShowAdvanced(false);
-            }}>
-            <FontAwesomeIcon icon={showInfo ? faXmarkCircle : faInfoCircle} />
+            onClick={() => setShowAdvanced((v) => !v)}>
+            {showAdvanced ? (
+              <FontAwesomeIcon icon={faChevronUp} />
+            ) : (
+              <img
+                src="/jump.svg"
+                alt="Jump"
+                className="tw-inline-block tw-w-4 tw-h-4"
+              />
+            )}
           </button>
         </div>
       </div>
@@ -1312,48 +1380,6 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div
-        className={
-          "tw-rounded-md tw-bg-black tw-border tw-border-solid tw-border-[#222222] " +
-          "tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out tw-origin-top " +
-          (showInfo
-            ? "tw-opacity-100 tw-max-h-[320px] tw-scale-y-100 tw-py-5 tw-px-3"
-            : "tw-opacity-0 tw-max-h-0 tw-scale-y-95 tw-pointer-events-none")
-        }
-        aria-hidden={!showInfo}>
-        <div className="tw-py-2">
-          <span className="tw-font-bold">Minting Days</span> - Monday /
-          Wednesday / Friday
-        </div>
-        <div className="tw-py-2">
-          <span className="tw-font-bold">SZN</span> - Traditional calendar
-          quarter system / 3 months each{" "}
-          <span className="tw-text-gray-500">~ 39 mints</span>
-        </div>
-        <div className="tw-py-2">
-          <span className="tw-font-bold">YEAR</span> - 4 SZNs in 1 YEAR{" "}
-          <span className="tw-text-gray-500">~ 156 mints</span>
-        </div>
-        <div className="tw-py-2">
-          <span className="tw-font-bold">EPOCH</span> - 4 YEARs / 16 SZNs{" "}
-          <span className="tw-text-gray-500">~ 626 mints</span>
-        </div>
-        <div className="tw-py-2">
-          <span className="tw-font-bold">PERIOD</span> - 5 EPOCHs / 20 YEARs /
-          80 SZNs <span className="tw-text-gray-500">~ 3,130 mints</span>
-        </div>
-        <div className="tw-py-2">
-          <span className="tw-font-bold">ERA</span> - 5 PERIODs / 20 EPOCHs /
-          100 YEARs / 400 SZNs{" "}
-          <span className="tw-text-gray-500">~ 15,650 mints</span>
-        </div>
-        <div className="tw-py-2">
-          <span className="tw-font-bold">EON</span> - 10 ERAs / 100 PERIODs /
-          1,000 YEARs / 4000 SZNs{" "}
-          <span className="tw-text-gray-500">~ 156,500 mints</span>
         </div>
       </div>
 

@@ -9,7 +9,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function MemesMintingCalendarPage() {
   return (
-    // <div className="tw-container tw-mx-auto tw-px-4 tw-my-6">
     <Container className="tw-pt-6 tw-pb-8">
       <Row>
         <Col>
@@ -17,6 +16,5 @@ export default function MemesMintingCalendarPage() {
         </Col>
       </Row>
     </Container>
-    // </div>
   );
 }
