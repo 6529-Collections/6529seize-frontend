@@ -25,6 +25,8 @@ import { getAuthJwt } from "../auth/auth.utils";
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
 const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
+const HEARTBEAT_INTERVAL = 30000; // 30 seconds between heartbeats
+const HEARTBEAT_TIMEOUT = 90000; // 90 seconds without messages triggers reconnect
 
 /**
  * Calculate delay for exponential backoff
@@ -64,11 +66,14 @@ export function WebSocketProvider({
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isManualDisconnectRef = useRef(false);
   const reconnectTokenRef = useRef<string | undefined>(undefined);
+  const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastPongRef = useRef<number>(Date.now());
 
   /**
    * Parse and route incoming WebSocket messages
    */
   const handleMessage = useCallback((event: MessageEvent) => {
+    lastPongRef.current = Date.now();
     try {
       // Parse the message
       const message: WebSocketMessage<{ data: any }> = JSON.parse(event.data);
@@ -98,6 +103,13 @@ export function WebSocketProvider({
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = null;
+    }
+  }, []);
+
+  const clearHeartbeatTimer = useCallback(() => {
+    if (heartbeatTimerRef.current) {
+      clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = null;
     }
   }, []);
 
@@ -147,6 +159,7 @@ export function WebSocketProvider({
 
       // Close existing connection if any
       if (wsRef.current) {
+        clearHeartbeatTimer();
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -173,11 +186,13 @@ export function WebSocketProvider({
 
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
+          lastPongRef.current = Date.now();
         };
 
         ws.onmessage = handleMessage;
 
         ws.onclose = (event) => {
+          clearHeartbeatTimer();
           // Clean up WebSocket
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
@@ -212,7 +227,13 @@ export function WebSocketProvider({
         attemptReconnect();
       }
     },
-    [config.url, handleMessage, clearReconnectTimer, attemptReconnect]
+    [
+      config.url,
+      handleMessage,
+      clearReconnectTimer,
+      attemptReconnect,
+      clearHeartbeatTimer,
+    ]
   );
 
   /**
@@ -224,6 +245,7 @@ export function WebSocketProvider({
 
     // Clear any pending reconnect
     clearReconnectTimer();
+    clearHeartbeatTimer();
 
     // Reset reconnect attempts
     reconnectAttemptsRef.current = 0;
@@ -234,7 +256,7 @@ export function WebSocketProvider({
       wsRef.current = null;
       setStatus(WebSocketStatus.DISCONNECTED);
     }
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, clearHeartbeatTimer]);
 
   /**
    * Subscribe to a specific message type
@@ -277,11 +299,44 @@ export function WebSocketProvider({
     ws.send(JSON.stringify(message));
   }, []);
 
+  useEffect(() => {
+    if (status !== WebSocketStatus.CONNECTED) {
+      clearHeartbeatTimer();
+      return;
+    }
+
+    clearHeartbeatTimer();
+    lastPongRef.current = Date.now();
+
+    heartbeatTimerRef.current = setInterval(() => {
+      const now = Date.now();
+      const ws = wsRef.current;
+
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      if (now - lastPongRef.current > HEARTBEAT_TIMEOUT) {
+        console.warn("WebSocket heartbeat timeout; closing connection");
+        clearHeartbeatTimer();
+        ws.close(4000, "Heartbeat timeout");
+        return;
+      }
+
+      send<Record<string, never>>(WsMessageType.PING, {});
+    }, HEARTBEAT_INTERVAL);
+
+    return () => {
+      clearHeartbeatTimer();
+    };
+  }, [status, clearHeartbeatTimer, send]);
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
       // Clear any pending reconnect
       clearReconnectTimer();
+      clearHeartbeatTimer();
 
       // Close the connection
       if (wsRef.current) {
@@ -289,7 +344,7 @@ export function WebSocketProvider({
         wsRef.current = null;
       }
     };
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, clearHeartbeatTimer]);
 
   // Create context value
   const contextValue: WebSocketContextValue = useMemo(
