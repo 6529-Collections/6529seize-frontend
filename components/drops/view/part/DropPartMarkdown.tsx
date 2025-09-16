@@ -10,6 +10,7 @@ import {
   ReactNode,
   type JSX,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -27,6 +28,7 @@ import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropRefere
 import { Tweet } from "react-tweet";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
+import YouTubePreview from "./YouTubePreview";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
@@ -41,6 +43,7 @@ import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
 import DropItemChat from "../../../waves/drops/DropItemChat";
 import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
+import { fetchYoutubePreview } from "../../../../services/youtube-preview";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -55,9 +58,13 @@ export enum DropContentPartType {
   HASHTAG = "HASHTAG",
 }
 
+type AnchorRendererProps = ClassAttributes<HTMLAnchorElement> &
+  AnchorHTMLAttributes<HTMLAnchorElement> &
+  ExtraProps;
+
 type SmartLinkHandler<T> = {
   parse: (href: string) => T | null;
-  render: (result: T, href: string) => JSX.Element | null;
+  render: (result: T, href: string, props: AnchorRendererProps) => JSX.Element | null;
 };
 
 function DropPartMarkdown({
@@ -247,10 +254,105 @@ function DropPartMarkdown({
     return gifRegex.test(href) ? href : null;
   };
 
+  interface YoutubeLinkInfo {
+    readonly videoId: string;
+    readonly startSeconds?: number;
+    readonly playlistId?: string;
+  }
+
+  const parseYoutubeTimeParam = (value: string | null): number | undefined => {
+    if (!value) {
+      return undefined;
+    }
+
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+      return undefined;
+    }
+
+    if (/^\d+$/.test(trimmedValue)) {
+      return Number.parseInt(trimmedValue, 10);
+    }
+
+    const pattern = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)(?:s)?)?$/i;
+    const match = trimmedValue.match(pattern);
+
+    if (!match) {
+      return undefined;
+    }
+
+    const hours = match[1] ? Number.parseInt(match[1], 10) : 0;
+    const minutes = match[2] ? Number.parseInt(match[2], 10) : 0;
+    const seconds = match[3] ? Number.parseInt(match[3], 10) : 0;
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+    return Number.isNaN(totalSeconds) ? undefined : totalSeconds;
+  };
+
+  const normalizeYoutubeHostname = (hostname: string) =>
+    hostname.replace(/^www\./i, "").toLowerCase();
+
+  const parseYoutubeLink = (href: string): YoutubeLinkInfo | null => {
+    try {
+      const trimmedHref = href.trim();
+      const url = new URL(trimmedHref);
+      const hostname = normalizeYoutubeHostname(url.hostname);
+
+      let videoId: string | null = null;
+
+      if (hostname === "youtu.be") {
+        const [firstSegment] = url.pathname.split("/").filter(Boolean);
+        videoId = firstSegment ?? null;
+      } else if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+        const pathname = url.pathname.toLowerCase();
+
+        if (pathname.startsWith("/watch")) {
+          videoId = url.searchParams.get("v");
+        } else if (pathname.startsWith("/shorts/")) {
+          const [, maybeId] = url.pathname.split("/").filter(Boolean);
+          videoId = maybeId ?? null;
+        } else if (pathname.startsWith("/embed/")) {
+          const [, maybeId] = url.pathname.split("/").filter(Boolean);
+          videoId = maybeId ?? null;
+        }
+      } else {
+        return null;
+      }
+
+      if (!videoId) {
+        return null;
+      }
+
+      const sanitizedVideoId = videoId.trim();
+
+      if (!sanitizedVideoId) {
+        return null;
+      }
+
+      const startSeconds =
+        parseYoutubeTimeParam(url.searchParams.get("t")) ??
+        parseYoutubeTimeParam(url.searchParams.get("start"));
+      const playlistId = url.searchParams.get("list")?.trim();
+
+      return {
+        videoId: sanitizedVideoId,
+        startSeconds: startSeconds ?? undefined,
+        playlistId: playlistId || undefined,
+      };
+    } catch {
+      return null;
+    }
+  };
+
   const smartLinkHandlers: SmartLinkHandler<any>[] = [
     {
       parse: parseSeizeQuoteLink,
-      render: (result: SeizeQuoteLinkInfo, href: string) =>
+      render: (
+        result: SeizeQuoteLinkInfo,
+        href: string,
+        _props: AnchorRendererProps
+      ) =>
         renderSeizeQuote(result, onQuoteClick, href),
     },
     {
@@ -272,6 +374,14 @@ function DropPartMarkdown({
       render: (result: { drop: string }, href: string) => (
         <DropItemChat href={href} dropId={result.drop} />
       ),
+    },
+    {
+      parse: parseYoutubeLink,
+      render: (
+        result: YoutubeLinkInfo,
+        href: string,
+        props: AnchorRendererProps
+      ) => <YouTubeSmartLink href={href} info={result} anchorProps={props} />,
     },
     {
       parse: parseTwitterLink,
@@ -302,7 +412,7 @@ function DropPartMarkdown({
     for (const { parse, render } of smartLinkHandlers) {
       const result = parse(href);
       if (result) {
-        return render(result, href);
+        return render(result, href, props);
       }
     }
 
@@ -336,6 +446,36 @@ function DropPartMarkdown({
     />
   );
 
+  function YouTubeSmartLink({
+    href,
+    info,
+    anchorProps,
+  }: {
+    readonly href: string;
+    readonly info: YoutubeLinkInfo;
+    readonly anchorProps: AnchorRendererProps;
+  }): JSX.Element | null {
+    const { data, isError } = useQuery({
+      queryKey: ["youtube-preview", info.videoId],
+      queryFn: ({ signal }) => fetchYoutubePreview({ videoId: info.videoId, signal }),
+      enabled: Boolean(info.videoId),
+      staleTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: false,
+    });
+
+    if (!data || isError) {
+      const fallbackProps: AnchorRendererProps = {
+        ...anchorProps,
+        href: anchorProps.href ?? href,
+      };
+
+      return renderExternalOrInternalLink(href, fallbackProps);
+    }
+
+    return <YouTubePreview href={href} preview={data} />;
+  }
+
   const isValidLink = (href: string): boolean => {
     try {
       new URL(href);
@@ -347,7 +487,7 @@ function DropPartMarkdown({
 
   const renderExternalOrInternalLink = (
     href: string,
-    props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
+    props: AnchorRendererProps
   ) => {
     const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
     const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
