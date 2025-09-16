@@ -465,8 +465,10 @@ function DropPartMarkdown({
     if (/style="[^"]*"/i.test(normalized)) {
       normalized = normalized.replace(
         /style="([^"]*)"/i,
-        (_, styles: string) =>
-          `style="${styles.replace(/;?\s*$/u, "")};width:100%;height:100%;"`
+        (_, styles: string) => {
+          const cleanedStyles = styles.replace(/;?\s*$/, "");
+          return `style="${cleanedStyles};width:100%;height:100%;"`;
+        }
       );
     } else {
       normalized = normalized.replace(
