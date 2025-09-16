@@ -236,10 +236,48 @@ function DropPartMarkdown({
   const parseTwitterLink = (
     href: string
   ): { href: string; tweetId: string } | null => {
-    const twitterRegex =
-      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
-    const match = href.match(twitterRegex);
-    return match ? { href, tweetId: match[3] } : null;
+    let url: URL;
+
+    try {
+      url = new URL(href);
+    } catch {
+      return null;
+    }
+
+    const hostname = url.hostname.toLowerCase();
+    const supportedDomains = ["twitter.com", "x.com"];
+    const isSupportedDomain = supportedDomains.some((domain) => {
+      return hostname === domain || hostname.endsWith(`.${domain}`);
+    });
+
+    if (!isSupportedDomain) {
+      return null;
+    }
+
+    const extractTweetId = (segments: string[]): string | null => {
+      const statusIndex = segments.findIndex((segment) => {
+        const normalized = segment.toLowerCase();
+        return normalized === "status" || normalized === "statuses";
+      });
+
+      if (statusIndex === -1) {
+        return null;
+      }
+
+      const candidate = segments[statusIndex + 1];
+      return candidate && /^\d+$/.test(candidate) ? candidate : null;
+    };
+
+    const pathSegments = url.pathname.split("/").filter(Boolean);
+    let tweetId = extractTweetId(pathSegments);
+
+    if (!tweetId && url.hash) {
+      const hashPath = url.hash.replace(/^#!?\/?/, "");
+      const hashSegments = hashPath.split("/").filter(Boolean);
+      tweetId = extractTweetId(hashSegments);
+    }
+
+    return tweetId ? { href, tweetId } : null;
   };
 
   const parseGifLink = (href: string): string | null => {

@@ -26,6 +26,36 @@ describe("DropPartMarkdown", () => {
     );
   });
 
+  it.each([
+    [
+      "standard status link with query params",
+      "https://twitter.com/test/status/1234567890?s=20&t=abc",
+      "1234567890",
+    ],
+    [
+      "i/web status link",
+      "https://twitter.com/i/web/status/9876543210",
+      "9876543210",
+    ],
+    [
+      "mobile subdomain link",
+      "https://mobile.twitter.com/test/status/1122334455",
+      "1122334455",
+    ],
+  ])("renders tweet embeds for %s", (_, url, expectedId) => {
+    const content = `[tweet](${url})`;
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText(`tweet:${expectedId}`)).toBeInTheDocument();
+  });
+
   it("handles external links", () => {
     process.env.BASE_ENDPOINT = "https://example.com";
     const content = "[link](https://google.com)";
