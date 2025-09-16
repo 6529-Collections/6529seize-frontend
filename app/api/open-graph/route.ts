@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import { buildResponse, validateUrl } from "./utils";
+import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
@@ -49,6 +49,14 @@ export async function GET(request: NextRequest) {
     targetUrl = validateUrl(request.nextUrl.searchParams.get("url"));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid URL";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  try {
+    await ensureUrlIsPublic(targetUrl);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "The provided URL is not allowed.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 

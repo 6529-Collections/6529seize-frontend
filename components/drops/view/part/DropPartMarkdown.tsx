@@ -262,7 +262,8 @@ function DropPartMarkdown({
       const isYoutubeDomain =
         normalizedHost === "youtube.com" ||
         normalizedHost === "youtube-nocookie.com" ||
-        normalizedHost.endsWith(".youtube.com");
+        normalizedHost.endsWith(".youtube.com") ||
+        normalizedHost.endsWith(".youtube-nocookie.com");
 
       let videoId: string | null = null;
 
