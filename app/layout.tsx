@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 export const dynamic = "force-dynamic";
 
 import "@/styles/seize-bootstrap.scss";
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <link rel="preconnect" href={process.env.API_ENDPOINT} />
+        <link rel="preconnect" href={env.API_ENDPOINT} />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
       </Head>
       <body>

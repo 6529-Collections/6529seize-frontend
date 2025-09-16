@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./6529Gradient.module.scss";
 
 import { useContext, useEffect, useState } from "react";
@@ -73,7 +74,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
         }
       });
     }
-    const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
+    const initialUrlNfts = `${env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
     fetchNfts(initialUrlNfts, []);
   }, []);
 
@@ -89,7 +90,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   useEffect(() => {
     if (id) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
+        `${env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
       });

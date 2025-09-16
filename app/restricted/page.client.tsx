@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import styles from "@/styles/Home.module.scss";
@@ -14,7 +15,7 @@ export default function RestrictedPage() {
   useEffect(() => {
     if (!image) {
       const apiAuth = getStagingAuth();
-      fetch(`${process.env.API_ENDPOINT}/api/`, {
+      fetch(`${env.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
       }).then((r: any) => {
         r.json().then((response: any) => {

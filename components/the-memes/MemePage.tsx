@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./TheMemes.module.scss";
 
 import { useContext, useEffect, useState } from "react";
@@ -92,13 +93,13 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   useEffect(() => {
     if (nftId) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
+        `${env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
       ).then((response: DBResponse) => {
         const nftMetas = response.data;
         if (nftMetas.length === 1) {
           setNftMeta(nftMetas[0]);
           fetchUrl(
-            `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
+            `${env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
           ).then((response: DBResponse) => {
             const mynft = response.data[0];
             setNft(mynft);
@@ -128,7 +129,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     if (connectedWallets.length && nftId) {
       fetchUrl(
         `${
-          process.env.API_ENDPOINT
+          env.API_ENDPOINT
         }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
           ","
         )}&id=${nftId}`

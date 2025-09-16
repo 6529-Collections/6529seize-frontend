@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./MemeLab.module.scss";
 
 import { useAuth } from "@/components/auth/Auth";
@@ -130,13 +131,13 @@ export default function MemeLabPageComponent({
   useEffect(() => {
     if (nftId) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
+        `${env.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
       ).then((response: DBResponse) => {
         const nftMetas = response.data;
         if (nftMetas.length === 1) {
           setNftMeta(nftMetas[0]);
           fetchUrl(
-            `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
+            `${env.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
           ).then((response: DBResponse) => {
             const nft: LabNFT = response.data[0];
             setNft(nft);
@@ -144,7 +145,7 @@ export default function MemeLabPageComponent({
             if (nft.meme_references.length > 0) {
               fetchUrl(
                 `${
-                  process.env.API_ENDPOINT
+                  env.API_ENDPOINT
                 }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
                   ","
                 )}`
@@ -168,7 +169,7 @@ export default function MemeLabPageComponent({
     if (wallets.length > 0 && nftId) {
       fetchUrl(
         `${
-          process.env.API_ENDPOINT
+          env.API_ENDPOINT
         }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
@@ -192,7 +193,7 @@ export default function MemeLabPageComponent({
 
   useEffect(() => {
     if (nftId) {
-      let url = `${process.env.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+      let url = `${env.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
       switch (activityTypeFilter) {
         case TypeFilter.SALES:
           url += `&filter=sales`;
@@ -224,7 +225,7 @@ export default function MemeLabPageComponent({
       });
     }
     if (nftId) {
-      const initialUrlHistory = `${process.env.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
+      const initialUrlHistory = `${env.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
       fetchHistory(initialUrlHistory);
     }
   }, [nftId]);

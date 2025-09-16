@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import {
   CapacitorBarcodeScanner,
   CapacitorBarcodeScannerTypeHint,
@@ -19,8 +20,8 @@ export default function HeaderQRScanner({
   readonly onScanSuccess: () => void;
   readonly appSidebar?: boolean;
 }) {
-  const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
-  const baseEndpoint = process.env.BASE_ENDPOINT ?? "https://6529.io";
+  const appScheme = env.MOBILE_APP_SCHEME ?? "mobile6529";
+  const baseEndpoint = env.BASE_ENDPOINT ?? "https://6529.io";
 
   const { setToast } = useAuth();
   const capacitor = useCapacitor();

@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./GasRoyalties.module.scss";
 import { Row, Col, Dropdown, Container } from "react-bootstrap";
 import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
@@ -69,7 +70,7 @@ function getUrlParams(
       ? "memelab"
       : "memes";
   const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
-  return `${process.env.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${filters}${artistFilter}`;
+  return `${env.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${filters}${artistFilter}`;
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
@@ -86,7 +87,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   useEffect(() => {
     const path =
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
-    fetchUrl(`${process.env.API_ENDPOINT}/api/${path}/artists_names`).then(
+    fetchUrl(`${env.API_ENDPOINT}/api/${path}/artists_names`).then(
       (res: ApiArtistNameItem[]) => {
         setArtists(res);
       }

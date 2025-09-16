@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { fetchUrl } from "@/services/6529api";
@@ -26,9 +27,9 @@ export async function generateMetadata({
   const { id } = await params;
 
   let title = `6529 Gradient #${id}`;
-  let ogImage = `${process.env.BASE_ENDPOINT}/6529io.png`;
+  let ogImage = `${env.BASE_ENDPOINT}/6529io.png`;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
+    `${env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
   );
   if (response?.data?.length > 0) {
     if (response.data[0].thumbnail) {

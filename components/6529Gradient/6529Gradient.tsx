@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./6529Gradient.module.scss";
 import { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
@@ -56,7 +57,7 @@ export default function GradientsComponent() {
     setSort(sortParam);
     setSortDir(dirParam);
 
-    const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?page_size=101`;
+    const url = `${env.API_ENDPOINT}/api/nfts/gradients?page_size=101`;
     fetchAllPages(url).then((raw: GradientNFT[]) => {
       setNftsRaw(raw);
       setNftsLoaded(true);

@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { configureStore } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
 import { groupSlice } from "./groupSlice";
@@ -9,7 +10,7 @@ export const makeStore = () =>
       [groupSlice.name]: groupSlice.reducer,
       [editSlice.name]: editSlice.reducer,
     },
-    devTools: process.env.NODE_ENV !== "production",
+    devTools: env.NODE_ENV !== "production",
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

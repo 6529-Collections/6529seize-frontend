@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { NextgenCollectionView } from "@/enums";
@@ -28,7 +29,7 @@ export async function generateMetadata({
     ogImage:
       resolvedCollection.banner ||
       resolvedCollection.image ||
-      `${process.env.BASE_ENDPOINT}/nextgen.png`,
+      `${env.BASE_ENDPOINT}/nextgen.png`,
     description: "NextGen",
     twitterCard: "summary_large_image",
   });

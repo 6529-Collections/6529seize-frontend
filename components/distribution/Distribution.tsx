@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import Address from "@/components/address/Address";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import Pagination from "@/components/pagination/Pagination";
@@ -68,7 +69,7 @@ export default function DistributionPage(props: Readonly<Props>) {
     setFetching(true);
     const walletFilter =
       searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
-    const distributionUrl = `${process.env.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
+    const distributionUrl = `${env.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
     fetchUrl(distributionUrl).then((r: DBResponse) => {
       setTotalResults(r.count);
       const mydistributions: Distribution[] = r.data;
@@ -87,7 +88,7 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   useEffect(() => {
     if (nftId) {
-      const distributionPhotosUrl = `${process.env.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
+      const distributionPhotosUrl = `${env.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
 
       fetchAllPages(distributionPhotosUrl).then((distributionPhotos: any[]) => {
         setDistributionPhotos(distributionPhotos);

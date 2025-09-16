@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DateCountdown from "@/components/date-countdown/DateCountdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -90,7 +91,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   const [collectionLoaded, setCollectionLoaded] = useState(false);
 
   useEffect(() => {
-    const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
+    const url = `${env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
     fetchUrl(url).then((response: CollectionWithMerkle) => {
       if (response) {
         setCollection(response);

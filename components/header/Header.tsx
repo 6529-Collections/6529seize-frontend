@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname } from "next/navigation";
@@ -111,7 +112,7 @@ export default function Header(props: Readonly<Props>) {
   useEffect(() => {
     if (address) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/consolidations/${address}`
+        `${env.API_ENDPOINT}/api/consolidations/${address}`
       ).then((response: DBResponse) => {
         if (!response.data) {
           setConsolidations([]);

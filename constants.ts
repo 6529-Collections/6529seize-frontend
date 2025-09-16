@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { mainnet } from "wagmi/chains";
 
 const PROJECT_NAME = "6529SEIZE";
@@ -8,7 +9,7 @@ export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
  * Ensures proper URL format, HTTPS in production, and domain allowlist
  */
 function validateBaseEndpoint(): string {
-  const baseEndpoint = process.env.BASE_ENDPOINT;
+  const baseEndpoint = env.BASE_ENDPOINT;
 
   if (!baseEndpoint) {
     throw new Error(

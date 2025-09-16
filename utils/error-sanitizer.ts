@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 /**
  * Error sanitization utility for secure error handling
  * Prevents exposure of sensitive data like JWT tokens, API keys, and secrets
@@ -180,7 +181,7 @@ export const sanitizeErrorForUser = (error: unknown): string => {
 export const logErrorSecurely = (context: string, error: unknown): void => {
   const timestamp = new Date().toISOString();
   
-  if (process.env.NODE_ENV === 'development') {
+  if (env.NODE_ENV === 'development') {
     // In development, log full error for debugging
     console.error(`[${timestamp}] [${context}]`, error);
     return;
@@ -193,7 +194,7 @@ export const logErrorSecurely = (context: string, error: unknown): void => {
 
   // TODO: Integrate with secure logging service (e.g., Sentry, DataDog, CloudWatch)
   // For now, we'll use console.error with sanitized data only
-  if (process.env.NODE_ENV !== 'test') {
+  if (env.NODE_ENV !== 'test') {
     // Avoid console spam in tests
     console.error(`[${timestamp}] [${context}] Error:`, sanitizedMessage);
   }

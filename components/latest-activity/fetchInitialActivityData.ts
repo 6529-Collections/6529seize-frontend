@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { Transaction } from "../../entities/ITransaction";
 import { NFT } from "../../entities/INFT";
 import { NextGenCollection } from "../../entities/INextgen";
@@ -18,7 +19,7 @@ export async function fetchInitialActivityData(
 ): Promise<InitialActivityData> {
   try {
     // Build activity API URL with default filters (All/All)
-    const activityUrl = `${process.env.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
+    const activityUrl = `${env.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
 
     // Fetch all data in parallel
     const [activityResponse, memesResponse, gradientsData, nextgenResponse] =
@@ -28,12 +29,12 @@ export async function fetchInitialActivityData(
 
         // Memes data
         fetchUrl(
-          `${process.env.API_ENDPOINT}/api/memes_lite`
+          `${env.API_ENDPOINT}/api/memes_lite`
         ) as Promise<DBResponse>,
 
         // Gradients data
         fetchAllPages(
-          `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
+          `${env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
         ) as Promise<NFT[]>,
 
         // NextGen collections

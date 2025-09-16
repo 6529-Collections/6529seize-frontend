@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { DELEGATION_ABI } from "@/abis";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
@@ -225,7 +226,7 @@ export default function NextGenMint(props: Readonly<Props>) {
   useEffect(() => {
     if (props.collection.merkle_root) {
       const merkleRoot = props.collection.merkle_root;
-      const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
+      const url = `${env.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
       fetchUrl(url).then((response: CollectionWithMerkle) => {
         if (response) {
           setCollection(response);

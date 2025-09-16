@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { AllowlistToolResponse } from "../components/allowlist-tool/allowlist-tool.types";
 import { makeErrorToast } from "./distribution-plan.utils";
 import { getAuthJwt, removeAuthJwt } from "./auth/auth.utils";
@@ -47,7 +48,7 @@ export async function distributionPlanApiFetch<T>(endpoint: string): Promise<{
   }
   try {
     const res = await fetch(
-      `${process.env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
+      `${env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
       {
         headers,
       }
@@ -82,7 +83,7 @@ export const distributionPlanApiPost = async <T>({
   }
   try {
     const res = await fetch(
-      `${process.env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
+      `${env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
       {
         method: "POST",
         headers,
@@ -117,7 +118,7 @@ export const distributionPlanApiDelete = async <T>({
   }
   try {
     const res = await fetch(
-      `${process.env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
+      `${env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
       {
         method: "DELETE",
         headers,

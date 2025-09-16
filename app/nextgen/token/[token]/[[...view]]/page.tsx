@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { NextgenCollectionView } from "@/enums";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
@@ -29,7 +30,7 @@ export async function generateMetadata({
       data.token?.thumbnail_url ||
       data.token?.image_url ||
       data.collection.banner ||
-      `${process.env.BASE_ENDPOINT}/nextgen.png`,
+      `${env.BASE_ENDPOINT}/nextgen.png`,
     description: "NextGen",
   });
 }

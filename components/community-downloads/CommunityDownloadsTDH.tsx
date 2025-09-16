@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import CommunityDownloadsComponent from "./CommunityDownloadsComponent";
 
@@ -19,7 +20,7 @@ export default function CommunityDownloadsTDH(props: Readonly<Props>) {
   }
   useSetTitle(`${title} | Open Data`);
 
-  const url = `${process.env.API_ENDPOINT}/api/${
+  const url = `${env.API_ENDPOINT}/api/${
     props.view === VIEW.WALLET ? "uploads" : "consolidated_uploads"
   }`;
   return <CommunityDownloadsComponent title={title} url={url} />;

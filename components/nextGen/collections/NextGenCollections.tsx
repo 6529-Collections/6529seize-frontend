@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./NextGen.module.scss";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
@@ -35,7 +36,7 @@ export default function NextGenCollections() {
       statusFilter = `&status=${selectedStatus}`;
     }
 
-    let url = `${process.env.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
+    let url = `${env.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setCollections(response.data);

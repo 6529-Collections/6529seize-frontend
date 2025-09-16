@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./MemeLab.module.scss";
 
 import { AuthContext } from "@/components/auth/Auth";
@@ -66,14 +67,14 @@ export default function LabCollection({
   useEffect(() => {
     if (collectionName) {
       const nftsUrl = `${
-        process.env.API_ENDPOINT
+        env.API_ENDPOINT
       }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
       fetchAllPages(nftsUrl).then((responseNftMetas: LabExtendedData[]) => {
         setNftMetas(responseNftMetas);
         if (responseNftMetas.length > 0) {
           const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
           fetchAllPages(
-            `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
+            `${env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
               ","
             )}`
           ).then((responseNfts: any[]) => {
@@ -101,7 +102,7 @@ export default function LabCollection({
   useEffect(() => {
     if (connectedProfile?.consolidation_key) {
       fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${MEMES_CONTRACT}`
+        `${env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${MEMES_CONTRACT}`
       ).then((owners: NftOwner[]) => {
         setNftBalances(owners);
       });

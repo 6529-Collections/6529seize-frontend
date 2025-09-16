@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -14,7 +15,7 @@ interface NavigationHistory {
 
 // DEBUG LOGGER
 const DEBUG_NAV =
-  typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
+  typeof window !== "undefined" && env.NEXT_PUBLIC_DEBUG_NAV === "true";
 const dlog = (...args: unknown[]): void => {
   if (DEBUG_NAV) console.log("[useNavigationHistory]", ...args);
 };

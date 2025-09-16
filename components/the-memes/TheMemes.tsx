@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./TheMemes.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -172,7 +173,7 @@ export default function TheMemesComponent() {
     if (selectedSeason > 0) {
       seasonFilter = `&season=${selectedSeason}`;
     }
-    return `${process.env.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
+    return `${env.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
   };
 
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
@@ -303,7 +304,7 @@ export default function TheMemesComponent() {
       .filter((id) => !nftBalances.some((b) => b.token_id === id));
     if (connectedConsolidationKey && newTokenIds.length > 0) {
       fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${
+        `${env.API_ENDPOINT}/api/nft-owners/consolidation/${
           connectedProfile?.consolidation_key
         }?contract=${MEMES_CONTRACT}&token_id=${newTokenIds.join(",")}`
       ).then((owners: NftOwner[]) => {

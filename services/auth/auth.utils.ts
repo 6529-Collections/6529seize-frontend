@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { safeLocalStorage } from "../../helpers/safeLocalStorage";
@@ -74,12 +75,12 @@ export const setAuthJwt = (
 };
 
 export const getStagingAuth = (): string | null => {
-  return Cookies.get(API_AUTH_COOKIE) ?? process.env.STAGING_API_KEY ?? null;
+  return Cookies.get(API_AUTH_COOKIE) ?? env.STAGING_API_KEY ?? null;
 };
 
 export const getAuthJwt = () => {
-  if (process.env.USE_DEV_AUTH === "true") {
-    return process.env.DEV_MODE_AUTH_JWT ?? null;
+  if (env.USE_DEV_AUTH === "true") {
+    return env.DEV_MODE_AUTH_JWT ?? null;
   }
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
@@ -89,8 +90,8 @@ export const getRefreshToken = () => {
 };
 
 export const getWalletAddress = () => {
-  if (process.env.USE_DEV_AUTH === "true") {
-    return process.env.DEV_MODE_WALLET_ADDRESS ?? null;
+  if (env.USE_DEV_AUTH === "true") {
+    return env.DEV_MODE_WALLET_ADDRESS ?? null;
   }
   return safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY) ?? null;
 };

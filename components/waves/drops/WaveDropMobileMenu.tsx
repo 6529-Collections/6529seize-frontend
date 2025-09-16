@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
@@ -52,7 +53,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     if (longPressTriggered) return;
     if (isTemporaryDrop) return;
 
-    const dropLink = `${process.env.BASE_ENDPOINT}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
+    const dropLink = `${env.BASE_ENDPOINT}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
 
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(dropLink).then(() => {

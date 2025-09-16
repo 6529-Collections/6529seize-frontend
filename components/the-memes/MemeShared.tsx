@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -44,9 +45,9 @@ async function getMetadataProps(
     name = `Meme Lab #${id}`;
   }
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
+    `${env.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
   );
-  let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
+  let image = `${env.BASE_ENDPOINT}/6529io.png`;
   if (response?.data?.length > 0) {
     description = `${name} | ${description}`;
     name = `${response.data[0].name}`;

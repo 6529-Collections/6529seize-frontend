@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { Tooltip } from "react-tooltip";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
@@ -36,7 +37,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     onGifDrop,
   }) => {
     const isMobile = useIsMobileScreen();
-    const gifPickerKey = process.env.TENOR_API_KEY;
+    const gifPickerKey = env.TENOR_API_KEY;
     const gifPickerEnabled = !!gifPickerKey;
     const [showGifPicker, setShowGifPicker] = useState(false);
 

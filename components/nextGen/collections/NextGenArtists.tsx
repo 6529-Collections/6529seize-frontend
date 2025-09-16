@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { Container, Row, Col } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../../../entities/IDBResponse";
@@ -14,7 +15,7 @@ export default function NextGenArtists() {
   >([]);
 
   function fetchResults() {
-    let url = `${process.env.API_ENDPOINT}/api/nextgen/collections`;
+    let url = `${env.API_ENDPOINT}/api/nextgen/collections`;
     fetchUrl(url).then((response: DBResponse) => {
       setArtistCollections(
         response.data.reduce((acc, collection) => {

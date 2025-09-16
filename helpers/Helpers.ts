@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -775,7 +776,7 @@ export const wait = async (ms: number): Promise<void> => {
 };
 
 export const removeBaseEndpoint = (link: string) => {
-  return link.replace(process.env.BASE_ENDPOINT ?? "", "");
+  return link.replace(env.BASE_ENDPOINT ?? "", "");
 };
 
 export const getMetadataForUserPage = (

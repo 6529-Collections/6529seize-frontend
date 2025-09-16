@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 import GradientsComponent from "@/components/6529Gradient/6529Gradient";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -15,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "6529 Gradient",
     description: "Collections",
-    ogImage: `${process.env.BASE_ENDPOINT}/gradients-preview.png`,
+    ogImage: `${env.BASE_ENDPOINT}/gradients-preview.png`,
     twitterCard: "summary_large_image",
   });
 }

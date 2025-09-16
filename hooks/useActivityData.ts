@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { useEffect, useState } from "react";
 import { Transaction } from "../entities/ITransaction";
 import { DBResponse } from "../entities/IDBResponse";
@@ -60,7 +61,7 @@ export function useActivityData(
     }
     
     setFetching(true);
-    let url = `${process.env.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
+    let url = `${env.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
     
     switch (typeFilter) {
       case TypeFilter.SALES:

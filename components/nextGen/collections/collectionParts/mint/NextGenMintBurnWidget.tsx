@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
@@ -136,7 +137,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     mintWrite.reset();
     if (tokenId) {
       setFetchingProofs(true);
-      const url = `${process.env.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
+      const url = `${env.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
       fetchUrl(url).then((response: ProofResponse) => {
         setBurnProofResponse(response);
         setFetchingProofs(false);

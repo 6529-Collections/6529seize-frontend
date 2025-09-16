@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -467,7 +468,7 @@ export default function MemeLabComponent() {
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
-    const nftsUrl = `${process.env.API_ENDPOINT}/api/lab_extended_data`;
+    const nftsUrl = `${env.API_ENDPOINT}/api/lab_extended_data`;
     fetchAllPages(nftsUrl).then((responseNftMetas: LabExtendedData[]) => {
       setNftMetas(responseNftMetas);
       const myCollections: string[] = [];
@@ -480,7 +481,7 @@ export default function MemeLabComponent() {
       if (responseNftMetas.length > 0) {
         const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
         fetchAllPages(
-          `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
+          `${env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
             ","
           )}`
         ).then((responseNfts: any[]) => {

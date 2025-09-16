@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
@@ -24,7 +25,7 @@ export interface AppKitInitializationResult {
  * Debug logger helper to reduce conditional complexity
  */
 function debugLog(message: string, ...args: any[]): void {
-  if (process.env.NODE_ENV === "development") {
+  if (env.NODE_ENV === "development") {
     console.log(`[AppKitInitialization] ${message}`, ...args);
   }
 }

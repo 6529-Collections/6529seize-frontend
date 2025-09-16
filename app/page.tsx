@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
@@ -44,7 +45,7 @@ export default async function HomePage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    ogImage: `${process.env.BASE_ENDPOINT}/6529io-banner.png`,
+    ogImage: `${env.BASE_ENDPOINT}/6529io-banner.png`,
     twitterCard: "summary_large_image",
   });
 }
