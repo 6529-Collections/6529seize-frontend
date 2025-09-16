@@ -5,9 +5,38 @@ jest.mock("../../../../../hooks/isMobileScreen", () => () => false);
 jest.mock("../../../../../contexts/EmojiContext", () => ({
   useEmoji: () => ({ emojiMap: [] }),
 }));
+
+const FALLBACK_BASE_ENDPOINT = "https://6529.io";
+const originalBaseEndpoint =
+  process.env.BASE_ENDPOINT ?? FALLBACK_BASE_ENDPOINT;
+
+process.env.BASE_ENDPOINT = originalBaseEndpoint;
+
+const tweetMock = jest.fn(
+  ({ id, components, onError }: any) => {
+    if (id === "1111111111") {
+      throw new Error("boom");
+    }
+
+    if (id === "2222222222") {
+      const error = new Error("not found");
+      onError?.(error);
+      const NotFound = components?.TweetNotFound;
+      return NotFound ? <NotFound error={error} /> : null;
+    }
+
+    return <div>tweet:{id}</div>;
+  }
+);
+
 jest.mock("react-tweet", () => ({
-  Tweet: ({ id }: any) => <div>tweet:{id}</div>,
+  Tweet: (props: any) => tweetMock(props),
 }));
+
+afterEach(() => {
+  tweetMock.mockClear();
+  process.env.BASE_ENDPOINT = originalBaseEndpoint;
+});
 
 describe("DropPartMarkdown", () => {
   it("renders gif embeds", () => {
@@ -56,5 +85,61 @@ describe("DropPartMarkdown", () => {
     const a = screen.getByRole("link");
     expect(a).not.toHaveAttribute("target");
     expect(a).toHaveAttribute("href", "/page");
+  });
+
+  it("renders a fallback link when tweet data is unavailable", async () => {
+    const content =
+      "[tweet](https://twitter.com/someuser/status/2222222222)";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const fallbackLink = await screen.findByRole("link", {
+      name: /tweet unavailable/i,
+    });
+
+    expect(fallbackLink).toHaveAttribute(
+      "href",
+      "https://twitter.com/someuser/status/2222222222"
+    );
+    expect(fallbackLink).toHaveAttribute("target", "_blank");
+    expect(fallbackLink).toHaveTextContent(/Tweet unavailable/i);
+    expect(fallbackLink).toHaveTextContent(/Open on X/i);
+  });
+
+  it("renders a fallback link when the tweet embed throws", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    try {
+      const content = "[tweet](https://twitter.com/foo/status/1111111111)";
+
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          referencedNfts={[]}
+          partContent={content}
+          onQuoteClick={jest.fn()}
+        />
+      );
+
+      const fallbackLink = await screen.findByRole("link", {
+        name: /tweet unavailable/i,
+      });
+
+      expect(fallbackLink).toHaveAttribute(
+        "href",
+        "https://twitter.com/foo/status/1111111111"
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 });
