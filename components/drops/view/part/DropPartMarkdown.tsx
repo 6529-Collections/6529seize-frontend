@@ -8,6 +8,8 @@ import {
   isValidElement,
   memo,
   ReactNode,
+  useEffect,
+  useState,
   type JSX,
 } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
@@ -41,6 +43,10 @@ import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
 import DropItemChat from "../../../waves/drops/DropItemChat";
 import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
+import {
+  fetchLinkPreview,
+  type LinkPreviewMetadata,
+} from "../../../../services/api/link-preview";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -284,8 +290,27 @@ function DropPartMarkdown({
     },
   ];
 
+  const shouldRenderLinkPreview = (href: string): boolean => {
+    const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
+    const isExternalLink = !!baseEndpoint && !href.startsWith(baseEndpoint);
+
+    if (!isExternalLink) {
+      return false;
+    }
+
+    try {
+      const protocol = new URL(href).protocol;
+      return protocol === "http:" || protocol === "https:";
+    } catch {
+      return false;
+    }
+  };
+
   const isSmartLink = (href: string): boolean => {
-    return smartLinkHandlers.some((handler) => !!handler.parse(href));
+    return (
+      smartLinkHandlers.some((handler) => !!handler.parse(href)) ||
+      shouldRenderLinkPreview(href)
+    );
   };
 
   const aHrefRenderer = ({
@@ -306,7 +331,19 @@ function DropPartMarkdown({
       }
     }
 
-    return renderExternalOrInternalLink(href, props);
+    const anchorRenderData = createAnchorRenderData(href, props);
+
+    if (!shouldRenderLinkPreview(href)) {
+      return anchorRenderData.element;
+    }
+
+    return (
+      <ExternalLinkPreview
+        href={href}
+        anchorProps={anchorRenderData.anchorProps}
+        fallback={anchorRenderData.element}
+      />
+    );
   };
 
   const imgRenderer = ({
@@ -345,30 +382,175 @@ function DropPartMarkdown({
     }
   };
 
-  const renderExternalOrInternalLink = (
+  const createAnchorRenderData = (
     href: string,
     props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
-  ) => {
+  ): {
+    anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps;
+    element: JSX.Element;
+    isExternalLink: boolean;
+  } => {
     const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
-    const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
+    const isExternalLink = !!baseEndpoint && !href.startsWith(baseEndpoint);
+
+    const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {
+      ...props,
+    };
+
+    const originalOnClick = anchorProps.onClick;
+
+    anchorProps.onClick = (event) => {
+      event.stopPropagation();
+      if (originalOnClick) {
+        originalOnClick(event);
+      }
+    };
 
     if (isExternalLink) {
-      props.rel = "noopener noreferrer nofollow";
-      props.target = "_blank";
+      anchorProps.href = href;
+      anchorProps.rel = "noopener noreferrer nofollow";
+      anchorProps.target = "_blank";
     } else {
-      props.href = href.replace(baseEndpoint, "");
+      anchorProps.href = href.replace(baseEndpoint, "");
     }
 
+    return {
+      anchorProps,
+      element: <a {...anchorProps} />,
+      isExternalLink,
+    };
+  };
+
+  type LinkPreviewState =
+    | { readonly status: "loading" }
+    | { readonly status: "error" }
+    | { readonly status: "success"; readonly data: LinkPreviewMetadata };
+
+  const ExternalLinkPreview = ({
+    href,
+    anchorProps,
+    fallback,
+  }: {
+    readonly href: string;
+    readonly anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps;
+    readonly fallback: JSX.Element;
+  }) => {
+    const [state, setState] = useState<LinkPreviewState>({
+      status: "loading",
+    });
+
+    useEffect(() => {
+      let isMounted = true;
+      const controller = new AbortController();
+
+      setState({ status: "loading" });
+
+      try {
+        const maybePromise = fetchLinkPreview(href, {
+          signal: controller.signal,
+        });
+
+        Promise.resolve(maybePromise)
+          .then((metadata) => {
+            if (!isMounted) {
+              return;
+            }
+
+            if (
+              !metadata ||
+              (!metadata.title && !metadata.description && !metadata.image)
+            ) {
+              setState({ status: "error" });
+              return;
+            }
+
+            setState({ status: "success", data: metadata });
+          })
+          .catch((error: unknown) => {
+            if (!isMounted) {
+              return;
+            }
+
+            if (error instanceof DOMException && error.name === "AbortError") {
+              return;
+            }
+
+            setState({ status: "error" });
+          });
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setState({ status: "error" });
+      }
+
+      return () => {
+        isMounted = false;
+        controller.abort();
+      };
+    }, [href]);
+
+    if (state.status !== "success") {
+      return fallback;
+    }
+
+    const { children: _children, className, ...restAnchorProps } = anchorProps;
+    const { title, description, image, siteName } = state.data;
+
+    let hostLabel: string | undefined;
+    try {
+      hostLabel = siteName ?? new URL(href).hostname;
+    } catch {
+      hostLabel = siteName ?? href;
+    }
+
+    const imageAlt = title ?? hostLabel ?? href;
+
     return (
-      <a
-        onClick={(e) => {
-          e.stopPropagation();
-          if (props.onClick) {
-            props.onClick(e);
-          }
-        }}
-        {...props}
-      />
+      <div
+        className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1"
+        data-testid="link-preview-card"
+      >
+        <div className="tw-flex-1 tw-min-w-0">
+          <a
+            {...restAnchorProps}
+            className={`tw-block tw-no-underline tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-500 ${
+              className ?? ""
+            }`}
+          >
+            <div className="tw-flex tw-items-start tw-gap-x-3">
+              {image && (
+                <div className="tw-w-20 tw-h-20 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+                  <img
+                    src={image}
+                    alt={imageAlt}
+                    className="tw-w-full tw-h-full tw-object-cover"
+                  />
+                </div>
+              )}
+              <div className="tw-flex tw-flex-col tw-gap-y-1 tw-min-w-0">
+                {hostLabel && (
+                  <span className="tw-text-xs tw-text-iron-400 tw-truncate">
+                    {hostLabel}
+                  </span>
+                )}
+                {title && (
+                  <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-truncate">
+                    {title}
+                  </span>
+                )}
+                {description && (
+                  <span className="tw-text-xs tw-text-iron-300 tw-break-words">
+                    {description}
+                  </span>
+                )}
+              </div>
+            </div>
+          </a>
+        </div>
+        <ChatItemHrefButtons href={href} />
+      </div>
     );
   };
 
