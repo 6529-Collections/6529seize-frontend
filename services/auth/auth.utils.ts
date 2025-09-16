@@ -5,11 +5,6 @@ import { API_AUTH_COOKIE } from "../../constants";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 
-// TODO: remove these cookies once migration is complete
-const WALLET_ADDRESS_COOKIE = "wallet-address";
-const WALLET_REFRESH_TOKEN_COOKIE = "wallet-refresh-token";
-const WALLET_ROLE_COOKIE = "wallet-role";
-
 const WALLET_ADDRESS_STORAGE_KEY = "6529-wallet-address";
 const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
 const WALLET_ROLE_STORAGE_KEY = "6529-wallet-role";
@@ -24,29 +19,6 @@ const getJwtExpiration = (jwt: string): number => {
     exp: number;
   }>(jwt);
   return decodedJwt.exp;
-};
-
-// TODO: remove these cookies once migration is complete
-export const migrateCookiesToLocalStorage = () => {
-  const walletAddress = Cookies.get(WALLET_ADDRESS_COOKIE);
-  const walletRefreshToken = Cookies.get(WALLET_REFRESH_TOKEN_COOKIE);
-  const walletRole = Cookies.get(WALLET_ROLE_COOKIE);
-
-  if (walletAddress) {
-    safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, walletAddress);
-    Cookies.remove(WALLET_ADDRESS_COOKIE);
-  }
-  if (walletRefreshToken) {
-    safeLocalStorage.setItem(
-      WALLET_REFRESH_TOKEN_STORAGE_KEY,
-      walletRefreshToken
-    );
-    Cookies.remove(WALLET_REFRESH_TOKEN_COOKIE);
-  }
-  if (walletRole) {
-    safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, walletRole);
-    Cookies.remove(WALLET_ROLE_COOKIE);
-  }
 };
 
 export const setAuthJwt = (

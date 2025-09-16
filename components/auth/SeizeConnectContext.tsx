@@ -10,11 +10,7 @@ import React, {
   useRef,
 } from "react";
 
-import {
-  migrateCookiesToLocalStorage,
-  getWalletAddress,
-  removeAuthJwt,
-} from "../../services/auth/auth.utils";
+import { getWalletAddress, removeAuthJwt } from "../../services/auth/auth.utils";
 import { WalletInitializationError } from "../../src/errors/wallet";
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from "@reown/appkit/react";
 import { isAddress, getAddress } from "viem";
@@ -341,10 +337,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isInitialized
   } = useConsolidatedWalletState();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    migrateCookiesToLocalStorage();
-  }, []);
 
   useEffect(() => {
     // Wait for initialization to complete before processing account changes

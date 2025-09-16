@@ -1,4 +1,4 @@
-import { setAuthJwt, getAuthJwt, getStagingAuth, removeAuthJwt, migrateCookiesToLocalStorage, getWalletAddress } from '../../services/auth/auth.utils';
+import { setAuthJwt, getAuthJwt, getStagingAuth, removeAuthJwt, getWalletAddress } from '../../services/auth/auth.utils';
 import Cookies from 'js-cookie';
 import { safeLocalStorage } from '../../helpers/safeLocalStorage';
 import { jwtDecode } from 'jwt-decode';
@@ -39,20 +39,6 @@ describe('auth.utils', () => {
     (Cookies.get as jest.Mock).mockReturnValueOnce(undefined);
     process.env.STAGING_API_KEY = 'e';
     expect(getStagingAuth()).toBe('e');
-  });
-
-  it('migrateCookiesToLocalStorage moves and removes cookies', () => {
-    (Cookies.get as jest.Mock)
-      .mockReturnValueOnce('addr')
-      .mockReturnValueOnce('refresh')
-      .mockReturnValueOnce('role');
-    migrateCookiesToLocalStorage();
-    expect(safeLocalStorage.setItem).toHaveBeenCalledWith('6529-wallet-address', 'addr');
-    expect(Cookies.remove).toHaveBeenCalledWith('wallet-address');
-    expect(safeLocalStorage.setItem).toHaveBeenCalledWith('6529-wallet-refresh-token', 'refresh');
-    expect(Cookies.remove).toHaveBeenCalledWith('wallet-refresh-token');
-    expect(safeLocalStorage.setItem).toHaveBeenCalledWith('6529-wallet-role', 'role');
-    expect(Cookies.remove).toHaveBeenCalledWith('wallet-role');
   });
 
   it('getWalletAddress respects dev mode and storage', () => {
