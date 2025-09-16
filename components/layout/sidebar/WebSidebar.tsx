@@ -4,14 +4,14 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import DesktopSidebarNav from "./DesktopSidebarNav";
-import DesktopSidebarUser from "./DesktopSidebarUser";
+import WebSidebarNav from "./WebSidebarNav";
+import WebSidebarUser from "./WebSidebarUser";
 import CollectionsSubmenu from "./CollectionsSubmenu";
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../hooks/useIdentity";
 
-interface DesktopSidebarProps {
+interface WebSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   isCollectionsSubmenuOpen: boolean;
@@ -22,7 +22,7 @@ interface DesktopSidebarProps {
   sidebarWidth: string;
 }
 
-function DesktopSidebar({
+function WebSidebar({
   isCollapsed,
   onToggle,
   isCollectionsSubmenuOpen,
@@ -31,7 +31,7 @@ function DesktopSidebar({
   isOffcanvasOpen,
   onCloseOffcanvas,
   sidebarWidth,
-}: DesktopSidebarProps) {
+}: WebSidebarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { address } = useSeizeConnectContext();
   const { profile } = useIdentity({
@@ -59,21 +59,23 @@ function DesktopSidebar({
   // Sidebar content
   const inner = (
     <div
-      className="tw-relative tw-z-50 tw-h-full  tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-white/20 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
+      className="tw-relative tw-z-50 tw-h-full  tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
       style={{ width: sidebarWidth }}
       aria-label="Primary sidebar"
     >
       <div className="tw-flex tw-flex-col tw-h-full">
         <div
-          className={`tw-flex tw-shrink-0 tw-py-3 ${
+          className={`tw-shrink-0 tw-py-3 ${
             isVisuallyCollapsed
-              ? "tw-flex-col tw-items-center tw-gap-y-4 tw-px-2"
-              : "tw-items-center tw-justify-between tw-px-4"
+              ? "tw-flex tw-flex-col tw-items-center tw-gap-y-3 tw-px-2"
+              : "tw-flex tw-items-center tw-justify-between tw-px-4"
           }`}
         >
           <Link
             href="/"
-            className={isVisuallyCollapsed ? "tw-mx-auto" : "tw-ml-1.5"}
+            className={`tw-inline-flex tw-items-center ${
+              isVisuallyCollapsed ? "" : "tw-ml-1.5"
+            }`}
           >
             <Image
               alt="6529Seize"
@@ -87,7 +89,9 @@ function DesktopSidebar({
           <button
             type="button"
             onClick={onToggle}
-            className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm tw-flex-shrink-0"
+            className={`tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm ${
+              isVisuallyCollapsed ? "tw-self-center" : ""
+            }`}
             aria-label={isVisuallyCollapsed ? "Expand" : "Collapse"}
             aria-expanded={!isVisuallyCollapsed}
             data-tooltip-id="sidebar-tooltip"
@@ -103,14 +107,14 @@ function DesktopSidebar({
         </div>
 
         <div className="tw-flex-1">
-          <DesktopSidebarNav
+          <WebSidebarNav
             isCollapsed={isVisuallyCollapsed}
             isCollectionsOpen={isCollectionsSubmenuOpen}
             onCollectionsClick={handleCollectionsClick}
           />
         </div>
 
-        <DesktopSidebarUser
+        <WebSidebarUser
           isCollapsed={isVisuallyCollapsed}
           showUserMenu={showUserMenu}
           onToggleUserMenu={onToggleUserMenu}
@@ -204,4 +208,4 @@ function DesktopSidebar({
   );
 }
 
-export default DesktopSidebar;
+export default WebSidebar;

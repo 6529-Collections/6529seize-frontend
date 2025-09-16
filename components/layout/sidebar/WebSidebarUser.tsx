@@ -19,19 +19,19 @@ import {
 } from "@/helpers/AllowlistToolHelpers";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
-interface DesktopSidebarUserProps {
+interface WebSidebarUserProps {
   isCollapsed: boolean;
   showUserMenu: boolean;
   onToggleUserMenu: () => void;
   profile: any;
 }
 
-function DesktopSidebarUser({
+function WebSidebarUser({
   isCollapsed,
   showUserMenu,
   onToggleUserMenu,
   profile: parentProfile,
-}: DesktopSidebarUserProps) {
+}: WebSidebarUserProps) {
   const { address, seizeConnect } = useSeizeConnectContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -54,8 +54,8 @@ function DesktopSidebarUser({
 
   const profile = parentProfile || localProfile;
 
-  const containerClasses = `tw-mt-auto tw-relative tw-w-full tw-group ${
-    isCollapsed ? "tw-px-2 tw-py-3" : "tw-px-4 tw-py-4"
+  const containerClasses = `tw-mt-auto tw-relative tw-w-full tw-group tw-py-4 ${
+    isCollapsed ? "tw-px-2" : "tw-px-4"
   }`;
 
   if (!address) {
@@ -88,13 +88,13 @@ function DesktopSidebarUser({
     return (
       <div className={containerClasses}>
         <div
-          className={`tw-flex tw-items-center tw-w-full tw-rounded-xl ${
+          className={`tw-flex tw-items-center tw-w-full tw-rounded-xl tw-py-2 ${
             isCollapsed
-              ? "tw-justify-center tw-px-2 tw-py-2"
-              : "tw-justify-start tw-px-3 tw-gap-x-3 tw-py-2"
+              ? "tw-justify-center tw-px-2"
+              : "tw-justify-start tw-px-3 tw-gap-x-3"
           }`}
         >
-          <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-800 tw-animate-pulse" />
+          <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-800 tw-animate-pulse tw-flex-shrink-0" />
           {!isCollapsed && (
             <div className="tw-flex tw-flex-col tw-gap-y-2 tw-flex-1">
               <div className="tw-h-4 tw-w-24 tw-bg-iron-800 tw-rounded tw-animate-pulse" />
@@ -117,10 +117,10 @@ function DesktopSidebarUser({
       <button
         ref={buttonRef}
         onClick={onToggleUserMenu}
-        className={`tw-group/user tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900 ${
+        className={`tw-group/user  tw-py-2 tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900 ${
           isCollapsed
             ? "tw-justify-center tw-px-2"
-            : "tw-justify-start tw-px-3 tw-gap-x-3 tw-py-2"
+            : "tw-justify-start tw-px-3 tw-gap-x-3"
         }`}
         aria-label="Open user menu"
         aria-expanded={showUserMenu}
@@ -156,4 +156,4 @@ function DesktopSidebarUser({
   );
 }
 
-export default memo(DesktopSidebarUser);
+export default memo(WebSidebarUser);

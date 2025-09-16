@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import DesktopLayout from "@/components/layout/DesktopLayout";
+import WebLayout from "@/components/layout/WebLayout";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { useMemo } from "react";
 import FooterWrapper from "@/FooterWrapper";
@@ -23,7 +23,7 @@ export default function LayoutWrapper({
     return isApp ? (
       <MobileLayout>{children}</MobileLayout>
     ) : (
-      <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
+      <WebLayout isSmall={isSmall}>{children}</WebLayout>
     );
   }, [isApp, isSmall, children]);
 

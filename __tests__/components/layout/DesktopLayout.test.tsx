@@ -19,9 +19,9 @@ jest.mock("next/navigation", () => ({
   usePathname: () => pathname,
 }));
 
-const DesktopLayout = require("@/components/layout/DesktopLayout").default;
+const WebLayout = require("@/components/layout/WebLayout").default;
 
-describe("DesktopLayout", () => {
+describe("WebLayout", () => {
   beforeEach(() => {
     registerRef.mockClear();
     setHeaderRef.mockClear();
@@ -29,7 +29,7 @@ describe("DesktopLayout", () => {
 
   it("renders header without breadcrumb on home page", () => {
     pathname = "/";
-    render(<DesktopLayout>child</DesktopLayout>);
+    render(<WebLayout>child</WebLayout>);
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.queryByText("Home")).not.toBeInTheDocument();
     expect(registerRef).toHaveBeenCalledWith("header", expect.any(HTMLElement));
@@ -38,7 +38,7 @@ describe("DesktopLayout", () => {
 
   it("shows breadcrumb when not on home page", () => {
     pathname = "/page";
-    render(<DesktopLayout>child</DesktopLayout>);
+    render(<WebLayout>child</WebLayout>);
     expect(screen.getByText("Home")).toBeInTheDocument();
     const wrapper = screen.getByTestId("header").parentElement as HTMLElement;
     expect(wrapper.className).not.toContain("tw-sticky");
@@ -46,7 +46,7 @@ describe("DesktopLayout", () => {
 
   it("adds sticky classes for stream view", () => {
     pathname = "/my-stream/test";
-    render(<DesktopLayout>child</DesktopLayout>);
+    render(<WebLayout>child</WebLayout>);
     const wrapper = screen.getByTestId("header").parentElement as HTMLElement;
     expect(wrapper.className).toContain("tw-sticky");
   });

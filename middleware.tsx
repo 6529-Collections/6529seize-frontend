@@ -124,16 +124,11 @@ export async function middleware(req: NextRequest) {
           }
 
           // Default: redirect to /waves with all params preserved
-          const wave = req.nextUrl.searchParams.get("wave");
-          const serialNo = req.nextUrl.searchParams.get("serialNo");
-
           url.pathname = "/waves";
-          const params = new URLSearchParams();
-          if (wave) params.set("wave", wave);
-          if (serialNo) {
-            // Remove trailing slash from serialNo if present
-            const cleanSerialNo = serialNo.replace(/\/$/, "");
-            params.set("drop", cleanSerialNo);
+          const params = new URLSearchParams(req.nextUrl.searchParams);
+          const viewParam = params.get("view");
+          if (viewParam) {
+            params.delete("view");
           }
           url.search = params.toString() ? `?${params.toString()}` : "";
           return NextResponse.redirect(url, 301);

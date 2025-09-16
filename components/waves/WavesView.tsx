@@ -1,25 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
 import CreateWaveModal from "./create-wave/CreateWaveModal";
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
-import {
-  ActiveDropAction,
-  ActiveDropState,
-} from "../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import { DropInteractionParams } from "../waves/drops/Drop";
 import PrimaryButton from "../utils/button/PrimaryButton";
 
 const WavesView: React.FC = () => {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
@@ -29,43 +21,6 @@ const WavesView: React.FC = () => {
     const waveId = searchParams?.get('wave') || null;
     setSerialisedWaveId(waveId);
   }, [searchParams]);
-
-  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-
-  const onDropContentClick = (drop: ExtendedDrop) => {
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.set('wave', drop.wave.id);
-    params.set('serialNo', `${drop.serial_no}/`);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  useEffect(() => {
-    // Use functional update to avoid unnecessary re-renders
-    setActiveDrop(prevActiveDrop => {
-      // Only update if there's actually an active drop to clear
-      return prevActiveDrop !== null ? null : prevActiveDrop;
-    });
-  }, [serialisedWaveId]);
-
-  const onReply = (param: DropInteractionParams) => {
-    setActiveDrop({
-      action: ActiveDropAction.REPLY,
-      drop: param.drop,
-      partId: param.partId,
-    });
-  };
-
-  const onQuote = (param: DropInteractionParams) => {
-    setActiveDrop({
-      action: ActiveDropAction.QUOTE,
-      drop: param.drop,
-      partId: param.partId,
-    });
-  };
-
-  const onCancelReplyQuote = () => {
-    setActiveDrop(null);
-  };
 
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
@@ -95,8 +50,8 @@ const WavesView: React.FC = () => {
   return (
     <>
       <BrainContent
-        activeDrop={activeDrop}
-        onCancelReplyQuote={onCancelReplyQuote}>
+        activeDrop={null}
+        onCancelReplyQuote={() => {}}>
         {component}
       </BrainContent>
 
