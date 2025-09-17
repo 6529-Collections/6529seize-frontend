@@ -75,6 +75,42 @@ const matchesDomainOrSubdomain = (host: string, domain: string): boolean => {
   return host === domain || host.endsWith(`.${domain}`);
 };
 
+const ART_BLOCKS_FLAG_CANDIDATES = [
+  "VITE_FEATURE_AB_CARD",
+  "NEXT_PUBLIC_VITE_FEATURE_AB_CARD",
+  "NEXT_PUBLIC_FEATURE_AB_CARD",
+  "FEATURE_AB_CARD",
+] as const;
+
+const parseFeatureFlagValue = (value: string): boolean => {
+  const normalized = value.trim().toLowerCase();
+
+  if (!normalized) {
+    return false;
+  }
+
+  if (["1", "true", "on", "yes", "enabled"].includes(normalized)) {
+    return true;
+  }
+
+  if (["0", "false", "off", "no", "disabled"].includes(normalized)) {
+    return false;
+  }
+
+  return Boolean(normalized);
+};
+
+const isArtBlocksCardEnabled = (): boolean => {
+  for (const flagName of ART_BLOCKS_FLAG_CANDIDATES) {
+    const value = process.env[flagName];
+    if (value !== undefined) {
+      return parseFeatureFlagValue(value);
+    }
+  }
+
+  return true;
+};
+
 const parseTwitterLink = (
   href: string
 ): { href: string; tweetId: string } | null => {
@@ -176,26 +212,12 @@ const renderSeizeQuote = (
 };
 
 const shouldUseOpenGraphPreview = (href: string): boolean => {
-  const baseEndpoint = process.env.BASE_ENDPOINT;
 
   try {
     const parsed = new URL(href);
     const protocol = parsed.protocol.toLowerCase();
     if (protocol !== "http:" && protocol !== "https:") {
       return false;
-    }
-
-    if (baseEndpoint) {
-      try {
-        const baseUrl = new URL(baseEndpoint);
-        if (parsed.host === baseUrl.host) {
-          return false;
-        }
-      } catch {
-        if (href.startsWith(baseEndpoint)) {
-          return false;
-        }
-      }
     }
 
     const hostname = parsed.hostname.toLowerCase();
@@ -297,7 +319,10 @@ const createSmartLinkHandlers = (
       parse: parseGifLink,
       render: (url: string) => renderGifEmbed(url),
     },
-    {
+  ];
+
+  if (isArtBlocksCardEnabled()) {
+    handlers.push({
       parse: parseArtBlocksLink,
       render: (
         artBlocksId: { tokenId: string; contract?: string },
@@ -313,8 +338,8 @@ const createSmartLinkHandlers = (
           </div>
         );
       },
-    }
-  ];
+    });
+  }
 
 
 
@@ -423,4 +448,3 @@ export const createLinkRenderer = ({
     renderImage,
   };
 };
-

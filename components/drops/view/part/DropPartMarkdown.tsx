@@ -1,4 +1,10 @@
-import { memo, useMemo, type ComponentPropsWithoutRef } from "react";
+import {
+  memo,
+  useMemo,
+  type ComponentPropsWithoutRef,
+  type ElementType,
+  type ReactNode,
+} from "react";
 import Markdown, { type Components, type ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -136,17 +142,28 @@ function DropPartMarkdown({
       ): string => classes.filter(Boolean).join(" ");
 
       const headingClassName = "tw-text-iron-200 tw-break-words word-break";
-      const createHeadingRenderer = <T extends keyof JSX.IntrinsicElements>(
-        Tag: T
-      ) =>
-        ({ children, className, ...props }: ComponentPropsWithoutRef<T> & ExtraProps) => (
-          <Tag
-            {...props}
-            className={mergeClassNames(headingClassName, className)}
-          >
-            {customRenderer(children)}
-          </Tag>
-        );
+
+      type MarkdownRendererProps<T extends ElementType> = ComponentPropsWithoutRef<T> &
+        ExtraProps & { children?: ReactNode; className?: string };
+
+      const createHeadingRenderer = <T extends ElementType>(Tag: T) =>
+        ({
+          children,
+          className,
+          ...props
+        }: MarkdownRendererProps<T>) => {
+          const TagComponent = Tag;
+          const mergedProps = {
+            ...(props as Record<string, unknown>),
+            className: mergeClassNames(headingClassName, className),
+          };
+
+          return (
+            <TagComponent {...(mergedProps as any)}>
+              {customRenderer(children)}
+            </TagComponent>
+          );
+        };
 
       return {
         h1: createHeadingRenderer("h1"),
