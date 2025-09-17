@@ -80,7 +80,6 @@ export enum CommunityMembersSortOption {
 
 export enum AboutSection {
   MEMES = "the-memes",
-  MEMES_CALENDAR = "memes-calendar",
   MEME_LAB = "meme-lab",
   GRADIENTS = "6529-gradient",
   FAQ = "faq",

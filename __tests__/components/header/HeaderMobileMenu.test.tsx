@@ -1,5 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import HeaderMobileMenu from '../../../components/header/HeaderMobileMenu';
 
 // Mock dependencies
@@ -529,7 +528,6 @@ describe('HeaderMobileMenu', () => {
 
       // NFTs section
       expect(screen.getByText('The Memes')).toBeInTheDocument();
-      expect(screen.getByText('Memes Calendar')).toBeInTheDocument();
       expect(screen.getByText('Minting')).toBeInTheDocument();
       expect(screen.getByText('Nakamoto Threshold')).toBeInTheDocument();
       expect(screen.getByText('Meme Lab')).toBeInTheDocument();

@@ -3,21 +3,33 @@ import { render, screen } from "@testing-library/react";
 import LadysabrinaPage from "@/app/author/ladysabrina/page";
 import DisneyDeekayPage from "@/app/blog/disney-deekay-their-secret-to-animation/page";
 import EducationCollabPage from "@/app/education/education-collaboration-form/page";
-import GMRedirectPage from "@/app/gm-or-die-small-mp4/page";
+import GMRedirectPage, {
+  generateMetadata as generateGMMetadata,
+} from "@/app/gm-or-die-small-mp4/page";
 import CryptoAdzPage from "@/app/museum/6529-fund-szn1/cryptoadz/page";
 import EntretiemposPage from "@/app/museum/6529-fund-szn1/entretiempos/page";
 import JiometoryPage from "@/app/museum/6529-fund-szn1/jiometory-no-compute/page";
 import ProtoglyphPage from "@/app/museum/6529-fund-szn1/proof-grails-protoglyph/page";
 import WallPage from "@/app/museum/6529-fund-szn1/proof-grails-wall/page";
 import KeyTrialPage from "@/app/museum/6529-fund-szn1/the-key-the-trial/page";
+import { redirect } from "next/navigation";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(),
+}));
+
+const redirectMock = redirect as jest.MockedFunction<typeof redirect>;
 
 const getTitle = () => document.querySelector("title")?.textContent;
 const getCanonical = () =>
   document.querySelector('link[rel="canonical"]')?.getAttribute("href");
 
 describe("static SEO pages render correctly", () => {
+  beforeEach(() => {
+    redirectMock.mockClear();
+  });
+
   it("author page renders with canonical link", () => {
     render(<LadysabrinaPage />);
     expect(getTitle()).toBe("Sabrina Khan, Author at 6529.io");
@@ -48,12 +60,16 @@ describe("static SEO pages render correctly", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("gm or die redirect page shows redirect meta", () => {
-    render(<GMRedirectPage />);
-    expect(getTitle()).toBe("Redirecting...");
-    const refresh = document.querySelector('meta[http-equiv="refresh"]');
-    expect(refresh?.getAttribute("content")).toContain("gm-or-die-small.mp4");
-    expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
+  it("gm or die redirect page triggers a video redirect", () => {
+    GMRedirectPage();
+    expect(redirectMock).toHaveBeenCalledWith(
+      "https://videos.files.wordpress.com/Pr49XLee/gm-or-die-small.mp4"
+    );
+  });
+
+  it("gm or die metadata exposes redirecting title", async () => {
+    const metadata = await generateGMMetadata();
+    expect(metadata.title).toBe("Redirecting...");
   });
 
   it("cryptoadz museum page renders", () => {

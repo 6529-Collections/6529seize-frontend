@@ -20,7 +20,6 @@ import AboutHTML from "./AboutHTML";
 import AboutLicense from "./AboutLicense";
 import AboutMemeLab from "./AboutMemeLab";
 import AboutMemes from "./AboutMemes";
-import AboutMemesCalendar from "./AboutMemesCalendar";
 import AboutMinting from "./AboutMinting";
 import AboutNakamotoThreshold from "./AboutNakamotoThreshold";
 import AboutNFTDelegation from "./AboutNFTDelegation";
@@ -43,8 +42,6 @@ export default function About({ section }: { readonly section: AboutSection }) {
     switch (section) {
       case AboutSection.MEMES:
         return <AboutMemes />;
-      case AboutSection.MEMES_CALENDAR:
-        return <AboutMemesCalendar />;
       case AboutSection.MEME_LAB:
         return <AboutMemeLab />;
       case AboutSection.GRADIENTS:
@@ -135,12 +132,6 @@ function AboutMenu({
           currentSection={currentSection}
         />
       )}
-      <MenuItem
-        section={AboutSection.MEMES_CALENDAR}
-        title="Memes Calendar"
-        setSection={setSection}
-        currentSection={currentSection}
-      />
       <MenuItem
         section={AboutSection.MEME_LAB}
         title="Meme Lab"

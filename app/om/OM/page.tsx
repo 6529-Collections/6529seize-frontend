@@ -1,16 +1,10 @@
-import React from "react";
+import { redirect } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 
-const IndexPage = () => (
-  <div>
-    <title>Redirecting...</title>
-    <meta httpEquiv="refresh" content="0;url=/om/" />
-    <p>
-      You are being redirected to <a href="/om/">/om/</a>
-    </p>
-  </div>
-);
+const IndexPage = () => {
+  redirect("/om/");
+};
 
 export default IndexPage;
 

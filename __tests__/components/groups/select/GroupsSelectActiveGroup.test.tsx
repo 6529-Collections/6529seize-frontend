@@ -39,7 +39,7 @@ describe('GroupsSelectActiveGroup', () => {
 
     renderComponent('1');
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...', { selector: 'div' })).toBeInTheDocument();
     expect(capturedProps).toBeNull();
   });
 
