@@ -21,7 +21,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
       {/* Wave name header with toggle button */}
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-6 tw-py-3">
         <div className="tw-flex tw-items-center tw-gap-x-3">
-          <div className="tw-size-8 tw-flex-shrink-0">
+          <div className="tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
             <WavePicture
               name={wave.name}
               picture={wave.picture}

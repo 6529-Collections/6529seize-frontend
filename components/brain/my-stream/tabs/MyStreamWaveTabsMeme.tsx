@@ -109,11 +109,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   return (
     <>
       {" "}
-      <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3  tw-bg-iron-950">
+      <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
         {/* Title, toggle button and submit button */}
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4 tw-px-6 tw-pt-4">
+        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4 tw-px-6 tw-py-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            <div className="tw-size-9 tw-flex-shrink-0 tw-ring-2 tw-ring-white/10 tw-rounded-full">
+            <div className="tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
               <WavePicture
                 name={wave.name}
                 picture={wave.picture}
@@ -148,7 +148,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-t tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-b-0">
           <MyStreamWaveDesktopTabs
             activeTab={activeContentTab}
             wave={wave}

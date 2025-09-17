@@ -168,8 +168,8 @@ const UnifiedWavesListWaves = forwardRef<
             </section>
         )}
 
-        {/* Add divider between pinned and regular waves */}
-        {!hideHeaders && pinnedWaves.length > 0 && regularWaves.length > 0 && (
+        {/* Add divider between pinned and regular waves (only for waves, not messages) */}
+        {!hideHeaders && !hidePin && pinnedWaves.length > 0 && regularWaves.length > 0 && (
           <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
         )}
 

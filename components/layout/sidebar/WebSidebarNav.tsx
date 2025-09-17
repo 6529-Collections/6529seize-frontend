@@ -9,16 +9,22 @@ import { AboutSection } from "@/enums";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useCollectionsNavigation } from "@/hooks/useCollectionsNavigation";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import Squares2X2Icon from "@/components/common/icons/Squares2X2Icon";
 import BellIcon from "@/components/common/icons/BellIcon";
 import UsersIcon from "@/components/common/icons/UsersIcon";
-import { WrenchIcon, DocumentTextIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  WrenchIcon,
+  DocumentTextIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 import { UserIcon } from "@heroicons/react/24/outline";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
-import WebSidebarExpandableItem from "./nav/WebSidebarExpandableItem";
+import WebSidebarExpandable from "./nav/WebSidebarExpandable";
 import { SidebarSection } from "@/components/navigation/navTypes";
 import { COLLECTIONS_ROUTES } from "@/constants/sidebar";
 import { useKey } from "react-use";
@@ -32,15 +38,6 @@ interface WebSidebarNavProps {
   onCollectionsClick?: () => void;
 }
 
-type NavItem = {
-  type: "route" | "action";
-  name: string;
-  href?: string;
-  onClick?: () => void;
-  icon: React.ComponentType<{ className?: string }>;
-  iconSizeClass?: string;
-};
-
 export default function WebSidebarNav({
   isCollapsed = false,
   isCollectionsOpen = false,
@@ -53,6 +50,15 @@ export default function WebSidebarNav({
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
   const { handleCollectionsClick } = useCollectionsNavigation();
+
+  // Notification indicators
+  const { haveUnreadNotifications } = useUnreadNotifications(
+    connectedProfile?.handle ?? null
+  );
+  const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
+    type: "messages",
+    handle: connectedProfile?.handle ?? null,
+  });
 
   // Local state for expandable sections
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -74,82 +80,35 @@ export default function WebSidebarNav({
     ? `/${address}`
     : null;
 
-  // Primary navigation items
-  const navItems: NavItem[] = [
-    {
-      type: "route" as const,
-      name: "Home",
-      href: "/",
-      icon: HomeIcon,
-    },
-    {
-      type: "route" as const,
-      name: "Waves",
-      href: "/waves",
-      icon: WavesIcon,
-    },
-    {
-      type: "route" as const,
-      name: "Messages",
-      href: "/messages",
-      icon: ChatBubbleIcon,
-    },
-    {
-      type: "route" as const,
-      name: "Network",
-      href: "/network",
-      icon: UsersIcon,
-    },
-    {
-      type: "action" as const,
-      name: "Collections",
-      onClick: () => handleCollectionsClick(onCollectionsClick),
-      icon: Squares2X2Icon,
-    },
-    {
-      type: "route" as const,
-      name: "Notifications",
-      href: "/notifications",
-      icon: BellIcon,
-    },
-    ...(profilePath
-      ? [
-          {
-            type: "route" as const,
-            name: "Profile",
-            href: profilePath,
-            icon: UserIcon,
-            iconSizeClass: "tw-h-6 tw-w-6",
-          },
-        ]
-      : []),
-    {
-      type: "action" as const,
-      name: "Search",
-      onClick: (e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        setIsSearchOpen(true);
-      },
-      icon: MagnifyingGlassIcon,
-    },
-  ];
-
   // Expandable sections (memoized as it has conditional logic)
   const sections = useMemo<SidebarSection[]>(
     () => [
       {
+        key: "network",
+        name: "Network",
+        icon: UsersIcon,
+        items: [
+          { name: "Identities", href: "/network" },
+          { name: "Activity", href: "/network/activity" },
+          { name: "Groups", href: "/network/groups" },
+          { name: "NFT Activity", href: "/nft-activity" },
+        ],
+        subsections: [
+          {
+            name: "Metrics",
+            items: [
+              { name: "Definitions", href: "/network/metrics" },
+              { name: "Network Stats", href: "/network/stats" },
+              { name: "Levels", href: "/network/levels" },
+            ],
+          },
+        ],
+      },
+      {
         key: "tools",
         name: "Tools",
         icon: WrenchIcon,
-        items: [
-          ...(appWalletsSupported
-            ? [{ name: "App Wallets", href: "/tools/app-wallets" }]
-            : []),
-          { name: "API", href: "/tools/api" },
-          { name: "EMMA", href: "/emma" },
-          { name: "Block Finder", href: "/meme-blocks" },
-          { name: "Open Data", href: "/open-data" },
-        ],
+        items: [],
         subsections: [
           {
             name: "NFT Delegation",
@@ -183,6 +142,18 @@ export default function WebSidebarNav({
                 : []),
               { name: "Memes Accounting", href: "/meme-accounting" },
               { name: "Memes Gas", href: "/meme-gas" },
+            ],
+          },
+          {
+            name: "Other Tools",
+            items: [
+              ...(appWalletsSupported
+                ? [{ name: "App Wallets", href: "/tools/app-wallets" }]
+                : []),
+              { name: "API", href: "/tools/api" },
+              { name: "EMMA", href: "/emma" },
+              { name: "Block Finder", href: "/meme-blocks" },
+              { name: "Open Data", href: "/open-data" },
             ],
           },
         ],
@@ -268,33 +239,6 @@ export default function WebSidebarNav({
     [appWalletsSupported, capacitor.isIos, country]
   );
 
-  // Simplified active state logic
-  const isActive = useCallback(
-    (item: NavItem): boolean => {
-      // Special case for Collections
-      if (item.name === "Collections") {
-        return (
-          isCollectionsOpen ||
-          COLLECTIONS_ROUTES.some((route) => pathname?.startsWith(route))
-        );
-      }
-
-      // Home page exact match
-      if (item.href === "/") {
-        return pathname === "/";
-      }
-
-      // Messages special case
-      if (item.name === "Messages") {
-        return pathname?.startsWith("/messages") || false;
-      }
-
-      // Default: check if path starts with href
-      return pathname?.startsWith(item.href || "") || false;
-    },
-    [pathname, isCollectionsOpen]
-  );
-
   // Toggle section expansion
   const toggleSection = (key: string) => {
     setExpandedSections((prev) =>
@@ -304,10 +248,32 @@ export default function WebSidebarNav({
     );
   };
 
-  // Auto-close expanded sections on route change
+  // Auto-manage expanded sections based on current route
   useEffect(() => {
-    setExpandedSections([]);
-  }, [pathname]);
+    if (!pathname) return;
+
+    // Find which section contains the current route
+    let activeSection: string | null = null;
+    for (const section of sections) {
+      const hasActiveItem =
+        section.items.some(item => pathname === item.href) ||
+        section.subsections?.some(sub =>
+          sub.items.some(item => pathname === item.href)
+        );
+
+      if (hasActiveItem) {
+        activeSection = section.key;
+        break;
+      }
+    }
+
+    // Set expanded sections based on active route
+    if (activeSection) {
+      setExpandedSections([activeSection]);
+    } else {
+      setExpandedSections([]);
+    }
+  }, [pathname, sections]); // Run when pathname changes
 
   return (
     <>
@@ -318,37 +284,119 @@ export default function WebSidebarNav({
         aria-label="Desktop navigation"
       >
         <ul className="tw-list-none tw-m-0 tw-p-0">
-          {/* Primary navigation items */}
-          {navItems.map((item) => {
-            // Search should always appear inactive (gray)
-            const active = item.name === "Search" ? false : isActive(item);
-            return (
-              <li key={item.name}>
-                <WebSidebarNavItem
-                  href={item.href}
-                  onClick={item.onClick}
-                  icon={item.icon}
-                  iconSizeClass={item.iconSizeClass}
-                  active={active}
-                  collapsed={isCollapsed}
-                  label={item.name}
-                />
-              </li>
-            );
-          })}
+          {/* Home */}
+          <li>
+            <WebSidebarNavItem
+              href="/"
+              icon={HomeIcon}
+              active={pathname === "/"}
+              collapsed={isCollapsed}
+              label="Home"
+            />
+          </li>
 
-          {/* Expandable sections */}
-          {sections.map((section) => (
-            <li key={section.key}>
-              <WebSidebarExpandableItem
-                section={section}
-                expanded={expandedSections.includes(section.key)}
-                onToggle={() => toggleSection(section.key)}
+          {/* Waves */}
+          <li>
+            <WebSidebarNavItem
+              href="/waves"
+              icon={WavesIcon}
+              active={pathname?.startsWith("/waves") || false}
+              collapsed={isCollapsed}
+              label="Waves"
+            />
+          </li>
+
+          {/* Messages */}
+          <li>
+            <WebSidebarNavItem
+              href="/messages"
+              icon={ChatBubbleIcon}
+              active={pathname?.startsWith("/messages") || false}
+              collapsed={isCollapsed}
+              label="Messages"
+              hasIndicator={hasUnreadMessages}
+            />
+          </li>
+
+          {/* Network */}
+          <li>
+            <WebSidebarExpandable
+              section={sections.find((s) => s.key === "network")!}
+              expanded={expandedSections.includes("network")}
+              onToggle={() => toggleSection("network")}
+              collapsed={isCollapsed}
+              pathname={pathname}
+            />
+          </li>
+
+          {/* Collections */}
+          <li>
+            <WebSidebarNavItem
+              onClick={() => handleCollectionsClick(onCollectionsClick)}
+              icon={Squares2X2Icon}
+              active={
+                isCollectionsOpen ||
+                COLLECTIONS_ROUTES.some((route) => pathname?.startsWith(route))
+              }
+              collapsed={isCollapsed}
+              label="Collections"
+            />
+          </li>
+
+          {/* Notifications */}
+          <li>
+            <WebSidebarNavItem
+              href="/notifications"
+              icon={BellIcon}
+              active={pathname?.startsWith("/notifications") || false}
+              collapsed={isCollapsed}
+              label="Notifications"
+              hasIndicator={haveUnreadNotifications}
+            />
+          </li>
+
+          {/* Profile */}
+          {profilePath && (
+            <li>
+              <WebSidebarNavItem
+                href={profilePath}
+                icon={UserIcon}
+                iconSizeClass="tw-h-6 tw-w-6"
+                active={pathname === profilePath}
                 collapsed={isCollapsed}
-                pathname={pathname}
+                label="Profile"
               />
             </li>
-          ))}
+          )}
+
+          {/* Search */}
+          <li>
+            <WebSidebarNavItem
+              onClick={(e?: React.MouseEvent) => {
+                e?.stopPropagation();
+                setIsSearchOpen(true);
+              }}
+              icon={MagnifyingGlassIcon}
+              active={false}
+              collapsed={isCollapsed}
+              label="Search"
+            />
+          </li>
+
+          {/* Tools and About - Expandable */}
+          {sections
+            .filter((section) => section.key !== "network")
+            .map((section) => (
+              <li key={section.key}>
+                <WebSidebarExpandable
+                  section={section}
+                  expanded={expandedSections.includes(section.key)}
+                  onToggle={() => toggleSection(section.key)}
+                  collapsed={isCollapsed}
+                  pathname={pathname}
+                />
+              </li>
+            ))}
         </ul>
       </nav>
 
@@ -359,7 +407,8 @@ export default function WebSidebarNav({
             key="search-modal"
             elementClasses="tw-fixed tw-inset-0 tw-z-50"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}>
+            onClicked={(e) => e.stopPropagation()}
+          >
             <HeaderSearchModal onClose={() => setIsSearchOpen(false)} />
           </CommonAnimationOpacity>
         )}

@@ -5,7 +5,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import WebLayout from "@/components/layout/WebLayout";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { useMemo } from "react";
-import FooterWrapper from "@/FooterWrapper";
+// import FooterWrapper from "@/FooterWrapper";
 
 export default function LayoutWrapper({
   children,
@@ -15,7 +15,6 @@ export default function LayoutWrapper({
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
 
-  const isSmall = pathname?.startsWith("/my-stream");
   const isAccessOrRestricted =
     pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
 
@@ -23,9 +22,9 @@ export default function LayoutWrapper({
     return isApp ? (
       <MobileLayout>{children}</MobileLayout>
     ) : (
-      <WebLayout isSmall={isSmall}>{children}</WebLayout>
+      <WebLayout>{children}</WebLayout>
     );
-  }, [isApp, isSmall, children]);
+  }, [isApp, children]);
 
   if (isAccessOrRestricted) {
     return <>{children}</>;
