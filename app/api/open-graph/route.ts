@@ -15,32 +15,58 @@ type CacheEntry = {
 
 const cache = new Map<string, CacheEntry>();
 
+const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
+const MAX_REDIRECTS = 5;
+
 async function fetchHtml(
   url: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let currentUrl = url;
+  let redirectCount = 0;
 
-  try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        "user-agent": USER_AGENT,
-        accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-      },
-      signal: controller.signal,
-      redirect: "follow",
-    });
+  while (true) {
+    await ensureUrlIsPublic(currentUrl);
 
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(currentUrl.toString(), {
+        headers: {
+          "user-agent": USER_AGENT,
+          accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        },
+        signal: controller.signal,
+        redirect: "manual",
+      });
+
+      if (REDIRECT_STATUS_CODES.has(response.status)) {
+        if (redirectCount >= MAX_REDIRECTS) {
+          throw new Error("Too many redirects");
+        }
+
+        const location = response.headers.get("location");
+        if (!location) {
+          throw new Error("Redirect response missing location header");
+        }
+
+        const nextUrl = new URL(location, currentUrl);
+        currentUrl = nextUrl;
+        redirectCount += 1;
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      const html = await response.text();
+      return { html, contentType, finalUrl: currentUrl.toString() };
+    } finally {
+      clearTimeout(timeout);
     }
-
-    const contentType = response.headers.get("content-type");
-    const html = await response.text();
-    return { html, contentType, finalUrl: response.url };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
