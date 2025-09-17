@@ -1,17 +1,9 @@
-import React from "react";
+import { redirect } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 
 export default function ElementSectionsRedirectPage() {
-  return (
-    <div>
-      <title>Redirecting...</title>
-      <meta httpEquiv="refresh" content="0;url=/" />
-      <p>
-        You are being redirected to <a href="/">/</a>
-      </p>
-    </div>
-  );
+  redirect("/");
 }
 
 export async function generateMetadata(): Promise<Metadata> {
