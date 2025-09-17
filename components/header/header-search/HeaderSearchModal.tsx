@@ -36,6 +36,7 @@ enum CATEGORY {
 }
 
 const MIN_SEARCH_LENGTH = 3;
+const HEADER_SEARCH_RESULTS_PANEL_ID = "header-search-results-panel";
 
 export default function HeaderSearchModal({
   onClose,
@@ -322,6 +323,7 @@ export default function HeaderSearchModal({
                   options={Object.values(CATEGORY).map((c) => ({
                     key: c,
                     label: c.charAt(0) + c.slice(1).toLowerCase(),
+                    panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
                   }))}
                   activeKey={selectedCategory}
                   onSelect={(k) => setSelectedCategory(k as CATEGORY)}
@@ -329,24 +331,40 @@ export default function HeaderSearchModal({
               </div>
 
               {state === STATE.SUCCESS && (
-                <div className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200">
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200"
+                >
                   {renderItems(getCurrentItems())}
                 </div>
               )}
               {state === STATE.LOADING && (
-                <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
+                >
                   <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
                     Loading...
                   </p>
                 </div>
               )}
               {state === STATE.NO_RESULTS && (
-                <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
+                >
                   <p className="tw-text-iron-300 tw-text-sm">No results found</p>
                 </div>
               )}
               {state === STATE.INITIAL && (
-                <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
+                >
                   <p className="tw-text-iron-300 tw-font-normal tw-text-sm tw-text-center">
                     Search for NFTs (by ID or name), Profiles and Waves
                   </p>
