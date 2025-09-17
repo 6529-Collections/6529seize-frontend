@@ -1,8 +1,4 @@
 "use client";
-
-import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import { useState } from "react";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import MemeCalendar from "./MemeCalendar";
@@ -25,12 +21,6 @@ export default function MemesMintingCalendar() {
       {/* Global Local/UTC toggle */}
       <div className="tw-flex tw-justify-end">
         <div className="tw-inline-flex">
-          <Link
-            href="/meme-calendar/calendar-101"
-            className={`${baseBtn} tw-rounded-md tw-mr-2 tw-bg-transparent tw-no-underline tw-flex tw-items-center tw-gap-x-1`}
-            title="Calendar Guide">
-            Calendar Guide <FontAwesomeIcon icon={faQuestionCircle} />
-          </Link>
           <button
             className={`${baseBtn} ${
               displayTz === "local" ? activeBtn : inactiveBtn

@@ -52,11 +52,11 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
     {
       title: "Network",
       items: [
-        { name: "Memes Calendar", path: "/meme-calendar" },
         { name: "Identities", path: "/network" },
         { name: "Activity", path: "/network/activity" },
         { name: "Groups", path: "/network/groups" },
         { name: "NFT Activity", path: "/nft-activity" },
+        { name: "Memes Calendar", path: "/meme-calendar" },
       ],
       sections: [
         {

@@ -3,13 +3,11 @@
 import {
   faCaretLeft,
   faCaretRight,
-  faChevronUp,
-  faCrosshairs,
   faInfoCircle,
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Tooltip } from "react-tooltip";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import {
@@ -843,7 +841,6 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
   });
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>("season");
   const [jumpValue, setJumpValue] = useState<string>("");
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [jumpMint, setJumpMint] = useState<string>("");
   const [autoOpenYmd, setAutoOpenYmd] = useState<string | null>(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -948,6 +945,52 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
       ? SZN1_SEASON_INDEX
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 1000 * (n - 1), 0, 1)));
 
+  const handleJumpToToday = () => {
+    const now = new Date();
+    const idx = getSeasonIndexForDate(now);
+    setSeasonIndex(clampIndex(idx));
+    setZoomLevel("season");
+  };
+
+  const jumpToMintNumber = () => {
+    const n = parseInt(jumpMint, 10);
+    if (!n || n < 1) {
+      return;
+    }
+    const d = dateFromMintNumber(n);
+    const idx = getSeasonIndexForDate(d);
+    setSeasonIndex(clampIndex(idx));
+    setZoomLevel("season");
+    setAutoOpenYmd(ymd(d));
+    setTimeout(() => setAutoOpenYmd(null), 1200);
+  };
+
+  const jumpToMonthValue = (value: string) => {
+    if (!value) {
+      return;
+    }
+    const [ys, ms] = value.split("-");
+    const y = Number(ys);
+    const m = Number(ms);
+    if (!y || !m) {
+      return;
+    }
+    const d = new Date(y, m - 1, 1);
+    const idx = getSeasonIndexForDate(d);
+    setSeasonIndex(clampIndex(idx));
+    setZoomLevel("season");
+  };
+
+  const handleMintJumpSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    jumpToMintNumber();
+  };
+
+  const handleDateJumpSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    jumpToMonthValue(jumpValue);
+  };
+
   return (
     <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
       {/* Division (zoom) selector buttons */}
@@ -1031,36 +1074,13 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               </div>
             ))}
           </div>
-
-          {/* Right side: full width when stacked; fixed-ish width on md+ */}
-          <div className="tw-flex tw-flex-col tw-gap-3 tw-mt-2 md:tw-mt-0 md:tw-w-56">
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <div className="tw-bg-gray-100 tw-rounded-md tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center">
-                <FontAwesomeIcon
-                  icon={faCrosshairs}
-                  className="tw-w-4 tw-h-4 tw-text-gray-900"
-                />
-              </div>
-              <span>Jump to Today</span>
-            </div>
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <div className="tw-bg-gray-100 tw-rounded-md tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center">
-                <img
-                  src="/jump.svg"
-                  alt="Jump"
-                  className="tw-inline-block tw-w-4 tw-h-4"
-                />
-              </div>
-              <span>Jump to Date / Meme #</span>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Unified navigation based on selected division */}
-      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-mt-2">
+      {/* Unified navigation + controls in one row on large, wrap on small */}
+      <div className="tw-mb-6 tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3 tw-mt-2">
         {/* Left half: Prev | Title+Range | Next */}
-        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0 md:tw-basis-2/3 md:tw-max-w-[40%]">
+        <div className="tw-w-full tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0 lg:tw-basis-2/3 lg:tw-max-w-[40%]">
           <button
             className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-1.5 tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
             onClick={() => {
@@ -1159,149 +1179,54 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
             <FontAwesomeIcon icon={faCaretRight} />
           </button>
         </div>
-
-        <div className="tw-flex tw-items-center tw-gap-2">
-          {/* Today */}
-          <button
-            className="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
-            aria-label="Jump to Today"
-            title="Jump to Today"
-            onClick={() => {
-              const now = new Date();
-              const idx = getSeasonIndexForDate(now);
-              setSeasonIndex(clampIndex(idx));
-            }}>
-            <FontAwesomeIcon icon={faCrosshairs} />
-          </button>
-
-          {/* More */}
-          <button
-            className="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
-            aria-label="More features"
-            title="More features"
-            onClick={() => setShowAdvanced((v) => !v)}>
-            {showAdvanced ? (
-              <FontAwesomeIcon icon={faChevronUp} />
-            ) : (
-              <img
-                src="/jump.svg"
-                alt="Jump"
-                className="tw-inline-block tw-w-4 tw-h-4"
-              />
-            )}
-          </button>
-        </div>
-      </div>
-
-      <div
-        className={
-          "tw-rounded-md tw-bg-black tw-border tw-border-solid tw-border-[#222222] " +
-          "tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out tw-origin-top " +
-          (showAdvanced
-            ? "tw-opacity-100 tw-max-h-[320px] tw-scale-y-100 tw-py-5 tw-px-3"
-            : "tw-opacity-0 tw-max-h-0 tw-scale-y-95 tw-pointer-events-none")
-        }
-        aria-hidden={!showAdvanced}>
-        <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-8 tw-items-start md:tw-items-end">
-          {/* Jump to month */}
-          <div className="tw-flex tw-flex-col tw-gap-1 tw-w-full md:tw-w-auto">
-            <label className="tw-text-xs tw-font-medium" htmlFor="jump-date">
-              Jump to Date
-            </label>
-            <div className="tw-flex tw-items-center tw-gap-2">
+        {/* Right: controls — Jump to Today, Mint #, and Date jump (date hidden on small screens) */}
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-w-full tw-justify-center lg:tw-w-auto lg:tw-justify-end">
+          {/* Responsive wrapper for Jump to Today and Mint # input */}
+          <div className="tw-flex tw-w-full tw-gap-3 sm:tw-w-auto sm:tw-gap-3">
+            <button
+              type="button"
+              className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-justify-center tw-h-9 tw-rounded-md tw-bg-white tw-text-black tw-px-3 tw-text-sm tw-font-semibold hover:tw-bg-[#e9e9e9] tw-border tw-border-[#d1d1d1] tw-shrink-0 tw-flex-1 sm:tw-flex-none sm:tw-w-auto"
+              onClick={handleJumpToToday}>
+              Jump to Today
+            </button>
+            <form
+              onSubmit={handleMintJumpSubmit}
+              className="tw-shrink-0 tw-flex-1 tw-w-full sm:tw-flex-none sm:tw-w-auto">
+              <div className="tw-bg-[#e5e5e5] tw-h-9 tw-flex tw-items-center tw-rounded-md tw-bg-white tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1] tw-w-full">
+                <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
+                <input
+                  id="meme-calendar-overview-mint-input"
+                  type="number"
+                  min={1}
+                  name="meme-calendar-overview-mint-input"
+                  placeholder="123"
+                  onChange={(event) => {
+                    const v = event.target.value.replace(/[^0-9]/g, "");
+                    setJumpMint(v);
+                  }}
+                  className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-9 tw-w-full sm:tw-w-[8ch] tw-min-w-0 tw-px-2 tw-rounded-r-md"
+                />
+              </div>
+            </form>
+          </div>
+          <form
+            onSubmit={handleDateJumpSubmit}
+            className="tw-hidden sm:tw-block sm:tw-basis-auto sm:tw-w-auto lg:tw-flex-1 tw-min-w-0 tw-max-w-full">
+            <div className="tw-bg-[#e5e5e5] tw-h-9 tw-flex tw-items-center tw-rounded-md tw-bg-white tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1] tw-w-full sm:tw-w-auto lg:tw-w-full tw-max-w-full sm:tw-max-w-[28rem]">
+              <div className="tw-shrink-0 tw-select-none tw-pr-2">Date</div>
               <input
-                id="jump-date"
+                id="meme-calendar-date-input"
                 type="month"
                 value={jumpValue}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setJumpValue(v);
-                  const [ys, ms] = v.split("-");
-                  const y = Number(ys);
-                  const m = Number(ms);
-                  if (!y || !m) return;
-                  const d = new Date(y, m - 1, 1);
-                  const idx = getSeasonIndexForDate(d);
-                  setSeasonIndex(clampIndex(idx));
-                  setZoomLevel("season");
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setJumpValue(value);
+                  jumpToMonthValue(value);
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    if (!jumpValue) return;
-                    const [ys, ms] = jumpValue.split("-");
-                    const y = Number(ys);
-                    const m = Number(ms);
-                    if (!y || !m) return;
-                    const d = new Date(y, m - 1, 1);
-                    const idx = getSeasonIndexForDate(d);
-                    setSeasonIndex(clampIndex(idx));
-                    setZoomLevel("season");
-                  }
-                }}
-                className="tw-border tw-rounded tw-px-2 tw-py-1 tw-text-sm tw-w-full md:tw-w-56 tw-bg-[#eee] tw-text-gray-900 dark:tw-bg-gray-800 dark:tw-text-gray-100 dark:tw-border-gray-700 placeholder:tw-text-gray-500 dark:placeholder:tw-text-gray-400"
+                className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-9 tw-px-2 tw-rounded-r-md tw-w-full tw-min-w-0 sm:tw-w-[16rem] lg:tw-w-full lg:tw-max-w-[28rem]"
               />
-              <button
-                className="tw-px-3 tw-py-1 tw-rounded tw-border tw-border-gray-300 hover:tw-bg-gray-100 tw-text-sm tw-text-gray-900 dark:tw-text-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700"
-                onClick={() => {
-                  if (!jumpValue) return;
-                  const [ys, ms] = jumpValue.split("-");
-                  const y = Number(ys);
-                  const m = Number(ms);
-                  if (!y || !m) return;
-                  const d = new Date(y, m - 1, 1);
-                  const idx = getSeasonIndexForDate(d);
-                  setSeasonIndex(clampIndex(idx));
-                  setZoomLevel("season");
-                }}>
-                Jump
-              </button>
             </div>
-          </div>
-
-          {/* Jump to meme number */}
-          <div className="tw-flex tw-flex-col tw-gap-1 tw-w-full md:tw-w-auto">
-            <label className="tw-text-xs tw-font-medium" htmlFor="jump-meme">
-              Jump to Meme #
-            </label>
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <input
-                id="jump-meme"
-                type="number"
-                min={1}
-                inputMode="numeric"
-                placeholder="#"
-                value={jumpMint}
-                onChange={(e) => setJumpMint(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    const n = parseInt(jumpMint, 10);
-                    if (!n || n < 1) return;
-                    const d = dateFromMintNumber(n);
-                    const idx = getSeasonIndexForDate(d);
-                    setSeasonIndex(clampIndex(idx));
-                    setZoomLevel("season");
-                    setAutoOpenYmd(ymd(d));
-                    setTimeout(() => setAutoOpenYmd(null), 1200);
-                  }
-                }}
-                className="tw-border tw-rounded tw-px-2 tw-py-1 tw-text-sm tw-w-full md:tw-w-40 tw-bg-[#eee] tw-text-gray-900 dark:tw-bg-gray-800 dark:tw-text-gray-100 dark:tw-border-gray-700 placeholder:tw-text-gray-500 dark:placeholder:tw-text-gray-400"
-              />
-              <button
-                className="tw-px-3 tw-py-1 tw-rounded tw-border tw-border-gray-300 hover:tw-bg-gray-100 tw-text-sm tw-text-gray-900 dark:tw-text-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700"
-                onClick={() => {
-                  const n = parseInt(jumpMint, 10);
-                  if (!n || n < 1) return;
-                  const d = dateFromMintNumber(n);
-                  const idx = getSeasonIndexForDate(d);
-                  setSeasonIndex(clampIndex(idx));
-                  setZoomLevel("season");
-                  setAutoOpenYmd(ymd(d));
-                  setTimeout(() => setAutoOpenYmd(null), 1200);
-                }}>
-                Jump
-              </button>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
 

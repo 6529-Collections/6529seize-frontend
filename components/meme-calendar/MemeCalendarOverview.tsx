@@ -1,10 +1,10 @@
 "use client";
 
-import { faCamera, faPencil } from "@fortawesome/free-solid-svg-icons";
+import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toPng } from "html-to-image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import {
   addMonths,
@@ -85,12 +85,11 @@ export function MemeCalendarOverviewNextMint({
     );
     return getMintNumberForMintDate(upcomingUtcDay);
   });
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState("");
+  const [mintInputValue, setMintInputValue] = useState("");
   const [isCapturing, setIsCapturing] = useState(false);
 
-  const editInputRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const mintInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 1000);
@@ -120,13 +119,6 @@ export function MemeCalendarOverviewNextMint({
       setIsManualSelection(false);
     }
   }, [canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
-
-  useEffect(() => {
-    if (isEditing && editInputRef.current) {
-      editInputRef.current.focus();
-      editInputRef.current.select();
-    }
-  }, [isEditing]);
 
   const mintDetails = useMemo(
     () => getMintTimelineDetails(selectedMintNumber),
@@ -185,35 +177,74 @@ export function MemeCalendarOverviewNextMint({
     setIsManualSelection(mintNumber !== canonicalNextMintNumber);
   };
 
-  const cancelEdit = () => {
-    setIsEditing(false);
-    setEditValue("");
-  };
-
-  const commitEdit = () => {
-    const parsed = parseInt(editValue, 10);
+  const handleMintInputSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const parsed = parseInt(mintInputValue, 10);
     if (Number.isNaN(parsed) || parsed < 1) {
-      cancelEdit();
       return;
     }
     handleMintSelection(parsed);
-    setIsEditing(false);
-    setEditValue("");
+    setMintInputValue("");
+    mintInputRef.current?.blur();
   };
 
   const handleScreenshot = async () => {
     if (!cardRef.current) return;
     try {
       setIsCapturing(true);
-      const dataUrl = await toPng(cardRef.current, {
+
+      // Clone the card and strip ignored elements
+      const clone = cardRef.current.cloneNode(true) as HTMLElement;
+      clone
+        .querySelectorAll("[data-ignore-screenshot]")
+        .forEach((el) => el.remove());
+
+      // Create a tight, offscreen wrapper so there is no outside gap
+      const mount = document.createElement("div");
+      const rect = cardRef.current.getBoundingClientRect();
+      Object.assign(mount.style, {
+        position: "fixed",
+        left: "-10000px",
+        top: "0",
+        padding: "0",
+        margin: "0",
+        background: "transparent",
+        display: "inline-block",
+        lineHeight: "normal",
+        width: `${rect.width}px`, // lock width to avoid reflow differences
+      } as CSSStyleDeclaration);
+
+      // Ensure the clone itself doesn't carry margins
+      Object.assign(clone.style, {
+        margin: "0",
+        height: "auto",
+        minHeight: "0",
+        display: "block",
+      } as CSSStyleDeclaration);
+
+      mount.appendChild(clone);
+      document.body.appendChild(mount);
+
+      // Measure tight dimensions and render the clone directly
+      const width = Math.ceil(clone.scrollWidth || rect.width);
+      const height = Math.ceil(
+        clone.scrollHeight || clone.getBoundingClientRect().height || 0
+      );
+
+      const dataUrl = await toPng(clone, {
         cacheBust: true,
         pixelRatio: window.devicePixelRatio || 1,
-        filter: (node) => !node?.hasAttribute?.("data-ignore-screenshot"),
+        width,
+        height,
+        backgroundColor: "#0c0c0d", // solid card bg so PNG doesn't look empty
       });
+
       const link = document.createElement("a");
       link.href = dataUrl;
       link.download = `meme-${mintDetails.mintNumber}-mint.png`;
       link.click();
+
+      document.body.removeChild(mount);
     } catch (error) {
       console.error("Failed to capture meme calendar panel", error);
     } finally {
@@ -222,59 +253,59 @@ export function MemeCalendarOverviewNextMint({
   };
 
   return (
-    <div className="tw-relative tw-group">
+    <div className="tw-relative">
       <div
         ref={cardRef}
         className="tw-p-4 tw-flex tw-flex-col tw-justify-between tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
         <div className="tw-space-y-1">
-          <div className="tw-text-sm tw-text-gray-400">{heading}</div>
-          <div className="tw-flex tw-items-center tw-gap-2 tw-group/item">
-            {isEditing ? (
-              <input
-                ref={editInputRef}
-                type="number"
-                min={1}
-                inputMode="numeric"
-                value={editValue}
-                onChange={(event) => setEditValue(event.target.value)}
-                onBlur={commitEdit}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    commitEdit();
-                  } else if (event.key === "Escape") {
-                    event.preventDefault();
-                    cancelEdit();
-                  }
-                }}
-                className="tw-border tw-rounded tw-px-2 tw-py-1 tw-text-lg tw-bg-[#111] tw-text-white tw-w-24 focus:tw-outline-none focus:tw-border-gray-400"
-              />
-            ) : (
-              <>
-                <button
-                  type="button"
-                  title="Edit mint number"
-                  aria-label="Edit mint number"
-                  onClick={() => {
-                    setEditValue(String(mintDetails.mintNumber));
-                    setIsEditing(true);
+          <div
+            className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-mb-3"
+            data-ignore-screenshot>
+            <button
+              disabled={canonicalNextMintNumber === selectedMintNumber}
+              type="button"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-rounded-md tw-bg-white tw-text-black tw-px-3 tw-text-sm tw-font-semibold tw-border tw-border-[#d1d1d1] hover:tw-bg-[#e9e9e9] disabled:tw-opacity-75 disabled:hover:tw-bg-white disabled:hover:tw-text-black disabled:hover:tw-border-[#d1d1d1]"
+              onClick={() => handleMintSelection(canonicalNextMintNumber)}>
+              Next Mint
+            </button>
+
+            <form onSubmit={handleMintInputSubmit}>
+              <div className="tw-bg-[#e5e5e5] tw-h-8 tw-flex tw-items-center tw-rounded-md tw-bg-white tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1]">
+                <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
+                <input
+                  id="meme-calendar-overview-mint-input"
+                  ref={mintInputRef}
+                  type="number"
+                  min={1}
+                  name="meme-calendar-overview-mint-input"
+                  placeholder="123"
+                  onChange={(event) => {
+                    const v = event.target.value.replace(/[^0-9]/g, "");
+                    setMintInputValue(v);
                   }}
-                  className="!tw-text-3xl md:!tw-text-4xl tw-font-bold tw-bg-transparent tw-border-0 tw-p-0 tw-m-0 tw-leading-none tw-cursor-pointer hover:tw-text-gray-200 focus:tw-outline-none">
-                  #{mintDetails.mintNumber.toLocaleString()}
-                </button>
-                <button
-                  type="button"
-                  data-ignore-screenshot
-                  className="tw-p-0 tw-border-0 tw-rounded-none tw-bg-transparent tw-text-gray-400 tw-transition tw-opacity-30 hover:tw-opacity-100 tw-group-hover/item:tw-opacity-100 tw-group-hover/item:tw-text-gray-200 focus:tw-opacity-100 focus:tw-outline-none"
-                  title="Jump to mint"
-                  onClick={() => {
-                    setEditValue(String(mintDetails.mintNumber));
-                    setIsEditing(true);
-                  }}>
-                  <FontAwesomeIcon icon={faPencil} className="tw-h-4 tw-w-4" />
-                </button>
-              </>
-            )}
+                  className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-8 tw-w-[8ch] tw-px-2 tw-rounded-r-md"
+                />
+              </div>
+            </form>
+
+            {/* spacer so the camera can sit on the same row but push to the right when space exists */}
+            <div className="tw-flex-1" />
+
+            <button
+              type="button"
+              onClick={handleScreenshot}
+              disabled={isCapturing}
+              className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
+              aria-label="Screenshot"
+              title="Screenshot">
+              <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
+            </button>
+          </div>
+          <div className="tw-text-sm tw-text-gray-400">{heading}</div>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="!tw-text-3xl md:!tw-text-4xl tw-font-bold">
+              #{mintDetails.mintNumber.toLocaleString()}
+            </div>
           </div>
           <div className="tw-text-lg tw-font-semibold">
             {formatFullDateTime(mintDetails.instantUtc, displayTz)}
@@ -290,20 +321,11 @@ export function MemeCalendarOverviewNextMint({
         </div>
 
         <div
+          data-ignore-screenshot
           className="tw-pt-3"
           dangerouslySetInnerHTML={{ __html: invitesHtml }}
         />
       </div>
-      <button
-        type="button"
-        data-ignore-screenshot
-        onClick={handleScreenshot}
-        disabled={isCapturing}
-        className="tw-absolute tw-top-4 tw-right-4 tw-border-0 tw-rounded-none tw-bg-transparent tw-text-gray-400 tw-p-0 tw-transition tw-opacity-30 hover:tw-opacity-100 tw-group-hover:tw-opacity-100 focus:tw-opacity-100 focus:tw-outline-none hover:tw-text-gray-100 disabled:tw-opacity-50"
-        aria-label="Screenshot"
-        title="Screenshot">
-        <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
-      </button>
     </div>
   );
 }
@@ -387,7 +409,7 @@ export function MemeCalendarOverviewUpcomingMints({
         </div>
       </div>
 
-      <div className="tw-overflow-x-auto tw-flex-1 tw-max-h-[350px] tw-overflow-y-auto">
+      <div className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto">
         <table className="tw-w-full tw-text-sm">
           <thead></thead>
           <tbody>
