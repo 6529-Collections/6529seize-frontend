@@ -37,7 +37,7 @@ describe('GroupCreate', () => {
     mockedUseQuery.mockReturnValueOnce({ isFetching: true, data: null })
                   .mockReturnValueOnce({ isFetching: true, data: null });
     const { getByText } = renderComponent({ connectedProfile: null });
-    expect(getByText('Loading...')).toBeInTheDocument();
+    expect(getByText('Loading...', { selector: 'div' })).toBeInTheDocument();
   });
 
   it('allows including primary wallet', () => {

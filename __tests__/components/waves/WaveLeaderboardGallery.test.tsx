@@ -35,7 +35,7 @@ function renderGallery(overrides: any) {
 
 it('shows loading when fetching and no drops', () => {
   renderGallery({ isFetching: true });
-  expect(screen.getByText('Loading drops...')).toBeInTheDocument();
+  expect(screen.getByText('Loading drops...', { selector: 'div' })).toBeInTheDocument();
 });
 
 it('shows empty message when no drops', () => {

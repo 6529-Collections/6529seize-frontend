@@ -50,10 +50,15 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
       if (markerIndex !== -1) {
         const prefix = wave.name.slice(0, markerIndex + marker.length);
         const addressStart = markerIndex + marker.length;
-        const candidateAddress = wave.name.slice(addressStart, addressStart + 42);
+        const candidateAddress = wave.name.slice(
+          addressStart,
+          addressStart + 42
+        );
 
         if (isValidEthAddress(candidateAddress)) {
-          const suffix = wave.name.slice(addressStart + candidateAddress.length);
+          const suffix = wave.name.slice(
+            addressStart + candidateAddress.length
+          );
           return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
         }
       }
@@ -75,7 +80,7 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
     <div
       className={`tw-group tw-flex tw-items-start tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
-          ? "tw-bg-iron-700/50 desktop-hover:hover:tw-bg-iron-700/70"
+          ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
@@ -92,8 +97,8 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
           <div
             className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
               isActive
-                ? "tw-opacity-100  tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400"
-                : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100  tw-ring-1 tw-ring-white/10"
+                ? "tw-opacity-100  tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-950 tw-ring-white/30"
+                : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100 tw-ring-1 tw-ring-white/10"
             }`}
           >
             <WavePicture

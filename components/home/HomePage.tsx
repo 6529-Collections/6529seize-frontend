@@ -11,6 +11,13 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import Image from "next/image";
 import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { commonApiFetch } from "@/services/api/common-api";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -31,11 +38,46 @@ export default function HomePage({
     isAuthenticated ? "feed" : "latest"
   );
   const { registerRef } = useLayout();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Drop modal logic
+  const dropId = searchParams?.get('drop') ?? undefined;
+
+  const { data: drop } = useQuery<ApiDrop>({
+    queryKey: [QueryKey.DROP, { drop_id: dropId }],
+    queryFn: async () =>
+      await commonApiFetch<ApiDrop>({
+        endpoint: `drops/${dropId}`,
+      }),
+    placeholderData: keepPreviousData,
+    enabled: !!dropId,
+  });
+
+  const onDropClose = () => {
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.delete('drop');
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/');
+    router.replace(newUrl, { scroll: false });
+  };
+
+  const isDropOpen = !!dropId && !!drop;
 
   // Update active tab when authentication state changes
   useEffect(() => {
     setActiveTab(isAuthenticated ? "feed" : "latest");
   }, [isAuthenticated]);
+
+  // Handle escape key for drop modal
+  useEffect(() => {
+    if (!isDropOpen) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onDropClose();
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isDropOpen, onDropClose]);
 
   // Callback ref for registration with LayoutContext
   const setTabsRef = useCallback(
@@ -52,10 +94,31 @@ export default function HomePage({
 
   return (
     <div className="tw-h-full  tw-min-h-screen tw-bg-black">
+      {/* Drop Modal - positioned to respect sidebar */}
+      {isDropOpen && (
+        <div
+          className="tw-fixed tw-inset-0 tw-z-[49] tw-bg-black"
+          style={{
+            left: 'var(--left-rail)',  // Start after sidebar
+            transition: "none"
+          }}
+        >
+          <BrainDesktopDrop
+            drop={{
+              type: DropSize.FULL,
+              ...drop,
+              stableKey: drop.id,
+              stableHash: drop.id,
+            }}
+            onClose={onDropClose}
+          />
+        </div>
+      )}
+
       {/* Tab Navigation */}
       <div
         ref={setTabsRef}
-        className="tailwind-scope tw-px-6 tw-sticky tw-top-0 tw-z-50 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
+        className="tailwind-scope tw-px-6 tw-sticky tw-top-0 tw-z-40 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
       >
         <div
           className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"

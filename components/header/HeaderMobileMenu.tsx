@@ -5,12 +5,12 @@ import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./Header.module.scss";
+import HeaderLogo from "./HeaderLogo";
 import {
   printMobileHr,
-  printMobileSubheader,
   printMobileRow,
+  printMobileSubheader,
 } from "./HeaderMobileUtils";
-import HeaderLogo from "./HeaderLogo";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import HeaderUser from "./user/HeaderUser";
 
@@ -61,8 +61,7 @@ export default function HeaderMobileMenu({
     <div
       className={`inset-safe-area ${styles.burgerMenu} ${
         burgerMenuOpen ? styles.burgerMenuOpen : ""
-      }`}
-    >
+      }`}>
       <Container className="pt-2 pb-2">
         <Row>
           <Col className="d-flex justify-content-end">
@@ -76,8 +75,7 @@ export default function HeaderMobileMenu({
                 setShowBurgerMenuCommunity(false);
                 setShowBurgerMenuTools(false);
                 setShowBurgerMenuBrain(false);
-              }}
-            ></FontAwesomeIcon>
+              }}></FontAwesomeIcon>
           </Col>
         </Row>
       </Container>
@@ -94,8 +92,7 @@ export default function HeaderMobileMenu({
         <Row className="pt-4 pb-3">
           <Col>
             <h3
-              className={`d-flex justify-content-center gap-2 ${styles.burgerMenuHeader}`}
-            >
+              className={`d-flex justify-content-center gap-2 ${styles.burgerMenuHeader}`}>
               <HeaderUser />
               <HeaderQRScanner
                 onScanSuccess={() => {
@@ -130,8 +127,7 @@ export default function HeaderMobileMenu({
                     showBurgerMenuBrain
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Brain
               </h3>
             </Col>
@@ -169,8 +165,7 @@ export default function HeaderMobileMenu({
                     showBurgerMenuCollections
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-            >
+                  }`}>
               Collections
             </h3>
           </Col>
@@ -208,8 +203,7 @@ export default function HeaderMobileMenu({
                     showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-            >
+                  }`}>
               Network
             </h3>
           </Col>
@@ -220,6 +214,7 @@ export default function HeaderMobileMenu({
               {printMobileRow("Activity", "/network/activity")}
               {printMobileRow("Groups", "/network/groups")}
               {printMobileRow("NFT Activity", "/nft-activity")}
+              {printMobileRow("Memes Calendar", "/meme-calendar")}
               {printMobileHr()}
               {printMobileSubheader("Metrics")}
               {printMobileRow("Definitions", "/network/metrics")}
@@ -251,8 +246,7 @@ export default function HeaderMobileMenu({
                     showBurgerMenuTools
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-            >
+                  }`}>
               Tools
             </h3>
           </Col>
@@ -315,8 +309,7 @@ export default function HeaderMobileMenu({
                     showBurgerMenuAbout
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-            >
+                  }`}>
               About
             </h3>
           </Col>
@@ -332,10 +325,6 @@ export default function HeaderMobileMenu({
                     `/about/${AboutSection.SUBSCRIPTIONS}`
                   )}
                 </>
-              )}
-              {printMobileRow(
-                "Memes Calendar",
-                `/about/${AboutSection.MEMES_CALENDAR}`
               )}
               {printMobileRow("Minting", `/about/${AboutSection.MINTING}`)}
               {printMobileRow(

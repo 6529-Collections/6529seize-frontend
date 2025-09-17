@@ -18,7 +18,11 @@ interface MyStreamWaveDesktopTabsProps {
 interface TabOption {
   key: MyStreamWaveTab;
   label: string;
+  panelId: string;
 }
+
+const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
+  `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
@@ -91,6 +95,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     .map((tab) => ({
       key: tab,
       label: tabLabels[tab],
+      panelId: getContentTabPanelId(tab),
     }));
 
   useEffect(() => {
@@ -109,7 +114,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   }
 
   return (
-    <div className="tw-@container/tabs tw-flex tw-items-center tw-gap-4 tw-w-full tw-overflow-x-auto tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-thin tw-border-y tw-border-solid tw-border-iron-800 tw-border-x-0 tw-px-2 sm:tw-px-4 md:tw-px-6">
+    <div className="tw-@container/tabs tw-flex tw-items-center tw-gap-4 tw-w-full tw-overflow-x-auto tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-thin tw-border-x-0 tw-pl-2 sm:tw-pl-4 md:tw-pl-6">
       <TabToggle
         options={options}
         activeKey={activeTab}

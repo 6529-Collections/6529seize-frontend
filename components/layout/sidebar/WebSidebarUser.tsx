@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useRef } from "react";
+import React, { memo, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -21,17 +21,14 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 interface WebSidebarUserProps {
   isCollapsed: boolean;
-  showUserMenu: boolean;
-  onToggleUserMenu: () => void;
   profile: any;
 }
 
 function WebSidebarUser({
   isCollapsed,
-  showUserMenu,
-  onToggleUserMenu,
   profile: parentProfile,
 }: WebSidebarUserProps) {
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { address, seizeConnect } = useSeizeConnectContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -43,7 +40,7 @@ function WebSidebarUser({
       buttonRef.current &&
       !buttonRef.current.contains(event.target as Node)
     ) {
-      onToggleUserMenu();
+      setShowUserMenu(false);
     }
   });
 
@@ -116,7 +113,7 @@ function WebSidebarUser({
     <div className={containerClasses}>
       <button
         ref={buttonRef}
-        onClick={onToggleUserMenu}
+        onClick={() => setShowUserMenu(!showUserMenu)}
         className={`tw-group/user  tw-py-2 tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900 ${
           isCollapsed
             ? "tw-justify-center tw-px-2"
@@ -148,7 +145,7 @@ function WebSidebarUser({
           <HeaderUserProxyDropdown
             profile={profile}
             isOpen={showUserMenu}
-            onClose={onToggleUserMenu}
+            onClose={() => setShowUserMenu(false)}
           />
         </div>
       )}

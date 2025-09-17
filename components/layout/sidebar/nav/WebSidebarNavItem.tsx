@@ -16,18 +16,8 @@ interface SidebarPrimaryItemProps {
   readonly ariaExpanded?: boolean;
   readonly ariaControls?: string;
   readonly rightSlot?: React.ReactNode;
+  readonly hasIndicator?: boolean;
 }
-
-const baseClasses =
-  "tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base";
-
-const expandedClasses = "tw-justify-start tw-px-3 tw-gap-4";
-const collapsedClasses = "tw-justify-center tw-px-2";
-
-const stateClasses = (active?: boolean) =>
-  active
-    ? "tw-text-white desktop-hover:hover:tw-text-white tw-bg-transparent active:tw-bg-transparent"
-    : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent";
 
 function WebSidebarNavItem({
   href,
@@ -40,14 +30,19 @@ function WebSidebarNavItem({
   ariaExpanded,
   ariaControls,
   rightSlot,
+  hasIndicator,
 }: SidebarPrimaryItemProps) {
-  const layoutClasses = collapsed ? collapsedClasses : expandedClasses;
-  const classes = `${baseClasses} ${layoutClasses} ${stateClasses(active)}`;
-
   const content = (
     <>
       {Icon && (
-        <Icon className={`tw-h-6 tw-w-6 tw-shrink-0 ${iconSizeClass || ""}`} />
+        <div className="tw-relative">
+          <Icon
+            className={`tw-h-6 tw-w-6 tw-shrink-0 ${iconSizeClass || ""}`}
+          />
+          {hasIndicator && (
+            <div className="tw-absolute tw-right-0 tw-top-0 tw-rounded-full tw-bg-red tw-h-2 tw-w-2"></div>
+          )}
+        </div>
       )}
       {!collapsed && (
         <>
@@ -58,27 +53,41 @@ function WebSidebarNavItem({
     </>
   );
 
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className={classes}
-        aria-label={collapsed ? label : undefined}
-        aria-current={active ? "page" : undefined}
-        data-tooltip-id="sidebar-tooltip"
-        data-tooltip-content={label}
-        data-tooltip-hidden={!collapsed}
-      >
-        {content}
-      </Link>
-    );
-  }
-
-  return (
+  // Render as Link when href is provided (for page navigation like Home, Waves, Messages)
+  // Render as button when no href (for actions like opening Collections menu or Search modal)
+  return href ? (
+    <Link
+      href={href}
+      className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base ${
+        collapsed
+          ? "tw-justify-center tw-px-2"
+          : "tw-justify-start tw-px-3 tw-gap-4"
+      } ${
+        active
+          ? "tw-text-white desktop-hover:hover:tw-text-white tw-bg-transparent active:tw-bg-transparent"
+          : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent"
+      }`}
+      aria-label={collapsed ? label : undefined}
+      aria-current={active ? "page" : undefined}
+      data-tooltip-id="sidebar-tooltip"
+      data-tooltip-content={label}
+      data-tooltip-hidden={!collapsed}
+    >
+      {content}
+    </Link>
+  ) : (
     <button
       type="button"
       onClick={onClick}
-      className={classes}
+      className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base ${
+        collapsed
+          ? "tw-justify-center tw-px-2"
+          : "tw-justify-start tw-px-3 tw-gap-4"
+      } ${
+        active
+          ? "tw-text-white desktop-hover:hover:tw-text-white tw-bg-transparent active:tw-bg-transparent"
+          : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent"
+      }`}
       aria-label={collapsed ? label : undefined}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}

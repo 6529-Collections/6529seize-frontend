@@ -1,32 +1,33 @@
 "use client";
 
-import styles from "./TheMemes.module.scss";
+import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
-import { NFT, MemesExtendedData, Rememe } from "../../entities/INFT";
+import { DBResponse } from "../../entities/IDBResponse";
+import { MemesExtendedData, NFT, Rememe } from "../../entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
-import RememeImage from "../nft-image/RememeImage";
-import Pagination from "../pagination/Pagination";
-import { RememeSort } from "../rememes/Rememes";
-import { Tooltip } from "react-tooltip";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ArtistProfileHandle from "./ArtistProfileHandle";
-import { NftPageStats } from "../nftAttributes/NftStats";
-import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
-import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
-import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
+import { fetchUrl } from "../../services/6529api";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
+import RememeImage from "../nft-image/RememeImage";
+import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
+import { NftPageStats } from "../nftAttributes/NftStats";
+import Pagination from "../pagination/Pagination";
+import { printMemeReferences } from "../rememes/RememePage";
+import { RememeSort } from "../rememes/Rememes";
+import ArtistProfileHandle from "./ArtistProfileHandle";
+import MemeCalendarPeriods from "./MemeCalendarPeriods";
+import styles from "./TheMemes.module.scss";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -55,10 +56,14 @@ export function MemePageLiveRightMenu(props: {
         sm={{ span: 12 }}
         md={{ span: 6 }}
         lg={{ span: 6 }}
-        className="pt-2"
-      >
+        className="pt-2">
         <Container className="p-0">
           <Row>
+            <Col>
+              <MemeCalendarPeriods id={props.nft.id} />
+            </Col>
+          </Row>
+          <Row className="pt-2">
             <Col>
               <h3>Meme Collectors</h3>
             </Col>
@@ -220,8 +225,7 @@ export function MemePageLiveRightMenu(props: {
                 <Link
                   href={distributionPlanLink}
                   target={props.nft.has_distribution ? "_self" : "_blank"}
-                  rel="noreferrer"
-                >
+                  rel="noreferrer">
                   Distribution Plan
                 </Link>
               </Col>
@@ -344,8 +348,7 @@ export function MemePageLiveSubMenu(props: {
               <span className="d-flex align-items-center gap-2 pt-2">
                 <Dropdown
                   className={styles.rememesSortDropdown}
-                  drop={"down-centered"}
-                >
+                  drop={"down-centered"}>
                   <Dropdown.Toggle>
                     Sort: {selectedRememeSorting}
                   </Dropdown.Toggle>
@@ -357,8 +360,7 @@ export function MemePageLiveSubMenu(props: {
                           setRememesPage(1);
                           setRememesTotalResults(0);
                           setSelectedRememeSorting(s);
-                        }}
-                      >
+                        }}>
                         {s}
                       </Dropdown.Item>
                     ))}
@@ -384,8 +386,7 @@ export function MemePageLiveSubMenu(props: {
                         backgroundColor: "#f8f9fa",
                         color: "#212529",
                         padding: "4px 8px",
-                      }}
-                    >
+                      }}>
                       Refresh results
                     </Tooltip>
                   </>
@@ -417,12 +418,10 @@ export function MemePageLiveSubMenu(props: {
                     xs={{ span: 6 }}
                     sm={{ span: 4 }}
                     md={{ span: 3 }}
-                    lg={{ span: 3 }}
-                  >
+                    lg={{ span: 3 }}>
                     <Link
                       href={`/rememes/${rememe.contract}/${rememe.id}`}
-                      className="decoration-none scale-hover"
-                    >
+                      className="decoration-none scale-hover">
                       <Container fluid className="no-padding">
                         <Row>
                           <Col>

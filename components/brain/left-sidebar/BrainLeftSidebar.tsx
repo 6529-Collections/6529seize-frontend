@@ -36,6 +36,12 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   const { activeContentTab, setActiveContentTab, availableTabs } =
     useContentTab();
 
+  const getContentFilterPanelId = (tab: MyStreamWaveTab): string =>
+    `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
+
+  const getSidebarTabPanelId = (tab: "waves" | "messages"): string =>
+    `brain-left-sidebar-${tab}-panel`;
+
   // Sidebar tab state: 'waves' or 'messages'
   const [sidebarTab, setSidebarTab] = useState<"waves" | "messages">(() => {
     if (typeof window === "undefined") return "waves";
@@ -103,17 +109,19 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
     return availableTabs.map((tab) => ({
       key: tab,
       label: tabLabels[tab],
+      panelId: getContentFilterPanelId(tab),
     }));
   }, [availableTabs, tabLabels]);
 
   // Create tab options with indicators
   const sidebarTabOptions = useMemo(
     () => [
-      { key: "waves", label: "Waves" },
+      { key: "waves", label: "Waves", panelId: getSidebarTabPanelId("waves") },
       {
         key: "messages",
         label: "Messages",
         hasIndicator: hasUnreadMessages,
+        panelId: getSidebarTabPanelId("messages"),
       },
     ],
     [hasUnreadMessages]
@@ -150,10 +158,22 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
           />
 
           {sidebarTab === "waves" && (
-            <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
+            <div
+              id={getSidebarTabPanelId("waves")}
+              role="tabpanel"
+              className="tw-w-full"
+            >
+              <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
+            </div>
           )}
           {sidebarTab === "messages" && (
-            <DirectMessagesList scrollContainerRef={scrollContainerRef} />
+            <div
+              id={getSidebarTabPanelId("messages")}
+              role="tabpanel"
+              className="tw-w-full"
+            >
+              <DirectMessagesList scrollContainerRef={scrollContainerRef} />
+            </div>
           )}
         </div>
       </div>

@@ -66,7 +66,7 @@ it('shows messages tab and DM list when view param is messages', async () => {
   expect(screen.getByTestId('search-wave')).toHaveTextContent('messages');
   await waitFor(() => expect(screen.getByTestId('dm-list')).toBeInTheDocument());
   expect(screen.queryByTestId('waves-list')).not.toBeInTheDocument();
-  const msgButton = screen.getByRole('button', { name: 'Messages' });
+  const msgButton = screen.getByRole('tab', { name: 'Messages' });
   expect(msgButton.querySelector('.tw-bg-red')).toBeTruthy();
   await waitFor(() => expect(localStorage.getItem('sidebarTab')).toBe('messages'));
 });

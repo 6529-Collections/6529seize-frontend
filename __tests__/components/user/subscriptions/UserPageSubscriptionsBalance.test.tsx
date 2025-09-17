@@ -18,7 +18,7 @@ describe('UserPageSubscriptionsBalance', () => {
         refresh={jest.fn()}
       />
     );
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...', { selector: 'div' })).toBeInTheDocument();
   });
 
   it('calls refresh when icon clicked', async () => {

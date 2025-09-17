@@ -9,6 +9,7 @@ import EmmaPlan from "@/app/emma/plans/[id]/page";
 import Museum from "@/app/museum/page";
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import { redirect } from "next/navigation";
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
@@ -28,6 +29,7 @@ jest.mock("next/navigation", () => ({
     replace: jest.fn(),
   }),
   useSearchParams: () => ({ get: () => "1" }),
+  redirect: jest.fn(),
 }));
 jest.mock("react-use", () => ({ useInterval: jest.fn() }));
 
@@ -56,6 +58,12 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("static pages render", () => {
+  const redirectMock = redirect as jest.MockedFunction<typeof redirect>;
+
+  beforeEach(() => {
+    redirectMock.mockClear();
+  });
+
   it("renders about rules page", () => {
     render(<AboutRules />);
     expect(screen.getAllByText(/6529 FAM RULES/i).length).toBeGreaterThan(0);
@@ -73,7 +81,7 @@ describe("static pages render", () => {
 
   it("element columns page redirects", () => {
     render(<ElementColumns />);
-    expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
+    expect(redirectMock).toHaveBeenCalledWith("/");
   });
 
   it("renders author page", () => {
@@ -93,7 +101,7 @@ describe("static pages render", () => {
 
   it("sections page redirects", () => {
     render(<ElementSections />);
-    expect(screen.getByText(/redirected/i)).toBeInTheDocument();
+    expect(redirectMock).toHaveBeenCalledWith("/");
   });
 
   it("emma plan page renders", async () => {

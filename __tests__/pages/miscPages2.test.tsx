@@ -15,6 +15,7 @@ import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 import { mainnet } from "viem/chains";
 import { WagmiProvider, createConfig, http } from "wagmi";
+import { redirect } from "next/navigation";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("@/components/pdfViewer/PdfViewer", () => () => (
@@ -24,6 +25,7 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), asPath: "/" }),
   usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
+  redirect: jest.fn(),
 }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(() => Promise.resolve({ data: [] })),
@@ -83,7 +85,13 @@ const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+const redirectMock = redirect as jest.MockedFunction<typeof redirect>;
+
 describe("misc pages render", () => {
+  beforeEach(() => {
+    redirectMock.mockClear();
+  });
+
   it("renders Willow Shield page", () => {
     render(
       <TestProvider>
@@ -122,7 +130,7 @@ describe("misc pages render", () => {
         <PartnershipRequest />
       </TestProvider>
     );
-    expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
+    expect(redirectMock).toHaveBeenCalledWith("/om/join-om/");
   });
 
   it("renders consolidated metrics page", () => {
@@ -174,7 +182,7 @@ describe("misc pages render", () => {
         <SlideInitiatives />
       </TestProvider>
     );
-    expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
+    expect(redirectMock).toHaveBeenCalledWith("/");
   });
 
   it("renders app wallets page", () => {

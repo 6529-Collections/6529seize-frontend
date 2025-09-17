@@ -29,7 +29,6 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
  */
 interface WebLayoutProps {
   readonly children: ReactNode;
-  readonly isSmall?: boolean;
 }
 
 const WebLayout = ({ children }: WebLayoutProps) => {
@@ -65,11 +64,10 @@ const WebLayout = ({ children }: WebLayoutProps) => {
   // );
 
   // Expose app left rail width as a CSS custom property for page-level sidebars
-  const rootStyle: React.CSSProperties = {
-    ["--left-rail" as any]: sidebarWidth,
-    // Prevent horizontal scrollbars when pushing content on small desktop
-    ...(isMobile && isOffcanvasOpen ? { overflowX: "hidden" } : {}),
-  };
+  const rootStyle = {
+    "--left-rail": sidebarWidth,
+    overflowX: isMobile && isOffcanvasOpen ? "hidden" : undefined,
+  } as React.CSSProperties;
 
   return (
     <div style={rootStyle}>
@@ -88,11 +86,11 @@ const WebLayout = ({ children }: WebLayoutProps) => {
 
       <main
         className="tw-transition-all tw-duration-300 tw-ease-out"
-        style={
-          isMobile && isOffcanvasOpen
-            ? ({ transform: `translateX(${sidebarWidth})` } as React.CSSProperties)
-            : ({ marginLeft: mainOffset } as React.CSSProperties)
-        }
+        style={{
+          ...(isMobile && isOffcanvasOpen
+            ? { transform: `translateX(${sidebarWidth})` }
+            : { marginLeft: mainOffset })
+        }}
       >
         {children}
       </main>

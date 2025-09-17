@@ -56,6 +56,7 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
         { name: "Activity", path: "/network/activity" },
         { name: "Groups", path: "/network/groups" },
         { name: "NFT Activity", path: "/nft-activity" },
+        { name: "Memes Calendar", path: "/meme-calendar" },
       ],
       sections: [
         {
@@ -80,7 +81,6 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
       sections: [
         {
           name: "NFT Delegation",
-          hasDivider: true,
           items: [
             {
               name: "Delegation Center",
@@ -127,10 +127,6 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
               name: "Subscriptions",
               path: `/about/${AboutSection.SUBSCRIPTIONS}`,
               condition: (ctx) => !ctx.capacitorIsIos || ctx.country === "US",
-            },
-            {
-              name: "Memes Calendar",
-              path: `/about/${AboutSection.MEMES_CALENDAR}`,
             },
             { name: "Minting", path: `/about/${AboutSection.MINTING}` },
             {

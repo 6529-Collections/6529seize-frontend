@@ -1,6 +1,8 @@
+import { API_AUTH_COOKIE } from "@/constants";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getUserProfileActivityLogs } from "@/helpers/server.helpers";
+import { WALLET_AUTH_COOKIE } from "@/services/auth/auth.utils";
 
 // Mocks
 jest.mock("@/helpers/server.helpers");
@@ -11,8 +13,8 @@ jest.mock("@/helpers/profile-logs.helpers", () => ({
 jest.mock("next/headers", () => ({
   cookies: jest.fn(() => ({
     get: (key: string) => {
-      if (key === "x-6529-auth") return { value: "auth-token" };
-      if (key === "wallet-auth") return { value: "wallet-token" };
+      if (key === API_AUTH_COOKIE) return { value: "auth-token" };
+      if (key === WALLET_AUTH_COOKIE) return { value: "wallet-token" };
       return undefined;
     },
   })),

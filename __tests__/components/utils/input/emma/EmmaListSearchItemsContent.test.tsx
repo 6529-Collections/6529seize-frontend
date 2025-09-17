@@ -15,7 +15,7 @@ describe('EmmaListSearchItemsContent', () => {
     render(
       <EmmaListSearchItemsContent selectedId={null} loading={true} items={[]} onSelect={jest.fn()} />
     );
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...', { selector: 'li' })).toBeInTheDocument();
   });
 
   it('renders items and passes props', () => {
