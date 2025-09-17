@@ -911,7 +911,7 @@ function printDivision(label: string, number: number, range: string) {
   return (
     <tr>
       <td className="tw-py-1 tw-font-semibold tw-pr-4 tw-whitespace-nowrap">
-        {label} {number}
+        {label} {number.toLocaleString()}
       </td>
       <td className="tw-py-1 tw-whitespace-nowrap">
         <span className="tw-text-gray-400">{range}</span>
