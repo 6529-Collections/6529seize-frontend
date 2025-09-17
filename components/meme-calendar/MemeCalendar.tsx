@@ -22,7 +22,6 @@ import {
   formatFullDate,
   formatFullDateTime,
   formatMint,
-  getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
   getMonthWeeks,
   getRangeDatesByZoom,
@@ -817,20 +816,6 @@ interface MemeCalendarProps {
 
 export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
   const isActive = isMintingActive();
-  console.log("hi i am minting active", isActive);
-
-  const cardsUntilEndOfSeason = getCardsRemainingUntilEndOf("season");
-  console.log("cardsUntilEndOfSeason", cardsUntilEndOfSeason);
-  const cardsUntilEndOfYear = getCardsRemainingUntilEndOf("year");
-  console.log("cardsUntilEndOfYear", cardsUntilEndOfYear);
-  const cardsUntilEndOfEpoch = getCardsRemainingUntilEndOf("epoch");
-  console.log("cardsUntilEndOfEpoch", cardsUntilEndOfEpoch);
-  const cardsUntilEndOfPeriod = getCardsRemainingUntilEndOf("period");
-  console.log("cardsUntilEndOfPeriod", cardsUntilEndOfPeriod);
-  const cardsUntilEndOfEra = getCardsRemainingUntilEndOf("era");
-  console.log("cardsUntilEndOfEra", cardsUntilEndOfEra);
-  const cardsUntilEndOfEon = getCardsRemainingUntilEndOf("eon");
-  console.log("cardsUntilEndOfEon", cardsUntilEndOfEon);
 
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
