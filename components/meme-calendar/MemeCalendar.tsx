@@ -979,12 +979,12 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
       <div className="tw-mb-8 tw-grid tw-grid-cols-3 lg:tw-grid-cols-[repeat(6,minmax(0,1fr))_auto] tw-gap-2">
         {(
           [
-            ["season", `SZN ${seasonNumber}`],
-            ["year", `Year ${yearNumber}`],
-            ["epoch", `Epoch ${epochNumber}`],
-            ["period", `Period ${periodNumber}`],
-            ["era", `Era ${eraNumber}`],
-            ["eon", `Eon ${eonNumber}`],
+            ["season", `SZN ${seasonNumber.toLocaleString()}`],
+            ["year", `Year ${yearNumber.toLocaleString()}`],
+            ["epoch", `Epoch ${epochNumber.toLocaleString()}`],
+            ["period", `Period ${periodNumber.toLocaleString()}`],
+            ["era", `Era ${eraNumber.toLocaleString()}`],
+            ["eon", `Eon ${eonNumber.toLocaleString()}`],
           ] as [ZoomLevel, string][]
         ).map(([level, label]) => (
           <button
