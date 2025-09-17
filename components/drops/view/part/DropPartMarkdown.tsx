@@ -486,18 +486,7 @@ function DropPartMarkdown({
         return false;
       }
 
-      if (baseEndpoint) {
-        try {
-          const baseUrl = new URL(baseEndpoint);
-          if (parsed.host === baseUrl.host) {
-            return false;
-          }
-        } catch {
-          if (href.startsWith(baseEndpoint)) {
-            return false;
-          }
-        }
-      }
+
 
       const hostname = parsed.hostname.toLowerCase();
       const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
