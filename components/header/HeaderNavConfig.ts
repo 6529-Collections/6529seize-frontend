@@ -96,7 +96,6 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
             },
             { name: "Wallet Checker", path: "/delegation/wallet-checker" },
           ],
-          hasDivider: true,
         },
         {
           name: "The Memes Tools",
