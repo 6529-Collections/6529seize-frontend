@@ -178,7 +178,7 @@ export default function WebSidebarNav({
                 : []),
               {
                 name: "Memes Calendar",
-                href: `/about/${AboutSection.MEMES_CALENDAR}`,
+                href: "/meme-calendar",
               },
               { name: "Minting", href: `/about/${AboutSection.MINTING}` },
               {
