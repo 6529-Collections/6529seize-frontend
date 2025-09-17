@@ -24,6 +24,8 @@ export function useNFTCollections(
   const [nextgenCollections, setNextgenCollections] = useState<NextGenCollection[]>(initialCollections?.nextgenCollections || []);
   const [loading, setLoading] = useState(!initialCollections);
 
+
+
   // Fetch Memes and Gradients collections
   useEffect(() => {
     // Skip fetch if we have initial data
