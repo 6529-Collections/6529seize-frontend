@@ -9,8 +9,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Tweet, type TwitterComponents } from "react-tweet";
 
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
-import { SeizeQuoteLinkInfo, parseSeizeQuoteLink } from "../../../../../helpers/SeizeLinkParser";
-import { parseSeizeQueryLink } from "../../../../../helpers/SeizeLinkParser";
+import { SeizeQuoteLinkInfo, parseSeizeQuoteLink, parseSeizeQueryLink } from "../../../../../helpers/SeizeLinkParser";
 import { parseArtBlocksLink } from "@/src/services/artblocks/url";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 

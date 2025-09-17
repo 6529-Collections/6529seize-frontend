@@ -5,7 +5,7 @@ export type ArtBlocksMeta = {
   artistName?: string;
   tokenNumber?: string;
   features?: Record<string, string>;
-  series?: "Curated" | "Presents" | "Engine" | string;
+  series?: string;
   aspectRatio?: number;
 };
 
