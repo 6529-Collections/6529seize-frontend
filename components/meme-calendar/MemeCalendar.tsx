@@ -463,8 +463,6 @@ function EpochView({
 
   if (epochNumber === 0) {
     // Special case: SZN1 epoch, single card for Year #0 (SZN1)
-    const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-    const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
     const sIdx = SZN1_SEASON_INDEX; // SZN1
     // Highlight if currentIdx is within SZN1 range
     const isCurrent = currentIdx === sIdx;
@@ -557,9 +555,6 @@ function PeriodView({
   const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
 
   if (periodNumber === 0) {
-    // Special case: SZN1 period, single card for Epoch #0
-    const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-    const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
     const sIdx = SZN1_SEASON_INDEX; // SZN1
     const isCurrent = currentIdx === sIdx;
     return (
