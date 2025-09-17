@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
   try {
     targetUrl = validateUrl(request.nextUrl.searchParams.get("url"));
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Invalid URL";
+    const message = error instanceof Error ? error.message : "Invalid or forbidden URL";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
