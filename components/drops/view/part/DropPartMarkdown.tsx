@@ -477,8 +477,6 @@ function DropPartMarkdown({
   };
 
   const shouldUseOpenGraphPreview = (href: string): boolean => {
-    const baseEndpoint = process.env.BASE_ENDPOINT;
-
     try {
       const parsed = new URL(href);
       const protocol = parsed.protocol.toLowerCase();
