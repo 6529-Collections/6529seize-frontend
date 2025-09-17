@@ -236,7 +236,7 @@ export default function OpenGraphPreview({
           <div
             className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
             data-testid="og-preview-skeleton">
-            <div className="tw-aspect-video tw-w-full tw-rounded-lg tw-bg-iron-800/60" />
+            <div className="tw-w-full tw-rounded-lg tw-bg-iron-800/60" />
             <div className="tw-h-4 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
             <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800/30" />
             <div className="tw-h-3 tw-w-2/3 tw-rounded tw-bg-iron-800/20" />
