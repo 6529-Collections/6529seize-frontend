@@ -1026,7 +1026,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               },
               {
                 label: "EON",
-                text: "10 ERAs / 100 PERIODs / 1,000 YEARs / 4000 SZNs",
+                text: "10 ERAs / 100 PERIODs / 1,000 YEARs / 4,000 SZNs",
                 note: "~ 156,500 mints",
               },
             ].map(({ label, text, note }) => (

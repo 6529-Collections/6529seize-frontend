@@ -23,6 +23,7 @@ This module centralizes all date math, numbering, and calendar link logic that p
 | `getMintNumber(date: Date)`            | Snap-to-mint convenience wrapper that accepts any `Date`, advances to the next mintable day if necessary, and returns its mint number.    |
 | `getNextMintNumber(now?: Date)`        | Determines the mint number for the currently active window (if any) or the upcoming mint if no window is live.                            |
 | `dateFromMintNumber(n: number)`        | Inverse lookup that returns the mint start timestamp for a specific mint number, including SZN1 historical data.                          |
+| `getMintTimelineDetails(n: number)`    | Bundles the mint's UTC start/end, season index, displayed SZN/Year/Epoch/Period/Era/Eon numbers, and the exact date ranges for each division. |
 
 ## Mint Activity & Remaining Supply
 
@@ -38,6 +39,13 @@ This module centralizes all date math, numbering, and calendar link logic that p
 | `createGoogleCalendarUrl(startInstantUtc, endInstantUtc, title, details)` | Builds a Google Calendar link with correctly formatted UTC timestamps for the mint window.                        |
 | `createIcsDataUrl(startInstantUtc, endInstantUtc, title, description)`    | Generates an ICS data URL containing the mint event with the proper mint window and metadata.                     |
 | `printCalendarInvites(dateOrInstant, mintNumber, fontColor?, size?)`      | Produces the HTML snippet that renders download links for both the ICS file and Google Calendar entry for a mint. |
+
+## Eligibility Range Helpers
+
+| Helper                                                            | Summary                                                                                                                 |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `firstEligibleInRange(startUtcDay, endUtcDay)`                    | Scans an inclusive UTC date window and returns the first day that actually mints (Mon/Wed/Fri plus overrides), or `null` if none exist. |
+| `nthEligibleInRange(startEligibleUtcDay, nZeroBased, endUtcDay?)` | Starting from a known eligible mint day, steps forward `n` additional eligible days (optionally stopping before `endUtcDay`).          |
 
 ## Range & Display Utilities
 

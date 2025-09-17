@@ -1,7 +1,10 @@
 "use client";
 
+import { faCamera, faPencil } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toPng } from "html-to-image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import {
   addMonths,
@@ -10,9 +13,10 @@ import {
   formatFullDateTime,
   formatToFullDivision,
   getMintNumberForMintDate,
+  getMintTimelineDetails,
+  getNextMintStart,
   getSeasonIndexForDate,
   getSeasonStartDate,
-  getNextMintStart,
   isMintEligibleUtcDay,
   mintStartInstantUtcForMintDay,
   printCalendarInvites,
@@ -69,90 +73,237 @@ export function MemeCalendarOverviewNextMint({
   displayTz,
 }: MemeCalendarOverviewNextMintProps) {
   const [now, setNow] = useState(new Date());
-  // Keep a stable target instant so we don't recompute calendar HTML every tick
-  const [targetInstant, setTargetInstant] = useState(() =>
-    getNextMintStart(new Date())
-  );
+  const [isManualSelection, setIsManualSelection] = useState(false);
+  const [selectedMintNumber, setSelectedMintNumber] = useState(() => {
+    const upcomingInstant = getNextMintStart(new Date());
+    const upcomingUtcDay = new Date(
+      Date.UTC(
+        upcomingInstant.getUTCFullYear(),
+        upcomingInstant.getUTCMonth(),
+        upcomingInstant.getUTCDate()
+      )
+    );
+    return getMintNumberForMintDate(upcomingUtcDay);
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const [isCapturing, setIsCapturing] = useState(false);
 
-  // tick every second for countdown and advance target when it actually changes
-  useEffect(() => { 
-    const t = setInterval(() => {
-      setNow((prev) => {
-        const current = new Date();
-        // If the computed next mint instant has changed, update once
-        const computed = getNextMintStart(current);
-        if (computed.getTime() !== targetInstant.getTime()) {
-          setTargetInstant(computed);
-        }
-        return current;
-      });
-    }, 1000);
-    return () => clearInterval(t);
-  }, [targetInstant]);
+  const editInputRef = useRef<HTMLInputElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const targetUtcDay = useMemo(
-    () =>
-      new Date(
-        Date.UTC(
-          targetInstant.getUTCFullYear(),
-          targetInstant.getUTCMonth(),
-          targetInstant.getUTCDate()
-        )
-      ),
-    [targetInstant]
-  );
-  const memeNo = useMemo(
-    () => getMintNumberForMintDate(targetUtcDay),
-    [targetUtcDay]
-  );
+  useEffect(() => {
+    const tick = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(tick);
+  }, []);
 
-  const diffMs = targetInstant.getTime() - now.getTime();
-  const diff = diffMs > 0 ? msToParts(diffMs) : { d: 0, h: 0, m: 0, s: 0 };
+  const canonicalNextMintNumber = useMemo(() => {
+    const upcomingInstant = getNextMintStart(now);
+    const upcomingUtcDay = new Date(
+      Date.UTC(
+        upcomingInstant.getUTCFullYear(),
+        upcomingInstant.getUTCMonth(),
+        upcomingInstant.getUTCDate()
+      )
+    );
+    return getMintNumberForMintDate(upcomingUtcDay);
+  }, [now]);
+
+  useEffect(() => {
+    if (!isManualSelection && selectedMintNumber !== canonicalNextMintNumber) {
+      setSelectedMintNumber(canonicalNextMintNumber);
+    }
+  }, [canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
+
+  useEffect(() => {
+    if (isManualSelection && selectedMintNumber === canonicalNextMintNumber) {
+      setIsManualSelection(false);
+    }
+  }, [canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
+
+  useEffect(() => {
+    if (isEditing && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const mintDetails = useMemo(
+    () => getMintTimelineDetails(selectedMintNumber),
+    [selectedMintNumber]
+  );
 
   const invitesHtml = useMemo(
-    () => printCalendarInvites(targetInstant, memeNo),
-    [memeNo, targetInstant]
+    () => printCalendarInvites(mintDetails.instantUtc, mintDetails.mintNumber),
+    [mintDetails]
   );
 
+  const nowMs = now.getTime();
+  const startMs = mintDetails.instantUtc.getTime();
+  const endMs = mintDetails.mintEndUtc.getTime();
+  const isUpcoming = nowMs < startMs;
+  const isPast = nowMs >= endMs;
+
+  let heading: string;
+  if (isUpcoming) {
+    heading =
+      mintDetails.mintNumber === canonicalNextMintNumber
+        ? "Next Mint"
+        : "Upcoming Mint";
+  } else if (isPast) {
+    heading = "Past Mint";
+  } else {
+    heading = "Mint Live";
+  }
+
+  let countdownTitle = "Minting in";
+  let countdownSuffix: string | null = null;
+  let countdownParts: ReturnType<typeof msToParts>;
+  if (isUpcoming) {
+    countdownParts = msToParts(startMs - nowMs);
+  } else if (isPast) {
+    countdownTitle = "Minted";
+    countdownSuffix = "ago";
+    countdownParts = msToParts(nowMs - startMs);
+  } else {
+    countdownTitle = "Mint ends in";
+    countdownParts = msToParts(endMs - nowMs);
+  }
+
+  const countdownText = formatDurationParts(countdownParts);
+  const finalCountdown = countdownSuffix ? (
+    <>
+      {countdownText}{" "}
+      <span className="tw-text-sm tw-font-normal">{countdownSuffix}</span>
+    </>
+  ) : (
+    countdownText
+  );
+
+  const handleMintSelection = (mintNumber: number) => {
+    setSelectedMintNumber(mintNumber);
+    setIsManualSelection(mintNumber !== canonicalNextMintNumber);
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setEditValue("");
+  };
+
+  const commitEdit = () => {
+    const parsed = parseInt(editValue, 10);
+    if (Number.isNaN(parsed) || parsed < 1) {
+      cancelEdit();
+      return;
+    }
+    handleMintSelection(parsed);
+    setIsEditing(false);
+    setEditValue("");
+  };
+
+  const handleScreenshot = async () => {
+    if (!cardRef.current) return;
+    try {
+      setIsCapturing(true);
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: window.devicePixelRatio || 1,
+        filter: (node) => !node?.hasAttribute?.("data-ignore-screenshot"),
+      });
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `meme-${mintDetails.mintNumber}-mint.png`;
+      link.click();
+    } catch (error) {
+      console.error("Failed to capture meme calendar panel", error);
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
   return (
-    <div className="tw-p-4 tw-flex tw-flex-col tw-justify-between tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
-      <div className="tw-space-y-1">
-        <div className="tw-text-sm tw-text-gray-400">Next Mint</div>
-        <div className="tw-text-3xl md:tw-text-4xl tw-font-bold">
-          #{memeNo.toLocaleString()}
-        </div>
-        <div className="tw-text-lg tw-font-semibold">
-          {formatFullDateTime(targetInstant, displayTz)}
-        </div>
-        <div className="tw-text-sm">{formatToFullDivision(targetInstant)}</div>
-
-        <div className="tw-pt-2 tw-text-sm tw-text-gray-400">Minting in</div>
-        <div className="tw-text-2xl tw-font-semibold">
-          {(() => {
-            const parts: string[] = [];
-            if (diff.d > 0) {
-              parts.push(
-                `${diff.d}d`,
-                `${diff.h}h`,
-                `${diff.m}m`,
-                `${diff.s}s`
-              );
-            } else if (diff.h > 0) {
-              parts.push(`${diff.h}h`, `${diff.m}m`, `${diff.s}s`);
-            } else if (diff.m > 0) {
-              parts.push(`${diff.m}m`, `${diff.s}s`);
-            } else {
-              parts.push(`${diff.s}s`);
-            }
-            return parts.join(" : ");
-          })()}
-        </div>
-      </div>
-
+    <div className="tw-relative tw-group">
       <div
-        className="tw-pt-3"
-        dangerouslySetInnerHTML={{ __html: invitesHtml }}
-      />
+        ref={cardRef}
+        className="tw-p-4 tw-flex tw-flex-col tw-justify-between tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
+        <div className="tw-space-y-1">
+          <div className="tw-text-sm tw-text-gray-400">{heading}</div>
+          <div className="tw-flex tw-items-center tw-gap-2 tw-group/item">
+            {isEditing ? (
+              <input
+                ref={editInputRef}
+                type="number"
+                min={1}
+                inputMode="numeric"
+                value={editValue}
+                onChange={(event) => setEditValue(event.target.value)}
+                onBlur={commitEdit}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    commitEdit();
+                  } else if (event.key === "Escape") {
+                    event.preventDefault();
+                    cancelEdit();
+                  }
+                }}
+                className="tw-border tw-rounded tw-px-2 tw-py-1 tw-text-lg tw-bg-[#111] tw-text-white tw-w-24 focus:tw-outline-none focus:tw-border-gray-400"
+              />
+            ) : (
+              <>
+                <button
+                  type="button"
+                  title="Edit mint number"
+                  aria-label="Edit mint number"
+                  onClick={() => {
+                    setEditValue(String(mintDetails.mintNumber));
+                    setIsEditing(true);
+                  }}
+                  className="!tw-text-3xl md:!tw-text-4xl tw-font-bold tw-bg-transparent tw-border-0 tw-p-0 tw-m-0 tw-leading-none tw-cursor-pointer hover:tw-text-gray-200 focus:tw-outline-none">
+                  #{mintDetails.mintNumber.toLocaleString()}
+                </button>
+                <button
+                  type="button"
+                  data-ignore-screenshot
+                  className="tw-p-0 tw-border-0 tw-rounded-none tw-bg-transparent tw-text-gray-400 tw-transition tw-opacity-30 hover:tw-opacity-100 tw-group-hover/item:tw-opacity-100 tw-group-hover/item:tw-text-gray-200 focus:tw-opacity-100 focus:tw-outline-none"
+                  title="Jump to mint"
+                  onClick={() => {
+                    setEditValue(String(mintDetails.mintNumber));
+                    setIsEditing(true);
+                  }}>
+                  <FontAwesomeIcon icon={faPencil} className="tw-h-4 tw-w-4" />
+                </button>
+              </>
+            )}
+          </div>
+          <div className="tw-text-lg tw-font-semibold">
+            {formatFullDateTime(mintDetails.instantUtc, displayTz)}
+          </div>
+          <div className="tw-text-sm">
+            {formatToFullDivision(mintDetails.instantUtc)}
+          </div>
+
+          <div className="tw-pt-2 tw-text-sm tw-text-gray-400">
+            {countdownTitle}
+          </div>
+          <div className="tw-text-2xl tw-font-semibold">{finalCountdown}</div>
+        </div>
+
+        <div
+          className="tw-pt-3"
+          dangerouslySetInnerHTML={{ __html: invitesHtml }}
+        />
+      </div>
+      <button
+        type="button"
+        data-ignore-screenshot
+        onClick={handleScreenshot}
+        disabled={isCapturing}
+        className="tw-absolute tw-top-4 tw-right-4 tw-border-0 tw-rounded-none tw-bg-transparent tw-text-gray-400 tw-p-0 tw-transition tw-opacity-30 hover:tw-opacity-100 tw-group-hover:tw-opacity-100 focus:tw-opacity-100 focus:tw-outline-none hover:tw-text-gray-100 disabled:tw-opacity-50"
+        aria-label="Screenshot"
+        title="Screenshot">
+        <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
+      </button>
     </div>
   );
 }
@@ -256,7 +407,7 @@ export function MemeCalendarOverviewUpcomingMints({
                     {formatFullDateTime(instantUtc, displayTz)}
                   </td>
                   <td
-                    className="tw-py-2 tw-flex align-items-center justify-content-end"
+                    className="tw-py-2 tw-flex align-items-center justify-content-end tw-pr-6"
                     dangerouslySetInnerHTML={{
                       __html: printCalendarInvites(
                         instantUtc,
@@ -284,4 +435,25 @@ function msToParts(ms: number) {
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
   return { d, h, m, s: sec };
+}
+
+type DurationParts = ReturnType<typeof msToParts>;
+
+function formatDurationParts(parts: DurationParts): string {
+  const segments: string[] = [];
+  if (parts.d > 0) {
+    segments.push(
+      `${parts.d.toLocaleString()}d`,
+      `${parts.h}h`,
+      `${parts.m}m`,
+      `${parts.s}s`
+    );
+  } else if (parts.h > 0) {
+    segments.push(`${parts.h}h`, `${parts.m}m`, `${parts.s}s`);
+  } else if (parts.m > 0) {
+    segments.push(`${parts.m}m`, `${parts.s}s`);
+  } else {
+    segments.push(`${parts.s}s`);
+  }
+  return segments.join(" : ");
 }
