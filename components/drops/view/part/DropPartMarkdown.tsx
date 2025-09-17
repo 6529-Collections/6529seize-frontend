@@ -43,6 +43,7 @@ import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
 import DropItemChat from "../../../waves/drops/DropItemChat";
 import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
+import LinkPreviewCard from "../../../waves/LinkPreviewCard";
 import {
   fetchYoutubePreview,
   YoutubeOEmbedResponse,
@@ -162,9 +163,8 @@ function DropPartMarkdown({
             ) : (
               <span
                 key={getRandomObjectId()}
-                className={`${
-                  areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
-                }`}
+                className={`${areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
+                  }`}
               >
                 {part}
               </span>
@@ -253,16 +253,21 @@ function DropPartMarkdown({
     return gifRegex.test(href) ? href : null;
   };
 
+  const matchesDomainOrSubdomain = (host: string, domain: string): boolean => {
+    return host === domain || host.endsWith(`.${domain}`);
+  };
+
   const parseYoutubeLink = (
     href: string
   ): { readonly videoId: string; readonly url: string } | null => {
     try {
       const url = new URL(href);
       const normalizedHost = url.hostname.replace(/^www\./i, "").toLowerCase();
-      const isYoutubeDomain =
-        normalizedHost === "youtube.com" ||
-        normalizedHost === "youtube-nocookie.com" ||
-        normalizedHost.endsWith(".youtube.com");
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const isYoutubeDomain = youtubeDomains.some(
+        (domain) =>
+          normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+      );
 
       let videoId: string | null = null;
 
@@ -357,10 +362,15 @@ function DropPartMarkdown({
   ];
 
   const isSmartLink = (href: string): boolean => {
-    return (
-      !!parseYoutubeLink(href) ||
-      smartLinkHandlers.some((handler) => !!handler.parse(href))
-    );
+    if (parseYoutubeLink(href)) {
+      return true;
+    }
+
+    if (smartLinkHandlers.some((handler) => !!handler.parse(href))) {
+      return true;
+    }
+
+    return shouldUseOpenGraphPreview(href);
   };
 
   const aHrefRenderer = ({
@@ -390,6 +400,15 @@ function DropPartMarkdown({
       if (result) {
         return render(result, href);
       }
+    }
+
+    if (shouldUseOpenGraphPreview(href)) {
+      return (
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => renderExternalOrInternalLink(href, props)}
+        />
+      );
     }
 
     return renderExternalOrInternalLink(href, props);
@@ -431,29 +450,75 @@ function DropPartMarkdown({
     }
   };
 
+  const shouldUseOpenGraphPreview = (href: string): boolean => {
+    const baseEndpoint = process.env.BASE_ENDPOINT;
+
+    try {
+      const parsed = new URL(href);
+      const protocol = parsed.protocol.toLowerCase();
+      if (protocol !== "http:" && protocol !== "https:") {
+        return false;
+      }
+
+      if (baseEndpoint) {
+        try {
+          const baseUrl = new URL(baseEndpoint);
+          if (parsed.host === baseUrl.host) {
+            return false;
+          }
+        } catch {
+          if (href.startsWith(baseEndpoint)) {
+            return false;
+          }
+        }
+      }
+
+      const hostname = parsed.hostname.toLowerCase();
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const twitterDomains = ["twitter.com", "x.com"];
+
+      if (
+        hostname === "youtu.be" ||
+        youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+        twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      ) {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const renderExternalOrInternalLink = (
     href: string,
     props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
   ) => {
     const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
     const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
+    const { onClick, ...restProps } = props;
+    const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {
+      ...restProps,
+      href,
+    };
 
     if (isExternalLink) {
-      props.rel = "noopener noreferrer nofollow";
-      props.target = "_blank";
+      anchorProps.rel = "noopener noreferrer nofollow";
+      anchorProps.target = "_blank";
     } else {
-      props.href = href.replace(baseEndpoint, "");
+      anchorProps.href = href.replace(baseEndpoint, "");
     }
 
     return (
       <a
+        {...anchorProps}
         onClick={(e) => {
           e.stopPropagation();
-          if (props.onClick) {
-            props.onClick(e);
+          if (typeof onClick === "function") {
+            onClick(e);
           }
         }}
-        {...props}
       />
     );
   };
