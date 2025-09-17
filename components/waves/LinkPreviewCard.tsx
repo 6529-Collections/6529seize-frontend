@@ -5,7 +5,6 @@ import { type ReactElement, useEffect, useState } from "react";
 import OpenGraphPreview, {
   hasOpenGraphContent,
   LinkPreviewCardLayout,
-  LINK_PREVIEW_CARD_MIN_HEIGHT_CLASS,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
@@ -82,7 +81,7 @@ export default function LinkPreviewCard({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className={`tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 ${LINK_PREVIEW_CARD_MIN_HEIGHT_CLASS}`}>
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-start">
             {fallbackContent}
           </div>
