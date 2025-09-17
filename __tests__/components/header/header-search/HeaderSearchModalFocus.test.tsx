@@ -1,11 +1,13 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HeaderSearchButton from "../../../../components/header/header-search/HeaderSearchButton";
 import { QueryKey } from "../../../../components/react-query-wrapper/ReactQueryWrapper";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { useClickAway, useKey, useKeyPressEvent } from "react-use";
 
 jest.mock("focus-trap-react", () => jest.requireActual("focus-trap-react"));
+jest.mock("react-use");
 
 const useQueryMock = jest.fn();
 const useRouterMock = jest.fn();
@@ -13,6 +15,12 @@ const usePathnameMock = jest.fn();
 const useSearchParamsMock = jest.fn();
 const useWavesMock = jest.fn();
 const useLocalPreferenceMock = jest.fn();
+const useKeyMock = useKey as jest.MockedFunction<typeof useKey>;
+const useClickAwayMock = useClickAway as jest.MockedFunction<typeof useClickAway>;
+const useKeyPressEventMock =
+  useKeyPressEvent as jest.MockedFunction<typeof useKeyPressEvent>;
+
+let escapeHandler: (() => void) | null = null;
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (...args: any[]) => useQueryMock(...args),
@@ -45,18 +53,6 @@ jest.mock("../../../../components/utils/animation/CommonAnimationOpacity", () =>
   ),
 }));
 
-jest.mock("react-use", () => {
-  const React = require("react");
-  return {
-    useKey: jest.fn(),
-    useClickAway: jest.fn(),
-    useKeyPressEvent: jest.fn(),
-    useDebounce: (fn: () => void, _delay: number, deps: any[]) => {
-      React.useEffect(fn, deps);
-    },
-  };
-});
-
 jest.mock("../../../../hooks/useDeviceInfo");
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
@@ -65,6 +61,16 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
 
 beforeEach(() => {
   jest.clearAllMocks();
+  escapeHandler = null;
+  useKeyMock.mockImplementation(() => {});
+  useClickAwayMock.mockImplementation(() => {});
+  useKeyPressEventMock.mockImplementation(
+    (targetKey: string, handler: () => void) => {
+      if (targetKey === "Escape") {
+        escapeHandler = handler;
+      }
+    }
+  );
   useQueryMock.mockImplementation(({ queryKey }) => {
     switch (queryKey[0]) {
       case QueryKey.PROFILE_SEARCH:
@@ -121,8 +127,25 @@ describe("HeaderSearchModal focus management", () => {
     const trigger = screen.getByRole("button", { name: /search/i });
     await user.click(trigger);
 
-    const closeButton = await screen.findByRole("button", { name: /close/i });
+    const closeButton = await screen.findByRole("button", {
+      name: /close search/i,
+    });
     await user.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();
+      expect(trigger).toHaveFocus();
+    });
+
+    await user.keyboard("[Space]");
+
+    await screen.findByPlaceholderText("Search");
+
+    expect(escapeHandler).not.toBeNull();
+
+    act(() => {
+      escapeHandler?.();
+    });
 
     await waitFor(() => {
       expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();
@@ -130,4 +153,3 @@ describe("HeaderSearchModal focus management", () => {
     });
   });
 });
-

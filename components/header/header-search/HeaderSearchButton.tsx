@@ -16,11 +16,21 @@ export default function HeaderSearchButton() {
   const { isApp } = useDeviceInfo();
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     if (wasOpenRef.current && !isOpen) {
-      buttonRef.current?.focus();
+      rafId = window.requestAnimationFrame(() => {
+        buttonRef.current?.focus({ preventScroll: true });
+      });
     }
 
     wasOpenRef.current = isOpen;
+
+    return () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
   }, [isOpen]);
 
   const handleOpen = () => setIsOpen(true);

@@ -20,7 +20,7 @@ import type { ApiWave } from "../../../generated/models/ApiWave";
 import { useWaves } from "../../../hooks/useWaves";
 import useLocalPreference from "../../../hooks/useLocalPreference";
 import { TabToggle } from "../../common/TabToggle";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -278,8 +278,9 @@ export default function HeaderSearchModal({
               <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
                 {/* Back arrow mobile */}
                 <button
+                  type="button"
                   onClick={onClose}
-                  aria-label="Close"
+                  aria-label="Go back"
                   className="tw-flex sm:tw-hidden tw-size-6 tw-bg-transparent -tw-ml-1 tw-mr-1 tw-border-none tw-rounded-full tw-items-center tw-justify-center tw-text-iron-300 hover:tw-text-iron-50 tw-transition tw-duration-200">
                   <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
                 </button>
@@ -307,6 +308,14 @@ export default function HeaderSearchModal({
                     placeholder="Search"
                   />
                 </div>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close search"
+                  className="tw-hidden sm:tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-text-iron-50 tw-transition tw-duration-200">
+                  <XMarkIcon className="tw-size-5" />
+                </button>
               </div>
               <div className="tw-pt-3 tw-px-4">
                 <TabToggle
