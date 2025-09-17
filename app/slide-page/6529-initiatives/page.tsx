@@ -1,12 +1,9 @@
+import { redirect } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
-const IndexPage = () => (
-  <div>
-      <title>Redirecting...</title>
-      <meta httpEquiv="refresh" content="0;url=/" />
-      <p>
-        You are being redirected to <a href="/">/</a>
-      </p>
-    </div>);
+
+const IndexPage = () => {
+  redirect("/");
+};
 
 export default IndexPage;
 

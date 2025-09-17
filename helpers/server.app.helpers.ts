@@ -1,14 +1,16 @@
+import { API_AUTH_COOKIE } from "@/constants";
+import { WALLET_AUTH_COOKIE } from "@/services/auth/auth.utils";
 import { cookies } from "next/headers";
 
 export const getAppCommonHeaders = async (): Promise<
   Record<string, string>
 > => {
   const cookieStore = await cookies();
-  const authCookie = cookieStore.get("x-6529-auth")?.value;
-  const walletAuthCookie = cookieStore.get("wallet-auth")?.value;
+  const authCookie = cookieStore.get(API_AUTH_COOKIE)?.value;
+  const walletAuthCookie = cookieStore.get(WALLET_AUTH_COOKIE)?.value;
 
   return {
-    ...(authCookie ? { "x-6529-auth": authCookie } : {}),
+    ...(authCookie ? { [API_AUTH_COOKIE]: authCookie } : {}),
     ...(walletAuthCookie
       ? { Authorization: `Bearer ${walletAuthCookie}` }
       : {}),

@@ -14,7 +14,7 @@ describe('GroupCreateNftSearchItemsContent', () => {
     render(
       <GroupCreateNftSearchItemsContent loading={true} items={[nft]} selected={[]} onSelect={jest.fn()} />
     );
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...', { selector: 'li' })).toBeInTheDocument();
   });
 
   it('renders list of items when available', () => {

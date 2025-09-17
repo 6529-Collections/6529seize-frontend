@@ -1,11 +1,29 @@
+const DEFAULT_SCREEN_READER_MESSAGE = "Loading...";
+
 interface SpinnerLoaderProps {
   readonly text?: string;
+  readonly ariaLabel?: string;
 }
 
-export default function SpinnerLoader({ text = "Loading..." }: SpinnerLoaderProps) {
+export default function SpinnerLoader({
+  text = DEFAULT_SCREEN_READER_MESSAGE,
+  ariaLabel,
+}: SpinnerLoaderProps) {
+  const screenReaderMessage =
+    ariaLabel && ariaLabel.trim().length > 0
+      ? ariaLabel
+      : text && text.trim().length > 0
+        ? text
+        : DEFAULT_SCREEN_READER_MESSAGE;
+
   return (
     <div className="tw-w-full tw-py-8">
-      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3">
+      <div
+        className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3"
+        role="status"
+        aria-live="polite"
+        aria-label={screenReaderMessage}>
+        <span className="tw-sr-only">{screenReaderMessage}</span>
         <div className="tw-animate-spin">
           <svg
             className="tw-w-8 tw-h-8 tw-text-iron-500"
@@ -28,10 +46,12 @@ export default function SpinnerLoader({ text = "Loading..." }: SpinnerLoaderProp
             />
           </svg>
         </div>
-        <div className="tw-text-iron-400 tw-text-sm">
-          {text}
-        </div>
+        {text && text.trim().length > 0 ? (
+          <div className="tw-text-iron-400 tw-text-sm" aria-hidden={true}>
+            {text}
+          </div>
+        ) : null}
       </div>
     </div>
   );
-} 
+}
