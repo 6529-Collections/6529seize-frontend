@@ -219,9 +219,23 @@ describe("HeaderNavConfig", () => {
         networkSection?.items?.some((item) => item.name === "NFT Activity")
       ).toBe(true);
 
-      // expect to include 'Metrics'
+      //'Metrics' section
+      const metricsSection = networkSection?.sections?.find(
+        (section) => section.name === "Metrics"
+      );
+
+      expect(metricsSection).toBeDefined();
+
       expect(
-        networkSection?.items?.some((item) => item.name === "Metrics")
+        metricsSection?.items?.some((item) => item.name === "Definitions")
+      ).toBe(true);
+
+      expect(
+        metricsSection?.items?.some((item) => item.name === "Network Stats")
+      ).toBe(true);
+
+      expect(
+        metricsSection?.items?.some((item) => item.name === "Levels")
       ).toBe(true);
     });
 
@@ -328,14 +342,16 @@ describe("HeaderNavConfig", () => {
       expect(toolsSection?.hasDividerAfter).toBe(true);
     });
 
-    it("includes NFT Delegation section with hasDivider property", () => {
+    it("includes NFT Delegation section with no hasDivider property", () => {
       const navigation = getDesktopNavigation(mockContext);
       const toolsSection = navigation.find((item) => item.title === "Tools");
       const nftDelegationSection = toolsSection?.sections?.find(
         (section) => section.name === "NFT Delegation"
       );
 
-      expect(nftDelegationSection?.hasDivider).toBe(false);
+      expect(nftDelegationSection).toBeDefined();
+
+      expect(nftDelegationSection?.hasDivider).toBeUndefined();
     });
   });
 
