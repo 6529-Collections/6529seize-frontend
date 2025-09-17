@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
@@ -24,7 +25,7 @@ export default async function TheMemesMintPage() {
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "Mint | The Memes",
-    ogImage: `${process.env.BASE_ENDPOINT}/memes-preview.png`,
+    ogImage: `${env.BASE_ENDPOINT}/memes-preview.png`,
     description: "Collections",
     twitterCard: "summary_large_image",
   });

@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 
 import MemeLabCollection from "@/components/memelab/MemeLabCollection";
@@ -27,7 +28,7 @@ export async function generateMetadata({
   return getAppMetadata({
     title: `${collectionName} | Meme Lab Collections`,
     description: "Collections",
-    ogImage: `${process.env.BASE_ENDPOINT}/meme-lab.jpg`,
+    ogImage: `${env.BASE_ENDPOINT}/meme-lab.jpg`,
     twitterCard: "summary",
   });
 }

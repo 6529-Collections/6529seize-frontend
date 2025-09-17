@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
 import { fetchUrl } from "@/services/6529api";
@@ -68,7 +69,7 @@ export default function Rememes() {
   );
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`)
+    fetchUrl(`${env.API_ENDPOINT}/api/memes_lite`)
       .then((response: DBResponse) => {
         setMemes(response.data);
       })
@@ -94,7 +95,7 @@ export default function Rememes() {
     if (selectedSorting === RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";
     }
-    let url = `${process.env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
+    let url = `${env.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
     fetchUrl(url)
       .then((response: DBResponse) => {
         setTotalResults(response.count);

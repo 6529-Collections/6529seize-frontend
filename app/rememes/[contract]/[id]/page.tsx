@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 import RememePage from "@/components/rememes/RememePage";
 import { fetchUrl } from "@/services/6529api";
@@ -26,9 +27,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { contract, id } = await params;
   let name = `${formatAddress(contract)} #${id}`;
-  let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
+  let image = `${env.BASE_ENDPOINT}/6529io.png`;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
+    `${env.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
   );
 
   if (response?.data?.length > 0) {
@@ -42,7 +43,7 @@ export async function generateMetadata({
 
   return getAppMetadata({
     title: name,
-    ogImage: image ?? `${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`,
+    ogImage: image ?? `${env.BASE_ENDPOINT}/re-memes-b.jpeg`,
     description: `ReMemes`,
     twitterCard: "summary",
   });

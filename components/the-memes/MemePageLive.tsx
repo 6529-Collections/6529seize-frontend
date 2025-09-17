@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./TheMemes.module.scss";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
@@ -277,7 +278,7 @@ export function MemePageLiveSubMenu(props: {
   useEffect(() => {
     if (props.nft) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
+        `${env.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
       ).then((response: DBResponse) => {
         setMemeLabNfts(response.data);
         setMemeLabNftsLoaded(true);
@@ -297,7 +298,7 @@ export function MemePageLiveSubMenu(props: {
       sort = "&sort=created_at&sort_direction=desc";
     }
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
+      `${env.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
     ).then((response: DBResponse) => {
       setRememesTotalResults(response.count);
       setRememes(response.data);

@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { useEffect, useRef, useState } from "react";
 import { WsMessageType } from "../helpers/Types";
 
@@ -34,8 +35,8 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
     shouldReconnectRef.current = true;
     // determine base URL from environment
     const url =
-      process.env.WS_ENDPOINT ??
-      process.env.API_ENDPOINT?.replace("https://api", "wss://ws") ??
+      env.WS_ENDPOINT ??
+      env.API_ENDPOINT?.replace("https://api", "wss://ws") ??
       "wss://default-fallback-url";
 
     function connect() {

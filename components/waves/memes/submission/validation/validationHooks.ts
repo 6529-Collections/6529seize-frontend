@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { useState, useMemo, useCallback } from "react";
 import { TraitsData } from "../types/TraitsData";
 import { ValidationOptions, ValidationResult } from "./validationTypes";
@@ -140,7 +141,7 @@ export function useTraitsValidation(
           behavior: "smooth",
         });
       }
-    } else if (process.env.NODE_ENV === "development") {
+    } else if (env.NODE_ENV === "development") {
       // Only log in development for debugging
       console.warn(`Could not find element to focus for field: ${field}`);
     }

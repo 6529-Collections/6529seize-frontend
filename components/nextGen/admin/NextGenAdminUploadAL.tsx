@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
@@ -115,7 +116,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
       );
 
       postFormData(
-        `${process.env.API_ENDPOINT}/api/nextgen/create_allowlist`,
+        `${env.API_ENDPOINT}/api/nextgen/create_allowlist`,
         formData
       ).then((response) => {
         setUploading(false);

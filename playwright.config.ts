@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import * as dotenv from "dotenv";
+import { env } from "./utils/env";
 
 dotenv.config(); // Loads variables from .env
 dotenv.config({ path: ".env.test" }); // Overrides or adds variables from .env
@@ -8,9 +9,9 @@ const config = defineConfig({
   testDir: './',
   testMatch: /.*\.spec\.ts/,
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  forbidOnly: !!env.CI,
+  retries: env.CI ? 2 : 0,
+  workers: env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3001', 
@@ -34,7 +35,7 @@ const config = defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3001',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !env.CI,
     timeout: 120000,
   },
 });

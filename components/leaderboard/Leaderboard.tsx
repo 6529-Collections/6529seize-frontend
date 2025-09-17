@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./Leaderboard.module.scss";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
@@ -73,7 +74,7 @@ export default function Leaderboard(
   }, [content, collector]);
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
+    fetchUrl(`${env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
       (response: ApiBlocksPage) => {
         if (response.data.length > 0) {
           setLastTDH({
@@ -92,7 +93,7 @@ export default function Leaderboard(
   }, []);
 
   useEffect(() => {
-    let url = `${process.env.API_ENDPOINT
+    let url = `${env.API_ENDPOINT
       }/api/tdh_global_history?page_size=${1}`;
     fetchUrl(url).then((response: DBResponse) => {
       const tdhH = response.data[0];

@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import React, { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Head from "next/head";
@@ -13,7 +14,7 @@ const BaseLayout = ({ children, metadata }: BaseLayoutProps) => {
 
   const { title: metadataTitle, description, ogImage, twitterCard } = metadata;
 
-  const ogUrl = `${process.env.BASE_ENDPOINT}${pathname}`;
+  const ogUrl = `${env.BASE_ENDPOINT}${pathname}`;
 
   return (
     <>

@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import React, {
   createContext,
   useContext,
@@ -16,14 +17,14 @@ interface IpfsContextType {
 const IpfsContext = createContext<IpfsContextType | undefined>(undefined);
 
 const getEnv = async () => {
-  const apiEndpoint = process.env.IPFS_API_ENDPOINT;
-  const gatewayEndpoint = process.env.IPFS_GATEWAY_ENDPOINT;
+  const apiEndpoint = env.IPFS_API_ENDPOINT;
+  const gatewayEndpoint = env.IPFS_GATEWAY_ENDPOINT;
 
   if (!apiEndpoint || !gatewayEndpoint) {
     throw new Error("Missing IPFS_API_ENDPOINT or IPFS_GATEWAY_ENDPOINT");
   }
 
-  const mfsPath = process.env.IPFS_MFS_PATH;
+  const mfsPath = env.IPFS_MFS_PATH;
 
   return { apiEndpoint, gatewayEndpoint, mfsPath };
 };

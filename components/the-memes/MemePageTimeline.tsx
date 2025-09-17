@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { Col, Container, Row } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { NFT, NFTHistory } from "../../entities/INFT";
@@ -20,7 +21,7 @@ export function MemePageTimeline(props: {
       });
     }
     if (props.nft) {
-      const initialUrlHistory = `${process.env.API_ENDPOINT}/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`;
+      const initialUrlHistory = `${env.API_ENDPOINT}/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`;
       fetchHistory(initialUrlHistory);
     }
   }, [props.nft]);

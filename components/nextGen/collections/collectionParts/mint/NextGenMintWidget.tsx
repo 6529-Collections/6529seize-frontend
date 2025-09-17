@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
@@ -145,7 +146,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       if (mintForAddress) {
         setFetchingProofs(true);
         const merkleRoot = props.collection.merkle_root;
-        const url = `${process.env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
+        const url = `${env.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
         fetchUrl(url).then((response: ProofResponse[]) => {
           const proofResponses: ProofResponse[] = [];
           if (response.length > 0) {

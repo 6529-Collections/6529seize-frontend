@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { PageSSRMetadata } from "@/helpers/Types";
 import { Metadata } from "next";
 import { VALIDATED_BASE_ENDPOINT } from "@/constants";
@@ -66,7 +67,7 @@ export function getAppMetadata(
       card: twitterCard,
     },
     other: {
-      version: process.env.VERSION ?? "",
+      version: env.VERSION ?? "",
     },
   };
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./Rememes.module.scss";
 
 import { useEffect, useState } from "react";
@@ -141,7 +142,7 @@ export default function RememePage(props: Readonly<Props>) {
   useEffect(() => {
     if (props.contract && props.id) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
+        `${env.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
       ).then((response: DBResponse) => {
         if (response.data.length === 1) {
           setRememe(response.data[0]);
@@ -158,7 +159,7 @@ export default function RememePage(props: Readonly<Props>) {
     if (rememe) {
       fetchAllPages(
         `${
-          process.env.API_ENDPOINT
+          env.API_ENDPOINT
         }/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
           ","
         )}`

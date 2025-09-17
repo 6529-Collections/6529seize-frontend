@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { SecurityEventType, SecurityEventContext } from '../types/security';
 
 /**
@@ -18,12 +19,12 @@ import { SecurityEventType, SecurityEventContext } from '../types/security';
  */
 const isSecurityLoggingEnabled = (): boolean => {
   // Production: ALWAYS disabled for security
-  if (process.env.NODE_ENV === 'production') {
+  if (env.NODE_ENV === 'production') {
     return false;
   }
   
   // Development: Require explicit opt-in
-  return process.env.ENABLE_SECURITY_LOGGING === 'true';
+  return env.ENABLE_SECURITY_LOGGING === 'true';
 };
 
 /**
@@ -140,7 +141,7 @@ export const logError = (context: string, error: Error): void => {
   };
 
   // Production: Minimal sanitized logging
-  if (process.env.NODE_ENV === 'production') {
+  if (env.NODE_ENV === 'production') {
     console.error('[SEIZE_CONNECT_ERROR]', {
       ...errorInfo,
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server-side'

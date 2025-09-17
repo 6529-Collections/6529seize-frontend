@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { useEffect, useState } from "react";
 import { NFT } from "../entities/INFT";
 import { NextGenCollection } from "../entities/INextgen";
@@ -31,11 +32,11 @@ export function useNFTCollections(
       return;
     }
     
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+    fetchUrl(`${env.API_ENDPOINT}/api/memes_lite`).then(
       (memeResponse: DBResponse) => {
         setNfts(memeResponse.data);
         fetchAllPages(
-          `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
+          `${env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
         ).then((gradients: NFT[]) => {
           setNfts([...memeResponse.data, ...gradients]);
           setLoading(false);

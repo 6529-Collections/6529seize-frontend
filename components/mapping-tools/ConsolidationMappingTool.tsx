@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./MappingTool.module.scss";
 import { Form, Row, Col, Button, Container } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
@@ -136,7 +137,7 @@ export default function ConsolidationMappingTool() {
       });
     }
     if (processing) {
-      const initialUrl = `${process.env.API_ENDPOINT}/api/consolidations`;
+      const initialUrl = `${env.API_ENDPOINT}/api/consolidations`;
       fetchConsolidations(initialUrl);
     }
   }, [processing]);

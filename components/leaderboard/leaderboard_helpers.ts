@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { useState, useCallback, useEffect } from "react";
 import { SortDirection } from "../../entities/ISort";
 import { cicToType } from "../../helpers/Helpers";
@@ -179,7 +180,7 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
     setTotalResults(data.count);
     setLeaderboard(data.data);
     setIsLoading(false);
-    setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
+    setMyFetchUrl(`${env.API_ENDPOINT}/api/${data.url}`);
   }, [
     page,
     sort.sort,

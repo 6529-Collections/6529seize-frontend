@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import { goerli, mainnet, sepolia } from "viem/chains";
 import {
   NEXTGEN_ADMIN_ABI,
@@ -13,8 +14,8 @@ export interface NextGenContract {
 }
 
 function getNextGenChainId() {
-  if (process.env.NEXTGEN_CHAIN_ID) {
-    const chainId: number = parseInt(process.env.NEXTGEN_CHAIN_ID);
+  if (env.NEXTGEN_CHAIN_ID) {
+    const chainId: number = parseInt(env.NEXTGEN_CHAIN_ID);
     if (chainId == sepolia.id) {
       return sepolia.id;
     }

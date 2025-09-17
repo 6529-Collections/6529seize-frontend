@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 export interface SeizeQuoteLinkInfo {
   waveId: string;
   serialNo?: string;
@@ -24,7 +25,7 @@ export function parseSeizeQueryLink(
   try {
     const url = new URL(href);
 
-    if (url.origin !== process.env.BASE_ENDPOINT) return null;
+    if (url.origin !== env.BASE_ENDPOINT) return null;
     if (url.pathname !== path) return null;
 
     if (exact) {

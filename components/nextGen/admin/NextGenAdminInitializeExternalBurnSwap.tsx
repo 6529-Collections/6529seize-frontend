@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
 import { useSignMessage } from "wagmi";
@@ -115,7 +116,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
       };
 
       postData(
-        `${process.env.API_ENDPOINT}/api/nextgen/register_burn_collection`,
+        `${env.API_ENDPOINT}/api/nextgen/register_burn_collection`,
         data
       ).then((response) => {
         if (response.status === 200 && response.response) {

@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 
 import React from "react";
@@ -16,7 +17,7 @@ export default function TheMemesPage() {
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "The Memes",
-    ogImage: `${process.env.BASE_ENDPOINT}/memes-preview.png`,
+    ogImage: `${env.BASE_ENDPOINT}/memes-preview.png`,
     description: "Collections",
     twitterCard: "summary_large_image",
   });

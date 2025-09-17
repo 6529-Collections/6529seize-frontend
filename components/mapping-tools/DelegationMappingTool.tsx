@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
@@ -112,7 +113,7 @@ export default function DelegationMappingTool() {
       const useCaseFilter = `&use_case=1,${useCase}`;
 
       const collectionFilter = `&collection=${DELEGATION_ALL_ADDRESS},${collection}`;
-      const initialUrl = `${process.env.API_ENDPOINT}/api/delegations?${useCaseFilter}${collectionFilter}`;
+      const initialUrl = `${env.API_ENDPOINT}/api/delegations?${useCaseFilter}${collectionFilter}`;
       fetchDelegations(initialUrl);
     }
   }, [processing]);

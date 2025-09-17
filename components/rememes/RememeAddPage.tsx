@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./Rememes.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Image from "next/image";
@@ -110,7 +111,7 @@ export default function RememeAddPage() {
   }, [signMessage.isError]);
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+    fetchUrl(`${env.API_ENDPOINT}/api/memes_lite`).then(
       (response: DBResponse) => {
         setMemes(response.data);
         setMemesLoaded(true);
@@ -136,7 +137,7 @@ export default function RememeAddPage() {
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
       setSubmitting(true);
-      postData(`${process.env.API_ENDPOINT}/api/rememes/add`, {
+      postData(`${env.API_ENDPOINT}/api/rememes/add`, {
         address: address,
         signature: signMessage.data,
         rememe: buildRememeObject(),
@@ -373,8 +374,8 @@ export default function RememeAddPage() {
                           <a
                             className="font-color"
                             href={`${
-                              process.env.BASE_ENDPOINT
-                                ? process.env.BASE_ENDPOINT
+                              env.BASE_ENDPOINT
+                                ? env.BASE_ENDPOINT
                                 : "https://6529.io"
                             }/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"

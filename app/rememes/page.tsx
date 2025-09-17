@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import styles from "@/styles/Home.module.scss";
 import Rememes from "@/components/rememes/Rememes";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -15,6 +16,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "ReMemes",
     description: "Collections",
-    ogImage: `${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`,
+    ogImage: `${env.BASE_ENDPOINT}/re-memes-b.jpeg`,
   });
 }

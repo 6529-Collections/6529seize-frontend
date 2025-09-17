@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import { NFT } from "../../entities/INFT";
 import styles from "./Rememes.module.scss";
 import { Row, Col, Form, Container, Button, Dropdown } from "react-bootstrap";
@@ -117,7 +118,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
       try {
         setTokenIds(myTokenIds);
         const validation = await postData(
-          `${process.env.API_ENDPOINT}/api/rememes/validate`,
+          `${env.API_ENDPOINT}/api/rememes/validate`,
           getRememe(myTokenIds)
         );
         const response = validation.response;

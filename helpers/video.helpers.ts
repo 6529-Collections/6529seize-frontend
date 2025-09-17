@@ -1,5 +1,6 @@
+import { env } from "@/utils/env";
 const CLOUDFRONT_DOMAIN =
-  process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ??
+  env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ??
   "https://d3lqz0a4bldqgf.cloudfront.net";
 
 export interface VideoConversions {

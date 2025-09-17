@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/utils/env";
 import styles from "./HeaderShare.module.scss";
 import {
   faCopy,
@@ -121,8 +122,8 @@ function HeaderQRModal({
       routerPath += `?${searchParamsString}`;
     }
 
-    const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
-    const coreScheme = process.env.CORE_SCHEME ?? "core6529";
+    const appScheme = env.MOBILE_APP_SCHEME ?? "mobile6529";
+    const coreScheme = env.CORE_SCHEME ?? "core6529";
 
     const browserUrl = `${window.location.origin}${routerPath}`;
     const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;

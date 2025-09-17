@@ -1,3 +1,4 @@
+import { env } from "@/utils/env";
 import GifPicker, { Theme } from "gif-picker-react";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 
@@ -14,7 +15,7 @@ export default function CreateDropGifPicker({
     <MobileWrapperDialog isOpen={show} onClose={() => setShow(false)} noPadding>
       <GifPicker
         width="100%"
-        tenorApiKey={process.env.TENOR_API_KEY!}
+        tenorApiKey={env.TENOR_API_KEY!}
         theme={Theme.DARK}
         onGifClick={(gif) => onSelect(gif.url)}
       />
