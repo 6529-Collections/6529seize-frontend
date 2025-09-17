@@ -16,6 +16,7 @@ import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
@@ -26,7 +27,7 @@ import DropListItemContentPart, {
 } from "../item/content/DropListItemContentPart";
 import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
-import { Tweet } from "react-tweet";
+import { Tweet, type TwitterComponents } from "react-tweet";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
@@ -424,14 +425,39 @@ function DropPartMarkdown({
       <DropPartMarkdownImage src={props.src} />
     ) : null;
 
-  const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
-        <Tweet id={result.tweetId} />
-      </div>
-      <ChatItemHrefButtons href={result.href} />
-    </div>
+  const renderTweetFallback = (href: string) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+    >
+      <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+        Tweet unavailable
+      </span>
+      <span className="tw-text-xs tw-text-iron-400">Open on X</span>
+    </a>
   );
+
+  const renderTweetEmbed = (result: { href: string; tweetId: string }) => {
+    const renderFallback = () => renderTweetFallback(result.href);
+    const TweetNotFound: TwitterComponents["TweetNotFound"] = () =>
+      renderFallback();
+
+    return (
+      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+        <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
+          <ErrorBoundary fallbackRender={() => renderFallback()}>
+            <Tweet
+              id={result.tweetId}
+              components={{ TweetNotFound }}
+            />
+          </ErrorBoundary>
+        </div>
+        <ChatItemHrefButtons href={result.href} />
+      </div>
+    );
+  };
 
   const renderGifEmbed = (url: string) => (
     <img
