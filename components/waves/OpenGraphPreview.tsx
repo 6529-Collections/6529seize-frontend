@@ -51,7 +51,6 @@ const IMAGE_KEYS = [
   "secureUrl",
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
-export const LINK_PREVIEW_CARD_MIN_HEIGHT_CLASS = "tw-min-h-[12rem]";
 
 function readFirstString(
   data: OpenGraphPreviewData | null | undefined,
@@ -214,8 +213,8 @@ export function hasOpenGraphContent(
 
   return Boolean(
     readFirstString(preview, TITLE_KEYS) ||
-      readFirstString(preview, DESCRIPTION_KEYS) ||
-      extractImageUrl(preview)
+    readFirstString(preview, DESCRIPTION_KEYS) ||
+    extractImageUrl(preview)
   );
 }
 
@@ -233,7 +232,7 @@ export default function OpenGraphPreview({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className={`tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 ${LINK_PREVIEW_CARD_MIN_HEIGHT_CLASS}`}>
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div
             className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
             data-testid="og-preview-skeleton">
@@ -257,7 +256,7 @@ export default function OpenGraphPreview({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className={`tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6 ${LINK_PREVIEW_CARD_MIN_HEIGHT_CLASS}`}
+          className="tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
           data-testid="og-preview-unavailable">
           <div className="tw-text-center tw-space-y-2">
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
@@ -279,7 +278,7 @@ export default function OpenGraphPreview({
   return (
     <LinkPreviewCardLayout href={href}>
       <div
-        className={`tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 ${LINK_PREVIEW_CARD_MIN_HEIGHT_CLASS}`}
+        className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
         data-testid="og-preview-card">
         <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
           {imageUrl && (
