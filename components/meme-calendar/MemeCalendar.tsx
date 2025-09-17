@@ -62,12 +62,15 @@ function formatMonthYearShort(d: Date): string {
 }
 
 function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
-  const seasonNumber = displayedSeasonNumberFromIndex(seasonIndex);
-  const yearNumber = displayedYearNumberFromIndex(seasonIndex);
-  const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
-  const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
-  const eraNumber = displayedEraNumberFromIndex(seasonIndex);
-  const eonNumber = displayedEonNumberFromIndex(seasonIndex);
+  const seasonNumber =
+    displayedSeasonNumberFromIndex(seasonIndex).toLocaleString();
+  const yearNumber = displayedYearNumberFromIndex(seasonIndex).toLocaleString();
+  const epochNumber =
+    displayedEpochNumberFromIndex(seasonIndex).toLocaleString();
+  const periodNumber =
+    displayedPeriodNumberFromIndex(seasonIndex).toLocaleString();
+  const eraNumber = displayedEraNumberFromIndex(seasonIndex).toLocaleString();
+  const eonNumber = displayedEonNumberFromIndex(seasonIndex).toLocaleString();
 
   switch (zoom) {
     case "season":
