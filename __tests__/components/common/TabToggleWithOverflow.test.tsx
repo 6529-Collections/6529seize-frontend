@@ -84,7 +84,6 @@ describe('TabToggleWithOverflow', () => {
     );
 
     const moreButton = screen.getByRole('button', { name: 'More' });
-    expect(moreButton).toHaveAttribute('aria-haspopup', 'menu');
     expect(moreButton).toHaveAttribute('aria-expanded', 'false');
 
     moreButton.focus();

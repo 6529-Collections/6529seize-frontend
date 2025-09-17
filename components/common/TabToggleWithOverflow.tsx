@@ -110,7 +110,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             key={option.key}
             role="tab"
             aria-selected={activeKey === option.key}
-            tabIndex={activeKey === option.key ? 0 : -1}
             onClick={() => handleSelect(option.key)}
             className={`tw-flex-1 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
               fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
@@ -129,7 +128,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
         <div ref={overflowRef} className="tw-relative">
           <button
             type="button"
-            aria-haspopup="menu"
             aria-expanded={isOverflowOpen}
             onClick={toggleOverflowMenu}
             onKeyDown={handleOverflowKeyDown}
@@ -167,7 +165,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
                     key={option.key}
                     role="tab"
                     aria-selected={activeKey === option.key}
-                    tabIndex={activeKey === option.key ? 0 : -1}
                     onClick={() => handleSelect(option.key)}
                     className={`tw-block tw-w-full tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-bg-transparent tw-border-0 tw-font-medium tw-transition-colors ${
                       activeKey === option.key
