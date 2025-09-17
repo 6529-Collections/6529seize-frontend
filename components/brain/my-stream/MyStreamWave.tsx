@@ -23,6 +23,9 @@ interface MyStreamWaveProps {
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
+const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
+  `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
+
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const searchParams = useSearchParams();
@@ -94,7 +97,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       {/* Don't render tab container for simple waves */}
       {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
 
-      <div className="tw-flex-grow tw-overflow-hidden">
+      <div
+        className="tw-flex-grow tw-overflow-hidden"
+        role="tabpanel"
+        id={getContentTabPanelId(activeContentTab)}
+      >
         {components[activeContentTab]}
       </div>
     </div>
