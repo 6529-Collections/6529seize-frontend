@@ -50,36 +50,87 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOverflowOpen) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOverflowOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOverflowOpen]);
+
   // Handle tab selection
   const handleSelect = (key: string) => {
     onSelect(key);
     setIsOverflowOpen(false);
   };
 
+  const toggleOverflowMenu = () => {
+    setIsOverflowOpen((prev) => !prev);
+  };
+
+  const handleOverflowKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+  ) => {
+    if (
+      event.key === "Enter" ||
+      event.key === " " ||
+      event.key === "Space" ||
+      event.key === "Spacebar"
+    ) {
+      event.preventDefault();
+      toggleOverflowMenu();
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOverflowOpen(false);
+    }
+  };
+
   return (
     <div
       className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}>
-      {/* Show visible tabs */}
-      {visibleTabs.map((option) => (
-        <button
-          key={option.key}
-          onClick={() => handleSelect(option.key)}
-          className={`tw-flex-1 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
-            fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
-          } ${
-            activeKey === option.key
-              ? "tw-text-primary-300 tw-border-primary-400"
-              : "tw-text-iron-400 hover:tw-text-iron-200 tw-border-transparent"
-          }`}>
-          {option.label}
-        </button>
-      ))}
+      <div
+        role="tablist"
+        aria-orientation="horizontal"
+        className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-flex-1" : ""}`}>
+        {/* Show visible tabs */}
+        {visibleTabs.map((option) => (
+          <button
+            key={option.key}
+            role="tab"
+            aria-selected={activeKey === option.key}
+            onClick={() => handleSelect(option.key)}
+            className={`tw-flex-1 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
+              fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
+            } ${
+              activeKey === option.key
+                ? "tw-text-primary-300 tw-border-primary-400"
+                : "tw-text-iron-400 hover:tw-text-iron-200 tw-border-transparent"
+            }`}>
+            {option.label}
+          </button>
+        ))}
+      </div>
 
       {/* Only show overflow dropdown if there are overflow tabs */}
       {overflowTabs.length > 0 && (
         <div ref={overflowRef} className="tw-relative">
           <button
-            onClick={() => setIsOverflowOpen(!isOverflowOpen)}
+            type="button"
+            aria-expanded={isOverflowOpen}
+            onClick={toggleOverflowMenu}
+            onKeyDown={handleOverflowKeyDown}
             className={`tw-whitespace-nowrap tw-flex tw-items-center tw-gap-0.5 tw-text-sm tw-font-medium tw-border-0 tw-bg-transparent tw-transition-all tw-duration-200 ${
               isActiveInOverflow
                 ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
@@ -112,6 +163,8 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
                 {overflowTabs.map((option) => (
                   <button
                     key={option.key}
+                    role="tab"
+                    aria-selected={activeKey === option.key}
                     onClick={() => handleSelect(option.key)}
                     className={`tw-block tw-w-full tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-bg-transparent tw-border-0 tw-font-medium tw-transition-colors ${
                       activeKey === option.key

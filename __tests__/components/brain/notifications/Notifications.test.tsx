@@ -111,7 +111,7 @@ describe('Notifications component', () => {
 
     render(<Notifications />);
 
-    expect(screen.getByText('Loading notifications...')).toBeInTheDocument();
+    expect(screen.getByText('Loading notifications...', { selector: 'div' })).toBeInTheDocument();
     expect(mutateAsyncMock).toHaveBeenCalled();
     // Title is set via TitleContext hooks
   });

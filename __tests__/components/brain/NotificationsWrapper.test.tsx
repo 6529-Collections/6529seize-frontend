@@ -28,7 +28,7 @@ describe('NotificationsWrapper', () => {
     render(
       <NotificationsWrapper items={[]} loading={true} activeDrop={null} setActiveDrop={setActive} />
     );
-    expect(screen.getByText(/Loading notifications/)).toBeInTheDocument();
+    expect(screen.getByText(/Loading notifications/, { selector: 'div' })).toBeInTheDocument();
   });
 
   it('delegates callbacks to router and state setter', () => {

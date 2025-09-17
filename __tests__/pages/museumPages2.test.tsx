@@ -9,8 +9,14 @@ import BlocksOfArt from "@/app/museum/genesis/the-blocks-of-art/page";
 import Vortex from "@/app/museum/genesis/vortex/page";
 import OMRedirect from "@/app/om/OM/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { redirect } from "next/navigation";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(),
+}));
+
+const redirectMock = redirect as jest.MockedFunction<typeof redirect>;
 
 const renderWithAuth = (ui: React.ReactElement, overrides = {}) => {
   const value = { setTitle: jest.fn(), ...overrides } as any;
@@ -38,6 +44,10 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("additional museum and misc pages render", () => {
+  beforeEach(() => {
+    redirectMock.mockClear();
+  });
+
   it("renders Elevated Deconstructions", () => {
     render(<ElevatedDeconstructions />);
     expect(
@@ -75,8 +85,8 @@ describe("additional museum and misc pages render", () => {
     expect(screen.getAllByText(/VORTEX/i).length).toBeGreaterThan(0);
   });
 
-  it("renders OM redirect page", () => {
+  it("redirects OM page to /om/", () => {
     render(<OMRedirect />);
-    expect(screen.getByText(/You are being redirected/i)).toBeInTheDocument();
+    expect(redirectMock).toHaveBeenCalledWith("/om/");
   });
 });
