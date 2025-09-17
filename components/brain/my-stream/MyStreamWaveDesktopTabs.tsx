@@ -22,7 +22,11 @@ interface MyStreamWaveDesktopTabsProps {
 interface TabOption {
   key: MyStreamWaveTab;
   label: string;
+  panelId: string;
 }
+
+const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
+  `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
@@ -160,6 +164,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     .map((tab) => ({
       key: tab,
       label: tabLabels[tab],
+      panelId: getContentTabPanelId(tab),
     }));
 
   useEffect(() => {

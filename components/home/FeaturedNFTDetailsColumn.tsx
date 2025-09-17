@@ -1,17 +1,18 @@
 "use client";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import MemeCalendarPeriods from "@/components/the-memes/MemeCalendarPeriods";
+import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import useCapacitor from "@/hooks/useCapacitor";
 import { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
-import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
-import ManifoldClaimTable from "./ManifoldClaimTable";
-import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
-import MintingApproachSection from "./MintingApproachSection";
-import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
+import ManifoldClaimTable from "./ManifoldClaimTable";
+import MintingApproachSection from "./MintingApproachSection";
 
 interface Props {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -35,8 +36,7 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
       xs={{ span: 12 }}
       sm={{ span: 12 }}
       md={{ span: 6 }}
-      lg={{ span: 6 }}
-    >
+      lg={{ span: 6 }}>
       <Container>
         <Row>
           <Col>
@@ -50,6 +50,11 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
           </Col>
         </Row>
         <Row>
+          <Col>
+            <MemeCalendarPeriods id={featuredNft.id} />
+          </Col>
+        </Row>
+        <Row className="pt-2">
           <Col>
             <FeaturedNFTDetailsTable
               nft={featuredNft}

@@ -6,12 +6,33 @@ import {
   type YoutubeOEmbedResponse,
 } from "@/services/api/youtube";
 
+const FALLBACK_BASE_ENDPOINT = "https://6529.io";
+const originalBaseEndpoint = process.env.BASE_ENDPOINT;
+
 jest.mock("../../../../../hooks/isMobileScreen", () => () => false);
 jest.mock("../../../../../contexts/EmojiContext", () => ({
   useEmoji: () => ({ emojiMap: [] }),
 }));
+
+const tweetMock = jest.fn(
+  ({ id, components, onError }: any) => {
+    if (id === "1111111111") {
+      throw new Error("boom");
+    }
+
+    if (id === "2222222222") {
+      const error = new Error("not found");
+      onError?.(error);
+      const NotFound = components?.TweetNotFound;
+      return NotFound ? <NotFound error={error} /> : null;
+    }
+
+    return <div>tweet:{id}</div>;
+  }
+);
+
 jest.mock("react-tweet", () => ({
-  Tweet: ({ id }: any) => <div>tweet:{id}</div>,
+  Tweet: (props: any) => tweetMock(props),
 }));
 jest.mock("@/services/api/youtube", () => ({
   fetchYoutubePreview: jest.fn(),
@@ -19,13 +40,31 @@ jest.mock("@/services/api/youtube", () => ({
 
 const mockFetchYoutubePreview =
   fetchYoutubePreview as jest.MockedFunction<typeof fetchYoutubePreview>;
-const originalBaseEndpoint = process.env.BASE_ENDPOINT;
+
+const mockLinkPreviewCard = jest.fn(({ renderFallback, href }: any) => (
+  <div data-testid="link-preview" data-href={href}>
+    {renderFallback()}
+  </div>
+));
+
+jest.mock("../../../../../components/waves/LinkPreviewCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockLinkPreviewCard(props),
+}));
+
+beforeEach(() => {
+  mockLinkPreviewCard.mockClear();
+});
+
+afterEach(() => {
+  tweetMock.mockClear();
+});
 
 describe("DropPartMarkdown", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     if (originalBaseEndpoint === undefined) {
-      delete process.env.BASE_ENDPOINT;
+      process.env.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
     } else {
       process.env.BASE_ENDPOINT = originalBaseEndpoint;
     }
@@ -66,9 +105,13 @@ describe("DropPartMarkdown", () => {
         onQuoteClick={jest.fn()}
       />
     );
-    const a = screen.getByRole("link");
+    expect(mockLinkPreviewCard).toHaveBeenCalledTimes(1);
+    const previewCall = mockLinkPreviewCard.mock.calls[0][0];
+    expect(previewCall.href).toBe("https://google.com");
+
+    const a = screen.getByRole("link", { name: "link" });
     expect(a).toHaveAttribute("target", "_blank");
-    expect(a).toHaveAttribute("rel");
+    expect(a).toHaveAttribute("rel", "noopener noreferrer nofollow");
   });
 
   it("handles internal links", () => {
@@ -82,9 +125,66 @@ describe("DropPartMarkdown", () => {
         onQuoteClick={jest.fn()}
       />
     );
-    const a = screen.getByRole("link");
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    const a = screen.getByRole("link", { name: "home" });
     expect(a).not.toHaveAttribute("target");
     expect(a).toHaveAttribute("href", "/page");
+  });
+
+  it("renders a fallback link when tweet data is unavailable", async () => {
+    const content =
+      "[tweet](https://twitter.com/someuser/status/2222222222)";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const fallbackLink = await screen.findByRole("link", {
+      name: /tweet unavailable/i,
+    });
+
+    expect(fallbackLink).toHaveAttribute(
+      "href",
+      "https://twitter.com/someuser/status/2222222222"
+    );
+    expect(fallbackLink).toHaveAttribute("target", "_blank");
+    expect(fallbackLink).toHaveTextContent(/Tweet unavailable/i);
+    expect(fallbackLink).toHaveTextContent(/Open on X/i);
+  });
+
+  it("renders a fallback link when the tweet embed throws", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    try {
+      const content = "[tweet](https://twitter.com/foo/status/1111111111)";
+
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          referencedNfts={[]}
+          partContent={content}
+          onQuoteClick={jest.fn()}
+        />
+      );
+
+      const fallbackLink = await screen.findByRole("link", {
+        name: /tweet unavailable/i,
+      });
+
+      expect(fallbackLink).toHaveAttribute(
+        "href",
+        "https://twitter.com/foo/status/1111111111"
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 
   it("renders YouTube previews with thumbnail and iframe interaction", async () => {

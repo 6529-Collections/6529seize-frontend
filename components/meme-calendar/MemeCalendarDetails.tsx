@@ -29,7 +29,7 @@ export default function MemeCalendarDetails() {
           <span className="tw-font-semibold tw-text-[#20fa59]">
             highlighted
           </span>
-          .
+          {"."}
         </p>
 
         <div className="tw-space-y-5">

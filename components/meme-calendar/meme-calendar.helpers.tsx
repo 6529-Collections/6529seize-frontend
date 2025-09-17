@@ -457,6 +457,12 @@ export function getRangeDatesByZoom(
       return { start, end };
     }
     case "year": {
+      if (isSznOneIndex(seasonIndex)) {
+        return {
+          start: new Date(SZN1_RANGE.start),
+          end: new Date(SZN1_RANGE.end),
+        };
+      }
       const start = getSeasonStartDate(
         Math.floor(seasonIndex / SEASONS_PER_YEAR) * SEASONS_PER_YEAR
       );
@@ -568,7 +574,10 @@ export function isMintingActive(now: Date = new Date()): boolean {
 
 // Inverse: mint number -> mint *instant* (UTC)
 // ---- helpers used by inverse mapping ----
-function firstEligibleInRange(startUtcDay: Date, endUtcDay: Date): Date | null {
+export function firstEligibleInRange(
+  startUtcDay: Date,
+  endUtcDay: Date
+): Date | null {
   let d = startOfUtcDay(startUtcDay);
   const end = startOfUtcDay(endUtcDay);
   while (+d <= +end) {
@@ -578,7 +587,7 @@ function firstEligibleInRange(startUtcDay: Date, endUtcDay: Date): Date | null {
   return null;
 }
 
-function nthEligibleInRange(
+export function nthEligibleInRange(
   startEligibleUtcDay: Date,
   nZeroBased: number,
   endUtcDay?: Date
@@ -624,6 +633,66 @@ export function dateFromMintNumber(n: number): Date {
   }
 
   return mintStartInstantUtcForMintDay(currentUtcDay);
+}
+
+export type DateRange = { start: Date; end: Date };
+
+export interface MintTimelineDetails {
+  readonly mintNumber: number;
+  readonly instantUtc: Date;
+  readonly mintDayUtc: Date;
+  readonly mintEndUtc: Date;
+  readonly seasonIndex: number;
+  readonly seasonNumber: number;
+  readonly yearNumber: number;
+  readonly epochNumber: number;
+  readonly periodNumber: number;
+  readonly eraNumber: number;
+  readonly eonNumber: number;
+  readonly ranges: Record<ZoomLevel, DateRange>;
+}
+
+const ZOOM_LEVELS: readonly ZoomLevel[] = [
+  "season",
+  "year",
+  "epoch",
+  "period",
+  "era",
+  "eon",
+];
+
+export function getMintTimelineDetails(
+  mintNumber: number
+): MintTimelineDetails {
+  const instantUtc = dateFromMintNumber(mintNumber);
+  const mintDayUtc = new Date(
+    Date.UTC(
+      instantUtc.getUTCFullYear(),
+      instantUtc.getUTCMonth(),
+      instantUtc.getUTCDate()
+    )
+  );
+  const mintEndUtc = mintEndInstantUtcForMintDay(mintDayUtc);
+  const seasonIndex = getSeasonIndexForDate(instantUtc);
+
+  const ranges = Object.fromEntries(
+    ZOOM_LEVELS.map((zoom) => [zoom, getRangeDatesByZoom(zoom, seasonIndex)])
+  ) as Record<ZoomLevel, DateRange>;
+
+  return {
+    mintNumber,
+    instantUtc,
+    mintDayUtc,
+    mintEndUtc,
+    seasonIndex,
+    seasonNumber: displayedSeasonNumberFromIndex(seasonIndex),
+    yearNumber: displayedYearNumberFromIndex(seasonIndex),
+    epochNumber: displayedEpochNumberFromIndex(seasonIndex),
+    periodNumber: displayedPeriodNumberFromIndex(seasonIndex),
+    eraNumber: displayedEraNumberFromIndex(seasonIndex),
+    eonNumber: displayedEonNumberFromIndex(seasonIndex),
+    ranges,
+  };
 }
 
 // Build a matrix of weeks for a given month (numbers or nulls). Align by UTC weekday.
@@ -813,37 +882,26 @@ export function formatToFullDivision(d: Date): React.ReactNode {
     });
   const range = (start: Date, end: Date) => `${fmt(start)} - ${fmt(end)}`;
 
-  const seasonStart = getSeasonStartDate(idx);
-  const seasonEnd = addMonths(seasonStart, 2);
-
-  const yearStart = new Date(Date.UTC(2023 + (year - 1), 0, 1));
-  const yearEnd = new Date(Date.UTC(2023 + year, 0, 0));
-
-  const epochStartYear = 2023 + 4 * (epoch - 1);
-  const epochStart = new Date(Date.UTC(epochStartYear, 0, 1));
-  const epochEnd = new Date(Date.UTC(epochStartYear + 4, 0, 0));
-
-  const periodStartYear = 2023 + 20 * (period - 1);
-  const periodStart = new Date(Date.UTC(periodStartYear, 0, 1));
-  const periodEnd = new Date(Date.UTC(periodStartYear + 20, 0, 0));
-
-  const eraStartYear = 2023 + 100 * (era - 1);
-  const eraStart = new Date(Date.UTC(eraStartYear, 0, 1));
-  const eraEnd = new Date(Date.UTC(eraStartYear + 100, 0, 0));
-
-  const eonStartYear = 2023 + 1000 * (eon - 1);
-  const eonStart = new Date(Date.UTC(eonStartYear, 0, 1));
-  const eonEnd = new Date(Date.UTC(eonStartYear + 1000, 0, 0));
+  const seasonDates = getRangeDatesByZoom("season", idx);
+  const yearDates = getRangeDatesByZoom("year", idx);
+  const epochDates = getRangeDatesByZoom("epoch", idx);
+  const periodDates = getRangeDatesByZoom("period", idx);
+  const eraDates = getRangeDatesByZoom("era", idx);
+  const eonDates = getRangeDatesByZoom("eon", idx);
 
   return (
     <table className="tw-inline-table tw-table-auto tw-w-auto tw-border-collapse">
       <tbody>
-        {printDivision("SZN", szn, range(seasonStart, seasonEnd))}
-        {printDivision("Year", year, range(yearStart, yearEnd))}
-        {printDivision("Epoch", epoch, range(epochStart, epochEnd))}
-        {printDivision("Period", period, range(periodStart, periodEnd))}
-        {printDivision("Era", era, range(eraStart, eraEnd))}
-        {printDivision("Eon", eon, range(eonStart, eonEnd))}
+        {printDivision("SZN", szn, range(seasonDates.start, seasonDates.end))}
+        {printDivision("Year", year, range(yearDates.start, yearDates.end))}
+        {printDivision("Epoch", epoch, range(epochDates.start, epochDates.end))}
+        {printDivision(
+          "Period",
+          period,
+          range(periodDates.start, periodDates.end)
+        )}
+        {printDivision("Era", era, range(eraDates.start, eraDates.end))}
+        {printDivision("Eon", eon, range(eonDates.start, eonDates.end))}
       </tbody>
     </table>
   );

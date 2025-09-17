@@ -27,9 +27,8 @@ export default function MemesMintingCalendar() {
         <div className="tw-inline-flex">
           <Link
             href="/meme-calendar/calendar-101"
-            className={`${baseBtn} tw-rounded-md tw-mr-2 tw-bg-transparent tw-no-underline`}
-            title="Calendar Guide"
-          >
+            className={`${baseBtn} tw-rounded-md tw-mr-2 tw-bg-transparent tw-no-underline tw-flex tw-items-center tw-gap-x-1`}
+            title="Calendar Guide">
             Calendar Guide <FontAwesomeIcon icon={faQuestionCircle} />
           </Link>
           <button

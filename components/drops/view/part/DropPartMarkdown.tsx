@@ -16,6 +16,7 @@ import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
@@ -26,7 +27,7 @@ import DropListItemContentPart, {
 } from "../item/content/DropListItemContentPart";
 import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
-import { Tweet } from "react-tweet";
+import { Tweet, type TwitterComponents } from "react-tweet";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
@@ -43,6 +44,7 @@ import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
 import DropItemChat from "../../../waves/drops/DropItemChat";
 import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
+import LinkPreviewCard from "../../../waves/LinkPreviewCard";
 import {
   fetchYoutubePreview,
   YoutubeOEmbedResponse,
@@ -162,9 +164,8 @@ function DropPartMarkdown({
             ) : (
               <span
                 key={getRandomObjectId()}
-                className={`${
-                  areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
-                }`}
+                className={`${areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
+                  }`}
               >
                 {part}
               </span>
@@ -253,16 +254,21 @@ function DropPartMarkdown({
     return gifRegex.test(href) ? href : null;
   };
 
+  const matchesDomainOrSubdomain = (host: string, domain: string): boolean => {
+    return host === domain || host.endsWith(`.${domain}`);
+  };
+
   const parseYoutubeLink = (
     href: string
   ): { readonly videoId: string; readonly url: string } | null => {
     try {
       const url = new URL(href);
       const normalizedHost = url.hostname.replace(/^www\./i, "").toLowerCase();
-      const isYoutubeDomain =
-        normalizedHost === "youtube.com" ||
-        normalizedHost === "youtube-nocookie.com" ||
-        normalizedHost.endsWith(".youtube.com");
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const isYoutubeDomain = youtubeDomains.some(
+        (domain) =>
+          normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+      );
 
       let videoId: string | null = null;
 
@@ -357,10 +363,15 @@ function DropPartMarkdown({
   ];
 
   const isSmartLink = (href: string): boolean => {
-    return (
-      !!parseYoutubeLink(href) ||
-      smartLinkHandlers.some((handler) => !!handler.parse(href))
-    );
+    if (parseYoutubeLink(href)) {
+      return true;
+    }
+
+    if (smartLinkHandlers.some((handler) => !!handler.parse(href))) {
+      return true;
+    }
+
+    return shouldUseOpenGraphPreview(href);
   };
 
   const aHrefRenderer = ({
@@ -392,6 +403,15 @@ function DropPartMarkdown({
       }
     }
 
+    if (shouldUseOpenGraphPreview(href)) {
+      return (
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => renderExternalOrInternalLink(href, props)}
+        />
+      );
+    }
+
     return renderExternalOrInternalLink(href, props);
   };
 
@@ -405,14 +425,39 @@ function DropPartMarkdown({
       <DropPartMarkdownImage src={props.src} />
     ) : null;
 
-  const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
-        <Tweet id={result.tweetId} />
-      </div>
-      <ChatItemHrefButtons href={result.href} />
-    </div>
+  const renderTweetFallback = (href: string) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+    >
+      <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+        Tweet unavailable
+      </span>
+      <span className="tw-text-xs tw-text-iron-400">Open on X</span>
+    </a>
   );
+
+  const renderTweetEmbed = (result: { href: string; tweetId: string }) => {
+    const renderFallback = () => renderTweetFallback(result.href);
+    const TweetNotFound: TwitterComponents["TweetNotFound"] = () =>
+      renderFallback();
+
+    return (
+      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+        <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
+          <ErrorBoundary fallbackRender={() => renderFallback()}>
+            <Tweet
+              id={result.tweetId}
+              components={{ TweetNotFound }}
+            />
+          </ErrorBoundary>
+        </div>
+        <ChatItemHrefButtons href={result.href} />
+      </div>
+    );
+  };
 
   const renderGifEmbed = (url: string) => (
     <img
@@ -431,29 +476,75 @@ function DropPartMarkdown({
     }
   };
 
+  const shouldUseOpenGraphPreview = (href: string): boolean => {
+    const baseEndpoint = process.env.BASE_ENDPOINT;
+
+    try {
+      const parsed = new URL(href);
+      const protocol = parsed.protocol.toLowerCase();
+      if (protocol !== "http:" && protocol !== "https:") {
+        return false;
+      }
+
+      if (baseEndpoint) {
+        try {
+          const baseUrl = new URL(baseEndpoint);
+          if (parsed.host === baseUrl.host) {
+            return false;
+          }
+        } catch {
+          if (href.startsWith(baseEndpoint)) {
+            return false;
+          }
+        }
+      }
+
+      const hostname = parsed.hostname.toLowerCase();
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const twitterDomains = ["twitter.com", "x.com"];
+
+      if (
+        hostname === "youtu.be" ||
+        youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+        twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      ) {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const renderExternalOrInternalLink = (
     href: string,
     props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
   ) => {
     const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
     const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
+    const { onClick, ...restProps } = props;
+    const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {
+      ...restProps,
+      href,
+    };
 
     if (isExternalLink) {
-      props.rel = "noopener noreferrer nofollow";
-      props.target = "_blank";
+      anchorProps.rel = "noopener noreferrer nofollow";
+      anchorProps.target = "_blank";
     } else {
-      props.href = href.replace(baseEndpoint, "");
+      anchorProps.href = href.replace(baseEndpoint, "");
     }
 
     return (
       <a
+        {...anchorProps}
         onClick={(e) => {
           e.stopPropagation();
-          if (props.onClick) {
-            props.onClick(e);
+          if (typeof onClick === "function") {
+            onClick(e);
           }
         }}
-        {...props}
       />
     );
   };

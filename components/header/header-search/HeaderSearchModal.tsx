@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import FocusTrap from "focus-trap-react";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
@@ -19,7 +20,7 @@ import type { ApiWave } from "../../../generated/models/ApiWave";
 import { useWaves } from "../../../hooks/useWaves";
 import useLocalPreference from "../../../hooks/useLocalPreference";
 import { TabToggle } from "../../common/TabToggle";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -35,6 +36,7 @@ enum CATEGORY {
 }
 
 const MIN_SEARCH_LENGTH = 3;
+const HEADER_SEARCH_RESULTS_PANEL_ID = "header-search-results-panel";
 
 export default function HeaderSearchModal({
   onClose,
@@ -255,85 +257,124 @@ export default function HeaderSearchModal({
     });
 
   return createPortal(
-    <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
-      <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
-        <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-2 tw-text-center sm:tw-items-center sm:tw-p-0">
-          <div
-            ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden inset-safe-area">
-            <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
-              {/* Back arrow mobile */}
-              <button
-                onClick={onClose}
-                aria-label="Close"
-                className="tw-flex sm:tw-hidden tw-size-6 tw-bg-transparent -tw-ml-1 tw-mr-1 tw-border-none tw-rounded-full tw-items-center tw-justify-center tw-text-iron-300 hover:tw-text-iron-50 tw-transition tw-duration-200">
-                <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
-              </button>
+    <FocusTrap
+      focusTrapOptions={{
+        allowOutsideClick: true,
+        fallbackFocus: () =>
+          (modalRef.current as HTMLElement | null) ??
+          (inputRef.current as HTMLElement | null) ??
+          document.body,
+        initialFocus: () =>
+          (inputRef.current as HTMLElement | null) ??
+          (modalRef.current as HTMLElement | null) ??
+          document.body,
+      }}>
+      <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
+        <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+        <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
+          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-2 tw-text-center sm:tw-items-center sm:tw-p-0">
+            <div
+              ref={modalRef}
+              className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden inset-safe-area">
+              <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
+                {/* Back arrow mobile */}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Go back"
+                  className="tw-flex sm:tw-hidden tw-size-6 tw-bg-transparent -tw-ml-1 tw-mr-1 tw-border-none tw-rounded-full tw-items-center tw-justify-center tw-text-iron-300 hover:tw-text-iron-50 tw-transition tw-duration-200">
+                  <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
+                </button>
 
-              <div className="tw-relative tw-flex-1">
-                <svg
-                  className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                    clipRule="evenodd"
+                <div className="tw-relative tw-flex-1">
+                  <svg
+                    className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true">
+                    <path
+                      fillRule="evenodd"
+                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    required
+                    autoComplete="off"
+                    value={searchValue}
+                    onChange={handleInputChange}
+                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset  focus:tw-ring-primary-300 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
+                    placeholder="Search"
                   />
-                </svg>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  required
-                  autoComplete="off"
-                  value={searchValue}
-                  onChange={handleInputChange}
-                  className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset  focus:tw-ring-primary-300 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
-                  placeholder="Search"
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close search"
+                  className="tw-hidden sm:tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-text-iron-50 tw-transition tw-duration-200">
+                  <XMarkIcon className="tw-size-5" />
+                </button>
+              </div>
+              <div className="tw-pt-3 tw-px-4">
+                <TabToggle
+                  options={Object.values(CATEGORY).map((c) => ({
+                    key: c,
+                    label: c.charAt(0) + c.slice(1).toLowerCase(),
+                    panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
+                  }))}
+                  activeKey={selectedCategory}
+                  onSelect={(k) => setSelectedCategory(k as CATEGORY)}
                 />
               </div>
-            </div>
-            <div className="tw-pt-3 tw-px-4">
-              <TabToggle
-                options={Object.values(CATEGORY).map((c) => ({
-                  key: c,
-                  label: c.charAt(0) + c.slice(1).toLowerCase(),
-                }))}
-                activeKey={selectedCategory}
-                onSelect={(k) => setSelectedCategory(k as CATEGORY)}
-              />
-            </div>
 
-            {state === STATE.SUCCESS && (
-              <div className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200">
-                {renderItems(getCurrentItems())}
-              </div>
-            )}
-            {state === STATE.LOADING && (
-              <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
-                  Loading...
-                </p>
-              </div>
-            )}
-            {state === STATE.NO_RESULTS && (
-              <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-300 tw-text-sm">No results found</p>
-              </div>
-            )}
-            {state === STATE.INITIAL && (
-              <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
-                <p className="tw-text-iron-300 tw-font-normal tw-text-sm tw-text-center">
-                  Search for NFTs (by ID or name), Profiles and Waves
-                </p>
-              </div>
-            )}
+              {state === STATE.SUCCESS && (
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200"
+                >
+                  {renderItems(getCurrentItems())}
+                </div>
+              )}
+              {state === STATE.LOADING && (
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
+                >
+                  <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
+                    Loading...
+                  </p>
+                </div>
+              )}
+              {state === STATE.NO_RESULTS && (
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
+                >
+                  <p className="tw-text-iron-300 tw-text-sm">No results found</p>
+                </div>
+              )}
+              {state === STATE.INITIAL && (
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
+                >
+                  <p className="tw-text-iron-300 tw-font-normal tw-text-sm tw-text-center">
+                    Search for NFTs (by ID or name), Profiles and Waves
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>,
+    </FocusTrap>,
     document.body
   );
 }

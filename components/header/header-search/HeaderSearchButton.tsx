@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import CommonAnimationWrapper from "../../utils/animation/CommonAnimationWrapper";
@@ -11,11 +11,34 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function HeaderSearchButton() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const wasOpenRef = useRef(false);
   const { isApp } = useDeviceInfo();
+
+  useEffect(() => {
+    let rafId: number | null = null;
+
+    if (wasOpenRef.current && !isOpen) {
+      rafId = window.requestAnimationFrame(() => {
+        buttonRef.current?.focus({ preventScroll: true });
+      });
+    }
+
+    wasOpenRef.current = isOpen;
+
+    return () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
+  }, [isOpen]);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
 
   useKey(
     (event) => event.metaKey && event.key === "k",
-    () => setIsOpen(true),
+    handleOpen,
     { event: "keydown" }
   );
 
@@ -24,10 +47,11 @@ export default function HeaderSearchButton() {
   return (
     <div className="tailwind-scope tw-self-center">
       <button
+        ref={buttonRef}
         type="button"
         aria-label="Search"
         title="Search"
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         className={clsx(
           "tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out",
           isApp
@@ -45,7 +69,7 @@ export default function HeaderSearchButton() {
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
             onClicked={(e) => e.stopPropagation()}>
-            <HeaderSearchModal onClose={() => setIsOpen(false)} />
+            <HeaderSearchModal onClose={handleClose} />
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>
