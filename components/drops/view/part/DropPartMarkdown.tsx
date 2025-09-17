@@ -17,7 +17,7 @@ import {
 } from "./dropPartMarkdown/content";
 import {
   createLinkRenderer,
-  isArtBlocksFeatureEnabled,
+
 } from "./dropPartMarkdown/linkHandlers";
 
 const BreakComponent = () => <br />;
@@ -49,18 +49,14 @@ function DropPartMarkdown({
     }
   }, [isMobile, textSize]);
 
-  const isArtBlocksCardEnabled = useMemo(
-    () => isArtBlocksFeatureEnabled(),
-    []
-  );
+
 
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
-        onQuoteClick,
-        isArtBlocksCardEnabled,
+        onQuoteClick
       }),
-    [onQuoteClick, isArtBlocksCardEnabled]
+    [onQuoteClick]
   );
 
   const { customRenderer, renderParagraph, processContent } = useMemo(

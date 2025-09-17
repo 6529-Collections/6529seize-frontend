@@ -257,8 +257,7 @@ const renderExternalOrInternalLink = (
 };
 
 const createSmartLinkHandlers = (
-  onQuoteClick: (drop: ApiDrop) => void,
-  isArtBlocksCardEnabled: boolean
+  onQuoteClick: (drop: ApiDrop) => void
 ): SmartLinkHandler<any>[] => {
   const handlers: SmartLinkHandler<any>[] = [
     {
@@ -298,10 +297,7 @@ const createSmartLinkHandlers = (
       parse: parseGifLink,
       render: (url: string) => renderGifEmbed(url),
     },
-  ];
-
-  if (isArtBlocksCardEnabled) {
-    handlers.push({
+    {
       parse: parseArtBlocksLink,
       render: (
         artBlocksId: { tokenId: string; contract?: string },
@@ -317,8 +313,10 @@ const createSmartLinkHandlers = (
           </div>
         );
       },
-    });
-  }
+    }
+  ];
+
+
 
   return handlers;
 };
@@ -334,7 +332,6 @@ const isValidLink = (href: string): boolean => {
 
 export interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly isArtBlocksCardEnabled: boolean;
 }
 
 export interface LinkRenderer {
@@ -352,12 +349,10 @@ export interface LinkRenderer {
 }
 
 export const createLinkRenderer = ({
-  onQuoteClick,
-  isArtBlocksCardEnabled,
+  onQuoteClick
 }: LinkRendererConfig): LinkRenderer => {
   const smartLinkHandlers = createSmartLinkHandlers(
-    onQuoteClick,
-    isArtBlocksCardEnabled
+    onQuoteClick
   );
 
   const renderImage: LinkRenderer["renderImage"] = ({
@@ -429,13 +424,3 @@ export const createLinkRenderer = ({
   };
 };
 
-export const isArtBlocksFeatureEnabled = () => {
-  const artBlocksFeatureFlags = [
-    process.env.VITE_FEATURE_AB_CARD,
-    process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD,
-    process.env.NEXT_PUBLIC_FEATURE_AB_CARD,
-    process.env.FEATURE_AB_CARD,
-  ];
-
-  return artBlocksFeatureFlags.some((flag) => flag === "true");
-};
