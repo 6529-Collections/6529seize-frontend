@@ -210,11 +210,11 @@ export default function HeaderMobileMenu({
           {showBurgerMenuCommunity && (
             <Container>
               {printMobileHr()}
-              {printMobileRow("Memes Calendar", "/meme-calendar")}
               {printMobileRow("Identities", "/network")}
               {printMobileRow("Activity", "/network/activity")}
               {printMobileRow("Groups", "/network/groups")}
               {printMobileRow("NFT Activity", "/nft-activity")}
+              {printMobileRow("Memes Calendar", "/meme-calendar")}
               {printMobileHr()}
               {printMobileSubheader("Metrics")}
               {printMobileRow("Definitions", "/network/metrics")}
