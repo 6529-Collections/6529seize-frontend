@@ -52,6 +52,7 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
     {
       title: "Network",
       items: [
+        { name: "Memes Calendar", path: "/meme-calendar" },
         { name: "Identities", path: "/network" },
         { name: "Activity", path: "/network/activity" },
         { name: "Groups", path: "/network/groups" },
@@ -101,7 +102,6 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
         {
           name: "The Memes Tools",
           items: [
-            { name: "Memes Calendar", path: "/meme-calendar" },
             {
               name: "Memes Subscriptions",
               path: "/tools/subscriptions-report",

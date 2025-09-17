@@ -210,6 +210,7 @@ export default function HeaderMobileMenu({
           {showBurgerMenuCommunity && (
             <Container>
               {printMobileHr()}
+              {printMobileRow("Memes Calendar", "/meme-calendar")}
               {printMobileRow("Identities", "/network")}
               {printMobileRow("Activity", "/network/activity")}
               {printMobileRow("Groups", "/network/groups")}
@@ -275,7 +276,6 @@ export default function HeaderMobileMenu({
               {printMobileRow("Wallet Checker", "/delegation/wallet-checker")}
               {printMobileHr()}
               {printMobileSubheader("The Memes Tools")}
-              {printMobileRow("Memes Calendar", "/meme-calendar")}
               {(!capacitorIsIos || country === "US") && (
                 <>
                   {printMobileRow(

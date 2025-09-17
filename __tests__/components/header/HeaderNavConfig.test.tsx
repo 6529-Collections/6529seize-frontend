@@ -185,6 +185,46 @@ describe("HeaderNavConfig", () => {
       ).toBe(false);
     });
 
+    it("checks Network section ", () => {
+      const navigation = getDesktopNavigation({
+        ...mockContext,
+      });
+
+      const networkSection = navigation.find(
+        (item) => item.title === "Network"
+      );
+
+      // expect to include 'Memes Calendar'
+      expect(
+        networkSection?.items?.some((item) => item.name === "Memes Calendar")
+      ).toBe(true);
+
+      // expect to include 'Identities'
+      expect(
+        networkSection?.items?.some((item) => item.name === "Identities")
+      ).toBe(true);
+
+      // expect to include 'Activity'
+      expect(
+        networkSection?.items?.some((item) => item.name === "Activity")
+      ).toBe(true);
+
+      // expect to include 'Groups'
+      expect(
+        networkSection?.items?.some((item) => item.name === "Groups")
+      ).toBe(true);
+
+      // expect to include 'NFT Activity'
+      expect(
+        networkSection?.items?.some((item) => item.name === "NFT Activity")
+      ).toBe(true);
+
+      // expect to include 'Metrics'
+      expect(
+        networkSection?.items?.some((item) => item.name === "Metrics")
+      ).toBe(true);
+    });
+
     it("checks The Memes Tools section ", () => {
       const navigation = getDesktopNavigation({
         ...mockContext,
@@ -194,11 +234,6 @@ describe("HeaderNavConfig", () => {
       const memesToolsSection = toolsSection?.sections?.find(
         (section) => section.name === "The Memes Tools"
       );
-
-      // expect to include 'Memes Calendar'
-      expect(
-        memesToolsSection?.items.some((item) => item.name === "Memes Calendar")
-      ).toBe(true);
 
       // expect to include 'Memes Gas'
       expect(
