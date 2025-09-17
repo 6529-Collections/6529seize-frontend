@@ -1195,13 +1195,13 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               <div className="tw-bg-[#e5e5e5] tw-h-9 tw-flex tw-items-center tw-rounded-md tw-bg-white tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1] tw-w-full">
                 <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
                 <input
-                  id="meme-calendar-overview-mint-input"
+                  id="meme-calendar-mint-input"
                   type="number"
                   min={1}
-                  name="meme-calendar-overview-mint-input"
+                  name="meme-calendar-mint-input"
                   placeholder="123"
                   onChange={(event) => {
-                    const v = event.target.value.replace(/[^0-9]/g, "");
+                    const v = event.target.value.replace(/\D/g, "");
                     setJumpMint(v);
                   }}
                   className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-9 tw-w-full sm:tw-w-[8ch] tw-min-w-0 tw-px-2 tw-rounded-r-md"
