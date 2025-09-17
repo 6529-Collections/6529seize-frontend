@@ -200,7 +200,7 @@ describe('HeaderNavConfig', () => {
       const toolsSection = navigation.find(item => item.title === 'Tools');
       const nftDelegationSection = toolsSection?.sections?.find(section => section.name === 'NFT Delegation');
       
-      expect(nftDelegationSection?.hasDivider).toBe(true);
+      expect(nftDelegationSection?.hasDivider).toBeUndefined();
     });
   });
 
