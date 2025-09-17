@@ -9,14 +9,23 @@ jest.mock("../../../helpers/Helpers", () => ({
 const helpers = jest.requireMock("../../../helpers/Helpers");
 
 describe("CommonTimeAgo", () => {
+  let toLocaleStringSpy: jest.SpyInstance<
+    string,
+    Parameters<typeof Date.prototype.toLocaleString>
+  >;
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    toLocaleStringSpy = jest
+      .spyOn(Date.prototype, "toLocaleString")
+      .mockReturnValue("human readable");
   });
 
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
+    toLocaleStringSpy.mockRestore();
   });
 
   it("uses long format by default", () => {
@@ -35,7 +44,7 @@ describe("CommonTimeAgo", () => {
       "tw-whitespace-nowrap tw-font-normal tw-text-iron-500 tw-text-sm sm:tw-text-base"
     );
     expect(time).toHaveAttribute("dateTime", isoTimestamp);
-    expect(time).toHaveAttribute("title", isoTimestamp);
+    expect(time).toHaveAttribute("title", "human readable");
   });
 
   it("uses short format when short prop set", () => {
@@ -52,6 +61,7 @@ describe("CommonTimeAgo", () => {
       "tw-whitespace-nowrap tw-font-normal tw-text-iron-500 extra"
     );
     expect(time).toHaveAttribute("dateTime", isoTimestamp);
+    expect(time).toHaveAttribute("title", "human readable");
   });
 
   it("refreshes the displayed value every minute", () => {

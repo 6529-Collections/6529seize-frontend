@@ -24,13 +24,15 @@ export default function CommonTimeAgo({
   }, [timestamp, short]);
 
   const text = short ? getTimeAgoShort(timestamp) : getTimeAgo(timestamp);
-  const isoTimestamp = new Date(timestamp).toISOString();
+  const date = new Date(timestamp);
+  const isoTimestamp = date.toISOString();
+  const readableTimestamp = date.toLocaleString();
 
   return (
     <time
       className={`tw-whitespace-nowrap tw-font-normal tw-text-iron-500 ${className}`}
       dateTime={isoTimestamp}
-      title={isoTimestamp}
+      title={readableTimestamp}
     >
       {text}
     </time>
