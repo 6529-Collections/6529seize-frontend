@@ -4,7 +4,15 @@ import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toPng } from "html-to-image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import {
   addMonths,
@@ -69,6 +77,74 @@ interface MemeCalendarOverviewNextMintProps {
   readonly displayTz: DisplayTz;
 }
 
+const TopControls = memo(function TopControls(props: {
+  canonicalNextMintNumber: number;
+  selectedMintNumber: number;
+  onSelect: (n: number) => void;
+  mintInputRef: React.RefObject<HTMLInputElement | null>;
+  onMintInputChange: (v: string) => void;
+  onMintInputSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onScreenshot: () => void;
+  isCapturing: boolean;
+}) {
+  const {
+    canonicalNextMintNumber,
+    selectedMintNumber,
+    onSelect,
+    mintInputRef,
+    onMintInputChange,
+    onMintInputSubmit,
+    onScreenshot,
+    isCapturing,
+  } = props;
+
+  return (
+    <div
+      className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-mb-3"
+      data-ignore-screenshot>
+      <button
+        disabled={canonicalNextMintNumber === selectedMintNumber}
+        type="button"
+        className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-rounded-md tw-bg-white tw-text-black tw-px-3 tw-text-sm tw-font-semibold tw-border tw-border-[#d1d1d1] hover:tw-bg-[#e9e9e9] disabled:tw-opacity-75 disabled:hover:tw-bg-white disabled:hover:tw-text-black disabled:hover:tw-border-[#d1d1d1]"
+        onClick={() => onSelect(canonicalNextMintNumber)}>
+        Next Mint
+      </button>
+
+      <form onSubmit={onMintInputSubmit}>
+        <div className="tw-bg-[#e5e5e5] tw-h-8 tw-flex tw-items-center tw-rounded-md tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1]">
+          <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
+          <input
+            id="meme-overview-mint-input"
+            ref={mintInputRef}
+            type="number"
+            min={1}
+            name="meme-overview-mint-input"
+            placeholder="123"
+            onChange={(event) => {
+              const v = event.target.value.replace(/\D/g, "");
+              onMintInputChange(v);
+            }}
+            className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-8 tw-w-[8ch] tw-px-2 tw-rounded-r-md"
+          />
+        </div>
+      </form>
+
+      {/* spacer so the camera can sit on the same row but push to the right when space exists */}
+      <div className="tw-flex-1" />
+
+      <button
+        type="button"
+        onClick={onScreenshot}
+        disabled={isCapturing}
+        className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
+        aria-label="Screenshot"
+        title="Screenshot">
+        <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
+      </button>
+    </div>
+  );
+});
+
 export function MemeCalendarOverviewNextMint({
   displayTz,
 }: MemeCalendarOverviewNextMintProps) {
@@ -91,11 +167,6 @@ export function MemeCalendarOverviewNextMint({
   const cardRef = useRef<HTMLDivElement>(null);
   const mintInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const tick = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(tick);
-  }, []);
-
   const canonicalNextMintNumber = useMemo(() => {
     const upcomingInstant = getNextMintStart(now);
     const upcomingUtcDay = new Date(
@@ -107,6 +178,37 @@ export function MemeCalendarOverviewNextMint({
     );
     return getMintNumberForMintDate(upcomingUtcDay);
   }, [now]);
+
+  const handleMintSelection = useCallback(
+    (mintNumber: number) => {
+      setSelectedMintNumber(mintNumber);
+      setIsManualSelection(mintNumber !== canonicalNextMintNumber);
+    },
+    [canonicalNextMintNumber]
+  );
+
+  const handleMintInputChange = useCallback((v: string) => {
+    setMintInputValue(v);
+  }, []);
+
+  const handleMintInputSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const parsed = parseInt(mintInputValue, 10);
+      if (Number.isNaN(parsed) || parsed < 1) {
+        return;
+      }
+      handleMintSelection(parsed);
+      setMintInputValue("");
+      mintInputRef.current?.blur();
+    },
+    [mintInputValue, handleMintSelection]
+  );
+
+  useEffect(() => {
+    const tick = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(tick);
+  }, []);
 
   useEffect(() => {
     if (!isManualSelection && selectedMintNumber !== canonicalNextMintNumber) {
@@ -171,24 +273,7 @@ export function MemeCalendarOverviewNextMint({
   ) : (
     countdownText
   );
-
-  const handleMintSelection = (mintNumber: number) => {
-    setSelectedMintNumber(mintNumber);
-    setIsManualSelection(mintNumber !== canonicalNextMintNumber);
-  };
-
-  const handleMintInputSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const parsed = parseInt(mintInputValue, 10);
-    if (Number.isNaN(parsed) || parsed < 1) {
-      return;
-    }
-    handleMintSelection(parsed);
-    setMintInputValue("");
-    mintInputRef.current?.blur();
-  };
-
-  const handleScreenshot = async () => {
+  const handleScreenshot = useCallback(async () => {
     if (!cardRef.current) return;
     try {
       setIsCapturing(true);
@@ -250,7 +335,7 @@ export function MemeCalendarOverviewNextMint({
     } finally {
       setIsCapturing(false);
     }
-  };
+  }, [mintDetails]);
 
   return (
     <div className="tw-relative">
@@ -258,49 +343,16 @@ export function MemeCalendarOverviewNextMint({
         ref={cardRef}
         className="tw-p-4 tw-flex tw-flex-col tw-justify-between tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
         <div className="tw-space-y-1">
-          <div
-            className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-mb-3"
-            data-ignore-screenshot>
-            <button
-              disabled={canonicalNextMintNumber === selectedMintNumber}
-              type="button"
-              className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-rounded-md tw-bg-white tw-text-black tw-px-3 tw-text-sm tw-font-semibold tw-border tw-border-[#d1d1d1] hover:tw-bg-[#e9e9e9] disabled:tw-opacity-75 disabled:hover:tw-bg-white disabled:hover:tw-text-black disabled:hover:tw-border-[#d1d1d1]"
-              onClick={() => handleMintSelection(canonicalNextMintNumber)}>
-              Next Mint
-            </button>
-
-            <form onSubmit={handleMintInputSubmit}>
-              <div className="tw-bg-[#e5e5e5] tw-h-8 tw-flex tw-items-center tw-rounded-md tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1]">
-                <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
-                <input
-                  id="meme-overview-mint-input"
-                  ref={mintInputRef}
-                  type="number"
-                  min={1}
-                  name="meme-overview-mint-input"
-                  placeholder="123"
-                  onChange={(event) => {
-                    const v = event.target.value.replace(/\D/g, "");
-                    setMintInputValue(v);
-                  }}
-                  className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-8 tw-w-[8ch] tw-px-2 tw-rounded-r-md"
-                />
-              </div>
-            </form>
-
-            {/* spacer so the camera can sit on the same row but push to the right when space exists */}
-            <div className="tw-flex-1" />
-
-            <button
-              type="button"
-              onClick={handleScreenshot}
-              disabled={isCapturing}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
-              aria-label="Screenshot"
-              title="Screenshot">
-              <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
-            </button>
-          </div>
+          <TopControls
+            canonicalNextMintNumber={canonicalNextMintNumber}
+            selectedMintNumber={selectedMintNumber}
+            onSelect={handleMintSelection}
+            mintInputRef={mintInputRef}
+            onMintInputChange={handleMintInputChange}
+            onMintInputSubmit={handleMintInputSubmit}
+            onScreenshot={handleScreenshot}
+            isCapturing={isCapturing}
+          />
           <div className="tw-text-sm tw-text-gray-400">{heading}</div>
           <div className="tw-flex tw-items-center tw-gap-2">
             <div className="!tw-text-3xl md:!tw-text-4xl tw-font-bold">

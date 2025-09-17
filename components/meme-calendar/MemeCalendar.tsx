@@ -29,7 +29,6 @@ import {
   getSeasonIndexForDate,
   getSeasonStartDate,
   isMintEligibleUtcDay,
-  isMintingActive,
   isSznOneIndex,
   mintStartInstantUtcForMintDay,
   printCalendarInvites,
@@ -815,8 +814,6 @@ interface MemeCalendarProps {
 }
 
 export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
-  const isActive = isMintingActive();
-
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
       return getSeasonIndexForDate(new Date());
