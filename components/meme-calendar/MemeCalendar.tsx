@@ -1052,6 +1052,11 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                 text: "10 ERAs / 100 PERIODs / 1,000 YEARs / 4,000 SZNs",
                 note: "~ 156,500 mints",
               },
+              {
+                label: "Year 0",
+                text: "Jun 2022 - Dec 2022 / SZN1 / Year 0 was our experimental launch period, not bound by the later structured minting schedule.",
+                note: "Memes #1 - #47",
+              },
             ].map(({ label, text, note }) => (
               <div key={label} className="tw-py-2">
                 <span className="tw-font-bold">{label}</span> - {text}{" "}
