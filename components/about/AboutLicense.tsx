@@ -31,7 +31,7 @@ export default function AboutLicense() {
             <a
               href="https://creativecommons.org/share-your-work/public-domain/cc0/"
               target="_blank"
-              rel="noreferrer">
+              rel="noopener noreferrer">
               https://creativecommons.org/share-your-work/public-domain/cc0/
             </a>
           </p>
@@ -55,7 +55,7 @@ export default function AboutLicense() {
             that are not in the public domain. For example, Meme Card #1 is a
             derivative of Punk 6529, the copyright for which is owned by Yuga
             Labs. &#64;
-            <a href="https://x.com/6529er" target="_blank" rel="noreferrer">
+            <a href="https://x.com/6529er" target="_blank" rel="noopener noreferrer">
               6529er
             </a>{" "}
             , the artist, is putting whatever rights he may have in Meme Card #1

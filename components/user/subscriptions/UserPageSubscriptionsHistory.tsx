@@ -198,7 +198,7 @@ function TopUpEntry(
             <a
               className="d-flex align-items-center"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.topUp.hash)}
               aria-label="View transaction on Etherscan"
             >
@@ -268,7 +268,7 @@ function RedeemedEntry(
             <a
               className="d-flex align-items-center"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.redeem.transaction)}
               aria-label="View transaction on Etherscan"
             >

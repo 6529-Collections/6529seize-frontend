@@ -299,7 +299,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 <a
                   href={`/delegation/delegation-faq/use-cases-overview`}
                   target="_blank"
-                  rel="noreferrer">
+                  rel="noopener noreferrer">
                   <FontAwesomeIcon
                     className={styles.infoIconLink}
                     icon={faInfoCircle}></FontAwesomeIcon>

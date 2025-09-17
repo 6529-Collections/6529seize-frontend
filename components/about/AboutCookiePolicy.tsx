@@ -103,7 +103,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           AWSALBTGCORS
                         </a>{" "}
                         (Amazon Web Services)
@@ -117,7 +117,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTG"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           AWSALBTG
                         </a>{" "}
                         (Amazon Web Services)
@@ -210,7 +210,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga_"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           _ga_71NLVV3KY3
                         </a>{" "}
                         (Google Analytics)
@@ -224,7 +224,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           _ga
                         </a>{" "}
                         (Google Analytics)
@@ -238,7 +238,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_gid"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           _gid
                         </a>{" "}
                         (Google Analytics)

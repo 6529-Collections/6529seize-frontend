@@ -272,7 +272,7 @@ export default function DistributionPage(props: Readonly<Props>) {
           <a
             href="https://x.com/6529Collections"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             &#64;6529Collections
           </a>{" "}

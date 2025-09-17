@@ -832,7 +832,7 @@ These cute companions live 100% on-chain where their bytes are cleverly stored i
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

@@ -260,7 +260,7 @@ export default function RememePage(props: Readonly<Props>) {
                       className={styles.userLink}
                       href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       <Image
                         unoptimized
@@ -299,7 +299,7 @@ export default function RememePage(props: Readonly<Props>) {
                         className={styles.userLink}
                         href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                       >
                         <Image
                           unoptimized
@@ -386,7 +386,7 @@ export default function RememePage(props: Readonly<Props>) {
         <a
           href={parseIpfsUrl(s)}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}
         >
           {s}
@@ -411,7 +411,7 @@ export default function RememePage(props: Readonly<Props>) {
                       <a
                         href={rememe.token_uri}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}
                       >
                         {rememe.token_uri}

@@ -1163,7 +1163,7 @@ An exploration in generating forms in 3-dimensional space. This exclusive set of
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

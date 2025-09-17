@@ -84,7 +84,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 writeDelegation.data
               )}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="tw-text-primary-400 tw-underline">
               View Transaction
             </a>

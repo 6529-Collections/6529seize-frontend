@@ -326,7 +326,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                               className="decoration-hover-underline"
                               href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                             >
                               <Image
                                 unoptimized

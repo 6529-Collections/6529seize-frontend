@@ -420,7 +420,7 @@ function EtherscanLink() {
           : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
       }
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       className={styles.delegationLink}
     >
       <Image
@@ -440,7 +440,7 @@ function GithubLink() {
     <a
       href={`https://github.com/6529-Collections/nftdelegation`}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       className={styles.delegationLink}
     >
       <Image

@@ -44,6 +44,7 @@ export default function ChatItemHrefButtons({
         <Link
           href={relativeHref ?? href}
           target={relativeHref ? undefined : "_blank"}
+          rel={relativeHref ? undefined : "noopener noreferrer"}
           className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}>
           <svg
             className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}

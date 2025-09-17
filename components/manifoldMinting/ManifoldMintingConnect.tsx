@@ -169,7 +169,7 @@ export default function ManifoldMintingConnect(
         <Link
           href={window.location.href}
           className="text-center pt-2 pb-2"
-          target="_blank">
+          target="_blank" rel="noopener noreferrer">
           <button className="btn btn-light" style={{ width: "100%" }}>
             Mint on 6529.io
           </button>

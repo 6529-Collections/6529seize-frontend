@@ -249,7 +249,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
                 }
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 <Image
                   unoptimized
@@ -263,7 +263,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getBlurCollectionLink()}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 <Image
                   unoptimized
@@ -277,7 +277,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getMagicEdenCollectionLink()}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 <Image
                   unoptimized

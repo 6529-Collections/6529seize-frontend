@@ -427,7 +427,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/sabrinaxdoll"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Sabrina Khan
                                   </a>
                                 </b>
@@ -468,7 +468,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/XCOPYART"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     XCOPY
                                   </a>
                                   , who, like Van Gogh, is highly prolific,
@@ -634,7 +634,7 @@ So, it is startling to imagine that"
                                 <a
                                   href="https://vangoghletters.org/vg/letters/let712/letter.html"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   letter to his brother
                                 </a>{" "}
                                 Van Gogh wrote almost prophetically:
@@ -933,7 +933,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/172139699716/today-i-sold-my-first-gif-for-1-nothing-can-stop"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     “Today I sold my first gif for £1. Nothing
                                     can stop us tumblr.”
                                   </a>
@@ -996,7 +996,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/182777190451/day-3-trying-to-give-away-crypto-art-on-tumblr"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     “Day 3 trying to give away crypto art on
                                     tumblr.”&nbsp;
                                   </a>
@@ -1013,7 +1013,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://www.reddit.com/r/OpenBazaar/comments/86nudn/shameless_self_promotion_thread_friday_323/dw7ry0u/"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     30% off coupon codes
                                   </a>{" "}
                                   to try to sell his pieces and gather as many
@@ -1041,7 +1041,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/182764132406/2019-mission-convert-some-tumblr-followers-to"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     gave away
                                   </a>{" "}
                                   so many of his pieces that may have been
@@ -1249,7 +1249,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/XCOPYART"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     XCOPY
                                   </a>{" "}
                                   for answering my questions about his work and
@@ -1257,14 +1257,14 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/fredwilson"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Fred Wilson
                                   </a>{" "}
                                   and{" "}
                                   <a
                                     href="https://twitter.com/punk6529"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     punk6529
                                   </a>{" "}
                                   for their helpful comments and
@@ -1312,7 +1312,7 @@ So, it is startling to imagine that"
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

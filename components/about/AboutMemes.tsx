@@ -76,13 +76,13 @@ export default function AboutMemes() {
           </p>
           <p>
             All The Memes:{" "}
-            <a href={`/the-memes`} target="_blank" rel="noreferrer">
+            <a href={`/the-memes`} target="_blank" rel="noopener noreferrer">
               6529.io/the-memes
             </a>
           </p>
           <p>
             The Memes Network:{" "}
-            <a href={`/network`} target="_blank" rel="noreferrer">
+            <a href={`/network`} target="_blank" rel="noopener noreferrer">
               6529.io/network
             </a>
           </p>
@@ -91,7 +91,7 @@ export default function AboutMemes() {
             <a
               href={`/about/${AboutSection.FAQ}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               6529.io/about/faq
             </a>
@@ -107,7 +107,7 @@ export default function AboutMemes() {
             <a
               href={`/about/${AboutSection.MINTING}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               6529.io/about/minting
             </a>

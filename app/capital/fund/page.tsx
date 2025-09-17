@@ -366,7 +366,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                                 <a
                                   href="https://angel.co/v/back/6529-nft-fund"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <u>here</u>
                                 </a>
                                 {"."}
@@ -415,7 +415,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                                 <a
                                   href="https://deca.art/punk6529/fundszn1"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <span style={{ textDecoration: "underline" }}>
                                     6529 NFT FUND SEASON 1
                                   </span>
@@ -425,7 +425,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                                 <a
                                   href="https://deca.art/punk6529/fundszn2"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <span style={{ textDecoration: "underline" }}>
                                     6529 NFT FUND SEASON 2
                                   </span>
@@ -435,7 +435,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                                 <a
                                   href="https://videos.files.wordpress.com/oXa5lrrh/casa-batllo.mp4"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <span style={{ textDecoration: "underline" }}>
                                     LIVING ARCHITECTURE – CASA BATLLO
                                   </span>
@@ -473,7 +473,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

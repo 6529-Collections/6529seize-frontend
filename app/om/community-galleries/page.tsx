@@ -338,7 +338,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=251.44x2.8x733.13x-2.71"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Individual Submissions
                               </a>
                             </p>
@@ -346,7 +346,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=509.39x2.8x953.66x-3.05"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Nude Neighborhood
                               </a>
                             </p>
@@ -354,7 +354,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=688.94x2.8x1142.62x-3.09"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Wildalps Community
                               </a>
                             </p>
@@ -362,7 +362,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=564.66x2.8x1406.29x-3.02"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Korean Artists Collective
                               </a>
                             </p>
@@ -370,7 +370,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=280.49x2.8x1161.19x-2.88"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 KatoKrew Community
                               </a>
                             </p>
@@ -378,7 +378,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=483.82x2.8x775.37x0.09"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 NFT Goddesses
                               </a>
                             </p>
@@ -386,7 +386,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=698.97x2.8x955.09x-3.10"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Obscura DAO
                               </a>
                             </p>
@@ -394,7 +394,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=655.96x2.8x775.70x0.19"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 NFTBoosters / FairArtNFT
                               </a>
                             </p>
@@ -402,7 +402,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=361.87x2.8x1397.80x2.91"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Japanese Artists Collective
                               </a>
                             </p>
@@ -410,7 +410,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=-436.62x2.8x773.49x0.02"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 ART Nation
                               </a>
                             </p>
@@ -418,7 +418,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=363.67x2.31x1226.19x0.17"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Turkish Artists Neighborhood
                               </a>
                             </p>
@@ -441,7 +441,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=291.03x2.8x1376.66x3.00"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Thai Artist Collective
                               </a>
                             </p>
@@ -449,7 +449,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=741.25x2.8x1030.41x0.14"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 TheBurrowNFT
                               </a>
                             </p>
@@ -457,7 +457,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=487.19x2.8x1224.66x0.05"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Latin American Artists Collective
                               </a>
                             </p>
@@ -465,7 +465,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=504.98x2.8x1408.15x3.11"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 NFT Asia
                               </a>
                             </p>
@@ -473,7 +473,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=566.69x2.31x1220.07x0.20"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Brazilian Artists Community
                               </a>
                             </p>
@@ -481,7 +481,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=483.82x2.8x775.37x0.09"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Digital Painters Collective
                               </a>
                             </p>
@@ -489,7 +489,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=361.87x2.8x1397.80x2.91"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 ArtGumi (Osaka Artists)
                               </a>
                             </p>
@@ -497,7 +497,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=-262.52x2.8x934.65x-2.82"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Pepe Art Neighborhood
                               </a>
                             </p>
@@ -505,7 +505,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=691.22x2.8x1223.51x0.25"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 African Artists Collective
                               </a>
                             </p>
@@ -513,7 +513,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=504.98x2.8x1408.15x3.11"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Indonesian Artist Collective
                               </a>
                             </p>
@@ -521,7 +521,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=698.97x2.8x955.09x-3.10"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Landscape Artist Collective
                               </a>
                             </p>
@@ -544,7 +544,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=745.56x2.8x776.44x0.03"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Pixel and Voxel Artists Collective
                               </a>
                             </p>
@@ -552,7 +552,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=297.76x2.80x1246.56x1.70"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Middle Eastern Artists Collective
                               </a>
                             </p>
@@ -560,7 +560,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=550.54x2.8x773.73x0.05"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 MONOGRAMA
                               </a>
                             </p>
@@ -568,7 +568,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=688.03x2.8x1408.06x-3.05"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Portuguese Artists
                               </a>
                             </p>
@@ -576,7 +576,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=764.97x2.31x1406.73x-2.98"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Italian Neighborhood
                               </a>
                             </p>
@@ -584,7 +584,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=-320.25x2.8x782.93x-0.21"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 mfers
                               </a>
                             </p>
@@ -592,7 +592,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=-243.84x2.8x804.69x-0.26"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Spirit DAO (Azuki collective)
                               </a>
                             </p>
@@ -600,7 +600,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=-214.73x2.8x731.55x-3.111"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 ZenAcademy 333 by Zeneca
                               </a>
                             </p>
@@ -608,7 +608,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=673.60x62.80x1412.90x-2.82"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Dutch Neighborhood
                               </a>
                             </p>
@@ -616,7 +616,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=655.96x2.8x775.70x0.19"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Abstract Art Community
                               </a>
                             </p>
@@ -624,7 +624,7 @@ NFTBoosters / FairArtNFT"
                               <a
                                 href="https://oncyber.io/6529om?coords=745.56x2.8x776.44x0.03"
                                 target="_blank"
-                                rel="noopener">
+                                rel="noopener noreferrer">
                                 Collage Art Collective
                               </a>
                             </p>
@@ -660,7 +660,7 @@ NFTBoosters / FairArtNFT"
           <li className="fab-fa-twitter">
             <a
               href="https://twitter.com/punk6529"
-              target="_blank"
+              target="_blank" rel="noopener noreferrer"
               className="fab-fa-twitter">
               <i className="fab fa-twitter" />
             </a>

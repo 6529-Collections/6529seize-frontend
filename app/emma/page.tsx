@@ -24,7 +24,7 @@ export default function DistributionPlanTool() {
                     className="tw-font-semibold hover:tw-text-neutral-300 tw-transition tw-duration-300 tw-ease-out"
                     href="https://github.com/6529-Collections/Janus"
                     target="_blank"
-                    rel="noreferrer">
+                    rel="noopener noreferrer">
                     Janus
                   </a>
                   {""}, a domain-specific language for deeply customized

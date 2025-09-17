@@ -88,7 +88,7 @@ export default function Timeline(props: Readonly<Props>) {
     return (
       <Col xs={12}>
         <b>{label}:</b>{" "}
-        <a href={value} target="_blank" rel="noreferrer">
+        <a href={value} target="_blank" rel="noopener noreferrer">
           {value}
         </a>
       </Col>
@@ -198,7 +198,7 @@ export default function Timeline(props: Readonly<Props>) {
                       <a
                         href={step.uri}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="d-flex align-items-center justify-content-center gap-2 decoration-none">
                         URI
                         <FontAwesomeIcon
@@ -209,7 +209,7 @@ export default function Timeline(props: Readonly<Props>) {
                       <a
                         href={`https://etherscan.io/tx/${step.transaction_hash}`}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="d-flex align-items-center justify-content-center gap-2 decoration-none">
                         TXN
                         <FontAwesomeIcon

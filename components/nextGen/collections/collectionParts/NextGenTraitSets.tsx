@@ -507,7 +507,7 @@ function TraitSetAccordion(
                           )}/art?traits=${props.trait}:${tv.value}`}
                           className="decoration-hover-underline"
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                         >
                           {tv.value}
                         </Link>
@@ -519,7 +519,7 @@ function TraitSetAccordion(
                           key={`accordion-${props.trait}-${tv.value}-${t}`}
                           href={`/nextgen/token/${t}`}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                         >
                           <>
                             <Image
@@ -576,7 +576,7 @@ function TraitSetAccordion(
                           )}/art?traits=${props.trait}:${mv}`}
                           className="decoration-hover-underline"
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                         >
                           {mv}
                         </Link>

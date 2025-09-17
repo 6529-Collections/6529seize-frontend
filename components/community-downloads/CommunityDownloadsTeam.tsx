@@ -39,7 +39,7 @@ export default function CommunityDownloadsTeam() {
           <tr key={download.created_at}>
             <td>{formatDate(download.created_at)}</td>
             <td>
-              <a href={download.url} target="_blank" rel="noreferrer">
+              <a href={download.url} target="_blank" rel="noopener noreferrer">
                 {download.url}
               </a>
             </td>

@@ -66,7 +66,7 @@ export default function BlockPickerAdvancedItemBlock({
           className="tw-underline-offset-2 tw-underline tw-transition tw-duration-300 tw-ease-out"
           href={`https://etherscan.io/block/countdown/${block}`}
           target="_blank"
-          rel="noreferrer">
+          rel="noopener noreferrer">
           {parts}
         </a>
       )}

@@ -26,7 +26,7 @@ export default function AboutGDRC1() {
           <a
             href="https://digitalrightscharter.org/"
             target="_blank"
-            rel="noreferrer">
+            rel="noopener noreferrer">
             The Global Digital Rights Charter 1
           </a>
           .

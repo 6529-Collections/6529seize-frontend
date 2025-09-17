@@ -83,7 +83,7 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                         className="font-color text-decoration-none"
                         href={getEtherscanLink()}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         data-tooltip-id={`contract-tooltip-${props.collection.id}`}>
                         {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
                       </Link>

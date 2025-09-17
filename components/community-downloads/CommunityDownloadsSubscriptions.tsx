@@ -51,7 +51,7 @@ export default function CommunityDownloadsSubscriptions() {
             <td>{formatDate(download.date)}</td>
             <td>#{download.token_id}</td>
             <td>
-              <a href={download.upload_url} target="_blank" rel="noreferrer">
+              <a href={download.upload_url} target="_blank" rel="noopener noreferrer">
                 {download.upload_url}
               </a>
             </td>
