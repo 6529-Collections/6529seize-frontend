@@ -8,6 +8,8 @@ import {
   isValidElement,
   memo,
   ReactNode,
+  useEffect,
+  useState,
   type JSX,
 } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
@@ -41,6 +43,11 @@ import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
 import DropItemChat from "../../../waves/drops/DropItemChat";
 import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
+import LinkPreviewCard from "../../../waves/LinkPreviewCard";
+import {
+  fetchYoutubePreview,
+  YoutubeOEmbedResponse,
+} from "@/services/api/youtube";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -156,9 +163,8 @@ function DropPartMarkdown({
             ) : (
               <span
                 key={getRandomObjectId()}
-                className={`${
-                  areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
-                }`}
+                className={`${areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
+                  }`}
               >
                 {part}
               </span>
@@ -247,6 +253,77 @@ function DropPartMarkdown({
     return gifRegex.test(href) ? href : null;
   };
 
+  const matchesDomainOrSubdomain = (host: string, domain: string): boolean => {
+    return host === domain || host.endsWith(`.${domain}`);
+  };
+
+  const parseYoutubeLink = (
+    href: string
+  ): { readonly videoId: string; readonly url: string } | null => {
+    try {
+      const url = new URL(href);
+      const normalizedHost = url.hostname.replace(/^www\./i, "").toLowerCase();
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const isYoutubeDomain = youtubeDomains.some(
+        (domain) =>
+          normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+      );
+
+      let videoId: string | null = null;
+
+      if (normalizedHost === "youtu.be") {
+        const pathSegments = url.pathname.split("/").filter(Boolean);
+        videoId = pathSegments[0] ?? null;
+      } else if (isYoutubeDomain) {
+        const pathSegments = url.pathname.split("/").filter(Boolean);
+
+        if (url.pathname === "/watch" || url.pathname === "/watch/") {
+          videoId = url.searchParams.get("v");
+        } else if (pathSegments[0] === "shorts") {
+          videoId = pathSegments[1] ?? null;
+        } else if (pathSegments[0] === "embed") {
+          videoId = pathSegments[1] ?? null;
+        } else if (pathSegments[0] === "live") {
+          videoId = pathSegments[1] ?? null;
+        } else if (pathSegments[0] === "v") {
+          videoId = pathSegments[1] ?? null;
+        }
+      }
+
+      if (!videoId) {
+        return null;
+      }
+
+      const trimmed = videoId.trim();
+      if (!trimmed.match(/^[A-Za-z0-9_-]{6,}$/)) {
+        return null;
+      }
+
+      return { videoId: trimmed, url: href };
+    } catch {
+      return null;
+    }
+  };
+
+  const getYoutubeFetchUrl = (href: string, videoId: string): string => {
+    try {
+      const url = new URL(href);
+      const canonical = new URL(`https://www.youtube.com/watch?v=${videoId}`);
+      const preservedParams = ["list", "index"] as const;
+
+      preservedParams.forEach((param) => {
+        const value = url.searchParams.get(param);
+        if (value) {
+          canonical.searchParams.set(param, value);
+        }
+      });
+
+      return canonical.toString();
+    } catch {
+      return `https://www.youtube.com/watch?v=${videoId}`;
+    }
+  };
+
   const smartLinkHandlers: SmartLinkHandler<any>[] = [
     {
       parse: parseSeizeQuoteLink,
@@ -285,7 +362,15 @@ function DropPartMarkdown({
   ];
 
   const isSmartLink = (href: string): boolean => {
-    return smartLinkHandlers.some((handler) => !!handler.parse(href));
+    if (parseYoutubeLink(href)) {
+      return true;
+    }
+
+    if (smartLinkHandlers.some((handler) => !!handler.parse(href))) {
+      return true;
+    }
+
+    return shouldUseOpenGraphPreview(href);
   };
 
   const aHrefRenderer = ({
@@ -299,11 +384,31 @@ function DropPartMarkdown({
       return null;
     }
 
+    const youtubeInfo = parseYoutubeLink(href);
+    if (youtubeInfo) {
+      return (
+        <YoutubePreview
+          href={youtubeInfo.url}
+          videoId={youtubeInfo.videoId}
+          fallbackProps={props}
+        />
+      );
+    }
+
     for (const { parse, render } of smartLinkHandlers) {
       const result = parse(href);
       if (result) {
         return render(result, href);
       }
+    }
+
+    if (shouldUseOpenGraphPreview(href)) {
+      return (
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => renderExternalOrInternalLink(href, props)}
+        />
+      );
     }
 
     return renderExternalOrInternalLink(href, props);
@@ -345,30 +450,230 @@ function DropPartMarkdown({
     }
   };
 
+  const shouldUseOpenGraphPreview = (href: string): boolean => {
+    const baseEndpoint = process.env.BASE_ENDPOINT;
+
+    try {
+      const parsed = new URL(href);
+      const protocol = parsed.protocol.toLowerCase();
+      if (protocol !== "http:" && protocol !== "https:") {
+        return false;
+      }
+
+      if (baseEndpoint) {
+        try {
+          const baseUrl = new URL(baseEndpoint);
+          if (parsed.host === baseUrl.host) {
+            return false;
+          }
+        } catch {
+          if (href.startsWith(baseEndpoint)) {
+            return false;
+          }
+        }
+      }
+
+      const hostname = parsed.hostname.toLowerCase();
+      const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
+      const twitterDomains = ["twitter.com", "x.com"];
+
+      if (
+        hostname === "youtu.be" ||
+        youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+        twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      ) {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const renderExternalOrInternalLink = (
     href: string,
     props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
   ) => {
     const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
     const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
+    const { onClick, ...restProps } = props;
+    const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {
+      ...restProps,
+      href,
+    };
 
     if (isExternalLink) {
-      props.rel = "noopener noreferrer nofollow";
-      props.target = "_blank";
+      anchorProps.rel = "noopener noreferrer nofollow";
+      anchorProps.target = "_blank";
     } else {
-      props.href = href.replace(baseEndpoint, "");
+      anchorProps.href = href.replace(baseEndpoint, "");
     }
 
     return (
       <a
+        {...anchorProps}
         onClick={(e) => {
           e.stopPropagation();
-          if (props.onClick) {
-            props.onClick(e);
+          if (typeof onClick === "function") {
+            onClick(e);
           }
         }}
-        {...props}
       />
+    );
+  };
+
+  const normalizeYoutubeHtml = (html: string): string => {
+    let normalized = html.replace(/width="[^"]*"/i, 'width="100%"');
+    normalized = normalized.replace(/height="[^"]*"/i, 'height="100%"');
+
+    if (/style="[^"]*"/i.test(normalized)) {
+      normalized = normalized.replace(
+        /style="([^"]*)"/i,
+        (_, styles: string) => {
+          const cleanedStyles = styles.replace(/;?\s*$/, "");
+          return `style="${cleanedStyles};width:100%;height:100%;"`;
+        }
+      );
+    } else {
+      normalized = normalized.replace(
+        /<iframe/i,
+        '<iframe style="width:100%;height:100%;"'
+      );
+    }
+
+    return normalized;
+  };
+
+  const YoutubePreview = ({
+    href,
+    videoId,
+    fallbackProps,
+  }: {
+    readonly href: string;
+    readonly videoId: string;
+    readonly fallbackProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps;
+  }) => {
+    const [preview, setPreview] = useState<YoutubeOEmbedResponse | null>(null);
+    const [hasError, setHasError] = useState(false);
+    const [showEmbed, setShowEmbed] = useState(false);
+
+    useEffect(() => {
+      const abortController = new AbortController();
+      let isActive = true;
+
+      setPreview(null);
+      setHasError(false);
+      setShowEmbed(false);
+
+      const fetchUrl = getYoutubeFetchUrl(href, videoId);
+
+      fetchYoutubePreview(fetchUrl, abortController.signal)
+        .then((data) => {
+          if (!isActive) {
+            return;
+          }
+
+          if (data) {
+            setPreview({
+              ...data,
+              html: normalizeYoutubeHtml(data.html),
+            });
+          } else {
+            setHasError(true);
+          }
+        })
+        .catch((error) => {
+          if (!isActive) {
+            return;
+          }
+
+          if (error instanceof DOMException && error.name === "AbortError") {
+            return;
+          }
+
+          setHasError(true);
+        });
+
+      return () => {
+        isActive = false;
+        abortController.abort();
+      };
+    }, [href, videoId]);
+
+    const renderFallback = () =>
+      renderExternalOrInternalLink(href, { ...fallbackProps });
+
+    if (hasError) {
+      return renderFallback();
+    }
+
+    if (!preview) {
+      return (
+        <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+          <div className="tw-flex-1 tw-min-w-0">
+            <div className="tw-aspect-video tw-w-full tw-rounded-lg tw-bg-iron-800 tw-animate-pulse" />
+          </div>
+          <ChatItemHrefButtons href={href} />
+        </div>
+      );
+    }
+
+    const ariaLabel = preview.title
+      ? `Play YouTube video ${preview.title}`
+      : `Play YouTube video ${videoId}`;
+
+    return (
+      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+        <div className="tw-flex-1 tw-min-w-0">
+          <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-black">
+            {showEmbed ? (
+              <div
+                className="tw-relative tw-w-full tw-aspect-video tw-bg-black"
+                data-testid="youtube-embed"
+                dangerouslySetInnerHTML={{ __html: preview.html }}
+              />
+            ) : (
+              <button
+                type="button"
+                className="tw-relative tw-w-full tw-aspect-video tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer"
+                onClick={() => setShowEmbed(true)}
+                aria-label={ariaLabel}
+              >
+                <img
+                  src={preview.thumbnail_url}
+                  alt={preview.title ?? `YouTube video ${videoId}`}
+                  className="tw-h-full tw-w-full tw-object-cover"
+                />
+                <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black/40">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="tw-h-12 tw-w-12 tw-text-white tw-opacity-90"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </button>
+            )}
+          </div>
+          <div className="tw-mt-2 tw-space-y-1">
+            {preview.title && (
+              <p className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-mb-0">
+                {preview.title}
+              </p>
+            )}
+            {preview.author_name && (
+              <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+                {preview.author_name}
+              </p>
+            )}
+          </div>
+        </div>
+        <ChatItemHrefButtons href={href} />
+      </div>
     );
   };
 
