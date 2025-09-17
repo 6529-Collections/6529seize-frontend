@@ -20,6 +20,25 @@ To run the project you need a .env file.
 
 [Sample .env file](https://github.com/6529-Collections/6529seize-frontend/tree/main/.env.sample)
 
+### Pepe.wtf previews
+
+The chat now renders cards for pepe.wtf assets, collections, artists and sets.
+Environment variables (with defaults) allow you to tune caching and IPFS
+gateway usage:
+
+- `PEPE_CACHE_TTL_MINUTES` (default `10`)
+- `PEPE_CACHE_MAX_ITEMS` (default `500`)
+- `IPFS_GATEWAY` (default `https://ipfs.io/ipfs/`)
+
+To test end-to-end:
+
+1. Run `npm run dev`.
+2. Paste any pepe.wtf link in chat, for example `https://pepe.wtf/asset/GOXPEPE`
+   or `https://pepe.wtf/artists/Easy-B`, and confirm the preview renders with
+   imagery and stats.
+3. Re-run the same link and confirm the network response for
+   `/api/pepe/resolve` includes the header `X-Cache: HIT`.
+
 ### Run
 
 - Locally

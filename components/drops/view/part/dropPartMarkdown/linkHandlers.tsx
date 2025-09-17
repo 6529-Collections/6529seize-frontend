@@ -15,6 +15,8 @@ import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 
 import { parseYoutubeLink } from "./youtube";
 import YoutubePreview from "./youtubePreview";
+import type { PepeLinkResult } from "./pepe";
+import { isPepeHost, parsePepeLink, renderPepeLink } from "./pepe";
 
 type DropPartMarkdownImageComponent = typeof import("../DropPartMarkdownImage").default;
 type WaveDropQuoteWithSerialNoComponent = typeof import("../../../../waves/drops/WaveDropQuoteWithSerialNo").default;
@@ -230,6 +232,10 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       "token.artblocks.io",
     ];
 
+    if (isPepeHost(hostname)) {
+      return false;
+    }
+
     if (
       hostname === "youtu.be" ||
       youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
@@ -339,6 +345,11 @@ const createSmartLinkHandlers = (
       },
     });
   }
+
+  handlers.push({
+    parse: parsePepeLink,
+    render: (result: PepeLinkResult) => renderPepeLink(result),
+  });
 
 
 
