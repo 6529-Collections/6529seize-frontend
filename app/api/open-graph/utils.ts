@@ -337,22 +337,7 @@ export function buildResponse(
   };
 }
 
-// Hostname allowlist to prevent SSRF
-const ALLOWED_HOSTNAMES = [
-  "example.com",
-  "twitter.com",
-  "6529.io"
-];
 
-export function isAllowedHostname(url: URL): boolean {
-  // You may want to normalize hostnames, lowercasing, etc.
-  // For subdomains, you can check: host.endsWith('.example.com')
-  const hostname = url.hostname.toLowerCase();
-  return ALLOWED_HOSTNAMES.some(allowed =>
-    hostname === allowed ||
-    hostname.endsWith("." + allowed)
-  );
-}
 
 export function validateUrl(url: string | null): URL {
   if (!url) {
@@ -369,10 +354,6 @@ export function validateUrl(url: string | null): URL {
   const protocol = parsed.protocol.toLowerCase();
   if (protocol !== "http:" && protocol !== "https:") {
     throw new Error("Only HTTP(S) URLs are supported.");
-  }
-
-  if (!isAllowedHostname(parsed)) {
-    throw new Error("The provided URL's hostname is not allowed.");
   }
 
   return parsed;
