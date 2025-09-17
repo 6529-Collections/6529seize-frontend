@@ -49,6 +49,8 @@ import {
   fetchYoutubePreview,
   YoutubeOEmbedResponse,
 } from "@/services/api/youtube";
+import { parseArtBlocksLink } from "@/src/services/artblocks/url";
+import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -362,6 +364,35 @@ function DropPartMarkdown({
     },
   ];
 
+  const artBlocksFeatureFlags = [
+    process.env.VITE_FEATURE_AB_CARD,
+    process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD,
+    process.env.NEXT_PUBLIC_FEATURE_AB_CARD,
+    process.env.FEATURE_AB_CARD,
+  ];
+
+  const isArtBlocksCardEnabled = artBlocksFeatureFlags.some((flag) => flag === "true");
+
+  if (isArtBlocksCardEnabled) {
+    const parseArtBlocks = (href: string) => parseArtBlocksLink(href);
+    const renderArtBlocks = (
+      artBlocksId: { tokenId: string; contract?: string },
+      href: string
+    ) => (
+      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+        <div className="tw-flex-1 tw-min-w-0">
+          <ArtBlocksTokenCard href={href} id={artBlocksId} />
+        </div>
+        <ChatItemHrefButtons href={href} />
+      </div>
+    );
+
+    smartLinkHandlers.push({
+      parse: parseArtBlocks,
+      render: (artBlocksId, href) => renderArtBlocks(artBlocksId, href),
+    });
+  }
+
   const isSmartLink = (href: string): boolean => {
     if (parseYoutubeLink(href)) {
       return true;
@@ -502,11 +533,19 @@ function DropPartMarkdown({
       const hostname = parsed.hostname.toLowerCase();
       const youtubeDomains = ["youtube.com", "youtube-nocookie.com"];
       const twitterDomains = ["twitter.com", "x.com"];
+      const artBlocksDomains = [
+        "artblocks.io",
+        "live.artblocks.io",
+        "media.artblocks.io",
+        "media-proxy.artblocks.io",
+        "token.artblocks.io",
+      ];
 
       if (
         hostname === "youtu.be" ||
         youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
-        twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+        twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+        artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
       ) {
         return false;
       }
