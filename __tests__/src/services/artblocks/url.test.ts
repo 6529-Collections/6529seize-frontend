@@ -94,8 +94,8 @@ describe("buildMediaUrl", () => {
 
 describe("buildLiveUrl", () => {
   it("builds live viewer URLs", () => {
-    expect(buildLiveUrl({ tokenId: "99" })).toBe(
-      "https://live.artblocks.io/token/99"
+    expect(buildLiveUrl({contract: "0x1234567890abcdef1234567890abcdef12345678", tokenId: "99" })).toBe(
+      "https://live.artblocks.io/token/0x1234567890abcdef1234567890abcdef12345678-99"
     );
   });
 });

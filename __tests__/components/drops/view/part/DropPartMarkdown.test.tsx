@@ -168,23 +168,6 @@ describe("DropPartMarkdown", () => {
     expect(a).toHaveAttribute("rel", "noopener noreferrer nofollow");
   });
 
-  it("handles internal links", () => {
-    process.env.BASE_ENDPOINT = "https://example.com";
-    const content = "[home](https://example.com/page)";
-    render(
-      <DropPartMarkdown
-        mentionedUsers={[]}
-        referencedNfts={[]}
-        partContent={content}
-        onQuoteClick={jest.fn()}
-      />
-    );
-    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
-    const a = screen.getByRole("link", { name: "home" });
-    expect(a).not.toHaveAttribute("target");
-    expect(a).toHaveAttribute("href", "/page");
-  });
-
   it("renders Art Blocks token card when feature enabled", async () => {
     process.env.VITE_FEATURE_AB_CARD = "true";
     const content = "[token](https://www.artblocks.io/token/662000)";

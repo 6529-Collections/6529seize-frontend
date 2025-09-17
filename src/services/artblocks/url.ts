@@ -154,8 +154,8 @@ export const buildMediaUrl = ({
   return `https://media.artblocks.io/${tokenId}.png`;
 };
 
-export const buildLiveUrl = ({ tokenId }: ArtBlocksTokenIdentifier): string => {
-  return `https://live.artblocks.io/token/${tokenId}`;
+export const buildLiveUrl = ({ contract, tokenId }: ArtBlocksTokenIdentifier): string => {
+  return `https://live.artblocks.io/token/${contract}-${tokenId}`;
 };
 
 export const buildTokenApiUrl = ({
