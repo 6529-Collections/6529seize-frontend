@@ -1,4 +1,6 @@
+import { API_AUTH_COOKIE } from "@/constants";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { WALLET_AUTH_COOKIE } from "@/services/auth/auth.utils";
 
 // Mock next/headers
 jest.mock("next/headers", () => ({
@@ -24,17 +26,19 @@ describe("getAppCommonHeaders", () => {
   it("includes x-6529-auth header when cookie exists", async () => {
     (cookies as jest.Mock).mockResolvedValue({
       get: (name: string) =>
-        name === "x-6529-auth" ? { value: "auth-token" } : undefined,
+        name === API_AUTH_COOKIE ? { value: "auth-token" } : undefined,
     });
 
     const headers = await getAppCommonHeaders();
-    expect(headers).toEqual({ "x-6529-auth": "auth-token" });
+    expect(headers).toEqual({ [API_AUTH_COOKIE]: "auth-token" });
   });
 
   it("includes Authorization header when wallet-auth cookie exists", async () => {
     (cookies as jest.Mock).mockResolvedValue({
       get: (name: string) =>
-        name === "wallet-auth" ? { value: "wallet-token" } : undefined,
+        name === WALLET_AUTH_COOKIE
+          ? { value: "wallet-token" }
+          : undefined,
     });
 
     const headers = await getAppCommonHeaders();
@@ -44,15 +48,15 @@ describe("getAppCommonHeaders", () => {
   it("includes both headers when both cookies exist", async () => {
     (cookies as jest.Mock).mockResolvedValue({
       get: (name: string) => {
-        if (name === "x-6529-auth") return { value: "auth-token" };
-        if (name === "wallet-auth") return { value: "wallet-token" };
+        if (name === API_AUTH_COOKIE) return { value: "auth-token" };
+        if (name === WALLET_AUTH_COOKIE) return { value: "wallet-token" };
         return undefined;
       },
     });
 
     const headers = await getAppCommonHeaders();
     expect(headers).toEqual({
-      "x-6529-auth": "auth-token",
+      [API_AUTH_COOKIE]: "auth-token",
       Authorization: "Bearer wallet-token",
     });
   });
