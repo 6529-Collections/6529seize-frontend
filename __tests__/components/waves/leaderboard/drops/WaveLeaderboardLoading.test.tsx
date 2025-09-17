@@ -5,7 +5,7 @@ import { WaveLeaderboardLoading } from '../../../../../components/waves/leaderbo
 describe('WaveLeaderboardLoading', () => {
   it('renders spinner and message', () => {
     render(<WaveLeaderboardLoading />);
-    expect(screen.getByText('Loading drops...')).toBeInTheDocument();
+    expect(screen.getByText('Loading drops...', { selector: 'div' })).toBeInTheDocument();
     expect(document.querySelector('svg')).toBeTruthy();
   });
 });
