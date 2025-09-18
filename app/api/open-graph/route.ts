@@ -90,7 +90,9 @@ function createGenericPlan(url: URL): PreviewPlan {
     cacheKey: `generic:${url.toString()}`,
     execute: async () => {
       const { html, contentType, finalUrl } = await fetchHtml(url);
-      await assertPublicUrl(new URL(finalUrl), PUBLIC_URL_OPTIONS);
+      const finalUrlInstance = new URL(finalUrl);
+      await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
+
       const data = buildResponse(url, html, contentType);
       return { data, ttl: CACHE_TTL_MS };
     },
