@@ -43,7 +43,7 @@ export default function HomePage({
   const router = useRouter();
 
   // Drop modal logic
-  const dropId = searchParams?.get('drop') ?? undefined;
+  const dropId = searchParams?.get("drop") ?? undefined;
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
@@ -56,9 +56,11 @@ export default function HomePage({
   });
 
   const onDropClose = () => {
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.delete('drop');
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/');
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("drop");
+    const newUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname || "/";
     router.replace(newUrl, { scroll: false });
   };
 
@@ -73,10 +75,10 @@ export default function HomePage({
   useEffect(() => {
     if (!isDropOpen) return;
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onDropClose();
+      if (e.key === "Escape") onDropClose();
     };
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
   }, [isDropOpen, onDropClose]);
 
   // Callback ref for registration with LayoutContext
@@ -93,14 +95,14 @@ export default function HomePage({
   }
 
   return (
-    <div className="tw-h-full  tw-min-h-screen tw-bg-black">
+    <div className="tw-h-full tw-min-h-screen">
       {/* Drop Modal - positioned to respect sidebar */}
       {isDropOpen && (
         <div
           className="tw-fixed tw-inset-0 tw-z-[49] tw-bg-black"
           style={{
-            left: 'var(--left-rail)',  // Start after sidebar
-            transition: "none"
+            left: "var(--left-rail)", // Start after sidebar
+            transition: "none",
           }}
         >
           <BrainDesktopDrop
@@ -118,7 +120,7 @@ export default function HomePage({
       {/* Tab Navigation */}
       <div
         ref={setTabsRef}
-        className="tailwind-scope tw-px-6 tw-sticky tw-top-0 tw-z-40 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
+        className="tailwind-scope tw-px-6 tw-sticky tw-top-0 tw-z-20 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
       >
         <div
           className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
@@ -166,7 +168,7 @@ export default function HomePage({
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-h-full tw-overflow-hidden tailwind-scope tw-px-2 xl:tw-px-8">
+          <div className="tw-h-full  tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 xl:tw-px-8">
             {isAuthenticated ? (
               <HomeFeed />
             ) : (

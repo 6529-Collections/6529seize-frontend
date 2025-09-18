@@ -66,7 +66,7 @@ function WebSidebarExpandable({
             <Link
               key={item.name}
               href={item.href}
-              className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-justify-start tw-pr-3 tw-pl-[3.25rem] tw-h-11 ${
+              className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-justify-start tw-pr-3 tw-pl-[3.25rem] tw-h-11 tw-text-base ${
                 isActive(item.href)
                   ? "tw-text-white desktop-hover:hover:tw-text-white"
                   : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
