@@ -1,3 +1,5 @@
+"use client";
+
 import { type ReactNode } from "react";
 
 import Image from "next/image";
@@ -5,6 +7,7 @@ import Link from "next/link";
 
 import { removeBaseEndpoint } from "../../helpers/Helpers";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
+import BlueskyCard from "./BlueskyCard";
 
 export interface OpenGraphPreviewData {
   title?: unknown;
@@ -24,6 +27,7 @@ export interface OpenGraphPreviewData {
   og_image?: unknown;
   thumbnailUrl?: unknown;
   thumbnail_url?: unknown;
+  type?: unknown;
   [key: string]: unknown;
 }
 
@@ -211,6 +215,11 @@ export function hasOpenGraphContent(
     return false;
   }
 
+  const previewType = getPreviewType(preview);
+  if (previewType && previewType.startsWith("bluesky.")) {
+    return true;
+  }
+
   return Boolean(
     readFirstString(preview, TITLE_KEYS) ||
     readFirstString(preview, DESCRIPTION_KEYS) ||
@@ -227,6 +236,11 @@ export default function OpenGraphPreview({
   const isExternalLink = !relativeHref;
   const linkTarget = isExternalLink ? "_blank" : undefined;
   const linkRel = isExternalLink ? "noopener noreferrer" : undefined;
+
+  const previewType = getPreviewType(preview);
+  if (preview && previewType && previewType.startsWith("bluesky.")) {
+    return <BlueskyCard href={href} preview={preview} />;
+  }
 
   if (typeof preview === "undefined") {
     return (
@@ -324,4 +338,15 @@ export default function OpenGraphPreview({
       </div>
     </LinkPreviewCardLayout>
   );
+}
+
+function getPreviewType(
+  preview: OpenGraphPreviewData | null | undefined
+): string | undefined {
+  if (!preview) {
+    return undefined;
+  }
+
+  const type = preview.type;
+  return typeof type === "string" ? type : undefined;
 }

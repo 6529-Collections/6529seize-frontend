@@ -23,9 +23,20 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
+jest.mock("../../../app/api/open-graph/bluesky", () => ({
+  detectBlueskyTarget: jest.fn(),
+  fetchBlueskyPreview: jest.fn(),
+}));
+
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
+};
+const bluesky = jest.requireMock(
+  "../../../app/api/open-graph/bluesky"
+) as {
+  detectBlueskyTarget: jest.Mock;
+  fetchBlueskyPreview: jest.Mock;
 };
 
 const originalFetch = global.fetch;
@@ -41,6 +52,7 @@ describe("open-graph API route", () => {
     jest.clearAllMocks();
     global.fetch = originalFetch;
     nextResponseJson.mockClear();
+    bluesky.detectBlueskyTarget.mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -167,5 +179,40 @@ describe("open-graph API route", () => {
       html,
       "text/html"
     );
+  });
+
+  it("returns cached Bluesky previews", async () => {
+    bluesky.detectBlueskyTarget.mockReturnValue({
+      kind: "post",
+      identifier: "example.com",
+      rkey: "abc",
+      normalizedUrl: "https://bsky.app/profile/example.com/post/abc",
+    });
+    bluesky.fetchBlueskyPreview.mockResolvedValue({
+      data: {
+        type: "bluesky.post",
+        canonicalUrl: "https://bsky.app/profile/example.com/post/abc",
+      },
+      ttlMs: 600_000,
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://bsky.app/profile/example.com/post/abc"
+      ),
+    } as any;
+
+    const first = await GET(request);
+    expect(first.status).toBe(200);
+    expect(await first.json()).toEqual({
+      type: "bluesky.post",
+      canonicalUrl: "https://bsky.app/profile/example.com/post/abc",
+    });
+    expect(bluesky.fetchBlueskyPreview).toHaveBeenCalledTimes(1);
+
+    const second = await GET(request);
+    expect(second.status).toBe(200);
+    await second.json();
+    expect(bluesky.fetchBlueskyPreview).toHaveBeenCalledTimes(1);
   });
 });

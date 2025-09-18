@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
+import {
+  detectBlueskyTarget,
+  fetchBlueskyPreview,
+} from "./bluesky";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
@@ -14,6 +18,21 @@ type CacheEntry = {
 };
 
 const cache = new Map<string, CacheEntry>();
+
+function getCachedResponse(key: string): LinkPreviewResponse | null {
+  const entry = cache.get(key);
+  if (!entry || entry.expiresAt <= Date.now()) {
+    return null;
+  }
+  return entry.data;
+}
+
+function setCacheEntry(key: string, data: LinkPreviewResponse, ttlMs: number) {
+  cache.set(key, {
+    data,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
 
 const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 5;
@@ -88,24 +107,35 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const normalizedUrl = targetUrl.toString();
-  const cached = cache.get(normalizedUrl);
+  const blueskyTarget = detectBlueskyTarget(targetUrl);
+  const cacheKey = blueskyTarget?.normalizedUrl ?? targetUrl.toString();
+  const cached = getCachedResponse(cacheKey);
 
-  if (cached && cached.expiresAt > Date.now()) {
-    return NextResponse.json(cached.data);
+  if (cached) {
+    return NextResponse.json(cached);
+  }
+
+  if (blueskyTarget) {
+    try {
+      const { data, ttlMs } = await fetchBlueskyPreview(blueskyTarget);
+      setCacheEntry(cacheKey, data, ttlMs);
+      const canonicalUrl = data.canonicalUrl;
+      if (typeof canonicalUrl === "string" && canonicalUrl.length > 0) {
+        setCacheEntry(canonicalUrl, data, ttlMs);
+      }
+      return NextResponse.json(data);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to fetch Bluesky data";
+      return NextResponse.json({ error: message }, { status: 502 });
+    }
   }
 
   try {
     const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
     await ensureUrlIsPublic(new URL(finalUrl));
     const data = buildResponse(targetUrl, html, contentType);
-    const entry: CacheEntry = {
-      data,
-      expiresAt: Date.now() + CACHE_TTL_MS,
-    };
-
-    cache.set(normalizedUrl, entry);
-
+    setCacheEntry(cacheKey, data, CACHE_TTL_MS);
     return NextResponse.json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to fetch URL";

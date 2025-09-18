@@ -61,6 +61,39 @@ describe("LinkPreviewCard", () => {
     expect(screen.queryByTestId("fallback")).toBeNull();
   });
 
+  it("treats Bluesky previews as valid content", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "bluesky.post",
+      canonicalUrl: "https://bsky.app/profile/example.com/post/abc",
+      post: {
+        uri: "at://did:plc:123/app.bsky.feed.post/abc",
+        text: "Hello",
+        author: { handle: "example.com" },
+        counts: { replies: 0, reposts: 0, likes: 0 },
+        images: [],
+        labels: [],
+      },
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://bsky.app/profile/example.com/post/abc"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          href: "https://bsky.app/profile/example.com/post/abc",
+          preview: expect.objectContaining({ type: "bluesky.post" }),
+        })
+      );
+    });
+
+    expect(screen.queryByTestId("fallback")).toBeNull();
+  });
+
   it("uses fallback when preview has no useful content", async () => {
     fetchLinkPreview.mockResolvedValue({});
 
