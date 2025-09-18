@@ -1,6 +1,5 @@
-import { Children, isValidElement } from "react";
-import type { ReactElement } from "react";
 import {
+  ZoomLevel,
   formatToFullDivision,
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
@@ -15,7 +14,8 @@ import {
   nextMintDateOnOrAfter,
   printCalendarInvites,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import type { ZoomLevel } from "@/components/meme-calendar/meme-calendar.helpers";
+import type { ReactElement } from "react";
+import { Children, isValidElement } from "react";
 
 const startOfUtcDay = (date: Date): Date =>
   new Date(
@@ -45,7 +45,9 @@ describe("formatToFullDivision", () => {
     const tbody = (node as ReactElement).props.children;
     expect(isValidElement(tbody)).toBe(true);
 
-    const rows = Children.toArray((tbody as ReactElement).props.children) as ReactElement[];
+    const rows = Children.toArray(
+      (tbody as ReactElement).props.children
+    ) as ReactElement[];
 
     expect(rows).toHaveLength(6);
 
@@ -133,7 +135,13 @@ describe("mint timing helpers", () => {
   const mintNumber = getMintNumberForMintDate(mintDay);
   const mintStart = mintStartInstantUtcForMintDay(mintDay);
   const nextMintDay = nextMintDateOnOrAfter(
-    new Date(Date.UTC(mintDay.getUTCFullYear(), mintDay.getUTCMonth(), mintDay.getUTCDate() + 1))
+    new Date(
+      Date.UTC(
+        mintDay.getUTCFullYear(),
+        mintDay.getUTCMonth(),
+        mintDay.getUTCDate() + 1
+      )
+    )
   );
   const nextMintStart = mintStartInstantUtcForMintDay(nextMintDay);
 
@@ -143,7 +151,9 @@ describe("mint timing helpers", () => {
 
   it("returns the next mint start time", () => {
     expect(getNextMintStart(beforeMint).getTime()).toBe(mintStart.getTime());
-    expect(getNextMintStart(duringMint).getTime()).toBe(nextMintStart.getTime());
+    expect(getNextMintStart(duringMint).getTime()).toBe(
+      nextMintStart.getTime()
+    );
   });
 
   it("reports whether minting is active", () => {
@@ -173,7 +183,7 @@ describe("getCardsRemainingUntilEndOf", () => {
   );
   const firstUpcomingMint = nextMintDateOnOrAfter(searchStart);
   const zoomLevels: ZoomLevel[] = [
-    "season",
+    "szn",
     "year",
     "epoch",
     "period",
@@ -204,10 +214,10 @@ describe("getCardsRemainingUntilEndOf", () => {
     );
     const upcomingMint = nextMintDateOnOrAfter(search);
     const { end } = getRangeDatesByZoom(
-      "season",
+      "szn",
       getSeasonIndexForDate(upcomingMint)
     );
     const expected = countMintsBetween(upcomingMint, end);
-    expect(getCardsRemainingUntilEndOf("season", now)).toBe(expected);
+    expect(getCardsRemainingUntilEndOf("szn", now)).toBe(expected);
   });
 });
