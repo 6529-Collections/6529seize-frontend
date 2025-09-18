@@ -47,6 +47,10 @@ Note: When changing files like readme.md, agents.md or other documentation or in
 
 If `npm run test` fails due to low coverage on a modified file, write meaningful tests that verify the file's functionality and bring its coverage to at least 80%. If a Jest test fails, debug and fix the underlying code or the test itself, ensuring the code behaves as expected and tests accurately reflect its intended functionality. Repeat this process until `npm run test` passes.
 
+## Git Hooks
+
+Husky is configured with a pre-commit hook that automatically runs `npm test`, `npm run lint`, and `npm run type-check` through `lint-staged` whenever you commit. Install the hooks locally by running `npm install` (or `npm run prepare` if dependencies are already installed). To skip the hook, append `--no-verify` to the `git commit` command.
+
 ## Coding Conventions
 
 - Use TypeScript and React functional components with hooks.
