@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import { buildFacebookPreview, shouldHandleFacebook } from "./facebook";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -97,8 +98,17 @@ export async function GET(request: NextRequest) {
 
   try {
     const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
-    await ensureUrlIsPublic(new URL(finalUrl));
-    const data = buildResponse(targetUrl, html, contentType);
+    const final = new URL(finalUrl);
+    await ensureUrlIsPublic(final);
+    const baseMetadata = buildResponse(final, html, contentType);
+    const baseData: LinkPreviewResponse = {
+      ...baseMetadata,
+      requestUrl: targetUrl.toString(),
+    };
+
+    const data = shouldHandleFacebook(final)
+      ? buildFacebookPreview(final, baseData) ?? baseData
+      : baseData;
     const entry: CacheEntry = {
       data,
       expiresAt: Date.now() + CACHE_TTL_MS,

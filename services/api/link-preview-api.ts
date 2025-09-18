@@ -8,7 +8,7 @@ export interface LinkPreviewMedia {
   readonly [key: string]: unknown;
 }
 
-export interface LinkPreviewResponse {
+export interface BaseLinkPreviewResponse {
   readonly requestUrl?: string | null;
   readonly url?: string | null;
   readonly title?: string | null;
@@ -22,6 +22,79 @@ export interface LinkPreviewResponse {
   readonly images?: readonly LinkPreviewMedia[] | null;
   readonly [key: string]: unknown;
 }
+
+export type FacebookPreviewType =
+  | "facebook.post"
+  | "facebook.video"
+  | "facebook.photo"
+  | "facebook.page"
+  | "facebook.unavailable";
+
+export interface FacebookPostPreviewImage {
+  readonly url: string;
+  readonly alt: string;
+}
+
+export interface FacebookPostPreviewData {
+  readonly page: string | null;
+  readonly postId: string | null;
+  readonly authorName: string | null;
+  readonly authorUrl: string | null;
+  readonly createdAt: string | null;
+  readonly text: string | null;
+  readonly images: readonly FacebookPostPreviewImage[];
+}
+
+export interface FacebookVideoPreviewData {
+  readonly videoId: string | null;
+  readonly title: string | null;
+  readonly authorName: string | null;
+  readonly authorUrl: string | null;
+  readonly thumbnail: string | null;
+  readonly duration: string | null;
+}
+
+export interface FacebookPhotoPreviewData {
+  readonly photoId: string | null;
+  readonly caption: string | null;
+  readonly authorName: string | null;
+  readonly authorUrl: string | null;
+  readonly image: string | null;
+}
+
+export interface FacebookPagePreviewData {
+  readonly name: string | null;
+  readonly about: string | null;
+  readonly avatar: string | null;
+  readonly banner: string | null;
+}
+
+export type FacebookUnavailableReason =
+  | "login_required"
+  | "removed"
+  | "rate_limited"
+  | "error";
+
+export interface FacebookPreviewPayloadBase {
+  readonly type: FacebookPreviewType;
+  readonly canonicalUrl?: string | null;
+}
+
+export type FacebookPreviewPayload =
+  | (FacebookPreviewPayloadBase & { readonly type: "facebook.post"; readonly post: FacebookPostPreviewData })
+  | (FacebookPreviewPayloadBase & { readonly type: "facebook.video"; readonly video: FacebookVideoPreviewData })
+  | (FacebookPreviewPayloadBase & { readonly type: "facebook.photo"; readonly photo: FacebookPhotoPreviewData })
+  | (FacebookPreviewPayloadBase & { readonly type: "facebook.page"; readonly page: FacebookPagePreviewData })
+  | (FacebookPreviewPayloadBase & {
+      readonly type: "facebook.unavailable";
+      readonly reason: FacebookUnavailableReason;
+    });
+
+export type LinkPreviewResponse =
+  | BaseLinkPreviewResponse
+  | (BaseLinkPreviewResponse & FacebookPreviewPayload);
+
+export type FacebookLinkPreviewResponse = BaseLinkPreviewResponse & FacebookPreviewPayload;
 
 const linkPreviewCache = new Map<string, Promise<LinkPreviewResponse>>();
 
