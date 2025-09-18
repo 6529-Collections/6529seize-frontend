@@ -17,6 +17,7 @@ import { parseYoutubeLink } from "./youtube";
 import YoutubePreview from "./youtubePreview";
 import type { PepeLinkResult } from "./pepe";
 import { isPepeHost, parsePepeLink, renderPepeLink } from "./pepe";
+import { parseTikTokLink } from "./tiktok";
 
 type DropPartMarkdownImageComponent = typeof import("../DropPartMarkdownImage").default;
 type WaveDropQuoteWithSerialNoComponent = typeof import("../../../../waves/drops/WaveDropQuoteWithSerialNo").default;
@@ -26,6 +27,7 @@ type WaveItemChatComponent = typeof import("../../../../waves/list/WaveItemChat"
 type DropItemChatComponent = typeof import("../../../../waves/drops/DropItemChat").default;
 type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHrefButtons").default;
 type LinkPreviewCardComponent = typeof import("../../../../waves/LinkPreviewCard").default;
+type TikTokCardComponent = typeof import("../../../../waves/TikTokCard").default;
 
 const getDropPartMarkdownImage = (): DropPartMarkdownImageComponent => {
   const module = require("../DropPartMarkdownImage");
@@ -67,6 +69,11 @@ const getLinkPreviewCard = (): LinkPreviewCardComponent => {
   return module.default as LinkPreviewCardComponent;
 };
 
+const getTikTokCard = (): TikTokCardComponent => {
+  const module = require("../../../../waves/TikTokCard");
+  return module.default as TikTokCardComponent;
+};
+
 interface SmartLinkHandler<T> {
   parse: (href: string) => T | null;
   render: (result: T, href: string) => ReactElement | null;
@@ -81,6 +88,11 @@ const ART_BLOCKS_FLAG_CANDIDATES = [
   "NEXT_PUBLIC_VITE_FEATURE_AB_CARD",
   "NEXT_PUBLIC_FEATURE_AB_CARD",
   "FEATURE_AB_CARD",
+] as const;
+
+const TIKTOK_FLAG_CANDIDATES = [
+  "FEATURE_TIKTOK_CARD",
+  "NEXT_PUBLIC_FEATURE_TIKTOK_CARD",
 ] as const;
 
 const parseFeatureFlagValue = (value: string): boolean => {
@@ -103,6 +115,17 @@ const parseFeatureFlagValue = (value: string): boolean => {
 
 const isArtBlocksCardEnabled = (): boolean => {
   for (const flagName of ART_BLOCKS_FLAG_CANDIDATES) {
+    const value = process.env[flagName];
+    if (value !== undefined) {
+      return parseFeatureFlagValue(value);
+    }
+  }
+
+  return true;
+};
+
+const isTikTokCardEnabled = (): boolean => {
+  for (const flagName of TIKTOK_FLAG_CANDIDATES) {
     const value = process.env[flagName];
     if (value !== undefined) {
       return parseFeatureFlagValue(value);
@@ -233,6 +256,10 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
     ];
 
     if (isPepeHost(hostname)) {
+      return false;
+    }
+
+    if (isTikTokCardEnabled() && matchesDomainOrSubdomain(hostname, "tiktok.com")) {
       return false;
     }
 
@@ -420,6 +447,19 @@ export const createLinkRenderer = ({
       );
     }
 
+    if (isTikTokCardEnabled()) {
+      const tiktokInfo = parseTikTokLink(href);
+      if (tiktokInfo) {
+        const TikTokCard = getTikTokCard();
+        return (
+          <TikTokCard
+            href={href}
+            renderFallback={() => renderExternalOrInternalLink(href, props)}
+          />
+        );
+      }
+    }
+
     for (const { parse, render } of smartLinkHandlers) {
       const result = parse(href);
       if (result) {
@@ -442,6 +482,10 @@ export const createLinkRenderer = ({
 
   const isSmartLink = (href: string): boolean => {
     if (parseYoutubeLink(href)) {
+      return true;
+    }
+
+    if (isTikTokCardEnabled() && parseTikTokLink(href)) {
       return true;
     }
 
