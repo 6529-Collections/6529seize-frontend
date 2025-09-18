@@ -4,6 +4,7 @@ import { type ReactElement, useEffect, useState } from "react";
 
 import OpenGraphPreview, {
   hasOpenGraphContent,
+  LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
@@ -75,7 +76,18 @@ export default function LinkPreviewCard({
   }, [href]);
 
   if (state.type === "fallback") {
-    return renderFallback();
+    const fallbackContent = renderFallback();
+
+    return (
+      <LinkPreviewCardLayout href={href}>
+        <div
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-start">
+            {fallbackContent}
+          </div>
+        </div>
+      </LinkPreviewCardLayout>
+    );
   }
 
   const preview = state.type === "success" ? state.data : undefined;
