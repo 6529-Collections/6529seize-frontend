@@ -3,6 +3,10 @@ import { isIP } from "node:net";
 import { toASCII } from "node:punycode";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import {
+  type BuildWeiboResponseParams,
+  buildWeiboResponse,
+} from "./weibo";
 
 const TITLE_KEYS = ["og:title", "twitter:title", "title"] as const;
 const DESCRIPTION_KEYS = [
@@ -304,8 +308,20 @@ export async function ensureUrlIsPublic(url: URL): Promise<void> {
 export function buildResponse(
   url: URL,
   html: string,
-  contentType: string | null
+  contentType: string | null,
+  finalUrl?: string
 ): LinkPreviewResponse {
+  const weiboResponse = buildWeiboResponse({
+    originalUrl: url,
+    finalUrl: finalUrl ?? url.toString(),
+    html,
+    contentType,
+  } satisfies BuildWeiboResponseParams);
+
+  if (weiboResponse) {
+    return weiboResponse;
+  }
+
   const title =
     extractFirstMetaContent(html, TITLE_KEYS) ?? extractTitleTag(html);
   const description = extractFirstMetaContent(html, DESCRIPTION_KEYS);

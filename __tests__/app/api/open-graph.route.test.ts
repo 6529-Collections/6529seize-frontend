@@ -165,7 +165,8 @@ describe("open-graph API route", () => {
     expect(utils.buildResponse).toHaveBeenCalledWith(
       new URL("http://safe.example/article"),
       html,
-      "text/html"
+      "text/html",
+      "https://cdn.safe.example/page"
     );
   });
 });
