@@ -1,3 +1,5 @@
+"use client";
+
 import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
@@ -6,8 +8,7 @@ import { BaseRendererProps } from "../types/renderer-props";
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <Col
-      className={`${styles.nftAnimation} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}
-    >
+      className={`${styles.nftAnimation} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
       <NFTImageBalance
         showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
         showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
@@ -31,8 +32,16 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
             : props.nft.animation
         }
         className={props.imageStyle}
-   
-      ></video>
+        onError={({ currentTarget }) => {
+          if (
+            "metadata" in props.nft &&
+            currentTarget.src === props.nft.compressed_animation
+          ) {
+            currentTarget.src = props.nft.animation;
+          } else if ("metadata" in props.nft) {
+            currentTarget.src = props.nft.metadata.animation;
+          }
+        }}></video>
     </Col>
   );
 }

@@ -1,27 +1,27 @@
 "use client";
 
-import { WagmiProvider } from "wagmi";
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import { VALIDATED_BASE_ENDPOINT } from "@/constants";
+import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
+import { AppKitValidationError } from "@/src/errors/appkit-initialization";
 import {
-  AppWallet,
-  useAppWallets,
-} from "../app-wallets/AppWalletsContext";
+  AppKitInitializationConfig,
+  initializeAppKit,
+} from "@/utils/appkit-initialization.utils";
+import {
+  logErrorSecurely,
+  sanitizeErrorForUser,
+} from "@/utils/error-sanitizer";
 import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
-import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { AppKitAdapterManager } from './AppKitAdapterManager';
-import { VALIDATED_BASE_ENDPOINT } from "@/constants";
-import { AppKitValidationError } from '@/src/errors/appkit-initialization';
-import { Capacitor } from '@capacitor/core';
-import { useAuth } from '../auth/Auth';
-import { sanitizeErrorForUser, logErrorSecurely } from '@/utils/error-sanitizer';
-import {
-  initializeAppKit,
-  AppKitInitializationConfig
-} from '@/utils/appkit-initialization.utils';
+import { Capacitor } from "@capacitor/core";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { WagmiProvider } from "wagmi";
+import { AppWallet, useAppWallets } from "../app-wallets/AppWalletsContext";
+import { useAuth } from "../auth/Auth";
+import { AppKitAdapterManager } from "./AppKitAdapterManager";
 
 export default function WagmiSetup({
   children,
@@ -32,7 +32,9 @@ export default function WagmiSetup({
   const { setToast } = useAuth();
   const { appWallets } = useAppWallets();
 
-  const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(null);
+  const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(
+    null
+  );
   const [isMounted, setIsMounted] = useState(false);
 
   // Track processed wallets by address for efficient comparison
@@ -48,7 +50,6 @@ export default function WagmiSetup({
     [appWalletPasswordModal.requestPassword]
   );
 
-
   // Handle client-side mounting for App Router
   useEffect(() => {
     setIsMounted(true);
@@ -58,51 +59,56 @@ export default function WagmiSetup({
   const [isInitializing, setIsInitializing] = useState(false);
 
   // Create adapter with essential configuration only
-  const createAdapterWithWallets = useCallback((wallets: AppWallet[]): WagmiAdapter => {
-    // Basic validation - let util handle detailed validation
-    if (!VALIDATED_BASE_ENDPOINT || !adapterManager) {
-      throw new AppKitValidationError('Internal API failed');
-    }
+  const createAdapterWithWallets = useCallback(
+    (wallets: AppWallet[]): WagmiAdapter => {
+      // Basic validation - let util handle detailed validation
+      if (!VALIDATED_BASE_ENDPOINT || !adapterManager) {
+        throw new AppKitValidationError("Internal API failed");
+      }
 
-    const config: AppKitInitializationConfig = {
-      wallets,
-      adapterManager: adapterManager as AppKitAdapterManager,
-      isCapacitor,
-    };
+      const config: AppKitInitializationConfig = {
+        wallets,
+        adapterManager: adapterManager as AppKitAdapterManager,
+        isCapacitor,
+      };
 
-
-    const result = initializeAppKit(config);
-    return result.adapter;
-  }, [adapterManager, isCapacitor]);
+      const result = initializeAppKit(config);
+      return result.adapter;
+    },
+    [adapterManager, isCapacitor]
+  );
 
   // Initialize AppKit with fail-fast approach
-  const setupAppKitAdapter = useCallback((wallets: AppWallet[]) => {
-    if (isInitializing) {
-      throw new AppKitValidationError('Internal API failed');
-    }
+  const setupAppKitAdapter = useCallback(
+    (wallets: AppWallet[]) => {
+      if (isInitializing) {
+        throw new AppKitValidationError("Internal API failed");
+      }
 
-    setIsInitializing(true);
+      setIsInitializing(true);
 
-    try {
-      const adapter = createAdapterWithWallets(wallets);
-      setCurrentAdapter(adapter);
-    } catch (error) {
-      logErrorSecurely('[WagmiSetup] AppKit initialization failed', error);
-      const userMessage = sanitizeErrorForUser(error);
-      setToast({
-        message: userMessage,
-        type: "error",
-      });
-      throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
-    } finally {
-      setIsInitializing(false);
-    }
-  }, [isInitializing, createAdapterWithWallets, setToast]);
+      try {
+        const adapter = createAdapterWithWallets(wallets);
+        setCurrentAdapter(adapter);
+      } catch (error) {
+        logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
+        const userMessage = sanitizeErrorForUser(error);
+        setToast({
+          message: userMessage,
+          type: "error",
+        });
+        throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
+      } finally {
+        setIsInitializing(false);
+      }
+    },
+    [isInitializing, createAdapterWithWallets, setToast]
+  );
 
   // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
     if (isMounted && !currentAdapter && !isInitializing) {
-      setupAppKitAdapter([])
+      setupAppKitAdapter([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMounted, currentAdapter, isInitializing]); // setupAppKitAdapter intentionally excluded to prevent loops
@@ -112,9 +118,12 @@ export default function WagmiSetup({
     if (!currentAdapter) return;
 
     // Check if wallets have actually changed to prevent unnecessary re-injection
-    const currentAddresses = new Set(appWallets.map(w => w.address));
-    const addressesEqual = processedWallets.current.size === currentAddresses.size &&
-      Array.from(processedWallets.current).every(addr => currentAddresses.has(addr));
+    const currentAddresses = new Set(appWallets.map((w) => w.address));
+    const addressesEqual =
+      processedWallets.current.size === currentAddresses.size &&
+      Array.from(processedWallets.current).every((addr) =>
+        currentAddresses.has(addr)
+      );
 
     if (addressesEqual) return;
 
@@ -125,9 +134,15 @@ export default function WagmiSetup({
           const connector = createAppWalletConnector(
             Array.from(currentAdapter.wagmiConfig.chains),
             { appWallet: wallet },
-            () => appWalletPasswordModal.requestPassword(wallet.address, wallet.address_hashed)
+            () =>
+              appWalletPasswordModal.requestPassword(
+                wallet.address,
+                wallet.address_hashed
+              )
           );
-          return currentAdapter.wagmiConfig._internal.connectors.setup(connector);
+          return currentAdapter.wagmiConfig._internal.connectors.setup(
+            connector
+          );
         })
         .filter((connector) => connector !== null);
 
@@ -144,9 +159,8 @@ export default function WagmiSetup({
 
       // Update processed wallets tracking
       processedWallets.current = currentAddresses;
-
     } catch (error) {
-      logErrorSecurely('[WagmiSetup] Connector injection failed', error);
+      logErrorSecurely("[WagmiSetup] Connector injection failed", error);
       const userMessage = sanitizeErrorForUser(error);
       setToast({
         message: userMessage,
@@ -158,7 +172,7 @@ export default function WagmiSetup({
 
   // Show loading state until fully initialized
   if (!isMounted || !currentAdapter) {
-    return null
+    return null;
   }
 
   return (

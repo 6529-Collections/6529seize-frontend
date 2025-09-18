@@ -16,7 +16,7 @@ describe('GroupCreateIdentitiesSearchItemsContent', () => {
         <GroupCreateIdentitiesSearchItemsContent items={items} loading={true} selectedWallets={[]} onSelect={jest.fn()} />
       </ul>
     );
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...', { selector: 'li' })).toBeInTheDocument();
   });
 
   it('renders items when provided', () => {

@@ -36,6 +36,8 @@ export default function RootLayout({
       <Head>
         <link rel="preconnect" href={process.env.API_ENDPOINT} />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
+        <link rel="preconnect" href="https://media.artblocks.io" />
+        <link rel="preconnect" href="https://media-proxy.artblocks.io" />
       </Head>
       <body>
         <AwsRumProvider>

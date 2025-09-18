@@ -12,7 +12,7 @@ describe('BrainLeftSidebarSearchWaveDropdownContent', () => {
     render(
       <BrainLeftSidebarSearchWaveDropdownContent loading waves={[]} onClose={jest.fn()} listType="waves" />
     );
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...', { selector: 'li' })).toBeInTheDocument();
   });
 
   it('renders list of waves when present', () => {
