@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  UrlGuardError,
+  assertPublicUrl,
+  fetchPublicUrl,
+  parsePublicUrl,
+} from "@/lib/security/urlGuard";
+import type { FetchPublicUrlOptions, UrlGuardOptions } from "@/lib/security/urlGuard";
 import type {
   TikTokPreviewKind,
   TikTokPreviewResult,
@@ -10,6 +17,28 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
 const USER_AGENT =
   "6529seize-tiktok-preview/1.0 (+https://6529.io; Fetching public TikTok oEmbed data)";
+
+const TIKTOK_ALLOWED_HOSTS = [
+  "www.tiktok.com",
+  "m.tiktok.com",
+  "tiktok.com",
+  "vm.tiktok.com",
+  "vt.tiktok.com",
+] as const;
+
+const TIKTOK_URL_GUARD_OPTIONS: UrlGuardOptions = {
+  policy: {
+    allowedHosts: TIKTOK_ALLOWED_HOSTS,
+  },
+};
+
+const TIKTOK_FETCH_OPTIONS: FetchPublicUrlOptions = {
+  policy: {
+    allowedHosts: TIKTOK_ALLOWED_HOSTS,
+  },
+  timeoutMs: FETCH_TIMEOUT_MS,
+  userAgent: USER_AGENT,
+};
 
 type CacheEntry = {
   data: TikTokPreviewResult;
@@ -170,34 +199,33 @@ function parseTikTokPath(segments: readonly string[]): NormalizedTikTokUrl {
 }
 
 async function resolveShortLink(url: URL): Promise<URL> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const baseHeaders = { "user-agent": USER_AGENT };
 
-  try {
-    let response = await fetch(url.toString(), {
+  let response = await fetchPublicUrl(
+    url,
+    {
       method: "HEAD",
-      redirect: "follow",
-      signal: controller.signal,
-      headers: { "user-agent": USER_AGENT },
-    });
+      headers: baseHeaders,
+    },
+    TIKTOK_FETCH_OPTIONS
+  );
 
-    if (response.status === 405 || response.status === 400) {
-      response = await fetch(url.toString(), {
+  if (response.status === 405 || response.status === 400) {
+    response = await fetchPublicUrl(
+      url,
+      {
         method: "GET",
-        redirect: "follow",
-        signal: controller.signal,
-        headers: { "user-agent": USER_AGENT },
-      });
-    }
-
-    if (!response.ok) {
-      throw new Error(`Short link resolution failed with status ${response.status}`);
-    }
-
-    return new URL(response.url);
-  } finally {
-    clearTimeout(timeout);
+        headers: baseHeaders,
+      },
+      TIKTOK_FETCH_OPTIONS
+    );
   }
+
+  if (!response.ok) {
+    throw new Error(`Short link resolution failed with status ${response.status}`);
+  }
+
+  return new URL(response.url || url.toString());
 }
 
 async function normalizeTikTokUrl(url: URL): Promise<NormalizedTikTokUrl> {
@@ -315,16 +343,33 @@ export async function GET(request: NextRequest) {
 
   let parsedUrl: URL;
   try {
-    parsedUrl = new URL(rawUrl);
-  } catch {
+    parsedUrl = parsePublicUrl(rawUrl);
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
+
     return NextResponse.json(
       { error: "The provided url parameter is not a valid URL." },
       { status: 400 }
     );
   }
 
-  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-    return NextResponse.json({ error: "Only HTTP(S) URLs are supported." }, { status: 400 });
+  try {
+    await assertPublicUrl(parsedUrl, TIKTOK_URL_GUARD_OPTIONS);
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      const message =
+        error.kind === "host-not-allowed" || error.kind === "ip-not-allowed"
+          ? "The provided URL is not a supported TikTok link."
+          : error.message;
+      return NextResponse.json({ error: message }, { status: error.statusCode });
+    }
+
+    return NextResponse.json(
+      { error: "The provided URL is not a supported TikTok link." },
+      { status: 400 }
+    );
   }
 
   let normalized: NormalizedTikTokUrl;
@@ -334,6 +379,23 @@ export async function GET(request: NextRequest) {
     const message =
       error instanceof Error ? error.message : "The provided URL is not a supported TikTok link.";
     return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  try {
+    await assertPublicUrl(new URL(normalized.canonicalUrl), TIKTOK_URL_GUARD_OPTIONS);
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      const message =
+        error.kind === "host-not-allowed" || error.kind === "ip-not-allowed"
+          ? "The provided URL is not a supported TikTok link."
+          : error.message;
+      return NextResponse.json({ error: message }, { status: error.statusCode });
+    }
+
+    return NextResponse.json(
+      { error: "The provided URL is not a supported TikTok link." },
+      { status: 400 }
+    );
   }
 
   const cached = cache.get(normalized.canonicalUrl);
