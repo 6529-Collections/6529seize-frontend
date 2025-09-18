@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { commonApiFetch } from "@/services/api/common-api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import HeaderUserConnect from "../header/user/HeaderUserConnect";
+import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import { isMintingActive } from "../meme-calendar/meme-calendar.helpers";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import HomePageTabs from "./HomePageTabs";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import Image from "next/image";
-import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import BrainDesktopDrop from "../brain/BrainDesktopDrop";
-import { DropSize } from "@/helpers/waves/drop.helpers";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -104,8 +105,7 @@ export default function HomePage({
           style={{
             left: "var(--left-rail)", // Start after sidebar
             transition: "none",
-          }}
-        >
+          }}>
           <BrainDesktopDrop
             drop={{
               type: DropSize.FULL,
@@ -157,6 +157,7 @@ export default function HomePage({
         ) : (
           <Home
             featuredNft={featuredNft}
+            isMemeMintingActive={isMintingActive()}
             featuredNextgen={featuredNextgen}
             initialActivityData={initialActivityData}
             initialTokens={initialTokens}
