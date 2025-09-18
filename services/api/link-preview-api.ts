@@ -8,7 +8,7 @@ export interface LinkPreviewMedia {
   readonly [key: string]: unknown;
 }
 
-export interface LinkPreviewResponse {
+export interface LinkPreviewBase {
   readonly requestUrl?: string | null;
   readonly url?: string | null;
   readonly title?: string | null;
@@ -22,6 +22,57 @@ export interface LinkPreviewResponse {
   readonly images?: readonly LinkPreviewMedia[] | null;
   readonly [key: string]: unknown;
 }
+
+type GoogleWorkspaceAvailability = "public" | "restricted";
+
+interface GoogleWorkspaceLinksBase {
+  readonly open: string;
+  readonly preview: string;
+}
+
+export interface GoogleDocsLinkPreview extends LinkPreviewBase {
+  readonly type: "google.docs";
+  readonly fileId: string;
+  readonly thumbnail?: string | null;
+  readonly links: GoogleWorkspaceLinksBase & {
+    readonly exportPdf?: string;
+  };
+  readonly availability: GoogleWorkspaceAvailability;
+}
+
+export interface GoogleSheetsLinkPreview extends LinkPreviewBase {
+  readonly type: "google.sheets";
+  readonly fileId: string;
+  readonly gid?: string | null;
+  readonly thumbnail?: string | null;
+  readonly links: GoogleWorkspaceLinksBase & {
+    readonly embedPub?: string;
+  };
+  readonly availability: GoogleWorkspaceAvailability;
+}
+
+export interface GoogleSlidesLinkPreview extends LinkPreviewBase {
+  readonly type: "google.slides";
+  readonly fileId: string;
+  readonly thumbnail?: string | null;
+  readonly links: GoogleWorkspaceLinksBase & {
+    readonly exportPdf?: string;
+  };
+  readonly availability: GoogleWorkspaceAvailability;
+}
+
+export type GoogleWorkspaceLinkPreview =
+  | GoogleDocsLinkPreview
+  | GoogleSheetsLinkPreview
+  | GoogleSlidesLinkPreview;
+
+export interface GenericLinkPreviewResponse extends LinkPreviewBase {
+  readonly type?: string | null;
+}
+
+export type LinkPreviewResponse =
+  | GenericLinkPreviewResponse
+  | GoogleWorkspaceLinkPreview;
 
 const linkPreviewCache = new Map<string, Promise<LinkPreviewResponse>>();
 

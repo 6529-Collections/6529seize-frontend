@@ -13,7 +13,9 @@ jest.mock("next/server", () => ({
 jest.mock("../../../app/api/open-graph/utils", () => {
   return {
     buildResponse: jest.fn(),
+    buildGoogleWorkspaceResponse: jest.fn(),
     ensureUrlIsPublic: jest.fn(),
+    LINK_PREVIEW_USER_AGENT: "test-agent",
     validateUrl: jest.fn((value: string | null) => {
       if (!value) {
         throw new Error("missing url");
@@ -25,6 +27,7 @@ jest.mock("../../../app/api/open-graph/utils", () => {
 
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
+  buildGoogleWorkspaceResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
 };
 
@@ -41,6 +44,7 @@ describe("open-graph API route", () => {
     jest.clearAllMocks();
     global.fetch = originalFetch;
     nextResponseJson.mockClear();
+    utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -162,10 +166,68 @@ describe("open-graph API route", () => {
       "https://cdn.safe.example/page",
       expect.objectContaining({ redirect: "manual" })
     );
+    expect(utils.buildGoogleWorkspaceResponse).toHaveBeenCalledWith(
+      new URL("https://cdn.safe.example/page"),
+      html,
+      new URL("http://safe.example/article")
+    );
     expect(utils.buildResponse).toHaveBeenCalledWith(
-      new URL("http://safe.example/article"),
+      new URL("https://cdn.safe.example/page"),
       html,
       "text/html"
     );
+  });
+
+  it("returns google workspace data when available", async () => {
+    const ensureUrlIsPublic = utils.ensureUrlIsPublic;
+    ensureUrlIsPublic.mockResolvedValue(undefined);
+
+    const html = "<html><head><title>Doc</title></head><body></body></html>";
+    const successResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+    });
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(successResponse) as jest.MockedFunction<typeof fetch>;
+
+    const googlePayload = {
+      type: "google.docs",
+      requestUrl: "http://safe.example/document",
+      url: "https://docs.google.com/document/d/FILE/edit",
+      title: "Doc",
+      description: null,
+      siteName: "Google Docs",
+      mediaType: null,
+      contentType: null,
+      favicon: null,
+      favicons: [],
+      image: null,
+      images: [],
+      thumbnail: "https://drive.google.com/thumbnail?id=FILE&sz=w1000",
+      fileId: "FILE",
+      availability: "public",
+      links: {
+        open: "https://docs.google.com/document/d/FILE/edit",
+        preview: "https://docs.google.com/document/d/FILE/preview",
+        exportPdf: "https://docs.google.com/document/d/FILE/export?format=pdf",
+      },
+    };
+
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(googlePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=http://safe.example/document"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toEqual(googlePayload);
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 });
