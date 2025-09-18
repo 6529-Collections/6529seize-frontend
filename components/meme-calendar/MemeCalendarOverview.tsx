@@ -415,7 +415,8 @@ export function MemeCalendarOverviewUpcomingMints({
         </div>
       </div>
 
-      <div className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto">
+      <div
+        className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 tw-transition-colors tw-duration-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         <table className="tw-w-full tw-text-sm">
           <thead></thead>
           <tbody>
