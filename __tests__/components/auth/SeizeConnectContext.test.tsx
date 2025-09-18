@@ -41,7 +41,6 @@ jest.mock('viem', () => ({
 
 // Mock auth utils
 jest.mock('../../../services/auth/auth.utils', () => ({
-  migrateCookiesToLocalStorage: jest.fn(),
   getWalletAddress: jest.fn(() => null),
   removeAuthJwt: jest.fn(),
 }));
