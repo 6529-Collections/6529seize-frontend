@@ -7,7 +7,9 @@ import OpenGraphPreview, {
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
+import JackButcherPreview from "./JackButcherPreview";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import { isJackButcherCard, type JackButcherCard } from "../../types/jackButcher";
 
 interface LinkPreviewCardProps {
   readonly href: string;
@@ -17,6 +19,7 @@ interface LinkPreviewCardProps {
 type PreviewState =
   | { readonly type: "loading"; readonly data: OpenGraphPreviewData | null }
   | { readonly type: "success"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "jack"; readonly data: JackButcherCard }
   | { readonly type: "fallback" };
 
 const toPreviewData = (
@@ -57,6 +60,11 @@ export default function LinkPreviewCard({
           return;
         }
 
+        if (isJackButcherCard(response)) {
+          setState({ type: "jack", data: response });
+          return;
+        }
+
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
           setState({ type: "success", data: previewData });
@@ -88,6 +96,10 @@ export default function LinkPreviewCard({
         </div>
       </LinkPreviewCardLayout>
     );
+  }
+
+  if (state.type === "jack") {
+    return <JackButcherPreview href={href} data={state.data} />;
   }
 
   const preview = state.type === "success" ? state.data : undefined;

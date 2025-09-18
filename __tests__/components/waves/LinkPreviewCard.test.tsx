@@ -7,6 +7,10 @@ const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
   <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
 ));
 
+const mockJackButcherPreview = jest.fn(({ data, href }: any) => (
+  <div data-testid="jack" data-href={href} data-type={data?.type ?? "unknown"} />
+));
+
 jest.mock("../../../components/waves/OpenGraphPreview", () => {
   const actual = jest.requireActual("../../../components/waves/OpenGraphPreview");
   return {
@@ -15,6 +19,11 @@ jest.mock("../../../components/waves/OpenGraphPreview", () => {
     default: (props: any) => mockOpenGraphPreview(props),
   };
 });
+
+jest.mock("../../../components/waves/JackButcherPreview", () => ({
+  __esModule: true,
+  default: (props: any) => mockJackButcherPreview(props),
+}));
 
 jest.mock("../../../services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
@@ -58,6 +67,34 @@ describe("LinkPreviewCard", () => {
     );
 
     expect(fetchLinkPreview).toHaveBeenCalledWith("https://example.com/article");
+    expect(screen.queryByTestId("fallback")).toBeNull();
+  });
+
+  it("renders Jack Butcher preview when specialized payload is returned", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "jack.checks",
+      chainId: 1,
+      collection: { address: "0x123", name: "Checks" },
+      token: { id: "1" },
+      links: {},
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://checks.art/checks/1"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockJackButcherPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          href: "https://checks.art/checks/1",
+          data: expect.objectContaining({ type: "jack.checks" }),
+        })
+      )
+    );
+
     expect(screen.queryByTestId("fallback")).toBeNull();
   });
 
