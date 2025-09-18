@@ -1,30 +1,27 @@
 "use client";
 
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis";
 import { MEMES_CONTRACT, MEMES_MANIFOLD_PROXY_CONTRACT } from "../../constants";
+import useCapacitor from "../../hooks/useCapacitor";
 import {
-  useManifoldClaim,
-  ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
+  useManifoldClaim,
 } from "../../hooks/useManifoldClaim";
-import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 import MintCountdownBox, {
   MemePageMintBtn,
 } from "../mintCountdownBox/MintCountdownBox";
 import styles from "../mintCountdownBox/MintCountdownBox.module.scss";
-import { useEffect } from "react";
-import useCapacitor from "../../hooks/useCapacitor";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { Tooltip } from "react-tooltip";
 
 export default function MemePageMintCountdown(
   props: Readonly<{
     nft_id: number;
     hide_mint_btn: boolean;
-    setClaim?: (claim: ManifoldClaim) => void;
     is_full_width: boolean;
     show_only_if_active: boolean;
   }>
@@ -39,14 +36,11 @@ export default function MemePageMintCountdown(
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
 
-  useEffect(() => {
-    if (props.setClaim && manifoldClaim) {
-      props.setClaim(manifoldClaim);
-    }
-  }, [manifoldClaim, props.setClaim]);
-
   // Return null if show_only_if_active is true and status isn't active
-  if (props.show_only_if_active && manifoldClaim?.status !== ManifoldClaimStatus.ACTIVE) {
+  if (
+    props.show_only_if_active &&
+    manifoldClaim?.status !== ManifoldClaimStatus.ACTIVE
+  ) {
     return null;
   }
 
@@ -56,11 +50,17 @@ export default function MemePageMintCountdown(
       <Container className="no-padding pb-3">
         <Row>
           <Col>
-            <div className={`${styles.countdownContainer} ${styles.loadingState}`}>
+            <div
+              className={`${styles.countdownContainer} ${styles.loadingState}`}>
               <Row>
-                <Col sm={12} md={props.is_full_width ? 12 : 6} className="pt-2 pb-2">
-                  <div className={`${styles.skeletonText} ${styles.skeletonTitle}`}></div>
-                  <div className={`${styles.skeletonText} ${styles.skeletonCountdown}`}></div>
+                <Col
+                  sm={12}
+                  md={props.is_full_width ? 12 : 6}
+                  className="pt-2 pb-2">
+                  <div
+                    className={`${styles.skeletonText} ${styles.skeletonTitle}`}></div>
+                  <div
+                    className={`${styles.skeletonText} ${styles.skeletonCountdown}`}></div>
                 </Col>
                 {!props.hide_mint_btn && (
                   <Col
@@ -139,7 +139,7 @@ export default function MemePageMintCountdown(
   };
 
   const showAllowlistInfo = manifoldClaim.phase === ManifoldPhase.ALLOWLIST;
-  
+
   return (
     <Container className="no-padding pb-3">
       <Row>
@@ -158,11 +158,11 @@ export default function MemePageMintCountdown(
                     fontSize: "18px",
                     cursor: "help",
                     color: "#6c757d",
-                    zIndex: 10
+                    zIndex: 10,
                   }}
                 />
-                <Tooltip 
-                  id="allowlist-info" 
+                <Tooltip
+                  id="allowlist-info"
                   place="left"
                   opacity={1}
                   style={{
@@ -174,7 +174,7 @@ export default function MemePageMintCountdown(
                     lineHeight: "1.4",
                     border: "1px solid rgba(255, 255, 255, 0.15)",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
-                    borderRadius: "6px"
+                    borderRadius: "6px",
                   }}
                 />
               </>
