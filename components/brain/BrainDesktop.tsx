@@ -126,8 +126,6 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
       {showRightSidebar && !isDropOpen && waveId && (
         <BrainRightSidebar
           key="right-sidebar"
-          isCollapsed={isCollapsed}
-          setIsCollapsed={setIsCollapsed}
           waveId={waveId}
           onDropClick={onDropClick}
           activeTab={sidebarTab}

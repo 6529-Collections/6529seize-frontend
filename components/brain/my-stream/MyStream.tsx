@@ -7,6 +7,8 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import { useSetStreamHasNewItems } from "../../../contexts/TitleContext";
 import { useMemo } from "react";
+import SpinnerLoader from "../../common/SpinnerLoader";
+import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamProps {
   readonly onReply: (param: DropInteractionParams) => void;
@@ -33,6 +35,7 @@ export default function MyStream({
   status,
   isInitialQueryDone,
 }: MyStreamProps) {
+  const { myStreamFeedStyle } = useLayout();
   // Compute whether stream has new items
   const hasNewItems = useMemo(() => 
     status !== "pending" && isInitialQueryDone && haveNewItems,
@@ -41,18 +44,29 @@ export default function MyStream({
   
   // Update stream new items status in title context
   useSetStreamHasNewItems(hasNewItems);
+  const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
+
   return (
     <div className="tw-h-full">
-      <FeedWrapper
-        items={items}
-        loading={isFetching}
-        showWaveInfo={true}
-        activeDrop={activeDrop}
-        onBottomIntersection={onBottomIntersection}
-        onReply={onReply}
-        onQuote={onQuote}
-        onDropContentClick={onDropContentClick}
-      />
+      {showLoader ? (
+        <div
+          className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl"
+          style={myStreamFeedStyle}
+        >
+          <SpinnerLoader text="Loading My Feed..." />
+        </div>
+      ) : (
+        <FeedWrapper
+          items={items}
+          loading={isFetching}
+          showWaveInfo={true}
+          activeDrop={activeDrop}
+          onBottomIntersection={onBottomIntersection}
+          onReply={onReply}
+          onQuote={onQuote}
+          onDropContentClick={onDropContentClick}
+        />
+      )}
     </div>
   );
 }

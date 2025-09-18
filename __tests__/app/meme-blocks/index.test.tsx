@@ -4,9 +4,6 @@ import userEvent from "@testing-library/user-event";
 import BlockPicker from "@/app/meme-blocks/page";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 
-jest.mock("next/font/google", () => ({
-  Poppins: () => ({ className: "font" }),
-}));
 jest.mock("@/services/distribution-plan-api", () => ({
   distributionPlanApiPost: jest.fn(),
 }));
