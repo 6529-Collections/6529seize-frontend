@@ -17,6 +17,11 @@ import { parseYoutubeLink } from "./youtube";
 import YoutubePreview from "./youtubePreview";
 import type { PepeLinkResult } from "./pepe";
 import { isPepeHost, parsePepeLink, renderPepeLink } from "./pepe";
+import {
+  isWikimediaHost,
+  parseWikimediaLink,
+  renderWikimediaLink,
+} from "./wikimedia";
 
 type DropPartMarkdownImageComponent = typeof import("../DropPartMarkdownImage").default;
 type WaveDropQuoteWithSerialNoComponent = typeof import("../../../../waves/drops/WaveDropQuoteWithSerialNo").default;
@@ -240,7 +245,8 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       hostname === "youtu.be" ||
       youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
       twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
-      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+      isWikimediaHost(hostname)
     ) {
       return false;
     }
@@ -349,6 +355,12 @@ const createSmartLinkHandlers = (
   handlers.push({
     parse: parsePepeLink,
     render: (result: PepeLinkResult) => renderPepeLink(result),
+  });
+
+  handlers.push({
+    parse: parseWikimediaLink,
+    render: (result: { href: string }, href: string) =>
+      renderWikimediaLink(result, href),
   });
 
 
