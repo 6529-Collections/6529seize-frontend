@@ -1,26 +1,39 @@
 "use client";
 
-import styles from "./UserPageSubscriptions.module.scss";
-import { useEffect, useState } from "react";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { parseEther } from "viem";
-import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
-import { formatAddress, getTransactionLink } from "../../../helpers/Helpers";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import {
+  displayedEonNumberFromIndex,
+  displayedEpochNumberFromIndex,
+  displayedEraNumberFromIndex,
+  displayedPeriodNumberFromIndex,
+  displayedSeasonNumberFromIndex,
+  displayedYearNumberFromIndex,
+  getCardsRemainingUntilEndOf,
+  getSeasonIndexForDate,
+  nextMintDateOnOrAfter,
+} from "@/components/meme-calendar/meme-calendar.helpers";
+import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import {
   MEMES_MINT_PRICE,
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_ADDRESS_ENS,
   SUBSCRIPTIONS_CHAIN,
-} from "../../../constants";
-import { Tooltip } from "react-tooltip";
-import DotLoader from "../../dotLoader/DotLoader";
+} from "@/constants";
 import {
-  numberOfCardsForCalendarEnd,
-  numberOfCardsForSeasonEnd,
-} from "../../../helpers/meme_calendar.helpers";
-import { useCookieConsent } from "../../cookies/CookieConsentContext";
-import useCapacitor from "../../../hooks/useCapacitor";
+  formatAddress,
+  getTransactionLink,
+  numberWithCommasFromString,
+} from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { parseEther } from "viem";
+import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
+import styles from "./UserPageSubscriptions.module.scss";
 
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
@@ -28,8 +41,23 @@ export default function UserPageSubscriptionsTopUp() {
   const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();
 
-  const remainingMintsForSeason = numberOfCardsForSeasonEnd();
-  const remainingMintsForYear = numberOfCardsForCalendarEnd();
+  const nextMintDate = nextMintDateOnOrAfter();
+  const idx = getSeasonIndexForDate(nextMintDate);
+  const szn = displayedSeasonNumberFromIndex(idx);
+  const year = displayedYearNumberFromIndex(idx);
+  const epoch = displayedEpochNumberFromIndex(idx);
+  const period = displayedPeriodNumberFromIndex(idx);
+  const era = displayedEraNumberFromIndex(idx);
+  const eon = displayedEonNumberFromIndex(idx);
+
+  const { isConnected } = useSeizeConnectContext();
+
+  const remainingMintsForSeason = getCardsRemainingUntilEndOf("szn");
+  const remainingMintsForYear = getCardsRemainingUntilEndOf("year");
+  const remainingMintsForEpoch = getCardsRemainingUntilEndOf("epoch");
+  const remainingMintsForPeriod = getCardsRemainingUntilEndOf("period");
+  const remainingMintsForEra = getCardsRemainingUntilEndOf("era");
+  const remainingMintsForEon = getCardsRemainingUntilEndOf("eon");
 
   const waitSendTransaction = useWaitForTransactionReceipt({
     chainId: SUBSCRIPTIONS_CHAIN.id,
@@ -38,11 +66,16 @@ export default function UserPageSubscriptionsTopUp() {
   });
 
   const [error, setError] = useState<string>("");
+  const [showDeep, setShowDeep] = useState(false);
 
   function submit(value: number) {
     setError("");
     if (isNaN(value)) {
       setError("Select card count");
+      return;
+    }
+    if (!isConnected) {
+      setError("You must have an active wallet connection to top up");
       return;
     }
     sendTransaction.reset();
@@ -116,6 +149,28 @@ export default function UserPageSubscriptionsTopUp() {
     </Row>
   );
 
+  const printRemainingMints = (count: number, label: string, value: number) => {
+    if (count > 0) {
+      return (
+        <Row className="pt-3">
+          <Col>
+            <CardCountTopup
+              count={count}
+              display={`Remaining ${label} ${value.toLocaleString()}`}
+              disabled={
+                sendTransaction.isPending || waitSendTransaction.isLoading
+              }
+              submit={(value: number) => {
+                submit(value);
+              }}
+            />
+          </Col>
+        </Row>
+      );
+    }
+    return null;
+  };
+
   const topUpContent = (
     <>
       <Row className="pt-2">
@@ -131,51 +186,9 @@ export default function UserPageSubscriptionsTopUp() {
           />
         </Col>
       </Row>
-      <Row className="pt-3">
-        <Col>
-          <CardCountTopup
-            count={10}
-            disabled={
-              sendTransaction.isPending || waitSendTransaction.isLoading
-            }
-            submit={(value: number) => {
-              submit(value);
-            }}
-          />
-        </Col>
-      </Row>
-      {remainingMintsForSeason.count > 0 && (
-        <Row className="pt-3">
-          <Col>
-            <CardCountTopup
-              count={remainingMintsForSeason.count ?? 0}
-              display={`Remaining SZN${remainingMintsForSeason.szn}`}
-              disabled={
-                sendTransaction.isPending || waitSendTransaction.isLoading
-              }
-              submit={(value: number) => {
-                submit(value);
-              }}
-            />
-          </Col>
-        </Row>
-      )}
-      {remainingMintsForYear.count > 0 && (
-        <Row className="pt-3">
-          <Col>
-            <CardCountTopup
-              count={remainingMintsForYear.count ?? 0}
-              display={`Remaining ${remainingMintsForYear.year}`}
-              disabled={
-                sendTransaction.isPending || waitSendTransaction.isLoading
-              }
-              submit={(value: number) => {
-                submit(value);
-              }}
-            />
-          </Col>
-        </Row>
-      )}
+      {printRemainingMints(remainingMintsForSeason, "SZN", szn)}
+      {printRemainingMints(remainingMintsForYear, "Year", year)}
+      {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch)}
       <Row className="pt-3">
         <Col>
           <Form
@@ -188,7 +201,7 @@ export default function UserPageSubscriptionsTopUp() {
                 submit(count * MEMES_MINT_PRICE);
               }
             }}>
-            <Form.Group className="mb-3">
+            <Form.Group>
               <Row className="d-flex align-items-center">
                 <Col xs={9} sm={8} className="d-flex align-items-center gap-2">
                   <span>Other</span>
@@ -232,8 +245,30 @@ export default function UserPageSubscriptionsTopUp() {
           </Form>
         </Col>
       </Row>
+      {showDeep && (
+        <>
+          {printRemainingMints(remainingMintsForPeriod, "Period", period)}
+          {printRemainingMints(remainingMintsForEra, "Era", era)}
+          {printRemainingMints(remainingMintsForEon, "Eon", eon)}
+        </>
+      )}
+      <Row className="pt-3 pb-4">
+        <Col>
+          <ShowMoreButton
+            expanded={showDeep}
+            setExpanded={setShowDeep}
+            showMoreLabel="Show Deep Time Subscriptions"
+            showLessLabel="Hide Deep Time Subscriptions"
+          />
+        </Col>
+      </Row>
       <Row>
-        <Col className="d-flex align-items-center gap-2">{getMessage()}</Col>
+        <Col
+          className={`d-flex align-items-center gap-2 tw-font-medium ${
+            error ? "tw-text-red" : ""
+          }`}>
+          {getMessage()}
+        </Col>
       </Row>
       {waitSendTransaction.isLoading && (
         <Row>
@@ -249,7 +284,7 @@ export default function UserPageSubscriptionsTopUp() {
     <Container className="no-padding">
       <Row className="pb-2">
         <Col className="d-flex align-items-end gap-2 no-wrap">
-          <h5 className="mb-0">Top Up</h5>
+          <h4 className="mb-0">Top Up</h4>
           <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
             Sending to{" "}
             <>
@@ -263,8 +298,7 @@ export default function UserPageSubscriptionsTopUp() {
                   backgroundColor: "#1F2937",
                   color: "white",
                   padding: "4px 8px",
-                }}
-              >
+                }}>
                 <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
               </Tooltip>
             </>
@@ -294,8 +328,8 @@ function CardCountTopup(
         <Row className="d-flex align-items-center no-wrap">
           <Col xs={9} sm={8} className="d-flex">
             {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
-            {props.count} Card{props.count > 1 && "s"} (
-            {MEMES_MINT_PRICE * props.count} ETH)
+            {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
+            {numberWithCommasFromString(MEMES_MINT_PRICE * props.count)} ETH)
           </Col>
           <Col xs={3} sm={4}>
             <Button

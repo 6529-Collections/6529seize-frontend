@@ -16,9 +16,13 @@ import MintingApproachSection from "./MintingApproachSection";
 
 interface Props {
   readonly featuredNft: NFTWithMemesExtendedData;
+  readonly isMemeMintingActive: boolean;
 }
 
-export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
+export default function FeaturedNFTDetailsColumn({
+  featuredNft,
+  isMemeMintingActive,
+}: Props) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
@@ -62,17 +66,19 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
             />
           </Col>
         </Row>
-        <Row>
-          <Col>
-            <MemePageMintCountdown
-              nft_id={featuredNft.id}
-              setClaim={setManifoldClaim}
-              is_full_width={true}
-              hide_mint_btn={false}
-              show_only_if_active={false}
-            />
-          </Col>
-        </Row>
+        {isMemeMintingActive && (
+          <Row>
+            <Col>
+              <MemePageMintCountdown
+                nft_id={featuredNft.id}
+                setClaim={setManifoldClaim}
+                is_full_width={true}
+                hide_mint_btn={false}
+                show_only_if_active={false}
+              />
+            </Col>
+          </Row>
+        )}
         <MintingApproachSection nftId={featuredNft.id} />
         <ManifoldClaimTable
           statusDisplay={manifoldClaimstatusDisplay}

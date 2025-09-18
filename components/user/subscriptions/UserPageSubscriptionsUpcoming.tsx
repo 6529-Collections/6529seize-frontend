@@ -1,33 +1,29 @@
 "use client";
 
-import styles from "./UserPageSubscriptions.module.scss";
-import { useContext, useEffect, useState } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
+import { Spinner } from "@/components/dotLoader/DotLoader";
+import {
+  formatFullDate,
+  getUpcomingMintsForCurrentOrNextSeason,
+  isMintingToday,
+  SeasonMintRow,
+  SeasonMintScanResult,
+} from "@/components/meme-calendar/meme-calendar.helpers";
+import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import {
   NFTFinalSubscription,
   NFTSubscription,
   SubscriptionDetails,
-} from "../../../entities/ISubscription";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../services/api/common-api";
-import { Spinner } from "../../dotLoader/DotLoader";
-import Toggle from "react-toggle";
+} from "@/entities/ISubscription";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import {
-  getMintingDates,
-  isMintingToday,
-} from "../../../helpers/meme_calendar.helpers";
 import { useQuery } from "@tanstack/react-query";
-import { Time } from "../../../helpers/time";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-  faInfoCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import Toggle from "react-toggle";
+import { Tooltip } from "react-tooltip";
+import styles from "./UserPageSubscriptions.module.scss";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
@@ -51,7 +47,11 @@ export default function UserPageSubscriptionsUpcoming(
     }
   }, [props.memes_subscriptions, expanded]);
 
-  const dates = getMintingDates(subscriptions.length);
+  const [now] = useState(new Date());
+  const { rows } = useMemo<SeasonMintScanResult>(
+    () => getUpcomingMintsForCurrentOrNextSeason(now),
+    [now]
+  );
 
   return (
     <Container className="no-padding">
@@ -75,16 +75,16 @@ export default function UserPageSubscriptionsUpcoming(
                       refresh={props.refresh}
                       minting_today={index === 0 && isMintingToday()}
                       first={index === 0}
-                      date={dates[index]}
+                      date={rows[index]}
                     />
                   </td>
                 </tr>
               ))}
-              {props.memes_subscriptions.length > 0 && (
+              {props.memes_subscriptions.length > 3 && (
                 <tr>
                   <td>
                     <div className="d-flex align-items-center justify-content-center gap-1">
-                      <SubscriptionExpandButton
+                      <ShowMoreButton
                         expanded={expanded}
                         setExpanded={setExpanded}
                       />
@@ -100,30 +100,6 @@ export default function UserPageSubscriptionsUpcoming(
   );
 }
 
-function SubscriptionExpandButton(
-  props: Readonly<{
-    expanded: boolean;
-    setExpanded: (expanded: boolean) => void;
-  }>
-) {
-  return (
-    <button
-      className="btn-link decoration-none"
-      onClick={() => props.setExpanded(!props.expanded)}>
-      {props.expanded ? (
-        <>
-          Show Less <FontAwesomeIcon icon={faChevronCircleUp} height={"20px"} />
-        </>
-      ) : (
-        <>
-          Show More{" "}
-          <FontAwesomeIcon icon={faChevronCircleDown} height={"20px"} />
-        </>
-      )}
-    </button>
-  );
-}
-
 function SubscriptionRow(
   props: Readonly<{
     profileKey: string;
@@ -132,7 +108,7 @@ function SubscriptionRow(
     readonly: boolean;
     minting_today?: boolean;
     first: boolean;
-    date: Time;
+    date: SeasonMintRow;
     refresh: () => void;
   }>
 ) {
@@ -217,7 +193,8 @@ function SubscriptionRow(
             {props.title} #{props.subscription.token_id}{" "}
             {props.minting_today ? (
               <>
-                <span data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
+                <span
+                  data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
                   - Minting Today{" "}
                   <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
                 </span>
@@ -228,14 +205,13 @@ function SubscriptionRow(
                     backgroundColor: "#f8f9fa",
                     color: "#212529",
                     padding: "4px 8px",
-                  }}
-                >
+                  }}>
                   No changes allowed on minting day
                 </Tooltip>
               </>
             ) : (
               <span className="font-color-silver">
-                {props.date.toIsoDateString()} / {props.date.toDayName()}
+                {formatFullDate(props.date.utcDay)}
               </span>
             )}
           </span>

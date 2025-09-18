@@ -73,7 +73,7 @@ function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
   const eonNumber = displayedEonNumberFromIndex(seasonIndex).toLocaleString();
 
   switch (zoom) {
-    case "season":
+    case "szn":
       return `SZN #${seasonNumber}`;
     case "year":
       return `Year #${yearNumber}`;
@@ -824,7 +824,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
       return 0;
     }
   });
-  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>("season");
+  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>("szn");
   const [jumpValue, setJumpValue] = useState<string>("");
   const [jumpMint, setJumpMint] = useState<string>("");
   const [autoOpenYmd, setAutoOpenYmd] = useState<string | null>(null);
@@ -848,7 +848,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
 
   const renderView = () => {
     switch (zoomLevel) {
-      case "season":
+      case "szn":
         return (
           <SeasonView
             seasonIndex={seasonIndex}
@@ -861,7 +861,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           <YearView
             seasonIndex={seasonIndex}
             onSelectSeason={setSeasonIndex}
-            onZoomToSeason={() => setZoomLevel("season")}
+            onZoomToSeason={() => setZoomLevel("szn")}
           />
         );
       case "epoch":
@@ -934,7 +934,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
     const now = new Date();
     const idx = getSeasonIndexForDate(now);
     setSeasonIndex(clampIndex(idx));
-    setZoomLevel("season");
+    setZoomLevel("szn");
   };
 
   const jumpToMintNumber = () => {
@@ -945,7 +945,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
     const d = dateFromMintNumber(n);
     const idx = getSeasonIndexForDate(d);
     setSeasonIndex(clampIndex(idx));
-    setZoomLevel("season");
+    setZoomLevel("szn");
     setAutoOpenYmd(ymd(d));
     setTimeout(() => setAutoOpenYmd(null), 1200);
   };
@@ -963,7 +963,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
     const d = new Date(y, m - 1, 1);
     const idx = getSeasonIndexForDate(d);
     setSeasonIndex(clampIndex(idx));
-    setZoomLevel("season");
+    setZoomLevel("szn");
   };
 
   const handleMintJumpSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -982,7 +982,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
       <div className="tw-mb-8 tw-grid tw-grid-cols-3 lg:tw-grid-cols-[repeat(6,minmax(0,1fr))_auto] tw-gap-2">
         {(
           [
-            ["season", `SZN ${seasonNumber.toLocaleString()}`],
+            ["szn", `SZN ${seasonNumber.toLocaleString()}`],
             ["year", `Year ${yearNumber.toLocaleString()}`],
             ["epoch", `Epoch ${epochNumber.toLocaleString()}`],
             ["period", `Period ${periodNumber.toLocaleString()}`],
@@ -1096,7 +1096,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                 return;
               }
               switch (zoomLevel) {
-                case "season":
+                case "szn":
                   delta = -1;
                   break;
                 case "year":
@@ -1157,7 +1157,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                 return;
               }
               switch (zoomLevel) {
-                case "season":
+                case "szn":
                   delta = 1;
                   break;
                 case "year":

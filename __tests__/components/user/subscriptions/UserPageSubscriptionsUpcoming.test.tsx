@@ -9,13 +9,40 @@ jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
 }));
 
-jest.mock('../../../../helpers/meme_calendar.helpers', () => ({
-  getMintingDates: jest.fn((count) => 
-    Array.from({ length: count }, (_, i) => ({
-      toIsoDateString: () => `2024-01-${(i + 1).toString().padStart(2, '0')}`,
-      toDayName: () => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'][i] || 'Friday'
-    }))
-  ),
+const mockUpcomingRows = [
+  {
+    utcDay: new Date('2024-01-01T00:00:00Z'),
+    instantUtc: new Date('2024-01-01T15:40:00Z'),
+    meme: 201,
+  },
+  {
+    utcDay: new Date('2024-01-02T00:00:00Z'),
+    instantUtc: new Date('2024-01-02T15:40:00Z'),
+    meme: 202,
+  },
+  {
+    utcDay: new Date('2024-01-03T00:00:00Z'),
+    instantUtc: new Date('2024-01-03T15:40:00Z'),
+    meme: 203,
+  },
+  {
+    utcDay: new Date('2024-01-04T00:00:00Z'),
+    instantUtc: new Date('2024-01-04T15:40:00Z'),
+    meme: 204,
+  },
+];
+
+jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+  __esModule: true,
+  formatFullDate: jest.fn((date: Date) => {
+    const iso = date.toISOString().split('T')[0];
+    const day = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      timeZone: 'UTC',
+    });
+    return `${iso} / ${day}`;
+  }),
+  getUpcomingMintsForCurrentOrNextSeason: jest.fn(() => ({ rows: mockUpcomingRows })),
   isMintingToday: jest.fn(() => false),
 }));
 
@@ -171,7 +198,7 @@ describe('UserPageSubscriptionsUpcoming', () => {
   });
 
   it('shows minting today message when applicable', () => {
-    const { isMintingToday } = require('../../../../helpers/meme_calendar.helpers');
+    const { isMintingToday } = require('../../../../components/meme-calendar/meme-calendar.helpers');
     isMintingToday.mockReturnValue(true);
     
     renderComponent();

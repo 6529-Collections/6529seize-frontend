@@ -21,9 +21,21 @@ jest.mock('wagmi', () => ({
   useWaitForTransactionReceipt: () => waitSendTransaction,
 }));
 
-jest.mock('../../../../helpers/meme_calendar.helpers', () => ({
-  numberOfCardsForCalendarEnd: () => ({ count: 0, year: 2024 }),
-  numberOfCardsForSeasonEnd: () => ({ count: 0, szn: 1 }),
+jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+  __esModule: true,
+  displayedEonNumberFromIndex: jest.fn(() => 1),
+  displayedEpochNumberFromIndex: jest.fn(() => 1),
+  displayedEraNumberFromIndex: jest.fn(() => 1),
+  displayedPeriodNumberFromIndex: jest.fn(() => 1),
+  displayedSeasonNumberFromIndex: jest.fn(() => 1),
+  displayedYearNumberFromIndex: jest.fn(() => 2024),
+  getCardsRemainingUntilEndOf: jest.fn(() => 0),
+  getSeasonIndexForDate: jest.fn(() => 0),
+  nextMintDateOnOrAfter: jest.fn(() => new Date('2024-01-01T00:00:00Z')),
+}));
+
+jest.mock('../../../../components/auth/SeizeConnectContext', () => ({
+  useSeizeConnectContext: jest.fn(() => ({ isConnected: true })),
 }));
 
 jest.mock('../../../../components/dotLoader/DotLoader', () => () => <span data-testid="loader" />);
