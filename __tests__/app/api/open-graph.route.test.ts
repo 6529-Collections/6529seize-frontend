@@ -10,25 +10,37 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-jest.mock("../../../app/api/open-graph/utils", () => {
+jest.mock("../../../app/api/open-graph/utils", () => ({
+  buildResponse: jest.fn(),
+}));
+
+jest.mock("@/lib/security/urlGuard", () => {
+  const actual = jest.requireActual("@/lib/security/urlGuard");
   return {
-    buildResponse: jest.fn(),
-    ensureUrlIsPublic: jest.fn(),
-    validateUrl: jest.fn((value: string | null) => {
+    ...actual,
+    parsePublicUrl: jest.fn((value: string | null) => {
       if (!value) {
-        throw new Error("missing url");
+        throw new actual.UrlGuardError("missing url", "missing-url");
       }
       return new URL(value);
     }),
+    assertPublicUrl: jest.fn(),
+    fetchPublicUrl: jest.fn(),
   };
 });
 
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
-  ensureUrlIsPublic: jest.Mock;
 };
 
-const originalFetch = global.fetch;
+const guard = jest.requireMock("@/lib/security/urlGuard") as {
+  parsePublicUrl: jest.Mock;
+  assertPublicUrl: jest.Mock;
+  fetchPublicUrl: jest.Mock;
+};
+
+const { UrlGuardError } = jest.requireActual("@/lib/security/urlGuard");
+
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
 let GET: GetHandler;
 
@@ -39,17 +51,13 @@ beforeAll(async () => {
 describe("open-graph API route", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = originalFetch;
     nextResponseJson.mockClear();
-  });
-
-  afterEach(() => {
-    global.fetch = originalFetch;
+    guard.assertPublicUrl.mockResolvedValue(undefined);
   });
 
   const createResponse = (
     status: number,
-    options: { headers?: Record<string, string>; body?: string } = {}
+    options: { headers?: Record<string, string>; body?: string; url?: string } = {}
   ) => {
     const headerEntries = Object.entries(options.headers ?? {}).reduce(
       (map, [key, value]) => map.set(key.toLowerCase(), value),
@@ -63,68 +71,28 @@ describe("open-graph API route", () => {
         get: (name: string) => headerEntries.get(name.toLowerCase()) ?? null,
       },
       text: async () => options.body ?? "",
+      url: options.url ?? "https://example.com/final",
     };
   };
 
-  it("rejects redirects to private targets before following them", async () => {
-    const ensureUrlIsPublic = utils.ensureUrlIsPublic;
-    ensureUrlIsPublic.mockImplementation(async (url: URL) => {
-      if (url.hostname === "safe.example") {
-        return;
-      }
-      if (url.hostname === "169.254.0.1") {
-        throw new Error("URL host is not allowed.");
-      }
-      throw new Error(`unexpected host: ${url.hostname}`);
+  it("returns 400 when the URL is missing", async () => {
+    guard.parsePublicUrl.mockImplementation(() => {
+      throw new UrlGuardError("missing", "missing-url", 400);
     });
-
-    const redirectResponse = createResponse(302, {
-      headers: { location: "http://169.254.0.1/internal" },
-    });
-
-    global.fetch = jest.fn().mockResolvedValueOnce(redirectResponse) as jest.MockedFunction<
-      typeof fetch
-    >;
 
     const request = {
-      nextUrl: new URL(
-        "https://app.local/api/open-graph?url=http://safe.example/article"
-      ),
+      nextUrl: new URL("https://app.local/api/open-graph"),
     } as any;
 
     const response = await GET(request);
 
-    expect(response.status).toBe(502);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(utils.buildResponse).not.toHaveBeenCalled();
+    expect(response.status).toBe(400);
+    expect(nextResponseJson).toHaveBeenCalledWith({ error: "missing" }, { status: 400 });
   });
 
-  it("follows safe redirects after validating each hop", async () => {
-    const ensureUrlIsPublic = utils.ensureUrlIsPublic;
-    ensureUrlIsPublic.mockImplementation(async (url: URL) => {
-      if (["safe.example", "cdn.safe.example"].includes(url.hostname)) {
-        return;
-      }
-      throw new Error(`unexpected host: ${url.hostname}`);
-    });
-
+  it("returns preview data and caches successive requests", async () => {
     const html = "<html><head><title>ok</title></head><body></body></html>";
-    const redirectResponse = createResponse(302, {
-      headers: { location: "https://cdn.safe.example/page" },
-    });
-    const successResponse = createResponse(200, {
-      headers: { "content-type": "text/html" },
-      body: html,
-    });
-
-    const fetchMock = jest
-      .fn()
-      .mockResolvedValueOnce(redirectResponse)
-      .mockResolvedValueOnce(successResponse) as jest.MockedFunction<typeof fetch>;
-
-    global.fetch = fetchMock;
-
-    const previewPayload = {
+    const responsePayload = {
       requestUrl: "http://safe.example/article",
       url: "https://cdn.safe.example/page",
       title: "ok",
@@ -138,7 +106,43 @@ describe("open-graph API route", () => {
       images: [],
     };
 
-    utils.buildResponse.mockReturnValue(previewPayload);
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://cdn.safe.example/page",
+    });
+
+    guard.fetchPublicUrl.mockResolvedValueOnce(fetchResponse);
+    utils.buildResponse.mockReturnValue(responsePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=http://safe.example/article"
+      ),
+    } as any;
+
+    const first = await GET(request);
+    const second = await GET(request);
+
+    console.log(nextResponseJson.mock.calls);
+
+    expect(first.status).toBe(200);
+    expect(await first.json()).toEqual(responsePayload);
+    expect(second.status).toBe(200);
+    expect(await second.json()).toEqual(responsePayload);
+    expect(guard.fetchPublicUrl).toHaveBeenCalledTimes(1);
+    expect(guard.assertPublicUrl).toHaveBeenCalledTimes(3);
+    expect(utils.buildResponse).toHaveBeenCalledWith(
+      new URL("http://safe.example/article"),
+      html,
+      "text/html"
+    );
+  });
+
+  it("returns upstream error responses", async () => {
+    guard.fetchPublicUrl.mockImplementation(() => {
+      throw new UrlGuardError("timeout", "timeout", 504);
+    });
 
     const request = {
       nextUrl: new URL(
@@ -148,24 +152,7 @@ describe("open-graph API route", () => {
 
     const response = await GET(request);
 
-    expect(response.status).toBe(200);
-    const body = await response.json();
-    expect(body).toEqual(previewPayload);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
-      "http://safe.example/article",
-      expect.objectContaining({ redirect: "manual" })
-    );
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      "https://cdn.safe.example/page",
-      expect.objectContaining({ redirect: "manual" })
-    );
-    expect(utils.buildResponse).toHaveBeenCalledWith(
-      new URL("http://safe.example/article"),
-      html,
-      "text/html"
-    );
+    expect(response.status).toBe(504);
+    expect(nextResponseJson).toHaveBeenCalledWith({ error: "timeout" }, { status: 504 });
   });
 });

@@ -2,7 +2,8 @@ jest.mock("node:dns/promises", () => ({
   lookup: jest.fn(),
 }));
 
-import { buildResponse, ensureUrlIsPublic } from "../../../app/api/open-graph/utils";
+import { buildResponse } from "../../../app/api/open-graph/utils";
+import { assertPublicUrl } from "@/lib/security/urlGuard";
 
 const { lookup } = require("node:dns/promises") as {
   lookup: jest.Mock;
@@ -69,7 +70,7 @@ describe("open-graph route helpers", () => {
 
   it("rejects localhost URLs", async () => {
     await expect(
-      ensureUrlIsPublic(new URL("http://localhost/resource"))
+      assertPublicUrl(new URL("http://localhost/resource"))
     ).rejects.toThrow("URL host is not allowed.");
   });
 
@@ -77,13 +78,13 @@ describe("open-graph route helpers", () => {
     lookup.mockResolvedValueOnce([{ address: "127.0.0.1", family: 4 }]);
 
     await expect(
-      ensureUrlIsPublic(new URL("http://example.internal"))
+      assertPublicUrl(new URL("http://example.internal"))
     ).rejects.toThrow("Resolved host is not reachable.");
   });
 
   it("rejects hex-encoded IPv4 hosts", async () => {
     await expect(
-      ensureUrlIsPublic(new URL("http://0x7f000001"))
+      assertPublicUrl(new URL("http://0x7f000001"))
     ).rejects.toThrow("URL host is not allowed.");
   });
 
@@ -91,7 +92,7 @@ describe("open-graph route helpers", () => {
     lookup.mockResolvedValueOnce([{ address: "93.184.216.34", family: 4 }]);
 
     await expect(
-      ensureUrlIsPublic(new URL("http://example.com"))
+      assertPublicUrl(new URL("http://example.com"))
     ).resolves.toBeUndefined();
   });
 });

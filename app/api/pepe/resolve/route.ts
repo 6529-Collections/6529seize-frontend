@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
 
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { UrlGuardError, fetchPublicJson, fetchPublicUrl } from "@/lib/security/urlGuard";
 
 const TOKENSCAN_BASE = "https://tokenscan.io/api";
 
@@ -110,68 +111,57 @@ function isCounterpartyAssetCode(value: string): boolean {
   return /^[A-Z0-9]{3,}$/.test(upper) || /^A[0-9]{6,}$/.test(upper);
 }
 
-type FetchOptions = RequestInit & { timeoutMs?: number };
-
 type ScrapeNextDataResult = {
   nextData: any | null;
   metaImages: string[];
 };
 
-async function fetchWithTimeout(
-  url: string,
-  options: FetchOptions = {}
-): Promise<Response | null> {
-  const { timeoutMs = 4000, ...rest } = options;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      ...rest,
-      signal: controller.signal,
-      headers: {
-        "user-agent": USER_AGENT,
-        ...rest.headers,
-      },
-    });
-    return response;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
 async function fetchText(url: string, timeoutMs = 4000): Promise<string | null> {
-  const response = await fetchWithTimeout(url, {
-    timeoutMs,
-    headers: { accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
-  });
-
-  if (!response || !response.ok) {
-    return null;
-  }
-
   try {
+    const response = await fetchPublicUrl(
+      url,
+      {
+        headers: {
+          accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+      },
+      {
+        timeoutMs,
+        userAgent: USER_AGENT,
+      }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
     return await response.text();
-  } catch {
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      return null;
+    }
     return null;
   }
 }
 
 async function fetchJson<T>(url: string, timeoutMs = 4000): Promise<T | null> {
-  const response = await fetchWithTimeout(url, {
-    timeoutMs,
-    headers: { accept: "application/json" },
-  });
-
-  if (!response || !response.ok) {
-    return null;
-  }
-
   try {
-    return (await response.json()) as T;
-  } catch {
+    return await fetchPublicJson<T>(
+      url,
+      {
+        headers: {
+          accept: "application/json",
+        },
+      },
+      {
+        timeoutMs,
+        userAgent: USER_AGENT,
+      }
+    );
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      return null;
+    }
     return null;
   }
 }
@@ -481,9 +471,20 @@ async function probeWikiUrl(url: string): Promise<string | null> {
   if (!isAllowedWikiUrl(url)) {
     return null;
   }
-  const response = await fetchWithTimeout(url, { method: "HEAD", timeoutMs: 2000 });
-  if (response && response.ok) {
-    return url;
+  try {
+    const response = await fetchPublicUrl(
+      url,
+      { method: "HEAD" },
+      {
+        timeoutMs: 2000,
+        userAgent: USER_AGENT,
+      }
+    );
+    if (response.ok) {
+      return url;
+    }
+  } catch {
+    // Ignore failures; caller will treat missing wiki link as absence.
   }
   return null;
 }

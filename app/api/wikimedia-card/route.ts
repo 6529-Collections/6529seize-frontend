@@ -3,7 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { WikimediaCardResponse, WikimediaSource, WikimediaImage } from "@/services/api/wikimedia-card";
 
-import { ensureUrlIsPublic, validateUrl } from "../open-graph/utils";
+import {
+  UrlGuardError,
+  assertPublicUrl,
+  fetchPublicUrl,
+  parsePublicUrl,
+  type UrlGuardHostPolicy,
+} from "@/lib/security/urlGuard";
 
 const USER_AGENT = "6529seize-wikimedia-preview/1.0 (+https://6529.io)";
 const REQUEST_TIMEOUT_MS = 8000;
@@ -105,6 +111,19 @@ const parseAcceptLanguage = (header: string | null): string[] => {
   return Array.from(preferred);
 };
 
+const respondWithGuardError = (
+  error: unknown,
+  fallbackMessage: string,
+  fallbackStatus = 400
+) => {
+  if (error instanceof UrlGuardError) {
+    return NextResponse.json({ error: error.message }, { status: error.statusCode });
+  }
+
+  const message = error instanceof Error ? error.message : fallbackMessage;
+  return NextResponse.json({ error: message }, { status: fallbackStatus });
+};
+
 const WIKIMEDIA_ALLOWED_HOSTS = new Set([
   "w.wiki",
   "wikidata.org",
@@ -112,6 +131,11 @@ const WIKIMEDIA_ALLOWED_HOSTS = new Set([
   "commons.wikimedia.org",
   "upload.wikimedia.org",
 ]);
+
+const WIKIMEDIA_HOST_POLICY: UrlGuardHostPolicy = {
+  allowedHosts: Array.from(WIKIMEDIA_ALLOWED_HOSTS),
+  allowedHostSuffixes: ["wikipedia.org"],
+};
 
 const isAllowedWikimediaHost = (hostname: string): boolean => {
   if (WIKIMEDIA_ALLOWED_HOSTS.has(hostname)) {
@@ -142,113 +166,111 @@ const ensureWikimediaUrl = (url: URL): void => {
   }
 };
 
+type WikimediaRequestInit = RequestInit & {
+  readonly timeoutMs?: number;
+  readonly language?: string;
+};
+
 const fetchWithTimeout = async (
-  url: string,
-  init: RequestInit & { readonly timeoutMs?: number; readonly language?: string } = {}
+  input: string | URL,
+  init: WikimediaRequestInit = {}
 ): Promise<Response> => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), init.timeoutMs ?? REQUEST_TIMEOUT_MS);
-
+  let targetUrl: URL;
   try {
-    let targetUrl: URL;
-    try {
-      targetUrl = new URL(url);
-    } catch {
-      throw new Error("Invalid URL provided.");
+    targetUrl =
+      typeof input === "string"
+        ? parsePublicUrl(input)
+        : new URL(input.toString());
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      throw error;
     }
-
-    await ensureUrlIsPublic(targetUrl);
-    ensureWikimediaUrl(targetUrl);
-
-    const headers = new Headers(init.headers);
-    headers.set("user-agent", USER_AGENT);
-    if (!headers.has("accept")) {
-      headers.set("accept", "application/json");
-    }
-    if (init.language) {
-      headers.set("accept-language", init.language);
-    }
-
-    const response = await fetch(targetUrl.toString(), {
-      ...init,
-      headers,
-      signal: controller.signal,
+    throw new UrlGuardError("Invalid URL provided.", "invalid-url", 400, {
+      cause: error,
     });
-
-    return response;
-  } finally {
-    clearTimeout(timeout);
   }
+
+  ensureWikimediaUrl(targetUrl);
+  await assertPublicUrl(targetUrl, { policy: WIKIMEDIA_HOST_POLICY });
+
+  const { timeoutMs = REQUEST_TIMEOUT_MS, language, ...requestInit } = init;
+  const headers = new Headers(requestInit.headers);
+  if (!headers.has("accept")) {
+    headers.set("accept", "application/json");
+  }
+  if (language) {
+    headers.set("accept-language", language);
+  }
+
+  return fetchPublicUrl(
+    targetUrl,
+    {
+      ...requestInit,
+      headers,
+    },
+    {
+      timeoutMs,
+      userAgent: USER_AGENT,
+      maxRedirects: SHORT_LINK_MAX_REDIRECTS,
+      policy: WIKIMEDIA_HOST_POLICY,
+    }
+  );
 };
 
 const fetchJson = async <T>(
-  url: string,
-  init: RequestInit & { readonly timeoutMs?: number; readonly language?: string } = {}
+  input: string | URL,
+  init: WikimediaRequestInit = {}
 ): Promise<T> => {
-  const response = await fetchWithTimeout(url, init);
+  const response = await fetchWithTimeout(input, init);
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new UrlGuardError(
+      `Request failed with status ${response.status}`,
+      "fetch-failed",
+      response.status
+    );
   }
   return response.json() as Promise<T>;
 };
 
 const resolveShortLink = async (url: URL): Promise<URL> => {
-  let current = url;
-  for (let redirectCount = 0; redirectCount < SHORT_LINK_MAX_REDIRECTS; redirectCount += 1) {
-    const response = await fetchWithTimeout(current.toString(), {
-      method: "HEAD",
-      redirect: "manual",
+  ensureWikimediaUrl(url);
+  await assertPublicUrl(url, { policy: WIKIMEDIA_HOST_POLICY });
+
+  const response = await fetchPublicUrl(
+    url,
+    { method: "HEAD" },
+    {
       timeoutMs: REQUEST_TIMEOUT_MS,
-    });
-
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get("location");
-      if (!location) {
-        break;
-      }
-      const nextUrl = new URL(location, current);
-      try {
-        await ensureUrlIsPublic(nextUrl);
-        ensureWikimediaUrl(nextUrl);
-      } catch {
-        throw new Error("Short link resolves to a non-Wikimedia or non-public destination");
-      }
-      current = nextUrl;
-      continue;
+      userAgent: USER_AGENT,
+      maxRedirects: SHORT_LINK_MAX_REDIRECTS,
+      policy: WIKIMEDIA_HOST_POLICY,
     }
+  );
 
-    if (response.ok) {
-      return current;
-    }
+  let finalResponse = response;
 
-    break;
+  if (!response.ok) {
+    finalResponse = await fetchPublicUrl(
+      url,
+      {},
+      {
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        userAgent: USER_AGENT,
+        maxRedirects: SHORT_LINK_MAX_REDIRECTS,
+        policy: WIKIMEDIA_HOST_POLICY,
+      }
+    );
   }
 
-  const fallback = await fetchWithTimeout(url.toString(), {
-    method: "GET",
-    redirect: "manual",
-    timeoutMs: REQUEST_TIMEOUT_MS,
-  });
-
-  if (fallback.status >= 300 && fallback.status < 400) {
-    const location = fallback.headers.get("location");
-    if (location) {
-      const nextUrl = new URL(location, url);
-      try {
-        await ensureUrlIsPublic(nextUrl);
-        ensureWikimediaUrl(nextUrl);
-      } catch {
-        throw new Error("Short link resolves to a non-Wikimedia or non-public destination");
-      }
-      return nextUrl;
-    }
+  if (!finalResponse.ok) {
+    throw new UrlGuardError("Unable to resolve short link", "fetch-failed", finalResponse.status);
   }
 
-  if (fallback.ok) {
-    return url;
-  }
+  const finalUrl = finalResponse.url ? new URL(finalResponse.url) : url;
+  ensureWikimediaUrl(finalUrl);
+  await assertPublicUrl(finalUrl, { policy: WIKIMEDIA_HOST_POLICY });
 
-  throw new Error("Unable to resolve short link");
+  return finalUrl;
 };
 
 const stripNamespace = (title: string): string => title.trim();
@@ -1015,18 +1037,16 @@ export async function GET(request: NextRequest) {
   let targetUrl: URL;
 
   try {
-    targetUrl = validateUrl(request.nextUrl.searchParams.get("url"));
+    targetUrl = parsePublicUrl(request.nextUrl.searchParams.get("url"));
+    ensureWikimediaUrl(targetUrl);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Invalid Wikimedia URL.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return respondWithGuardError(error, "Invalid Wikimedia URL.");
   }
 
   try {
-    await ensureUrlIsPublic(targetUrl);
-    ensureWikimediaUrl(targetUrl);
+    await assertPublicUrl(targetUrl, { policy: WIKIMEDIA_HOST_POLICY });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "The provided URL is not allowed.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return respondWithGuardError(error, "The provided URL is not allowed.");
   }
 
   const cacheKey = sanitizeCacheKey(targetUrl);
