@@ -1,11 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 
 export default function NotFound() {
   const { setTitle } = useTitle();
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    router.back();
+  };
   useEffect(() => {
     setTitle("404 - NOT FOUND");
   }, []);
@@ -28,9 +35,16 @@ export default function NotFound() {
           className="tw-ml-0.5 tw-w-8 tw-h-8"
         />
       </div>
-      <a href="/" className="tw-mt-4 tw-text-md tw-font-semibold">
+      <Link href="/" className="tw-mt-4 tw-text-md tw-font-semibold">
         TAKE ME HOME
-      </a>
+      </Link>
+      <button
+        type="button"
+        onClick={handleGoBack}
+        className="tw-mt-2 tw-text-md tw-font-semibold"
+      >
+        BACK TO PREVIOUS PAGE
+      </button>
     </div>
   );
 }
