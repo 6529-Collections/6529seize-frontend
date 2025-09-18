@@ -566,8 +566,10 @@ export function getNextMintNumber(now: Date = new Date()): number {
   return getMintNumberForMintDate(nextMintDay);
 }
 
-export function isMintingActive(now: Date = new Date()): boolean {
-  return getActiveMintWindow(now) !== null;
+export function isMintingActive(d: Date = new Date()): boolean {
+  return (
+    isMintEligibleUtcDay(startOfUtcDay(d)) || getActiveMintWindow(d) !== null
+  );
 }
 
 export function isMintingToday(): boolean {

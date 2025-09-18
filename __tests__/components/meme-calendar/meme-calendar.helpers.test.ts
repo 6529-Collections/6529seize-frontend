@@ -7,8 +7,10 @@ import {
   getNextMintStart,
   getRangeDatesByZoom,
   getSeasonIndexForDate,
+  getUpcomingMintsForCurrentOrNextSeason,
   isMintEligibleUtcDay,
   isMintingActive,
+  isMintingToday,
   mintEndInstantUtcForMintDay,
   mintStartInstantUtcForMintDay,
   nextMintDateOnOrAfter,
@@ -16,6 +18,13 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { ReactElement } from "react";
 import { Children, isValidElement } from "react";
+
+const asElement = (n: unknown): ReactElement<any> => {
+  if (!isValidElement(n)) {
+    throw new Error("Expected a valid ReactElement");
+  }
+  return n as ReactElement<any>;
+};
 
 const startOfUtcDay = (date: Date): Date =>
   new Date(
@@ -42,25 +51,23 @@ describe("formatToFullDivision", () => {
     const node = formatToFullDivision(new Date(Date.UTC(2025, 9, 1)));
     expect(isValidElement(node)).toBe(true);
 
-    const tbody = (node as ReactElement).props.children;
+    const elementNode = asElement(node as unknown);
+    const tbody = asElement(elementNode.props.children as unknown);
     expect(isValidElement(tbody)).toBe(true);
 
-    const rows = Children.toArray(
-      (tbody as ReactElement).props.children
-    ) as ReactElement[];
+    const rows = Children.toArray(tbody.props.children).map(asElement);
 
     expect(rows).toHaveLength(6);
 
     const labels = rows.map((row) => {
-      const cells = Children.toArray(row.props.children) as ReactElement[];
-      const labelCell = cells[0];
-      const rangeCell = cells[1];
+      const cells = Children.toArray(row.props.children).map(asElement);
+      const [labelCell, rangeCell] = cells;
       const labelText = Children.toArray(labelCell.props.children)
         .map((child) => String(child).trim())
         .join(" ")
         .replace(/\s+/g, " ")
         .trim();
-      const span = rangeCell.props.children as ReactElement;
+      const span = asElement(rangeCell.props.children as unknown);
       const rangeText = String(span.props.children);
       expect(rangeText).toContain("-");
       return labelText;
@@ -219,5 +226,45 @@ describe("getCardsRemainingUntilEndOf", () => {
     );
     const expected = countMintsBetween(upcomingMint, end);
     expect(getCardsRemainingUntilEndOf("szn", now)).toBe(expected);
+  });
+});
+
+describe("meme-calendar helpers", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("detects minting day and returns upcoming dates", () => {
+    jest.setSystemTime(new Date(Date.UTC(2023, 0, 2, 12, 0, 0)));
+    expect(isMintingToday()).toBe(true);
+
+    const { rows } = getUpcomingMintsForCurrentOrNextSeason(
+      new Date(Date.UTC(2023, 0, 1))
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0].utcDay.toISOString()).toBe("2023-01-02T00:00:00.000Z");
+  });
+
+  it("calculates cards remaining across the season timeline", () => {
+    const earlySeason = getCardsRemainingUntilEndOf(
+      "szn",
+      new Date(Date.UTC(2023, 0, 2))
+    );
+    const lateSeason = getCardsRemainingUntilEndOf(
+      "szn",
+      new Date(Date.UTC(2023, 2, 31))
+    );
+
+    expect(earlySeason).toBeGreaterThan(lateSeason);
+
+    const yearRemaining = getCardsRemainingUntilEndOf(
+      "year",
+      new Date(Date.UTC(2023, 0, 2))
+    );
+    expect(yearRemaining).toBeGreaterThanOrEqual(earlySeason);
   });
 });

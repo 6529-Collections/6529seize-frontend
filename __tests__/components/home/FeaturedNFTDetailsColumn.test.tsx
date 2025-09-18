@@ -220,14 +220,14 @@ describe("FeaturedNFTDetailsColumn", () => {
   describe("Basic rendering", () => {
     it("renders without crashing", () => {
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
     });
 
     it("renders the NFT title as a link to the meme page", () => {
       const nft = createTestNFT({ id: 456, name: "Amazing Meme" });
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       const link = screen.getByRole("link", { name: /Card 456 - Amazing Meme/i });
       expect(link).toHaveAttribute("href", "/the-memes/456");
@@ -235,7 +235,7 @@ describe("FeaturedNFTDetailsColumn", () => {
 
     it("renders all child components with correct props", () => {
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // Check all child components are rendered
       expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
@@ -248,7 +248,7 @@ describe("FeaturedNFTDetailsColumn", () => {
   describe("Manifold claim integration", () => {
     it("displays manifold claim information when available", () => {
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // User should see the manifold claim displays
       const detailsTable = screen.getByTestId("featured-nft-details-table");
@@ -269,7 +269,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       const nft = createTestNFT();
       
       expect(() => {
-        render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+        render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       }).not.toThrow();
     });
   });
@@ -279,7 +279,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       const nft = createTestNFT();
       setupPlatformAndCountry("web", "DE");
 
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       expect(screen.getByTestId("nft-marketplace-links")).toBeInTheDocument();
       expect(screen.getByText(`Marketplace Links - Contract: ${nft.contract}, ID: ${nft.id}`)).toBeInTheDocument();
@@ -289,7 +289,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       const nft = createTestNFT();
       setupPlatformAndCountry("ios", "US");
 
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       expect(screen.getByTestId("nft-marketplace-links")).toBeInTheDocument();
     });
@@ -298,7 +298,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       const nft = createTestNFT();
       setupPlatformAndCountry("ios", "FR");
 
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       expect(screen.queryByTestId("nft-marketplace-links")).not.toBeInTheDocument();
     });
@@ -307,7 +307,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       const nft = createTestNFT();
       setupPlatformAndCountry("android", "DE");
 
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       expect(screen.getByTestId("nft-marketplace-links")).toBeInTheDocument();
     });
@@ -316,7 +316,7 @@ describe("FeaturedNFTDetailsColumn", () => {
   describe("State interactions", () => {
     it("updates manifold claim state when mint countdown triggers setClaim", () => {
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // User can trigger claim setting via the mint countdown
       const setClaimButton = screen.getByRole("button", { name: "Set Claim" });
@@ -330,7 +330,7 @@ describe("FeaturedNFTDetailsColumn", () => {
   describe("Accessibility and user experience", () => {
     it("provides accessible navigation link to NFT detail page", () => {
       const nft = createTestNFT({ id: 456, name: "Accessible Meme" });
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       const link = screen.getByRole("link", { name: /Card 456 - Accessible Meme/i });
       expect(link).toHaveAttribute("href", "/the-memes/456");
@@ -339,7 +339,7 @@ describe("FeaturedNFTDetailsColumn", () => {
 
     it("maintains semantic structure with headings and sections", () => {
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // Should have proper heading structure
       const heading = screen.getByRole("heading", { level: 3 });
@@ -354,7 +354,7 @@ describe("FeaturedNFTDetailsColumn", () => {
         name: "Integration Test NFT",
         contract: "0xtest123" 
       });
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // Verify NFT data reaches the appropriate child components
       expect(screen.getByTestId("featured-nft-details-table")).toHaveTextContent("Integration Test NFT");
@@ -377,7 +377,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       mockUseManifoldClaimDisplays.mockReturnValue(customDisplays);
       
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // Custom displays should be rendered through child components
       expect(screen.getByTestId("featured-nft-details-table")).toBeInTheDocument();
@@ -395,7 +395,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       const nft = createTestNFT();
       
       expect(() => {
-        render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+        render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       }).toThrow("Hook error");
     });
 
@@ -405,7 +405,7 @@ describe("FeaturedNFTDetailsColumn", () => {
         contract: "",
       });
       
-      render(<FeaturedNFTDetailsColumn featuredNft={incompleteNFT} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={incompleteNFT} isMemeMintingActive={true} />);
       
       // Should still show the card structure with ID, even if name/contract are empty
       expect(screen.getByText(`Card ${incompleteNFT.id} -`)).toBeInTheDocument();
@@ -421,7 +421,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       });
       
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // Main structure should still be visible to user
       expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
@@ -445,7 +445,7 @@ describe("FeaturedNFTDetailsColumn", () => {
           reject: jest.fn(),
         });
         
-        const { unmount } = render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+        const { unmount } = render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
         
         // Core content should always be visible
         expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
@@ -485,7 +485,7 @@ describe("FeaturedNFTDetailsColumn", () => {
           reject: jest.fn(),
         });
         
-        const { unmount } = render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+        const { unmount } = render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
         
         // Core content always visible
         expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();
@@ -505,7 +505,7 @@ describe("FeaturedNFTDetailsColumn", () => {
   describe("Layout structure", () => {
     it("renders proper layout structure with all sections", () => {
       const nft = createTestNFT();
-      render(<FeaturedNFTDetailsColumn featuredNft={nft} />);
+      render(<FeaturedNFTDetailsColumn featuredNft={nft} isMemeMintingActive={true} />);
       
       // User should see all the main sections
       expect(screen.getByText(`Card ${nft.id} - ${nft.name}`)).toBeInTheDocument();

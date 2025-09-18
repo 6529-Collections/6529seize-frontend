@@ -113,17 +113,10 @@ export default function SubscriptionsReportComponent() {
         }
         const upcoming = await fetchUpcomingCounts(remainingCountForSeason);
 
-        const addDays = redeemed.data.some((r) => {
-          const mintDate = Time.fromString(r.mint_date);
-          return mintDate.toIsoDateString() === Time.now().toIsoDateString();
-        })
-          ? 1
-          : 0;
-
         setRedeemedCounts(redeemed.data);
         setTotalRedeemed(redeemed.count);
         setUpcomingCounts(upcoming);
-        setRemainingMintsForSeason(remainingMintsForSeason);
+        setRemainingMintsForSeason(remainingCountForSeason);
       } finally {
         setRedeemedLoading(false);
         setUpcomingLoading(false);
