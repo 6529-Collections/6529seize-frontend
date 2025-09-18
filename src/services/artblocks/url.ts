@@ -154,8 +154,16 @@ export const buildMediaUrl = ({
   return `https://media.artblocks.io/${tokenId}.png`;
 };
 
-export const buildLiveUrl = ({ contract, tokenId }: ArtBlocksTokenIdentifier): string => {
-  return `https://live.artblocks.io/token/${contract}-${tokenId}`;
+const FLAGSHIP_LIVE_SLUG = "flagship";
+
+export const buildLiveUrl = ({
+  contract,
+  tokenId,
+}: ArtBlocksTokenIdentifier): string => {
+  const normalizedContract = ensureValidContract(contract);
+
+  const prefix = normalizedContract ?? FLAGSHIP_LIVE_SLUG;
+  return `https://live.artblocks.io/token/${prefix}-${tokenId}`;
 };
 
 export const buildTokenApiUrl = ({
