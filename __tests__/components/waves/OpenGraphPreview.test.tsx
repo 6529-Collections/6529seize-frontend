@@ -17,6 +17,7 @@ jest.mock('next/image', () => ({
   default: function MockNextImage({
     alt = '',
     unoptimized: _unoptimized,
+    fill: _fill,
     ...rest
   }: any) {
     return <img alt={alt} {...rest} />;
@@ -136,5 +137,87 @@ describe('OpenGraphPreview', () => {
       'src',
       'https://cdn.example.com/secure.png'
     );
+  });
+
+  it('renders Threads post cards when provided', () => {
+    render(
+      <OpenGraphPreview
+        href="https://threads.net/@alice/post/abc"
+        preview={{
+          type: 'threads.post',
+          canonicalUrl: 'https://threads.com/@alice/post/abc',
+          post: {
+            handle: 'alice',
+            postId: 'abc',
+            author: {
+              displayName: 'Alice',
+              profileUrl: 'https://threads.com/@alice',
+              avatar: 'https://cdn.example.com/avatar.jpg',
+            },
+            createdAt: '2024-01-02T12:00:00Z',
+            text: 'Hello Threads!',
+            images: [
+              { url: 'https://cdn.example.com/image-one.jpg', alt: 'Post image' },
+            ],
+          },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('threads-post-card')).toBeInTheDocument();
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('@alice')).toBeInTheDocument();
+    expect(screen.getByAltText('Post image')).toHaveAttribute(
+      'src',
+      'https://cdn.example.com/image-one.jpg'
+    );
+    expect(
+      screen.getByRole('link', { name: 'Open this post on Threads' })
+    ).toHaveAttribute('href', 'https://threads.com/@alice/post/abc');
+  });
+
+  it('renders Threads profile cards when provided', () => {
+    render(
+      <OpenGraphPreview
+        href="https://threads.net/@alice"
+        preview={{
+          type: 'threads.profile',
+          canonicalUrl: 'https://threads.com/@alice',
+          profile: {
+            handle: 'alice',
+            displayName: 'Alice',
+            avatar: 'https://cdn.example.com/avatar.jpg',
+            banner: 'https://cdn.example.com/banner.jpg',
+            bio: 'Exploring wonderland',
+          },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('threads-profile-card')).toBeInTheDocument();
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('@alice')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open this profile on Threads' })
+    ).toHaveAttribute('href', 'https://threads.com/@alice');
+  });
+
+  it('renders Threads unavailable cards when metadata cannot be loaded', () => {
+    render(
+      <OpenGraphPreview
+        href="https://threads.net/@alice/post/abc"
+        preview={{
+          type: 'threads.unavailable',
+          canonicalUrl: 'https://threads.com/@alice/post/abc',
+          reason: 'login_required',
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('threads-unavailable-card')).toBeInTheDocument();
+    expect(screen.getByText('Threads content unavailable')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open this link on Threads' })
+    ).toHaveAttribute('href', 'https://threads.com/@alice/post/abc');
   });
 });

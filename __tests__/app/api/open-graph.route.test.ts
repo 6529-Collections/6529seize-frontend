@@ -23,10 +23,17 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
+jest.mock("../../../app/api/open-graph/threads", () => ({
+  getThreadsPreview: jest.fn().mockResolvedValue(null),
+}));
+
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
 };
+const { getThreadsPreview } = jest.requireMock(
+  "../../../app/api/open-graph/threads",
+) as { getThreadsPreview: jest.Mock };
 
 const originalFetch = global.fetch;
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
@@ -41,6 +48,7 @@ describe("open-graph API route", () => {
     jest.clearAllMocks();
     global.fetch = originalFetch;
     nextResponseJson.mockClear();
+    getThreadsPreview.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -151,6 +159,12 @@ describe("open-graph API route", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual(previewPayload);
+    expect(getThreadsPreview).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originalUrl: new URL("http://safe.example/article"),
+        html,
+      })
+    );
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
@@ -167,5 +181,41 @@ describe("open-graph API route", () => {
       html,
       "text/html"
     );
+  });
+
+  it("returns specialized preview when threads handler resolves", async () => {
+    const ensureUrlIsPublic = utils.ensureUrlIsPublic;
+    ensureUrlIsPublic.mockResolvedValue(undefined);
+
+    const threadsPreview = {
+      type: "threads.post",
+      canonicalUrl: "https://threads.com/@alice/post/abc",
+    };
+
+    getThreadsPreview.mockResolvedValue(threadsPreview);
+
+    const html = "<html></html>";
+    const responsePayload = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+    });
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(responsePayload) as jest.MockedFunction<
+      typeof fetch
+    >;
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://threads.net/@alice/post/abc"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(threadsPreview);
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 });

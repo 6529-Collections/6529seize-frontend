@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
+import { getThreadsPreview } from "./threads";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
@@ -97,8 +98,18 @@ export async function GET(request: NextRequest) {
 
   try {
     const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
-    await ensureUrlIsPublic(new URL(finalUrl));
-    const data = buildResponse(targetUrl, html, contentType);
+    const finalUrlInstance = new URL(finalUrl);
+    await ensureUrlIsPublic(finalUrlInstance);
+
+    const threadsPreview = await getThreadsPreview({
+      originalUrl: targetUrl,
+      finalUrl: finalUrlInstance,
+      html,
+      contentType,
+    });
+
+    const data =
+      threadsPreview ?? buildResponse(targetUrl, html, contentType);
     const entry: CacheEntry = {
       data,
       expiresAt: Date.now() + CACHE_TTL_MS,
