@@ -7,7 +7,9 @@ import OpenGraphPreview, {
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
+import NostrCard from "./nostr/NostrCard";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import { isNostrCardResponse, type NostrCardResponse } from "@/types/nostr-open-graph";
 
 interface LinkPreviewCardProps {
   readonly href: string;
@@ -17,6 +19,7 @@ interface LinkPreviewCardProps {
 type PreviewState =
   | { readonly type: "loading"; readonly data: OpenGraphPreviewData | null }
   | { readonly type: "success"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "nostr"; readonly data: NostrCardResponse }
   | { readonly type: "fallback" };
 
 const toPreviewData = (
@@ -57,6 +60,11 @@ export default function LinkPreviewCard({
           return;
         }
 
+        if (isNostrCardResponse(response)) {
+          setState({ type: "nostr", data: response });
+          return;
+        }
+
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
           setState({ type: "success", data: previewData });
@@ -88,6 +96,10 @@ export default function LinkPreviewCard({
         </div>
       </LinkPreviewCardLayout>
     );
+  }
+
+  if (state.type === "nostr") {
+    return <NostrCard href={href} data={state.data} />;
   }
 
   const preview = state.type === "success" ? state.data : undefined;
