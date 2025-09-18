@@ -104,8 +104,13 @@ describe("/api/pepe/resolve", () => {
       if (url.startsWith("https://tokenscan.io/api/api/market") && url.includes("XCP")) {
         return createJsonResponse({ data: [{ price: 1.5 }] });
       }
-      if (url.startsWith("https://api.coingecko.com")) {
-        return createJsonResponse({ bitcoin: { eth: 15 }, counterparty: { eth: 0.002 } });
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === "api.coingecko.com") {
+          return createJsonResponse({ bitcoin: { eth: 15 }, counterparty: { eth: 0.002 } });
+        }
+      } catch {
+        // ignore URL parsing issues so other mocks can handle the input
       }
       if (url === "https://wiki.pepe.wtf/rare-pepes/mtgox-pepe") {
         return { status: 404, ok: false } as Response;

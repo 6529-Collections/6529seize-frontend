@@ -460,12 +460,28 @@ async function getApproxRates(): Promise<{ ethPerBtc: number; ethPerXcp: number 
   return { ethPerBtc, ethPerXcp };
 }
 
+function isAllowedWikiUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" && parsed.hostname === "wiki.pepe.wtf";
+  } catch {
+    return false;
+  }
+}
+
 async function probeWikiUrl(url: string): Promise<string | null> {
+  if (!isAllowedWikiUrl(url)) {
+    return null;
+  }
   const response = await fetchWithTimeout(url, { method: "HEAD", timeoutMs: 2000 });
   if (response && response.ok) {
     return url;
   }
   return null;
+}
+
+function isValidSlug(slug: string): boolean {
+  return /^[a-z0-9-]{1,64}$/.test(slug);
 }
 
 async function findWikiLink(name?: string, series?: number | null): Promise<string | null> {
@@ -474,12 +490,17 @@ async function findWikiLink(name?: string, series?: number | null): Promise<stri
   }
 
   const slug = slugifyName(name);
+  if (!isValidSlug(slug)) {
+    return null;
+  }
   const candidates: string[] = [];
 
   if (series && Number.isFinite(series)) {
     const seriesSlug = `series-${series}`;
-    candidates.push(`https://wiki.pepe.wtf/rare-pepes/${seriesSlug}/${slug}`);
-    candidates.push(`https://wiki.pepe.wtf/book-of-kek/${seriesSlug}/${slug}`);
+    if (isValidSlug(seriesSlug)) {
+      candidates.push(`https://wiki.pepe.wtf/rare-pepes/${seriesSlug}/${slug}`);
+      candidates.push(`https://wiki.pepe.wtf/book-of-kek/${seriesSlug}/${slug}`);
+    }
   }
 
   candidates.push(`https://wiki.pepe.wtf/rare-pepes/${slug}`);
