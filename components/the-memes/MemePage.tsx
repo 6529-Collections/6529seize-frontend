@@ -2,7 +2,8 @@
 
 import styles from "./TheMemes.module.scss";
 
-import { useContext, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -13,14 +14,11 @@ import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import { NFT, MemesExtendedData, NftTDH, NftRank } from "../../entities/INFT";
 import { areEqualAddresses } from "../../helpers/Helpers";
-import { MemePageActivity } from "./MemePageActivity";
-import { MemePageArt } from "./MemePageArt";
 import {
   MemePageCollectorsRightMenu,
   MemePageCollectorsSubMenu,
 } from "./MemePageCollectors";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
-import { MemePageTimeline } from "./MemePageTimeline";
 import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
@@ -37,22 +35,90 @@ import {
   TabButton,
 } from "./MemeShared";
 import NftNavigation from "../nft-navigation/NftNavigation";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+const MemePageArt = dynamic(() =>
+  import("./MemePageArt").then((mod) => mod.MemePageArt)
+);
+
+const MemePageActivity = dynamic(() =>
+  import("./MemePageActivity").then((mod) => mod.MemePageActivity)
+);
+
+const MemePageTimeline = dynamic(() =>
+  import("./MemePageTimeline").then((mod) => mod.MemePageTimeline)
+);
 
 const ACTIVITY_PAGE_SIZE = 25;
 
 export default function MemePage({ nftId }: { readonly nftId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
+  const focusParam = searchParams?.get("focus");
+  const resolvedRouterFocus = useMemo(() => {
+    if (!focusParam) {
+      return undefined;
+    }
+    return (Object.values(MEME_FOCUS) as MEME_FOCUS[]).find(
+      (sd) => sd === focusParam
+    );
+  }, [focusParam]);
+
+  const [activeTab, setActiveTab] = useState<MEME_FOCUS>(
+    resolvedRouterFocus ?? MEME_FOCUS.LIVE
+  );
+
+  const [loadedTabs, setLoadedTabs] = useState<Record<MEME_FOCUS, boolean>>(
+    () => ({
+      [MEME_FOCUS.LIVE]: true,
+      [MEME_FOCUS.YOUR_CARDS]: true,
+      [MEME_FOCUS.COLLECTORS]: true,
+      [MEME_FOCUS.THE_ART]: resolvedRouterFocus === MEME_FOCUS.THE_ART,
+      [MEME_FOCUS.ACTIVITY]: resolvedRouterFocus === MEME_FOCUS.ACTIVITY,
+      [MEME_FOCUS.TIMELINE]: resolvedRouterFocus === MEME_FOCUS.TIMELINE,
+    })
+  );
 
   useEffect(() => {
     setConnectedWallets(connectedProfile?.wallets?.map((w) => w.wallet) ?? []);
   }, [connectedProfile]);
 
-  const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
+  useEffect(() => {
+    const nextFocus = resolvedRouterFocus ?? MEME_FOCUS.LIVE;
+    setActiveTab((prev) => (prev === nextFocus ? prev : nextFocus));
+  }, [resolvedRouterFocus]);
+
+  useEffect(() => {
+    setLoadedTabs((prev) => {
+      if (prev[activeTab]) {
+        return prev;
+      }
+      return { ...prev, [activeTab]: true };
+    });
+  }, [activeTab]);
+
+  const searchParamsString = useMemo(
+    () => searchParams?.toString() ?? "",
+    [searchParams]
+  );
+
+  useEffect(() => {
+    if (focusParam === activeTab) {
+      return;
+    }
+    const params = new URLSearchParams(searchParamsString);
+    params.set("focus", activeTab);
+    const queryString = params.toString();
+    router.replace(
+      queryString ? `${pathname}?${queryString}` : pathname,
+      { scroll: false }
+    );
+  }, [activeTab, focusParam, pathname, router, searchParamsString]);
 
   const [nft, setNft] = useState<NFT>();
   const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
@@ -67,47 +133,47 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   useEffect(() => {
     setTitle(getMemeTabTitle(`The Memes`, nftId, nft, activeTab));
-  }, [nft, nftId, activeTab]);
+  }, [nft, nftId, activeTab, setTitle]);
 
   useEffect(() => {
-    let initialFocus = MEME_FOCUS.LIVE;
-    const routerFocus = searchParams?.get("focus");
-    if (routerFocus) {
-      const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
-        (sd) => sd === routerFocus
-      );
-      if (resolvedRouterFocus) {
-        initialFocus = resolvedRouterFocus;
-      }
+    if (!nftId) {
+      return;
     }
-    setActiveTab(initialFocus);
-  }, [searchParams]);
 
-  useEffect(() => {
-    if (activeTab) {
-      router.push(`/the-memes/${nftId}?focus=${activeTab}`);
-    }
-  }, [activeTab]);
+    let cancelled = false;
 
-  useEffect(() => {
-    if (nftId) {
-      fetchUrl(
-        `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
-      ).then((response: DBResponse) => {
-        const nftMetas = response.data;
-        if (nftMetas.length === 1) {
+    const metaPromise = fetchUrl(
+      `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
+    );
+    const nftPromise = fetchUrl(
+      `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
+    );
+
+    Promise.all([metaPromise, nftPromise])
+      .then(([metaResponse, nftResponse]: [DBResponse, DBResponse]) => {
+        if (cancelled) {
+          return;
+        }
+        const nftMetas = metaResponse.data;
+        if (Array.isArray(nftMetas) && nftMetas.length === 1) {
           setNftMeta(nftMetas[0]);
-          fetchUrl(
-            `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
-          ).then((response: DBResponse) => {
-            const mynft = response.data[0];
-            setNft(mynft);
-          });
+          const mynft = nftResponse.data?.[0];
+          setNft(mynft);
         } else {
           setNftMeta(undefined);
+          setNft(undefined);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setNftMeta(undefined);
+          setNft(undefined);
         }
       });
-    }
+
+    return () => {
+      cancelled = true;
+    };
   }, [nftId]);
 
   function updateNftBalances(data: Transaction[]) {
@@ -182,7 +248,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               MEME_FOCUS.LIVE,
               MEME_FOCUS.YOUR_CARDS,
               MEME_FOCUS.COLLECTORS,
-            ].includes(activeTab!) &&
+              ].includes(activeTab) &&
               nft && (
                 <>
                   <Col
@@ -237,17 +303,26 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             nft={nft}
           />
         </Container>
-        <MemePageArt
-          show={activeTab === MEME_FOCUS.THE_ART}
-          nft={nft}
-          nftMeta={nftMeta}
-        />
-        <MemePageActivity
-          show={activeTab === MEME_FOCUS.ACTIVITY}
-          nft={nft}
-          pageSize={ACTIVITY_PAGE_SIZE}
-        />
-        <MemePageTimeline show={activeTab === MEME_FOCUS.TIMELINE} nft={nft} />
+        {loadedTabs[MEME_FOCUS.THE_ART] && (
+          <MemePageArt
+            show={activeTab === MEME_FOCUS.THE_ART}
+            nft={nft}
+            nftMeta={nftMeta}
+          />
+        )}
+        {loadedTabs[MEME_FOCUS.ACTIVITY] && (
+          <MemePageActivity
+            show={activeTab === MEME_FOCUS.ACTIVITY}
+            nft={nft}
+            pageSize={ACTIVITY_PAGE_SIZE}
+          />
+        )}
+        {loadedTabs[MEME_FOCUS.TIMELINE] && (
+          <MemePageTimeline
+            show={activeTab === MEME_FOCUS.TIMELINE}
+            nft={nft}
+          />
+        )}
       </>
     );
   }

@@ -10,6 +10,7 @@ import { fetchUrl } from "@/services/6529api";
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
 jest.mock("@/services/6529api", () => ({
@@ -72,19 +73,41 @@ jest.mock("@/components/nft-navigation/NftNavigation", () => () => (
   <div data-testid="nft-navigation" />
 ));
 
-const mockPush = jest.fn();
+const mockReplace = jest.fn(
+  (url: string, _options?: { scroll?: boolean }) => {
+    const parsedUrl = new URL(url, "https://example.com");
+    currentFocus = parsedUrl.searchParams.get("focus");
+  }
+);
+let currentFocus: string | null = null;
 const mockSearchParams = {
-  get: jest.fn().mockReturnValue(null),
+  get: jest.fn((key: string) => (key === "focus" ? currentFocus : null)),
+  toString: jest.fn(() => {
+    const params = new URLSearchParams();
+    if (currentFocus) {
+      params.set("focus", currentFocus);
+    }
+    return params.toString();
+  }),
 };
 
 const useSearchParamsMock = require("next/navigation").useSearchParams;
 useSearchParamsMock.mockReturnValue(mockSearchParams);
+const usePathnameMock = require("next/navigation").usePathname;
+usePathnameMock.mockReturnValue("/the-memes/1");
 
 (useRouter as jest.Mock).mockReturnValue({
   query: { id: "1" },
   isReady: true,
-  push: mockPush,
-  replace: jest.fn(),
+  push: jest.fn(),
+  replace: mockReplace,
+});
+
+beforeEach(() => {
+  currentFocus = null;
+  mockReplace.mockClear();
+  mockSearchParams.get.mockClear();
+  mockSearchParams.toString.mockClear();
 });
 
 const nftMeta = {
@@ -212,8 +235,8 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 describe("MemePage tab navigation", () => {
   beforeEach(() => {
-    mockPush.mockClear();
-    mockSearchParams.get.mockReturnValue(null);
+    currentFocus = null;
+    mockReplace.mockClear();
   });
 
   it.each([
@@ -231,7 +254,7 @@ describe("MemePage tab navigation", () => {
         expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
       );
 
-      mockPush.mockClear();
+      mockReplace.mockClear();
       const btn = screen.getByRole("button", { name: label });
       await userEvent.click(btn);
 
@@ -240,8 +263,9 @@ describe("MemePage tab navigation", () => {
       });
 
       if (label !== "Live") {
-        expect(mockPush).toHaveBeenLastCalledWith(
-          `/the-memes/1?focus=${focus}`
+        expect(mockReplace).toHaveBeenLastCalledWith(
+          `/the-memes/1?focus=${focus}`,
+          { scroll: false }
         );
       }
     }
@@ -250,12 +274,13 @@ describe("MemePage tab navigation", () => {
 
 describe("MemePage search params handling", () => {
   beforeEach(() => {
-    mockPush.mockClear();
+    currentFocus = null;
+    mockReplace.mockClear();
     mockSearchParams.get.mockClear();
   });
 
   it("defaults to LIVE focus when no focus param", async () => {
-    mockSearchParams.get.mockReturnValue(null);
+    currentFocus = null;
     renderPage();
     await waitFor(() => {
       expect(screen.getByTestId("live-right")).toBeInTheDocument();
@@ -263,7 +288,7 @@ describe("MemePage search params handling", () => {
   });
 
   it("sets focus from valid search param", async () => {
-    mockSearchParams.get.mockReturnValue(MEME_FOCUS.ACTIVITY);
+    currentFocus = MEME_FOCUS.ACTIVITY;
     renderPage();
     await waitFor(() => {
       expect(screen.getByTestId("activity")).toBeInTheDocument();
@@ -271,7 +296,7 @@ describe("MemePage search params handling", () => {
   });
 
   it("ignores invalid focus param and defaults to LIVE", async () => {
-    mockSearchParams.get.mockReturnValue("invalid-focus");
+    currentFocus = "invalid-focus";
     renderPage();
     await waitFor(() => {
       expect(screen.getByTestId("live-right")).toBeInTheDocument();
@@ -288,7 +313,10 @@ describe("MemePage search params handling", () => {
     const artButton = screen.getByRole("button", { name: "The Art" });
     await userEvent.click(artButton);
 
-    expect(mockPush).toHaveBeenCalledWith(`/the-memes/1?focus=${MEME_FOCUS.THE_ART}`);
+    expect(mockReplace).toHaveBeenCalledWith(
+      `/the-memes/1?focus=${MEME_FOCUS.THE_ART}`,
+      { scroll: false }
+    );
   });
 });
 
@@ -324,13 +352,16 @@ describe("MemePage API interactions", () => {
     });
 
     renderPage();
-    
-    // Should not make the second NFT call when metadata is empty
+
     await waitFor(() => {
       const calls = (fetchUrl as jest.Mock).mock.calls;
-      const nftCalls = calls.filter(call => call[0].includes("/api/nfts?"));
-      expect(nftCalls).toHaveLength(0);
+      const nftCalls = calls.filter((call) =>
+        call[0].includes("/api/nfts?")
+      );
+      expect(nftCalls).toHaveLength(1);
     });
+
+    expect(screen.queryByTestId("nft-navigation")).not.toBeInTheDocument();
   });
 });
 

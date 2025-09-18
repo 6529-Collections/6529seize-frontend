@@ -26,6 +26,11 @@ export function MemePageActivity(props: {
   );
 
   useEffect(() => {
+    if (!props.show || !props.nft) {
+      return;
+    }
+    let isMounted = true;
+
     if (props.nft) {
       let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&id=${props.nft.id}&page_size=${props.pageSize}&page=${activityPage}`;
       switch (activityTypeFilter) {
@@ -46,11 +51,24 @@ export function MemePageActivity(props: {
           break;
       }
       fetchUrl(url).then((response: DBResponse) => {
+        if (!isMounted) {
+          return;
+        }
         setActivityTotalResults(response.count);
         setActivity(response.data);
       });
     }
-  }, [props.nft, activityPage, activityTypeFilter]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    props.show,
+    props.nft,
+    props.pageSize,
+    activityPage,
+    activityTypeFilter,
+  ]);
 
   if (props.show && props.nft) {
     return (

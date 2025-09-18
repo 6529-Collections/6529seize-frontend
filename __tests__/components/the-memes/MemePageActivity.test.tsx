@@ -99,17 +99,23 @@ describe("MemePageActivity", () => {
   });
   
   describe("Activity Fetching", () => {
-  it("fetches activity with correct base url", async () => {
-    render(<MemePageActivity show nft={nft} pageSize={10} />);
+    it("skips fetching when tab is hidden", () => {
+      render(<MemePageActivity show={false} nft={nft} pageSize={10} />);
 
-    await waitFor(() => {
-      expect(fetchUrlMock).toHaveBeenCalledWith(
-        `https://api.test/api/transactions?contract=${MEMES_CONTRACT}&id=1&page_size=10&page=1`
+      expect(fetchUrlMock).not.toHaveBeenCalled();
+    });
+
+    it("fetches activity with correct base url", async () => {
+      render(<MemePageActivity show nft={nft} pageSize={10} />);
+
+      await waitFor(() => {
+        expect(fetchUrlMock).toHaveBeenCalledWith(
+          `https://api.test/api/transactions?contract=${MEMES_CONTRACT}&id=1&page_size=10&page=1`
       );
     });
   });
 
-  it("updates url when filter is changed", async () => {
+    it("updates url when filter is changed", async () => {
     render(<MemePageActivity show nft={nft} pageSize={5} />);
 
     await waitFor(() => expect(fetchUrlMock).toHaveBeenCalledTimes(1));
@@ -124,7 +130,7 @@ describe("MemePageActivity", () => {
     });
   });
 
-  it("requests new page when pagination changes", async () => {
+    it("requests new page when pagination changes", async () => {
     fetchUrlMock.mockResolvedValueOnce({ count: 20, data: [{} as any] });
     render(<MemePageActivity show nft={nft} pageSize={10} />);
     await waitFor(() => expect(fetchUrlMock).toHaveBeenCalledTimes(1));
@@ -142,7 +148,7 @@ describe("MemePageActivity", () => {
     });
   });
   
-  it("tests all TypeFilter values", async () => {
+    it("tests all TypeFilter values", async () => {
     render(<MemePageActivity show nft={nft} pageSize={5} />);
     await waitFor(() => expect(fetchUrlMock).toHaveBeenCalledTimes(1));
     
@@ -165,7 +171,7 @@ describe("MemePageActivity", () => {
     }
   });
   
-  it("resets page to 1 when filter changes", async () => {
+    it("resets page to 1 when filter changes", async () => {
     // Start with page 2
     fetchUrlMock.mockResolvedValue({ count: 20, data: [{} as any] });
     render(<MemePageActivity show nft={nft} pageSize={10} />);
@@ -195,10 +201,10 @@ describe("MemePageActivity", () => {
     });
   });
   
-  it("does not fetch when nft is undefined", () => {
-    render(<MemePageActivity show nft={undefined} pageSize={10} />);
-    expect(fetchUrlMock).not.toHaveBeenCalled();
-  });
+    it("does not fetch when nft is undefined", () => {
+      render(<MemePageActivity show nft={undefined} pageSize={10} />);
+      expect(fetchUrlMock).not.toHaveBeenCalled();
+    });
   });
   
   describe("Error Handling", () => {
