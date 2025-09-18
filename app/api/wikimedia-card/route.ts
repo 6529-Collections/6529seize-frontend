@@ -104,6 +104,28 @@ const parseAcceptLanguage = (header: string | null): string[] => {
   return Array.from(preferred);
 };
 
+const WIKIMEDIA_ALLOWED_HOSTS = new Set([
+  "w.wiki",
+  "wikidata.org",
+  "www.wikidata.org",
+  "commons.wikimedia.org",
+  "upload.wikimedia.org",
+]);
+
+const isAllowedWikimediaHost = (hostname: string): boolean => {
+  if (WIKIMEDIA_ALLOWED_HOSTS.has(hostname)) {
+    return true;
+  }
+  return hostname.endsWith(".wikipedia.org");
+};
+
+const ensureWikimediaUrl = (url: URL): void => {
+  const hostname = url.hostname.toLowerCase();
+  if (!isAllowedWikimediaHost(hostname)) {
+    throw new Error("Unsupported Wikimedia host");
+  }
+};
+
 const fetchWithTimeout = async (
   url: string,
   init: RequestInit & { readonly timeoutMs?: number; readonly language?: string } = {}
@@ -305,9 +327,12 @@ const extractCommonsFileName = (url: URL): string | null => {
 };
 
 const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
+  ensureWikimediaUrl(url);
+
   let currentUrl = url;
   if (currentUrl.hostname.toLowerCase() === "w.wiki") {
     currentUrl = await resolveShortLink(currentUrl);
+    ensureWikimediaUrl(currentUrl);
   }
 
   let hostname = currentUrl.hostname.toLowerCase();
@@ -958,6 +983,7 @@ export async function GET(request: NextRequest) {
 
   try {
     await ensureUrlIsPublic(targetUrl);
+    ensureWikimediaUrl(targetUrl);
   } catch (error) {
     const message = error instanceof Error ? error.message : "The provided URL is not allowed.";
     return NextResponse.json({ error: message }, { status: 400 });
