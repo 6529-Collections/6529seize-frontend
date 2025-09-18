@@ -169,6 +169,8 @@ const fetchJson = async <T>(
 const resolveShortLink = async (url: URL): Promise<URL> => {
   let current = url;
   for (let redirectCount = 0; redirectCount < SHORT_LINK_MAX_REDIRECTS; redirectCount += 1) {
+    await ensureUrlIsPublic(current);
+    ensureWikimediaUrl(current);
     const response = await fetchWithTimeout(current.toString(), {
       method: "HEAD",
       redirect: "manual",
@@ -180,7 +182,14 @@ const resolveShortLink = async (url: URL): Promise<URL> => {
       if (!location) {
         break;
       }
-      current = new URL(location, current);
+      const nextUrl = new URL(location, current);
+      try {
+        await ensureUrlIsPublic(nextUrl);
+        ensureWikimediaUrl(nextUrl);
+      } catch {
+        throw new Error("Short link resolves to a non-Wikimedia or non-public destination");
+      }
+      current = nextUrl;
       continue;
     }
 
@@ -191,6 +200,8 @@ const resolveShortLink = async (url: URL): Promise<URL> => {
     break;
   }
 
+  await ensureUrlIsPublic(url);
+  ensureWikimediaUrl(url);
   const fallback = await fetchWithTimeout(url.toString(), {
     method: "GET",
     redirect: "manual",
@@ -200,7 +211,14 @@ const resolveShortLink = async (url: URL): Promise<URL> => {
   if (fallback.status >= 300 && fallback.status < 400) {
     const location = fallback.headers.get("location");
     if (location) {
-      return new URL(location, url);
+      const nextUrl = new URL(location, url);
+      try {
+        await ensureUrlIsPublic(nextUrl);
+        ensureWikimediaUrl(nextUrl);
+      } catch {
+        throw new Error("Short link resolves to a non-Wikimedia or non-public destination");
+      }
+      return nextUrl;
     }
   }
 
