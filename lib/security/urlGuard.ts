@@ -176,12 +176,20 @@ function isForbiddenAddress(address: string): boolean {
   return true;
 }
 
+function stripTrailingDots(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 46) {
+    end -= 1;
+  }
+  return end === value.length ? value : value.slice(0, end);
+}
+
 function normalizeHostname(hostname: string): string {
   try {
     const ascii = toASCII(hostname.trim());
-    return ascii.replace(/\.+$/, "").toLowerCase();
+    return stripTrailingDots(ascii).toLowerCase();
   } catch {
-    return hostname.trim().replace(/\.+$/, "").toLowerCase();
+    return stripTrailingDots(hostname.trim()).toLowerCase();
   }
 }
 
