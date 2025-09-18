@@ -72,8 +72,6 @@ export default function SubscriptionsReportComponent() {
   const nextMintDate = nextMintDateOnOrAfter();
   const idx = getSeasonIndexForDate(nextMintDate);
   const szn = displayedSeasonNumberFromIndex(idx);
-  const [remainingMintsForSeason, setRemainingMintsForSeason] =
-    useState<number>(getCardsRemainingUntilEndOf("szn"));
 
   const [now] = useState(new Date());
   const { rows } = useMemo<SeasonMintScanResult>(
@@ -116,7 +114,6 @@ export default function SubscriptionsReportComponent() {
         setRedeemedCounts(redeemed.data);
         setTotalRedeemed(redeemed.count);
         setUpcomingCounts(upcoming);
-        setRemainingMintsForSeason(remainingCountForSeason);
       } finally {
         setRedeemedLoading(false);
         setUpcomingLoading(false);
