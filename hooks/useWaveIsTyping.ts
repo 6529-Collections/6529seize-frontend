@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useWaveWebSocket } from "./useWaveWebSocket";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   WsDropUpdateMessage,
   WsMessageType,
   WsTypingMessage,
 } from "../helpers/Types";
 import { ApiProfileMin } from "../generated/models/ApiProfileMin";
+import { useWebSocket } from "../services/websocket/useWebSocket";
+import { useWebSocketMessage } from "../services/websocket/useWebSocketMessage";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
 /* ------------------------------------------------------------------ */
@@ -63,7 +64,7 @@ export function useWaveIsTyping(
   waveId: string,
   myHandle: string | null
 ): string {
-  const { socket } = useWaveWebSocket(waveId);
+  const { send } = useWebSocket();
 
   /** Only the final string lives in state; everything else is in a ref. */
   const [typingMessage, setTypingMessage] = useState("");
@@ -77,38 +78,78 @@ export function useWaveIsTyping(
     setTypingMessage("");
   }, [waveId]);
 
-  /* ----- 2. Handle incoming USER_IS_TYPING packets ----------------- */
+  /* ----- 2. Subscribe to wave updates ------------------------------- */
   useEffect(() => {
-    if (!socket) return;
+    if (!waveId) {
+      return;
+    }
 
-    const onMessage = (event: MessageEvent) => {
-      let msg: WsTypingMessage | WsDropUpdateMessage;
-      try {
-        msg = JSON.parse(event.data);
-      } catch (err) {
-        console.error("Bad WebSocket JSON", err);
+    send(WsMessageType.SUBSCRIBE_TO_WAVE, {
+      wave_id: waveId,
+      subscribe: true,
+    });
+
+    return () => {
+      send(WsMessageType.SUBSCRIBE_TO_WAVE, {
+        wave_id: waveId,
+        subscribe: false,
+      });
+    };
+  }, [send, waveId]);
+
+  /* ----- 3. Handle drop updates ------------------------------------ */
+  const handleDropUpdate = useCallback(
+    (drop: WsDropUpdateMessage["data"]) => {
+      if (!drop) {
         return;
       }
-      if (msg.type === WsMessageType.DROP_UPDATE) {
-        typersRef.current.delete(msg.data?.author.handle ?? "");
+
+      if (drop.wave?.id !== waveId) {
+        return;
       }
-      if (msg.type !== WsMessageType.USER_IS_TYPING) return;
-      const data = msg.data;
-      if (!data || data.wave_id !== waveId) return;
-      if (data.profile?.handle === myHandle) return; // ignore myself
-      if (!data.profile?.handle) return;
+
+      const handle = drop.author?.handle;
+      if (!handle) {
+        return;
+      }
+
+      typersRef.current.delete(handle);
+    },
+    [waveId]
+  );
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_UPDATE,
+    handleDropUpdate
+  );
+
+  /* ----- 4. Handle incoming USER_IS_TYPING packets ----------------- */
+  const handleTypingMessage = useCallback(
+    (data: WsTypingMessage["data"]) => {
+      if (!data || data.wave_id !== waveId) {
+        return;
+      }
+
+      const handle = data.profile?.handle;
+      if (!handle || handle === myHandle) {
+        return;
+      }
+
       // Use local clock for freshness (avoids clock‑skew issues)
-      typersRef.current.set(data.profile.handle, {
+      typersRef.current.set(handle, {
         profile: data.profile,
         lastTypingAt: Date.now(),
       });
-    };
+    },
+    [waveId, myHandle]
+  );
 
-    socket.addEventListener("message", onMessage);
-    return () => socket.removeEventListener("message", onMessage);
-  }, [socket, waveId, myHandle]);
+  useWebSocketMessage<WsTypingMessage["data"]>(
+    WsMessageType.USER_IS_TYPING,
+    handleTypingMessage
+  );
 
-  /* ----- 3. Periodic cleanup + state update ------------------------ */
+  /* ----- 5. Periodic cleanup + state update ------------------------ */
   useEffect(() => {
     const intervalId = setInterval(() => {
       const now = Date.now();
