@@ -5,8 +5,9 @@ import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
+const HTML_BYTE_LIMIT = 128 * 1024;
 const USER_AGENT =
-  "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
 type CacheEntry = {
   readonly expiresAt: number;
@@ -62,7 +63,42 @@ async function fetchHtml(
       }
 
       const contentType = response.headers.get("content-type");
-      const html = await response.text();
+      const reader = response.body?.getReader();
+
+      if (!reader) {
+        const html = await response.text();
+        return {
+          html: html.slice(0, HTML_BYTE_LIMIT),
+          contentType,
+          finalUrl: currentUrl.toString(),
+        };
+      }
+
+      const decoder = new TextDecoder();
+      let receivedBytes = 0;
+      let html = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done || !value) {
+          break;
+        }
+
+        const slice =
+          receivedBytes + value.length > HTML_BYTE_LIMIT
+            ? value.subarray(0, HTML_BYTE_LIMIT - receivedBytes)
+            : value;
+
+        html += decoder.decode(slice, { stream: true });
+        receivedBytes += slice.length;
+
+        if (receivedBytes >= HTML_BYTE_LIMIT) {
+          break;
+        }
+      }
+
+      html += decoder.decode();
+
       return { html, contentType, finalUrl: currentUrl.toString() };
     } finally {
       clearTimeout(timeout);
@@ -98,7 +134,7 @@ export async function GET(request: NextRequest) {
   try {
     const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
     await ensureUrlIsPublic(new URL(finalUrl));
-    const data = buildResponse(targetUrl, html, contentType);
+    const data = buildResponse(targetUrl, html, contentType, finalUrl);
     const entry: CacheEntry = {
       data,
       expiresAt: Date.now() + CACHE_TTL_MS,

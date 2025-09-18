@@ -94,4 +94,49 @@ describe("open-graph route helpers", () => {
       ensureUrlIsPublic(new URL("http://example.com"))
     ).resolves.toBeUndefined();
   });
+
+  it("builds a Weibo post response when metadata is present", () => {
+    const html = `
+      <html>
+        <head>
+          <meta property="og:title" content="测试用户的微博" />
+          <meta property="og:description" content="这是正文" />
+          <meta property="og:image" content="https://wx1.sinaimg.cn/large/post-image.jpg" />
+          <meta property="article:published_time" content="2024-01-02T03:04:05Z" />
+        </head>
+        <body></body>
+      </html>
+    `;
+
+    const url = new URL("https://weibo.com/123456/AbCdE");
+    const result = buildResponse(url, html, "text/html", "https://weibo.com/123456/AbCdE?refer=foo");
+
+    expect(result).toMatchObject({
+      type: "weibo.post",
+      canonicalUrl: "https://weibo.com/123456/AbCdE",
+    });
+    expect((result as any).post.uid).toBe("123456");
+    expect((result as any).post.mid).toBe("AbCdE");
+    expect((result as any).post.text).toContain("这是正文");
+    expect((result as any).post.images?.[0]?.url).toContain(
+      "/api/open-graph/proxy-image?url="
+    );
+  });
+
+  it("returns an unavailable response when Weibo login wall is detected", () => {
+    const html = `
+      <html>
+        <head><title>Sina Visitor System</title></head>
+        <body>Sina Visitor System</body>
+      </html>
+    `;
+
+    const url = new URL("https://weibo.com/123456/AbCdE");
+    const result = buildResponse(url, html, "text/html");
+
+    expect(result).toMatchObject({
+      type: "weibo.unavailable",
+      reason: "login_required",
+    });
+  });
 });
