@@ -120,6 +120,14 @@ const isAllowedWikimediaHost = (hostname: string): boolean => {
   return hostname.endsWith(".wikipedia.org");
 };
 
+const stripTrailingDots = (value: string): string => {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 46) {
+    end -= 1;
+  }
+  return end === value.length ? value : value.slice(0, end);
+};
+
 const ensureWikimediaUrl = (url: URL): void => {
   let asciiHostname: string;
   try {
@@ -128,7 +136,7 @@ const ensureWikimediaUrl = (url: URL): void => {
     throw new Error("Unsupported Wikimedia host");
   }
 
-  const normalizedHostname = asciiHostname.replace(/\.+$/, "").toLowerCase();
+  const normalizedHostname = stripTrailingDots(asciiHostname).toLowerCase();
   if (!normalizedHostname || !isAllowedWikimediaHost(normalizedHostname)) {
     throw new Error("Unsupported Wikimedia host");
   }
