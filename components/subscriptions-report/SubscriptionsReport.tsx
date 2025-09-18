@@ -17,6 +17,7 @@ import {
   SeasonMintScanResult,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import Pagination, { Paginated } from "@/components/pagination/Pagination";
+import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import {
   RedeemedSubscriptionCounts,
   SubscriptionCounts,
@@ -24,11 +25,6 @@ import {
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -240,7 +236,7 @@ export default function SubscriptionsReportComponent() {
               </table>
               {upcomingCounts.length > 10 && (
                 <div ref={upcomingToggleRef} className="tw-pt-3 tw-text-center">
-                  <SubscriptionExpandButton
+                  <ShowMoreButton
                     expanded={upcomingExpanded}
                     setExpanded={setUpcomingExpanded}
                   />
@@ -379,29 +375,5 @@ function RedeemedSubscriptionDetails(
         {props.count.count > 0 ? props.count.count.toLocaleString() : "0"}
       </td>
     </>
-  );
-}
-
-function SubscriptionExpandButton(
-  props: Readonly<{
-    expanded: boolean;
-    setExpanded: (expanded: boolean) => void;
-  }>
-) {
-  return (
-    <button
-      className="btn-link decoration-none"
-      onClick={() => props.setExpanded(!props.expanded)}>
-      {props.expanded ? (
-        <>
-          Show Less <FontAwesomeIcon icon={faChevronCircleUp} height={"20px"} />
-        </>
-      ) : (
-        <>
-          Show More{" "}
-          <FontAwesomeIcon icon={faChevronCircleDown} height={"20px"} />
-        </>
-      )}
-    </button>
   );
 }

@@ -14,6 +14,7 @@ import {
   getSeasonIndexForDate,
   nextMintDateOnOrAfter,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import {
   MEMES_MINT_PRICE,
   SUBSCRIPTIONS_ADDRESS,
@@ -26,11 +27,6 @@ import {
   numberWithCommasFromString,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
@@ -258,7 +254,12 @@ export default function UserPageSubscriptionsTopUp() {
       )}
       <Row className="pt-3 pb-4">
         <Col>
-          <DeepTimeExpandButton expanded={showDeep} setExpanded={setShowDeep} />
+          <ShowMoreButton
+            expanded={showDeep}
+            setExpanded={setShowDeep}
+            showMoreLabel="Show Deep Time Subscriptions"
+            showLessLabel="Hide Deep Time Subscriptions"
+          />
         </Col>
       </Row>
       <Row>
@@ -345,30 +346,5 @@ function CardCountTopup(
         </Row>
       </Form.Group>
     </Form>
-  );
-}
-
-function DeepTimeExpandButton(
-  props: Readonly<{
-    expanded: boolean;
-    setExpanded: (expanded: boolean) => void;
-  }>
-) {
-  return (
-    <button
-      className="btn-link decoration-none"
-      onClick={() => props.setExpanded(!props.expanded)}>
-      {props.expanded ? (
-        <>
-          Hide Deep Time Subscriptions{" "}
-          <FontAwesomeIcon icon={faChevronCircleUp} height={"20px"} />
-        </>
-      ) : (
-        <>
-          Show Deep Time Subscriptions{" "}
-          <FontAwesomeIcon icon={faChevronCircleDown} height={"20px"} />
-        </>
-      )}
-    </button>
   );
 }

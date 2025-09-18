@@ -1,5 +1,7 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
+import { Spinner } from "@/components/dotLoader/DotLoader";
 import {
   formatFullDate,
   getUpcomingMintsForCurrentOrNextSeason,
@@ -7,25 +9,20 @@ import {
   SeasonMintRow,
   SeasonMintScanResult,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import {
   NFTFinalSubscription,
   NFTSubscription,
   SubscriptionDetails,
 } from "@/entities/ISubscription";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-  faInfoCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
-import { AuthContext } from "../../auth/Auth";
-import { Spinner } from "../../dotLoader/DotLoader";
 import styles from "./UserPageSubscriptions.module.scss";
 
 export default function UserPageSubscriptionsUpcoming(
@@ -87,7 +84,7 @@ export default function UserPageSubscriptionsUpcoming(
                 <tr>
                   <td>
                     <div className="d-flex align-items-center justify-content-center gap-1">
-                      <SubscriptionExpandButton
+                      <ShowMoreButton
                         expanded={expanded}
                         setExpanded={setExpanded}
                       />
@@ -100,30 +97,6 @@ export default function UserPageSubscriptionsUpcoming(
         </Col>
       </Row>
     </Container>
-  );
-}
-
-function SubscriptionExpandButton(
-  props: Readonly<{
-    expanded: boolean;
-    setExpanded: (expanded: boolean) => void;
-  }>
-) {
-  return (
-    <button
-      className="btn-link decoration-none"
-      onClick={() => props.setExpanded(!props.expanded)}>
-      {props.expanded ? (
-        <>
-          Show Less <FontAwesomeIcon icon={faChevronCircleUp} height={"20px"} />
-        </>
-      ) : (
-        <>
-          Show More{" "}
-          <FontAwesomeIcon icon={faChevronCircleDown} height={"20px"} />
-        </>
-      )}
-    </button>
   );
 }
 
