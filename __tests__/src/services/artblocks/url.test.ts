@@ -93,8 +93,19 @@ describe("buildMediaUrl", () => {
 });
 
 describe("buildLiveUrl", () => {
-  it("builds live viewer URLs", () => {
-    expect(buildLiveUrl({contract: "0x1234567890abcdef1234567890abcdef12345678", tokenId: "99" })).toBe(
+  it("builds flagship live viewer URLs", () => {
+    expect(buildLiveUrl({ tokenId: "99" })).toBe(
+      "https://live.artblocks.io/token/flagship-99"
+    );
+  });
+
+  it("builds contract live viewer URLs", () => {
+    expect(
+      buildLiveUrl({
+        contract: "0x1234567890abcdef1234567890abcdef12345678",
+        tokenId: "99",
+      })
+    ).toBe(
       "https://live.artblocks.io/token/0x1234567890abcdef1234567890abcdef12345678-99"
     );
   });
