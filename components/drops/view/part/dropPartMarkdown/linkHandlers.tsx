@@ -11,6 +11,7 @@ import { Tweet, type TwitterComponents } from "react-tweet";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { SeizeQuoteLinkInfo, parseSeizeQuoteLink, parseSeizeQueryLink } from "../../../../../helpers/SeizeLinkParser";
 import { parseArtBlocksLink } from "@/src/services/artblocks/url";
+import { isFarcasterHost } from "@/src/services/farcaster/url";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 
 import { parseYoutubeLink } from "./youtube";
@@ -26,6 +27,7 @@ type WaveItemChatComponent = typeof import("../../../../waves/list/WaveItemChat"
 type DropItemChatComponent = typeof import("../../../../waves/drops/DropItemChat").default;
 type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHrefButtons").default;
 type LinkPreviewCardComponent = typeof import("../../../../waves/LinkPreviewCard").default;
+type FarcasterCardComponent = typeof import("../../../../waves/FarcasterCard").default;
 
 const getDropPartMarkdownImage = (): DropPartMarkdownImageComponent => {
   const module = require("../DropPartMarkdownImage");
@@ -65,6 +67,11 @@ const getChatItemHrefButtons = (): ChatItemHrefButtonsComponent => {
 const getLinkPreviewCard = (): LinkPreviewCardComponent => {
   const module = require("../../../../waves/LinkPreviewCard");
   return module.default as LinkPreviewCardComponent;
+};
+
+const getFarcasterCard = (): FarcasterCardComponent => {
+  const module = require("../../../../waves/FarcasterCard");
+  return module.default as FarcasterCardComponent;
 };
 
 interface SmartLinkHandler<T> {
@@ -231,6 +238,7 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       "media-proxy.artblocks.io",
       "token.artblocks.io",
     ];
+    const farcasterDomains = ["warpcast.com", "farcaster.xyz"];
 
     if (isPepeHost(hostname)) {
       return false;
@@ -240,7 +248,9 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       hostname === "youtu.be" ||
       youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
       twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
-      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+      farcasterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+      isFarcasterHost(hostname)
     ) {
       return false;
     }
@@ -427,12 +437,26 @@ export const createLinkRenderer = ({
       }
     }
 
-    if (shouldUseOpenGraphPreview(href)) {
-      const LinkPreviewCard = getLinkPreviewCard();
+    const isHttpLink = href.startsWith("http://") || href.startsWith("https://");
+
+    if (isHttpLink) {
+      const FarcasterCard = getFarcasterCard();
       return (
-        <LinkPreviewCard
+        <FarcasterCard
           href={href}
-          renderFallback={() => renderExternalOrInternalLink(href, props)}
+          renderFallback={() => {
+            if (shouldUseOpenGraphPreview(href)) {
+              const LinkPreviewCard = getLinkPreviewCard();
+              return (
+                <LinkPreviewCard
+                  href={href}
+                  renderFallback={() => renderExternalOrInternalLink(href, props)}
+                />
+              );
+            }
+
+            return renderExternalOrInternalLink(href, props);
+          }}
         />
       );
     }

@@ -55,6 +55,13 @@ const mockArtBlocksTokenCard = jest.fn((props: any) => (
   <div data-testid="artblocks-card" data-href={props.href} data-token={props.id?.tokenId} />
 ));
 
+const mockFarcasterCard = jest.fn(({ renderFallback, href }: any) => (
+  <span data-testid="farcaster-card" data-href={href}>
+    {renderFallback()}
+  </span>
+));
+
+
 jest.mock("../../../../../components/waves/LinkPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockLinkPreviewCard(props),
@@ -65,9 +72,15 @@ jest.mock("@/src/components/waves/ArtBlocksTokenCard", () => ({
   default: (props: any) => mockArtBlocksTokenCard(props),
 }));
 
+jest.mock("../../../../../components/waves/FarcasterCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockFarcasterCard(props),
+}));
+
 beforeEach(() => {
   mockLinkPreviewCard.mockClear();
   mockArtBlocksTokenCard.mockClear();
+  mockFarcasterCard.mockClear();
 });
 
 afterEach(() => {
@@ -159,6 +172,7 @@ describe("DropPartMarkdown", () => {
         onQuoteClick={jest.fn()}
       />
     );
+    expect(mockFarcasterCard).toHaveBeenCalledTimes(1);
     expect(mockLinkPreviewCard).toHaveBeenCalledTimes(1);
     const previewCall = mockLinkPreviewCard.mock.calls[0][0];
     expect(previewCall.href).toBe("https://google.com");
