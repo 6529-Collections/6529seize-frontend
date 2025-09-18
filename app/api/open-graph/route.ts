@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
+import { handleJackButcher } from "./jack-butcher";
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
 const USER_AGENT =
   "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
@@ -96,12 +97,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
-    await ensureUrlIsPublic(new URL(finalUrl));
-    const data = buildResponse(targetUrl, html, contentType);
+    const { data, ttl } = await resolveLinkPreview(targetUrl);
     const entry: CacheEntry = {
       data,
-      expiresAt: Date.now() + CACHE_TTL_MS,
+      expiresAt: Date.now() + ttl,
     };
 
     cache.set(normalizedUrl, entry);
@@ -111,6 +110,24 @@ export async function GET(request: NextRequest) {
     const message = error instanceof Error ? error.message : "Unable to fetch URL";
     return NextResponse.json({ error: message }, { status: 502 });
   }
+}
+
+async function resolveLinkPreview(
+  targetUrl: URL
+): Promise<{ data: LinkPreviewResponse; ttl: number }> {
+  const specialized = await handleJackButcher(targetUrl);
+  if (specialized) {
+    return specialized;
+  }
+
+  const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
+  await ensureUrlIsPublic(new URL(finalUrl));
+  const data = buildResponse(targetUrl, html, contentType);
+
+  return {
+    data,
+    ttl: DEFAULT_CACHE_TTL_MS,
+  };
 }
 
 export const dynamic = "force-dynamic";
