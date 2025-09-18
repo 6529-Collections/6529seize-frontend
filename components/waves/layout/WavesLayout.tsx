@@ -103,7 +103,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     return (
       <div
         id="waves-connect"
-        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[85dvh]">
+        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-screen">
         <Image
           priority
           loading="eager"

@@ -14,7 +14,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   rightContent,
 }) => {
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-px-5 tw-pt-2 tw-pb-1">
+    <div className="tw-flex tw-items-center tw-justify-between tw-px-4">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         {icon && (
           <FontAwesomeIcon icon={icon} className="tw-size-3 tw-text-iron-400" />

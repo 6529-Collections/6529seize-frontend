@@ -1,45 +1,53 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import React, { ReactNode, useCallback } from "react";
-import { usePathname } from "next/navigation";
-import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import HeaderPlaceholder from "../header/HeaderPlaceholder";
-import Breadcrumb from "../breadcrumb/Breadcrumb";
-import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
-import { useHeaderContext } from "../../contexts/HeaderContext";
-
-const Header = dynamic(() => import("../header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import React, { ReactNode, useState } from "react";
+import SmallScreenHeader from "./SmallScreenHeader";
+import WebSidebar from "./sidebar/WebSidebar";
+import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 
 interface Props {
   readonly children: ReactNode;
 }
 
 export default function SmallScreenLayout({ children }: Props) {
-  const { registerRef } = useLayout();
-  const { setHeaderRef } = useHeaderContext();
-  const breadcrumbs = useBreadcrumbs();
-  const pathname = usePathname();
-  const isHomePage = pathname === "/";
+  // Simple menu state
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
 
-  const headerWrapperRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      registerRef("header", node);
-      setHeaderRef(node);
-    },
-    [registerRef, setHeaderRef]
-  );
+  const handleCollectionsToggle = () =>
+    setIsCollectionsSubmenuOpen(prev => !prev);
+
+  const handleCollectionsClose = () => setIsCollectionsSubmenuOpen(false);
 
   return (
-    <div>
-      <div ref={headerWrapperRef}>
-        <Header />
-        {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />}
-      </div>
-      <main>{children}</main>
+    <div className="tw-flex tw-flex-col tw-h-screen">
+      {/* Simple header bar with hamburger */}
+      <SmallScreenHeader
+        onMenuToggle={() => setIsMenuOpen(!isMenuOpen)}
+        isMenuOpen={isMenuOpen}
+      />
+
+      {/* Simple overlay sidebar */}
+      {isMenuOpen && (
+        <div className="tailwind-scope">
+          <WebSidebar
+            isCollapsed={false}
+            onToggle={() => setIsMenuOpen(!isMenuOpen)}
+            isCollectionsSubmenuOpen={isCollectionsSubmenuOpen}
+            onCollectionsSubmenuToggle={handleCollectionsToggle}
+            onCollectionsSubmenuClose={handleCollectionsClose}
+            isMobile={true}
+            isOffcanvasOpen={isMenuOpen}
+            onCloseOffcanvas={() => setIsMenuOpen(false)}
+            sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
+          />
+        </div>
+      )}
+
+      {/* Main content that grows to fill space */}
+      <main className={`tw-flex-1 tw-overflow-auto tw-transition-opacity tw-duration-300 ${isMenuOpen ? 'tw-opacity-40 tw-pointer-events-none' : ''}`}>
+        {children}
+      </main>
     </div>
   );
 }

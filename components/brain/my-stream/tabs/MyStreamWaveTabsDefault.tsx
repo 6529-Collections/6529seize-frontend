@@ -17,9 +17,9 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3 tw-bg-iron-950">
+    <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
       {/* Wave name header with toggle button */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-6 tw-py-3">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-6 tw-py-3 tw-border-b tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-t-0">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <div className="tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
             <WavePicture
@@ -38,7 +38,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         <button
           type="button"
           onClick={toggleRightSidebar}
-          className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-600 tw-shadow-sm tw-flex-shrink-0"
+          className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800/85 tw-border tw-border-iron-700/70 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-700/95 desktop-hover:hover:tw-border-iron-500/70 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
           aria-label="Toggle right sidebar"
         >
           <ChevronDoubleLeftIcon

@@ -51,7 +51,7 @@ function WebSidebarUser({
 
   const profile = parentProfile || localProfile;
 
-  const containerClasses = `tw-mt-auto tw-relative tw-w-full tw-group tw-py-4 ${
+  const containerClasses = `tw-mt-auto tw-relative tw-w-full tw-group tw-pb-4  tw-pt-2 ${
     isCollapsed ? "tw-px-2" : "tw-px-4"
   }`;
 

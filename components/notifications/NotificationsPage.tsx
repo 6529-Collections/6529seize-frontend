@@ -19,7 +19,7 @@ export default function NotificationsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[85dvh]">
+      <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-screen">
         <Image
           unoptimized
           priority

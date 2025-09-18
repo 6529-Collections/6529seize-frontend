@@ -37,10 +37,10 @@ function WebSidebarNavItem({
       {Icon && (
         <div className="tw-relative">
           <Icon
-            className={`tw-h-6 tw-w-6 tw-shrink-0 ${iconSizeClass || ""}`}
+            className={`tw-h-6 tw-w-6 tw-flex-shrink-0 ${iconSizeClass || ""}`}
           />
           {hasIndicator && (
-            <div className="tw-absolute tw-right-0 tw-top-0 tw-rounded-full tw-bg-red tw-h-2 tw-w-2"></div>
+            <div className="tw-flex-shrink-0 tw-absolute tw-right-0 tw-top-0 tw-rounded-full tw-bg-red tw-h-2 tw-w-2"></div>
           )}
         </div>
       )}
