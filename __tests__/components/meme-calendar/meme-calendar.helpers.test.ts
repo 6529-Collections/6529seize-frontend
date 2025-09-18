@@ -74,7 +74,7 @@ describe("formatToFullDivision", () => {
     });
 
     expect(labels.join(" ")).toMatch(
-      /SZN\s+\d+.*Year\s+\d+.*Epoch\s+\d+.*Period\s+\d+.*Era\s+\d+.*Eon\s+\d+/
+      /^SZN\s+\d+\b[^\r\n]*?Year\s+\d+\b[^\r\n]*?Epoch\s+\d+\b[^\r\n]*?Period\s+\d+\b[^\r\n]*?Era\s+\d+\b[^\r\n]*?Eon\s+\d+\b$/
     );
   });
 });
