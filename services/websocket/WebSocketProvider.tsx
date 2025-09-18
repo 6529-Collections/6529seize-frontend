@@ -27,16 +27,22 @@ const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
 
 /**
- * Calculate delay for exponential backoff
+ * Calculate delay for exponential backoff with jitter.
+ *
+ * Applies a random multiplier between 0.5x and 1.5x to stagger reconnect
+ * attempts while still respecting the configured maximum delay.
  */
-function calculateReconnectDelay(
+export function calculateReconnectDelay(
   attempt: number,
   initialDelay: number,
   maxDelay: number
 ): number {
-  // Exponential backoff formula: initialDelay * 2^attempt (capped at maxDelay)
-  const delay = initialDelay * Math.pow(1.5, attempt);
-  return Math.min(delay, maxDelay);
+  // Exponential backoff formula: initialDelay * 1.5^attempt (capped at maxDelay)
+  const exponentialDelay = initialDelay * Math.pow(1.5, attempt);
+  const jitterFactor = 0.5 + Math.random();
+  const jitteredDelay = exponentialDelay * jitterFactor;
+
+  return Math.min(jitteredDelay, maxDelay);
 }
 
 /**
