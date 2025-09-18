@@ -2,21 +2,30 @@
 
 import { type ReactElement, useEffect, useState } from "react";
 
+import GoogleWorkspaceCard from "@/src/components/waves/GoogleWorkspaceCard";
+
 import OpenGraphPreview, {
   hasOpenGraphContent,
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
-import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import {
+  fetchLinkPreview,
+  type GoogleWorkspaceLinkPreview,
+} from "../../services/api/link-preview-api";
 
 interface LinkPreviewCardProps {
   readonly href: string;
   readonly renderFallback: () => ReactElement;
 }
 
+type SuccessState =
+  | { readonly kind: "google"; readonly data: GoogleWorkspaceLinkPreview }
+  | { readonly kind: "openGraph"; readonly data: OpenGraphPreviewData };
+
 type PreviewState =
-  | { readonly type: "loading"; readonly data: OpenGraphPreviewData | null }
-  | { readonly type: "success"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "loading" }
+  | { readonly type: "success"; readonly data: SuccessState }
   | { readonly type: "fallback" };
 
 const toPreviewData = (
@@ -37,19 +46,27 @@ const toPreviewData = (
   };
 };
 
+const isGoogleWorkspacePreview = (
+  response: Awaited<ReturnType<typeof fetchLinkPreview>>
+): response is GoogleWorkspaceLinkPreview => {
+  if (!response || typeof response !== "object") {
+    return false;
+  }
+
+  const type = (response as { readonly type?: unknown }).type;
+  return typeof type === "string" && type.startsWith("google.");
+};
+
 export default function LinkPreviewCard({
   href,
   renderFallback,
 }: LinkPreviewCardProps) {
-  const [state, setState] = useState<PreviewState>({
-    type: "loading",
-    data: null,
-  });
+  const [state, setState] = useState<PreviewState>({ type: "loading" });
 
   useEffect(() => {
     let active = true;
 
-    setState({ type: "loading", data: null });
+    setState({ type: "loading" });
 
     fetchLinkPreview(href)
       .then((response) => {
@@ -57,12 +74,24 @@ export default function LinkPreviewCard({
           return;
         }
 
+        if (isGoogleWorkspacePreview(response)) {
+          setState({
+            type: "success",
+            data: { kind: "google", data: response },
+          });
+          return;
+        }
+
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
-          setState({ type: "success", data: previewData });
-        } else {
-          setState({ type: "fallback" });
+          setState({
+            type: "success",
+            data: { kind: "openGraph", data: previewData },
+          });
+          return;
         }
+
+        setState({ type: "fallback" });
       })
       .catch(() => {
         if (active) {
@@ -90,7 +119,15 @@ export default function LinkPreviewCard({
     );
   }
 
-  const preview = state.type === "success" ? state.data : undefined;
+  if (state.type === "loading") {
+    return <OpenGraphPreview href={href} preview={undefined} />;
+  }
 
-  return <OpenGraphPreview href={href} preview={preview} />;
+  if (state.data.kind === "google") {
+    return (
+      <GoogleWorkspaceCard href={href} data={state.data.data} />
+    );
+  }
+
+  return <OpenGraphPreview href={href} preview={state.data.data} />;
 }

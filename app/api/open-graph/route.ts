@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
+import {
+  LINK_PREVIEW_USER_AGENT,
+  buildGoogleWorkspaceResponse,
+  buildResponse,
+  ensureUrlIsPublic,
+  validateUrl,
+} from "./utils";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
-const USER_AGENT =
-  "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
-
 type CacheEntry = {
   readonly expiresAt: number;
   readonly data: LinkPreviewResponse;
@@ -33,7 +36,7 @@ async function fetchHtml(
     try {
       const response = await fetch(currentUrl.toString(), {
         headers: {
-          "user-agent": USER_AGENT,
+          "user-agent": LINK_PREVIEW_USER_AGENT,
           accept:
             "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         },
@@ -97,8 +100,15 @@ export async function GET(request: NextRequest) {
 
   try {
     const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
-    await ensureUrlIsPublic(new URL(finalUrl));
-    const data = buildResponse(targetUrl, html, contentType);
+    const finalUrlObject = new URL(finalUrl);
+    await ensureUrlIsPublic(finalUrlObject);
+    const googleWorkspaceResponse = await buildGoogleWorkspaceResponse(
+      finalUrlObject,
+      html,
+      targetUrl
+    );
+    const data =
+      googleWorkspaceResponse ?? buildResponse(finalUrlObject, html, contentType);
     const entry: CacheEntry = {
       data,
       expiresAt: Date.now() + CACHE_TTL_MS,
