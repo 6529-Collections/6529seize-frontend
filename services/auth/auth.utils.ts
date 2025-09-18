@@ -59,6 +59,8 @@ export const setAuthJwt = (
   const now = Math.floor(Date.now() / 1000);
   const expiresInSeconds = jwtExpiration - now;
   const expiresInDays = expiresInSeconds / 86400;
+  const normalizedAddress = address.toLowerCase();
+  const addressRoleStorageKey = `auth-role-${normalizedAddress}`;
 
   // custom expiry for auth token
   Cookies.set(WALLET_AUTH_COOKIE, jwt, {
@@ -68,8 +70,12 @@ export const setAuthJwt = (
 
   safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, address);
   safeLocalStorage.setItem(WALLET_REFRESH_TOKEN_STORAGE_KEY, refreshToken);
-  if (role) {
+  if (role != null) {
     safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, role);
+    safeLocalStorage.setItem(addressRoleStorageKey, role);
+  } else {
+    safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
+    safeLocalStorage.removeItem(addressRoleStorageKey);
   }
 };
 
@@ -115,15 +121,19 @@ export const removeAuthJwt = () => {
  * @returns The validated role from the fresh JWT
  * @throws Error if validation fails
  */
-export const syncWalletRoleWithServer = (serverRole: string | null, address: string): void => {
-  const currentRole = getWalletRole();
-  if (currentRole !== serverRole) {
-    // Update local storage to match server
-    if (serverRole) {
-      safeLocalStorage.setItem(`auth-role-${address.toLowerCase()}`, serverRole);
-    } else {
-      safeLocalStorage.removeItem(`auth-role-${address.toLowerCase()}`);
-    }
+export const syncWalletRoleWithServer = (
+  serverRole: string | null,
+  address: string
+): void => {
+  const normalizedAddress = address.toLowerCase();
+  const addressRoleStorageKey = `auth-role-${normalizedAddress}`;
+
+  if (serverRole) {
+    safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, serverRole);
+    safeLocalStorage.setItem(addressRoleStorageKey, serverRole);
+  } else {
+    safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
+    safeLocalStorage.removeItem(addressRoleStorageKey);
   }
 };
 
