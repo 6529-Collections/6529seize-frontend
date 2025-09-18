@@ -401,9 +401,41 @@ const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
   throw new Error("Unsupported Wikimedia host");
 };
 
+const stripHtmlTags = (value: string): string => {
+  let inTag = false;
+  const chars: string[] = [];
+  let pendingSpace = false;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const current = value[index];
+
+    if (current === "<") {
+      inTag = true;
+      pendingSpace = chars.length > 0;
+      continue;
+    }
+
+    if (current === ">") {
+      inTag = false;
+      continue;
+    }
+
+    if (inTag) {
+      continue;
+    }
+
+    if (pendingSpace && chars[chars.length - 1] !== " ") {
+      chars.push(" ");
+    }
+    pendingSpace = false;
+    chars.push(current);
+  }
+
+  return chars.join("");
+};
+
 const sanitizeHtml = (value: string): string => {
-  return value
-    .replace(/<[^>]+>/g, " ")
+  return stripHtmlTags(value)
     .replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_match, entity) => {
       if (entity.startsWith("#x") || entity.startsWith("#X")) {
         const codePoint = Number.parseInt(entity.slice(2), 16);
@@ -960,4 +992,3 @@ export async function GET(request: NextRequest) {
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-

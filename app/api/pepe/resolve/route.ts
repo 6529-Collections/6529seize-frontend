@@ -95,7 +95,15 @@ const cache = new LruTtlCache<string, Preview>({
 
 const USER_AGENT =
   "6529seize-pepe-card/1.0 (+https://6529.io; fetching pepe.wtf previews)";
-const IPFS_GATEWAY = (process.env.IPFS_GATEWAY || "https://ipfs.io/ipfs/").replace(/\/+$/, "");
+const IPFS_GATEWAY = trimTrailingSlashes(process.env.IPFS_GATEWAY || "https://ipfs.io/ipfs/");
+
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+  return end === value.length ? value : value.slice(0, end);
+}
 
 function isCounterpartyAssetCode(value: string): boolean {
   const upper = value.toUpperCase();
