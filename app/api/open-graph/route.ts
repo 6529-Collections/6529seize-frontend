@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import { fetchEnsPreview, detectEnsTarget, EnsPreviewError } from "./ens";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -71,10 +72,30 @@ async function fetchHtml(
 }
 
 export async function GET(request: NextRequest) {
+  const rawInput = request.nextUrl.searchParams.get("url");
+  if (!rawInput) {
+    return NextResponse.json({ error: "A url query parameter is required." }, { status: 400 });
+  }
+
+  const ensTarget = detectEnsTarget(rawInput);
+  if (ensTarget) {
+    try {
+      const preview = await fetchEnsPreview(ensTarget);
+      return NextResponse.json(preview);
+    } catch (error) {
+      if (error instanceof EnsPreviewError) {
+        return NextResponse.json({ error: error.message }, { status: error.status });
+      }
+      const message =
+        error instanceof Error ? error.message : "Unable to resolve ENS information";
+      return NextResponse.json({ error: message }, { status: 502 });
+    }
+  }
+
   let targetUrl: URL;
 
   try {
-    targetUrl = validateUrl(request.nextUrl.searchParams.get("url"));
+    targetUrl = validateUrl(rawInput);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid or forbidden URL";
     return NextResponse.json({ error: message }, { status: 400 });
