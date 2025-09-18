@@ -8,6 +8,35 @@ export interface LinkPreviewMedia {
   readonly [key: string]: unknown;
 }
 
+export interface TruthSocialPostImage {
+  readonly url: string;
+  readonly alt?: string | null;
+}
+
+export interface TruthSocialAuthor {
+  readonly displayName?: string | null;
+  readonly avatar?: string | null;
+}
+
+export interface TruthSocialPostData {
+  readonly handle: string;
+  readonly postId: string;
+  readonly author: TruthSocialAuthor;
+  readonly createdAt?: string | null;
+  readonly text?: string | null;
+  readonly images?: readonly TruthSocialPostImage[];
+  readonly unavailable?: boolean;
+}
+
+export interface TruthSocialProfileData {
+  readonly handle: string;
+  readonly displayName?: string | null;
+  readonly avatar?: string | null;
+  readonly banner?: string | null;
+  readonly bio?: string | null;
+  readonly unavailable?: boolean;
+}
+
 export interface LinkPreviewResponse {
   readonly requestUrl?: string | null;
   readonly url?: string | null;
@@ -20,6 +49,10 @@ export interface LinkPreviewResponse {
   readonly favicons?: readonly string[] | null;
   readonly image?: LinkPreviewMedia | null;
   readonly images?: readonly LinkPreviewMedia[] | null;
+  readonly type?: string | null;
+  readonly canonicalUrl?: string | null;
+  readonly post?: TruthSocialPostData;
+  readonly profile?: TruthSocialProfileData;
   readonly [key: string]: unknown;
 }
 

@@ -53,7 +53,7 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function decodeHtmlEntities(value: string): string {
+export function decodeHtmlEntities(value: string): string {
   return value.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_, entity: string) => {
     if (entity.startsWith("#x") || entity.startsWith("#X")) {
       const codePoint = parseInt(entity.slice(2), 16);
@@ -67,7 +67,7 @@ function decodeHtmlEntities(value: string): string {
   });
 }
 
-function extractFirstMetaContent(
+export function extractFirstMetaContent(
   html: string,
   keys: readonly string[]
 ): string | undefined {
@@ -84,7 +84,7 @@ function extractFirstMetaContent(
   return undefined;
 }
 
-function extractAllMetaContent(
+export function extractAllMetaContent(
   html: string,
   keys: readonly string[]
 ): string[] {
@@ -106,12 +106,12 @@ function extractAllMetaContent(
   return Array.from(results);
 }
 
-function extractTitleTag(html: string): string | undefined {
+export function extractTitleTag(html: string): string | undefined {
   const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
   return match && match[1] ? decodeHtmlEntities(match[1].trim()) : undefined;
 }
 
-function extractCanonicalUrl(html: string, baseUrl: URL): string | undefined {
+export function extractCanonicalUrl(html: string, baseUrl: URL): string | undefined {
   const pattern = /<link[^>]*rel=['"]canonical['"][^>]*href=['"]([^'"]+)['"][^>]*>/i;
   const match = pattern.exec(html);
   if (match && match[1]) {
@@ -139,7 +139,7 @@ function extractIconLinks(html: string, baseUrl: URL): string[] {
   return Array.from(results);
 }
 
-function resolveUrl(baseUrl: URL, value: string | undefined): string | undefined {
+export function resolveUrl(baseUrl: URL, value: string | undefined): string | undefined {
   if (!value) {
     return undefined;
   }
