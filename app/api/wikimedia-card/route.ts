@@ -1,3 +1,4 @@
+import { toASCII } from "node:punycode";
 import { NextRequest, NextResponse } from "next/server";
 
 import type { WikimediaCardResponse, WikimediaSource, WikimediaImage } from "@/services/api/wikimedia-card";
@@ -120,8 +121,15 @@ const isAllowedWikimediaHost = (hostname: string): boolean => {
 };
 
 const ensureWikimediaUrl = (url: URL): void => {
-  const hostname = url.hostname.toLowerCase();
-  if (!isAllowedWikimediaHost(hostname)) {
+  let asciiHostname: string;
+  try {
+    asciiHostname = toASCII(url.hostname);
+  } catch {
+    throw new Error("Unsupported Wikimedia host");
+  }
+
+  const normalizedHostname = asciiHostname.replace(/\.+$/, "").toLowerCase();
+  if (!normalizedHostname || !isAllowedWikimediaHost(normalizedHostname)) {
     throw new Error("Unsupported Wikimedia host");
   }
 };
