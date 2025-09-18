@@ -1,5 +1,4 @@
 import { InitialActivityData } from "@/components/latest-activity/fetchInitialActivityData";
-import LatestActivity from "@/components/latest-activity/LatestActivity";
 import MemeCalendarOverview from "@/components/meme-calendar/MemeCalendarOverview";
 import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
@@ -8,6 +7,7 @@ import { isEmptyObject } from "@/helpers/Helpers";
 import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+import LatestActivity from "../latest-activity/LatestActivity.client";
 import LatestDropSection from "./LatestDropSection";
 
 export default function Home({

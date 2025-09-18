@@ -207,22 +207,22 @@ describe("Home component", () => {
     expect(screen.queryByTestId("nextgen-slideshow")).not.toBeInTheDocument();
   });
 
-  it("includes latest activity section", () => {
+  it("includes latest activity section", async () => {
     render(
       <TestProvider>
-        <Home 
-          featuredNft={mockNft} 
-          featuredNextgen={mockCollection} 
+        <Home
+          featuredNft={mockNft}
+          featuredNextgen={mockCollection}
           initialActivityData={mockInitialActivityData}
           initialTokens={mockInitialTokens}
         />
       </TestProvider>
     );
 
-    expect(screen.getByTestId("latest-activity")).toBeInTheDocument();
+    expect(await screen.findByTestId("latest-activity")).toBeInTheDocument();
   });
 
-  it("passes correct props to LatestActivity component", () => {
+  it("passes correct props to LatestActivity component", async () => {
     const customActivityData = {
       activity: [{ id: 1, type: 'MINT' }],
       totalResults: 150,
@@ -242,7 +242,7 @@ describe("Home component", () => {
     );
 
     // Verify LatestActivity is rendered (our mock just shows the text)
-    expect(screen.getByTestId("latest-activity")).toBeInTheDocument();
+    expect(await screen.findByTestId("latest-activity")).toBeInTheDocument();
     expect(screen.getByText("Latest Activity")).toBeInTheDocument();
   });
 

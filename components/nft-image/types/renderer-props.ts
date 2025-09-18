@@ -9,6 +9,8 @@ export interface BaseRendererProps {
   readonly id?: string;
   readonly showOriginal?: boolean;
   readonly showThumbnail?: boolean;
+  readonly priority?: boolean;
+  readonly sizes?: string;
   readonly heightStyle: string;
   readonly imageStyle: string;
   readonly bgStyle: string;

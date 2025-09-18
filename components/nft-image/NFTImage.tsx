@@ -17,6 +17,8 @@ interface Props {
   showUnseizedIfLoggedIn: boolean;
   transparentBG?: boolean;
   id?: string;
+  priority?: boolean;
+  sizes?: string;
 }
 
 export default function NFTImage(props: Readonly<Props>) {
@@ -38,6 +40,8 @@ export default function NFTImage(props: Readonly<Props>) {
     heightStyle,
     imageStyle,
     bgStyle,
+    priority: props.priority,
+    sizes: props.sizes ?? "100vw",
   };
 
   switch (mediaType) {
