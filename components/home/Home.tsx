@@ -5,22 +5,10 @@ import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { formatNameForUrl } from "@/helpers/nextgen-utils";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+import LatestActivity from "../latest-activity/LatestActivity.client";
 import LatestDropSection from "./LatestDropSection";
-
-const LatestActivity = dynamic(
-  () => import("../latest-activity/LatestActivity"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="pt-4" role="status" aria-live="polite" aria-busy="true">
-        Loading latest activity…
-      </div>
-    ),
-  }
-);
 
 export default function Home({
   featuredNft,
