@@ -131,8 +131,11 @@ function resolveUrl(baseUrl: URL, value: string | undefined): string | undefined
 export function buildResponse(
   url: URL,
   html: string,
-  contentType: string | null
+  contentType: string | null,
+  finalUrl?: string
 ): LinkPreviewResponse {
+
+
   const title =
     extractFirstMetaContent(html, TITLE_KEYS) ?? extractTitleTag(html);
   const description = extractFirstMetaContent(html, DESCRIPTION_KEYS);

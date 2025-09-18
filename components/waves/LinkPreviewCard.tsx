@@ -8,21 +8,28 @@ import OpenGraphPreview, {
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
-import CompoundCard, {
-  toCompoundResponse,
-} from "./compound/CompoundCard";
+
+import CompoundCard, { toCompoundResponse } from "./compound/CompoundCard";
 import type { CompoundResponse } from "./compound/types";
+
 
 interface LinkPreviewCardProps {
   readonly href: string;
   readonly renderFallback: () => ReactElement;
 }
+type OpenGraphPreviewState = {
+  readonly kind: "openGraph";
+  readonly data: OpenGraphPreviewData;
+};
 
 type PreviewState =
   | { readonly type: "loading" }
-  | { readonly type: "openGraph"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "fallback" }
   | { readonly type: "compound"; readonly data: CompoundResponse }
-  | { readonly type: "fallback" };
+  | {
+      readonly type: "success";
+      readonly data: OpenGraphPreviewState;
+    };
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -48,6 +55,8 @@ export default function LinkPreviewCard({
 }: LinkPreviewCardProps) {
   const [state, setState] = useState<PreviewState>({ type: "loading" });
 
+
+
   useEffect(() => {
     let active = true;
 
@@ -67,10 +76,14 @@ export default function LinkPreviewCard({
 
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
-          setState({ type: "openGraph", data: previewData });
-        } else {
-          setState({ type: "fallback" });
+          setState({
+            type: "success",
+            data: { kind: "openGraph", data: previewData },
+          });
+          return;
         }
+
+        setState({ type: "fallback" });
       })
       .catch(() => {
         if (active) {
@@ -93,7 +106,8 @@ export default function LinkPreviewCard({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+        >
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-start">
             {fallbackContent}
           </div>
@@ -102,7 +116,9 @@ export default function LinkPreviewCard({
     );
   }
 
-  const preview = state.type === "openGraph" ? state.data : undefined;
+  if (state.type === "success") {
+    return <OpenGraphPreview href={href} preview={state.data.data} />;
+  }
 
-  return <OpenGraphPreview href={href} preview={preview} />;
+  return <OpenGraphPreview href={href} preview={undefined} />;
 }

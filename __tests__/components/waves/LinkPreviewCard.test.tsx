@@ -6,11 +6,12 @@ import LinkPreviewCard from "../../../components/waves/LinkPreviewCard";
 const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
   <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
 ));
-
+const mockWeiboCard = jest.fn(({ href, data }: any) => (
+  <div data-testid="weibo-card" data-href={href} data-type={data?.type} />
+));
 const mockCompoundCard = jest.fn(({ href, response }: any) => (
   <div data-testid="compound-card" data-href={href} data-type={response?.type} />
 ));
-
 const mockToCompoundResponse = jest.fn((value: any) => {
   if (value && typeof value === "object" && typeof value.type === "string" && value.type.startsWith("compound.")) {
     return value;
@@ -33,6 +34,11 @@ jest.mock("../../../components/waves/compound/CompoundCard", () => ({
   toCompoundResponse: (value: unknown) => mockToCompoundResponse(value),
 }));
 
+jest.mock("../../../components/waves/WeiboCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockWeiboCard(props),
+}));
+
 jest.mock("../../../services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
 }));
@@ -42,6 +48,12 @@ describe("LinkPreviewCard", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToCompoundResponse.mockImplementation((value: any) => {
+      if (value && typeof value === "object" && typeof value.type === "string" && value.type.startsWith("compound.")) {
+        return value;
+      }
+      return undefined;
+    });
   });
 
   it("renders preview when metadata is available", async () => {
@@ -151,5 +163,41 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
+  });
+
+  it("renders a Weibo card when response type matches", async () => {
+    const weiboResponse = {
+      type: "weibo.post",
+      canonicalUrl: "https://weibo.com/123/abc",
+      post: {
+        uid: "123",
+        mid: "abc",
+        author: { displayName: "Author", avatar: null, verified: "none" },
+        createdAt: null,
+        text: "hello",
+        images: [],
+        video: { thumbnail: null },
+      },
+    } as any;
+
+    fetchLinkPreview.mockResolvedValue(weiboResponse);
+
+    render(
+      <LinkPreviewCard
+        href="https://weibo.com/123/abc"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockWeiboCard).toHaveBeenCalledTimes(1);
+    });
+
+    expect(mockWeiboCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://weibo.com/123/abc",
+        data: weiboResponse,
+      })
+    );
   });
 });

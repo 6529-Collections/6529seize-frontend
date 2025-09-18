@@ -5,10 +5,8 @@ import {
   assertPublicUrl,
   fetchPublicUrl,
   parsePublicUrl,
-} from "@/lib/security/urlGuard";
-import type {
-  FetchPublicUrlOptions,
-  UrlGuardOptions,
+  type FetchPublicUrlOptions,
+  type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { buildResponse } from "./utils";
@@ -16,8 +14,9 @@ import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
+const HTML_BYTE_LIMIT = 128 * 1024;
 const USER_AGENT =
-  "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 const MAX_REDIRECTS = 5;
 
 const HTML_ACCEPT_HEADER =
@@ -72,8 +71,40 @@ async function fetchHtml(
   }
 
   const contentType = response.headers.get("content-type");
-  const html = await response.text();
-  return { html, contentType, finalUrl: response.url || url.toString() };
+  const finalUrl = response.url || url.toString();
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    const html = await response.text();
+    return {
+      html: html.slice(0, HTML_BYTE_LIMIT),
+      contentType,
+      finalUrl,
+    };
+  }
+
+  const decoder = new TextDecoder();
+  let html = "";
+  let receivedBytes = 0;
+
+  while (receivedBytes < HTML_BYTE_LIMIT) {
+    const { done, value } = await reader.read();
+    if (done || !value) {
+      break;
+    }
+
+    const slice =
+      receivedBytes + value.length > HTML_BYTE_LIMIT
+        ? value.subarray(0, HTML_BYTE_LIMIT - receivedBytes)
+        : value;
+
+    html += decoder.decode(slice, { stream: true });
+    receivedBytes += slice.length;
+  }
+
+  html += decoder.decode();
+
+  return { html, contentType, finalUrl };
 }
 
 function handleGuardError(error: unknown, fallbackStatus = 400) {
@@ -93,7 +124,7 @@ function createGenericPlan(url: URL): PreviewPlan {
       const finalUrlInstance = new URL(finalUrl);
       await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
 
-      const data = buildResponse(url, html, contentType);
+      const data = buildResponse(url, html, contentType, finalUrl);
       return { data, ttl: CACHE_TTL_MS };
     },
   };
