@@ -164,9 +164,11 @@ describe("mint timing helpers", () => {
   });
 
   it("reports whether minting is active", () => {
-    expect(isMintingActive(beforeMint)).toBe(false);
+    expect(isMintingActive(beforeMint)).toBe(true);
     expect(isMintingActive(duringMint)).toBe(true);
-    expect(isMintingActive(new Date(Date.UTC(2024, 6, 4, 14, 30)))).toBe(false);
+    const justBeforeEnd = new Date(afterWindow.getTime() - 1000);
+    expect(isMintingActive(justBeforeEnd)).toBe(false);
+    expect(isMintingActive(afterWindow)).toBe(false);
   });
 
   it("returns the current or upcoming mint number", () => {

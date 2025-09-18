@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { App } from "@capacitor/app";
 import { Capacitor, PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
-import { App } from "@capacitor/app";
+import { useEffect, useState } from "react";
 
-enum CapacitorOrientationType {
+export enum CapacitorOrientationType {
   PORTRAIT,
   LANDSCAPE,
 }
@@ -77,7 +77,7 @@ const useCapacitor = () => {
         try {
           // Show the keyboard accessory bar (Done button)
           await Keyboard.setAccessoryBarVisible({ isVisible: true });
-          
+
           keyboardShowListener = await Keyboard.addListener(
             "keyboardWillShow",
             () => {
