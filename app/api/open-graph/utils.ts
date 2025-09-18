@@ -302,27 +302,30 @@ export async function ensureUrlIsPublic(url: URL): Promise<void> {
 }
 
 export function buildResponse(
-  url: URL,
+  requestUrl: URL,
   html: string,
-  contentType: string | null
+  contentType: string | null,
+  baseUrl?: URL
 ): LinkPreviewResponse {
+  const resolutionBase = baseUrl ?? requestUrl;
   const title =
     extractFirstMetaContent(html, TITLE_KEYS) ?? extractTitleTag(html);
   const description = extractFirstMetaContent(html, DESCRIPTION_KEYS);
   const siteName = extractFirstMetaContent(html, SITE_NAME_KEYS);
   const resolvedImageUrls = extractAllMetaContent(html, IMAGE_KEYS)
-    .map((src) => resolveUrl(url, src))
+    .map((src) => resolveUrl(resolutionBase, src))
     .filter((src): src is string => Boolean(src));
   const canonicalUrl =
-    extractFirstMetaContent(html, URL_KEYS) ?? extractCanonicalUrl(html, url);
+    extractFirstMetaContent(html, URL_KEYS) ??
+    extractCanonicalUrl(html, resolutionBase);
   const type = extractFirstMetaContent(html, TYPE_KEYS);
-  const favicons = extractIconLinks(html, url);
+  const favicons = extractIconLinks(html, resolutionBase);
 
   const primaryImage = resolvedImageUrls[0];
 
   return {
-    requestUrl: url.toString(),
-    url: canonicalUrl ?? url.toString(),
+    requestUrl: requestUrl.toString(),
+    url: canonicalUrl ?? resolutionBase.toString(),
     title: title ?? null,
     description: description ?? null,
     siteName: siteName ?? null,

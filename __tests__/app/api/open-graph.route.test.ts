@@ -23,9 +23,18 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
+jest.mock("../../../app/api/open-graph/office365", () => ({
+  buildOffice365Preview: jest.fn(),
+}));
+
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
+};
+const office365 = jest.requireMock(
+  "../../../app/api/open-graph/office365"
+) as {
+  buildOffice365Preview: jest.Mock;
 };
 
 const originalFetch = global.fetch;
@@ -41,6 +50,7 @@ describe("open-graph API route", () => {
     jest.clearAllMocks();
     global.fetch = originalFetch;
     nextResponseJson.mockClear();
+    office365.buildOffice365Preview.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -165,7 +175,51 @@ describe("open-graph API route", () => {
     expect(utils.buildResponse).toHaveBeenCalledWith(
       new URL("http://safe.example/article"),
       html,
-      "text/html"
+      "text/html",
+      new URL("https://cdn.safe.example/page")
     );
+    expect(office365.buildOffice365Preview).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originalUrl: new URL("http://safe.example/article"),
+        finalUrl: new URL("https://cdn.safe.example/page"),
+        html,
+        contentType: "text/html",
+        baseResponse: previewPayload,
+      })
+    );
+  });
+
+  it("prefers Microsoft 365 preview when available", async () => {
+    const ensureUrlIsPublic = utils.ensureUrlIsPublic;
+    ensureUrlIsPublic.mockResolvedValue(undefined);
+
+    const html = "<html><head><title>ok</title></head><body></body></html>";
+    const response = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+    });
+
+    const fetchMock = jest.fn().mockResolvedValue(response) as jest.MockedFunction<
+      typeof fetch
+    >;
+    global.fetch = fetchMock;
+
+    const previewPayload = { type: "office.word", title: "Doc" };
+    utils.buildResponse.mockReturnValue({
+      requestUrl: "http://office.example/doc",
+    });
+    office365.buildOffice365Preview.mockResolvedValue(previewPayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://tenant.sharepoint.com/doc"
+      ),
+    } as any;
+
+    const result = await GET(request);
+
+    expect(result.status).toBe(200);
+    const body = await result.json();
+    expect(body).toEqual(previewPayload);
   });
 });
