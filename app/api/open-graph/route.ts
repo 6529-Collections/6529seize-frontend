@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
+import { handleOpenSea } from "./opensea";
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
 const USER_AGENT =
   "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
@@ -95,13 +96,30 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(cached.data);
   }
 
+  let ttlMs = DEFAULT_CACHE_TTL_MS;
+
+  try {
+    const special = await handleOpenSea(targetUrl);
+    if (special) {
+      ttlMs = Math.max(special.ttlMs, 1_000);
+      const entry: CacheEntry = {
+        data: special.data,
+        expiresAt: Date.now() + ttlMs,
+      };
+      cache.set(normalizedUrl, entry);
+      return NextResponse.json(special.data);
+    }
+  } catch {
+    // Ignore OpenSea handling errors and fallback to generic scraping.
+  }
+
   try {
     const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
     await ensureUrlIsPublic(new URL(finalUrl));
     const data = buildResponse(targetUrl, html, contentType);
     const entry: CacheEntry = {
       data,
-      expiresAt: Date.now() + CACHE_TTL_MS,
+      expiresAt: Date.now() + ttlMs,
     };
 
     cache.set(normalizedUrl, entry);
