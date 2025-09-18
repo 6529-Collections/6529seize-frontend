@@ -59,7 +59,14 @@ const nextConfig = {
   },
   images: {
     loader: "default",
-    domains: ["6529.io", "arweave.net", "localhost", "media.generator.seize.io", "d3lqz0a4bldqgf.cloudfront.net"],
+    domains: [
+      "6529.io",
+      "arweave.net",
+      "localhost",
+      "media.generator.seize.io",
+      "d3lqz0a4bldqgf.cloudfront.net",
+      "upload.wikimedia.org",
+    ],
     minimumCacheTTL: 86400,
   },
   transpilePackages: ["react-tweet"],

@@ -12,6 +12,7 @@ import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { SeizeQuoteLinkInfo, parseSeizeQuoteLink, parseSeizeQueryLink } from "../../../../../helpers/SeizeLinkParser";
 import { parseArtBlocksLink } from "@/src/services/artblocks/url";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
+import { parseWikimediaLink } from "@/src/services/wikimedia/url";
 
 import { parseYoutubeLink } from "./youtube";
 import YoutubePreview from "./youtubePreview";
@@ -26,6 +27,7 @@ type WaveItemChatComponent = typeof import("../../../../waves/list/WaveItemChat"
 type DropItemChatComponent = typeof import("../../../../waves/drops/DropItemChat").default;
 type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHrefButtons").default;
 type LinkPreviewCardComponent = typeof import("../../../../waves/LinkPreviewCard").default;
+type WikimediaCardComponent = typeof import("../../../../waves/WikimediaCard").default;
 
 const getDropPartMarkdownImage = (): DropPartMarkdownImageComponent => {
   const module = require("../DropPartMarkdownImage");
@@ -65,6 +67,11 @@ const getChatItemHrefButtons = (): ChatItemHrefButtonsComponent => {
 const getLinkPreviewCard = (): LinkPreviewCardComponent => {
   const module = require("../../../../waves/LinkPreviewCard");
   return module.default as LinkPreviewCardComponent;
+};
+
+const getWikimediaCard = (): WikimediaCardComponent => {
+  const module = require("../../../../waves/WikimediaCard");
+  return module.default as WikimediaCardComponent;
 };
 
 interface SmartLinkHandler<T> {
@@ -231,6 +238,12 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       "media-proxy.artblocks.io",
       "token.artblocks.io",
     ];
+    const wikimediaDomains = [
+      "w.wiki",
+      "wikipedia.org",
+      "wikimedia.org",
+      "wikidata.org",
+    ];
 
     if (isPepeHost(hostname)) {
       return false;
@@ -240,7 +253,8 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       hostname === "youtu.be" ||
       youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
       twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
-      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+      wikimediaDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
     ) {
       return false;
     }
@@ -319,6 +333,13 @@ const createSmartLinkHandlers = (
       parse: parseTwitterLink,
       render: (result: { href: string; tweetId: string }) =>
         renderTweetEmbed(result),
+    },
+    {
+      parse: parseWikimediaLink,
+      render: (_result, href: string) => {
+        const WikimediaCard = getWikimediaCard();
+        return <WikimediaCard href={href} />;
+      },
     },
     {
       parse: parseGifLink,
