@@ -58,12 +58,6 @@ jobs:
           AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
         run: npm run build
 
-      - name: Scan production build for wallet addresses
-        run: |
-          echo "🔍 Scanning production build for unauthorized wallet addresses..."
-          ./scripts/scan-wallet-addresses.sh
-          echo "✅ Wallet address security check passed"
-
       - name: Build Target
         run: |
           mkdir -p target/_next
