@@ -104,6 +104,11 @@ function isCounterpartyAssetCode(value: string): boolean {
 
 type FetchOptions = RequestInit & { timeoutMs?: number };
 
+type ScrapeNextDataResult = {
+  nextData: any | null;
+  metaImages: string[];
+};
+
 async function fetchWithTimeout(
   url: string,
   options: FetchOptions = {}
@@ -181,6 +186,39 @@ function absolutizeRelativeUrl(candidate: string, base: string): string {
   }
 }
 
+function normalizeImageUrl(candidate: unknown, base: string): string | null {
+  if (typeof candidate !== "string") {
+    return null;
+  }
+
+  const trimmed = candidate.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/^data:/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("ipfs://")) {
+    return ipfsToHttp(trimmed);
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
+
+  if (/^[./]/.test(trimmed)) {
+    return absolutizeRelativeUrl(trimmed, base);
+  }
+
+  return null;
+}
+
 function slugifyName(name: string): string {
   return name
     .toLowerCase()
@@ -215,22 +253,46 @@ function deepFindAll(value: unknown, keys: string[], results: unknown[] = []): u
   return results;
 }
 
-async function scrapeNextData(url: string): Promise<any | null> {
+async function scrapeNextData(url: string): Promise<ScrapeNextDataResult> {
   const html = await fetchText(url, 5000);
   if (!html) {
-    return null;
+    return { nextData: null, metaImages: [] };
   }
 
   const $ = cheerio.load(html);
+  const metaImageSelectors = [
+    'meta[name="image"]',
+    'meta[property="image"]',
+    'meta[property="og:image"]',
+    'meta[property="og:image:secure_url"]',
+    'meta[name="og:image"]',
+    'meta[name="twitter:image"]',
+    'meta[property="twitter:image"]',
+    'meta[name="twitter:image:src"]',
+    'meta[property="twitter:image:src"]',
+  ];
+
+  const metaImages = new Set<string>();
+  for (const selector of metaImageSelectors) {
+    $(selector)
+      .toArray()
+      .forEach((element) => {
+        const content = $(element).attr("content");
+        if (content && content.trim()) {
+          metaImages.add(content.trim());
+        }
+      });
+  }
+
   const raw = $('script#__NEXT_DATA__').first().text();
   if (!raw) {
-    return null;
+    return { nextData: null, metaImages: Array.from(metaImages) };
   }
 
   try {
-    return JSON.parse(raw);
+    return { nextData: JSON.parse(raw), metaImages: Array.from(metaImages) };
   } catch {
-    return null;
+    return { nextData: null, metaImages: Array.from(metaImages) };
   }
 }
 
@@ -315,7 +377,7 @@ async function tryExtractImageFromDescription(
 
 async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
   const href = `https://pepe.wtf/asset/${encodeURIComponent(slug)}`;
-  const nextData = await scrapeNextData(href);
+  const { nextData, metaImages } = await scrapeNextData(href);
   const scraped: ScrapedAsset = {};
 
   if (nextData) {
@@ -323,6 +385,7 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
     const artists = deepFindAll(nextData, ["artist", "creator"]);
     const collections = deepFindAll(nextData, ["collection", "family"]);
     const images = deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"]);
+
     const descriptions = deepFindAll(nextData, ["description", "body"]);
     const assetCandidates = deepFindAll(nextData, [
       "asset",
@@ -337,7 +400,9 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
     scraped.name = extractFirstString(names) ?? undefined;
     scraped.artist = extractFirstString(artists) ?? undefined;
     scraped.collection = extractFirstString(collections) ?? undefined;
-    scraped.image = extractFirstString(images) ?? null;
+
+    const imageCandidate = extractFirstString(images);
+    scraped.image = normalizeImageUrl(imageCandidate, href);
 
     const assetCode = assetCandidates.find((candidate) => isCounterpartyAssetCode(candidate));
     if (assetCode) {
@@ -360,6 +425,14 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
       parseMaybeNumber(extractFirstString(cardValues)) ?? parseMaybeNumber(cardValues[0]) ?? null;
     scraped.series = seriesCandidate;
     scraped.card = cardCandidate;
+  }
+
+  if (!scraped.image) {
+    const metaImage = extractFirstString(metaImages);
+    const normalizedMetaImage = normalizeImageUrl(metaImage, href);
+    if (normalizedMetaImage) {
+      scraped.image = normalizedMetaImage;
+    }
   }
 
   if (!scraped.asset) {
@@ -443,26 +516,40 @@ function normalizeSlug(value: string | null): string | null {
 
 async function resolveCollection(slug: string): Promise<CollectionPreview> {
   const href = `https://pepe.wtf/collection/${encodeURIComponent(slug)}`;
-  const nextData = await scrapeNextData(href);
+  const { nextData, metaImages } = await scrapeNextData(href);
   const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
     slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const image = extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])) ?? null;
+  let image = normalizeImageUrl(
+    extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])),
+    href
+  );
+
+  if (!image) {
+    image = normalizeImageUrl(extractFirstString(metaImages), href);
+  }
 
   return {
     kind: "collection",
     href,
     slug,
     name,
-    image,
+    image: image ?? null,
     stats: { items: null, floorSats: null },
   };
 }
 
 async function resolveArtist(slug: string): Promise<ArtistPreview> {
   const href = `https://pepe.wtf/artists/${encodeURIComponent(slug)}`;
-  const nextData = await scrapeNextData(href);
+  const { nextData, metaImages } = await scrapeNextData(href);
   const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replace(/-/g, " ");
-  const image = extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])) ?? null;
+  let image = normalizeImageUrl(
+    extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])),
+    href
+  );
+
+  if (!image) {
+    image = normalizeImageUrl(extractFirstString(metaImages), href);
+  }
   const collections = Array.from(
     new Set(
       deepFindAll(nextData, ["collection", "family"]).filter((value): value is string => typeof value === "string")
@@ -474,16 +561,23 @@ async function resolveArtist(slug: string): Promise<ArtistPreview> {
     href,
     slug,
     name,
-    image,
+    image: image ?? null,
     stats: { uniqueCards: null, collections: collections.slice(0, 4) },
   };
 }
 
 async function resolveSet(slug: string): Promise<SetPreview> {
   const href = `https://pepe.wtf/sets/${encodeURIComponent(slug)}`;
-  const nextData = await scrapeNextData(href);
+  const { nextData, metaImages } = await scrapeNextData(href);
   const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replace(/-/g, " ");
-  const image = extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])) ?? null;
+  let image = normalizeImageUrl(
+    extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])),
+    href
+  );
+
+  if (!image) {
+    image = normalizeImageUrl(extractFirstString(metaImages), href);
+  }
 
   let wiki: string | null = null;
   const seriesMatch = name.match(/series\s*(\d+)/i);
@@ -499,7 +593,7 @@ async function resolveSet(slug: string): Promise<SetPreview> {
     href,
     slug,
     name,
-    image,
+    image: image ?? null,
     stats: { items: null, fullSetFloorSats: null, lastSaleValuationSats: null },
     links: wiki ? { wiki } : null,
   };
