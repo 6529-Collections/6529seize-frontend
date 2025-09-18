@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import { handleInstagramRequest } from "./instagram";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -86,6 +87,21 @@ export async function GET(request: NextRequest) {
     const message =
       error instanceof Error ? error.message : "The provided URL is not allowed.";
     return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  try {
+    const instagramResult = await handleInstagramRequest(targetUrl);
+    if (instagramResult) {
+      return NextResponse.json(instagramResult.body, {
+        status: instagramResult.status,
+      });
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to fetch Instagram preview.";
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 
   const normalizedUrl = targetUrl.toString();

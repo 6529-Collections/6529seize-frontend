@@ -8,6 +8,8 @@ import OpenGraphPreview, {
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import type { InstagramPreviewResponse } from "../../services/api/link-preview-api";
+import InstagramCard from "./InstagramCard";
 
 interface LinkPreviewCardProps {
   readonly href: string;
@@ -17,6 +19,7 @@ interface LinkPreviewCardProps {
 type PreviewState =
   | { readonly type: "loading"; readonly data: OpenGraphPreviewData | null }
   | { readonly type: "success"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "instagram"; readonly data: InstagramPreviewResponse }
   | { readonly type: "fallback" };
 
 const toPreviewData = (
@@ -57,6 +60,11 @@ export default function LinkPreviewCard({
           return;
         }
 
+        if (response?.instagram) {
+          setState({ type: "instagram", data: response.instagram });
+          return;
+        }
+
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
           setState({ type: "success", data: previewData });
@@ -74,6 +82,10 @@ export default function LinkPreviewCard({
       active = false;
     };
   }, [href]);
+
+  if (state.type === "instagram") {
+    return <InstagramCard href={href} preview={state.data} />;
+  }
 
   if (state.type === "fallback") {
     const fallbackContent = renderFallback();

@@ -7,6 +7,15 @@ const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
   <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
 ));
 
+const mockInstagramCard = jest.fn(({ href, preview }: any) => (
+  <div
+    data-testid="instagram-card"
+    data-href={href}
+    data-status={preview.status}
+    data-resource={preview.resource}
+  />
+));
+
 jest.mock("../../../components/waves/OpenGraphPreview", () => {
   const actual = jest.requireActual("../../../components/waves/OpenGraphPreview");
   return {
@@ -15,6 +24,11 @@ jest.mock("../../../components/waves/OpenGraphPreview", () => {
     default: (props: any) => mockOpenGraphPreview(props),
   };
 });
+
+jest.mock("../../../components/waves/InstagramCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockInstagramCard(props),
+}));
 
 jest.mock("../../../services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
@@ -25,6 +39,39 @@ describe("LinkPreviewCard", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("renders instagram card when instagram preview is provided", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      instagram: {
+        canonicalUrl: "https://instagram.com/p/abc/",
+        resource: "post",
+        status: "available",
+      },
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://www.instagram.com/p/abc/"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockInstagramCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          href: "https://www.instagram.com/p/abc/",
+          preview: expect.objectContaining({
+            canonicalUrl: "https://instagram.com/p/abc/",
+            resource: "post",
+            status: "available",
+          }),
+        })
+      );
+    });
+
+    expect(screen.queryByTestId("open-graph")).toBeNull();
+    expect(screen.queryByTestId("fallback")).toBeNull();
   });
 
   it("renders preview when metadata is available", async () => {

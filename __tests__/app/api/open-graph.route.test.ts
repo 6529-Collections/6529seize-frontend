@@ -23,10 +23,17 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
+jest.mock("../../../app/api/open-graph/instagram", () => ({
+  handleInstagramRequest: jest.fn(),
+}));
+
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
 };
+const { handleInstagramRequest } = jest.requireMock(
+  "../../../app/api/open-graph/instagram"
+) as { handleInstagramRequest: jest.Mock };
 
 const originalFetch = global.fetch;
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
@@ -41,6 +48,7 @@ describe("open-graph API route", () => {
     jest.clearAllMocks();
     global.fetch = originalFetch;
     nextResponseJson.mockClear();
+    handleInstagramRequest.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -167,5 +175,40 @@ describe("open-graph API route", () => {
       html,
       "text/html"
     );
+  });
+
+  it("delegates to instagram handler when data is available", async () => {
+    const payload = {
+      instagram: {
+        canonicalUrl: "https://instagram.com/p/abc/",
+        resource: "post",
+        status: "available",
+      },
+    };
+
+    handleInstagramRequest.mockResolvedValueOnce({
+      status: 200,
+      body: payload,
+    });
+
+    utils.ensureUrlIsPublic.mockResolvedValue(undefined);
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock as any;
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://instagram.com/p/abc/"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(payload);
+    expect(handleInstagramRequest).toHaveBeenCalledWith(
+      new URL("https://instagram.com/p/abc/")
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 });
