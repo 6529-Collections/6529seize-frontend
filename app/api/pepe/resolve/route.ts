@@ -274,7 +274,7 @@ async function scrapeNextData(url: string): Promise<ScrapeNextDataResult> {
   for (const selector of metaImageSelectors) {
     $(selector)
       .toArray()
-      .forEach((element) => {
+      .forEach((element: any) => {
         const content = $(element).attr("content");
         if (content && content.trim()) {
           metaImages.add(content.trim());

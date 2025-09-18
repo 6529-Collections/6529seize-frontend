@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import {
   UrlGuardError,
   assertPublicUrl,
   fetchPublicUrl,
   parsePublicUrl,
 } from "@/lib/security/urlGuard";
+import type {
+  FetchPublicUrlOptions,
+  UrlGuardOptions,
+} from "@/lib/security/urlGuard";
+import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { buildResponse } from "./utils";
+import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
@@ -18,12 +23,32 @@ const MAX_REDIRECTS = 5;
 const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
 
+const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
+  blockedHosts: ["localhost", "127.0.0.1", "::1"],
+  blockedHostSuffixes: [".local", ".internal"],
+};
+
+const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
+  policy: PUBLIC_URL_POLICY,
+};
+
+const PUBLIC_FETCH_OPTIONS: FetchPublicUrlOptions = {
+  ...PUBLIC_URL_OPTIONS,
+  timeoutMs: FETCH_TIMEOUT_MS,
+  userAgent: USER_AGENT,
+  maxRedirects: MAX_REDIRECTS,
+};
+
 type CacheEntry = {
   readonly expiresAt: number;
   readonly data: LinkPreviewResponse;
 };
 
 const cache = new Map<string, CacheEntry>();
+
+const isUrlGuardError = (error: unknown): error is UrlGuardError =>
+  error instanceof UrlGuardError ||
+  (typeof error === "object" && error !== null && (error as { name?: string }).name === "UrlGuardError");
 
 async function fetchHtml(
   url: URL
@@ -35,11 +60,7 @@ async function fetchHtml(
         accept: HTML_ACCEPT_HEADER,
       },
     },
-    {
-      timeoutMs: FETCH_TIMEOUT_MS,
-      userAgent: USER_AGENT,
-      maxRedirects: MAX_REDIRECTS,
-    }
+    PUBLIC_FETCH_OPTIONS
   );
 
   if (!response.ok) {
@@ -56,12 +77,24 @@ async function fetchHtml(
 }
 
 function handleGuardError(error: unknown, fallbackStatus = 400) {
-  if (error instanceof UrlGuardError) {
+  if (isUrlGuardError(error)) {
     return NextResponse.json({ error: error.message }, { status: error.statusCode });
   }
 
   const message = error instanceof Error ? error.message : "Invalid or forbidden URL";
   return NextResponse.json({ error: message }, { status: fallbackStatus });
+}
+
+function createGenericPlan(url: URL): PreviewPlan {
+  return {
+    cacheKey: `generic:${url.toString()}`,
+    execute: async () => {
+      const { html, contentType, finalUrl } = await fetchHtml(url);
+      await assertPublicUrl(new URL(finalUrl), PUBLIC_URL_OPTIONS);
+      const data = buildResponse(url, html, contentType);
+      return { data, ttl: CACHE_TTL_MS };
+    },
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -74,34 +107,32 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await assertPublicUrl(targetUrl);
+    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
   } catch (error) {
     return handleGuardError(error);
   }
 
-  const normalizedUrl = targetUrl.toString();
-  const cached = cache.get(normalizedUrl);
+  const compoundPlan = createCompoundPlan(targetUrl);
+  const plan = compoundPlan ?? createGenericPlan(targetUrl);
+
+  const cached = cache.get(plan.cacheKey);
 
   if (cached && cached.expiresAt > Date.now()) {
     return NextResponse.json(cached.data);
   }
 
   try {
-    const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
-    const finalTarget = new URL(finalUrl);
-    await assertPublicUrl(finalTarget);
-
-    const data = buildResponse(targetUrl, html, contentType);
+    const { data, ttl } = await plan.execute();
     const entry: CacheEntry = {
       data,
-      expiresAt: Date.now() + CACHE_TTL_MS,
+      expiresAt: Date.now() + ttl,
     };
 
-    cache.set(normalizedUrl, entry);
+    cache.set(plan.cacheKey, entry);
 
     return NextResponse.json(data);
   } catch (error) {
-    if (error instanceof UrlGuardError) {
+    if (isUrlGuardError(error)) {
       return NextResponse.json({ error: error.message }, { status: error.statusCode });
     }
 
