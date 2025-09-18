@@ -134,6 +134,16 @@ const fetchWithTimeout = async (
   const timeout = setTimeout(() => controller.abort(), init.timeoutMs ?? REQUEST_TIMEOUT_MS);
 
   try {
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(url);
+    } catch {
+      throw new Error("Invalid URL provided.");
+    }
+
+    await ensureUrlIsPublic(targetUrl);
+    ensureWikimediaUrl(targetUrl);
+
     const headers = new Headers(init.headers);
     headers.set("user-agent", USER_AGENT);
     if (!headers.has("accept")) {
@@ -143,7 +153,7 @@ const fetchWithTimeout = async (
       headers.set("accept-language", init.language);
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(targetUrl.toString(), {
       ...init,
       headers,
       signal: controller.signal,
@@ -169,8 +179,6 @@ const fetchJson = async <T>(
 const resolveShortLink = async (url: URL): Promise<URL> => {
   let current = url;
   for (let redirectCount = 0; redirectCount < SHORT_LINK_MAX_REDIRECTS; redirectCount += 1) {
-    await ensureUrlIsPublic(current);
-    ensureWikimediaUrl(current);
     const response = await fetchWithTimeout(current.toString(), {
       method: "HEAD",
       redirect: "manual",
@@ -200,8 +208,6 @@ const resolveShortLink = async (url: URL): Promise<URL> => {
     break;
   }
 
-  await ensureUrlIsPublic(url);
-  ensureWikimediaUrl(url);
   const fallback = await fetchWithTimeout(url.toString(), {
     method: "GET",
     redirect: "manual",
