@@ -23,9 +23,17 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
+jest.mock("../../../app/api/open-graph/compound/service", () => ({
+  createCompoundPlan: jest.fn(() => null),
+}));
+
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
+};
+
+const compound = jest.requireMock("../../../app/api/open-graph/compound/service") as {
+  createCompoundPlan: jest.Mock;
 };
 
 const originalFetch = global.fetch;
@@ -97,6 +105,7 @@ describe("open-graph API route", () => {
     expect(response.status).toBe(502);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(utils.buildResponse).not.toHaveBeenCalled();
+    expect(compound.createCompoundPlan).toHaveBeenCalled();
   });
 
   it("follows safe redirects after validating each hop", async () => {
@@ -167,5 +176,6 @@ describe("open-graph API route", () => {
       html,
       "text/html"
     );
+    expect(compound.createCompoundPlan).toHaveBeenCalled();
   });
 });

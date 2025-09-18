@@ -8,6 +8,10 @@ import OpenGraphPreview, {
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import CompoundCard, {
+  toCompoundResponse,
+} from "./compound/CompoundCard";
+import type { CompoundResponse } from "./compound/types";
 
 interface LinkPreviewCardProps {
   readonly href: string;
@@ -15,8 +19,9 @@ interface LinkPreviewCardProps {
 }
 
 type PreviewState =
-  | { readonly type: "loading"; readonly data: OpenGraphPreviewData | null }
-  | { readonly type: "success"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "loading" }
+  | { readonly type: "openGraph"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "compound"; readonly data: CompoundResponse }
   | { readonly type: "fallback" };
 
 const toPreviewData = (
@@ -41,15 +46,12 @@ export default function LinkPreviewCard({
   href,
   renderFallback,
 }: LinkPreviewCardProps) {
-  const [state, setState] = useState<PreviewState>({
-    type: "loading",
-    data: null,
-  });
+  const [state, setState] = useState<PreviewState>({ type: "loading" });
 
   useEffect(() => {
     let active = true;
 
-    setState({ type: "loading", data: null });
+    setState({ type: "loading" });
 
     fetchLinkPreview(href)
       .then((response) => {
@@ -57,9 +59,15 @@ export default function LinkPreviewCard({
           return;
         }
 
+        const compoundResponse = toCompoundResponse(response);
+        if (compoundResponse) {
+          setState({ type: "compound", data: compoundResponse });
+          return;
+        }
+
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
-          setState({ type: "success", data: previewData });
+          setState({ type: "openGraph", data: previewData });
         } else {
           setState({ type: "fallback" });
         }
@@ -74,6 +82,10 @@ export default function LinkPreviewCard({
       active = false;
     };
   }, [href]);
+
+  if (state.type === "compound") {
+    return <CompoundCard href={href} response={state.data} />;
+  }
 
   if (state.type === "fallback") {
     const fallbackContent = renderFallback();
@@ -90,7 +102,7 @@ export default function LinkPreviewCard({
     );
   }
 
-  const preview = state.type === "success" ? state.data : undefined;
+  const preview = state.type === "openGraph" ? state.data : undefined;
 
   return <OpenGraphPreview href={href} preview={preview} />;
 }

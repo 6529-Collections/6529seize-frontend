@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
+import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
@@ -70,6 +71,18 @@ async function fetchHtml(
   }
 }
 
+function createGenericPlan(url: URL): PreviewPlan {
+  return {
+    cacheKey: `generic:${url.toString()}`,
+    execute: async () => {
+      const { html, contentType, finalUrl } = await fetchHtml(url);
+      await ensureUrlIsPublic(new URL(finalUrl));
+      const data = buildResponse(url, html, contentType);
+      return { data, ttl: CACHE_TTL_MS };
+    },
+  };
+}
+
 export async function GET(request: NextRequest) {
   let targetUrl: URL;
 
@@ -88,23 +101,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const normalizedUrl = targetUrl.toString();
-  const cached = cache.get(normalizedUrl);
+  const compoundPlan = createCompoundPlan(targetUrl);
+  const plan = compoundPlan ?? createGenericPlan(targetUrl);
+
+  const cached = cache.get(plan.cacheKey);
 
   if (cached && cached.expiresAt > Date.now()) {
     return NextResponse.json(cached.data);
   }
 
   try {
-    const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
-    await ensureUrlIsPublic(new URL(finalUrl));
-    const data = buildResponse(targetUrl, html, contentType);
+    const { data, ttl } = await plan.execute();
     const entry: CacheEntry = {
       data,
-      expiresAt: Date.now() + CACHE_TTL_MS,
+      expiresAt: Date.now() + ttl,
     };
 
-    cache.set(normalizedUrl, entry);
+    cache.set(plan.cacheKey, entry);
 
     return NextResponse.json(data);
   } catch (error) {
