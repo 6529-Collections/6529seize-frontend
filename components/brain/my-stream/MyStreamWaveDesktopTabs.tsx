@@ -114,7 +114,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   }
 
   return (
-    <div className="tw-@container/tabs tw-flex tw-items-center tw-gap-4 tw-w-full tw-overflow-x-auto tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-thin tw-border-x-0 tw-pl-2 sm:tw-pl-4 md:tw-pl-6">
+    <div className="tw-@container/tabs tw-flex tw-items-center tw-gap-4 tw-w-full tw-overflow-x-auto tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-thin tw-border-x-0 tw-pl-2 sm:tw-pl-4 md:tw-pl-6 tw-border-b tw-border-solid tw-border-iron-700 tw-border-t-0">
       <TabToggle
         options={options}
         activeKey={activeTab}

@@ -91,19 +91,19 @@ function CollectionsSubmenu({
       id="collections-submenu"
     >
       {/* Header */}
-      <header className="tw-flex tw-items-center tw-justify-between tw-px-6 tw-py-5 tw-border-b tw-border-iron-800">
+      <header className="tw-flex tw-items-center tw-justify-between tw-px-6 tw-py-4 tw-border-b tw-border-iron-800">
         <span className="tw-text-white tw-font-semibold tw-text-xl tw-tracking-tight">
           Collections
         </span>
         <button
           onClick={onClose}
-          className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 desktop-hover:hover:tw-from-iron-750 desktop-hover:hover:tw-to-iron-850 desktop-hover:hover:tw-border-iron-650"
+          className="tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800/85 tw-border tw-border-iron-700/70 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-700/95 desktop-hover:hover:tw-border-iron-500/70 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
           title="Close collections menu"
           aria-label="Close collections menu"
           type="button"
         >
           <XMarkIcon
-            className="tw-h-4 tw-w-4 tw-text-iron-200 group-hover:tw-text-white tw-transition-transform tw-duration-200"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 group-hover:tw-text-white tw-transition-transform tw-duration-200"
             aria-hidden="true"
           />
         </button>

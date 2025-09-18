@@ -10,12 +10,14 @@ import CollectionsSubmenu from "./CollectionsSubmenu";
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../hooks/useIdentity";
+import HeaderShare from "../../header/share/HeaderShare";
 
 interface WebSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   isCollectionsSubmenuOpen: boolean;
-  onCollectionsSubmenuToggle: (open: boolean) => void;
+  onCollectionsSubmenuToggle: () => void;
+  onCollectionsSubmenuClose: () => void;
   isMobile: boolean;
   isOffcanvasOpen: boolean;
   onCloseOffcanvas: () => void;
@@ -27,6 +29,7 @@ function WebSidebar({
   onToggle,
   isCollectionsSubmenuOpen,
   onCollectionsSubmenuToggle,
+  onCollectionsSubmenuClose,
   isMobile,
   isOffcanvasOpen,
   onCloseOffcanvas,
@@ -52,15 +55,15 @@ function WebSidebar({
     return () => window.removeEventListener("keydown", onKey);
   }, [isMobile, isOffcanvasOpen, onCloseOffcanvas]);
 
-  const handleCollectionsClick = () =>
-    onCollectionsSubmenuToggle(!isCollectionsSubmenuOpen);
+  const handleCollectionsClick = () => onCollectionsSubmenuToggle();
 
   // Sidebar is expanded on mobile when offcanvas is open
   const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
+  const isDialog = isMobile && isOffcanvasOpen;
 
   return (
     <>
-      {isMobile && isOffcanvasOpen && (
+      {isDialog && (
         <div
           className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
           onClick={onCloseOffcanvas}
@@ -70,10 +73,10 @@ function WebSidebar({
       )}
       <div
         className={`tw-fixed tw-inset-y-0 tw-left-0 ${
-          isMobile && isOffcanvasOpen ? "tw-z-[80]" : "tw-z-40"
+          isDialog ? "tw-z-[80]" : "tw-z-40"
         }`}
-        role={isMobile && isOffcanvasOpen ? "dialog" : undefined}
-        aria-modal={isMobile && isOffcanvasOpen ? "true" : undefined}
+        role={isDialog ? "dialog" : undefined}
+        aria-modal={isDialog ? "true" : undefined}
       >
         <div
           className="tw-relative tw-z-50 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
@@ -88,30 +91,29 @@ function WebSidebar({
                   : "tw-flex tw-items-center tw-justify-between tw-px-4"
               }`}
             >
-              <Link
-                href="/"
-                className={`tw-flex tw-items-center ${
-                  shouldShowCollapsed ? "" : "tw-ml-1.5"
-                }`}
-              >
-                <Image
-                  unoptimized
-                  loading="eager"
-                  priority
-                  alt="6529Seize"
-                  src="/6529.png"
-                  className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-transition-all tw-duration-100 hover:tw-scale-[1.02] hover:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.3)]"
-                  width={40}
-                  height={40}
-                />
-              </Link>
+              {!shouldShowCollapsed && (
+                <Link
+                  href="/"
+                  className="tw-flex tw-items-center tw-ml-1.5"
+                >
+                  <Image
+                    unoptimized
+                    loading="eager"
+                    priority
+                    alt="6529Seize"
+                    src="/6529.png"
+                    className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-transition-all tw-duration-100 hover:tw-scale-[1.02] hover:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.3)]"
+                    width={40}
+                    height={40}
+                  />
+                </Link>
+              )}
 
               <button
                 type="button"
                 onClick={onToggle}
-                className={`tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800/85 tw-border tw-border-iron-700/70 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-700/95 desktop-hover:hover:tw-border-iron-500/70 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)] ${
-                  shouldShowCollapsed ? "tw-self-center" : ""
-                }`}
+                onMouseDown={(event) => event.preventDefault()}
+                className={`tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800/85 tw-border tw-border-iron-700/70 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-700/95 desktop-hover:hover:tw-border-iron-500/70 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]`}
                 aria-label={shouldShowCollapsed ? "Expand" : "Collapse"}
                 aria-expanded={!shouldShowCollapsed}
                 data-tooltip-id="sidebar-tooltip"
@@ -136,6 +138,9 @@ function WebSidebar({
               />
             </div>
 
+            {/* QR Code Generator */}
+            <HeaderShare isCollapsed={shouldShowCollapsed} />
+
             <WebSidebarUser
               isCollapsed={shouldShowCollapsed}
               profile={profile}
@@ -145,7 +150,7 @@ function WebSidebar({
           <CollectionsSubmenu
             isOpen={isCollectionsSubmenuOpen}
             sidebarCollapsed={shouldShowCollapsed}
-            onClose={() => onCollectionsSubmenuToggle(false)}
+            onClose={onCollectionsSubmenuClose}
           />
         </div>
       </div>

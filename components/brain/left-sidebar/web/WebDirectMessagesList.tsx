@@ -35,6 +35,13 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Check if device is touch-enabled for tooltip display
+  const isTouchDevice = typeof window !== "undefined" && (
+    "ontouchstart" in window ||
+    navigator.maxTouchPoints > 0 ||
+    window.matchMedia?.("(pointer: coarse)").matches
+  );
+
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
   const { directMessages, registerWave } = useMyStream();
@@ -111,7 +118,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
   return (
     <div className="tw-h-full tw-flex tw-flex-col">
-      <div className="tw-flex-1 tw-bg-black tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4 tw-flex tw-flex-col">
+      <div className="tw-flex-1 tw-bg-black tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-3 tw-flex tw-flex-col">
         {/* Messages header with create button */}
         <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-4">
           <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -169,42 +176,27 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
           />
         </div>
       </div>
-      
+
       {/* Tooltip */}
-      {(() => {
-        const isTouch = (() => {
-          if (typeof window === "undefined") return false;
-          try {
-            return (
-              "ontouchstart" in window ||
-              (navigator as any)?.maxTouchPoints > 0 ||
-              window.matchMedia?.("(pointer: coarse)").matches
-            );
-          } catch {
-            return false;
-          }
-        })();
-        if (isTouch) return null;
-        return (
-          <ReactTooltip
-            id="create-dm-tooltip"
-            place="bottom"
-            offset={8}
-            opacity={1}
-            style={{
-              padding: "6px 10px",
-              background: "#37373E", // iron-700
-              color: "white",
-              fontSize: "12px",
-              fontWeight: 500,
-              borderRadius: "6px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              zIndex: 10000,
-            }}
-            border="1px solid #4C4C55" // iron-650
-          />
-        );
-      })()}
+      {!isTouchDevice && (
+        <ReactTooltip
+          id="create-dm-tooltip"
+          place="bottom"
+          offset={8}
+          opacity={1}
+          style={{
+            padding: "6px 10px",
+            background: "#37373E", // iron-700
+            color: "white",
+            fontSize: "12px",
+            fontWeight: 500,
+            borderRadius: "6px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+            zIndex: 10000,
+          }}
+          border="1px solid #4C4C55" // iron-650
+        />
+      )}
       
       {/* Create Direct Message Modal */}
       {connectedProfile && (

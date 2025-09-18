@@ -5,6 +5,7 @@ import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
+import HomePageTabs from "./HomePageTabs";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -118,61 +119,19 @@ export default function HomePage({
       )}
 
       {/* Tab Navigation */}
-      <div
+      <HomePageTabs
         ref={setTabsRef}
-        className="tailwind-scope tw-px-6 tw-sticky tw-top-0 tw-z-20 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
-      >
-        <div
-          className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
-          aria-label="Tabs"
-        >
-          <div
-            className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-            aria-label="Tabs"
-          >
-            <button
-              onClick={() => setActiveTab("feed")}
-              className={`tw-no-underline tw-flex tw-items-center tw-justify-center tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
-                activeTab === "feed" ? "tw-pointer-events-none" : ""
-              }`}
-            >
-              <div
-                className={
-                  activeTab === "feed"
-                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-5 tw-px-1"
-                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-5 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-                }
-              >
-                My Feed
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab("latest")}
-              className={`tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
-                activeTab === "latest" ? "tw-pointer-events-none" : ""
-              }`}
-            >
-              <div
-                className={
-                  activeTab === "latest"
-                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-5 tw-px-1"
-                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-5 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-                }
-              >
-                Latest Drop
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-h-full  tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 xl:tw-px-8">
+          <div className="tw-min-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 xl:tw-px-8">
             {isAuthenticated ? (
               <HomeFeed />
             ) : (
-              <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[85dvh]">
+              <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[calc(100vh-56px)]">
                 <Image
                   unoptimized
                   priority

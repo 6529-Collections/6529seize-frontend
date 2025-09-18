@@ -81,6 +81,13 @@ const WebUnifiedWavesListWaves = forwardRef<
     const { isApp } = useDeviceInfo();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+    // Check if device is touch-enabled for tooltip display
+    const isTouchDevice = typeof window !== "undefined" && (
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia?.("(pointer: coarse)").matches
+    );
+
     useImperativeHandle(ref, () => ({
       sentinelRef,
     }));
@@ -120,7 +127,7 @@ const WebUnifiedWavesListWaves = forwardRef<
               label="Waves"
               rightContent={
                 !isApp && connectedProfile ? (
-                  <div 
+                  <div
                     data-tooltip-id="create-wave-tooltip"
                     data-tooltip-content="Create wave"
                   >
@@ -177,7 +184,12 @@ const WebUnifiedWavesListWaves = forwardRef<
                 </section>
               </>
             )}
-            <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3"></div>
+            {/* Add divider between pinned and regular waves */}
+            {!hideHeaders &&
+              pinnedWaves.length > 0 &&
+              regularWaves.length > 0 && (
+                <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
+              )}
             {/* Conditionally show regular waves or maintain structure */}
             {regularWaves.length > 0 ? (
               <section
@@ -245,42 +257,27 @@ const WebUnifiedWavesListWaves = forwardRef<
             profile={connectedProfile}
           />
         )}
-        
+
         {/* Tooltip */}
-        {(() => {
-          const isTouch = (() => {
-            if (typeof window === "undefined") return false;
-            try {
-              return (
-                "ontouchstart" in window ||
-                (navigator as any)?.maxTouchPoints > 0 ||
-                window.matchMedia?.("(pointer: coarse)").matches
-              );
-            } catch {
-              return false;
-            }
-          })();
-          if (isTouch) return null;
-          return (
-            <ReactTooltip
-              id="create-wave-tooltip"
-              place="bottom"
-              offset={8}
-              opacity={1}
-              style={{
-                padding: "6px 10px",
-                background: "#37373E", // iron-700
-                color: "white",
-                fontSize: "12px",
-                fontWeight: 500,
-                borderRadius: "6px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                zIndex: 10000,
-              }}
-              border="1px solid #4C4C55" // iron-650
-            />
-          );
-        })()}
+        {!isTouchDevice && (
+          <ReactTooltip
+            id="create-wave-tooltip"
+            place="bottom"
+            offset={8}
+            opacity={1}
+            style={{
+              padding: "6px 10px",
+              background: "#37373E", // iron-700
+              color: "white",
+              fontSize: "12px",
+              fontWeight: 500,
+              borderRadius: "6px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              zIndex: 10000,
+            }}
+            border="1px solid #4C4C55" // iron-650
+          />
+        )}
       </>
     );
   }

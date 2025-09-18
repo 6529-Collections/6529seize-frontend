@@ -14,6 +14,11 @@ export default function SmallScreenLayout({ children }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
 
+  const handleCollectionsToggle = () =>
+    setIsCollectionsSubmenuOpen(prev => !prev);
+
+  const handleCollectionsClose = () => setIsCollectionsSubmenuOpen(false);
+
   return (
     <div className="tw-flex tw-flex-col tw-h-screen">
       {/* Simple header bar with hamburger */}
@@ -29,7 +34,8 @@ export default function SmallScreenLayout({ children }: Props) {
             isCollapsed={false}
             onToggle={() => setIsMenuOpen(!isMenuOpen)}
             isCollectionsSubmenuOpen={isCollectionsSubmenuOpen}
-            onCollectionsSubmenuToggle={setIsCollectionsSubmenuOpen}
+            onCollectionsSubmenuToggle={handleCollectionsToggle}
+            onCollectionsSubmenuClose={handleCollectionsClose}
             isMobile={true}
             isOffcanvasOpen={isMenuOpen}
             onCloseOffcanvas={() => setIsMenuOpen(false)}
