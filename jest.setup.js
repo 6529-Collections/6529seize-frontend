@@ -83,7 +83,9 @@ if (typeof global.ResizeObserver === "undefined") {
   };
 }
 
-// Default API endpoint needed for service tests
+// Default endpoints needed for service tests
+process.env.BASE_ENDPOINT =
+  process.env.BASE_ENDPOINT || "https://6529.io";
 process.env.API_ENDPOINT = process.env.API_ENDPOINT || "https://example.com";
 
 // Mock ResizeObserver for react-tooltip

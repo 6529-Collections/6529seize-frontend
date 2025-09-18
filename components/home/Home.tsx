@@ -1,22 +1,26 @@
+import { InitialActivityData } from "@/components/latest-activity/fetchInitialActivityData";
+import MemeCalendarOverview from "@/components/meme-calendar/MemeCalendarOverview";
+import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { isEmptyObject } from "@/helpers/Helpers";
-import { Col, Container, Row } from "react-bootstrap";
 import { formatNameForUrl } from "@/helpers/nextgen-utils";
-import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
-import LatestDropSection from "./LatestDropSection";
-import Link from "next/link";
 import dynamic from "next/dynamic";
-import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+import LatestDropSection from "./LatestDropSection";
 
-const LatestActivity = dynamic(() => import("../latest-activity/LatestActivity"), {
-  ssr: false,
-  loading: () => (
-    <div className="pt-4" role="status" aria-live="polite" aria-busy="true">
-      Loading latest activity…
-    </div>
-  ),
-});
+const LatestActivity = dynamic(
+  () => import("../latest-activity/LatestActivity"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="pt-4" role="status" aria-live="polite" aria-busy="true">
+        Loading latest activity…
+      </div>
+    ),
+  }
+);
 
 export default function Home({
   featuredNft,
@@ -32,6 +36,13 @@ export default function Home({
   return (
     <>
       <LatestDropSection featuredNft={featuredNft} />
+      <Container className="py-5">
+        <Row>
+          <Col>
+            <MemeCalendarOverview displayTz="local" showViewAll />
+          </Col>
+        </Row>
+      </Container>
       {featuredNextgen && !isEmptyObject(featuredNextgen) && (
         <Container className="pt-3 pb-5">
           <Row>
@@ -43,8 +54,7 @@ export default function Home({
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   featuredNextgen.name
-                )}`}
-              >
+                )}`}>
                 View Collection
               </Link>
             </Col>

@@ -3,5 +3,5 @@ import DropLoading from '../../../components/waves/drops/DropLoading';
 
 test('shows loading state', () => {
   render(<DropLoading />);
-  expect(screen.getByText('Loading...')).toBeInTheDocument();
+  expect(screen.getByText('Loading...', { selector: 'p' })).toBeInTheDocument();
 });
