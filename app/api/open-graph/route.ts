@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import { buildOffice365Preview } from "./office365";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -97,8 +98,29 @@ export async function GET(request: NextRequest) {
 
   try {
     const { html, contentType, finalUrl } = await fetchHtml(targetUrl);
-    await ensureUrlIsPublic(new URL(finalUrl));
-    const data = buildResponse(targetUrl, html, contentType);
+    const finalUrlInstance = new URL(finalUrl);
+    await ensureUrlIsPublic(finalUrlInstance);
+
+    const baseResponse = buildResponse(targetUrl, html, contentType, finalUrlInstance);
+
+    let data = baseResponse;
+
+    try {
+      const officePreview = await buildOffice365Preview({
+        originalUrl: targetUrl,
+        finalUrl: finalUrlInstance,
+        html,
+        contentType,
+        baseResponse,
+      });
+
+      if (officePreview) {
+        data = officePreview;
+      }
+    } catch {
+      // Ignore Office-specific errors and fall back to the generic Open Graph data.
+    }
+
     const entry: CacheEntry = {
       data,
       expiresAt: Date.now() + CACHE_TTL_MS,
