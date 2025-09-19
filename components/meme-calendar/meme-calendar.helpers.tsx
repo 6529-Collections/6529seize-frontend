@@ -56,8 +56,6 @@ const CONTINUOUS_MINT_START_UTC_DAY = new Date(Date.UTC(2026, 0, 2));
 // Historic: the very first “new-era” mint is #48 on/after 2023-01-01 (SZN2 start).
 const HISTORIC_BASE_COUNT = 47; // #1..#47 were Year 0 (we'll add them later)
 
-// Based on your screenshot: ONLY SZN blocks mint; the named breaks don’t.
-// Each entry is [inclusiveStartUTC, inclusiveEndUTC].
 const HISTORIC_MINT_PHASES: Array<{ startUtcDay: Date; endUtcDay: Date }> = [
   // 2023 — Year 1
   { startUtcDay: utcDate(2023, 0, 1), endUtcDay: utcDate(2023, 2, 31) }, // Winter SZN2
@@ -172,7 +170,7 @@ export function isMintDayDate(d: Date): boolean {
   return isMintDow(d.getUTCDay());
 }
 
-export function nextMintDateOnOrAfter(d: Date): Date {
+export function nextMintDateOnOrAfter(d: Date = new Date()): Date {
   let x = startOfUtcDay(d);
   // clamp before 2023 to the first mintable historic day
   if (+x < +FIRST_MINT_DATE) x = new Date(FIRST_MINT_DATE);
@@ -430,7 +428,7 @@ export function displayedEonNumberFromIndex(seasonIndex: number): number {
 }
 
 // Type definitions for zoom levels
-export type ZoomLevel = "season" | "year" | "epoch" | "period" | "era" | "eon";
+export type ZoomLevel = "szn" | "year" | "epoch" | "period" | "era" | "eon";
 
 // Helper: add N months to a date and return the last day of the resulting month (UTC)
 export function addMonths(date: Date, months: number): Date {
@@ -445,7 +443,7 @@ export function getRangeDatesByZoom(
   seasonIndex: number
 ): { start: Date; end: Date } {
   switch (zoom) {
-    case "season": {
+    case "szn": {
       if (isSznOneIndex(seasonIndex)) {
         return {
           start: new Date(SZN1_RANGE.start),
@@ -568,8 +566,14 @@ export function getNextMintNumber(now: Date = new Date()): number {
   return getMintNumberForMintDate(nextMintDay);
 }
 
-export function isMintingActive(now: Date = new Date()): boolean {
-  return getActiveMintWindow(now) !== null;
+export function isMintingActive(d: Date = new Date()): boolean {
+  return (
+    isMintEligibleUtcDay(startOfUtcDay(d)) || getActiveMintWindow(d) !== null
+  );
+}
+
+export function isMintingToday(): boolean {
+  return isMintEligibleUtcDay(startOfUtcDay(new Date()));
 }
 
 // Inverse: mint number -> mint *instant* (UTC)
@@ -653,7 +657,7 @@ export interface MintTimelineDetails {
 }
 
 const ZOOM_LEVELS: readonly ZoomLevel[] = [
-  "season",
+  "szn",
   "year",
   "epoch",
   "period",
@@ -882,7 +886,7 @@ export function formatToFullDivision(d: Date): React.ReactNode {
     });
   const range = (start: Date, end: Date) => `${fmt(start)} - ${fmt(end)}`;
 
-  const seasonDates = getRangeDatesByZoom("season", idx);
+  const seasonDates = getRangeDatesByZoom("szn", idx);
   const yearDates = getRangeDatesByZoom("year", idx);
   const epochDates = getRangeDatesByZoom("epoch", idx);
   const periodDates = getRangeDatesByZoom("period", idx);
@@ -918,4 +922,96 @@ function printDivision(label: string, number: number, range: string) {
       </td>
     </tr>
   );
+}
+
+// ---- Reusable season scan helper ----
+export interface SeasonMintRow {
+  utcDay: Date;
+  instantUtc: Date;
+  meme: number;
+}
+
+export interface SeasonMintScanResult {
+  /** First UTC day considered for the season (1st of month at 00:00 UTC). */
+  seasonStart: Date;
+  /** Last UTC day considered for the season (last day of month at 00:00 UTC). */
+  seasonEndInclusive: Date;
+  /** Season index derived from the provided range's start. */
+  seasonIndex: number;
+  /** Upcoming mints strictly after `now`. */
+  rows: SeasonMintRow[];
+}
+
+/**
+ * Compute upcoming mints within a [start, end] range (inclusive by UTC day).
+ * - Clamps the scan start to **today (UTC)** so only *future* mint instants are returned.
+ * - Honors all scheduling rules via `isMintEligibleUtcDay` and `mintStartInstantUtcForMintDay`.
+ */
+export function getUpcomingMintsBetween(
+  start: Date,
+  end: Date,
+  now: Date = new Date()
+): SeasonMintScanResult {
+  // Normalize anchors to UTC day boundaries
+  const todayUtcDay = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  );
+  const seasonStart = new Date(
+    Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1)
+  );
+  const seasonEndInclusive = new Date(
+    Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0)
+  );
+
+  // Begin scanning from the later of today vs season start
+  const scanStart = new Date(
+    Math.max(todayUtcDay.getTime(), seasonStart.getTime())
+  );
+
+  const out: SeasonMintRow[] = [];
+  const cursor = new Date(scanStart);
+  while (+cursor <= +seasonEndInclusive) {
+    if (isMintEligibleUtcDay(cursor)) {
+      const mintInstant = mintStartInstantUtcForMintDay(cursor);
+      out.push({
+        utcDay: new Date(cursor),
+        instantUtc: mintInstant,
+        meme: getMintNumberForMintDate(cursor),
+      });
+    }
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  const rows = out.filter((x) => x.instantUtc.getTime() > now.getTime());
+  const seasonIndex = getSeasonIndexForDate(seasonStart);
+
+  return { seasonStart, seasonEndInclusive, seasonIndex, rows };
+}
+
+/**
+ * Get upcoming mints for the season containing `now`. If none remain in that
+ * season (strictly after `now`), automatically fall forward to the next season.
+ */
+export function getUpcomingMintsForCurrentOrNextSeason(
+  now: Date = new Date()
+): SeasonMintScanResult {
+  const idx = getSeasonIndexForDate(now);
+  const start = getSeasonStartDate(idx);
+  const end = addMonths(start, 2);
+
+  let current = getUpcomingMintsBetween(start, end, now);
+  if (current.rows.length > 0) {
+    return current;
+  }
+
+  const nextIdx = idx + 1;
+  const nextStart = getSeasonStartDate(nextIdx);
+  const nextEnd = addMonths(nextStart, 2);
+  const next = getUpcomingMintsBetween(nextStart, nextEnd, now);
+
+  // Ensure seasonIndex reflects the next season when we roll forward
+  return {
+    ...next,
+    seasonIndex: nextIdx,
+  };
 }

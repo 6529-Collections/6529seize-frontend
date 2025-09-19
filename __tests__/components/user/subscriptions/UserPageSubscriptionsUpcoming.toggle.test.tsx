@@ -11,9 +11,19 @@ jest.mock('react-toggle', () => (props: any) => (
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 
-jest.mock('../../../../helpers/meme_calendar.helpers', () => ({
-  getMintingDates: () => [{ toIsoDateString: ()=>'2024', toDayName: ()=>'Mon' }],
-  isMintingToday: () => false,
+const mockUpcomingRows = [
+  {
+    utcDay: new Date('2024-01-01T00:00:00Z'),
+    instantUtc: new Date('2024-01-01T15:40:00Z'),
+    meme: 201,
+  },
+];
+
+jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+  __esModule: true,
+  formatFullDate: jest.fn(() => '2024-01-01 / Monday'),
+  getUpcomingMintsForCurrentOrNextSeason: jest.fn(() => ({ rows: mockUpcomingRows })),
+  isMintingToday: jest.fn(() => false),
 }));
 
 jest.mock('../../../../services/api/common-api', () => ({
