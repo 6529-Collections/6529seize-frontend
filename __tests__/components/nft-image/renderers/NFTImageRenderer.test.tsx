@@ -20,16 +20,15 @@ jest.mock("next/image", () => {
     unoptimized,
     ...props
   }: any) {
+    let _src = src as string;
     const mockCurrentTarget = {
-      src,
       get src() {
-        return this._src || src;
+        return _src;
       },
-      set src(newSrc) {
-        this._src = newSrc;
+      set src(newSrc: string) {
+        _src = newSrc;
       },
-      _src: src,
-    };
+    } as any;
 
     return (
       <img
@@ -63,8 +62,16 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
   return function MockNFTImageBalance({ contract, tokenId, height }: any) {
     // Mock the balance logic - simulate different states
     // tokenId: 1 => 5, 2 => 0, 3 => -1, else => 1
-    const mockBalance =
-      tokenId === 1 ? 5 : tokenId === 2 ? 0 : tokenId === 3 ? -1 : 1;
+    let mockBalance: number;
+    if (tokenId === 1) {
+      mockBalance = 5;
+    } else if (tokenId === 2) {
+      mockBalance = 0;
+    } else if (tokenId === 3) {
+      mockBalance = -1;
+    } else {
+      mockBalance = 1;
+    }
 
     return (
       <div data-testid="nft-image-balance">
