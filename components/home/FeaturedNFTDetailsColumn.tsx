@@ -1,14 +1,15 @@
 "use client";
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import MemeCalendarPeriods from "@/components/the-memes/MemeCalendarPeriods";
 import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
+import { MEMES_CONTRACT, MEMES_MANIFOLD_PROXY_CONTRACT } from "@/constants";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import useCapacitor from "@/hooks/useCapacitor";
-import { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import { useManifoldClaim } from "@/hooks/useManifoldClaim";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 import Link from "next/link";
-import { useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import FeaturedNFTDetailsTable from "./FeaturedNFTDetailsTable";
 import ManifoldClaimTable from "./ManifoldClaimTable";
@@ -16,13 +17,22 @@ import MintingApproachSection from "./MintingApproachSection";
 
 interface Props {
   readonly featuredNft: NFTWithMemesExtendedData;
+  readonly isMemeMintingActive: boolean;
 }
 
-export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
+export default function FeaturedNFTDetailsColumn({
+  featuredNft,
+  isMemeMintingActive,
+}: Props) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
-  const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
+  const manifoldClaim = useManifoldClaim(
+    MEMES_CONTRACT,
+    MEMES_MANIFOLD_PROXY_CONTRACT,
+    MEMES_MANIFOLD_PROXY_ABI,
+    featuredNft.id
+  );
 
   const {
     editionSizeDisplay: manifoldClaimEditionSizeDisplay,
@@ -62,17 +72,18 @@ export default function FeaturedNFTDetailsColumn({ featuredNft }: Props) {
             />
           </Col>
         </Row>
-        <Row>
-          <Col>
-            <MemePageMintCountdown
-              nft_id={featuredNft.id}
-              setClaim={setManifoldClaim}
-              is_full_width={true}
-              hide_mint_btn={false}
-              show_only_if_active={false}
-            />
-          </Col>
-        </Row>
+        {isMemeMintingActive && (
+          <Row>
+            <Col>
+              <MemePageMintCountdown
+                nft_id={featuredNft.id}
+                is_full_width={true}
+                hide_mint_btn={false}
+                show_only_if_active={false}
+              />
+            </Col>
+          </Row>
+        )}
         <MintingApproachSection nftId={featuredNft.id} />
         <ManifoldClaimTable
           statusDisplay={manifoldClaimstatusDisplay}
