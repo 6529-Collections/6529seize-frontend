@@ -342,7 +342,6 @@ interface EnsPreviewCardProps {
 }
 
 export default function EnsPreviewCard({ preview }: EnsPreviewCardProps) {
-  console.log("i am ens preview card preview", preview);
   if (preview.type === "ens.address") {
     return <AddressCard preview={preview} />;
   }
