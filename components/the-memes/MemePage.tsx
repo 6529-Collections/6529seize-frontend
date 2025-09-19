@@ -176,7 +176,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               </Col>
             </Row>
           )}
-          <Row>
+          <Row className={connectedProfile ? styles.nftImagePadding : ""}>
             {[
               MEME_FOCUS.LIVE,
               MEME_FOCUS.YOUR_CARDS,
