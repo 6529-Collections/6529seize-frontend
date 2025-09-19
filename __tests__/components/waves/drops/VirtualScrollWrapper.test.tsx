@@ -85,7 +85,7 @@ describe("IntersectionObserver Configuration", () => {
   test("sets up observer with correct options", () => {
     setup(DropSize.FULL);
     expect(intersectionObserverOptions).toEqual({
-      rootMargin: "2000px 0px 2000px 0px",
+      rootMargin: "5000px 0px 5000px 0px",
       threshold: 0.0,
       root: expect.any(HTMLDivElement),
     });

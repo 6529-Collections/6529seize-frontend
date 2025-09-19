@@ -1,3 +1,5 @@
+import { type ReactNode } from "react";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -49,7 +51,6 @@ const IMAGE_KEYS = [
   "secureUrl",
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
-const CARD_MIN_HEIGHT_CLASS = "tw-min-h-[12rem]";
 
 function readFirstString(
   data: OpenGraphPreviewData | null | undefined,
@@ -186,6 +187,23 @@ function getRelativeHref(href: string): string | undefined {
   return relative.startsWith("/") ? relative : undefined;
 }
 
+export function LinkPreviewCardLayout({
+  href,
+  children,
+}: {
+  readonly href: string;
+  readonly children: ReactNode;
+}) {
+  const relativeHref = getRelativeHref(href);
+
+  return (
+    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+      <div className="tw-flex-1 tw-min-w-0">{children}</div>
+      <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
+    </div>
+  );
+}
+
 export function hasOpenGraphContent(
   preview: OpenGraphPreviewData | null | undefined
 ): boolean {
@@ -195,8 +213,8 @@ export function hasOpenGraphContent(
 
   return Boolean(
     readFirstString(preview, TITLE_KEYS) ||
-      readFirstString(preview, DESCRIPTION_KEYS) ||
-      extractImageUrl(preview)
+    readFirstString(preview, DESCRIPTION_KEYS) ||
+    extractImageUrl(preview)
   );
 }
 
@@ -212,22 +230,19 @@ export default function OpenGraphPreview({
 
   if (typeof preview === "undefined") {
     return (
-      <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
-        <div className="tw-flex-1 tw-min-w-0">
+      <LinkPreviewCardLayout href={href}>
+        <div
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div
-            className={`tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 ${CARD_MIN_HEIGHT_CLASS}`}>
-            <div
-              className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
-              data-testid="og-preview-skeleton">
-              <div className="tw-aspect-video tw-w-full tw-rounded-lg tw-bg-iron-800/60" />
-              <div className="tw-h-4 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
-              <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800/30" />
-              <div className="tw-h-3 tw-w-2/3 tw-rounded tw-bg-iron-800/20" />
-            </div>
+            className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
+            data-testid="og-preview-skeleton">
+            <div className="tw-w-full tw-rounded-lg tw-bg-iron-800/60" />
+            <div className="tw-h-4 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
+            <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800/30" />
+            <div className="tw-h-3 tw-w-2/3 tw-rounded tw-bg-iron-800/20" />
           </div>
         </div>
-        <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
-      </div>
+      </LinkPreviewCardLayout>
     );
   }
 
@@ -239,80 +254,74 @@ export default function OpenGraphPreview({
 
   if (!hasContent) {
     return (
-      <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
-        <div className="tw-flex-1 tw-min-w-0">
-          <div
-            className={`tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6 ${CARD_MIN_HEIGHT_CLASS}`}
-            data-testid="og-preview-unavailable">
-            <div className="tw-text-center tw-space-y-2">
-              <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
-                Link unavailable
-              </p>
-              <Link
-                href={effectiveHref}
-                target={linkTarget}
-                rel={linkRel}
-                className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
-                {domain ?? href}
-              </Link>
-            </div>
+      <LinkPreviewCardLayout href={href}>
+        <div
+          className="tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
+          data-testid="og-preview-unavailable">
+          <div className="tw-text-center tw-space-y-2">
+            <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
+              Link unavailable
+            </p>
+            <Link
+              href={effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              {domain ?? href}
+            </Link>
           </div>
         </div>
-        <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
-      </div>
+      </LinkPreviewCardLayout>
     );
   }
 
   return (
-    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <div
-          className={`tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 ${CARD_MIN_HEIGHT_CLASS}`}
-          data-testid="og-preview-card">
-          <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
-            {imageUrl && (
-              <Link
-                href={effectiveHref}
-                target={linkTarget}
-                rel={linkRel}
-                className="tw-block md:tw-w-60 md:tw-flex-shrink-0">
-                <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
-                  <Image
-                    src={imageUrl}
-                    alt={title ?? domain ?? "Link preview"}
-                    width={1200}
-                    height={630}
-                    className="tw-h-full tw-w-full tw-object-cover"
-                    loading="lazy"
-                    sizes="(max-width: 768px) 100vw, 240px"
-                    unoptimized
-                  />
-                </div>
-              </Link>
+    <LinkPreviewCardLayout href={href}>
+      <div
+        className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+        data-testid="og-preview-card">
+        <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
+          {imageUrl && (
+            <Link
+              href={effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              className="tw-block md:tw-w-60 md:tw-flex-shrink-0">
+              <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
+                <Image
+                  src={imageUrl}
+                  alt={title ?? domain ?? "Link preview"}
+                  width={1200}
+                  height={630}
+                  className="tw-h-full tw-w-full tw-object-cover"
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 240px"
+                  unoptimized
+                />
+              </div>
+            </Link>
+          )}
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
+            {domain && (
+              <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+                {domain}
+              </span>
             )}
-            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
-              {domain && (
-                <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-                  {domain}
-                </span>
-              )}
-              <Link
-                href={effectiveHref}
-                target={linkTarget}
-                rel={linkRel}
-                className="tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
-                {title ?? domain ?? href}
-              </Link>
-              {description && (
-                <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-whitespace-pre-line">
-                  {description}
-                </p>
-              )}
-            </div>
+            <Link
+              href={effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              className="tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              {title ?? domain ?? href}
+            </Link>
+            {description && (
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-whitespace-pre-line">
+                {description}
+              </p>
+            )}
           </div>
         </div>
       </div>
-      <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
-    </div>
+    </LinkPreviewCardLayout>
   );
 }
