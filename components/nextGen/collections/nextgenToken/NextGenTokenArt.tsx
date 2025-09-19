@@ -61,6 +61,7 @@ function NextGenTokenArtImage(
       />
     );
   }
+  
 
   return (
     <NextGenTokenImage

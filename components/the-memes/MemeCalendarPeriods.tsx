@@ -28,7 +28,7 @@ export default function MemeCalendarPeriods({ id }: { readonly id: number }) {
   };
 
   return (
-    <div className="tw-text-sm tw-text-iron-300">
+    <div className="tw-text-xs sm:tw-text-sm tw-text-iron-300">
       {printPeriod("SZN", szn)} / {printPeriod("YEAR", year)} /{" "}
       {printPeriod("EPOCH", epoch)} / {printPeriod("PERIOD", period)} /{" "}
       {printPeriod("ERA", era)} / {printPeriod("EON", eon)}
