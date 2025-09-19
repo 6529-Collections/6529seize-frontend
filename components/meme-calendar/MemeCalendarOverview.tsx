@@ -1,5 +1,6 @@
 "use client";
 
+import useCapacitor from "@/hooks/useCapacitor";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toPng } from "html-to-image";
@@ -13,9 +14,8 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import type { DisplayTz } from "./meme-calendar.helpers";
+import type { DisplayTz, SeasonMintScanResult } from "./meme-calendar.helpers";
 import {
-  addMonths,
   displayedSeasonNumberFromIndex,
   formatFullDate,
   formatFullDateTime,
@@ -23,10 +23,7 @@ import {
   getMintNumberForMintDate,
   getMintTimelineDetails,
   getNextMintStart,
-  getSeasonIndexForDate,
-  getSeasonStartDate,
-  isMintEligibleUtcDay,
-  mintStartInstantUtcForMintDay,
+  getUpcomingMintsForCurrentOrNextSeason,
   printCalendarInvites,
   ymd,
 } from "./meme-calendar.helpers";
@@ -87,6 +84,7 @@ const TopControls = memo(function TopControls(props: {
   onScreenshot: () => void;
   isCapturing: boolean;
 }) {
+  const { isCapacitor } = useCapacitor();
   const {
     canonicalNextMintNumber,
     selectedMintNumber,
@@ -129,18 +127,22 @@ const TopControls = memo(function TopControls(props: {
         </div>
       </form>
 
-      {/* spacer so the camera can sit on the same row but push to the right when space exists */}
-      <div className="tw-flex-1" />
+      {!isCapacitor && (
+        <>
+          {/* spacer so the camera can sit on the same row but push to the right when space exists */}
+          <div className="tw-flex-1" />
 
-      <button
-        type="button"
-        onClick={onScreenshot}
-        disabled={isCapturing}
-        className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
-        aria-label="Screenshot"
-        title="Screenshot">
-        <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
-      </button>
+          <button
+            type="button"
+            onClick={onScreenshot}
+            disabled={isCapturing}
+            className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
+            aria-label="Screenshot"
+            title="Screenshot">
+            <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
+          </button>
+        </>
+      )}
     </div>
   );
 });
@@ -395,59 +397,11 @@ export function MemeCalendarOverviewUpcomingMints({
 }: MemeCalendarOverviewUpcomingMintsProps) {
   const [now] = useState(new Date());
 
-  const { seasonStart, seasonEndInclusive, seasonIndex, rows } = useMemo(() => {
-    function buildRows(start: Date, end: Date) {
-      const todayUtcDay = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-      );
-      const seasonStartUtcDay = new Date(
-        Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1)
-      );
-      const seasonEndLastUtcDay = new Date(
-        Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0)
-      );
-      const scanStart = new Date(
-        Math.max(todayUtcDay.getTime(), seasonStartUtcDay.getTime())
-      );
-      const out: { utcDay: Date; instantUtc: Date; meme: number }[] = [];
-      const cursor = new Date(scanStart);
-      while (cursor <= seasonEndLastUtcDay) {
-        if (isMintEligibleUtcDay(cursor)) {
-          const mintInstant = mintStartInstantUtcForMintDay(cursor);
-          out.push({
-            utcDay: new Date(cursor),
-            instantUtc: mintInstant,
-            meme: getMintNumberForMintDate(cursor),
-          });
-        }
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-      }
-      return out.filter((x) => x.instantUtc.getTime() > now.getTime());
-    }
-
-    const idx = getSeasonIndexForDate(now);
-    const start = getSeasonStartDate(idx);
-    const end = addMonths(start, 2);
-    let seasonRows = buildRows(start, end);
-    if (seasonRows.length === 0) {
-      const nextIdx = idx + 1;
-      const nextStart = getSeasonStartDate(nextIdx);
-      const nextEnd = addMonths(nextStart, 2);
-      seasonRows = buildRows(nextStart, nextEnd);
-      return {
-        seasonStart: nextStart,
-        seasonEndInclusive: nextEnd,
-        seasonIndex: nextIdx,
-        rows: seasonRows,
-      };
-    }
-    return {
-      seasonStart: start,
-      seasonEndInclusive: end,
-      seasonIndex: idx,
-      rows: seasonRows,
-    };
-  }, [now]);
+  const { seasonStart, seasonEndInclusive, seasonIndex, rows } =
+    useMemo<SeasonMintScanResult>(
+      () => getUpcomingMintsForCurrentOrNextSeason(now),
+      [now]
+    );
 
   return (
     <div className="tw-h-full tw-p-4 tw-flex tw-flex-col tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
@@ -461,7 +415,8 @@ export function MemeCalendarOverviewUpcomingMints({
         </div>
       </div>
 
-      <div className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto">
+      <div
+        className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 tw-transition-colors tw-duration-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         <table className="tw-w-full tw-text-sm">
           <thead></thead>
           <tbody>
