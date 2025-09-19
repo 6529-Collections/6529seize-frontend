@@ -306,6 +306,29 @@ function normalizeEnsName(name: string): {
   }
 }
 
+function stripHtmlTags(input: string, maxLen = 20000): string {
+  // Cap input to avoid huge worst-cases
+  const s = input.length > maxLen ? input.slice(0, maxLen) : input;
+  let out = "";
+  let inTag = false;
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s.charCodeAt(i);
+    if (ch === 60) {
+      // '<'
+      inTag = true;
+      continue;
+    }
+    if (ch === 62) {
+      // '>'
+      inTag = false;
+      continue;
+    }
+    if (!inTag) out += s[i];
+  }
+  return out;
+}
+
 function sanitizeRecordValue(
   value: string | null,
   key: TextRecordKey
@@ -314,7 +337,7 @@ function sanitizeRecordValue(
     return null;
   }
 
-  const withoutTags = value.replace(/<[^>]*>/g, " ");
+  const withoutTags = stripHtmlTags(value);
   const collapsed = withoutTags.replace(/\s+/g, " ").trim();
   if (!collapsed) {
     return null;

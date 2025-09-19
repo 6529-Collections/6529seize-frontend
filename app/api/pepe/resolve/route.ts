@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
+import { NextRequest, NextResponse } from "next/server";
 
 import LruTtlCache from "@/lib/cache/lruTtl";
 
@@ -95,7 +95,9 @@ const cache = new LruTtlCache<string, Preview>({
 
 const USER_AGENT =
   "6529seize-pepe-card/1.0 (+https://6529.io; fetching pepe.wtf previews)";
-const IPFS_GATEWAY = (process.env.IPFS_GATEWAY || "https://ipfs.io/ipfs/").replace(/\/+$/, "");
+const IPFS_GATEWAY = (
+  process.env.IPFS_GATEWAY || "https://ipfs.io/ipfs/"
+).replace(/\/+$/, "");
 
 function isCounterpartyAssetCode(value: string): boolean {
   const upper = value.toUpperCase();
@@ -129,10 +131,15 @@ async function fetchWithTimeout(
   }
 }
 
-async function fetchText(url: string, timeoutMs = 4000): Promise<string | null> {
+async function fetchText(
+  url: string,
+  timeoutMs = 4000
+): Promise<string | null> {
   const response = await fetchWithTimeout(url, {
     timeoutMs,
-    headers: { accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
+    headers: {
+      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    },
   });
 
   if (!response || !response.ok) {
@@ -164,13 +171,19 @@ async function fetchJson<T>(url: string, timeoutMs = 4000): Promise<T | null> {
 }
 
 function ipfsToHttp(url: string): string {
-  const match = url.match(/^ipfs:\/\/(ipfs\/)?(.+)$/i);
-  if (!match) {
-    return url;
-  }
+  // Early exit for non-ipfs URLs
+  if (!/^ipfs:\/\//i.test(url)) return url;
 
-  const [, , path] = match;
-  return `${IPFS_GATEWAY}/${path.replace(/^\/+/, "")}`;
+  // Drop the scheme
+  const rest = url.slice(7); // after "ipfs://"
+  // Handle optional "ipfs/" prefix
+  const path = rest.toLowerCase().startsWith("ipfs/") ? rest.slice(5) : rest;
+
+  // Normalize leading slashes without regex backtracking
+  let clean = path;
+  while (clean.startsWith("/")) clean = clean.slice(1);
+
+  return `${IPFS_GATEWAY}/${clean}`;
 }
 
 function absolutizeRelativeUrl(candidate: string, base: string): string {
@@ -191,7 +204,11 @@ function slugifyName(name: string): string {
     .replace(/-+/g, "-");
 }
 
-function deepFindAll(value: unknown, keys: string[], results: unknown[] = []): unknown[] {
+function deepFindAll(
+  value: unknown,
+  keys: string[],
+  results: unknown[] = []
+): unknown[] {
   if (Array.isArray(value)) {
     for (const item of value) {
       deepFindAll(item, keys, results);
@@ -222,7 +239,7 @@ async function scrapeNextData(url: string): Promise<any | null> {
   }
 
   const $ = cheerio.load(html);
-  const raw = $('script#__NEXT_DATA__').first().text();
+  const raw = $("script#__NEXT_DATA__").first().text();
   if (!raw) {
     return null;
   }
@@ -262,7 +279,9 @@ async function tryExtractImageFromDescription(
   description: string,
   pageUrl: string
 ): Promise<string | null> {
-  const urls = Array.from(new Set(description.match(/https?:\/\/[^\s"'<>]+/g) ?? []));
+  const urls = Array.from(
+    new Set(description.match(/https?:\/\/[^\s"'<>]+/g) ?? [])
+  );
   for (const rawUrl of urls) {
     const trimmed = rawUrl.trim();
     if (!trimmed) {
@@ -322,7 +341,12 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
     const names = deepFindAll(nextData, ["name", "title"]);
     const artists = deepFindAll(nextData, ["artist", "creator"]);
     const collections = deepFindAll(nextData, ["collection", "family"]);
-    const images = deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"]);
+    const images = deepFindAll(nextData, [
+      "image",
+      "thumbnail_url",
+      "imageUrl",
+      "imageURL",
+    ]);
     const descriptions = deepFindAll(nextData, ["description", "body"]);
     const assetCandidates = deepFindAll(nextData, [
       "asset",
@@ -339,7 +363,9 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
     scraped.collection = extractFirstString(collections) ?? undefined;
     scraped.image = extractFirstString(images) ?? null;
 
-    const assetCode = assetCandidates.find((candidate) => isCounterpartyAssetCode(candidate));
+    const assetCode = assetCandidates.find((candidate) =>
+      isCounterpartyAssetCode(candidate)
+    );
     if (assetCode) {
       scraped.asset = assetCode.toUpperCase();
     }
@@ -352,12 +378,24 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
       }
     }
 
-    const seriesValues = deepFindAll(nextData, ["series", "seriesNumber", "series_number"]);
-    const cardValues = deepFindAll(nextData, ["card", "cardNumber", "card_number"]);
+    const seriesValues = deepFindAll(nextData, [
+      "series",
+      "seriesNumber",
+      "series_number",
+    ]);
+    const cardValues = deepFindAll(nextData, [
+      "card",
+      "cardNumber",
+      "card_number",
+    ]);
     const seriesCandidate =
-      parseMaybeNumber(extractFirstString(seriesValues)) ?? parseMaybeNumber(seriesValues[0]) ?? null;
+      parseMaybeNumber(extractFirstString(seriesValues)) ??
+      parseMaybeNumber(seriesValues[0]) ??
+      null;
     const cardCandidate =
-      parseMaybeNumber(extractFirstString(cardValues)) ?? parseMaybeNumber(cardValues[0]) ?? null;
+      parseMaybeNumber(extractFirstString(cardValues)) ??
+      parseMaybeNumber(cardValues[0]) ??
+      null;
     scraped.series = seriesCandidate;
     scraped.card = cardCandidate;
   }
@@ -376,7 +414,10 @@ async function tokenscanJson<T>(path: string): Promise<T | null> {
   return fetchJson<T>(`${TOKENSCAN_BASE}${path}`, 5000);
 }
 
-async function getApproxRates(): Promise<{ ethPerBtc: number; ethPerXcp: number }> {
+async function getApproxRates(): Promise<{
+  ethPerBtc: number;
+  ethPerXcp: number;
+}> {
   const response = await fetchJson<any>(
     "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,counterparty,ethereum&vs_currencies=eth",
     4000
@@ -388,14 +429,20 @@ async function getApproxRates(): Promise<{ ethPerBtc: number; ethPerXcp: number 
 }
 
 async function probeWikiUrl(url: string): Promise<string | null> {
-  const response = await fetchWithTimeout(url, { method: "HEAD", timeoutMs: 2000 });
+  const response = await fetchWithTimeout(url, {
+    method: "HEAD",
+    timeoutMs: 2000,
+  });
   if (response && response.ok) {
     return url;
   }
   return null;
 }
 
-async function findWikiLink(name?: string, series?: number | null): Promise<string | null> {
+async function findWikiLink(
+  name?: string,
+  series?: number | null
+): Promise<string | null> {
   if (!name) {
     return null;
   }
@@ -424,7 +471,10 @@ async function findWikiLink(name?: string, series?: number | null): Promise<stri
 
 function buildCacheHeaders(hit: boolean): Headers {
   const headers = new Headers();
-  headers.set("Cache-Control", `s-maxage=${ttlMinutes * 60}, stale-while-revalidate=60`);
+  headers.set(
+    "Cache-Control",
+    `s-maxage=${ttlMinutes * 60}, stale-while-revalidate=60`
+  );
   headers.set("X-Cache", hit ? "HIT" : "MISS");
   return headers;
 }
@@ -444,9 +494,13 @@ function normalizeSlug(value: string | null): string | null {
 async function resolveCollection(slug: string): Promise<CollectionPreview> {
   const href = `https://pepe.wtf/collection/${encodeURIComponent(slug)}`;
   const nextData = await scrapeNextData(href);
-  const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
+  const name =
+    extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
     slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const image = extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])) ?? null;
+  const image =
+    extractFirstString(
+      deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
+    ) ?? null;
 
   return {
     kind: "collection",
@@ -461,11 +515,18 @@ async function resolveCollection(slug: string): Promise<CollectionPreview> {
 async function resolveArtist(slug: string): Promise<ArtistPreview> {
   const href = `https://pepe.wtf/artists/${encodeURIComponent(slug)}`;
   const nextData = await scrapeNextData(href);
-  const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replace(/-/g, " ");
-  const image = extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])) ?? null;
+  const name =
+    extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
+    slug.replace(/-/g, " ");
+  const image =
+    extractFirstString(
+      deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
+    ) ?? null;
   const collections = Array.from(
     new Set(
-      deepFindAll(nextData, ["collection", "family"]).filter((value): value is string => typeof value === "string")
+      deepFindAll(nextData, ["collection", "family"]).filter(
+        (value): value is string => typeof value === "string"
+      )
     )
   );
 
@@ -482,15 +543,22 @@ async function resolveArtist(slug: string): Promise<ArtistPreview> {
 async function resolveSet(slug: string): Promise<SetPreview> {
   const href = `https://pepe.wtf/sets/${encodeURIComponent(slug)}`;
   const nextData = await scrapeNextData(href);
-  const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replace(/-/g, " ");
-  const image = extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])) ?? null;
+  const name =
+    extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
+    slug.replace(/-/g, " ");
+  const image =
+    extractFirstString(
+      deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
+    ) ?? null;
 
   let wiki: string | null = null;
   const seriesMatch = name.match(/series\s*(\d+)/i);
   if (seriesMatch) {
     const seriesNo = Number(seriesMatch[1]);
     if (Number.isFinite(seriesNo)) {
-      wiki = await probeWikiUrl(`https://wiki.pepe.wtf/rare-pepes/series-${seriesNo}`);
+      wiki = await probeWikiUrl(
+        `https://wiki.pepe.wtf/rare-pepes/series-${seriesNo}`
+      );
     }
   }
 
@@ -528,41 +596,74 @@ async function resolveAsset(slug: string): Promise<AssetPreview> {
     };
   }
 
-  const [assetInfo, holdersList, dispensersOpen, marketHistBtc, marketHistXcp, rates] = await Promise.all([
+  const [
+    assetInfo,
+    holdersList,
+    dispensersOpen,
+    marketHistBtc,
+    marketHistXcp,
+    rates,
+  ] = await Promise.all([
     tokenscanJson<any>(`/api/asset/${encodeURIComponent(assetCode)}`),
     tokenscanJson<any>(`/api/holders/${encodeURIComponent(assetCode)}`),
-    tokenscanJson<any>(`/api/dispensers/${encodeURIComponent(assetCode)}?status=open`),
-    tokenscanJson<any>(`/api/market/${encodeURIComponent(assetCode)}/BTC/history`),
-    tokenscanJson<any>(`/api/market/${encodeURIComponent(assetCode)}/XCP/history`),
+    tokenscanJson<any>(
+      `/api/dispensers/${encodeURIComponent(assetCode)}?status=open`
+    ),
+    tokenscanJson<any>(
+      `/api/market/${encodeURIComponent(assetCode)}/BTC/history`
+    ),
+    tokenscanJson<any>(
+      `/api/market/${encodeURIComponent(assetCode)}/XCP/history`
+    ),
     getApproxRates(),
   ]);
 
-  const holders = Array.isArray(holdersList?.data) ? holdersList.data.length : null;
+  const holders = Array.isArray(holdersList?.data)
+    ? holdersList.data.length
+    : null;
 
   let bestAskSats: number | undefined;
   if (Array.isArray(dispensersOpen?.data)) {
     const satsValues = dispensersOpen.data
-      .map((entry: any) => Number(entry?.satoshi_price ?? entry?.satoshirate ?? 0))
+      .map((entry: any) =>
+        Number(entry?.satoshi_price ?? entry?.satoshirate ?? 0)
+      )
       .filter((value: number) => Number.isFinite(value) && value > 0);
     if (satsValues.length) {
       bestAskSats = Math.min(...satsValues);
     }
   }
 
-  const lastBtc = Array.isArray(marketHistBtc?.data) && marketHistBtc.data.length ? marketHistBtc.data[0] : null;
-  const lastXcp = Array.isArray(marketHistXcp?.data) && marketHistXcp.data.length ? marketHistXcp.data[0] : null;
+  const lastBtc =
+    Array.isArray(marketHistBtc?.data) && marketHistBtc.data.length
+      ? marketHistBtc.data[0]
+      : null;
+  const lastXcp =
+    Array.isArray(marketHistXcp?.data) && marketHistXcp.data.length
+      ? marketHistXcp.data[0]
+      : null;
 
   const lastSaleSats = Number(lastBtc?.price_sats);
   const lastSaleXcp = Number(lastXcp?.price);
 
-  if (!scraped.image && typeof assetInfo?.description === "string" && assetInfo.description) {
-    const enriched = await tryExtractImageFromDescription(assetInfo.description, href);
+  if (
+    !scraped.image &&
+    typeof assetInfo?.description === "string" &&
+    assetInfo.description
+  ) {
+    const enriched = await tryExtractImageFromDescription(
+      assetInfo.description,
+      href
+    );
     if (enriched) {
       scraped.image = enriched;
     }
   }
 
-  const wikiLink = await findWikiLink(scraped.name ?? assetCode, scraped.series ?? null);
+  const wikiLink = await findWikiLink(
+    scraped.name ?? assetCode,
+    scraped.series ?? null
+  );
 
   return {
     kind: "asset",
@@ -578,7 +679,9 @@ async function resolveAsset(slug: string): Promise<AssetPreview> {
     holders,
     image: scraped.image ?? null,
     links: {
-      horizon: `https://horizon.market/explorer/assets/${encodeURIComponent(assetCode)}`,
+      horizon: `https://horizon.market/explorer/assets/${encodeURIComponent(
+        assetCode
+      )}`,
       xchain: `https://xchain.io/asset/${encodeURIComponent(assetCode)}`,
       wiki: wikiLink ?? undefined,
     },
@@ -594,10 +697,15 @@ async function resolveAsset(slug: string): Promise<AssetPreview> {
 }
 
 export async function GET(request: NextRequest) {
-  const kind = (request.nextUrl.searchParams.get("kind") as PepeKind | null) ?? null;
+  const kind =
+    (request.nextUrl.searchParams.get("kind") as PepeKind | null) ?? null;
   const slug = normalizeSlug(request.nextUrl.searchParams.get("slug"));
 
-  if (!kind || !slug || !["asset", "collection", "artist", "set"].includes(kind)) {
+  if (
+    !kind ||
+    !slug ||
+    !["asset", "collection", "artist", "set"].includes(kind)
+  ) {
     return errorResponse("invalid params", 400);
   }
 
@@ -630,7 +738,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(preview, { headers: buildCacheHeaders(false) });
   } catch (error) {
     console.error("Failed to resolve pepe preview", error);
-    return NextResponse.json({ error: "resolve_failed" }, { headers: buildCacheHeaders(false) });
+    return NextResponse.json(
+      { error: "resolve_failed" },
+      { headers: buildCacheHeaders(false) }
+    );
   }
 }
 
