@@ -30,6 +30,14 @@ gateway usage:
 - `PEPE_CACHE_MAX_ITEMS` (default `500`)
 - `IPFS_GATEWAY` (default `https://ipfs.io/ipfs/`)
 
+### Farcaster previews
+
+To enable richer previews for Warpcast/Farcaster links you can configure:
+
+- `FARCASTER_WARPCAST_API_BASE` (default `https://api.warpcast.com`)
+- `FARCASTER_WARPCAST_API_KEY` (optional, required only if your Warpcast API
+  usage needs authentication)
+
 To test end-to-end:
 
 1. Run `npm run dev`.

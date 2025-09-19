@@ -11,8 +11,9 @@ import { Tweet, type TwitterComponents } from "react-tweet";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { SeizeQuoteLinkInfo, parseSeizeQuoteLink, parseSeizeQueryLink } from "../../../../../helpers/SeizeLinkParser";
 import { parseArtBlocksLink } from "@/src/services/artblocks/url";
-import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
+import { isFarcasterHost } from "@/src/services/farcaster/url";
 import { parseWikimediaLink } from "@/src/services/wikimedia/url";
+import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 
 import { parseYoutubeLink } from "./youtube";
 import YoutubePreview from "./youtubePreview";
@@ -30,6 +31,7 @@ type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHre
 type LinkPreviewCardComponent = typeof import("../../../../waves/LinkPreviewCard").default;
 type WikimediaCardComponent = typeof import("../../../../waves/WikimediaCard").default;
 type TikTokCardComponent = typeof import("../../../../waves/TikTokCard").default;
+type FarcasterCardComponent = typeof import("../../../../waves/FarcasterCard").default;
 
 const getDropPartMarkdownImage = (): DropPartMarkdownImageComponent => {
   const module = require("../DropPartMarkdownImage");
@@ -79,6 +81,11 @@ const getWikimediaCard = (): WikimediaCardComponent => {
 const getTikTokCard = (): TikTokCardComponent => {
   const module = require("../../../../waves/TikTokCard");
   return module.default as TikTokCardComponent;
+};
+
+const getFarcasterCard = (): FarcasterCardComponent => {
+  const module = require("../../../../waves/FarcasterCard");
+  return module.default as FarcasterCardComponent;
 };
 
 interface SmartLinkHandler<T> {
@@ -488,6 +495,35 @@ export const createLinkRenderer = ({
       }
     }
 
+    let parsedUrl: URL | null = null;
+    try {
+      parsedUrl = new URL(href);
+    } catch {
+      parsedUrl = null;
+    }
+
+    if (parsedUrl && isFarcasterHost(parsedUrl.hostname)) {
+      const FarcasterCard = getFarcasterCard();
+      return (
+        <FarcasterCard
+          href={href}
+          renderFallback={() => {
+            if (shouldUseOpenGraphPreview(href)) {
+              const LinkPreviewCard = getLinkPreviewCard();
+              return (
+                <LinkPreviewCard
+                  href={href}
+                  renderFallback={() => renderExternalOrInternalLink(href, props)}
+                />
+              );
+            }
+
+            return renderExternalOrInternalLink(href, props);
+          }}
+        />
+      );
+    }
+
     if (shouldUseOpenGraphPreview(href)) {
       const LinkPreviewCard = getLinkPreviewCard();
       return (
@@ -512,6 +548,15 @@ export const createLinkRenderer = ({
 
     if (smartLinkHandlers.some((handler) => !!handler.parse(href))) {
       return true;
+    }
+
+    try {
+      const parsed = new URL(href);
+      if (isFarcasterHost(parsed.hostname)) {
+        return true;
+      }
+    } catch {
+      // ignore invalid urls
     }
 
     return shouldUseOpenGraphPreview(href);
