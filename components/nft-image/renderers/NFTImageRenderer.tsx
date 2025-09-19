@@ -56,13 +56,13 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
           }
         }}
       />
-      <NFTImageBalance
-        showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
-        showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
-        contract={props.nft.contract}
-        tokenId={props.nft.id}
-        height={props.height}
-      />
+      {props.showBalance && (
+        <NFTImageBalance
+          contract={props.nft.contract}
+          tokenId={props.nft.id}
+          height={props.height}
+        />
+      )}
     </Col>
   );
 }
