@@ -55,6 +55,10 @@ const mockArtBlocksTokenCard = jest.fn((props: any) => (
   <div data-testid="artblocks-card" data-href={props.href} data-token={props.id?.tokenId} />
 ));
 
+const mockFarcasterCard = jest.fn(({ href }: any) => (
+  <div data-testid="farcaster-card" data-href={href} />
+));
+
 jest.mock("../../../../../components/waves/LinkPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockLinkPreviewCard(props),
@@ -65,9 +69,15 @@ jest.mock("@/src/components/waves/ArtBlocksTokenCard", () => ({
   default: (props: any) => mockArtBlocksTokenCard(props),
 }));
 
+jest.mock("../../../../../components/waves/FarcasterCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockFarcasterCard(props),
+}));
+
 beforeEach(() => {
   mockLinkPreviewCard.mockClear();
   mockArtBlocksTokenCard.mockClear();
+  mockFarcasterCard.mockClear();
 });
 
 afterEach(() => {
@@ -186,6 +196,24 @@ describe("DropPartMarkdown", () => {
     expect(call.href).toBe("https://www.artblocks.io/token/662000");
     expect(call.id).toEqual({ tokenId: "662000" });
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+  });
+
+  it("renders Farcaster card for Warpcast links", () => {
+    const content = "[cast](https://warpcast.com/alice/0x123)";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mockFarcasterCard).toHaveBeenCalledTimes(1);
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    const call = mockFarcasterCard.mock.calls[0][0];
+    expect(call.href).toBe("https://warpcast.com/alice/0x123");
   });
 
   it("falls back to regular link when Art Blocks card disabled", () => {

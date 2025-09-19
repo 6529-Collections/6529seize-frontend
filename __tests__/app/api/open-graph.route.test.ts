@@ -10,46 +10,93 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-jest.mock("../../../app/api/open-graph/utils", () => {
+jest.mock("../../../app/api/open-graph/utils", () => ({
+  buildResponse: jest.fn(),
+  buildGoogleWorkspaceResponse: jest.fn(),
+  HTML_ACCEPT_HEADER:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+  LINK_PREVIEW_USER_AGENT:
+    "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)",
+}));
+
+jest.mock("@/lib/security/urlGuard", () => {
+  const actual = jest.requireActual("@/lib/security/urlGuard");
   return {
-    buildResponse: jest.fn(),
-    ensureUrlIsPublic: jest.fn(),
-    validateUrl: jest.fn((value: string | null) => {
+    ...actual,
+    parsePublicUrl: jest.fn((value: string | null) => {
       if (!value) {
-        throw new Error("missing url");
+        throw new actual.UrlGuardError("missing url", "missing-url");
       }
       return new URL(value);
     }),
+    assertPublicUrl: jest.fn(),
   };
 });
 
-const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
-  buildResponse: jest.Mock;
-  ensureUrlIsPublic: jest.Mock;
-};
+jest.mock("../../../app/api/open-graph/compound/service", () => ({
+  createCompoundPlan: jest.fn(() => null),
+}));
 
-const originalFetch = global.fetch;
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
 let GET: GetHandler;
 
-beforeAll(async () => {
+let utils: {
+  buildResponse: jest.Mock;
+  buildGoogleWorkspaceResponse: jest.Mock;
+};
+let guard: {
+  parsePublicUrl: jest.Mock;
+  assertPublicUrl: jest.Mock;
+};
+let compound: {
+  createCompoundPlan: jest.Mock;
+};
+let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
+
+const DEFAULT_USER_AGENT =
+  "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
+
+const originalFetch = global.fetch;
+const mockFetch = jest.fn();
+
+async function loadRoute(): Promise<void> {
+  jest.resetModules();
   ({ GET } = await import("../../../app/api/open-graph/route"));
-});
+  ({ UrlGuardError } = jest.requireActual("@/lib/security/urlGuard"));
+  utils = jest.requireMock("../../../app/api/open-graph/utils") as {
+    buildResponse: jest.Mock;
+    buildGoogleWorkspaceResponse: jest.Mock;
+  };
+  guard = jest.requireMock("@/lib/security/urlGuard") as {
+    parsePublicUrl: jest.Mock;
+    assertPublicUrl: jest.Mock;
+  };
+  compound = jest.requireMock(
+    "../../../app/api/open-graph/compound/service"
+  ) as {
+    createCompoundPlan: jest.Mock;
+  };
+}
 
 describe("open-graph API route", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    global.fetch = originalFetch;
+  beforeEach(async () => {
     nextResponseJson.mockClear();
+    jest.clearAllMocks();
+    await loadRoute();
+    guard.assertPublicUrl.mockResolvedValue(undefined);
+    compound.createCompoundPlan.mockReturnValue(null);
+    utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
+    mockFetch.mockReset();
+    global.fetch = mockFetch as unknown as typeof fetch;
   });
 
-  afterEach(() => {
+  afterAll(() => {
     global.fetch = originalFetch;
   });
 
   const createResponse = (
     status: number,
-    options: { headers?: Record<string, string>; body?: string } = {}
+    options: { headers?: Record<string, string>; body?: string; url?: string } = {}
   ) => {
     const headerEntries = Object.entries(options.headers ?? {}).reduce(
       (map, [key, value]) => map.set(key.toLowerCase(), value),
@@ -63,68 +110,28 @@ describe("open-graph API route", () => {
         get: (name: string) => headerEntries.get(name.toLowerCase()) ?? null,
       },
       text: async () => options.body ?? "",
+      url: options.url ?? "https://example.com/final",
     };
   };
 
-  it("rejects redirects to private targets before following them", async () => {
-    const ensureUrlIsPublic = utils.ensureUrlIsPublic;
-    ensureUrlIsPublic.mockImplementation(async (url: URL) => {
-      if (url.hostname === "safe.example") {
-        return;
-      }
-      if (url.hostname === "169.254.0.1") {
-        throw new Error("URL host is not allowed.");
-      }
-      throw new Error(`unexpected host: ${url.hostname}`);
+  it("returns 400 when the URL is missing", async () => {
+    guard.parsePublicUrl.mockImplementation(() => {
+      throw new UrlGuardError("missing", "missing-url", 400);
     });
-
-    const redirectResponse = createResponse(302, {
-      headers: { location: "http://169.254.0.1/internal" },
-    });
-
-    global.fetch = jest.fn().mockResolvedValueOnce(redirectResponse) as jest.MockedFunction<
-      typeof fetch
-    >;
 
     const request = {
-      nextUrl: new URL(
-        "https://app.local/api/open-graph?url=http://safe.example/article"
-      ),
+      nextUrl: new URL("https://app.local/api/open-graph"),
     } as any;
 
     const response = await GET(request);
 
-    expect(response.status).toBe(502);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(utils.buildResponse).not.toHaveBeenCalled();
+    expect(response.status).toBe(400);
+    expect(nextResponseJson).toHaveBeenCalledWith({ error: "missing" }, { status: 400 });
   });
 
-  it("follows safe redirects after validating each hop", async () => {
-    const ensureUrlIsPublic = utils.ensureUrlIsPublic;
-    ensureUrlIsPublic.mockImplementation(async (url: URL) => {
-      if (["safe.example", "cdn.safe.example"].includes(url.hostname)) {
-        return;
-      }
-      throw new Error(`unexpected host: ${url.hostname}`);
-    });
-
+  it("returns preview data and caches successive requests", async () => {
     const html = "<html><head><title>ok</title></head><body></body></html>";
-    const redirectResponse = createResponse(302, {
-      headers: { location: "https://cdn.safe.example/page" },
-    });
-    const successResponse = createResponse(200, {
-      headers: { "content-type": "text/html" },
-      body: html,
-    });
-
-    const fetchMock = jest
-      .fn()
-      .mockResolvedValueOnce(redirectResponse)
-      .mockResolvedValueOnce(successResponse) as jest.MockedFunction<typeof fetch>;
-
-    global.fetch = fetchMock;
-
-    const previewPayload = {
+    const responsePayload = {
       requestUrl: "http://safe.example/article",
       url: "https://cdn.safe.example/page",
       title: "ok",
@@ -138,7 +145,166 @@ describe("open-graph API route", () => {
       images: [],
     };
 
-    utils.buildResponse.mockReturnValue(previewPayload);
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://cdn.safe.example/page",
+    });
+
+    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
+    utils.buildResponse.mockReturnValue(responsePayload);
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=http://safe.example/article"
+      ),
+    } as any;
+
+    const first = await GET(request);
+    const second = await GET(request);
+
+    expect(compound.createCompoundPlan).toHaveBeenCalledWith(
+      new URL("http://safe.example/article")
+    );
+    expect(first.status).toBe(200);
+    expect(await first.json()).toEqual(responsePayload);
+    expect(second.status).toBe(200);
+    expect(await second.json()).toEqual(responsePayload);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const [fetchUrl, fetchInit] = mockFetch.mock.calls[0];
+    expect(fetchUrl).toBe("http://safe.example/article");
+    expect(fetchInit?.headers).toEqual(
+      expect.objectContaining({
+        accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "user-agent": DEFAULT_USER_AGENT,
+      })
+    );
+    expect(guard.assertPublicUrl.mock.calls.length).toBeGreaterThanOrEqual(3);
+    expect(utils.buildResponse).toHaveBeenCalledWith(
+      new URL("https://cdn.safe.example/page"),
+      html,
+      "text/html",
+      "https://cdn.safe.example/page"
+    );
+  });
+
+  it("applies host-specific overrides for facebook", async () => {
+    const html = "<html></html>";
+    const responsePayload = {
+      requestUrl: "https://www.facebook.com/some-post",
+    };
+
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://www.facebook.com/some-post",
+    });
+
+    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
+    utils.buildResponse.mockReturnValue(responsePayload);
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://www.facebook.com/20531316728/posts/10154009990506729/"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const [fetchUrl, fetchInit] = mockFetch.mock.calls[0];
+    expect(fetchUrl).toBe(
+      "https://www.facebook.com/20531316728/posts/10154009990506729/"
+    );
+    expect(fetchInit?.headers).toEqual(
+      expect.objectContaining({
+        referer: "https://www.facebook.com/",
+        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      })
+    );
+    expect(fetchInit?.headers?.["sec-fetch-mode"]).toBeUndefined();
+    expect(fetchInit?.headers?.["user-agent"]).toBe(
+      "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
+    );
+  });
+
+  it("returns google workspace preview when available", async () => {
+    const html = "<html><head><title>Doc</title></head><body></body></html>";
+    const googlePayload = {
+      type: "google.docs",
+      requestUrl: "https://docs.google.com/document/d/abc/edit",
+      url: "https://docs.google.com/document/d/abc/edit",
+      title: "Doc",
+      description: null,
+      siteName: "Google Docs",
+      mediaType: null,
+      contentType: null,
+      favicon: null,
+      favicons: [],
+      image: null,
+      images: [],
+      thumbnail: "https://drive.google.com/thumbnail?id=abc",
+      fileId: "abc",
+      availability: "public",
+      links: {
+        open: "https://docs.google.com/document/d/abc/edit",
+        preview: "https://docs.google.com/document/d/abc/preview",
+        exportPdf: "https://docs.google.com/document/d/abc/export?format=pdf",
+      },
+    };
+
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://docs.google.com/document/d/abc/edit",
+    });
+
+    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(googlePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://docs.google.com/document/d/abc/edit"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(googlePayload);
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("uses compound plan when available", async () => {
+    const compoundData = { kind: "compound", value: 123 } as any;
+    const execute = jest.fn(async () => ({ data: compoundData, ttl: 45_000 }));
+    compound.createCompoundPlan.mockReturnValue({
+      cacheKey: "compound:test",
+      execute,
+    });
+
+    const request = {
+      nextUrl: new URL("https://app.local/api/open-graph?url=https://compound.finance"),
+    } as any;
+
+    const first = await GET(request);
+    const second = await GET(request);
+
+    expect(first.status).toBe(200);
+    expect(await first.json()).toEqual(compoundData);
+    expect(second.status).toBe(200);
+    expect(await second.json()).toEqual(compoundData);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("returns 502 when fetch fails unexpectedly", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("boom"));
 
     const request = {
       nextUrl: new URL(
@@ -148,24 +314,32 @@ describe("open-graph API route", () => {
 
     const response = await GET(request);
 
-    expect(response.status).toBe(200);
-    const body = await response.json();
-    expect(body).toEqual(previewPayload);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
-      "http://safe.example/article",
-      expect.objectContaining({ redirect: "manual" })
+    expect(response.status).toBe(502);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "Failed to fetch URL." },
+      { status: 502 }
     );
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      "https://cdn.safe.example/page",
-      expect.objectContaining({ redirect: "manual" })
-    );
-    expect(utils.buildResponse).toHaveBeenCalledWith(
-      new URL("http://safe.example/article"),
-      html,
-      "text/html"
+  });
+
+  it("returns 502 when plan execution fails", async () => {
+    const execute = jest.fn(async () => {
+      throw new Error("boom");
+    });
+    compound.createCompoundPlan.mockReturnValue({
+      cacheKey: "compound:error",
+      execute,
+    });
+
+    const request = {
+      nextUrl: new URL("https://app.local/api/open-graph?url=https://compound.finance"),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(502);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "boom" },
+      { status: 502 }
     );
   });
 });

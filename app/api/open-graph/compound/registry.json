@@ -1,0 +1,79 @@
+{
+  "comptroller": "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B",
+  "v2Markets": [
+    {
+      "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+      "symbol": "cUSDC",
+      "name": "Compound USD Coin",
+      "appPath": "/markets/usdc",
+      "marketUrl": "https://app.compound.finance/markets/usdc",
+      "underlying": {
+        "address": "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    {
+      "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+      "symbol": "cDAI",
+      "name": "Compound Dai",
+      "appPath": "/markets/dai",
+      "marketUrl": "https://app.compound.finance/markets/dai",
+      "underlying": {
+        "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        "symbol": "DAI",
+        "decimals": 18
+      }
+    },
+    {
+      "address": "0x4ddc2D193948926d02f9B1fE9e1daa0718270ED5",
+      "symbol": "cETH",
+      "name": "Compound Ether",
+      "appPath": "/markets/eth",
+      "marketUrl": "https://app.compound.finance/markets/eth",
+      "underlying": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "symbol": "ETH",
+        "decimals": 18
+      }
+    },
+    {
+      "address": "0xccF4429DB6322D5C611ee964527D42E5d685DD6a",
+      "symbol": "cWBTC",
+      "name": "Compound Wrapped BTC",
+      "appPath": "/markets/wbtc",
+      "marketUrl": "https://app.compound.finance/markets/wbtc",
+      "underlying": {
+        "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+        "symbol": "WBTC",
+        "decimals": 8
+      }
+    }
+  ],
+  "v3Markets": [
+    {
+      "address": "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+      "symbol": "USDC",
+      "name": "Compound USDC Comet",
+      "appPath": "/comet/usdc",
+      "marketUrl": "https://app.compound.finance/comet/usdc",
+      "base": {
+        "address": "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    {
+      "address": "0xA17581A9E3356d785e831eC38ef7617dCece098a",
+      "symbol": "WETH",
+      "name": "Compound WETH Comet",
+      "appPath": "/comet/eth",
+      "marketUrl": "https://app.compound.finance/comet/eth",
+      "base": {
+        "address": "0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18
+      }
+    }
+  ]
+}

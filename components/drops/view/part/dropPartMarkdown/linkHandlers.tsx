@@ -11,10 +11,15 @@ import { Tweet, type TwitterComponents } from "react-tweet";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { SeizeQuoteLinkInfo, parseSeizeQuoteLink, parseSeizeQueryLink } from "../../../../../helpers/SeizeLinkParser";
 import { parseArtBlocksLink } from "@/src/services/artblocks/url";
+import { isFarcasterHost } from "@/src/services/farcaster/url";
+import { parseWikimediaLink } from "@/src/services/wikimedia/url";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 
 import { parseYoutubeLink } from "./youtube";
 import YoutubePreview from "./youtubePreview";
+import type { PepeLinkResult } from "./pepe";
+import { isPepeHost, parsePepeLink, renderPepeLink } from "./pepe";
+import { parseTikTokLink } from "./tiktok";
 
 type DropPartMarkdownImageComponent = typeof import("../DropPartMarkdownImage").default;
 type WaveDropQuoteWithSerialNoComponent = typeof import("../../../../waves/drops/WaveDropQuoteWithSerialNo").default;
@@ -24,6 +29,9 @@ type WaveItemChatComponent = typeof import("../../../../waves/list/WaveItemChat"
 type DropItemChatComponent = typeof import("../../../../waves/drops/DropItemChat").default;
 type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHrefButtons").default;
 type LinkPreviewCardComponent = typeof import("../../../../waves/LinkPreviewCard").default;
+type WikimediaCardComponent = typeof import("../../../../waves/WikimediaCard").default;
+type TikTokCardComponent = typeof import("../../../../waves/TikTokCard").default;
+type FarcasterCardComponent = typeof import("../../../../waves/FarcasterCard").default;
 
 const getDropPartMarkdownImage = (): DropPartMarkdownImageComponent => {
   const module = require("../DropPartMarkdownImage");
@@ -65,6 +73,21 @@ const getLinkPreviewCard = (): LinkPreviewCardComponent => {
   return module.default as LinkPreviewCardComponent;
 };
 
+const getWikimediaCard = (): WikimediaCardComponent => {
+  const module = require("../../../../waves/WikimediaCard");
+  return module.default as WikimediaCardComponent;
+};
+
+const getTikTokCard = (): TikTokCardComponent => {
+  const module = require("../../../../waves/TikTokCard");
+  return module.default as TikTokCardComponent;
+};
+
+const getFarcasterCard = (): FarcasterCardComponent => {
+  const module = require("../../../../waves/FarcasterCard");
+  return module.default as FarcasterCardComponent;
+};
+
 interface SmartLinkHandler<T> {
   parse: (href: string) => T | null;
   render: (result: T, href: string) => ReactElement | null;
@@ -79,6 +102,11 @@ const ART_BLOCKS_FLAG_CANDIDATES = [
   "NEXT_PUBLIC_VITE_FEATURE_AB_CARD",
   "NEXT_PUBLIC_FEATURE_AB_CARD",
   "FEATURE_AB_CARD",
+] as const;
+
+const TIKTOK_FLAG_CANDIDATES = [
+  "FEATURE_TIKTOK_CARD",
+  "NEXT_PUBLIC_FEATURE_TIKTOK_CARD",
 ] as const;
 
 const parseFeatureFlagValue = (value: string): boolean => {
@@ -101,6 +129,17 @@ const parseFeatureFlagValue = (value: string): boolean => {
 
 const isArtBlocksCardEnabled = (): boolean => {
   for (const flagName of ART_BLOCKS_FLAG_CANDIDATES) {
+    const value = process.env[flagName];
+    if (value !== undefined) {
+      return parseFeatureFlagValue(value);
+    }
+  }
+
+  return true;
+};
+
+const isTikTokCardEnabled = (): boolean => {
+  for (const flagName of TIKTOK_FLAG_CANDIDATES) {
     const value = process.env[flagName];
     if (value !== undefined) {
       return parseFeatureFlagValue(value);
@@ -229,12 +268,27 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       "media-proxy.artblocks.io",
       "token.artblocks.io",
     ];
+    const wikimediaDomains = [
+      "w.wiki",
+      "wikipedia.org",
+      "wikimedia.org",
+      "wikidata.org",
+    ];
+
+    if (isPepeHost(hostname)) {
+      return false;
+    }
+
+    if (isTikTokCardEnabled() && matchesDomainOrSubdomain(hostname, "tiktok.com")) {
+      return false;
+    }
 
     if (
       hostname === "youtu.be" ||
       youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
       twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
-      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
+      wikimediaDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
     ) {
       return false;
     }
@@ -315,6 +369,13 @@ const createSmartLinkHandlers = (
         renderTweetEmbed(result),
     },
     {
+      parse: parseWikimediaLink,
+      render: (_result, href: string) => {
+        const WikimediaCard = getWikimediaCard();
+        return <WikimediaCard href={href} />;
+      },
+    },
+    {
       parse: parseGifLink,
       render: (url: string) => renderGifEmbed(url),
     },
@@ -339,6 +400,11 @@ const createSmartLinkHandlers = (
       },
     });
   }
+
+  handlers.push({
+    parse: parsePepeLink,
+    render: (result: PepeLinkResult) => renderPepeLink(result),
+  });
 
 
 
@@ -409,11 +475,53 @@ export const createLinkRenderer = ({
       );
     }
 
+    if (isTikTokCardEnabled()) {
+      const tiktokInfo = parseTikTokLink(href);
+      if (tiktokInfo) {
+        const TikTokCard = getTikTokCard();
+        return (
+          <TikTokCard
+            href={href}
+            renderFallback={() => renderExternalOrInternalLink(href, props)}
+          />
+        );
+      }
+    }
+
     for (const { parse, render } of smartLinkHandlers) {
       const result = parse(href);
       if (result) {
         return render(result, href);
       }
+    }
+
+    let parsedUrl: URL | null = null;
+    try {
+      parsedUrl = new URL(href);
+    } catch {
+      parsedUrl = null;
+    }
+
+    if (parsedUrl && isFarcasterHost(parsedUrl.hostname)) {
+      const FarcasterCard = getFarcasterCard();
+      return (
+        <FarcasterCard
+          href={href}
+          renderFallback={() => {
+            if (shouldUseOpenGraphPreview(href)) {
+              const LinkPreviewCard = getLinkPreviewCard();
+              return (
+                <LinkPreviewCard
+                  href={href}
+                  renderFallback={() => renderExternalOrInternalLink(href, props)}
+                />
+              );
+            }
+
+            return renderExternalOrInternalLink(href, props);
+          }}
+        />
+      );
     }
 
     if (shouldUseOpenGraphPreview(href)) {
@@ -434,8 +542,21 @@ export const createLinkRenderer = ({
       return true;
     }
 
+    if (isTikTokCardEnabled() && parseTikTokLink(href)) {
+      return true;
+    }
+
     if (smartLinkHandlers.some((handler) => !!handler.parse(href))) {
       return true;
+    }
+
+    try {
+      const parsed = new URL(href);
+      if (isFarcasterHost(parsed.hostname)) {
+        return true;
+      }
+    } catch {
+      // ignore invalid urls
     }
 
     return shouldUseOpenGraphPreview(href);
