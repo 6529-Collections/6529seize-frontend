@@ -1,33 +1,32 @@
 "use client";
 
-import styles from "./TheMemes.module.scss";
-import { useContext, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col } from "react-bootstrap";
-import { MEMES_CONTRACT } from "../../constants";
-import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
-import { NftOwner } from "../../entities/IOwner";
-import { SortDirection } from "../../entities/ISort";
-import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
-import { useRouter, useSearchParams } from "next/navigation";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import NFTImage from "../nft-image/NFTImage";
-import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
-import DotLoader from "../dotLoader/DotLoader";
-import { DBResponse } from "../../entities/IDBResponse";
-import { MemeSeason } from "../../entities/ISeason";
-import { commonApiFetch } from "../../services/api/common-api";
-import { AuthContext } from "../auth/Auth";
-import { MemeLabSort, MemesSort, MEMES_EXTENDED_SORT } from "../../enums";
-import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
-import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
+import { useSetTitle } from "@/contexts/TitleContext";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useSetTitle } from "@/contexts/TitleContext";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { MEMES_CONTRACT } from "../../constants";
+import { DBResponse } from "../../entities/IDBResponse";
+import { NFTWithMemesExtendedData, VolumeType } from "../../entities/INFT";
+import { MemeSeason } from "../../entities/ISeason";
+import { SortDirection } from "../../entities/ISort";
+import { MemeLabSort, MEMES_EXTENDED_SORT, MemesSort } from "../../enums";
+import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
+import { fetchUrl } from "../../services/6529api";
+import { commonApiFetch } from "../../services/api/common-api";
+import { AuthContext } from "../auth/Auth";
+import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
+import DotLoader from "../dotLoader/DotLoader";
+import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
+import NFTImage from "../nft-image/NFTImage";
+import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
 import { VolumeTypeDropdown } from "./MemeShared";
+import styles from "./TheMemes.module.scss";
 
 interface Meme {
   meme: number;
@@ -101,8 +100,6 @@ export default function TheMemesComponent() {
   const searchParams = useSearchParams();
 
   const { connectedProfile } = useContext(AuthContext);
-  const [connectedConsolidationKey, setConnectedConsolidationKey] =
-    useState("");
 
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [seasons, setSeasons] = useState<MemeSeason[]>([]);
@@ -184,23 +181,7 @@ export default function TheMemesComponent() {
   const [nfts, setNfts] = useState<NFTWithMemesExtendedData[]>([]);
   const [nftsNextPage, setNftsNextPage] = useState<string>();
 
-  const [nftBalancesTokenIds, setNftBalancesTokenIds] = useState<Set<number>>(
-    new Set()
-  );
-  const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
-
-  function getBalance(id: number) {
-    const balance = nftBalances.find((b) => b.token_id === id);
-    if (balance) {
-      return balance.balance;
-    }
-    const isLoaded = nftBalancesTokenIds.has(id);
-    if (isLoaded) {
-      return 0;
-    }
-    return -1;
-  }
 
   useEffect(() => {
     commonApiFetch<MemeSeason[]>({
@@ -297,34 +278,6 @@ export default function TheMemesComponent() {
     return () => window.removeEventListener("scroll", checkScrollPosition);
   }, []);
 
-  useEffect(() => {
-    const newTokenIds = [...nfts]
-      .map((nft) => nft.id)
-      .filter((id) => !nftBalances.some((b) => b.token_id === id));
-    if (connectedConsolidationKey && newTokenIds.length > 0) {
-      fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${
-          connectedProfile?.consolidation_key
-        }?contract=${MEMES_CONTRACT}&token_id=${newTokenIds.join(",")}`
-      ).then((owners: NftOwner[]) => {
-        setNftBalances([...nftBalances, ...owners]);
-        setNftBalancesTokenIds(
-          new Set([...Array.from(nftBalancesTokenIds), ...newTokenIds])
-        );
-      });
-    }
-  }, [connectedConsolidationKey, nfts]);
-
-  useEffect(() => {
-    setNftBalances([]);
-    setNftBalancesTokenIds(new Set());
-    setConnectedConsolidationKey(
-      connectedProfile?.consolidation_key ??
-        connectedProfile?.wallets?.[0]?.wallet ??
-        ""
-    );
-  }, [connectedProfile]);
-
   function getVolume(nft: NFTWithMemesExtendedData) {
     let vol = 0;
     switch (volumeType) {
@@ -356,12 +309,10 @@ export default function TheMemesComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
+        lg={{ span: 3 }}>
         <Link
           href={`/the-memes/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
+          className="decoration-none scale-hover">
           <Container fluid>
             <Row className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
@@ -369,8 +320,7 @@ export default function TheMemesComponent() {
                 animation={false}
                 height={300}
                 showThumbnail={true}
-                showUnseizedIfLoggedIn={false}
-                showOwnedIfLoggedIn={false}
+                showBalance={true}
               />
             </Row>
             <Row>
@@ -573,8 +523,7 @@ export function SortButton(
         isActive
           ? "tw-text-white tw-font-semibold"
           : "tw-text-gray-400 hover:tw-text-white"
-      }`}
-    >
+      }`}>
       {props.sort}
     </button>
   );

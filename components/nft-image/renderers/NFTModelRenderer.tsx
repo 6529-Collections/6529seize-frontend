@@ -16,13 +16,13 @@ export default function NFTModelRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <Col
       className={`${styles.nftAnimation} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
-      <NFTImageBalance 
-        showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
-        showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
-        contract={props.nft.contract}
-        tokenId={props.nft.id}
-        height={props.height}
-      />
+      {props.showBalance && (
+        <NFTImageBalance
+          contract={props.nft.contract}
+          tokenId={props.nft.id}
+          height={props.height}
+        />
+      )}
       <NFTModel nft={props.nft} id={props.id} />
     </Col>
   );

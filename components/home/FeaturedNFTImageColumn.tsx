@@ -14,8 +14,7 @@ export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
       xs={{ span: 12 }}
       sm={{ span: 12 }}
       md={{ span: 6 }}
-      lg={{ span: 6 }}
-    >
+      lg={{ span: 6 }}>
       <Container className="no-padding">
         <Row>
           {featuredNft.animation || featuredNft.metadata.animation ? (
@@ -23,8 +22,7 @@ export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
               nft={featuredNft}
               animation={true}
               height={650}
-              showOwnedIfLoggedIn={true}
-              showUnseizedIfLoggedIn={true}
+              showBalance={true}
             />
           ) : (
             <Link href={`/the-memes/${featuredNft.id}`}>
@@ -32,8 +30,7 @@ export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
                 nft={featuredNft}
                 animation={true}
                 height={650}
-                showOwnedIfLoggedIn={true}
-                showUnseizedIfLoggedIn={true}
+                showBalance={true}
               />
             </Link>
           )}
