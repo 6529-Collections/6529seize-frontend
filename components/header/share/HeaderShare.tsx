@@ -69,7 +69,7 @@ export default function HeaderShare({ isCollapsed = false }: { readonly isCollap
         }`}
       >
         <ShareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-        {!isCollapsed && <span>QR Code</span>}
+        {!isCollapsed && <span>Share</span>}
       </button>
       <HeaderQRModal show={showQRModal} onClose={() => setShowQRModal(false)} />
     </div>

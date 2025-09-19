@@ -4,7 +4,7 @@ import UserPageSubscriptions from '../../../../components/user/subscriptions/Use
 import { renderWithAuth } from '../../../utils/testContexts';
 import { ApiIdentity } from '../../../../generated/models/ApiIdentity';
 import * as commonApi from '../../../../services/api/common-api';
-import * as memeCalendarHelpers from '../../../../helpers/meme_calendar.helpers';
+import * as memeCalendarHelpers from '../../../../components/meme-calendar/meme-calendar.helpers';
 
 // Mock child components
 jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsBalance', () => ({
@@ -66,9 +66,19 @@ jest.mock('../../../../services/api/common-api');
 const mockCommonApiFetch = commonApi.commonApiFetch as jest.MockedFunction<typeof commonApi.commonApiFetch>;
 
 // Mock meme calendar helpers
-jest.mock('../../../../helpers/meme_calendar.helpers');
-const mockNumberOfCardsForSeasonEnd = memeCalendarHelpers.numberOfCardsForSeasonEnd as jest.MockedFunction<typeof memeCalendarHelpers.numberOfCardsForSeasonEnd>;
-const mockIsMintingToday = memeCalendarHelpers.isMintingToday as jest.MockedFunction<typeof memeCalendarHelpers.isMintingToday>;
+jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+  __esModule: true,
+  getCardsRemainingUntilEndOf: jest.fn(),
+  isMintingToday: jest.fn(),
+}));
+const mockGetCardsRemainingUntilEndOf =
+  memeCalendarHelpers.getCardsRemainingUntilEndOf as jest.MockedFunction<
+    typeof memeCalendarHelpers.getCardsRemainingUntilEndOf
+  >;
+const mockIsMintingToday =
+  memeCalendarHelpers.isMintingToday as jest.MockedFunction<
+    typeof memeCalendarHelpers.isMintingToday
+  >;
 
 describe('UserPageSubscriptions', () => {
   const mockProfile: ApiIdentity = {
@@ -79,7 +89,7 @@ describe('UserPageSubscriptions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCommonApiFetch.mockResolvedValue({});
-    mockNumberOfCardsForSeasonEnd.mockReturnValue({ szn: 1, count: 5 });
+    mockGetCardsRemainingUntilEndOf.mockReturnValue(5);
     mockIsMintingToday.mockReturnValue(false);
   });
 
