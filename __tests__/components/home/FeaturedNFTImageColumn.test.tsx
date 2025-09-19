@@ -1,23 +1,24 @@
-import { render, screen } from '@testing-library/react';
-import FeaturedNFTImageColumn from '@/components/home/FeaturedNFTImageColumn';
-import { NFTWithMemesExtendedData } from '@/entities/INFT';
+import FeaturedNFTImageColumn from "@/components/home/FeaturedNFTImageColumn";
+import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import { render, screen } from "@testing-library/react";
 
 // Mock dependencies
-jest.mock('@/components/nft-image/NFTImage', () => {
+jest.mock("@/components/nft-image/NFTImage", () => {
   return function MockNFTImage(props: any) {
     return (
       <div data-testid="nft-image">
         <span data-testid="nft-id">{props.nft.id}</span>
         <span data-testid="nft-animation">{props.animation.toString()}</span>
         <span data-testid="nft-height">{props.height}</span>
-        <span data-testid="nft-show-owned">{props.showOwnedIfLoggedIn.toString()}</span>
-        <span data-testid="nft-show-unseized">{props.showUnseizedIfLoggedIn.toString()}</span>
+        <span data-testid="nft-show-balance">
+          {(props.showBalance ?? false).toString()}
+        </span>
       </div>
     );
   };
 });
 
-jest.mock('next/link', () => {
+jest.mock("next/link", () => {
   return function MockLink({ children, href, className }: any) {
     return (
       <a href={href} className={className} data-testid="mock-link">
@@ -30,236 +31,185 @@ jest.mock('next/link', () => {
 // Mock NFT data
 const mockNFT: NFTWithMemesExtendedData = {
   id: 1,
-  name: 'Test NFT',
-  contract: '0x123',
-  collection: 'The Memes',
+  name: "Test NFT",
+  contract: "0x123",
+  collection: "The Memes",
   season: 1,
-  meme_name: 'Test Meme',
-  artist: 'Test Artist',
-  mint_date: '2024-01-01',
+  meme_name: "Test Meme",
+  artist: "Test Artist",
+  mint_date: "2024-01-01",
   metadata: {
-    name: 'Test NFT',
-    description: 'Test Description',
-    image: 'https://example.com/image.jpg',
-    animation_url: 'https://example.com/animation.mp4'
+    name: "Test NFT",
+    description: "Test Description",
+    image: "https://example.com/image.jpg",
+    animation_url: "https://example.com/animation.mp4",
   },
   animation: null,
-  image: 'https://example.com/image.jpg'
+  image: "https://example.com/image.jpg",
 } as NFTWithMemesExtendedData;
 
-describe('FeaturedNFTImageColumn', () => {
+describe("FeaturedNFTImageColumn", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Component Rendering', () => {
-    it('should render without crashing with required props', () => {
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
-      );
+  describe("Component Rendering", () => {
+    it("should render without crashing with required props", () => {
+      render(<FeaturedNFTImageColumn featuredNft={mockNFT} />);
 
-      expect(screen.getByTestId('nft-image')).toBeInTheDocument();
+      expect(screen.getByTestId("nft-image")).toBeInTheDocument();
     });
 
-    it('should render with proper Bootstrap Col structure and responsive props', () => {
+    it("should render with proper Bootstrap Col structure and responsive props", () => {
       const { container } = render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
+        <FeaturedNFTImageColumn featuredNft={mockNFT} />
       );
 
       const col = container.querySelector('[class*="col"]');
       expect(col).toBeInTheDocument();
-      expect(col).toHaveClass('pt-3', 'pb-3', 'd-flex', 'align-items-start', 'justify-content-center');
+      expect(col).toHaveClass(
+        "pt-3",
+        "pb-3",
+        "d-flex",
+        "align-items-start",
+        "justify-content-center"
+      );
     });
 
-    it('should render Container with no-padding class', () => {
+    it("should render Container with no-padding class", () => {
       const { container } = render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
+        <FeaturedNFTImageColumn featuredNft={mockNFT} />
       );
 
-      const containerEl = container.querySelector('.container.no-padding');
+      const containerEl = container.querySelector(".container.no-padding");
       expect(containerEl).toBeInTheDocument();
     });
 
-    it('should render with correct responsive breakpoints', () => {
+    it("should render with correct responsive breakpoints", () => {
       const { container } = render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
+        <FeaturedNFTImageColumn featuredNft={mockNFT} />
       );
 
       const col = container.querySelector('[class*="col"]');
-      expect(col).toHaveClass('col-12', 'col-sm-12', 'col-md-6', 'col-lg-6');
+      expect(col).toHaveClass("col-12", "col-sm-12", "col-md-6", "col-lg-6");
     });
   });
 
-  describe('NFT Animation Conditional Rendering', () => {
-    it('should render NFTImage directly when NFT has animation property', () => {
+  describe("NFT Animation Conditional Rendering", () => {
+    it("should render NFTImage directly when NFT has animation property", () => {
       const nftWithAnimation = {
         ...mockNFT,
-        animation: 'https://example.com/animation.mp4'
+        animation: "https://example.com/animation.mp4",
       };
 
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={nftWithAnimation}
-        />
-      );
+      render(<FeaturedNFTImageColumn featuredNft={nftWithAnimation} />);
 
-      expect(screen.getByTestId('nft-image')).toBeInTheDocument();
-      expect(screen.queryByTestId('mock-link')).not.toBeInTheDocument();
+      expect(screen.getByTestId("nft-image")).toBeInTheDocument();
+      expect(screen.queryByTestId("mock-link")).not.toBeInTheDocument();
     });
 
-    it('should render NFTImage directly when NFT has metadata animation', () => {
+    it("should render NFTImage directly when NFT has metadata animation", () => {
       const nftWithMetadataAnimation = {
         ...mockNFT,
         animation: null,
         metadata: {
           ...mockNFT.metadata,
-          animation: 'https://example.com/animation.gif'
-        }
+          animation: "https://example.com/animation.gif",
+        },
       };
 
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={nftWithMetadataAnimation}
-        />
-      );
+      render(<FeaturedNFTImageColumn featuredNft={nftWithMetadataAnimation} />);
 
-      expect(screen.getByTestId('nft-image')).toBeInTheDocument();
-      expect(screen.queryByTestId('mock-link')).not.toBeInTheDocument();
+      expect(screen.getByTestId("nft-image")).toBeInTheDocument();
+      expect(screen.queryByTestId("mock-link")).not.toBeInTheDocument();
     });
 
-    it('should render Link wrapper when NFT has no animation', () => {
+    it("should render Link wrapper when NFT has no animation", () => {
       const nftWithoutAnimation = {
         ...mockNFT,
         animation: null,
         metadata: {
           ...mockNFT.metadata,
           animation: null,
-          animation_url: null
-        }
+          animation_url: null,
+        },
       };
 
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={nftWithoutAnimation}
-        />
-      );
+      render(<FeaturedNFTImageColumn featuredNft={nftWithoutAnimation} />);
 
-      const link = screen.getByTestId('mock-link');
+      const link = screen.getByTestId("mock-link");
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', '/the-memes/1');
-      expect(screen.getByTestId('nft-image')).toBeInTheDocument();
+      expect(link).toHaveAttribute("href", "/the-memes/1");
+      expect(screen.getByTestId("nft-image")).toBeInTheDocument();
     });
 
-    it('should check animation in both direct property and metadata', () => {
+    it("should check animation in both direct property and metadata", () => {
       const nftWithoutAnyAnimation = {
         ...mockNFT,
         animation: null,
         metadata: {
           ...mockNFT.metadata,
           animation: null,
-          animation_url: null
-        }
+          animation_url: null,
+        },
       };
 
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={nftWithoutAnyAnimation}
-        />
-      );
+      render(<FeaturedNFTImageColumn featuredNft={nftWithoutAnyAnimation} />);
 
-      expect(screen.getByTestId('mock-link')).toBeInTheDocument();
+      expect(screen.getByTestId("mock-link")).toBeInTheDocument();
     });
   });
 
-  describe('NFTImage Component Integration', () => {
-    it('should pass correct props to NFTImage component', () => {
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
-      );
+  describe("NFTImage Component Integration", () => {
+    it("should pass correct props to NFTImage component", () => {
+      render(<FeaturedNFTImageColumn featuredNft={mockNFT} />);
 
-      expect(screen.getByTestId('nft-id')).toHaveTextContent('1');
-      expect(screen.getByTestId('nft-animation')).toHaveTextContent('true');
-      expect(screen.getByTestId('nft-height')).toHaveTextContent('650');
-      expect(screen.getByTestId('nft-show-owned')).toHaveTextContent('true');
-      expect(screen.getByTestId('nft-show-unseized')).toHaveTextContent('true');
+      expect(screen.getByTestId("nft-id")).toHaveTextContent("1");
+      expect(screen.getByTestId("nft-animation")).toHaveTextContent("true");
+      expect(screen.getByTestId("nft-height")).toHaveTextContent("650");
+      expect(screen.getByTestId("nft-show-balance")).toHaveTextContent("true");
     });
 
-    it('should always pass animation as true to NFTImage', () => {
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
-      );
+    it("should always pass animation as true to NFTImage", () => {
+      render(<FeaturedNFTImageColumn featuredNft={mockNFT} />);
 
-      expect(screen.getByTestId('nft-animation')).toHaveTextContent('true');
+      expect(screen.getByTestId("nft-animation")).toHaveTextContent("true");
     });
 
-    it('should always pass height as 650 to NFTImage', () => {
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
-      );
+    it("should always pass height as 650 to NFTImage", () => {
+      render(<FeaturedNFTImageColumn featuredNft={mockNFT} />);
 
-      expect(screen.getByTestId('nft-height')).toHaveTextContent('650');
+      expect(screen.getByTestId("nft-height")).toHaveTextContent("650");
     });
 
-    it('should always pass showOwnedIfLoggedIn as true', () => {
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
-      );
+    it("should always pass showBalance as true", () => {
+      render(<FeaturedNFTImageColumn featuredNft={mockNFT} />);
 
-      expect(screen.getByTestId('nft-show-owned')).toHaveTextContent('true');
-    });
-
-    it('should always pass showUnseizedIfLoggedIn as true', () => {
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
-      );
-
-      expect(screen.getByTestId('nft-show-unseized')).toHaveTextContent('true');
+      expect(screen.getByTestId("nft-show-balance")).toHaveTextContent("true");
     });
   });
 
-  describe('Link Generation', () => {
-    it('should generate correct link URL when NFT has no animation', () => {
+  describe("Link Generation", () => {
+    it("should generate correct link URL when NFT has no animation", () => {
       const nftWithId = {
         ...mockNFT,
         id: 42,
         animation: null,
         metadata: {
           ...mockNFT.metadata,
-          animation: null
-        }
+          animation: null,
+        },
       };
 
-      render(
-        <FeaturedNFTImageColumn
-          featuredNft={nftWithId}
-        />
-      );
+      render(<FeaturedNFTImageColumn featuredNft={nftWithId} />);
 
-      const link = screen.getByTestId('mock-link');
-      expect(link).toHaveAttribute('href', '/the-memes/42');
+      const link = screen.getByTestId("mock-link");
+      expect(link).toHaveAttribute("href", "/the-memes/42");
     });
 
-    it('should generate correct link URL for different NFT IDs', () => {
+    it("should generate correct link URL for different NFT IDs", () => {
       const testIds = [1, 100, 999, 1234];
-      
+
       testIds.forEach((id) => {
         const nftWithId = {
           ...mockNFT,
@@ -267,117 +217,101 @@ describe('FeaturedNFTImageColumn', () => {
           animation: null,
           metadata: {
             ...mockNFT.metadata,
-            animation: null
-          }
+            animation: null,
+          },
         };
 
         const { unmount } = render(
-          <FeaturedNFTImageColumn
-            featuredNft={nftWithId}
-          />
+          <FeaturedNFTImageColumn featuredNft={nftWithId} />
         );
 
-        const link = screen.getByTestId('mock-link');
-        expect(link).toHaveAttribute('href', `/the-memes/${id}`);
+        const link = screen.getByTestId("mock-link");
+        expect(link).toHaveAttribute("href", `/the-memes/${id}`);
         unmount();
       });
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
-    it('should handle undefined animation gracefully', () => {
+  describe("Error Handling and Edge Cases", () => {
+    it("should handle undefined animation gracefully", () => {
       const nftWithUndefinedAnimation = {
         ...mockNFT,
         animation: undefined,
         metadata: {
           ...mockNFT.metadata,
-          animation: undefined
-        }
+          animation: undefined,
+        },
       } as any;
 
       expect(() => {
         render(
-          <FeaturedNFTImageColumn
-            featuredNft={nftWithUndefinedAnimation}
-          />
+          <FeaturedNFTImageColumn featuredNft={nftWithUndefinedAnimation} />
         );
       }).not.toThrow();
 
-      expect(screen.getByTestId('mock-link')).toBeInTheDocument();
+      expect(screen.getByTestId("mock-link")).toBeInTheDocument();
     });
 
-    it('should handle NFT with missing metadata gracefully', () => {
+    it("should handle NFT with missing metadata gracefully", () => {
       const nftWithMinimalMetadata = {
         ...mockNFT,
-        metadata: {} as any
+        metadata: {} as any,
       };
 
       expect(() => {
-        render(
-          <FeaturedNFTImageColumn
-            featuredNft={nftWithMinimalMetadata}
-          />
-        );
+        render(<FeaturedNFTImageColumn featuredNft={nftWithMinimalMetadata} />);
       }).not.toThrow();
 
-      expect(screen.getByTestId('nft-image')).toBeInTheDocument();
+      expect(screen.getByTestId("nft-image")).toBeInTheDocument();
     });
 
-    it('should handle null animation values', () => {
+    it("should handle null animation values", () => {
       const nftWithNullAnimation = {
         ...mockNFT,
         animation: null,
         metadata: {
           ...mockNFT.metadata,
-          animation: null
-        }
+          animation: null,
+        },
       };
 
       expect(() => {
-        render(
-          <FeaturedNFTImageColumn
-            featuredNft={nftWithNullAnimation}
-          />
-        );
+        render(<FeaturedNFTImageColumn featuredNft={nftWithNullAnimation} />);
       }).not.toThrow();
 
-      expect(screen.getByTestId('mock-link')).toBeInTheDocument();
+      expect(screen.getByTestId("mock-link")).toBeInTheDocument();
     });
 
-    it('should handle NFT with missing animation properties', () => {
+    it("should handle NFT with missing animation properties", () => {
       const nftWithoutAnimationProp = {
         ...mockNFT,
         metadata: {
-          name: 'Test NFT',
-          description: 'Test Description',
-          image: 'https://example.com/image.jpg'
-        }
+          name: "Test NFT",
+          description: "Test Description",
+          image: "https://example.com/image.jpg",
+        },
       } as any;
       delete nftWithoutAnimationProp.animation;
 
       expect(() => {
         render(
-          <FeaturedNFTImageColumn
-            featuredNft={nftWithoutAnimationProp}
-          />
+          <FeaturedNFTImageColumn featuredNft={nftWithoutAnimationProp} />
         );
       }).not.toThrow();
 
-      expect(screen.getByTestId('mock-link')).toBeInTheDocument();
+      expect(screen.getByTestId("mock-link")).toBeInTheDocument();
     });
   });
 
-  describe('Layout Structure', () => {
-    it('should render proper Bootstrap layout hierarchy', () => {
+  describe("Layout Structure", () => {
+    it("should render proper Bootstrap layout hierarchy", () => {
       const { container } = render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
+        <FeaturedNFTImageColumn featuredNft={mockNFT} />
       );
 
       // Check Col > Container > Row structure
       const col = container.querySelector('[class*="col"]');
-      const containerEl = col?.querySelector('.container.no-padding');
+      const containerEl = col?.querySelector(".container.no-padding");
       const row = containerEl?.querySelector('[class*="row"]');
 
       expect(col).toBeInTheDocument();
@@ -385,26 +319,26 @@ describe('FeaturedNFTImageColumn', () => {
       expect(row).toBeInTheDocument();
     });
 
-    it('should apply correct flexbox classes to Col', () => {
+    it("should apply correct flexbox classes to Col", () => {
       const { container } = render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
+        <FeaturedNFTImageColumn featuredNft={mockNFT} />
       );
 
       const col = container.querySelector('[class*="col"]');
-      expect(col).toHaveClass('d-flex', 'align-items-start', 'justify-content-center');
+      expect(col).toHaveClass(
+        "d-flex",
+        "align-items-start",
+        "justify-content-center"
+      );
     });
 
-    it('should apply correct padding classes to Col', () => {
+    it("should apply correct padding classes to Col", () => {
       const { container } = render(
-        <FeaturedNFTImageColumn
-          featuredNft={mockNFT}
-        />
+        <FeaturedNFTImageColumn featuredNft={mockNFT} />
       );
 
       const col = container.querySelector('[class*="col"]');
-      expect(col).toHaveClass('pt-3', 'pb-3');
+      expect(col).toHaveClass("pt-3", "pb-3");
     });
   });
 });

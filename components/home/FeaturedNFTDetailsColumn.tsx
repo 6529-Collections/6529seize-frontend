@@ -42,7 +42,7 @@ export default function FeaturedNFTDetailsColumn({
 
   return (
     <Col
-      className="pt-4 pb-3"
+      className="pt-3 pb-5"
       xs={{ span: 12 }}
       sm={{ span: 12 }}
       md={{ span: 6 }}
