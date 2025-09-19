@@ -1,7 +1,7 @@
+import NFTImage from "@/components/nft-image/NFTImage";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
-import NFTImage from "../nft-image/NFTImage";
 
 interface Props {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -10,7 +10,7 @@ interface Props {
 export default function FeaturedNFTImageColumn({ featuredNft }: Props) {
   return (
     <Col
-      className="pt-3 pb-3 d-flex align-items-start justify-content-center"
+      className="pt-3 pb-5 d-flex align-items-start justify-content-center"
       xs={{ span: 12 }}
       sm={{ span: 12 }}
       md={{ span: 6 }}

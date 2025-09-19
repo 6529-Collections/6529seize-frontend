@@ -1,4 +1,3 @@
-import { isGradientsContract, isNextgenContract } from "@/helpers/Helpers";
 import { useQuery } from "@tanstack/react-query";
 import { DBResponse } from "../entities/IDBResponse";
 import { NftOwner } from "../entities/IOwner";
@@ -21,10 +20,7 @@ export function useNftBalance({
       await commonApiFetch<DBResponse>({
         endpoint: `nft-owners/consolidation/${consolidationKey}?contract=${contract}&token_id=${tokenId}`,
       }),
-    enabled:
-      !!consolidationKey &&
-      !isGradientsContract(contract) &&
-      !isNextgenContract(contract),
+    enabled: !!consolidationKey,
   });
 
   const balanceObject: NftOwner | undefined = data?.data?.[0];
