@@ -12,6 +12,11 @@ jest.mock("next/server", () => ({
 
 jest.mock("../../../app/api/open-graph/utils", () => ({
   buildResponse: jest.fn(),
+  buildGoogleWorkspaceResponse: jest.fn(),
+  HTML_ACCEPT_HEADER:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+  LINK_PREVIEW_USER_AGENT:
+    "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)",
 }));
 
 jest.mock("@/lib/security/urlGuard", () => {
@@ -25,7 +30,6 @@ jest.mock("@/lib/security/urlGuard", () => {
       return new URL(value);
     }),
     assertPublicUrl: jest.fn(),
-    fetchPublicUrl: jest.fn(),
   };
 });
 
@@ -36,11 +40,13 @@ jest.mock("../../../app/api/open-graph/compound/service", () => ({
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
 let GET: GetHandler;
 
-let utils: { buildResponse: jest.Mock };
+let utils: {
+  buildResponse: jest.Mock;
+  buildGoogleWorkspaceResponse: jest.Mock;
+};
 let guard: {
   parsePublicUrl: jest.Mock;
   assertPublicUrl: jest.Mock;
-  fetchPublicUrl: jest.Mock;
 };
 let compound: {
   createCompoundPlan: jest.Mock;
@@ -50,17 +56,20 @@ let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
 const DEFAULT_USER_AGENT =
   "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
 
+const originalFetch = global.fetch;
+const mockFetch = jest.fn();
+
 async function loadRoute(): Promise<void> {
   jest.resetModules();
   ({ GET } = await import("../../../app/api/open-graph/route"));
   ({ UrlGuardError } = jest.requireActual("@/lib/security/urlGuard"));
   utils = jest.requireMock("../../../app/api/open-graph/utils") as {
     buildResponse: jest.Mock;
+    buildGoogleWorkspaceResponse: jest.Mock;
   };
   guard = jest.requireMock("@/lib/security/urlGuard") as {
     parsePublicUrl: jest.Mock;
     assertPublicUrl: jest.Mock;
-    fetchPublicUrl: jest.Mock;
   };
   compound = jest.requireMock(
     "../../../app/api/open-graph/compound/service"
@@ -76,6 +85,13 @@ describe("open-graph API route", () => {
     await loadRoute();
     guard.assertPublicUrl.mockResolvedValue(undefined);
     compound.createCompoundPlan.mockReturnValue(null);
+    utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
+    mockFetch.mockReset();
+    global.fetch = mockFetch as unknown as typeof fetch;
+  });
+
+  afterAll(() => {
+    global.fetch = originalFetch;
   });
 
   const createResponse = (
@@ -135,8 +151,9 @@ describe("open-graph API route", () => {
       url: "https://cdn.safe.example/page",
     });
 
-    guard.fetchPublicUrl.mockResolvedValueOnce(fetchResponse);
+    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
     utils.buildResponse.mockReturnValue(responsePayload);
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
     const request = {
       nextUrl: new URL(
@@ -154,17 +171,19 @@ describe("open-graph API route", () => {
     expect(await first.json()).toEqual(responsePayload);
     expect(second.status).toBe(200);
     expect(await second.json()).toEqual(responsePayload);
-    expect(guard.fetchPublicUrl).toHaveBeenCalledTimes(1);
-    const [, fetchInit] = guard.fetchPublicUrl.mock.calls[0];
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const [fetchUrl, fetchInit] = mockFetch.mock.calls[0];
+    expect(fetchUrl).toBe("http://safe.example/article");
     expect(fetchInit?.headers).toEqual(
       expect.objectContaining({
         accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "user-agent": DEFAULT_USER_AGENT,
       })
     );
     expect(guard.assertPublicUrl.mock.calls.length).toBeGreaterThanOrEqual(3);
     expect(utils.buildResponse).toHaveBeenCalledWith(
-      new URL("http://safe.example/article"),
+      new URL("https://cdn.safe.example/page"),
       html,
       "text/html",
       "https://cdn.safe.example/page"
@@ -183,8 +202,9 @@ describe("open-graph API route", () => {
       url: "https://www.facebook.com/some-post",
     });
 
-    guard.fetchPublicUrl.mockResolvedValueOnce(fetchResponse);
+    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
     utils.buildResponse.mockReturnValue(responsePayload);
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
     const request = {
       nextUrl: new URL(
@@ -195,8 +215,11 @@ describe("open-graph API route", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(guard.fetchPublicUrl).toHaveBeenCalledTimes(1);
-    const [, fetchInit, fetchOptions] = guard.fetchPublicUrl.mock.calls[0];
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const [fetchUrl, fetchInit] = mockFetch.mock.calls[0];
+    expect(fetchUrl).toBe(
+      "https://www.facebook.com/20531316728/posts/10154009990506729/"
+    );
     expect(fetchInit?.headers).toEqual(
       expect.objectContaining({
         referer: "https://www.facebook.com/",
@@ -204,9 +227,56 @@ describe("open-graph API route", () => {
       })
     );
     expect(fetchInit?.headers?.["sec-fetch-mode"]).toBeUndefined();
-    expect(fetchOptions?.userAgent).toBe(
+    expect(fetchInit?.headers?.["user-agent"]).toBe(
       "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
     );
+  });
+
+  it("returns google workspace preview when available", async () => {
+    const html = "<html><head><title>Doc</title></head><body></body></html>";
+    const googlePayload = {
+      type: "google.docs",
+      requestUrl: "https://docs.google.com/document/d/abc/edit",
+      url: "https://docs.google.com/document/d/abc/edit",
+      title: "Doc",
+      description: null,
+      siteName: "Google Docs",
+      mediaType: null,
+      contentType: null,
+      favicon: null,
+      favicons: [],
+      image: null,
+      images: [],
+      thumbnail: "https://drive.google.com/thumbnail?id=abc",
+      fileId: "abc",
+      availability: "public",
+      links: {
+        open: "https://docs.google.com/document/d/abc/edit",
+        preview: "https://docs.google.com/document/d/abc/preview",
+        exportPdf: "https://docs.google.com/document/d/abc/export?format=pdf",
+      },
+    };
+
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://docs.google.com/document/d/abc/edit",
+    });
+
+    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(googlePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://docs.google.com/document/d/abc/edit"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(googlePayload);
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
   it("uses compound plan when available", async () => {
@@ -229,14 +299,12 @@ describe("open-graph API route", () => {
     expect(second.status).toBe(200);
     expect(await second.json()).toEqual(compoundData);
     expect(execute).toHaveBeenCalledTimes(1);
-    expect(guard.fetchPublicUrl).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
     expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
-  it("propagates UrlGuardError from fetch", async () => {
-    guard.fetchPublicUrl.mockImplementation(() => {
-      throw new UrlGuardError("timeout", "timeout", 504);
-    });
+  it("returns 502 when fetch fails unexpectedly", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("boom"));
 
     const request = {
       nextUrl: new URL(
@@ -246,8 +314,11 @@ describe("open-graph API route", () => {
 
     const response = await GET(request);
 
-    expect(response.status).toBe(504);
-    expect(nextResponseJson).toHaveBeenCalledWith({ error: "timeout" }, { status: 504 });
+    expect(response.status).toBe(502);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "Failed to fetch URL." },
+      { status: 502 }
+    );
   });
 
   it("returns 502 when plan execution fails", async () => {

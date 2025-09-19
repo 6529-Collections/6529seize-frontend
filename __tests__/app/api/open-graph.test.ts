@@ -2,15 +2,45 @@ jest.mock("node:dns/promises", () => ({
   lookup: jest.fn(),
 }));
 
-import { buildResponse } from "../../../app/api/open-graph/utils";
+import {
+  buildGoogleWorkspaceResponse,
+  buildResponse,
+} from "../../../app/api/open-graph/utils";
 import { assertPublicUrl } from "@/lib/security/urlGuard";
 
 const { lookup } = require("node:dns/promises") as {
   lookup: jest.Mock;
 };
 
+const originalFetch = global.fetch;
+const mockFetch = jest.fn();
+
+const createMockFetchResponse = (
+  status: number,
+  body: string,
+  url: string
+) => {
+  const headerMap = new Map<string, string>();
+  headerMap.set("content-type", "text/html");
+  return {
+    status,
+    ok: status >= 200 && status < 300,
+    headers: {
+      get: (name: string) => headerMap.get(name.toLowerCase()) ?? null,
+    },
+    text: async () => body,
+    url,
+  } as unknown as Response;
+};
+
 beforeEach(() => {
   lookup.mockReset();
+  mockFetch.mockReset();
+  global.fetch = mockFetch as unknown as typeof fetch;
+});
+
+afterAll(() => {
+  global.fetch = originalFetch;
 });
 
 describe("open-graph route helpers", () => {
@@ -68,6 +98,90 @@ describe("open-graph route helpers", () => {
     expect(result.favicon).toBe("https://cdn.example.com/icon.png");
   });
 
+  it("builds a Google Docs preview with public availability", async () => {
+    const initialHtml = "<html><head><title>Doc Title</title></head><body></body></html>";
+    const previewHtml = "<html><head><title>Preview Title</title></head><body></body></html>";
+
+    mockFetch.mockResolvedValueOnce(
+      Promise.resolve(
+        createMockFetchResponse(
+          200,
+          previewHtml,
+          "https://docs.google.com/document/d/abc/preview"
+        )
+      )
+    );
+
+    const resolvedUrl = new URL("https://docs.google.com/document/d/abc/edit");
+    const result = await buildGoogleWorkspaceResponse(
+      resolvedUrl,
+      initialHtml,
+      new URL("https://docs.google.com/document/d/abc/edit")
+    );
+
+    expect(result).toMatchObject({
+      type: "google.docs",
+      availability: "public",
+      title: "Preview Title",
+      fileId: "abc",
+      links: {
+        open: "https://docs.google.com/document/d/abc/edit",
+        preview: "https://docs.google.com/document/d/abc/preview",
+      },
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://docs.google.com/document/d/abc/preview",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "user-agent": expect.stringContaining("6529seize-link-preview"),
+        }),
+      })
+    );
+  });
+
+  it("builds a Google Sheets preview and marks restricted access on failure", async () => {
+    mockFetch.mockResolvedValueOnce(
+      Promise.resolve(
+        createMockFetchResponse(
+          403,
+          "",
+          "https://docs.google.com/spreadsheets/d/def/htmlview"
+        )
+      )
+    );
+
+    const resolvedUrl = new URL(
+      "https://docs.google.com/spreadsheets/d/def/pubhtml?gid=123"
+    );
+    const result = await buildGoogleWorkspaceResponse(
+      resolvedUrl,
+      "<html><head><title>Sheet</title></head></html>",
+      new URL("https://docs.google.com/spreadsheets/d/def/edit")
+    );
+
+    expect(result).toMatchObject({
+      type: "google.sheets",
+      availability: "restricted",
+      gid: "123",
+      links: {
+        preview: expect.stringContaining("htmlview"),
+        embedPub: expect.stringContaining("pubhtml"),
+      },
+    });
+  });
+
+  it("returns null for non Google workspace URLs", async () => {
+    const result = await buildGoogleWorkspaceResponse(
+      new URL("https://example.com/page"),
+      "<html></html>",
+      new URL("https://example.com/page")
+    );
+
+    expect(result).toBeNull();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
   it("rejects localhost URLs", async () => {
     await expect(
       assertPublicUrl(new URL("http://localhost/resource"))
@@ -96,48 +210,4 @@ describe("open-graph route helpers", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("builds a Weibo post response when metadata is present", () => {
-    const html = `
-      <html>
-        <head>
-          <meta property="og:title" content="测试用户的微博" />
-          <meta property="og:description" content="这是正文" />
-          <meta property="og:image" content="https://wx1.sinaimg.cn/large/post-image.jpg" />
-          <meta property="article:published_time" content="2024-01-02T03:04:05Z" />
-        </head>
-        <body></body>
-      </html>
-    `;
-
-    const url = new URL("https://weibo.com/123456/AbCdE");
-    const result = buildResponse(url, html, "text/html", "https://weibo.com/123456/AbCdE?refer=foo");
-
-    expect(result).toMatchObject({
-      type: "weibo.post",
-      canonicalUrl: "https://weibo.com/123456/AbCdE",
-    });
-    expect((result as any).post.uid).toBe("123456");
-    expect((result as any).post.mid).toBe("AbCdE");
-    expect((result as any).post.text).toContain("这是正文");
-    expect((result as any).post.images?.[0]?.url).toContain(
-      "/api/open-graph/proxy-image?url="
-    );
-  });
-
-  it("returns an unavailable response when Weibo login wall is detected", () => {
-    const html = `
-      <html>
-        <head><title>Sina Visitor System</title></head>
-        <body>Sina Visitor System</body>
-      </html>
-    `;
-
-    const url = new URL("https://weibo.com/123456/AbCdE");
-    const result = buildResponse(url, html, "text/html");
-
-    expect(result).toMatchObject({
-      type: "weibo.unavailable",
-      reason: "login_required",
-    });
-  });
 });

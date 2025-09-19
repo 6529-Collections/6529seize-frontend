@@ -6,9 +6,6 @@ import LinkPreviewCard from "../../../components/waves/LinkPreviewCard";
 const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
   <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
 ));
-const mockWeiboCard = jest.fn(({ href, data }: any) => (
-  <div data-testid="weibo-card" data-href={href} data-type={data?.type} />
-));
 const mockCompoundCard = jest.fn(({ href, response }: any) => (
   <div data-testid="compound-card" data-href={href} data-type={response?.type} />
 ));
@@ -18,6 +15,9 @@ const mockToCompoundResponse = jest.fn((value: any) => {
   }
   return undefined;
 });
+const mockGoogleWorkspaceCard = jest.fn(({ href, data }: any) => (
+  <div data-testid="google-card" data-href={href} data-type={data?.type} />
+));
 
 jest.mock("../../../components/waves/OpenGraphPreview", () => {
   const actual = jest.requireActual("../../../components/waves/OpenGraphPreview");
@@ -34,9 +34,9 @@ jest.mock("../../../components/waves/compound/CompoundCard", () => ({
   toCompoundResponse: (value: unknown) => mockToCompoundResponse(value),
 }));
 
-jest.mock("../../../components/waves/WeiboCard", () => ({
+jest.mock("../../../components/waves/GoogleWorkspaceCard", () => ({
   __esModule: true,
-  default: (props: any) => mockWeiboCard(props),
+  default: (props: any) => mockGoogleWorkspaceCard(props),
 }));
 
 jest.mock("../../../services/api/link-preview-api", () => ({
@@ -165,39 +165,45 @@ describe("LinkPreviewCard", () => {
     });
   });
 
-  it("renders a Weibo card when response type matches", async () => {
-    const weiboResponse = {
-      type: "weibo.post",
-      canonicalUrl: "https://weibo.com/123/abc",
-      post: {
-        uid: "123",
-        mid: "abc",
-        author: { displayName: "Author", avatar: null, verified: "none" },
-        createdAt: null,
-        text: "hello",
-        images: [],
-        video: { thumbnail: null },
+  it("renders a Google Workspace card when response type matches", async () => {
+    const googleResponse = {
+      type: "google.docs",
+      requestUrl: "https://docs.google.com/document/d/abc/edit",
+      url: "https://docs.google.com/document/d/abc/edit",
+      title: "Shared Doc",
+      description: null,
+      siteName: "Google Docs",
+      mediaType: null,
+      contentType: null,
+      favicon: null,
+      favicons: [],
+      image: null,
+      images: [],
+      thumbnail: null,
+      fileId: "abc",
+      availability: "public",
+      links: {
+        open: "https://docs.google.com/document/d/abc/edit",
+        preview: "https://docs.google.com/document/d/abc/preview",
       },
-    } as any;
+    };
 
-    fetchLinkPreview.mockResolvedValue(weiboResponse);
+    fetchLinkPreview.mockResolvedValue(googleResponse);
 
     render(
       <LinkPreviewCard
-        href="https://weibo.com/123/abc"
+        href="https://docs.google.com/document/d/abc/edit"
         renderFallback={() => <div data-testid="fallback">fallback</div>}
       />
     );
 
     await waitFor(() => {
-      expect(mockWeiboCard).toHaveBeenCalledTimes(1);
+      expect(mockGoogleWorkspaceCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          href: "https://docs.google.com/document/d/abc/edit",
+          data: googleResponse,
+        })
+      );
     });
-
-    expect(mockWeiboCard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        href: "https://weibo.com/123/abc",
-        data: weiboResponse,
-      })
-    );
   });
 });

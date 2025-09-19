@@ -7,10 +7,14 @@ import OpenGraphPreview, {
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
-import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import {
+  fetchLinkPreview,
+  type GoogleWorkspaceLinkPreview,
+} from "../../services/api/link-preview-api";
 
 import CompoundCard, { toCompoundResponse } from "./compound/CompoundCard";
 import type { CompoundResponse } from "./compound/types";
+import GoogleWorkspaceCard from "./GoogleWorkspaceCard";
 
 
 interface LinkPreviewCardProps {
@@ -28,7 +32,9 @@ type PreviewState =
   | { readonly type: "compound"; readonly data: CompoundResponse }
   | {
       readonly type: "success";
-      readonly data: OpenGraphPreviewState;
+      readonly data:
+        | OpenGraphPreviewState
+        | { readonly kind: "google"; readonly data: GoogleWorkspaceLinkPreview };
     };
 
 const toPreviewData = (
@@ -49,6 +55,17 @@ const toPreviewData = (
   };
 };
 
+const isGoogleWorkspacePreview = (
+  response: Awaited<ReturnType<typeof fetchLinkPreview>>
+): response is GoogleWorkspaceLinkPreview => {
+  if (!response || typeof response !== "object") {
+    return false;
+  }
+
+  const type = (response as { readonly type?: unknown }).type;
+  return typeof type === "string" && type.startsWith("google.");
+};
+
 export default function LinkPreviewCard({
   href,
   renderFallback,
@@ -65,6 +82,14 @@ export default function LinkPreviewCard({
     fetchLinkPreview(href)
       .then((response) => {
         if (!active) {
+          return;
+        }
+
+        if (isGoogleWorkspacePreview(response)) {
+          setState({
+            type: "success",
+            data: { kind: "google", data: response },
+          });
           return;
         }
 
@@ -117,6 +142,10 @@ export default function LinkPreviewCard({
   }
 
   if (state.type === "success") {
+    if (state.data.kind === "google") {
+      return <GoogleWorkspaceCard href={href} data={state.data.data} />;
+    }
+
     return <OpenGraphPreview href={href} preview={state.data.data} />;
   }
 

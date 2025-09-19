@@ -7,17 +7,18 @@ import {
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import { buildResponse } from "./utils";
+import {
+  HTML_ACCEPT_HEADER,
+  LINK_PREVIEW_USER_AGENT,
+  buildGoogleWorkspaceResponse,
+  buildResponse,
+} from "./utils";
 import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
-const USER_AGENT =
-  "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
+const USER_AGENT = LINK_PREVIEW_USER_AGENT;
 const MAX_REDIRECTS = 5;
-
-const HTML_ACCEPT_HEADER =
-  "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
 
 const HTML_FETCH_HEADERS = {
   accept: HTML_ACCEPT_HEADER,
@@ -215,8 +216,13 @@ function createGenericPlan(url: URL): PreviewPlan {
       const { html, contentType, finalUrl } = await fetchHtml(url);
       const finalUrlInstance = new URL(finalUrl);
       await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
-
-      const data = buildResponse(url, html, contentType, finalUrl);
+      const googleWorkspace = await buildGoogleWorkspaceResponse(
+        finalUrlInstance,
+        html,
+        url
+      );
+      const data =
+        googleWorkspace ?? buildResponse(finalUrlInstance, html, contentType, finalUrl);
       return { data, ttl: CACHE_TTL_MS };
     },
   };
