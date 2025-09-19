@@ -9,13 +9,13 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <Col
       className={`${styles.nftAnimation} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
-      <NFTImageBalance
-        showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
-        showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
-        contract={props.nft.contract}
-        tokenId={props.nft.id}
-        height={props.height}
-      />
+      {props.showBalance && (
+        <NFTImageBalance
+          contract={props.nft.contract}
+          tokenId={props.nft.id}
+          height={props.height}
+        />
+      )}
       <video
         id={props.id ?? `video-${props.nft.id}`}
         autoPlay

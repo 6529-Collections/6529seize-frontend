@@ -23,15 +23,14 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
 
   return (
     <Col
-      className={`${styles.nftAnimation} ${props.heightStyle} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}
-    >
-      <NFTImageBalance
-        showOwnedIfLoggedIn={props.showOwnedIfLoggedIn}
-        showUnseizedIfLoggedIn={props.showUnseizedIfLoggedIn}
-        contract={props.nft.contract}
-        tokenId={props.nft.id}
-        height={props.height}
-      />
+      className={`${styles.nftAnimation} ${props.heightStyle} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
+      {props.showBalance && (
+        <NFTImageBalance
+          contract={props.nft.contract}
+          tokenId={props.nft.id}
+          height={props.height}
+        />
+      )}
       <iframe
         title={props.id}
         src={src}

@@ -1,10 +1,10 @@
-import styles from "./NFTImage.module.scss";
 import { BaseNFT, NFTLite } from "../../entities/INFT";
-import { getMediaType } from "./utils/media-type";
-import NFTImageRenderer from "./renderers/NFTImageRenderer";
-import NFTVideoRenderer from "./renderers/NFTVideoRenderer";
+import styles from "./NFTImage.module.scss";
 import NFTHTMLRenderer from "./renderers/NFTHTMLRenderer";
+import NFTImageRenderer from "./renderers/NFTImageRenderer";
 import NFTModelRenderer from "./renderers/NFTModelRenderer";
+import NFTVideoRenderer from "./renderers/NFTVideoRenderer";
+import { getMediaType } from "./utils/media-type";
 
 interface Props {
   nft: BaseNFT | NFTLite;
@@ -13,8 +13,7 @@ interface Props {
   showOriginal?: boolean;
   height: 300 | 650 | "full";
   targetProfile?: string;
-  showOwnedIfLoggedIn: boolean;
-  showUnseizedIfLoggedIn: boolean;
+  showBalance: boolean;
   transparentBG?: boolean;
   id?: string;
 }

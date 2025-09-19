@@ -1,4 +1,4 @@
-@use 'sass:color';
+@use "sass:color";
 @use "../../styles/variables.scss";
 
 .sortDirection {
@@ -22,11 +22,10 @@
 .nftNextdisabled,
 .nftPreviousdisabled {
   pointer-events: none !important;
-  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
-}
-
-.subheading {
-  color: variables.$font-color;
+  color: color.scale(
+    variables.$font-color,
+    $lightness: -(variables.$darken-percentage)
+  );
 }
 
 .fullScreen {
