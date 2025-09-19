@@ -47,6 +47,9 @@ let compound: {
 };
 let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
 
+const DEFAULT_USER_AGENT =
+  "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
+
 async function loadRoute(): Promise<void> {
   jest.resetModules();
   ({ GET } = await import("../../../app/api/open-graph/route"));
@@ -152,12 +155,57 @@ describe("open-graph API route", () => {
     expect(second.status).toBe(200);
     expect(await second.json()).toEqual(responsePayload);
     expect(guard.fetchPublicUrl).toHaveBeenCalledTimes(1);
+    const [, fetchInit] = guard.fetchPublicUrl.mock.calls[0];
+    expect(fetchInit?.headers).toEqual(
+      expect.objectContaining({
+        accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+      })
+    );
     expect(guard.assertPublicUrl.mock.calls.length).toBeGreaterThanOrEqual(3);
     expect(utils.buildResponse).toHaveBeenCalledWith(
       new URL("http://safe.example/article"),
       html,
       "text/html",
       "https://cdn.safe.example/page"
+    );
+  });
+
+  it("applies host-specific overrides for facebook", async () => {
+    const html = "<html></html>";
+    const responsePayload = {
+      requestUrl: "https://www.facebook.com/some-post",
+    };
+
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://www.facebook.com/some-post",
+    });
+
+    guard.fetchPublicUrl.mockResolvedValueOnce(fetchResponse);
+    utils.buildResponse.mockReturnValue(responsePayload);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://www.facebook.com/20531316728/posts/10154009990506729/"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(guard.fetchPublicUrl).toHaveBeenCalledTimes(1);
+    const [, fetchInit, fetchOptions] = guard.fetchPublicUrl.mock.calls[0];
+    expect(fetchInit?.headers).toEqual(
+      expect.objectContaining({
+        referer: "https://www.facebook.com/",
+        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      })
+    );
+    expect(fetchInit?.headers?.["sec-fetch-mode"]).toBeUndefined();
+    expect(fetchOptions?.userAgent).toBe(
+      "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
     );
   });
 
