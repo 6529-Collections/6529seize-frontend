@@ -1,0 +1,13 @@
+# Production/CI .npmrc - Maximum security
+save-exact=true
+package-lock=true
+audit-level=high
+registry=https://registry.npmjs.org/
+
+# Prevent any automatic updates
+save=false
+package-lock-only=true
+
+# Fail on audit issues
+audit=true
+fund=false
