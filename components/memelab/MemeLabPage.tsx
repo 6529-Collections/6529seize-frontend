@@ -248,7 +248,7 @@ export default function MemeLabPageComponent({
 
     return (
       <Container className="p-0">
-        <Row>
+        <Row className={connectedProfile ? styles.nftImagePadding : ""}>
           {[MEME_FOCUS.LIVE, MEME_FOCUS.YOUR_CARDS].includes(activeTab!) &&
             nft && (
               <>

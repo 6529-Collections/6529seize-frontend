@@ -1,7 +1,7 @@
+import NFTImage from "@/components/nft-image/NFTImage";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
-import NFTImage from "../nft-image/NFTImage";
 
 interface Props {
   readonly featuredNft: NFTWithMemesExtendedData;
