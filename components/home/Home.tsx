@@ -12,18 +12,23 @@ import LatestDropSection from "./LatestDropSection";
 
 export default function Home({
   featuredNft,
+  isMemeMintingActive,
   featuredNextgen,
   initialActivityData,
   initialTokens,
 }: {
   readonly featuredNft: NFTWithMemesExtendedData;
+  readonly isMemeMintingActive: boolean;
   readonly featuredNextgen: NextGenCollection;
   readonly initialActivityData: InitialActivityData;
   readonly initialTokens: NextGenToken[];
 }) {
   return (
     <>
-      <LatestDropSection featuredNft={featuredNft} />
+      <LatestDropSection
+        featuredNft={featuredNft}
+        isMemeMintingActive={isMemeMintingActive}
+      />
       <Container className="py-5">
         <Row>
           <Col>

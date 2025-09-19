@@ -1,30 +1,31 @@
 "use client";
 
-import { Col, Container, Row } from "react-bootstrap";
-import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
-import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
-import { useContext, useEffect, useState } from "react";
-import { commonApiFetch } from "../../../services/api/common-api";
 import {
   NFTSubscription,
   RedeemedSubscription,
   SubscriptionDetails,
   SubscriptionLog,
   SubscriptionTopUp,
-} from "../../../entities/ISubscription";
-import { AuthContext } from "../../auth/Auth";
-import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
-import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
+} from "@/entities/ISubscription";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
+import { AuthContext } from "@/components/auth/Auth";
+import {
+  getCardsRemainingUntilEndOf,
+  isMintingToday,
+} from "@/components/meme-calendar/meme-calendar.helpers";
+import { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import UserPageSubscriptionsAirdropAddress, {
   AirdropAddressResult,
 } from "./UserPageSubscriptionsAirdropAddress";
-import {
-  isMintingToday,
-  numberOfCardsForSeasonEnd,
-} from "../../../helpers/meme_calendar.helpers";
-import { Page } from "../../../helpers/Types";
+import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
+import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
+import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
+import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
+import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -66,7 +67,7 @@ export default function UserPageSubscriptions(
   const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
     useState<boolean>(true);
 
-  const remainingMintsForSeason = numberOfCardsForSeasonEnd();
+  const remainingMintsForSeason = getCardsRemainingUntilEndOf("szn");
   const [memeSubscriptions, setMemeSubscriptions] = useState<NFTSubscription[]>(
     []
   );
@@ -201,7 +202,7 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingMemeSubscriptions(true);
-    let upcomingLimit: number = remainingMintsForSeason.count;
+    let upcomingLimit: number = remainingMintsForSeason;
     if (isMintingToday()) {
       upcomingLimit += 1;
     }
@@ -260,9 +261,9 @@ export default function UserPageSubscriptions(
   return (
     <Container className="no-padding pb-5">
       <Row className="pt-2 pb-2">
-        <Col sm={12} md={6}>
+        <Col sm={12} md={isConnectedAccount ? 6 : 12}>
           <Container className="no-padding">
-            <Row>
+            <Row className="pb-2">
               <Col className="d-flex align-items-center gap-2">
                 <h4 className="mb-0">Subscribe</h4>
                 <span>
@@ -275,7 +276,12 @@ export default function UserPageSubscriptions(
               </Col>
             </Row>
             <Row>
-              <Col className="pt-2 pb-2 d-flex flex-column gap-4">
+              <Col
+                className={`pt-2 pb-2 d-flex ${
+                  isConnectedAccount
+                    ? "flex-column gap-4"
+                    : "flex-wrap flex-md-nowrap gap-4 justify-content-between"
+                }`}>
                 <UserPageSubscriptionsBalance
                   details={details}
                   fetching={isFetching}
@@ -297,7 +303,7 @@ export default function UserPageSubscriptions(
           </Container>
         </Col>
         {isConnectedAccount && (
-          <Col className="pt-2 pb-2" sm={12} md={6}>
+          <Col sm={12} md={6}>
             <UserPageSubscriptionsTopUp />
           </Col>
         )}
