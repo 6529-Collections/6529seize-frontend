@@ -8,11 +8,11 @@ import type { ReactElement } from "react";
 
 import {
   type EnsAddressPreview,
+  type EnsContenthash,
   type EnsContentPreview,
+  type EnsLinks,
   type EnsNamePreview,
   type EnsPreview,
-  type EnsContenthash,
-  type EnsLinks,
 } from "./types";
 
 const RECORD_LABELS: Readonly<Record<string, string>> = {
@@ -62,7 +62,10 @@ const renderAvatar = (url: string | null, alt: string): ReactElement | null => {
   );
 };
 
-const renderLink = (href: string | undefined, label: string): ReactElement | null => {
+const renderLink = (
+  href: string | undefined,
+  label: string
+): ReactElement | null => {
   if (!href) {
     return null;
   }
@@ -73,8 +76,7 @@ const renderLink = (href: string | undefined, label: string): ReactElement | nul
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100"
-    >
+      className="tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
       {label}
     </Link>
   );
@@ -99,7 +101,9 @@ const renderContenthash = (
         {protocol === "other" ? "Other" : protocol.toUpperCase()}
       </span>
       {decoded && (
-        <span className="tw-break-all tw-text-xs tw-text-iron-300">{decoded}</span>
+        <span className="tw-break-all tw-text-xs tw-text-iron-300">
+          {decoded}
+        </span>
       )}
       {gatewayUrl && renderLink(links.open ?? gatewayUrl, "Open content")}
     </div>
@@ -125,8 +129,7 @@ const renderRecords = (
               href={value}
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-break-all tw-text-sm tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100"
-            >
+              className="tw-break-all tw-text-sm tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
               {value}
             </Link>
           </li>
@@ -138,7 +141,9 @@ const renderRecords = (
           <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
             {label}
           </span>
-          <span className="tw-break-words tw-text-sm tw-text-iron-200">{value}</span>
+          <span className="tw-break-words tw-text-sm tw-text-iron-200">
+            {value}
+          </span>
         </li>
       );
     })
@@ -154,13 +159,8 @@ const renderRecords = (
 const renderOwnership = (
   ownership: EnsNamePreview["ownership"]
 ): ReactElement | null => {
-  const {
-    registryOwner,
-    registrant,
-    isWrapped,
-    expiry,
-    gracePeriodEnds,
-  } = ownership;
+  const { registryOwner, registrant, isWrapped, expiry, gracePeriodEnds } =
+    ownership;
 
   if (!registryOwner && !registrant && !expiry && !isWrapped) {
     return null;
@@ -208,8 +208,16 @@ const renderOwnership = (
 };
 
 const NameCard = ({ preview }: { readonly preview: EnsNamePreview }) => {
-  const { name, normalized, address, avatarUrl, links, records, contenthash, ownership } =
-    preview;
+  const {
+    name,
+    normalized,
+    address,
+    avatarUrl,
+    links,
+    records,
+    contenthash,
+    ownership,
+  } = preview;
 
   const formattedAddress = address ? formatAddress(address) : null;
 
@@ -221,7 +229,9 @@ const NameCard = ({ preview }: { readonly preview: EnsNamePreview }) => {
           <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
             ENS Name
           </span>
-          <span className="tw-text-xl tw-font-semibold tw-text-iron-50">{name}</span>
+          <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
+            {name}
+          </span>
           {normalized !== name && (
             <span className="tw-text-xs tw-text-iron-400">{normalized}</span>
           )}
@@ -232,8 +242,7 @@ const NameCard = ({ preview }: { readonly preview: EnsNamePreview }) => {
                   href={links.etherscan}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100"
-                >
+                  className="tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
                   {formattedAddress}
                 </Link>
               ) : (
@@ -261,14 +270,18 @@ const AddressCard = ({ preview }: { readonly preview: EnsAddressPreview }) => {
   const formattedAddress = formatAddress(address);
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-5" data-testid="ens-address-card">
+    <div
+      className="tw-flex tw-flex-col tw-gap-5"
+      data-testid="ens-address-card">
       <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start">
         {renderAvatar(avatarUrl, `${address} avatar`)}
         <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-1">
           <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
             ENS Reverse Record
           </span>
-          <span className="tw-text-xl tw-font-semibold tw-text-iron-50">{formattedAddress}</span>
+          <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
+            {formattedAddress}
+          </span>
           {primaryName && (
             <span className="tw-text-sm tw-text-iron-200">
               {links.app ? (
@@ -276,8 +289,7 @@ const AddressCard = ({ preview }: { readonly preview: EnsAddressPreview }) => {
                   href={links.app}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100"
-                >
+                  className="tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
                   {primaryName}
                 </Link>
               ) : (
@@ -286,7 +298,9 @@ const AddressCard = ({ preview }: { readonly preview: EnsAddressPreview }) => {
             </span>
           )}
           <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-            {forwardMatch ? "Forward resolution verified" : "Forward resolution not verified"}
+            {forwardMatch
+              ? "Forward resolution verified"
+              : "Forward resolution not verified"}
           </span>
         </div>
       </div>
@@ -303,12 +317,16 @@ const ContentCard = ({ preview }: { readonly preview: EnsContentPreview }) => {
   const { name, contenthash, links } = preview;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-5" data-testid="ens-content-card">
+    <div
+      className="tw-flex tw-flex-col tw-gap-5"
+      data-testid="ens-content-card">
       <div className="tw-flex tw-flex-col tw-gap-1">
         <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
           ENS Contenthash
         </span>
-        <span className="tw-text-xl tw-font-semibold tw-text-iron-50">{name}</span>
+        <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
+          {name}
+        </span>
       </div>
       {renderContenthash(contenthash, links)}
       <div className="tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
@@ -324,6 +342,7 @@ interface EnsPreviewCardProps {
 }
 
 export default function EnsPreviewCard({ preview }: EnsPreviewCardProps) {
+  console.log("i am ens preview card preview", preview);
   if (preview.type === "ens.address") {
     return <AddressCard preview={preview} />;
   }

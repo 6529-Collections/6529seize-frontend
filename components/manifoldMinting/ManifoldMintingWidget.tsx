@@ -1,11 +1,8 @@
 "use client";
 
-import styles from "./ManifoldMinting.module.scss";
+import { MANIFOLD_NETWORK } from "@/constants";
 import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
-import { ManifoldMerkleProof } from "./manifold-types";
-import DotLoader from "../dotLoader/DotLoader";
-import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import {
   useReadContract,
   useReadContracts,
@@ -17,14 +14,17 @@ import {
   fromGWEI,
   getTransactionLink,
 } from "../../helpers/Helpers";
+import { Time } from "../../helpers/time";
 import {
   ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
-import { Time } from "../../helpers/time";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { MANIFOLD_NETWORK } from "@/constants";
+import DotLoader from "../dotLoader/DotLoader";
+import { ManifoldMerkleProof } from "./manifold-types";
+import styles from "./ManifoldMinting.module.scss";
+import ManifoldMintingConnect from "./ManifoldMintingConnect";
 
 export default function ManifoldMintingWidget(
   props: Readonly<{
@@ -203,7 +203,7 @@ export default function ManifoldMintingWidget(
     setMintStatus(<></>);
     const value = getValue();
     const args = getMintArgs();
-    console.log("i am args", args);
+    console.log("i am mint args", args);
     mintWrite.writeContract({
       address: props.proxy as `0x${string}`,
       abi: props.abi,

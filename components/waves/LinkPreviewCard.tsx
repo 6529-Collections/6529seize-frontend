@@ -1,7 +1,8 @@
 "use client";
 
-import { type ReactElement, useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 
+import { fetchLinkPreview } from "../../services/api/link-preview-api";
 import OpenGraphPreview, {
   hasOpenGraphContent,
   LinkPreviewCardLayout,
@@ -9,7 +10,6 @@ import OpenGraphPreview, {
 } from "./OpenGraphPreview";
 import EnsPreviewCard from "./ens/EnsPreviewCard";
 import { isEnsPreview, type EnsPreview } from "./ens/types";
-import { fetchLinkPreview } from "../../services/api/link-preview-api";
 
 interface LinkPreviewCardProps {
   readonly href: string;
@@ -55,10 +55,6 @@ export default function LinkPreviewCard({
 
     fetchLinkPreview(href)
       .then((response) => {
-        if (!active) {
-          return;
-        }
-
         if (isEnsPreview(response)) {
           setState({ type: "ens", data: response });
           return;
@@ -71,7 +67,8 @@ export default function LinkPreviewCard({
           setState({ type: "fallback" });
         }
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("LinkPreviewCard error", e);
         if (active) {
           setState({ type: "fallback" });
         }
@@ -87,8 +84,7 @@ export default function LinkPreviewCard({
 
     return (
       <LinkPreviewCardLayout href={href}>
-        <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-start">
             {fallbackContent}
           </div>
@@ -100,7 +96,9 @@ export default function LinkPreviewCard({
   if (state.type === "ens") {
     return (
       <LinkPreviewCardLayout href={href}>
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4" data-testid="ens-preview-card">
+        <div
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          data-testid="ens-preview-card">
           <EnsPreviewCard preview={state.data} />
         </div>
       </LinkPreviewCardLayout>

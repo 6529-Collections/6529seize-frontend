@@ -11,14 +11,17 @@ import {
   type Address,
   type Hex,
 } from "viem";
-import { labelhash, namehash, normalize } from "viem/ens";
 import { mainnet } from "viem/chains";
+import { labelhash, namehash, normalize } from "viem/ens";
 
 const CHAIN_ID = 1;
 
-const ENS_REGISTRY_ADDRESS = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e" as const satisfies Address;
-const BASE_REGISTRAR_ADDRESS = "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85" as const satisfies Address;
-const NAME_WRAPPER_ADDRESS = "0x060f1546642E67c485D56248201feA2f9AB1803C" as const satisfies Address;
+const ENS_REGISTRY_ADDRESS =
+  "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e" as const satisfies Address;
+const BASE_REGISTRAR_ADDRESS =
+  "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85" as const satisfies Address;
+const NAME_WRAPPER_ADDRESS =
+  "0x060f1546642E67c485D56248201feA2f9AB1803C" as const satisfies Address;
 
 const PUBLIC_RESOLVER_ABI = [
   {
@@ -203,12 +206,14 @@ function extractEnsNameFromUrl(url: URL): string | null {
     .map((segment) => segment.trim())
     .filter((segment) => segment.length > 0);
 
-  if (hostname === "app.ens.domains" && segments.length >= 2) {
-    if (segments[0] === "name") {
-      return decodeURIComponent(segments[1]);
+  if (hostname === "app.ens.domains") {
+    if (segments.length === 1) {
+      return decodeURIComponent(segments[0]);
     }
-    if (segments[0] === "address") {
-      return decodeURIComponent(segments[1]);
+    if (segments.length >= 2) {
+      if (segments[0] === "name" || segments[0] === "address") {
+        return decodeURIComponent(segments[1]);
+      }
     }
   }
 
@@ -253,7 +258,10 @@ function extractNameCandidate(value: string): string | null {
   try {
     const parsed = new URL(trimmed);
     const fromUrl = extractEnsNameFromUrl(parsed);
-    if (fromUrl && (ENS_NAME_PATTERN.test(fromUrl) || ENS_REVERSE_PATTERN.test(fromUrl))) {
+    if (
+      fromUrl &&
+      (ENS_NAME_PATTERN.test(fromUrl) || ENS_REVERSE_PATTERN.test(fromUrl))
+    ) {
       return fromUrl;
     }
   } catch {
@@ -285,7 +293,10 @@ export function detectEnsTarget(raw: string | null): EnsTarget | null {
   return null;
 }
 
-function normalizeEnsName(name: string): { normalized: string; display: string } {
+function normalizeEnsName(name: string): {
+  normalized: string;
+  display: string;
+} {
   try {
     const normalized = normalize(name);
     const display = toUnicode(normalized);
@@ -295,7 +306,10 @@ function normalizeEnsName(name: string): { normalized: string; display: string }
   }
 }
 
-function sanitizeRecordValue(value: string | null, key: TextRecordKey): string | null {
+function sanitizeRecordValue(
+  value: string | null,
+  key: TextRecordKey
+): string | null {
   if (!value) {
     return null;
   }
@@ -351,7 +365,10 @@ function sanitizeUrl(value: string | null): string | null {
   return null;
 }
 
-function buildGatewayUrl(protocol: EnsContenthash["protocol"], value: string): string | null {
+function buildGatewayUrl(
+  protocol: EnsContenthash["protocol"],
+  value: string
+): string | null {
   if (!value) {
     return null;
   }
@@ -368,7 +385,9 @@ function buildGatewayUrl(protocol: EnsContenthash["protocol"], value: string): s
   }
 }
 
-function decodeEnsContenthash(value: Hex | null | undefined): ContenthashResult {
+function decodeEnsContenthash(
+  value: Hex | null | undefined
+): ContenthashResult {
   if (!value || value === "0x") {
     return null;
   }
@@ -434,10 +453,15 @@ function ensureChecksumAddress(address: NullableAddress): Address | null {
   }
 }
 
-function createLinksForName(normalized: string, address: string | null): EnsLinks {
+function createLinksForName(
+  normalized: string,
+  address: string | null
+): EnsLinks {
   return {
-    app: `https://app.ens.domains/name/${encodeURIComponent(normalized)}`,
-    ...(address ? { etherscan: `https://etherscan.io/address/${address}` } : {}),
+    app: `https://app.ens.domains/${encodeURIComponent(normalized)}`,
+    ...(address
+      ? { etherscan: `https://etherscan.io/address/${address}` }
+      : {}),
   };
 }
 
@@ -496,7 +520,8 @@ async function loadOwnership(
   }
 
   isWrapped = Boolean(
-    registryOwner && registryOwner.toLowerCase() === NAME_WRAPPER_ADDRESS.toLowerCase()
+    registryOwner &&
+      registryOwner.toLowerCase() === NAME_WRAPPER_ADDRESS.toLowerCase()
   );
 
   if (isEthSecondLevel(normalized)) {
@@ -565,9 +590,9 @@ async function loadOwnership(
   return ownership;
 }
 
-async function fetchTextRecords(normalized: string): Promise<
-  Partial<Record<TextRecordKey, string | null>>
-> {
+async function fetchTextRecords(
+  normalized: string
+): Promise<Partial<Record<TextRecordKey, string | null>>> {
   const result: Partial<Record<TextRecordKey, string | null>> = {};
 
   await Promise.all(
@@ -599,40 +624,41 @@ async function fetchEnsName(input: string): Promise<EnsNamePreview> {
     .then((resolverAddress) => ensureChecksumAddress(resolverAddress))
     .catch(() => null);
 
-  const [address, avatarUrl, records, contenthash, ownership] = (await Promise.all([
-    publicClient
-      .getEnsAddress({ name: normalized })
-      .then((resolved) => ensureChecksumAddress(resolved))
-      .catch(() => null),
-    publicClient
-      .getEnsAvatar({ name: normalized })
-      .then((avatar) => sanitizeUrl(avatar))
-      .catch(() => null),
-    fetchTextRecords(normalized),
-    (async () => {
-      if (!resolver) {
-        return null;
-      }
-      try {
-        const raw = await publicClient.readContract({
-          address: resolver as Address,
-          abi: PUBLIC_RESOLVER_ABI,
-          functionName: "contenthash",
-          args: [node],
-        });
-        return decodeEnsContenthash(raw);
-      } catch {
-        return null;
-      }
-    })(),
-    loadOwnership(normalized, node),
-  ])) as [
-    Address | null,
-    string | null,
-    Partial<Record<TextRecordKey, string | null>>,
-    EnsContenthash | null,
-    EnsOwnership
-  ];
+  const [address, avatarUrl, records, contenthash, ownership] =
+    (await Promise.all([
+      publicClient
+        .getEnsAddress({ name: normalized })
+        .then((resolved) => ensureChecksumAddress(resolved))
+        .catch(() => null),
+      publicClient
+        .getEnsAvatar({ name: normalized })
+        .then((avatar) => sanitizeUrl(avatar))
+        .catch(() => null),
+      fetchTextRecords(normalized),
+      (async () => {
+        if (!resolver) {
+          return null;
+        }
+        try {
+          const raw = await publicClient.readContract({
+            address: resolver as Address,
+            abi: PUBLIC_RESOLVER_ABI,
+            functionName: "contenthash",
+            args: [node],
+          });
+          return decodeEnsContenthash(raw);
+        } catch {
+          return null;
+        }
+      })(),
+      loadOwnership(normalized, node),
+    ])) as [
+      Address | null,
+      string | null,
+      Partial<Record<TextRecordKey, string | null>>,
+      EnsContenthash | null,
+      EnsOwnership
+    ];
 
   const sanitizedRecords: Partial<Record<TextRecordKey, string | null>> = {};
   for (const key of TEXT_RECORD_KEYS) {
@@ -677,7 +703,9 @@ async function fetchEnsAddress(address: string): Promise<EnsAddressPreview> {
 
   if (primaryName) {
     try {
-      const resolvedAddress = await publicClient.getEnsAddress({ name: primaryName });
+      const resolvedAddress = await publicClient.getEnsAddress({
+        name: primaryName,
+      });
       forwardMatch = Boolean(
         resolvedAddress && getAddress(resolvedAddress) === checksummed
       );
