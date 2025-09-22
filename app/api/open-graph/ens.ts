@@ -256,7 +256,7 @@ function normalizeEnsName(name: string): {
     return { normalized, display };
   } catch (error: any) {
     console.error(error);
-    let message = "Invalid ENS name provided.";
+    let message = "Invalid ENS name provided";
     if (error?.message) {
       message = `${message}: ${error.message}`;
     }
