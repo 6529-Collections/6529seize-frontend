@@ -100,6 +100,19 @@ export const createLinkRenderer = ({
       renderDefault: renderDefaultAnchor,
     };
 
+    const tryRenderOpenGraph = () => {
+      try {
+        const ogContent = context.renderOpenGraph();
+        if (ogContent) {
+          return ogContent;
+        }
+      } catch {
+        // swallow and fall back to default anchor
+      }
+
+      return null;
+    };
+
     if (match) {
       try {
         const rendered = match.handler.render(match.payload, context);
@@ -108,17 +121,17 @@ export const createLinkRenderer = ({
         }
         return rendered;
       } catch (error) {
-        try {
-          const ogContent = context.renderOpenGraph();
-          if (ogContent) {
-            return ogContent;
-          }
-        } catch {
-          // fall through to default anchor
+        const ogContent = tryRenderOpenGraph();
+        if (ogContent) {
+          return ogContent;
         }
-
         return renderDefaultAnchor();
       }
+    }
+
+    const ogContent = tryRenderOpenGraph();
+    if (ogContent) {
+      return ogContent;
     }
 
     return renderDefaultAnchor();

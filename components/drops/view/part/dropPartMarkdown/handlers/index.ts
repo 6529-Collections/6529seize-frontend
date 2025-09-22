@@ -4,7 +4,6 @@ import type { LinkHandler } from "../linkTypes";
 import { createArtBlocksHandler } from "./artBlocks";
 import { createFarcasterHandler } from "./farcaster";
 import { createGifHandler } from "./gif";
-import { createOpenGraphHandler } from "./openGraph";
 import { createPepeHandler } from "./pepe";
 import { createSeizeHandlers } from "./seize";
 import { createTikTokHandler } from "./tiktok";
@@ -28,7 +27,6 @@ export const createLinkHandlers = ({
   createArtBlocksHandler(),
   createPepeHandler(),
   createFarcasterHandler(),
-  createOpenGraphHandler(),
 ];
 
 export type LinkHandlers = ReturnType<typeof createLinkHandlers>;
