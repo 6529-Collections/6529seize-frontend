@@ -7,35 +7,17 @@ import OpenGraphPreview, {
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
-import {
-  fetchLinkPreview,
-  type GoogleWorkspaceLinkPreview,
-} from "../../services/api/link-preview-api";
-
-import CompoundCard, { toCompoundResponse } from "./compound/CompoundCard";
-import type { CompoundResponse } from "./compound/types";
-import GoogleWorkspaceCard from "./GoogleWorkspaceCard";
-
+import { fetchLinkPreview } from "../../services/api/link-preview-api";
 
 interface LinkPreviewCardProps {
   readonly href: string;
   readonly renderFallback: () => ReactElement;
 }
-type OpenGraphPreviewState = {
-  readonly kind: "openGraph";
-  readonly data: OpenGraphPreviewData;
-};
 
 type PreviewState =
   | { readonly type: "loading" }
   | { readonly type: "fallback" }
-  | { readonly type: "compound"; readonly data: CompoundResponse }
-  | {
-      readonly type: "success";
-      readonly data:
-        | OpenGraphPreviewState
-        | { readonly kind: "google"; readonly data: GoogleWorkspaceLinkPreview };
-    };
+  | { readonly type: "success"; readonly data: OpenGraphPreviewData };
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -55,24 +37,11 @@ const toPreviewData = (
   };
 };
 
-const isGoogleWorkspacePreview = (
-  response: Awaited<ReturnType<typeof fetchLinkPreview>>
-): response is GoogleWorkspaceLinkPreview => {
-  if (!response || typeof response !== "object") {
-    return false;
-  }
-
-  const type = (response as { readonly type?: unknown }).type;
-  return typeof type === "string" && type.startsWith("google.");
-};
-
 export default function LinkPreviewCard({
   href,
   renderFallback,
 }: LinkPreviewCardProps) {
   const [state, setState] = useState<PreviewState>({ type: "loading" });
-
-
 
   useEffect(() => {
     let active = true;
@@ -85,26 +54,9 @@ export default function LinkPreviewCard({
           return;
         }
 
-        if (isGoogleWorkspacePreview(response)) {
-          setState({
-            type: "success",
-            data: { kind: "google", data: response },
-          });
-          return;
-        }
-
-        const compoundResponse = toCompoundResponse(response);
-        if (compoundResponse) {
-          setState({ type: "compound", data: compoundResponse });
-          return;
-        }
-
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
-          setState({
-            type: "success",
-            data: { kind: "openGraph", data: previewData },
-          });
+          setState({ type: "success", data: previewData });
           return;
         }
 
@@ -121,18 +73,12 @@ export default function LinkPreviewCard({
     };
   }, [href]);
 
-  if (state.type === "compound") {
-    return <CompoundCard href={href} response={state.data} />;
-  }
-
   if (state.type === "fallback") {
     const fallbackContent = renderFallback();
 
     return (
       <LinkPreviewCardLayout href={href}>
-        <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
-        >
+        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-start">
             {fallbackContent}
           </div>
@@ -142,11 +88,7 @@ export default function LinkPreviewCard({
   }
 
   if (state.type === "success") {
-    if (state.data.kind === "google") {
-      return <GoogleWorkspaceCard href={href} data={state.data.data} />;
-    }
-
-    return <OpenGraphPreview href={href} preview={state.data.data} />;
+    return <OpenGraphPreview href={href} preview={state.data} />;
   }
 
   return <OpenGraphPreview href={href} preview={undefined} />;

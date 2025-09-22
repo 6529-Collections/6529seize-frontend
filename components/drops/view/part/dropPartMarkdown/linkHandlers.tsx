@@ -4,6 +4,7 @@ import {
   ImgHTMLAttributes,
   type ReactElement,
 } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { ExtraProps } from "react-markdown";
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
@@ -100,17 +101,31 @@ export const createLinkRenderer = ({
       return null;
     };
 
+    const renderHandlerContent = (element: ReactElement): ReactElement => (
+      <ErrorBoundary
+        fallbackRender={() => {
+          const ogContent = tryRenderOpenGraph();
+          if (ogContent) {
+            return ogContent;
+          }
+          return renderFallbackAnchor();
+        }}
+      >
+        {element}
+      </ErrorBoundary>
+    );
+
     const renderFromHandler = (handler: LinkHandler): ReactElement | null => {
       try {
         const rendered = handler.render(href);
         if (rendered === null || rendered === undefined) {
           throw new Error("Link handler returned no content");
         }
-        return rendered;
+        return renderHandlerContent(rendered);
       } catch {
         const ogContent = tryRenderOpenGraph();
         if (ogContent) {
-        return ogContent;
+          return ogContent;
         }
         return renderFallbackAnchor();
       }

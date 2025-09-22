@@ -6,18 +6,6 @@ import LinkPreviewCard from "../../../components/waves/LinkPreviewCard";
 const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
   <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
 ));
-const mockCompoundCard = jest.fn(({ href, response }: any) => (
-  <div data-testid="compound-card" data-href={href} data-type={response?.type} />
-));
-const mockToCompoundResponse = jest.fn((value: any) => {
-  if (value && typeof value === "object" && typeof value.type === "string" && value.type.startsWith("compound.")) {
-    return value;
-  }
-  return undefined;
-});
-const mockGoogleWorkspaceCard = jest.fn(({ href, data }: any) => (
-  <div data-testid="google-card" data-href={href} data-type={data?.type} />
-));
 
 jest.mock("../../../components/waves/OpenGraphPreview", () => {
   const actual = jest.requireActual("../../../components/waves/OpenGraphPreview");
@@ -28,17 +16,6 @@ jest.mock("../../../components/waves/OpenGraphPreview", () => {
   };
 });
 
-jest.mock("../../../components/waves/compound/CompoundCard", () => ({
-  __esModule: true,
-  default: (props: any) => mockCompoundCard(props),
-  toCompoundResponse: (value: unknown) => mockToCompoundResponse(value),
-}));
-
-jest.mock("../../../components/waves/GoogleWorkspaceCard", () => ({
-  __esModule: true,
-  default: (props: any) => mockGoogleWorkspaceCard(props),
-}));
-
 jest.mock("../../../services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
 }));
@@ -48,15 +25,9 @@ describe("LinkPreviewCard", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockToCompoundResponse.mockImplementation((value: any) => {
-      if (value && typeof value === "object" && typeof value.type === "string" && value.type.startsWith("compound.")) {
-        return value;
-      }
-      return undefined;
-    });
   });
 
-  it("renders preview when metadata is available", async () => {
+  it("renders OpenGraph preview when metadata is available", async () => {
     fetchLinkPreview.mockResolvedValue({
       title: "Example Title",
       description: "Example description",
@@ -71,10 +42,7 @@ describe("LinkPreviewCard", () => {
     );
 
     expect(mockOpenGraphPreview).toHaveBeenCalledWith(
-      expect.objectContaining({
-        href: "https://example.com/article",
-        preview: undefined,
-      })
+      expect.objectContaining({ href: "https://example.com/article", preview: undefined })
     );
 
     await waitFor(() =>
@@ -90,52 +58,7 @@ describe("LinkPreviewCard", () => {
     expect(screen.queryByTestId("fallback")).toBeNull();
   });
 
-  it("renders compound card when compound data is returned", async () => {
-    const compoundResponse = {
-      type: "compound.market",
-      version: "v2",
-      chainId: 1,
-      market: {
-        cToken: "0xToken",
-        symbol: "cUSDC",
-        underlying: { address: "0xUnderlying", symbol: "USDC", decimals: 6 },
-      },
-      metrics: {
-        supplyApy: "0.01",
-        borrowApy: "0.02",
-        utilization: "0.5",
-        tvlUnderlying: "1000",
-        tvlUsd: "1000",
-        collateralFactor: "0.5",
-        reserveFactor: "0.1",
-        exchangeRate: "0.02",
-      },
-      links: {},
-    };
-
-    fetchLinkPreview.mockResolvedValue(compoundResponse);
-
-    render(
-      <LinkPreviewCard
-        href="https://example.com/compound"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
-
-    await waitFor(() => {
-      expect(mockCompoundCard).toHaveBeenCalledWith(
-        expect.objectContaining({
-          href: "https://example.com/compound",
-          response: compoundResponse,
-        })
-      );
-    });
-
-    expect(mockToCompoundResponse).toHaveBeenCalledWith(compoundResponse);
-    expect(screen.queryByTestId("fallback")).toBeNull();
-  });
-
-  it("uses fallback when preview has no useful content", async () => {
+  it("renders fallback when preview lacks useful content", async () => {
     fetchLinkPreview.mockResolvedValue({});
 
     render(
@@ -150,7 +73,7 @@ describe("LinkPreviewCard", () => {
     });
   });
 
-  it("uses fallback when request fails", async () => {
+  it("renders fallback when request fails", async () => {
     fetchLinkPreview.mockRejectedValue(new Error("network"));
 
     render(
@@ -162,48 +85,6 @@ describe("LinkPreviewCard", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
-    });
-  });
-
-  it("renders a Google Workspace card when response type matches", async () => {
-    const googleResponse = {
-      type: "google.docs",
-      requestUrl: "https://docs.google.com/document/d/abc/edit",
-      url: "https://docs.google.com/document/d/abc/edit",
-      title: "Shared Doc",
-      description: null,
-      siteName: "Google Docs",
-      mediaType: null,
-      contentType: null,
-      favicon: null,
-      favicons: [],
-      image: null,
-      images: [],
-      thumbnail: null,
-      fileId: "abc",
-      availability: "public",
-      links: {
-        open: "https://docs.google.com/document/d/abc/edit",
-        preview: "https://docs.google.com/document/d/abc/preview",
-      },
-    };
-
-    fetchLinkPreview.mockResolvedValue(googleResponse);
-
-    render(
-      <LinkPreviewCard
-        href="https://docs.google.com/document/d/abc/edit"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
-
-    await waitFor(() => {
-      expect(mockGoogleWorkspaceCard).toHaveBeenCalledWith(
-        expect.objectContaining({
-          href: "https://docs.google.com/document/d/abc/edit",
-          data: googleResponse,
-        })
-      );
     });
   });
 });
