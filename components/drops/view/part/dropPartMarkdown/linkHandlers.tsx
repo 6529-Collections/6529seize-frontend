@@ -8,14 +8,14 @@ import { ErrorBoundary } from "react-error-boundary";
 import { ExtraProps } from "react-markdown";
 import { Tweet, type TwitterComponents } from "react-tweet";
 
-import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
-import { parseArtBlocksLink } from "@/src/services/artblocks/url";
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   SeizeQuoteLinkInfo,
   parseSeizeQueryLink,
   parseSeizeQuoteLink,
-} from "../../../../../helpers/SeizeLinkParser";
+} from "@/helpers/SeizeLinkParser";
+import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
+import { parseArtBlocksLink } from "@/src/services/artblocks/url";
 
 import type { PepeLinkResult } from "./pepe";
 import { isPepeHost, parsePepeLink, renderPepeLink } from "./pepe";
