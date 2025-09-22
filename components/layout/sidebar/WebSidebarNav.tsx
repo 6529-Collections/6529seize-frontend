@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -92,6 +92,7 @@ export default function WebSidebarNav({
           { name: "Activity", href: "/network/activity" },
           { name: "Groups", href: "/network/groups" },
           { name: "NFT Activity", href: "/nft-activity" },
+          { name: "Memes Calendar", href: "/meme-calendar" },
         ],
         subsections: [
           {
@@ -176,10 +177,6 @@ export default function WebSidebarNav({
                     },
                   ]
                 : []),
-              {
-                name: "Memes Calendar",
-                href: "/meme-calendar",
-              },
               { name: "Minting", href: `/about/${AboutSection.MINTING}` },
               {
                 name: "Nakamoto Threshold",
