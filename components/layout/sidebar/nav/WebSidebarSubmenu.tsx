@@ -12,7 +12,7 @@ interface WebSidebarSubmenuProps {
   readonly onClose: () => void;
 }
 
-const FLYOUT_OFFSET = 12;
+// No offset needed - submenu should be flush with sidebar
 
 function WebSidebarSubmenu({
   section,
@@ -22,14 +22,13 @@ function WebSidebarSubmenu({
 }: WebSidebarSubmenuProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // Simple position calculation - full height from top, positioned to the right of anchor
+  // Position submenu at fixed position - right after collapsed sidebar
   const position = useMemo(() => {
-    const rect = anchor.getBoundingClientRect();
     return {
       top: 0, // Always start from top for full-height submenu
-      left: rect.right + FLYOUT_OFFSET
+      left: 64 // Fixed 4rem (64px) - collapsed sidebar width
     };
-  }, [anchor]);
+  }, []);
 
   // Memoize event handlers
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
@@ -59,13 +58,18 @@ function WebSidebarSubmenu({
     };
   }, [handleKeyDown, handleClickOutside]);
 
-  const isActive = useCallback((href: string) => pathname === href, [pathname]);
+  const isActive = (href: string) => pathname === href;
 
-  // Memoize combined items to prevent recalculation
-  const combinedItems = useMemo(() => [
-    ...section.items,
-    ...(section.subsections?.flatMap((sub) => sub.items) ?? []),
-  ], [section.items, section.subsections]);
+  // Combine all items from section and subsections
+  const combinedItems = useMemo(() => {
+    const items = [...section.items];
+    if (section.subsections) {
+      section.subsections.forEach(sub => {
+        items.push(...sub.items);
+      });
+    }
+    return items;
+  }, [section.items, section.subsections]);
 
   // SSR check - early return for server-side rendering
   if (typeof document === "undefined") {
@@ -75,32 +79,43 @@ function WebSidebarSubmenu({
   return createPortal(
     <div
       ref={popoverRef}
-      className="tw-fixed tw-z-[95]"
+      className="tw-fixed tw-z-[95] tw-bg-iron-950"
       style={{ top: position.top, left: position.left }}
       role="presentation"
     >
       <div
-        className="tailwind-scope tw-w-64 tw-border tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(0,0,0,0.7)] tw-overflow-hidden tw-h-screen"
+        className="tailwind-scope tw-w-56 tw-bg-iron-950 tw-backdrop-blur-xl tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-800/50 tw-shadow-2xl tw-shadow-black/80 tw-overflow-hidden tw-h-screen"
         role="menu"
         aria-label={`${section.name} sub-navigation`}
       >
-        <div className="tw-px-2 tw-py-3 tw-overflow-y-auto tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-800">
-          {combinedItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`tw-flex tw-items-center tw-no-underline tw-rounded-lg tw-px-3 tw-h-10 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 tw-ring-offset-black ${
-                isActive(item.href)
-                  ? "tw-text-white tw-bg-iron-800/70"
-                  : "tw-text-iron-300 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
-              }`}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              role="menuitem"
-              onClick={onClose}
-            >
-              {item.name}
-            </Link>
-          ))}
+        {/* Header with section name */}
+        <div className="tw-px-6 tw-py-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-t-0">
+          <h3 className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {section.name}
+          </h3>
+        </div>
+
+        <div className="tw-p-3 tw-overflow-y-auto tw-h-[calc(100vh-56px)] tw-scrollbar-thin tw-scrollbar-thumb-iron-800 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-iron-700">
+          {combinedItems.map((item) => {
+            const baseClass = "tw-group tw-flex tw-items-center tw-no-underline tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-600 focus-visible:tw-ring-offset-1 tw-ring-offset-iron-950 tw-mb-1";
+
+            const stateClass = isActive(item.href)
+              ? "tw-text-white tw-bg-iron-800/80"
+              : "tw-text-iron-400 desktop-hover:hover:tw-bg-iron-850/50 desktop-hover:hover:tw-text-iron-200";
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${baseClass} ${stateClass}`}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                role="menuitem"
+                onClick={onClose}
+              >
+                <span className="tw-truncate">{item.name}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>,

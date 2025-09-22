@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useImperativeHandle,
 } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
@@ -31,9 +32,10 @@ interface WebSidebarNavProps {
   isCollapsed: boolean;
 }
 
-export default function WebSidebarNav({
-  isCollapsed = false,
-}: WebSidebarNavProps) {
+const WebSidebarNav = React.forwardRef<
+  { closeSubmenu: () => void },
+  WebSidebarNavProps
+>(({ isCollapsed = false }, ref) => {
   const pathname = usePathname();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -111,6 +113,11 @@ export default function WebSidebarNav({
     setSubmenuAnchor(null);
   }, []);
 
+  // Expose closeSubmenu to parent
+  useImperativeHandle(ref, () => ({
+    closeSubmenu
+  }), [closeSubmenu]);
+
   // Toggle section expansion
   const toggleSection = useCallback((key: string) => {
     setExpandedSections((prev) =>
@@ -150,12 +157,12 @@ export default function WebSidebarNav({
   // Get the section for the active submenu
   const activeSection = sections.find(s => s.key === activeSubmenu);
 
-  // Close submenu when sidebar expands or pathname changes
+  // Close submenu immediately when sidebar expands or pathname changes
   useEffect(() => {
-    if (!isCollapsed) {
+    if (!isCollapsed && activeSubmenu) {
       closeSubmenu();
     }
-  }, [isCollapsed, closeSubmenu]);
+  }, [isCollapsed, activeSubmenu, closeSubmenu]);
 
   useEffect(() => {
     closeSubmenu();
@@ -321,21 +328,26 @@ export default function WebSidebarNav({
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {activeSubmenu && activeSection && submenuAnchor && (
-          <CommonAnimationOpacity
-            key={`submenu-${activeSubmenu}`}
-            elementClasses=""
-          >
-            <WebSidebarSubmenu
-              section={activeSection}
-              anchor={submenuAnchor}
-              pathname={pathname}
-              onClose={closeSubmenu}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {activeSubmenu && activeSection && submenuAnchor && (
+        <>
+          {/* Overlay for main content only - not covering the sidebar */}
+          <div
+            className="tw-fixed tw-inset-0 tw-bg-black/20 tw-z-[94]"
+            style={{ left: "288px" }} // 64px sidebar + 224px submenu
+            onClick={closeSubmenu}
+          />
+          <WebSidebarSubmenu
+            section={activeSection}
+            anchor={submenuAnchor}
+            pathname={pathname}
+            onClose={closeSubmenu}
+          />
+        </>
+      )}
     </>
   );
-}
+});
+
+WebSidebarNav.displayName = "WebSidebarNav";
+
+export default WebSidebarNav;

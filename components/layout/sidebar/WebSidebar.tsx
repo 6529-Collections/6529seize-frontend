@@ -26,6 +26,7 @@ function WebSidebar({
   onCloseOffcanvas,
   sidebarWidth,
 }: WebSidebarProps) {
+  const navRef = useRef<{ closeSubmenu: () => void }>(null);
   const { address } = useSeizeConnectContext();
   const { profile } = useIdentity({
     handleOrWallet: address || "",
@@ -77,12 +78,17 @@ function WebSidebar({
           <div className="tw-flex tw-flex-col tw-h-full tw-pt-3">
             <WebSidebarHeader
               collapsed={shouldShowCollapsed}
-              onToggle={onToggle}
+              onToggle={() => {
+                // Close submenu immediately before toggling
+                navRef.current?.closeSubmenu();
+                onToggle();
+              }}
               tooltipId="sidebar-tooltip"
             />
 
             <div className="tw-flex-1">
               <WebSidebarNav
+                ref={navRef}
                 isCollapsed={shouldShowCollapsed}
               />
             </div>
