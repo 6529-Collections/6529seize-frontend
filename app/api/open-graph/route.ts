@@ -4,6 +4,8 @@ import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { detectEnsTarget, EnsPreviewError, fetchEnsPreview } from "./ens";
 import { buildResponse, ensureUrlIsPublic, validateUrl } from "./utils";
 
+export const runtime = "nodejs";
+
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
 const USER_AGENT =
