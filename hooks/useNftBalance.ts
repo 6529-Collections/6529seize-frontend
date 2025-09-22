@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../services/api/common-api";
-import { NftOwner } from "../entities/IOwner";
 import { DBResponse } from "../entities/IDBResponse";
+import { NftOwner } from "../entities/IOwner";
+import { commonApiFetch } from "../services/api/common-api";
 
 interface UseNftBalanceProps {
   consolidationKey: string | null;
@@ -15,7 +15,7 @@ export function useNftBalance({
   tokenId,
 }: UseNftBalanceProps) {
   const { data, isLoading, error } = useQuery<DBResponse>({
-    queryKey: ['nft-balance', consolidationKey, contract, tokenId],
+    queryKey: ["nft-balance", consolidationKey, contract, tokenId],
     queryFn: async () =>
       await commonApiFetch<DBResponse>({
         endpoint: `nft-owners/consolidation/${consolidationKey}?contract=${contract}&token_id=${tokenId}`,

@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { mockGradientCollection } from "@/__tests__/fixtures/gradientFixtures";
 import GradientPageComponent from "@/components/6529Gradient/GradientPage";
-import { useRouter } from "next/navigation";
-import { fetchUrl } from "@/services/6529api";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { mockGradientCollection } from "@/__tests__/fixtures/gradientFixtures";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { fetchUrl } from "@/services/6529api";
+import { render, screen, waitFor } from "@testing-library/react";
+import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -18,13 +18,16 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock("@/components/nft-image/NFTImage", () => (props: any) => (
-  <div data-testid="image" data-owned={String(props.showOwnedIfLoggedIn)} />
+  <div data-testid="image" />
 ));
 jest.mock("@/components/address/Address", () => (props: any) => (
   <div data-testid="address">{props.display}</div>
 ));
 jest.mock("@/components/the-memes/ArtistProfileHandle", () => () => (
   <div data-testid="artist" />
+));
+jest.mock("@/components/you-own-nft-badge/YouOwnNftBadge", () => () => (
+  <div data-testid="owner-badge" />
 ));
 jest.mock("@/components/nftAttributes/NftStats", () => ({
   NftPageStats: () => (
@@ -88,21 +91,25 @@ function renderPage(wallet: string = "0x1") {
 }
 
 describe("GradientPage", () => {
-  it("shows NFT data and owner star", async () => {
+  it("shows NFT data and owner badge", async () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toHaveAttribute("data-owned", "true")
+      expect(screen.getByTestId("image")).toBeInTheDocument()
     );
-    expect(screen.getByText("*")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
+    );
   });
 
-  it("hides owner star for non-owner", async () => {
+  it("hides owner badge for non-owner", async () => {
     renderPage("0x2");
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toHaveAttribute("data-owned", "false")
+      expect(screen.getByTestId("image")).toBeInTheDocument()
     );
-    expect(screen.queryByText("*")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByTestId("owner-badge")).not.toBeInTheDocument()
+    );
   });
 
   it("shows transaction history", async () => {
@@ -121,17 +128,23 @@ describe("GradientPage", () => {
   it("fetches correct NFT data on mount", async () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
-    
-    expect(fetchUrl).toHaveBeenCalledWith(`${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`);
-    expect(fetchUrl).toHaveBeenCalledWith(`${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=1`);
+
+    expect(fetchUrl).toHaveBeenCalledWith(
+      `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
+    );
+    expect(fetchUrl).toHaveBeenCalledWith(
+      `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=1`
+    );
   });
 
   it("displays NFT title correctly", async () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     // Wait for the NFT name to appear, which indicates data has loaded
-    await waitFor(() => expect(screen.getByText("Gradient #1")).toBeInTheDocument());
-    
+    await waitFor(() =>
+      expect(screen.getByText("Gradient #1")).toBeInTheDocument()
+    );
+
     expect(screen.getByText("6529")).toBeInTheDocument();
     expect(screen.getByText("Gradient")).toBeInTheDocument();
   });
@@ -140,8 +153,10 @@ describe("GradientPage", () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     // Wait for the NFT name to appear, indicating the component has rendered with data
-    await waitFor(() => expect(screen.getByText("Gradient #1")).toBeInTheDocument());
-    
+    await waitFor(() =>
+      expect(screen.getByText("Gradient #1")).toBeInTheDocument()
+    );
+
     expect(screen.getByText("Owner")).toBeInTheDocument();
     expect(screen.getByTestId("address")).toBeInTheDocument();
     expect(screen.getByTestId("address")).toHaveTextContent("TestOwner");
@@ -151,8 +166,10 @@ describe("GradientPage", () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     // Wait for the NFT name to appear
-    await waitFor(() => expect(screen.getByText("Gradient #1")).toBeInTheDocument());
-    
+    await waitFor(() =>
+      expect(screen.getByText("Gradient #1")).toBeInTheDocument()
+    );
+
     expect(screen.getByText("NFT")).toBeInTheDocument();
     expect(screen.getByText("Mint Date")).toBeInTheDocument();
     expect(screen.getByText("Artist")).toBeInTheDocument();
@@ -164,8 +181,10 @@ describe("GradientPage", () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     // Wait for the NFT name to appear
-    await waitFor(() => expect(screen.getByText("Gradient #1")).toBeInTheDocument());
-    
+    await waitFor(() =>
+      expect(screen.getByText("Gradient #1")).toBeInTheDocument()
+    );
+
     expect(screen.getAllByText("TDH")).toHaveLength(2); // h3 heading and table cell
     expect(screen.getByText("100")).toBeInTheDocument(); // boosted_tdh
     expect(screen.getByText("Unweighted TDH")).toBeInTheDocument();
@@ -177,8 +196,10 @@ describe("GradientPage", () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     // Wait for the NFT name to appear
-    await waitFor(() => expect(screen.getByText("Gradient #1")).toBeInTheDocument());
-    
+    await waitFor(() =>
+      expect(screen.getByText("Gradient #1")).toBeInTheDocument()
+    );
+
     expect(screen.getByTestId("links")).toBeInTheDocument();
   });
 
@@ -186,15 +207,17 @@ describe("GradientPage", () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
     // Wait for the NFT name to appear
-    await waitFor(() => expect(screen.getByText("Gradient #1")).toBeInTheDocument());
-    
+    await waitFor(() =>
+      expect(screen.getByText("Gradient #1")).toBeInTheDocument()
+    );
+
     expect(screen.getByText("Transaction History")).toBeInTheDocument();
     expect(screen.getByTestId("activity-row")).toBeInTheDocument();
   });
 
   it("handles loading state correctly", () => {
     renderPage();
-    
+
     // Initially, before NFT data is loaded, navigation should not show rank
     expect(screen.queryByText("1/3")).not.toBeInTheDocument();
   });
@@ -209,7 +232,7 @@ describe("GradientPage", () => {
 
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
-    
+
     // Transaction History section should not be rendered when no transactions
     expect(screen.queryByText("Transaction History")).not.toBeInTheDocument();
     expect(screen.queryByTestId("activity-row")).not.toBeInTheDocument();
@@ -218,8 +241,7 @@ describe("GradientPage", () => {
   it("handles wallet connection state changes", async () => {
     const { rerender } = render(
       <TitleProvider>
-        <AuthContext.Provider
-          value={{ connectedProfile: null } as any}>
+        <AuthContext.Provider value={{ connectedProfile: null } as any}>
           <CookieConsentProvider>
             <GradientPageComponent id="1" />
           </CookieConsentProvider>
@@ -228,12 +250,14 @@ describe("GradientPage", () => {
     );
 
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
-    
+
     // Should show as non-owner when no connected profile
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toHaveAttribute("data-owned", "false")
+      expect(screen.getByTestId("image")).toBeInTheDocument()
     );
-    expect(screen.queryByText("*")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByTestId("owner-badge")).not.toBeInTheDocument()
+    );
 
     // Rerender with connected profile
     rerender(
@@ -249,8 +273,10 @@ describe("GradientPage", () => {
 
     // Should now show as owner
     await waitFor(() =>
-      expect(screen.getByTestId("image")).toHaveAttribute("data-owned", "true")
+      expect(screen.getByTestId("image")).toBeInTheDocument()
     );
-    expect(screen.getByText("*")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
+    );
   });
 });

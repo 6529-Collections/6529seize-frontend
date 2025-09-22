@@ -3,32 +3,33 @@
 import { env } from "@/utils/env";
 import styles from "./6529Gradient.module.scss";
 
-import { useContext, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col, Table } from "react-bootstrap";
+import Address from "@/components/address/Address";
+import { AuthContext } from "@/components/auth/Auth";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import NFTImage from "@/components/nft-image/NFTImage";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import { NftPageStats } from "@/components/nftAttributes/NftStats";
+import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { GRADIENT_CONTRACT } from "@/constants";
+import { useSetTitle } from "@/contexts/TitleContext";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFT } from "@/entities/INFT";
+import { Transaction } from "@/entities/ITransaction";
 import {
   areEqualAddresses,
   enterArtFullScreen,
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
-import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
-import { Transaction } from "@/entities/ITransaction";
-import { fetchUrl } from "@/services/6529api";
-import NFTImage from "@/components/nft-image/NFTImage";
-import Address from "@/components/address/Address";
-import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
-import { AuthContext } from "@/components/auth/Auth";
-import { NftPageStats } from "@/components/nftAttributes/NftStats";
 import useCapacitor from "@/hooks/useCapacitor";
-import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import { fetchUrl } from "@/services/6529api";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
-import NftNavigation from "@/components/nft-navigation/NftNavigation";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { useSetTitle } from "@/contexts/TitleContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -106,16 +107,14 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
             sm={{ span: 12 }}
             md={{ span: 6 }}
             lg={{ span: 6 }}
-            className="pt-2 position-relative"
-          >
+            className="pt-2 position-relative">
             {nft && (
               <NFTImage
                 id={fullscreenElementId}
                 nft={nft}
                 animation={false}
                 height={650}
-                showOwnedIfLoggedIn={isOwner}
-                showUnseizedIfLoggedIn={false}
+                showBalance={false}
               />
             )}
           </Col>
@@ -125,8 +124,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
               sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 6 }}
-              className="pt-2"
-            >
+              className="pt-2">
               <Container>
                 <Row>
                   <Col>
@@ -134,14 +132,14 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                   </Col>
                 </Row>
                 <Row>
-                  <Col>
-                    <h4 className={styles.subheading}>
-                      {isOwner ? "*" : ""}
+                  <Col className="d-flex align-items-center gap-1">
+                    <h4 className="tw-mb-0">
                       <Address
                         wallets={[nft.owner as `0x${string}`]}
                         display={nft.owner_display}
                       />
                     </h4>
+                    {isOwner && <YouOwnNftBadge />}
                   </Col>
                 </Row>
                 <Row className="pt-4">
@@ -280,9 +278,9 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                     />
                   </Col>
                 </Row>
-                <Row className="pt-2">
+                <Row className="pt-4">
                   <Col>
-                    <h2 className={styles.subheading}>{nft?.name}</h2>
+                    <h2>{nft?.name}</h2>
                   </Col>
                 </Row>
                 <Row className="pt-2">

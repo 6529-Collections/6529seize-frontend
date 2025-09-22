@@ -1,25 +1,27 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import NFTImageBalance from '../../../components/nft-image/NFTImageBalance';
+import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 // Mock the hooks
-jest.mock('../../../hooks/useNftBalance');
-jest.mock('../../../components/auth/Auth');
+jest.mock("@/hooks/useNftBalance");
+jest.mock("@/components/auth/Auth");
 
 // Mock the SCSS module
-jest.mock('../../../components/nft-image/NFTImage.module.scss', () => ({
-  balance: 'balance',
-  balanceBigger: 'balanceBigger',
+jest.mock("@/components/nft-image/NFTImage.module.scss", () => ({
+  balance: "balance",
+  balanceBigger: "balanceBigger",
 }));
 
-import { useNftBalance } from '../../../hooks/useNftBalance';
-import { useAuth } from '../../../components/auth/Auth';
+import { useAuth } from "@/components/auth/Auth";
+import { useNftBalance } from "@/hooks/useNftBalance";
 
-const mockUseNftBalance = useNftBalance as jest.MockedFunction<typeof useNftBalance>;
+const mockUseNftBalance = useNftBalance as jest.MockedFunction<
+  typeof useNftBalance
+>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
-describe('NFTImageBalance', () => {
+describe("NFTImageBalance", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
@@ -29,7 +31,7 @@ describe('NFTImageBalance', () => {
         mutations: { retry: false },
       },
     });
-    
+
     // Reset mocks
     mockUseNftBalance.mockReset();
     mockUseAuth.mockReset();
@@ -44,19 +46,17 @@ describe('NFTImageBalance', () => {
   };
 
   const defaultProps = {
-    contract: '0x1234567890123456789012345678901234567890',
+    contract: "0x1234567890123456789012345678901234567890",
     tokenId: 123,
-    showOwnedIfLoggedIn: true,
-    showUnseizedIfLoggedIn: true,
     height: 300 as const,
   };
 
-  describe('When user is not logged in', () => {
+  describe("When user is not logged in", () => {
     beforeEach(() => {
       mockUseAuth.mockReturnValue({
         connectedProfile: null,
       } as any);
-      
+
       mockUseNftBalance.mockReturnValue({
         balance: 0,
         isLoading: false,
@@ -64,12 +64,14 @@ describe('NFTImageBalance', () => {
       });
     });
 
-    it('renders nothing when user is not connected', () => {
-      const { container } = renderWithProviders(<NFTImageBalance {...defaultProps} />);
+    it("renders nothing when user is not connected", () => {
+      const { container } = renderWithProviders(
+        <NFTImageBalance {...defaultProps} />
+      );
       expect(container).toBeEmptyDOMElement();
     });
 
-    it('does not call useNftBalance when user is not connected', () => {
+    it("calls useNftBalance with null consolidationKey when user is not connected", () => {
       renderWithProviders(<NFTImageBalance {...defaultProps} />);
       expect(mockUseNftBalance).toHaveBeenCalledWith({
         consolidationKey: null,
@@ -79,10 +81,10 @@ describe('NFTImageBalance', () => {
     });
   });
 
-  describe('When user is logged in', () => {
+  describe("When user is logged in", () => {
     const mockProfile = {
-      consolidation_key: 'test-consolidation-key-123',
-      handle: 'testuser',
+      consolidation_key: "test-consolidation-key-123",
+      handle: "testuser",
     };
 
     beforeEach(() => {
@@ -91,43 +93,18 @@ describe('NFTImageBalance', () => {
       } as any);
     });
 
-    describe('SEIZED state rendering', () => {
-      it('renders SEIZED without quantity when showOwnedIfLoggedIn is true', () => {
+    describe("SEIZED state rendering", () => {
+      it("renders SEIZED with quantity when balance is positive", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 5,
           isLoading: false,
           error: null,
         });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showOwnedIfLoggedIn={true}
-          />
-        );
-        
-        expect(screen.getByText('SEIZED')).toBeInTheDocument();
-        expect(screen.queryByText('x5')).not.toBeInTheDocument();
+        renderWithProviders(<NFTImageBalance {...defaultProps} />);
+        expect(screen.getByText("SEIZED x5")).toBeInTheDocument();
       });
 
-      it('renders SEIZED with quantity when showOwnedIfLoggedIn is false', () => {
-        mockUseNftBalance.mockReturnValue({
-          balance: 5,
-          isLoading: false,
-          error: null,
-        });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showOwnedIfLoggedIn={false}
-          />
-        );
-        
-        expect(screen.getByText('SEIZED x5')).toBeInTheDocument();
-      });
-
-      it('renders with correct CSS classes for different heights', () => {
+      it("renders with correct CSS classes for different heights", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 1,
           isLoading: false,
@@ -135,255 +112,141 @@ describe('NFTImageBalance', () => {
         });
 
         const { rerender, container } = renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            height={300}
-          />
+          <NFTImageBalance {...defaultProps} height={300} />
         );
-        
-        let outerSpan = container.querySelector('span');
-        expect(outerSpan).toHaveClass('balance');
-        expect(outerSpan).not.toHaveClass('balanceBigger');
-        
-        // Test height 650 - should have balanceBigger class
+
+        let outerSpan = container.querySelector("span");
+        expect(outerSpan).toHaveClass("balance");
+        expect(outerSpan).not.toHaveClass("balanceBigger");
+
         rerender(
           <QueryClientProvider client={queryClient}>
-            <NFTImageBalance
-              {...defaultProps}
-              height={650}
-            />
+            <NFTImageBalance {...defaultProps} height={650} />
           </QueryClientProvider>
         );
-        
-        outerSpan = container.querySelector('span');
-        expect(outerSpan).toHaveClass('balance');
-        expect(outerSpan).toHaveClass('balanceBigger');
-        
-        // Test height "full" - should not have balanceBigger class
+
+        outerSpan = container.querySelector("span");
+        expect(outerSpan).toHaveClass("balance");
+        expect(outerSpan).toHaveClass("balanceBigger");
+
         rerender(
           <QueryClientProvider client={queryClient}>
-            <NFTImageBalance
-              {...defaultProps}
-              height="full"
-            />
+            <NFTImageBalance {...defaultProps} height="full" />
           </QueryClientProvider>
         );
-        
-        outerSpan = container.querySelector('span');
-        expect(outerSpan).toHaveClass('balance');
-        expect(outerSpan).not.toHaveClass('balanceBigger');
+
+        outerSpan = container.querySelector("span");
+        expect(outerSpan).toHaveClass("balance");
+        expect(outerSpan).not.toHaveClass("balanceBigger");
       });
 
-      it('handles large balance numbers correctly', () => {
+      it("handles large balance numbers correctly", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 999999,
           isLoading: false,
           error: null,
         });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showOwnedIfLoggedIn={false}
-          />
-        );
-        
-        expect(screen.getByText('SEIZED x999999')).toBeInTheDocument();
+        renderWithProviders(<NFTImageBalance {...defaultProps} />);
+        expect(screen.getByText("SEIZED x999999")).toBeInTheDocument();
       });
     });
 
-    describe('UNSEIZED state rendering', () => {
-      it('renders UNSEIZED when balance is 0 and showUnseizedIfLoggedIn is true', () => {
+    describe("UNSEIZED state rendering", () => {
+      it("renders UNSEIZED when balance is 0", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 0,
           isLoading: false,
           error: null,
         });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={true}
-          />
-        );
-        
-        expect(screen.getByText('UNSEIZED')).toBeInTheDocument();
-        expect(screen.queryByText('SEIZED')).not.toBeInTheDocument();
+        renderWithProviders(<NFTImageBalance {...defaultProps} />);
+        expect(screen.getByText("UNSEIZED")).toBeInTheDocument();
+        expect(screen.queryByText("SEIZED")).not.toBeInTheDocument();
       });
 
-      it('does not render UNSEIZED when balance is 0 but showUnseizedIfLoggedIn is false', () => {
+      it("renders UNSEIZED with correct CSS classes", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 0,
           isLoading: false,
           error: null,
         });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={false}
-          />
-        );
-        
-        expect(screen.queryByText('UNSEIZED')).not.toBeInTheDocument();
-        expect(screen.queryByText('SEIZED')).not.toBeInTheDocument();
-      });
-
-      it('renders UNSEIZED with correct CSS classes', () => {
-        mockUseNftBalance.mockReturnValue({
-          balance: 0,
-          isLoading: false,
-          error: null,
-        });
-
         const { container } = renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={true}
-          />
+          <NFTImageBalance {...defaultProps} />
         );
-        
-        const unseizedElement = container.querySelector('span');
-        expect(unseizedElement).toHaveClass('balance');
-        expect(unseizedElement).not.toHaveClass('balanceBigger');
-        expect(screen.getByText('UNSEIZED')).toBeInTheDocument();
+        const unseizedElement = container.querySelector("span");
+        expect(unseizedElement).toHaveClass("balance");
+        expect(unseizedElement).not.toHaveClass("balanceBigger");
+        expect(screen.getByText("UNSEIZED")).toBeInTheDocument();
       });
     });
 
-    describe('Loading state rendering', () => {
-      it('renders loading dots when balance is -1 (loading) and showUnseizedIfLoggedIn is true', () => {
-        // Note: useNftBalance returns isLoading: true, but balance defaults to 0
-        // However, the component logic checks for balance === -1 for loading dots
-        // This suggests the hook might return -1 as a loading state indicator
+    describe("Loading state rendering", () => {
+      it("renders loading dots when isLoading is true", () => {
         mockUseNftBalance.mockReturnValue({
-          balance: -1,
+          balance: 0,
           isLoading: true,
           error: null,
         });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={true}
-          />
-        );
-        
-        expect(screen.getByText('...')).toBeInTheDocument();
-        expect(screen.queryByText('SEIZED')).not.toBeInTheDocument();
-        expect(screen.queryByText('UNSEIZED')).not.toBeInTheDocument();
+        renderWithProviders(<NFTImageBalance {...defaultProps} />);
+        expect(screen.getByText("...")).toBeInTheDocument();
+        expect(screen.queryByText("SEIZED")).not.toBeInTheDocument();
+        expect(screen.queryByText("UNSEIZED")).not.toBeInTheDocument();
       });
 
-      it('does not render loading dots when balance is -1 but showUnseizedIfLoggedIn is false', () => {
+      it("renders loading dots with correct CSS classes", () => {
         mockUseNftBalance.mockReturnValue({
-          balance: -1,
+          balance: 0,
           isLoading: true,
           error: null,
         });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={false}
-          />
-        );
-        
-        expect(screen.queryByText('...')).not.toBeInTheDocument();
-        expect(screen.queryByText('SEIZED')).not.toBeInTheDocument();
-        expect(screen.queryByText('UNSEIZED')).not.toBeInTheDocument();
-      });
-
-      it('renders loading dots with correct CSS classes', () => {
-        mockUseNftBalance.mockReturnValue({
-          balance: -1,
-          isLoading: true,
-          error: null,
-        });
-
         const { container } = renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={true}
-          />
+          <NFTImageBalance {...defaultProps} />
         );
-        
-        const loadingElement = container.querySelector('span');
-        expect(loadingElement).toHaveClass('balance');
-        expect(loadingElement).not.toHaveClass('balanceBigger');
-        expect(screen.getByText('...')).toBeInTheDocument();
+        const loadingElement = container.querySelector("span");
+        expect(loadingElement).toHaveClass("balance");
+        expect(loadingElement).not.toHaveClass("balanceBigger");
+        expect(screen.getByText("...")).toBeInTheDocument();
       });
     });
 
-    describe('Error handling', () => {
-      it('logs error but still renders based on balance when useNftBalance has error', () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        const mockError = new Error('Failed to fetch balance');
-        
+    describe("Error handling", () => {
+      it("logs error and renders N/A when useNftBalance has error", () => {
+        const consoleSpy = jest
+          .spyOn(console, "error")
+          .mockImplementation(() => {});
+        const mockError = new Error("Failed to fetch balance");
+
         mockUseNftBalance.mockReturnValue({
           balance: 0,
           isLoading: false,
           error: mockError,
         });
+        renderWithProviders(<NFTImageBalance {...defaultProps} />);
 
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={true}
-          />
+        expect(consoleSpy).toHaveBeenCalledWith(
+          "Failed to fetch NFT balance:",
+          mockError
         );
-        
-        expect(consoleSpy).toHaveBeenCalledWith('Failed to fetch NFT balance:', mockError);
-        expect(screen.getByText('UNSEIZED')).toBeInTheDocument();
-        
-        consoleSpy.mockRestore();
-      });
+        expect(screen.getByText("N/A")).toBeInTheDocument();
 
-      it('does not render anything when error occurs and balance is 0 with showUnseizedIfLoggedIn false', () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        const mockError = new Error('Network error');
-        
-        mockUseNftBalance.mockReturnValue({
-          balance: 0,
-          isLoading: false,
-          error: mockError,
-        });
-
-        const { container } = renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={false}
-          />
-        );
-        
-        expect(consoleSpy).toHaveBeenCalledWith('Failed to fetch NFT balance:', mockError);
-        expect(container).toBeEmptyDOMElement();
-        
         consoleSpy.mockRestore();
       });
     });
 
-    describe('Priority logic', () => {
-      it('prioritizes SEIZED state over UNSEIZED when balance is positive', () => {
+    describe("Priority logic", () => {
+      it("prioritizes SEIZED when balance is positive", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 1,
           isLoading: false,
           error: null,
         });
-
-        renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showUnseizedIfLoggedIn={true}
-            showOwnedIfLoggedIn={false}
-          />
-        );
-        
-        expect(screen.getByText('SEIZED x1')).toBeInTheDocument();
-        expect(screen.queryByText('UNSEIZED')).not.toBeInTheDocument();
+        renderWithProviders(<NFTImageBalance {...defaultProps} />);
+        expect(screen.getByText("SEIZED x1")).toBeInTheDocument();
+        expect(screen.queryByText("UNSEIZED")).not.toBeInTheDocument();
       });
     });
 
-    describe('Hook integration', () => {
-      it('calls useNftBalance with correct parameters', () => {
+    describe("Hook integration", () => {
+      it("calls useNftBalance with correct parameters", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 0,
           isLoading: false,
@@ -391,7 +254,7 @@ describe('NFTImageBalance', () => {
         });
 
         renderWithProviders(<NFTImageBalance {...defaultProps} />);
-        
+
         expect(mockUseNftBalance).toHaveBeenCalledWith({
           consolidationKey: mockProfile.consolidation_key,
           contract: defaultProps.contract,
@@ -399,11 +262,11 @@ describe('NFTImageBalance', () => {
         });
       });
 
-      it('handles undefined consolidation_key gracefully', () => {
+      it("handles undefined consolidation_key gracefully", () => {
         mockUseAuth.mockReturnValue({
           connectedProfile: { ...mockProfile, consolidation_key: undefined },
         } as any);
-        
+
         mockUseNftBalance.mockReturnValue({
           balance: 0,
           isLoading: false,
@@ -411,7 +274,7 @@ describe('NFTImageBalance', () => {
         });
 
         renderWithProviders(<NFTImageBalance {...defaultProps} />);
-        
+
         expect(mockUseNftBalance).toHaveBeenCalledWith({
           consolidationKey: null,
           contract: defaultProps.contract,
@@ -420,52 +283,35 @@ describe('NFTImageBalance', () => {
       });
     });
 
-    describe('Component structure', () => {
-      it('renders as React fragment containing spans for SEIZED state', () => {
+    describe("Component structure", () => {
+      it("renders a single span for SEIZED state", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 5,
           isLoading: false,
           error: null,
         });
-
         const { container } = renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            showOwnedIfLoggedIn={false}
-          />
+          <NFTImageBalance {...defaultProps} />
         );
-        
-        const spans = container.querySelectorAll('span');
-        expect(spans).toHaveLength(2); // Outer span and inner span
-        
+        const spans = container.querySelectorAll("span");
+        expect(spans).toHaveLength(1);
         const outerSpan = spans[0];
-        const innerSpan = spans[1];
-        
-        expect(outerSpan).toHaveClass('balance');
-        expect(innerSpan).toHaveTextContent('SEIZED x5');
+        expect(outerSpan).toHaveClass("balance");
+        expect(outerSpan).toHaveTextContent("SEIZED x5");
       });
 
-      it('maintains proper nesting structure for different heights', () => {
+      it("applies balanceBigger class when height is 650", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 3,
           isLoading: false,
           error: null,
         });
-
         const { container } = renderWithProviders(
-          <NFTImageBalance
-            {...defaultProps}
-            height={650}
-            showOwnedIfLoggedIn={false}
-          />
+          <NFTImageBalance {...defaultProps} height={650} />
         );
-        
-        const outerSpan = container.querySelector('span.balance.balanceBigger');
+        const outerSpan = container.querySelector("span.balance.balanceBigger");
         expect(outerSpan).toBeInTheDocument();
-        
-        const innerSpan = outerSpan?.querySelector('span');
-        expect(innerSpan).toBeInTheDocument();
-        expect(innerSpan).toHaveTextContent('SEIZED x3');
+        expect(outerSpan).toHaveTextContent("SEIZED x3");
       });
     });
   });

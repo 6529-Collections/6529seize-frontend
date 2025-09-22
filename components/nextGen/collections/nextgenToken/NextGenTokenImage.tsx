@@ -245,10 +245,12 @@ export function NextGenTokenImage(
           <Image
             quality={100}
             priority
-            loading={"eager"}
-            width="290"
-            height="380"
+            unoptimized
+            width="0"
+            height="0"
             style={{
+              height: "auto",
+              width: "auto",
               maxHeight: "100%",
               maxWidth: "100%",
             }}
