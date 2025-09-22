@@ -15,7 +15,8 @@ import {
   type EnsPreview,
 } from "./types";
 
-const RECORD_LABELS: Readonly<Record<string, string>> = {
+type RecordKey = keyof EnsNamePreview["records"];
+const RECORD_LABELS: Readonly<Record<RecordKey, string>> = {
   url: "Website",
   email: "Email",
   "com.twitter": "Twitter",
@@ -113,8 +114,9 @@ const renderContenthash = (
 const renderRecords = (
   records: EnsNamePreview["records"]
 ): ReactElement | null => {
-  const entries = Object.entries(RECORD_LABELS)
-    .map(([key, label]) => {
+  const entries = (Object.keys(RECORD_LABELS) as RecordKey[])
+    .map((key) => {
+      const label = RECORD_LABELS[key];
       const value = records[key];
       if (!value) {
         return null;
