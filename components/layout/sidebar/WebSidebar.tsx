@@ -92,10 +92,7 @@ function WebSidebar({
               }`}
             >
               {!shouldShowCollapsed && (
-                <Link
-                  href="/"
-                  className="tw-flex tw-items-center tw-ml-1.5"
-                >
+                <Link href="/" className="tw-flex tw-items-center tw-ml-1.5">
                   <Image
                     unoptimized
                     loading="eager"
@@ -139,7 +136,9 @@ function WebSidebar({
             </div>
 
             {/* QR Code Generator */}
-            <HeaderShare isCollapsed={shouldShowCollapsed} />
+            <div className="tw-mt-1">
+              <HeaderShare isCollapsed={shouldShowCollapsed} />
+            </div>
 
             <WebSidebarUser
               isCollapsed={shouldShowCollapsed}

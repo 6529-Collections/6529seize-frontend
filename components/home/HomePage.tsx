@@ -26,6 +26,7 @@ interface HomePageProps {
   readonly featuredNextgen: NextGenCollection;
   readonly initialActivityData: InitialActivityData;
   readonly initialTokens: NextGenToken[];
+  readonly isMemeMintingActive: boolean;
 }
 
 export default function HomePage({
@@ -33,6 +34,7 @@ export default function HomePage({
   featuredNextgen,
   initialActivityData,
   initialTokens,
+  isMemeMintingActive,
 }: HomePageProps) {
   const { isApp } = useDeviceInfo();
   const { isAuthenticated } = useSeizeConnectContext();
