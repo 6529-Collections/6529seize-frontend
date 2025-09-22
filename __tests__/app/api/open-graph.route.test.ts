@@ -23,6 +23,20 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
+const ensModule = {
+  detectEnsTarget: jest.fn(() => null),
+  fetchEnsPreview: jest.fn(),
+  EnsPreviewError: class extends Error {
+    status: number;
+    constructor(message: string, status = 400) {
+      super(message);
+      this.status = status;
+    }
+  },
+};
+
+jest.mock("../../../app/api/open-graph/ens", () => ensModule);
+
 const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
@@ -41,6 +55,7 @@ describe("open-graph API route", () => {
     jest.clearAllMocks();
     global.fetch = originalFetch;
     nextResponseJson.mockClear();
+    ensModule.detectEnsTarget.mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -167,5 +182,25 @@ describe("open-graph API route", () => {
       html,
       "text/html"
     );
+  });
+
+  it("handles ENS previews when detected", async () => {
+    const previewPayload = { type: "ens.name", name: "vitalik.eth" };
+    ensModule.detectEnsTarget.mockReturnValue({ kind: "name", input: "vitalik.eth" });
+    ensModule.fetchEnsPreview.mockResolvedValue(previewPayload);
+
+    const request = {
+      nextUrl: new URL("https://app.local/api/open-graph?url=vitalik.eth"),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(previewPayload);
+    expect(ensModule.fetchEnsPreview).toHaveBeenCalledWith({
+      kind: "name",
+      input: "vitalik.eth",
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 });

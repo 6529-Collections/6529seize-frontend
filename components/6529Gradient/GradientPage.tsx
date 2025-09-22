@@ -18,14 +18,11 @@ import { NFT } from "@/entities/INFT";
 import { Transaction } from "@/entities/ITransaction";
 import {
   areEqualAddresses,
-  enterArtFullScreen,
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
-import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
@@ -237,18 +234,6 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
           </>
         )}
       </>
-    );
-  }
-
-  function printFullScreen() {
-    return (
-      <FontAwesomeIcon
-        icon={faExpandAlt}
-        className={styles.fullScreen}
-        onClick={() =>
-          fullscreenElementId && enterArtFullScreen(fullscreenElementId)
-        }
-      />
     );
   }
 
