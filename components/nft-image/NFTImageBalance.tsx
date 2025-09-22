@@ -1,56 +1,59 @@
 "use client";
 
-import { useAuth } from "../auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
+import { useNftBalance } from "@/hooks/useNftBalance";
 import styles from "./NFTImage.module.scss";
-import { useNftBalance } from "../../hooks/useNftBalance";
 
 interface Props {
   readonly contract: string;
   readonly tokenId: number;
-  readonly showOwnedIfLoggedIn: boolean;
-  readonly showUnseizedIfLoggedIn: boolean;
   readonly height: 300 | 650 | "full";
 }
 
-export default function NFTImageBalance({
-  contract,
-  tokenId,
-  showOwnedIfLoggedIn,
-  showUnseizedIfLoggedIn,
-  height,
-}: Props) {
+export default function NFTImageBalance({ contract, tokenId, height }: Props) {
   const { connectedProfile } = useAuth();
 
-  const { balance: nftBalance, error } = useNftBalance({
+  const {
+    balance: nftBalance,
+    isLoading,
+    error,
+  } = useNftBalance({
     consolidationKey: connectedProfile?.consolidation_key ?? null,
     contract,
     tokenId,
   });
 
-  if (error) {
-    console.error("Failed to fetch NFT balance:", error);
+  const printBalance = () => {
+    if (nftBalance > 0) {
+      return printBalanceSpan(`SEIZED x${nftBalance}`);
+    } else {
+      return printBalanceSpan("UNSEIZED");
+    }
+  };
+
+  const printBalanceSpan = (b: string) => {
+    return (
+      <span
+        className={`${styles.balance}  ${
+          height === 650 ? styles.balanceBigger : ""
+        } `}>
+        {b}
+      </span>
+    );
+  };
+
+  if (!connectedProfile) {
+    return null;
   }
 
-  return (
-    <>
-      {nftBalance > 0 && (
-        <span
-          className={`${styles.balance}  ${
-            height === 650 ? styles.balanceBigger : ""
-          } `}
-        >
-          <span>
-            SEIZED
-            {!showOwnedIfLoggedIn && connectedProfile ? ` x${nftBalance}` : ""}
-          </span>
-        </span>
-      )}
-      {showUnseizedIfLoggedIn && connectedProfile && nftBalance === 0 && (
-        <span className={`${styles.balance}`}>UNSEIZED</span>
-      )}
-      {showUnseizedIfLoggedIn && connectedProfile && nftBalance === -1 && (
-        <span className={`${styles.balance}`}>...</span>
-      )}
-    </>
-  );
+  if (isLoading) {
+    return printBalanceSpan("...");
+  }
+
+  if (error) {
+    console.error("Failed to fetch NFT balance:", error);
+    return printBalanceSpan("N/A");
+  }
+
+  return printBalance();
 }

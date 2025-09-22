@@ -8,11 +8,10 @@ import { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import styles from "@/styles/Home.module.scss";
-import type { Metadata } from "next";
+import { Metadata } from "next";
 
 export default async function Page() {
   const headers = await getAppCommonHeaders();
-
   // First, fetch featured data and activity data in parallel
   const [featuredNft, featuredNextgen, initialActivityData] = await Promise.all(
     [
