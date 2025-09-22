@@ -93,11 +93,20 @@ const cache = new LruTtlCache<string, Preview>({
   ttlMs: ttlMinutes * 60 * 1000,
 });
 
-const normaliseSlashes = (s: string) => s.replace(/^\/+|\/+$/g, "");
+const trimSlashes = (s: string): string => {
+  let start = 0;
+  let end = s.length;
+
+  // '/' === charCode 47
+  while (start < end && s.charCodeAt(start) === 47) start++;
+  while (end > start && s.charCodeAt(end - 1) === 47) end--;
+
+  return s.slice(start, end);
+};
 
 const USER_AGENT =
   "6529seize-pepe-card/1.0 (+https://6529.io; fetching pepe.wtf previews)";
-const IPFS_GATEWAY = normaliseSlashes(
+const IPFS_GATEWAY = trimSlashes(
   process.env.IPFS_GATEWAY || "https://ipfs.io/ipfs/"
 );
 
@@ -234,7 +243,10 @@ function deepFindAll(
   return results;
 }
 
-async function scrapeNextData(url: string): Promise<unknown | null> {
+// JSON value type for parsed Next.js __NEXT_DATA__
+type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+
+async function scrapeNextData(url: string): Promise<Json> {
   const html = await fetchText(url, 5000);
   if (!html) {
     return null;
@@ -247,7 +259,7 @@ async function scrapeNextData(url: string): Promise<unknown | null> {
   }
 
   try {
-    return JSON.parse(raw) as unknown;
+    return JSON.parse(raw) as Json;
   } catch {
     return null;
   }

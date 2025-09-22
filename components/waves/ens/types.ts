@@ -1,3 +1,14 @@
+export const TEXT_RECORD_KEYS = [
+  "url",
+  "email",
+  "com.twitter",
+  "org.telegram",
+  "com.github",
+  "description",
+] as const;
+
+export type TextRecordKey = (typeof TEXT_RECORD_KEYS)[number];
+
 export interface EnsContenthash {
   readonly protocol: "ipfs" | "ipns" | "arweave" | "other";
   readonly decoded: string | null;
@@ -26,7 +37,7 @@ export interface EnsNamePreview {
   readonly address: string | null;
   readonly resolver: string | null;
   readonly avatarUrl: string | null;
-  readonly records: Partial<Record<string, string | null>>;
+  readonly records: Partial<Record<TextRecordKey, string | null>>;
   readonly contenthash: EnsContenthash | null;
   readonly ownership: EnsOwnership;
   readonly links: EnsLinks;
@@ -50,10 +61,7 @@ export interface EnsContentPreview {
   readonly links: EnsLinks;
 }
 
-export type EnsPreview =
-  | EnsNamePreview
-  | EnsAddressPreview
-  | EnsContentPreview;
+export type EnsPreview = EnsNamePreview | EnsAddressPreview | EnsContentPreview;
 
 export const isEnsPreview = (value: unknown): value is EnsPreview => {
   if (!value || typeof value !== "object") {
@@ -72,6 +80,8 @@ export const isEnsNamePreview = (value: unknown): value is EnsNamePreview => {
   return isEnsPreview(value) && value.type === "ens.name";
 };
 
-export const isEnsAddressPreview = (value: unknown): value is EnsAddressPreview => {
+export const isEnsAddressPreview = (
+  value: unknown
+): value is EnsAddressPreview => {
   return isEnsPreview(value) && value.type === "ens.address";
 };
