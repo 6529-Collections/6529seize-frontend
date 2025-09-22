@@ -13,7 +13,7 @@ jest.mock("viem", () => {
     ...actual,
     createPublicClient: jest.fn(() => mockPublicClient),
     fallback: jest.fn((value) => value),
-    http: jest.fn((...args) => args.length > 0 ? { url: args[0] } : {}),
+    http: jest.fn((...args) => (args.length > 0 ? { url: args[0] } : {})),
   };
 });
 
@@ -50,21 +50,23 @@ describe("ENS utilities", () => {
       kind: "name",
       input: "vitalik.eth",
     });
-    expect(
-      detectEnsTarget("https://app.ens.domains/name/alice.eth")
-    ).toEqual({
+    expect(detectEnsTarget("https://app.ens.domains/name/alice.eth")).toEqual({
       kind: "name",
       input: "alice.eth",
     });
   });
 
   it("detects ENS addresses", () => {
-    expect(detectEnsTarget("0x1234567890abcdef1234567890abcdef12345678")).toEqual({
+    expect(
+      detectEnsTarget("0x1234567890abcdef1234567890abcdef12345678")
+    ).toEqual({
       kind: "address",
       input: getAddress("0x1234567890abcdef1234567890abcdef12345678"),
     });
     expect(
-      detectEnsTarget("https://etherscan.io/address/0x0000000000000000000000000000000000000001")
+      detectEnsTarget(
+        "https://etherscan.io/address/0x0000000000000000000000000000000000000001"
+      )
     ).toEqual({
       kind: "address",
       input: getAddress("0x0000000000000000000000000000000000000001"),
@@ -79,40 +81,53 @@ describe("ENS utilities", () => {
 
     mockPublicClient.getEnsResolver.mockResolvedValue(resolverAddress);
     mockPublicClient.getEnsAddress.mockResolvedValue(ownerAddress);
-    mockPublicClient.getEnsAvatar.mockResolvedValue("https://example.com/avatar.png");
-    mockPublicClient.getEnsText.mockImplementation(async ({ key }: { key: string }) => {
-      if (key === "url") {
-        return "example.com";
+    mockPublicClient.getEnsAvatar.mockResolvedValue(
+      "https://example.com/avatar.png"
+    );
+    mockPublicClient.getEnsText.mockImplementation(
+      async ({ key }: { key: string }) => {
+        if (key === "url") {
+          return "example.com";
+        }
+        if (key === "com.twitter") {
+          return "vitalik";
+        }
+        if (key === "description") {
+          return "  Leading builder  ";
+        }
+        return null;
       }
-      if (key === "com.twitter") {
-        return "vitalik";
-      }
-      if (key === "description") {
-        return "  Leading builder  ";
-      }
-      return null;
-    });
+    );
 
-    mockPublicClient.readContract.mockImplementation(({ address, functionName }: any) => {
-      if (address === resolverAddress && functionName === "contenthash") {
-        return encodedContenthash;
+    mockPublicClient.readContract.mockImplementation(
+      ({ address, functionName }: any) => {
+        if (address === resolverAddress && functionName === "contenthash") {
+          return encodedContenthash;
+        }
+        if (
+          functionName === "owner" &&
+          typeof address === "string" &&
+          address.endsWith("d2e1e")
+        ) {
+          return "0x060f1546642E67c485D56248201feA2f9AB1803C";
+        }
+        if (functionName === "ownerOf") {
+          return registrantAddress;
+        }
+        if (functionName === "nameExpires") {
+          return BigInt(1_700_000_000);
+        }
+        if (functionName === "getData") {
+          return [ownerAddress, 0, BigInt(1_700_000_100)];
+        }
+        throw new Error(`Unexpected readContract call for ${functionName}`);
       }
-      if (functionName === "owner" && typeof address === "string" && address.endsWith("d2e1e")) {
-        return "0x060f1546642E67c485D56248201feA2f9AB1803C";
-      }
-      if (functionName === "ownerOf") {
-        return registrantAddress;
-      }
-      if (functionName === "nameExpires") {
-        return BigInt(1_700_000_000);
-      }
-      if (functionName === "getData") {
-        return [ownerAddress, 0, BigInt(1_700_000_100)];
-      }
-      throw new Error(`Unexpected readContract call for ${functionName}`);
-    });
+    );
 
-    const preview = await fetchEnsPreview({ kind: "name", input: "vitalik.eth" });
+    const preview = await fetchEnsPreview({
+      kind: "name",
+      input: "vitalik.eth",
+    });
 
     expect(preview.type).toBe("ens.name");
     expect(preview.name).toBe("vitalik.eth");
@@ -130,7 +145,9 @@ describe("ENS utilities", () => {
     const address = "0x4444444444444444444444444444444444444444";
     mockPublicClient.getEnsName.mockResolvedValue("alice.eth");
     mockPublicClient.getEnsAddress.mockResolvedValue(address);
-    mockPublicClient.getEnsAvatar.mockResolvedValue("https://example.com/avatar.png");
+    mockPublicClient.getEnsAvatar.mockResolvedValue(
+      "https://example.com/avatar.png"
+    );
 
     const preview = await fetchEnsPreview({
       kind: "address",
@@ -146,6 +163,6 @@ describe("ENS utilities", () => {
   it("throws for invalid names", async () => {
     await expect(
       fetchEnsPreview({ kind: "name", input: "not a name" })
-    ).rejects.toThrow("Invalid ENS name provided.");
+    ).rejects.toThrow(/^Invalid ENS name provided/);
   });
 });
