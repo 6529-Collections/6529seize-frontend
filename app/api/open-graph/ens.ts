@@ -563,7 +563,7 @@ async function loadOwnership(
     isWrapped,
     registrant,
     expiry,
-    ...(gracePeriodEnds !== null ? { gracePeriodEnds } : {}),
+    ...(gracePeriodEnds === null ? {} : { gracePeriodEnds }),
   };
 
   storeCache(ownershipCache, cacheKey, ownership, OWNERSHIP_CACHE_TTL_MS);

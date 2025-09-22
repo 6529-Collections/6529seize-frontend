@@ -327,7 +327,7 @@ export default function ManifoldMintingWidget(
         }}
         type="number"
         value={mintCount}
-        onChange={(e) => setMintCount(parseInt(e.target.value))}
+        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}
       />
     );
   }
