@@ -108,6 +108,8 @@ const nextConfig = {
   webpack: (config, { dev, isServer }) => {
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
+    config.resolve.alias["@react-native-async-storage/async-storage"] = false;
+    config.resolve.alias["react-native"] = false;
 
     // Fix source maps for Chrome DevTools
     if (!dev && !isServer) {
@@ -160,6 +162,8 @@ const nextConfig = {
     resolveAlias: {
       canvas: "./stubs/empty.js",
       encoding: "./stubs/empty.js",
+      "@react-native-async-storage/async-storage": "./stubs/empty.js",
+      "react-native": "./stubs/empty.js",
     },
   },
 };
