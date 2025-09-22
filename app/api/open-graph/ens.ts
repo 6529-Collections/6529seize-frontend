@@ -1,5 +1,3 @@
-import { toUnicode } from "node:punycode";
-
 import {
   EnsAddressPreview,
   EnsContenthash,
@@ -10,7 +8,9 @@ import {
   TEXT_RECORD_KEYS,
   TextRecordKey,
 } from "@/components/waves/ens/types";
+import { ens_normalize } from "@adraffy/ens-normalize";
 import * as contentHash from "@ensdomains/content-hash";
+import { toUnicode } from "punycode";
 import {
   createPublicClient,
   fallback,
@@ -22,7 +22,7 @@ import {
   type Hex,
 } from "viem";
 import { mainnet } from "viem/chains";
-import { labelhash, namehash, normalize } from "viem/ens";
+import { labelhash, namehash } from "viem/ens";
 
 const CHAIN_ID = 1;
 
@@ -252,19 +252,13 @@ function normalizeEnsName(name: string): {
 } {
   console.log("normalizeEnsName", `[${name}]`);
   try {
-    const normalized = normalize(name);
+    const normalized = ens_normalize(name);
     console.log("after normalize", `[${name}]`, `[${normalized}]`);
-    let display: string;
-    try {
-      display =
-        typeof toUnicode === "function" ? toUnicode(normalized) : normalized;
-    } catch {
-      display = normalized;
-    }
+    const display = toUnicode(normalized);
     console.log("after toUnicode", `[${name}]`, `[${display}]`);
     return { normalized, display };
   } catch (error: any) {
-    console.error("normalizeEnsName error", `[${name}]`, error);
+    console.error("normalizeEnsName error", error);
     let message = "Invalid ENS name provided";
     if (error?.message) {
       message = `${message}: ${error.message}`;
