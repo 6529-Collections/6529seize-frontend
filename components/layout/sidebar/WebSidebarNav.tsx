@@ -1,32 +1,27 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { AboutSection } from "@/enums";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
-import { useCollectionsNavigation } from "@/hooks/useCollectionsNavigation";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
-import Squares2X2Icon from "@/components/common/icons/Squares2X2Icon";
 import BellIcon from "@/components/common/icons/BellIcon";
-import UsersIcon from "@/components/common/icons/UsersIcon";
-import {
-  WrenchIcon,
-  DocumentTextIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
-import { UserIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, UserIcon } from "@heroicons/react/24/outline";
+import { useSidebarSections, useSectionMap } from "@/hooks/useSidebarSections";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarExpandable from "./nav/WebSidebarExpandable";
-import { SidebarSection } from "@/components/navigation/navTypes";
-import { COLLECTIONS_ROUTES } from "@/constants/sidebar";
+import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
 import { useKey } from "react-use";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
@@ -34,14 +29,10 @@ import HeaderSearchModal from "@/components/header/header-search/HeaderSearchMod
 
 interface WebSidebarNavProps {
   isCollapsed: boolean;
-  isCollectionsOpen?: boolean;
-  onCollectionsClick?: () => void;
 }
 
 export default function WebSidebarNav({
   isCollapsed = false,
-  isCollectionsOpen = false,
-  onCollectionsClick,
 }: WebSidebarNavProps) {
   const pathname = usePathname();
   const capacitor = useCapacitor();
@@ -49,8 +40,6 @@ export default function WebSidebarNav({
   const { address } = useSeizeConnectContext();
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
-  const { handleCollectionsClick } = useCollectionsNavigation();
-
   // Notification indicators
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
@@ -73,177 +62,63 @@ export default function WebSidebarNav({
     { event: "keydown" }
   );
 
-  // Simple profile path computation (no need for memoization)
+  // Profile path computation
   const profilePath = connectedProfile?.handle
     ? `/${connectedProfile.handle}`
     : address
     ? `/${address}`
     : null;
 
-  // Expandable sections (memoized as it has conditional logic)
-  const sections = useMemo<SidebarSection[]>(
-    () => [
-      {
-        key: "network",
-        name: "Network",
-        icon: UsersIcon,
-        items: [
-          { name: "Identities", href: "/network" },
-          { name: "Activity", href: "/network/activity" },
-          { name: "Groups", href: "/network/groups" },
-          { name: "NFT Activity", href: "/nft-activity" },
-          { name: "Memes Calendar", href: "/meme-calendar" },
-        ],
-        subsections: [
-          {
-            name: "Metrics",
-            items: [
-              { name: "Definitions", href: "/network/metrics" },
-              { name: "Network Stats", href: "/network/stats" },
-              { name: "Levels", href: "/network/levels" },
-            ],
-          },
-        ],
-      },
-      {
-        key: "tools",
-        name: "Tools",
-        icon: WrenchIcon,
-        items: [],
-        subsections: [
-          {
-            name: "NFT Delegation",
-            items: [
-              {
-                name: "Delegation Center",
-                href: "/delegation/delegation-center",
-              },
-              {
-                name: "Wallet Architecture",
-                href: "/delegation/wallet-architecture",
-              },
-              { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
-              {
-                name: "Consolidation Use Cases",
-                href: "/delegation/consolidation-use-cases",
-              },
-              { name: "Wallet Checker", href: "/delegation/wallet-checker" },
-            ],
-          },
-          {
-            name: "The Memes Tools",
-            items: [
-              ...(!capacitor.isIos || country === "US"
-                ? [
-                    {
-                      name: "Memes Subscriptions",
-                      href: "/tools/subscriptions-report",
-                    },
-                  ]
-                : []),
-              { name: "Memes Accounting", href: "/meme-accounting" },
-              { name: "Memes Gas", href: "/meme-gas" },
-            ],
-          },
-          {
-            name: "Other Tools",
-            items: [
-              ...(appWalletsSupported
-                ? [{ name: "App Wallets", href: "/tools/app-wallets" }]
-                : []),
-              { name: "API", href: "/tools/api" },
-              { name: "EMMA", href: "/emma" },
-              { name: "Block Finder", href: "/meme-blocks" },
-              { name: "Open Data", href: "/open-data" },
-            ],
-          },
-        ],
-      },
-      {
-        key: "about",
-        name: "About",
-        icon: DocumentTextIcon,
-        items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
-        subsections: [
-          {
-            name: "NFTs",
-            items: [
-              { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
-              ...(!capacitor.isIos || country === "US"
-                ? [
-                    {
-                      name: "Subscriptions",
-                      href: `/about/${AboutSection.SUBSCRIPTIONS}`,
-                    },
-                  ]
-                : []),
-              { name: "Minting", href: `/about/${AboutSection.MINTING}` },
-              {
-                name: "Nakamoto Threshold",
-                href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-              },
-              { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
-              { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
-            ],
-          },
-          {
-            name: "NFT Delegation",
-            items: [
-              {
-                name: "About NFTD",
-                href: `/about/${AboutSection.NFT_DELEGATION}`,
-              },
-              {
-                name: "Primary Address",
-                href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
-              },
-            ],
-          },
-          {
-            name: "6529 Capital",
-            items: [
-              { name: "About 6529 Capital", href: "/capital" },
-              { name: "Company Portfolio", href: "/capital/company-portfolio" },
-              { name: "NFT Fund", href: "/capital/fund" },
-            ],
-          },
-          {
-            name: "Support",
-            items: [
-              { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
-              { name: "Apply", href: `/about/${AboutSection.APPLY}` },
-              { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
-            ],
-          },
-          {
-            name: "Resources",
-            items: [
-              {
-                name: "Data Decentralization",
-                href: `/about/data-decentralization`,
-              },
-              { name: "ENS", href: `/about/${AboutSection.ENS}` },
-              { name: "License", href: `/about/${AboutSection.LICENSE}` },
-              {
-                name: "Release Notes",
-                href: `/about/${AboutSection.RELEASE_NOTES}`,
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    [appWalletsSupported, capacitor.isIos, country]
+  // Use custom hook for sections
+  const sections = useSidebarSections(
+    appWalletsSupported,
+    capacitor.isIos,
+    country
   );
 
+  // Create section map for efficient lookups
+  const sectionMap = useSectionMap(sections);
+
+  // Get specific sections from map
+  const networkSection = sectionMap.get("network");
+  const collectionsSection = sectionMap.get("collections");
+
+  // Click-based submenu state for collapsed sidebar
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const [submenuAnchor, setSubmenuAnchor] = useState<HTMLElement | null>(null);
+
+  // Handle click on collapsed sidebar section
+  const handleCollapsedClick = useCallback(
+    (sectionKey: string, event: React.MouseEvent) => {
+      if (!isCollapsed) return;
+
+      const target = event.currentTarget as HTMLElement;
+
+      // Toggle submenu
+      if (activeSubmenu === sectionKey) {
+        setActiveSubmenu(null);
+        setSubmenuAnchor(null);
+      } else {
+        setActiveSubmenu(sectionKey);
+        setSubmenuAnchor(target);
+      }
+    },
+    [isCollapsed, activeSubmenu]
+  );
+
+  const closeSubmenu = useCallback(() => {
+    setActiveSubmenu(null);
+    setSubmenuAnchor(null);
+  }, []);
+
   // Toggle section expansion
-  const toggleSection = (key: string) => {
+  const toggleSection = useCallback((key: string) => {
     setExpandedSections((prev) =>
       prev.includes(key)
         ? prev.filter((section) => section !== key)
         : [...prev, key]
     );
-  };
+  }, []);
 
   // Auto-manage expanded sections based on current route
   useEffect(() => {
@@ -271,6 +146,20 @@ export default function WebSidebarNav({
       setExpandedSections([]);
     }
   }, [pathname, sections]); // Run when pathname changes
+
+  // Get the section for the active submenu
+  const activeSection = sections.find(s => s.key === activeSubmenu);
+
+  // Close submenu when sidebar expands or pathname changes
+  useEffect(() => {
+    if (!isCollapsed) {
+      closeSubmenu();
+    }
+  }, [isCollapsed, closeSubmenu]);
+
+  useEffect(() => {
+    closeSubmenu();
+  }, [pathname, closeSubmenu]);
 
   return (
     <>
@@ -316,29 +205,44 @@ export default function WebSidebarNav({
           </li>
 
           {/* Network */}
-          <li>
-            <WebSidebarExpandable
-              section={sections.find((s) => s.key === "network")!}
-              expanded={expandedSections.includes("network")}
-              onToggle={() => toggleSection("network")}
-              collapsed={isCollapsed}
-              pathname={pathname}
-            />
-          </li>
+          {networkSection && (
+            <li>
+              <WebSidebarExpandable
+                section={networkSection}
+                expanded={expandedSections.includes("network")}
+                onToggle={(e?: React.MouseEvent) => {
+                  if (isCollapsed && e) {
+                    handleCollapsedClick("network", e);
+                  } else if (!isCollapsed) {
+                    toggleSection("network");
+                  }
+                }}
+                collapsed={isCollapsed}
+                pathname={pathname}
+                data-section="network"
+              />
+            </li>
+          )}
 
           {/* Collections */}
-          <li>
-            <WebSidebarNavItem
-              onClick={() => handleCollectionsClick(onCollectionsClick)}
-              icon={Squares2X2Icon}
-              active={
-                isCollectionsOpen ||
-                COLLECTIONS_ROUTES.some((route) => pathname?.startsWith(route))
-              }
-              collapsed={isCollapsed}
-              label="Collections"
-            />
-          </li>
+          {collectionsSection && (
+            <li>
+              <WebSidebarExpandable
+                section={collectionsSection}
+                expanded={expandedSections.includes("collections")}
+                onToggle={(e?: React.MouseEvent) => {
+                  if (isCollapsed && e) {
+                    handleCollapsedClick("collections", e);
+                  } else if (!isCollapsed) {
+                    toggleSection("collections");
+                  }
+                }}
+                collapsed={isCollapsed}
+                pathname={pathname}
+                data-section="collections"
+              />
+            </li>
+          )}
 
           {/* Notifications */}
           <li>
@@ -382,15 +286,22 @@ export default function WebSidebarNav({
 
           {/* Tools and About - Expandable */}
           {sections
-            .filter((section) => section.key !== "network")
+            .filter((section) => section.key !== "network" && section.key !== "collections")
             .map((section) => (
               <li key={section.key}>
                 <WebSidebarExpandable
                   section={section}
                   expanded={expandedSections.includes(section.key)}
-                  onToggle={() => toggleSection(section.key)}
+                  onToggle={(e?: React.MouseEvent) => {
+                    if (isCollapsed && e) {
+                      handleCollapsedClick(section.key, e);
+                    } else if (!isCollapsed) {
+                      toggleSection(section.key);
+                    }
+                  }}
                   collapsed={isCollapsed}
                   pathname={pathname}
+                  data-section={section.key}
                 />
               </li>
             ))}
@@ -407,6 +318,21 @@ export default function WebSidebarNav({
             onClicked={(e) => e.stopPropagation()}
           >
             <HeaderSearchModal onClose={() => setIsSearchOpen(false)} />
+          </CommonAnimationOpacity>
+        )}
+      </CommonAnimationWrapper>
+      <CommonAnimationWrapper mode="sync" initial={true}>
+        {activeSubmenu && activeSection && submenuAnchor && (
+          <CommonAnimationOpacity
+            key={`submenu-${activeSubmenu}`}
+            elementClasses=""
+          >
+            <WebSidebarSubmenu
+              section={activeSection}
+              anchor={submenuAnchor}
+              pathname={pathname}
+              onClose={closeSubmenu}
+            />
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>

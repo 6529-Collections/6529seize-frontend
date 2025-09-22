@@ -1,15 +1,15 @@
 export const SIDEBAR_WIDTHS = {
-  EXPANDED: '18rem',      // tw-w-72
-  COLLAPSED: '4rem',      // tw-w-16 
-  SUBMENU: '16rem',       // Collections submenu width
+  EXPANDED: "18rem",
+  COLLAPSED: "4rem",
+  SUBMENU: "16rem",
 } as const;
 
 export const SIDEBAR_BREAKPOINT = 1024; // lg breakpoint
 
 export const COLLECTIONS_ROUTES = [
-  '/the-memes',
-  '/meme-lab', 
-  '/rememes',
-  '/6529-gradient',
-  '/nextgen',
+  "/the-memes",
+  "/meme-lab",
+  "/rememes",
+  "/6529-gradient",
+  "/nextgen",
 ] as const;

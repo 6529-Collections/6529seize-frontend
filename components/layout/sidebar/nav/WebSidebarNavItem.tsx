@@ -7,7 +7,7 @@ type IconComp = React.ComponentType<{ className?: string }>;
 
 interface SidebarPrimaryItemProps {
   readonly href?: string;
-  readonly onClick?: () => void;
+  readonly onClick?: (e?: React.MouseEvent) => void;
   readonly icon?: IconComp;
   readonly iconSizeClass?: string;
   readonly label: string;
@@ -17,6 +17,7 @@ interface SidebarPrimaryItemProps {
   readonly ariaControls?: string;
   readonly rightSlot?: React.ReactNode;
   readonly hasIndicator?: boolean;
+  readonly 'data-section'?: string;
 }
 
 function WebSidebarNavItem({
@@ -31,6 +32,7 @@ function WebSidebarNavItem({
   ariaControls,
   rightSlot,
   hasIndicator,
+  'data-section': dataSection,
 }: SidebarPrimaryItemProps) {
   const content = (
     <>
@@ -64,8 +66,8 @@ function WebSidebarNavItem({
           : "tw-justify-start tw-px-3 tw-gap-4"
       } ${
         active
-          ? "tw-text-white desktop-hover:hover:tw-text-white tw-bg-transparent active:tw-bg-transparent"
-          : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent"
+          ? "tw-text-white tw-bg-iron-900 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-900 active:tw-bg-iron-900"
+          : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-bg-transparent"
       }`}
       aria-label={collapsed ? label : undefined}
       aria-current={active ? "page" : undefined}
@@ -78,19 +80,20 @@ function WebSidebarNavItem({
   ) : (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(e) => onClick?.(e)}
       className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base ${
         collapsed
           ? "tw-justify-center tw-px-2"
           : "tw-justify-start tw-px-3 tw-gap-4"
       } ${
         active
-          ? "tw-text-white desktop-hover:hover:tw-text-white tw-bg-transparent active:tw-bg-transparent"
-          : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent"
+          ? "tw-text-white tw-bg-iron-900 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-900 active:tw-bg-iron-900"
+          : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-bg-transparent"
       }`}
       aria-label={collapsed ? label : undefined}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}
+      data-section={dataSection}
       data-tooltip-id="sidebar-tooltip"
       data-tooltip-content={label}
       data-tooltip-hidden={!collapsed}

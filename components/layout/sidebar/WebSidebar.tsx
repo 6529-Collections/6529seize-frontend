@@ -1,23 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import WebSidebarNav from "./WebSidebarNav";
 import WebSidebarUser from "./WebSidebarUser";
-import CollectionsSubmenu from "./CollectionsSubmenu";
-import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../hooks/useIdentity";
 import HeaderShare from "../../header/share/HeaderShare";
+import WebSidebarHeader from "./WebSidebarHeader";
 
 interface WebSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
-  isCollectionsSubmenuOpen: boolean;
-  onCollectionsSubmenuToggle: () => void;
-  onCollectionsSubmenuClose: () => void;
   isMobile: boolean;
   isOffcanvasOpen: boolean;
   onCloseOffcanvas: () => void;
@@ -27,9 +21,6 @@ interface WebSidebarProps {
 function WebSidebar({
   isCollapsed,
   onToggle,
-  isCollectionsSubmenuOpen,
-  onCollectionsSubmenuToggle,
-  onCollectionsSubmenuClose,
   isMobile,
   isOffcanvasOpen,
   onCloseOffcanvas,
@@ -55,11 +46,10 @@ function WebSidebar({
     return () => window.removeEventListener("keydown", onKey);
   }, [isMobile, isOffcanvasOpen, onCloseOffcanvas]);
 
-  const handleCollectionsClick = () => onCollectionsSubmenuToggle();
-
   // Sidebar is expanded on mobile when offcanvas is open
   const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
   const isDialog = isMobile && isOffcanvasOpen;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -82,56 +72,18 @@ function WebSidebar({
           className="tw-relative tw-z-50 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
+          ref={scrollContainerRef}
         >
-          <div className="tw-flex tw-flex-col tw-h-full">
-            <div
-              className={`tw-shrink-0 tw-py-3 ${
-                shouldShowCollapsed
-                  ? "tw-flex tw-flex-col tw-items-center tw-gap-y-3 tw-px-2"
-                  : "tw-flex tw-items-center tw-justify-between tw-px-4"
-              }`}
-            >
-              {!shouldShowCollapsed && (
-                <Link href="/" className="tw-flex tw-items-center tw-ml-1.5">
-                  <Image
-                    unoptimized
-                    loading="eager"
-                    priority
-                    alt="6529Seize"
-                    src="/6529.png"
-                    className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-transition-all tw-duration-100 hover:tw-scale-[1.02] hover:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.3)]"
-                    width={40}
-                    height={40}
-                  />
-                </Link>
-              )}
-
-              <button
-                type="button"
-                onClick={onToggle}
-                onMouseDown={(event) => event.preventDefault()}
-                className={`tw-group tw-size-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800/85 tw-border tw-border-iron-700/70 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-700/95 desktop-hover:hover:tw-border-iron-500/70 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]`}
-                aria-label={shouldShowCollapsed ? "Expand" : "Collapse"}
-                aria-expanded={!shouldShowCollapsed}
-                data-tooltip-id="sidebar-tooltip"
-                data-tooltip-content={
-                  shouldShowCollapsed ? "Expand" : "Collapse"
-                }
-              >
-                <ChevronDoubleLeftIcon
-                  strokeWidth={2.5}
-                  className={`tw-h-4 tw-w-4 tw-text-iron-200 group-hover:hover:tw-text-white tw-transition-all tw-duration-200 ${
-                    shouldShowCollapsed ? "tw-rotate-180" : ""
-                  }`}
-                />
-              </button>
-            </div>
+          <div className="tw-flex tw-flex-col tw-h-full tw-pt-3">
+            <WebSidebarHeader
+              collapsed={shouldShowCollapsed}
+              onToggle={onToggle}
+              tooltipId="sidebar-tooltip"
+            />
 
             <div className="tw-flex-1">
               <WebSidebarNav
                 isCollapsed={shouldShowCollapsed}
-                isCollectionsOpen={isCollectionsSubmenuOpen}
-                onCollectionsClick={handleCollectionsClick}
               />
             </div>
 
@@ -146,11 +98,6 @@ function WebSidebar({
             />
           </div>
 
-          <CollectionsSubmenu
-            isOpen={isCollectionsSubmenuOpen}
-            sidebarCollapsed={shouldShowCollapsed}
-            onClose={onCollectionsSubmenuClose}
-          />
         </div>
       </div>
       {!isTouchScreen && (
