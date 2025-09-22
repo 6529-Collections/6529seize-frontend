@@ -23,7 +23,7 @@ jest.mock("@ensdomains/content-hash", () => ({
   decode: jest.fn(() => ""),
 }));
 
-const ensModule = require("../../../app/api/open-graph/ens");
+const ensModule = require("@/app/api/open-graph/ens");
 
 const { getAddress } = jest.requireActual("viem");
 
