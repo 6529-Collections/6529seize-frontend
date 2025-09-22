@@ -303,7 +303,7 @@ export default function ManifoldMintingWidget(
           height: "100%",
         }}
         value={mintCount}
-        onChange={(e) => setMintCount(parseInt(e.target.value))}>
+        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}>
         <option value="" disabled>
           Select
         </option>
@@ -327,7 +327,7 @@ export default function ManifoldMintingWidget(
         }}
         type="number"
         value={mintCount}
-        onChange={(e) => setMintCount(parseInt(e.target.value))}
+        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}
       />
     );
   }
@@ -342,9 +342,9 @@ export default function ManifoldMintingWidget(
         <Row>
           <Col className="d-flex gap-3 align-items-center">
             Select Mint Count:
-            {available !== undefined
-              ? printMintCountDropdown(available)
-              : printMintCountInput()}
+            {available === undefined
+              ? printMintCountInput()
+              : printMintCountDropdown(available)}
             {mintCount > 0 && <b>{fromGWEI(getValue())} ETH</b>}
           </Col>
         </Row>
@@ -393,8 +393,8 @@ export default function ManifoldMintingWidget(
       return;
     }
 
-    const minted = merkleProofsMints.filter((m) => m).length;
-    const unminted = merkleProofsMints.filter((m) => !m).length;
+    const minted = merkleProofsMints.filter(Boolean).length;
+    const unminted = merkleProofsMints.filter((m) => !Boolean(m)).length;
 
     return (
       <>

@@ -251,7 +251,7 @@ test("does not render Magic Eden royalty image when me_price does not match toke
   const tokenWithMismatchedMEPrice = {
     ...token,
     price: 1.5,
-    me_price: 2.0,
+    me_price: 2,
     me_royalty: 750,
   };
   render(<NextGenTokenImage token={tokenWithMismatchedMEPrice} show_listing />);
@@ -430,11 +430,11 @@ describe("URL helper functions", () => {
   test("URL helper functions handle different token IDs correctly", () => {
     const tokenIds = [1, 999, 12345];
 
-    tokenIds.forEach((id) => {
+    for (const id of tokenIds) {
       expect(getNextGenImageUrl(id)).toContain(`/png/${id}`);
       expect(getNextGenIconUrl(id)).toContain(`/thumbnail/${id}`);
       expect(get8KUrl(id)).toContain(`/png8k/${id}`);
       expect(get16KUrl(id)).toContain(`/png16k/${id}`);
-    });
+    }
   });
 });

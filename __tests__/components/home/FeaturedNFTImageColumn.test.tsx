@@ -210,7 +210,7 @@ describe("FeaturedNFTImageColumn", () => {
     it("should generate correct link URL for different NFT IDs", () => {
       const testIds = [1, 100, 999, 1234];
 
-      testIds.forEach((id) => {
+      for (const id of testIds) {
         const nftWithId = {
           ...mockNFT,
           id,
@@ -228,7 +228,7 @@ describe("FeaturedNFTImageColumn", () => {
         const link = screen.getByTestId("mock-link");
         expect(link).toHaveAttribute("href", `/the-memes/${id}`);
         unmount();
-      });
+      }
     });
   });
 

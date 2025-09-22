@@ -42,7 +42,7 @@ const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
   ensureUrlIsPublic: jest.Mock;
 };
 
-const originalFetch = global.fetch;
+const originalFetch = globalThis.fetch;
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
 let GET: GetHandler;
 
@@ -53,13 +53,13 @@ beforeAll(async () => {
 describe("open-graph API route", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
     nextResponseJson.mockClear();
     ensModule.detectEnsTarget.mockReturnValue(null);
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   const createResponse = (
@@ -97,7 +97,9 @@ describe("open-graph API route", () => {
       headers: { location: "http://169.254.0.1/internal" },
     });
 
-    global.fetch = jest.fn().mockResolvedValueOnce(redirectResponse) as jest.MockedFunction<
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(redirectResponse) as jest.MockedFunction<
       typeof fetch
     >;
 
@@ -110,7 +112,7 @@ describe("open-graph API route", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(502);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
@@ -135,9 +137,11 @@ describe("open-graph API route", () => {
     const fetchMock = jest
       .fn()
       .mockResolvedValueOnce(redirectResponse)
-      .mockResolvedValueOnce(successResponse) as jest.MockedFunction<typeof fetch>;
+      .mockResolvedValueOnce(successResponse) as jest.MockedFunction<
+      typeof fetch
+    >;
 
-    global.fetch = fetchMock;
+    globalThis.fetch = fetchMock;
 
     const previewPayload = {
       requestUrl: "http://safe.example/article",
@@ -186,7 +190,10 @@ describe("open-graph API route", () => {
 
   it("handles ENS previews when detected", async () => {
     const previewPayload = { type: "ens.name", name: "vitalik.eth" };
-    ensModule.detectEnsTarget.mockReturnValue({ kind: "name", input: "vitalik.eth" });
+    ensModule.detectEnsTarget.mockReturnValue({
+      kind: "name",
+      input: "vitalik.eth",
+    });
     ensModule.fetchEnsPreview.mockResolvedValue(previewPayload);
 
     const request = {

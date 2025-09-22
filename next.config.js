@@ -8,7 +8,7 @@ if (VERSION) {
 } else {
   LOAD_S3 = false;
   try {
-    VERSION = require("child_process")
+    VERSION = require("node:child_process")
       .execSync("git rev-parse HEAD")
       .toString()
       .trim();

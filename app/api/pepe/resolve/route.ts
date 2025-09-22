@@ -98,8 +98,8 @@ const trimSlashes = (s: string): string => {
   let end = s.length;
 
   // '/' === charCode 47
-  while (start < end && s.charCodeAt(start) === 47) start++;
-  while (end > start && s.charCodeAt(end - 1) === 47) end--;
+  while (start < end && s.codePointAt(start) === 47) start++;
+  while (end > start && s.codePointAt(end - 1) === 47) end--;
 
   return s.slice(start, end);
 };
@@ -208,11 +208,11 @@ function absolutizeRelativeUrl(candidate: string, base: string): string {
 function slugifyName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9\s-]/g, "")
+    .replaceAll(/&/g, "and")
+    .replaceAll(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/-+/g, "-");
 }
 
 function deepFindAll(
@@ -370,7 +370,7 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
       "token",
     ])
       .map((value) => (typeof value === "string" ? value : null))
-      .filter((value): value is string => Boolean(value));
+      .filter(Boolean) as string[];
 
     scraped.name = extractFirstString(names) ?? undefined;
     scraped.artist = extractFirstString(artists) ?? undefined;
@@ -415,7 +415,7 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
   }
 
   if (!scraped.asset) {
-    const normalized = slug.replace(/-/g, "").toUpperCase();
+    const normalized = slug.replaceAll(/-/g, "").toUpperCase();
     if (isCounterpartyAssetCode(normalized)) {
       scraped.asset = normalized;
     }
@@ -462,16 +462,17 @@ async function findWikiLink(
   }
 
   const slug = slugifyName(name);
-  const candidates: string[] = [];
 
-  if (series && Number.isFinite(series)) {
-    const seriesSlug = `series-${series}`;
-    candidates.push(`https://wiki.pepe.wtf/rare-pepes/${seriesSlug}/${slug}`);
-    candidates.push(`https://wiki.pepe.wtf/book-of-kek/${seriesSlug}/${slug}`);
-  }
-
-  candidates.push(`https://wiki.pepe.wtf/rare-pepes/${slug}`);
-  candidates.push(`https://wiki.pepe.wtf/${slug}`);
+  const candidates = [
+    ...(series && Number.isFinite(series)
+      ? [
+          `https://wiki.pepe.wtf/rare-pepes/series-${series}/${slug}`,
+          `https://wiki.pepe.wtf/book-of-kek/series-${series}/${slug}`,
+        ]
+      : []),
+    `https://wiki.pepe.wtf/rare-pepes/${slug}`,
+    `https://wiki.pepe.wtf/${slug}`,
+  ];
 
   for (const candidate of candidates) {
     const match = await probeWikiUrl(candidate);
@@ -514,7 +515,7 @@ async function resolveCollection(slug: string): Promise<CollectionPreview> {
   const nextData = await scrapeNextData(href);
   const name =
     extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    slug.replaceAll(/-/g, " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
   const image =
     extractFirstString(
       deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
@@ -535,7 +536,7 @@ async function resolveArtist(slug: string): Promise<ArtistPreview> {
   const nextData = await scrapeNextData(href);
   const name =
     extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replace(/-/g, " ");
+    slug.replaceAll(/-/g, " ");
   const image =
     extractFirstString(
       deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
@@ -563,7 +564,7 @@ async function resolveSet(slug: string): Promise<SetPreview> {
   const nextData = await scrapeNextData(href);
   const name =
     extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replace(/-/g, " ");
+    slug.replaceAll(/-/g, " ");
   const image =
     extractFirstString(
       deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
