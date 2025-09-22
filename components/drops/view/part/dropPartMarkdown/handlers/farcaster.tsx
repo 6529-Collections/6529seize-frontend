@@ -17,7 +17,7 @@ export const createFarcasterHandler = (): LinkHandler<URL> => ({
   render: (_payload, context) => (
     <FarcasterCard
       href={context.href}
-      renderFallback={() => context.renderOpenGraph() ?? context.renderFallbackAnchor()}
+      renderFallback={() => context.renderOpenGraph()}
     />
   ),
   display: "block",

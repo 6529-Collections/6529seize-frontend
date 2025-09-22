@@ -9,6 +9,7 @@ import GroupCardChat from "@/components/groups/page/list/card/GroupCardChat";
 import DropItemChat from "@/components/waves/drops/DropItemChat";
 import WaveItemChat from "@/components/waves/list/WaveItemChat";
 import type { LinkHandler } from "../linkTypes";
+import { renderExternalOrInternalLink } from "../linkUtils";
 import { renderSeizeQuote } from "../renderers";
 
 interface CreateSeizeHandlersConfig {
@@ -19,8 +20,9 @@ const createSeizeQuoteHandler = (
   onQuoteClick: (drop: ApiDrop) => void
 ): LinkHandler<SeizeQuoteLinkInfo> => ({
   match: parseSeizeQuoteLink,
-  render: (payload, context) =>
-    renderSeizeQuote(payload, onQuoteClick, context.href) ?? context.renderFallbackAnchor(),
+  render: (payload, context, anchorProps) =>
+    renderSeizeQuote(payload, onQuoteClick, context.href) ??
+    renderExternalOrInternalLink(context.href, anchorProps),
   display: "block",
 });
 

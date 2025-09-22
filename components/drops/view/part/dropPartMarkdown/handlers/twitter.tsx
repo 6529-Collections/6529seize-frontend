@@ -27,7 +27,6 @@ export const createTwitterHandler = (): LinkHandler<TwitterMatchResult> => ({
   match: parseTwitterLink,
   render: (payload) => renderTweetEmbed(payload),
   display: "block",
-  blockOpenGraphFallback: true,
 });
 
 export type TwitterHandler = ReturnType<typeof createTwitterHandler>;

@@ -15,7 +15,6 @@ export const createArtBlocksHandler = (): LinkHandler<ArtBlocksTokenId> => ({
     </div>
   ),
   display: "block",
-  blockOpenGraphFallback: true,
 });
 
 export type ArtBlocksHandler = ReturnType<typeof createArtBlocksHandler>;

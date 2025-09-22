@@ -6,7 +6,6 @@ export const createWikimediaHandler = (): LinkHandler<string> => ({
   match: (href) => (parseWikimediaLink(href) ? href : null),
   render: (_payload, context) => <WikimediaCard href={context.href} />,
   display: "block",
-  blockOpenGraphFallback: true,
 });
 
 export type WikimediaHandler = ReturnType<typeof createWikimediaHandler>;

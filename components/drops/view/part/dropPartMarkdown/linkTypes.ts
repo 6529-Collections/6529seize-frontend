@@ -9,8 +9,7 @@ export interface LinkRenderContext {
   readonly href: string;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly parsedUrl: URL | null;
-  readonly renderFallbackAnchor: () => React.ReactElement;
-  readonly renderOpenGraph: () => React.ReactElement | null;
+  readonly renderOpenGraph: () => React.ReactElement;
 }
 
 export interface LinkHandler<TPayload = unknown> {
@@ -21,5 +20,4 @@ export interface LinkHandler<TPayload = unknown> {
     anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
   ) => React.ReactElement;
   readonly display: LinkDisplay;
-  readonly blockOpenGraphFallback?: boolean;
 }

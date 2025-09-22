@@ -3,7 +3,7 @@ import type { LinkHandler } from "../linkTypes";
 
 export const createOpenGraphHandler = (): LinkHandler<string> => ({
   match: (href) => (shouldUseOpenGraphPreview(href) ? href : null),
-  render: (_payload, context) => context.renderOpenGraph() ?? context.renderFallbackAnchor(),
+  render: (_payload, context) => context.renderOpenGraph(),
   display: "block",
 });
 

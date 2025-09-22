@@ -77,20 +77,17 @@ export const createLinkRenderer = ({
     }
 
     const parsedUrl = parseUrl(href);
-    const renderFallbackAnchor = () => renderExternalOrInternalLink(href, props);
+    const renderDefaultAnchor = () => renderExternalOrInternalLink(href, props);
     const match = findMatch(handlers, href);
-    const blocksOpenGraphFallback = match?.handler.blockOpenGraphFallback ?? false;
-    const canUseOpenGraph =
-      shouldUseOpenGraphPreview(href, parsedUrl) && !blocksOpenGraphFallback;
     const renderOpenGraph = () => {
-      if (!canUseOpenGraph) {
-        return null;
+      if (!shouldUseOpenGraphPreview(href, parsedUrl)) {
+        return renderDefaultAnchor();
       }
 
       return (
         <LinkPreviewCard
           href={href}
-          renderFallback={() => renderFallbackAnchor()}
+          renderFallback={() => renderDefaultAnchor()}
         />
       );
     };
@@ -99,16 +96,15 @@ export const createLinkRenderer = ({
       href,
       onQuoteClick,
       parsedUrl,
-      renderFallbackAnchor,
       renderOpenGraph,
     };
 
     if (match) {
       const rendered = match.handler.render(match.payload, context, props);
-      return rendered ?? renderFallbackAnchor();
+      return rendered ?? renderDefaultAnchor();
     }
 
-    return renderFallbackAnchor();
+    return renderDefaultAnchor();
   };
 
   const isSmartLink = (href: string): boolean => {

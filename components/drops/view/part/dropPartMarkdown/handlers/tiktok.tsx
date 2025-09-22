@@ -1,17 +1,17 @@
 import TikTokCard from "@/components/waves/TikTokCard";
 import { parseTikTokLink, type TikTokLinkInfo } from "../tiktok";
+import { renderExternalOrInternalLink } from "../linkUtils";
 import type { LinkHandler } from "../linkTypes";
 
 export const createTikTokHandler = (): LinkHandler<TikTokLinkInfo> => ({
   match: parseTikTokLink,
-  render: (_payload, context) => (
+  render: (_payload, context, anchorProps) => (
     <TikTokCard
       href={context.href}
-      renderFallback={() => context.renderFallbackAnchor()}
+      renderFallback={() => renderExternalOrInternalLink(context.href, anchorProps)}
     />
   ),
   display: "block",
-  blockOpenGraphFallback: true,
 });
 
 export type TikTokHandler = ReturnType<typeof createTikTokHandler>;
