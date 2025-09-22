@@ -149,7 +149,7 @@ const renderRecords = (
         </li>
       );
     })
-    .filter((entry): entry is ReactElement => Boolean(entry));
+    .filter(Boolean) as ReactElement[];
 
   if (entries.length === 0) {
     return null;

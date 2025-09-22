@@ -18,7 +18,7 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-const originalFetch = global.fetch;
+const originalFetch = globalThis.fetch;
 const originalEnv = process.env;
 
 type GetHandler = typeof import("@/app/api/pepe/resolve/route").GET;
@@ -42,11 +42,11 @@ afterAll(() => {
 describe("/api/pepe/resolve", () => {
   beforeEach(() => {
     nextResponseJson.mockClear();
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   const createTextResponse = (body: string, status = 200) => ({
@@ -133,7 +133,7 @@ describe("/api/pepe/resolve", () => {
       }
     );
 
-    global.fetch = mockFetch as unknown as typeof fetch;
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
 
     const request = {
       nextUrl: new URL(
@@ -174,6 +174,6 @@ describe("/api/pepe/resolve", () => {
 
     const response = await GET(request);
     expect(response.status).toBe(400);
-    expect(global.fetch).toBe(originalFetch);
+    expect(globalThis.fetch).toBe(originalFetch);
   });
 });

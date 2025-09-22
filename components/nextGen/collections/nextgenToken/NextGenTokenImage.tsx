@@ -200,7 +200,7 @@ export function NextGenTokenImage(
             <span className="font-color-h font-smaller">{display}</span>&nbsp;
             <span className="d-flex gap-2">
               <span>
-                {parseFloat(value.toFixed(5)).toLocaleString()}{" "}
+                {Number.parseFloat(value.toFixed(5)).toLocaleString()}{" "}
                 {ETHEREUM_ICON_TEXT}
               </span>
               <span>{new Date(date).toLocaleDateString()}</span>

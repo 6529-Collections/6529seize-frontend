@@ -80,8 +80,10 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
       a.tdh_rank > b.tdh_rank ? 1 : -1
     );
     setCollectionCount(allNfts.length);
-    setNft(rankedNFTs.find((n) => n.id === parseInt(id)));
-    setCollectionRank(rankedNFTs.map((r) => r.id).indexOf(parseInt(id)) + 1);
+    setNft(rankedNFTs.find((n) => n.id === Number.parseInt(id)));
+    setCollectionRank(
+      rankedNFTs.map((r) => r.id).indexOf(Number.parseInt(id)) + 1
+    );
   }, [allNfts, id]);
 
   useEffect(() => {
