@@ -74,8 +74,7 @@ export function NextGenTokenImage(
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-          }}
-        >
+          }}>
           <FontAwesomeIcon
             height={18}
             icon={faInfoCircle}
@@ -89,8 +88,7 @@ export function NextGenTokenImage(
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}
-          >
+            }}>
             <Container>
               <Row className="pt-2 pb-2">
                 <Col>{ownerInfo}</Col>
@@ -240,8 +238,7 @@ export function NextGenTokenImage(
           style={{
             overflow: "hidden",
             height: height,
-          }}
-        >
+          }}>
           <Image
             quality={100}
             priority
@@ -271,8 +268,7 @@ export function NextGenTokenImage(
               props.show_owner_info
                 ? "justify-content-between"
                 : "justify-content-center"
-            }`}
-          >
+            }`}>
             <span className={props.info_class ?? ""}>
               #{props.token.normalised_id}
             </span>
@@ -314,8 +310,7 @@ export function NextGenTokenImage(
     return (
       <Link
         href={`/nextgen/token/${props.token.id}`}
-        className="decoration-none scale-hover unselectable"
-      >
+        className="decoration-none scale-hover unselectable">
         {getContent()}
       </Link>
     );

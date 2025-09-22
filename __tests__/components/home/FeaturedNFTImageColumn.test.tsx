@@ -69,7 +69,7 @@ describe("FeaturedNFTImageColumn", () => {
       expect(col).toBeInTheDocument();
       expect(col).toHaveClass(
         "pt-3",
-        "pb-3",
+        "pb-5",
         "d-flex",
         "align-items-start",
         "justify-content-center"
@@ -338,7 +338,7 @@ describe("FeaturedNFTImageColumn", () => {
       );
 
       const col = container.querySelector('[class*="col"]');
-      expect(col).toHaveClass("pt-3", "pb-3");
+      expect(col).toHaveClass("pt-3", "pb-5");
     });
   });
 });
