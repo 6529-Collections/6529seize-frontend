@@ -83,7 +83,6 @@ export async function GET(request: NextRequest) {
   }
 
   const ensTarget = detectEnsTarget(rawInput);
-  console.log("ensTarget", `[${rawInput}]`, ensTarget);
   if (ensTarget) {
     try {
       const preview = await fetchEnsPreview(ensTarget);
