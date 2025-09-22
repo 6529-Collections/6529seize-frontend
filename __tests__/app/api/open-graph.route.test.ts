@@ -1,4 +1,4 @@
-const nextResponseJson = jest.fn(
+const nextResponseJsonRoute = jest.fn(
   (body: unknown, init?: { status?: number }) => ({
     status: init?.status ?? 200,
     json: async () => body,
@@ -6,7 +6,7 @@ const nextResponseJson = jest.fn(
 );
 
 jest.mock("next/server", () => ({
-  NextResponse: { json: nextResponseJson },
+  NextResponse: { json: nextResponseJsonRoute },
   NextRequest: class {},
 }));
 
@@ -54,7 +54,7 @@ describe("open-graph API route", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     globalThis.fetch = originalFetch;
-    nextResponseJson.mockClear();
+    nextResponseJsonRoute.mockClear();
     ensRouteModule.detectEnsTarget.mockReturnValue(null);
   });
 

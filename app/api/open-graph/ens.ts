@@ -253,7 +253,15 @@ function normalizeEnsName(name: string): {
   console.log("normalizeEnsName", `[${name}]`);
   try {
     const normalized = normalize(name);
-    const display = toUnicode(normalized);
+    console.log("after normalize", `[${name}]`, `[${normalized}]`);
+    let display: string;
+    try {
+      display =
+        typeof toUnicode === "function" ? toUnicode(normalized) : normalized;
+    } catch {
+      display = normalized;
+    }
+    console.log("after toUnicode", `[${name}]`, `[${display}]`);
     return { normalized, display };
   } catch (error: any) {
     console.error("normalizeEnsName error", `[${name}]`, error);
