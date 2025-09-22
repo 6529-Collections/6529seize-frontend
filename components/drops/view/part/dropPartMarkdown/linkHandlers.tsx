@@ -72,17 +72,17 @@ export const createLinkRenderer = ({
     }
 
     const parsedUrl = parseUrl(href);
-    const renderDefaultAnchor = () => renderExternalOrInternalLink(href, props);
+    const renderFallbackAnchor = () => renderExternalOrInternalLink(href, props);
     const matchSeize = findMatch(seizeHandlers, href);
     const renderOpenGraph = () => {
       if (!shouldUseOpenGraphPreview(href, parsedUrl)) {
-        return renderDefaultAnchor();
+        return renderFallbackAnchor();
       }
 
       return (
         <LinkPreviewCard
           href={href}
-          renderFallback={() => renderDefaultAnchor()}
+          renderFallback={() => renderFallbackAnchor()}
         />
       );
     };
@@ -110,9 +110,9 @@ export const createLinkRenderer = ({
       } catch {
         const ogContent = tryRenderOpenGraph();
         if (ogContent) {
-          return ogContent;
+        return ogContent;
         }
-        return renderDefaultAnchor();
+        return renderFallbackAnchor();
       }
     };
 
@@ -137,7 +137,7 @@ export const createLinkRenderer = ({
       return ogContent;
     }
 
-    return renderDefaultAnchor();
+    return renderFallbackAnchor();
   };
 
   const isSmartLink = (href: string): boolean => {
