@@ -84,42 +84,61 @@ describe("/api/pepe/resolve", () => {
       nextData
     )}</script></head><body></body></html>`;
 
-    const mockFetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input.toString();
-      if (url.startsWith("https://pepe.wtf/asset/")) {
-        return createTextResponse(html);
+    const mockFetch = jest.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.startsWith("https://pepe.wtf/asset/")) {
+          return createTextResponse(html);
+        }
+        if (url.startsWith("https://tokenscan.io/api/api/asset")) {
+          return createJsonResponse({ supply: "1000" });
+        }
+        if (url.startsWith("https://tokenscan.io/api/api/holders")) {
+          return createJsonResponse({ data: [{}, {}] });
+        }
+        if (url.startsWith("https://tokenscan.io/api/api/dispensers")) {
+          return createJsonResponse({
+            data: [{ satoshi_price: 2500 }, { satoshirate: 4000 }],
+          });
+        }
+        if (
+          url.startsWith("https://tokenscan.io/api/api/market") &&
+          url.includes("BTC")
+        ) {
+          return createJsonResponse({ data: [{ price_sats: 1500 }] });
+        }
+        if (
+          url.startsWith("https://tokenscan.io/api/api/market") &&
+          url.includes("XCP")
+        ) {
+          return createJsonResponse({ data: [{ price: 1.5 }] });
+        }
+
+        try {
+          const parsedUrl = new URL(url);
+          if (parsedUrl.hostname === "api.coingecko.com") {
+            return createJsonResponse({
+              bitcoin: { eth: 15 },
+              counterparty: { eth: 0.002 },
+            });
+          }
+        } catch {}
+        if (url === "https://wiki.pepe.wtf/rare-pepes/mtgox-pepe") {
+          return { status: 404, ok: false } as Response;
+        }
+        if (url === "https://wiki.pepe.wtf/mtgox-pepe") {
+          return { status: 200, ok: true } as Response;
+        }
+        throw new Error(`Unexpected fetch to ${url}`);
       }
-      if (url.startsWith("https://tokenscan.io/api/api/asset")) {
-        return createJsonResponse({ supply: "1000" });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/holders")) {
-        return createJsonResponse({ data: [{}, {}] });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/dispensers")) {
-        return createJsonResponse({ data: [{ satoshi_price: 2500 }, { satoshirate: 4000 }] });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/market") && url.includes("BTC")) {
-        return createJsonResponse({ data: [{ price_sats: 1500 }] });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/market") && url.includes("XCP")) {
-        return createJsonResponse({ data: [{ price: 1.5 }] });
-      }
-      if (url.startsWith("https://api.coingecko.com")) {
-        return createJsonResponse({ bitcoin: { eth: 15 }, counterparty: { eth: 0.002 } });
-      }
-      if (url === "https://wiki.pepe.wtf/rare-pepes/mtgox-pepe") {
-        return { status: 404, ok: false } as Response;
-      }
-      if (url === "https://wiki.pepe.wtf/mtgox-pepe") {
-        return { status: 200, ok: true } as Response;
-      }
-      throw new Error(`Unexpected fetch to ${url}`);
-    });
+    );
 
     global.fetch = mockFetch as unknown as typeof fetch;
 
     const request = {
-      nextUrl: new URL("https://app.local/api/pepe/resolve?kind=asset&slug=GOXPEPE"),
+      nextUrl: new URL(
+        "https://app.local/api/pepe/resolve?kind=asset&slug=GOXPEPE"
+      ),
     } as any;
 
     const response1 = await GET(request);
@@ -129,7 +148,10 @@ describe("/api/pepe/resolve", () => {
       kind: "asset",
       asset: "GOXPEPE",
       links: { wiki: "https://wiki.pepe.wtf/mtgox-pepe" },
-      market: expect.objectContaining({ bestAskSats: 2500, lastSaleSats: 1500 }),
+      market: expect.objectContaining({
+        bestAskSats: 2500,
+        lastSaleSats: 1500,
+      }),
     });
 
     expect(response1.headers.get("X-Cache")).toBe("MISS");

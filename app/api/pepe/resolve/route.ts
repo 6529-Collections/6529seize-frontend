@@ -502,6 +502,10 @@ function normalizeSlug(value: string | null): string | null {
     return null;
   }
   const trimmed = value.trim();
+  // Slug must only be letters, numbers, hyphens, and 2-64 chars long.
+  if (!/^[a-zA-Z0-9-]{2,64}$/.test(trimmed)) {
+    return null;
+  }
   return trimmed ? trimmed : null;
 }
 
@@ -721,6 +725,40 @@ export async function GET(request: NextRequest) {
     !["asset", "collection", "artist", "set"].includes(kind)
   ) {
     return errorResponse("invalid params", 400);
+  }
+  // additional SSRF prevention: ensure slug does not contain dangerous substrings
+  // (redundant due to normalizeSlug, but extra defense in depth)
+  if (
+    slug.includes("../") ||
+    slug.includes("/") ||
+    slug.includes("\\") ||
+    slug.startsWith("-") ||
+    slug.length > 64
+  ) {
+    return errorResponse("invalid slug", 400);
+  }
+  // additional SSRF prevention: ensure slug does not contain dangerous substrings
+  // (redundant due to normalizeSlug, but extra defense in depth)
+  if (
+    slug.includes("../") ||
+    slug.includes("/") ||
+    slug.includes("\\") ||
+    slug.startsWith("-") ||
+    slug.length > 64
+  ) {
+    return errorResponse("invalid slug", 400);
+  }
+
+  // additional SSRF prevention: ensure slug does not contain dangerous substrings
+  // (redundant due to normalizeSlug, but extra defense in depth)
+  if (
+    slug.includes("../") ||
+    slug.includes("/") ||
+    slug.includes("\\") ||
+    slug.startsWith("-") ||
+    slug.length > 64
+  ) {
+    return errorResponse("invalid slug", 400);
   }
 
   const cacheKey = `${kind}:${slug.toLowerCase()}`;
