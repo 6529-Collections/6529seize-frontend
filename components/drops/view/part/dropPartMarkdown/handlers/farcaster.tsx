@@ -1,7 +1,7 @@
 import FarcasterCard from "@/components/waves/FarcasterCard";
 import { isFarcasterHost } from "@/src/services/farcaster/url";
 
-import { createSimpleHandler } from "./simpleHandler";
+import type { LinkHandler } from "../linkTypes";
 
 const isFarcasterLink = (href: string): boolean => {
   try {
@@ -12,8 +12,8 @@ const isFarcasterLink = (href: string): boolean => {
   }
 };
 
-export const createFarcasterHandler = () =>
-  createSimpleHandler({
-    match: isFarcasterLink,
-    render: (href) => <FarcasterCard href={href} />,
-  });
+export const createFarcasterHandler = (): LinkHandler => ({
+  match: isFarcasterLink,
+  render: (href) => <FarcasterCard href={href} />,
+  display: "block",
+});

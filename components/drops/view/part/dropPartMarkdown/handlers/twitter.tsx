@@ -1,9 +1,9 @@
 import { renderTweetEmbed } from "../renderers";
 import { isTwitterLink } from "../twitter";
-import { createSimpleHandler } from "./simpleHandler";
+import type { LinkHandler } from "../linkTypes";
 
-export const createTwitterHandler = () =>
-  createSimpleHandler({
-    match: isTwitterLink,
-    render: (href) => renderTweetEmbed(href),
-  });
+export const createTwitterHandler = (): LinkHandler => ({
+  match: isTwitterLink,
+  render: (href) => renderTweetEmbed(href),
+  display: "block",
+});

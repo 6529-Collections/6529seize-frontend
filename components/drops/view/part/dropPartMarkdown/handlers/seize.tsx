@@ -15,63 +15,99 @@ interface CreateSeizeHandlersConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
+const ensureSeizeQuote = (href: string): SeizeQuoteLinkInfo => {
+  const info = parseSeizeQuoteLink(href);
+  if (!info) {
+    throw new Error("Invalid seize quote link");
+  }
+
+  return info;
+};
+
 const createSeizeQuoteHandler = (
   onQuoteClick: (drop: ApiDrop) => void
-): LinkHandler<SeizeQuoteLinkInfo> => ({
-  match: parseSeizeQuoteLink,
-  render: (payload, context) =>
-    renderSeizeQuote(payload, onQuoteClick, context.href) ?? context.renderDefault(),
+): LinkHandler => ({
+  match: (href) => Boolean(parseSeizeQuoteLink(href)),
+  render: (href) => {
+    const content = renderSeizeQuote(ensureSeizeQuote(href), onQuoteClick, href);
+    if (!content) {
+      throw new Error("Unable to render seize quote link");
+    }
+
+    return content;
+  },
   display: "block",
 });
 
-const createSeizeGroupHandler = (): LinkHandler<{ groupId: string }> => ({
-  match: (href) => {
-    const result = parseSeizeQueryLink(href, "/network", ["group"]);
-    if (!result || typeof result.group !== "string") {
-      return null;
+const getGroupId = (href: string): string | null => {
+  const result = parseSeizeQueryLink(href, "/network", ["group"]);
+  if (!result || typeof result.group !== "string") {
+    return null;
+  }
+
+  return result.group;
+};
+
+const createSeizeGroupHandler = (): LinkHandler => ({
+  match: (href) => Boolean(getGroupId(href)),
+  render: (href) => {
+    const groupId = getGroupId(href);
+    if (!groupId) {
+      throw new Error("Invalid seize group link");
     }
 
-    return { groupId: result.group };
+    return <GroupCardChat href={href} groupId={groupId} />;
   },
-  render: (payload, context) => (
-    <GroupCardChat href={context.href} groupId={payload.groupId} />
-  ),
   display: "block",
 });
 
-const createSeizeWaveHandler = (): LinkHandler<{ waveId: string }> => ({
-  match: (href) => {
-    const result = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
-    if (!result || typeof result.wave !== "string") {
-      return null;
+const getWaveId = (href: string): string | null => {
+  const result = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
+  if (!result || typeof result.wave !== "string") {
+    return null;
+  }
+
+  return result.wave;
+};
+
+const createSeizeWaveHandler = (): LinkHandler => ({
+  match: (href) => Boolean(getWaveId(href)),
+  render: (href) => {
+    const waveId = getWaveId(href);
+    if (!waveId) {
+      throw new Error("Invalid seize wave link");
     }
 
-    return { waveId: result.wave };
+    return <WaveItemChat href={href} waveId={waveId} />;
   },
-  render: (payload, context) => (
-    <WaveItemChat href={context.href} waveId={payload.waveId} />
-  ),
   display: "block",
 });
 
-const createSeizeDropHandler = (): LinkHandler<{ dropId: string }> => ({
-  match: (href) => {
-    const result = parseSeizeQueryLink(href, "/my-stream", ["wave", "drop"], true);
-    if (!result || typeof result.drop !== "string") {
-      return null;
+const getDropId = (href: string): string | null => {
+  const result = parseSeizeQueryLink(href, "/my-stream", ["wave", "drop"], true);
+  if (!result || typeof result.drop !== "string") {
+    return null;
+  }
+
+  return result.drop;
+};
+
+const createSeizeDropHandler = (): LinkHandler => ({
+  match: (href) => Boolean(getDropId(href)),
+  render: (href) => {
+    const dropId = getDropId(href);
+    if (!dropId) {
+      throw new Error("Invalid seize drop link");
     }
 
-    return { dropId: result.drop };
+    return <DropItemChat href={href} dropId={dropId} />;
   },
-  render: (payload, context) => (
-    <DropItemChat href={context.href} dropId={payload.dropId} />
-  ),
   display: "block",
 });
 
 export const createSeizeHandlers = ({
   onQuoteClick,
-}: CreateSeizeHandlersConfig): Array<LinkHandler<any>> => [
+}: CreateSeizeHandlersConfig): LinkHandler[] => [
   createSeizeQuoteHandler(onQuoteClick),
   createSeizeGroupHandler(),
   createSeizeWaveHandler(),

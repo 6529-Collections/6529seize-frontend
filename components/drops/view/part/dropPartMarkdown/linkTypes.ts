@@ -1,17 +1,9 @@
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import type { ReactElement } from "react";
 
 export type LinkDisplay = "block" | "inline";
 
-export interface LinkRenderContext {
-  readonly href: string;
-  readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly parsedUrl: URL | null;
-  readonly renderOpenGraph: () => React.ReactElement;
-  readonly renderDefault: () => React.ReactElement;
-}
-
-export interface LinkHandler<TPayload = unknown> {
-  readonly match: (href: string) => TPayload | null;
-  readonly render: (payload: TPayload, context: LinkRenderContext) => React.ReactElement;
+export interface LinkHandler {
+  readonly match: (href: string) => boolean;
+  readonly render: (href: string) => ReactElement;
   readonly display: LinkDisplay;
 }

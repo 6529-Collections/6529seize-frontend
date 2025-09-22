@@ -11,14 +11,14 @@ import { ApiDrop } from "@/generated/models/ApiDrop";
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 import DropPartMarkdownImage from "../DropPartMarkdownImage";
 
-import { createLinkHandlers } from "./handlers";
+import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import {
   isValidLink,
   parseUrl,
   renderExternalOrInternalLink,
   shouldUseOpenGraphPreview,
 } from "./linkUtils";
-import type { LinkHandler, LinkRenderContext } from "./linkTypes";
+import type { LinkHandler } from "./linkTypes";
 
 export interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
@@ -38,19 +38,13 @@ export interface LinkRenderer {
   ) => ReactElement | null;
 }
 
-interface LinkMatchResult<TPayload> {
-  readonly handler: LinkHandler<TPayload>;
-  readonly payload: TPayload;
-}
-
-const findMatch = <TPayload,>(
-  handlers: readonly LinkHandler<unknown>[],
+const findMatch = (
+  handlers: readonly LinkHandler[],
   href: string
-): LinkMatchResult<TPayload> | null => {
+): LinkHandler | null => {
   for (const handler of handlers) {
-    const payload = handler.match(href);
-    if (payload) {
-      return { handler, payload } as LinkMatchResult<TPayload>;
+    if (handler.match(href)) {
+      return handler;
     }
   }
 
@@ -60,7 +54,8 @@ const findMatch = <TPayload,>(
 export const createLinkRenderer = ({
   onQuoteClick,
 }: LinkRendererConfig): LinkRenderer => {
-  const handlers = createLinkHandlers({ onQuoteClick });
+  const seizeHandlers = createSeizeHandlers({ onQuoteClick });
+  const handlers = createLinkHandlers();
 
   const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
     if (typeof src !== "string") {
@@ -78,7 +73,7 @@ export const createLinkRenderer = ({
 
     const parsedUrl = parseUrl(href);
     const renderDefaultAnchor = () => renderExternalOrInternalLink(href, props);
-    const match = findMatch(handlers, href);
+    const matchSeize = findMatch(seizeHandlers, href);
     const renderOpenGraph = () => {
       if (!shouldUseOpenGraphPreview(href, parsedUrl)) {
         return renderDefaultAnchor();
@@ -92,17 +87,9 @@ export const createLinkRenderer = ({
       );
     };
 
-    const context: LinkRenderContext = {
-      href,
-      onQuoteClick,
-      parsedUrl,
-      renderOpenGraph,
-      renderDefault: renderDefaultAnchor,
-    };
-
     const tryRenderOpenGraph = () => {
       try {
-        const ogContent = context.renderOpenGraph();
+        const ogContent = renderOpenGraph();
         if (ogContent) {
           return ogContent;
         }
@@ -113,19 +100,35 @@ export const createLinkRenderer = ({
       return null;
     };
 
-    if (match) {
+    const renderFromHandler = (handler: LinkHandler): ReactElement | null => {
       try {
-        const rendered = match.handler.render(match.payload, context);
+        const rendered = handler.render(href);
         if (rendered === null || rendered === undefined) {
           throw new Error("Link handler returned no content");
         }
         return rendered;
-      } catch (error) {
+      } catch {
         const ogContent = tryRenderOpenGraph();
         if (ogContent) {
           return ogContent;
         }
         return renderDefaultAnchor();
+      }
+    };
+
+    if (matchSeize) {
+      const rendered = renderFromHandler(matchSeize);
+      if (rendered) {
+        return rendered;
+      }
+    }
+
+    const matchExternal = findMatch(handlers, href);
+
+    if (matchExternal) {
+      const rendered = renderFromHandler(matchExternal);
+      if (rendered) {
+        return rendered;
       }
     }
 
@@ -142,12 +145,17 @@ export const createLinkRenderer = ({
       return false;
     }
 
+    const seizeMatch = findMatch(seizeHandlers, href);
+    if (seizeMatch) {
+      return seizeMatch.display === "block";
+    }
+
     const match = findMatch(handlers, href);
     if (!match) {
       return false;
     }
 
-    return match.handler.display === "block";
+    return match.display === "block";
   };
 
   return {

@@ -1,11 +1,11 @@
 import YoutubePreview from "../youtubePreview";
 import { parseYoutubeLink } from "../youtube";
-import { createSimpleHandler } from "./simpleHandler";
+import type { LinkHandler } from "../linkTypes";
 
-export const createYoutubeHandler = () =>
-  createSimpleHandler({
-    match: (href) => Boolean(parseYoutubeLink(href)),
-    render: (href) => <YoutubePreview href={href} />,
-  });
+export const createYoutubeHandler = (): LinkHandler => ({
+  match: (href) => Boolean(parseYoutubeLink(href)),
+  render: (href) => <YoutubePreview href={href} />,
+  display: "block",
+});
 
 export type YoutubeHandler = ReturnType<typeof createYoutubeHandler>;

@@ -4,7 +4,7 @@ import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 import { parseArtBlocksLink } from "@/src/services/artblocks/url";
 
-import { createSimpleHandler } from "./simpleHandler";
+import type { LinkHandler } from "../linkTypes";
 
 const ArtBlocksPreview = ({ href }: { href: string }) => {
   const tokenId = useMemo(() => {
@@ -26,8 +26,8 @@ const ArtBlocksPreview = ({ href }: { href: string }) => {
   );
 };
 
-export const createArtBlocksHandler = () =>
-  createSimpleHandler({
-    match: (href) => Boolean(parseArtBlocksLink(href)),
-    render: (href) => <ArtBlocksPreview href={href} />,
-  });
+export const createArtBlocksHandler = (): LinkHandler => ({
+  match: (href) => Boolean(parseArtBlocksLink(href)),
+  render: (href) => <ArtBlocksPreview href={href} />,
+  display: "block",
+});
