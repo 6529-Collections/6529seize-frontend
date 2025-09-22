@@ -69,7 +69,7 @@ describe("FeaturedNFTImageColumn", () => {
       expect(col).toBeInTheDocument();
       expect(col).toHaveClass(
         "pt-3",
-        "pb-3",
+        "pb-5",
         "d-flex",
         "align-items-start",
         "justify-content-center"
@@ -210,7 +210,7 @@ describe("FeaturedNFTImageColumn", () => {
     it("should generate correct link URL for different NFT IDs", () => {
       const testIds = [1, 100, 999, 1234];
 
-      testIds.forEach((id) => {
+      for (const id of testIds) {
         const nftWithId = {
           ...mockNFT,
           id,
@@ -228,7 +228,7 @@ describe("FeaturedNFTImageColumn", () => {
         const link = screen.getByTestId("mock-link");
         expect(link).toHaveAttribute("href", `/the-memes/${id}`);
         unmount();
-      });
+      }
     });
   });
 
@@ -338,7 +338,7 @@ describe("FeaturedNFTImageColumn", () => {
       );
 
       const col = container.querySelector('[class*="col"]');
-      expect(col).toHaveClass("pt-3", "pb-3");
+      expect(col).toHaveClass("pt-3", "pb-5");
     });
   });
 });

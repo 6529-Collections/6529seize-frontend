@@ -1,13 +1,15 @@
 "use client";
 
-import { type ReactElement, useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 
+import { fetchLinkPreview } from "../../services/api/link-preview-api";
 import OpenGraphPreview, {
   hasOpenGraphContent,
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
-import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import EnsPreviewCard from "./ens/EnsPreviewCard";
+import { isEnsPreview, type EnsPreview } from "./ens/types";
 
 interface LinkPreviewCardProps {
   readonly href: string;
@@ -15,7 +17,8 @@ interface LinkPreviewCardProps {
 }
 
 type PreviewState =
-  | { readonly type: "loading"; readonly data: OpenGraphPreviewData | null }
+  | { readonly type: "loading" }
+  | { readonly type: "ens"; readonly data: EnsPreview }
   | { readonly type: "success"; readonly data: OpenGraphPreviewData }
   | { readonly type: "fallback" };
 
@@ -43,17 +46,17 @@ export default function LinkPreviewCard({
 }: LinkPreviewCardProps) {
   const [state, setState] = useState<PreviewState>({
     type: "loading",
-    data: null,
   });
 
   useEffect(() => {
     let active = true;
 
-    setState({ type: "loading", data: null });
+    setState({ type: "loading" });
 
     fetchLinkPreview(href)
       .then((response) => {
-        if (!active) {
+        if (isEnsPreview(response)) {
+          setState({ type: "ens", data: response });
           return;
         }
 
@@ -64,7 +67,8 @@ export default function LinkPreviewCard({
           setState({ type: "fallback" });
         }
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("LinkPreviewCard error", e);
         if (active) {
           setState({ type: "fallback" });
         }
@@ -80,11 +84,22 @@ export default function LinkPreviewCard({
 
     return (
       <LinkPreviewCardLayout href={href}>
-        <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-start">
             {fallbackContent}
           </div>
+        </div>
+      </LinkPreviewCardLayout>
+    );
+  }
+
+  if (state.type === "ens") {
+    return (
+      <LinkPreviewCardLayout href={href}>
+        <div
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          data-testid="ens-preview-card">
+          <EnsPreviewCard preview={state.data} />
         </div>
       </LinkPreviewCardLayout>
     );
