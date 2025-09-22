@@ -4,14 +4,9 @@ import {
   YoutubeOEmbedResponse,
 } from "@/services/api/youtube";
 
+import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
+
 import { getYoutubeFetchUrl } from "./youtube";
-
-type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHrefButtons").default;
-
-const getChatItemHrefButtons = (): ChatItemHrefButtonsComponent => {
-  const module = require("../../../../waves/ChatItemHrefButtons");
-  return module.default as ChatItemHrefButtonsComponent;
-};
 
 const normalizeYoutubeHtml = (html: string): string => {
   let normalized = html.replace(/width="[^"]*"/i, 'width="100%"');
@@ -96,8 +91,6 @@ const YoutubePreview = ({
   if (hasError) {
     return renderFallback();
   }
-
-  const ChatItemHrefButtons = getChatItemHrefButtons();
 
   if (!preview) {
     return (

@@ -8,10 +8,6 @@ import {
 
 const FALLBACK_BASE_ENDPOINT = "https://6529.io";
 const originalBaseEndpoint = process.env.BASE_ENDPOINT;
-const originalAbFeature = process.env.VITE_FEATURE_AB_CARD;
-const originalAbFeatureNext = process.env.NEXT_PUBLIC_FEATURE_AB_CARD;
-const originalAbFeatureNextVite = process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD;
-const originalAbFeatureGeneric = process.env.FEATURE_AB_CARD;
 
 jest.mock("../../../../../hooks/isMobileScreen", () => () => false);
 jest.mock("../../../../../contexts/EmojiContext", () => ({
@@ -92,26 +88,6 @@ describe("DropPartMarkdown", () => {
     } else {
       process.env.BASE_ENDPOINT = originalBaseEndpoint;
     }
-    if (originalAbFeature === undefined) {
-      delete process.env.VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.VITE_FEATURE_AB_CARD = originalAbFeature;
-    }
-    if (originalAbFeatureNext === undefined) {
-      delete process.env.NEXT_PUBLIC_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_FEATURE_AB_CARD = originalAbFeatureNext;
-    }
-    if (originalAbFeatureNextVite === undefined) {
-      delete process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD = originalAbFeatureNextVite;
-    }
-    if (originalAbFeatureGeneric === undefined) {
-      delete process.env.FEATURE_AB_CARD;
-    } else {
-      process.env.FEATURE_AB_CARD = originalAbFeatureGeneric;
-    }
   });
 
   afterEach(() => {
@@ -119,26 +95,6 @@ describe("DropPartMarkdown", () => {
       delete process.env.BASE_ENDPOINT;
     } else {
       process.env.BASE_ENDPOINT = originalBaseEndpoint;
-    }
-    if (originalAbFeature === undefined) {
-      delete process.env.VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.VITE_FEATURE_AB_CARD = originalAbFeature;
-    }
-    if (originalAbFeatureNext === undefined) {
-      delete process.env.NEXT_PUBLIC_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_FEATURE_AB_CARD = originalAbFeatureNext;
-    }
-    if (originalAbFeatureNextVite === undefined) {
-      delete process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD = originalAbFeatureNextVite;
-    }
-    if (originalAbFeatureGeneric === undefined) {
-      delete process.env.FEATURE_AB_CARD;
-    } else {
-      process.env.FEATURE_AB_CARD = originalAbFeatureGeneric;
     }
   });
 
@@ -178,8 +134,7 @@ describe("DropPartMarkdown", () => {
     expect(a).toHaveAttribute("rel", "noopener noreferrer nofollow");
   });
 
-  it("renders Art Blocks token card when feature enabled", async () => {
-    process.env.VITE_FEATURE_AB_CARD = "true";
+  it("renders Art Blocks token card for supported URLs", async () => {
     const content = "[token](https://www.artblocks.io/token/662000)";
 
     render(
@@ -216,9 +171,8 @@ describe("DropPartMarkdown", () => {
     expect(call.href).toBe("https://warpcast.com/alice/0x123");
   });
 
-  it("falls back to regular link when Art Blocks card disabled", () => {
-    process.env.VITE_FEATURE_AB_CARD = "false";
-    const content = "[token](https://www.artblocks.io/token/662000)";
+  it("falls back to regular link when Art Blocks URL is not supported", () => {
+    const content = "[token](https://www.artblocks.io/project/662000)";
 
     render(
       <DropPartMarkdown
@@ -232,7 +186,7 @@ describe("DropPartMarkdown", () => {
     expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const link = screen.getByRole("link", { name: "token" });
-    expect(link).toHaveAttribute("href", "https://www.artblocks.io/token/662000");
+    expect(link).toHaveAttribute("href", "https://www.artblocks.io/project/662000");
   });
 
   it("renders a fallback link when tweet data is unavailable", async () => {
