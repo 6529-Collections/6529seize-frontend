@@ -93,15 +93,17 @@ const cache = new LruTtlCache<string, Preview>({
   ttlMs: ttlMinutes * 60 * 1000,
 });
 
+const normaliseSlashes = (s: string) => s.replace(/^\/+|\/+$/g, "");
+
 const USER_AGENT =
   "6529seize-pepe-card/1.0 (+https://6529.io; fetching pepe.wtf previews)";
-const IPFS_GATEWAY = (
+const IPFS_GATEWAY = normaliseSlashes(
   process.env.IPFS_GATEWAY || "https://ipfs.io/ipfs/"
-).replace(/\/+$/, "");
+);
 
 function isCounterpartyAssetCode(value: string): boolean {
   const upper = value.toUpperCase();
-  return /^[A-Z0-9]{3,}$/.test(upper) || /^A[0-9]{6,}$/.test(upper);
+  return /^[A-Z0-9]{3,}$/.test(upper) || /^A\d{6,}$/.test(upper);
 }
 
 type FetchOptions = RequestInit & { timeoutMs?: number };
@@ -142,7 +144,7 @@ async function fetchText(
     },
   });
 
-  if (!response || !response.ok) {
+  if (!response?.ok) {
     return null;
   }
 
@@ -159,7 +161,7 @@ async function fetchJson<T>(url: string, timeoutMs = 4000): Promise<T | null> {
     headers: { accept: "application/json" },
   });
 
-  if (!response || !response.ok) {
+  if (!response?.ok) {
     return null;
   }
 
@@ -232,7 +234,7 @@ function deepFindAll(
   return results;
 }
 
-async function scrapeNextData(url: string): Promise<any | null> {
+async function scrapeNextData(url: string): Promise<unknown | null> {
   const html = await fetchText(url, 5000);
   if (!html) {
     return null;
@@ -245,7 +247,7 @@ async function scrapeNextData(url: string): Promise<any | null> {
   }
 
   try {
-    return JSON.parse(raw);
+    return JSON.parse(raw) as unknown;
   } catch {
     return null;
   }
@@ -433,7 +435,7 @@ async function probeWikiUrl(url: string): Promise<string | null> {
     method: "HEAD",
     timeoutMs: 2000,
   });
-  if (response && response.ok) {
+  if (response?.ok) {
     return url;
   }
   return null;
