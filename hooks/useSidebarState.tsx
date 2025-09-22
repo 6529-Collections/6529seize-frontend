@@ -14,20 +14,15 @@ import React, {
  *
  * Global UI state not covered by the responsive left sidebar controller.
  * - Right sidebar visibility (open/close)
- * - Collections submenu visibility (open/close)
  *
  * Note: Main (left) sidebar responsive/collapsed/off‑canvas state lives in
  * `useSidebarController` and should not be duplicated here.
  */
 export interface SidebarState {
-  isCollectionsSubmenuOpen: boolean;
   isRightSidebarOpen: boolean;
 }
 
 export interface SidebarActions {
-  toggleCollectionsSubmenu: () => void;
-  openCollectionsSubmenu: () => void;
-  closeCollectionsSubmenu: () => void;
   toggleRightSidebar: () => void;
   openRightSidebar: () => void;
   closeRightSidebar: () => void;
@@ -40,21 +35,7 @@ const SidebarContext = createContext<UseSidebarStateReturn | null>(null);
 
 // Provider component
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [isCollectionsSubmenuOpen, setIsCollectionsSubmenuOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-
-  // Collections submenu actions
-  const toggleCollectionsSubmenu = useCallback(() => {
-    setIsCollectionsSubmenuOpen((prev: boolean) => !prev);
-  }, []);
-
-  const openCollectionsSubmenu = useCallback(() => {
-    setIsCollectionsSubmenuOpen(true);
-  }, []);
-
-  const closeCollectionsSubmenu = useCallback(() => {
-    setIsCollectionsSubmenuOpen(false);
-  }, []);
 
   // Right sidebar actions
   const toggleRightSidebar = useCallback(() => {
@@ -72,23 +53,15 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       // State
-      isCollectionsSubmenuOpen,
       isRightSidebarOpen,
 
       // Actions
-      toggleCollectionsSubmenu,
-      openCollectionsSubmenu,
-      closeCollectionsSubmenu,
       toggleRightSidebar,
       openRightSidebar,
       closeRightSidebar,
     }),
     [
-      isCollectionsSubmenuOpen,
       isRightSidebarOpen,
-      toggleCollectionsSubmenu,
-      openCollectionsSubmenu,
-      closeCollectionsSubmenu,
       toggleRightSidebar,
       openRightSidebar,
       closeRightSidebar,

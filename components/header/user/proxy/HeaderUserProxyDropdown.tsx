@@ -90,7 +90,7 @@ export default function HeaderUserProxyDropdown({
                           <img
                             src={profile.pfp}
                             alt="Profile Picture"
-                            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+                            className="tw-flex-shrink-0 tw-object-cover tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                           />
                         ) : (
                           <div

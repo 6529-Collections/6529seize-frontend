@@ -4,12 +4,9 @@ import React, { type CSSProperties, type ReactNode, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
-import { useCollectionsSubmenu } from "../../hooks/useCollectionsSubmenu";
-import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 
 type LayoutCssVars = CSSProperties & {
   "--left-rail": string;
-  "--collections-rail": string;
 };
 
 interface WebLayoutProps {
@@ -27,47 +24,25 @@ const WebLayout = ({ children }: WebLayoutProps) => {
     sidebarWidth,
   } = useSidebarController();
 
-  const {
-    isSubmenuOpen,
-    toggleSubmenu,
-    closeSubmenu,
-    isOnCollectionsPage,
-  } =
-    useCollectionsSubmenu(pathname, isMobile);
-
-  const isDesktopCollectionsOpen =
-    !isMobile && isSubmenuOpen && isOnCollectionsPage;
-
   const rootStyle = useMemo<LayoutCssVars>(
     () => ({
       "--left-rail": sidebarWidth,
-      "--collections-rail": isDesktopCollectionsOpen
-        ? SIDEBAR_WIDTHS.SUBMENU
-        : "0px",
     }),
-    [sidebarWidth, isDesktopCollectionsOpen]
+    [sidebarWidth]
   );
-
-  const basePadding = `calc(${sidebarWidth} + ${
-    isDesktopCollectionsOpen ? SIDEBAR_WIDTHS.SUBMENU : "0px"
-  })`;
 
   const mainStyle: CSSProperties = isMobile && isOffcanvasOpen
     ? { transform: `translateX(${sidebarWidth})` }
-    : { paddingLeft: basePadding };
+    : { paddingLeft: sidebarWidth };
 
   return (
     <div
       className="tw-flex tw-h-screen tw-relative tw-overflow-x-hidden"
-      style={rootStyle}
-      data-collections-open={isDesktopCollectionsOpen || undefined}>
+      style={rootStyle}>
       <div className="tailwind-scope">
         <WebSidebar
           isCollapsed={isCollapsed}
           onToggle={toggleCollapsed}
-          isCollectionsSubmenuOpen={isSubmenuOpen}
-          onCollectionsSubmenuToggle={toggleSubmenu}
-          onCollectionsSubmenuClose={closeSubmenu}
           isMobile={isMobile}
           isOffcanvasOpen={isOffcanvasOpen}
           onCloseOffcanvas={closeOffcanvas}

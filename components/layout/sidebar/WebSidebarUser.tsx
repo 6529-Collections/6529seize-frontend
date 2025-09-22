@@ -114,10 +114,10 @@ function WebSidebarUser({
       <button
         ref={buttonRef}
         onClick={() => setShowUserMenu(!showUserMenu)}
-        className={`tw-group/user  tw-py-2 tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900 ${
+        className={`tw-group/user tw-py-2 tw-border-none tw-bg-transparent tw-flex tw-items-center tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200  ${
           isCollapsed
             ? "tw-justify-center tw-px-2"
-            : "tw-justify-start tw-px-3 tw-gap-x-3"
+            : "tw-justify-start tw-px-3 tw-gap-x-3 desktop-hover:hover:tw-bg-iron-900"
         }`}
         aria-label="Open user menu"
         aria-expanded={showUserMenu}

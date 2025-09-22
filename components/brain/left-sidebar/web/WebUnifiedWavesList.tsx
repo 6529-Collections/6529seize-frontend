@@ -48,30 +48,28 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   );
 
   return (
-    <div>
-      <div className="tw-h-full tw-bg-black tw-py-3">
-        <div className="tw-w-full">
-          {/* Unified Waves List */}
-          <WebUnifiedWavesListWaves
-            ref={listRef}
-            waves={waves}
-            onHover={onHover}
-            scrollContainerRef={scrollContainerRef}
-          />
+    <div className="tw-h-full tw-bg-black tw-py-3">
+      <div className="tw-w-full">
+        {/* Unified Waves List */}
+        <WebUnifiedWavesListWaves
+          ref={listRef}
+          waves={waves}
+          onHover={onHover}
+          scrollContainerRef={scrollContainerRef}
+        />
 
-          {/* Loading indicator and intersection trigger */}
-          <UnifiedWavesListLoader
-            isFetching={isFetching && waves.length === 0}
-            isFetchingNextPage={isFetchingNextPage}
-          />
+        {/* Loading indicator and intersection trigger */}
+        <UnifiedWavesListLoader
+          isFetching={isFetching && waves.length === 0}
+          isFetchingNextPage={isFetchingNextPage}
+        />
 
-          {/* Empty state */}
-          <UnifiedWavesListEmpty
-            sortedWaves={waves}
-            isFetching={isFetching}
-            isFetchingNextPage={isFetchingNextPage}
-          />
-        </div>
+        {/* Empty state */}
+        <UnifiedWavesListEmpty
+          sortedWaves={waves}
+          isFetching={isFetching}
+          isFetchingNextPage={isFetchingNextPage}
+        />
       </div>
     </div>
   );
