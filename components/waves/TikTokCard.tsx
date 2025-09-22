@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type ReactElement, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   fetchTikTokPreview,
@@ -14,7 +14,6 @@ import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 
 interface TikTokCardProps {
   readonly href: string;
-  readonly renderFallback: () => ReactElement | null;
 }
 
 type TikTokCardState =
@@ -82,10 +81,7 @@ function buildAuthorLink(
   return undefined;
 }
 
-export default function TikTokCard({
-  href,
-  renderFallback: _renderFallback,
-}: TikTokCardProps) {
+export default function TikTokCard({ href }: TikTokCardProps) {
   const [state, setState] = useState<TikTokCardState>({ status: "loading" });
   const [isCaptionExpanded, setCaptionExpanded] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);

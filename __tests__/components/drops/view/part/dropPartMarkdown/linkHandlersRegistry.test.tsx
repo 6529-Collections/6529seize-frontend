@@ -6,8 +6,8 @@ import { createLinkRenderer } from "@/components/drops/view/part/dropPartMarkdow
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => ({
   __esModule: true,
-  default: ({ href, videoId }: { href: string; videoId: string }) => (
-    <div data-testid="youtube-preview" data-href={href} data-video={videoId} />
+  default: ({ href }: { href: string }) => (
+    <div data-testid="youtube-preview" data-href={href} />
   ),
 }));
 
@@ -19,8 +19,8 @@ jest.mock("@/components/drops/view/part/DropPartMarkdownImage", () => ({
 jest.mock("@/components/drops/view/part/dropPartMarkdown/renderers", () => ({
   renderGifEmbed: jest.fn((url: string) => <div data-testid="gif" data-url={url} />),
   renderSeizeQuote: jest.fn(() => <div data-testid="seize-quote" />),
-  renderTweetEmbed: jest.fn((payload: { tweetId: string }) => (
-    <div data-testid="tweet" data-id={payload.tweetId} />
+  renderTweetEmbed: jest.fn((href: string) => (
+    <div data-testid="tweet" data-href={href} />
   )),
   TweetFallback: () => null,
 }));
@@ -45,10 +45,8 @@ jest.mock("@/components/drops/view/part/dropPartMarkdown/tiktok", () => ({
 
 jest.mock("@/components/waves/TikTokCard", () => ({
   __esModule: true,
-  default: ({ href, renderFallback }: { href: string; renderFallback: () => ReactNode }) => (
-    <div data-testid="tiktok-card" data-href={href}>
-      {renderFallback()}
-    </div>
+  default: ({ href }: { href: string }) => (
+    <div data-testid="tiktok-card" data-href={href} />
   ),
 }));
 
@@ -63,10 +61,8 @@ jest.mock("@/components/waves/LinkPreviewCard", () => ({
 
 jest.mock("@/components/waves/FarcasterCard", () => ({
   __esModule: true,
-  default: ({ href, renderFallback }: { href: string; renderFallback: () => ReactNode }) => (
-    <div data-testid="farcaster-card" data-href={href}>
-      {renderFallback()}
-    </div>
+  default: ({ href }: { href: string }) => (
+    <div data-testid="farcaster-card" data-href={href} />
   ),
 }));
 
@@ -142,7 +138,10 @@ describe("createLinkRenderer", () => {
     const { renderAnchor } = baseRenderer();
     const element = renderAnchor({ href: "https://youtu.be/video123" } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("youtube-preview")).toHaveAttribute("data-video", "video123");
+    expect(screen.getByTestId("youtube-preview")).toHaveAttribute(
+      "data-href",
+      "https://youtu.be/video123"
+    );
     expect(screen.queryByTestId("opengraph")).not.toBeInTheDocument();
   });
 
@@ -171,9 +170,10 @@ describe("createLinkRenderer", () => {
 
   it("renders Twitter embeds", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://twitter.com/user/status/987654321" } as any);
+    const tweetHref = "https://twitter.com/user/status/987654321";
+    const element = renderAnchor({ href: tweetHref } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("tweet")).toHaveAttribute("data-id", "987654321");
+    expect(screen.getByTestId("tweet")).toHaveAttribute("data-href", tweetHref);
     expect(screen.queryByTestId("opengraph")).not.toBeInTheDocument();
   });
 

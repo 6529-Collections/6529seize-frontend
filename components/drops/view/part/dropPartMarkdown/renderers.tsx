@@ -8,6 +8,7 @@ import type { SeizeQuoteLinkInfo } from "../../../../../helpers/SeizeLinkParser"
 import ChatItemHrefButtons from "../../../../waves/ChatItemHrefButtons";
 import WaveDropQuoteWithDropId from "../../../../waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "../../../../waves/drops/WaveDropQuoteWithSerialNo";
+import { ensureTwitterLink } from "./twitter";
 
 const TweetFallback = ({ href }: { href: string }) => (
   <a
@@ -23,7 +24,8 @@ const TweetFallback = ({ href }: { href: string }) => (
   </a>
 );
 
-const renderTweetEmbed = (result: { href: string; tweetId: string }) => {
+const renderTweetEmbed = (href: string) => {
+  const result = ensureTwitterLink(href);
   const renderFallback = () => <TweetFallback href={result.href} />;
   const TweetNotFound: TwitterComponents["TweetNotFound"] = () => renderFallback();
   return (

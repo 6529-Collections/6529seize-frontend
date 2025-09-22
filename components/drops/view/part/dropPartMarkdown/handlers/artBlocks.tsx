@@ -1,20 +1,33 @@
-import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
-import { parseArtBlocksLink, type ArtBlocksTokenId } from "@/src/services/artblocks/url";
+import { useMemo } from "react";
 
 import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
-import type { LinkHandler } from "../linkTypes";
+import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
+import { parseArtBlocksLink } from "@/src/services/artblocks/url";
 
-export const createArtBlocksHandler = (): LinkHandler<ArtBlocksTokenId> => ({
-  match: parseArtBlocksLink,
-  render: (payload, context) => (
+import { createSimpleHandler } from "./simpleHandler";
+
+const ArtBlocksPreview = ({ href }: { href: string }) => {
+  const tokenId = useMemo(() => {
+    const parsed = parseArtBlocksLink(href);
+    if (!parsed) {
+      throw new Error("Invalid Art Blocks link");
+    }
+
+    return parsed;
+  }, [href]);
+
+  return (
     <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
       <div className="tw-flex-1 tw-min-w-0">
-        <ArtBlocksTokenCard href={context.href} id={payload} />
+        <ArtBlocksTokenCard href={href} id={tokenId} />
       </div>
-      <ChatItemHrefButtons href={context.href} />
+      <ChatItemHrefButtons href={href} />
     </div>
-  ),
-  display: "block",
-});
+  );
+};
 
-export type ArtBlocksHandler = ReturnType<typeof createArtBlocksHandler>;
+export const createArtBlocksHandler = () =>
+  createSimpleHandler({
+    match: (href) => Boolean(parseArtBlocksLink(href)),
+    render: (href) => <ArtBlocksPreview href={href} />,
+  });

@@ -33,12 +33,7 @@ describe("TikTokCard", () => {
     getCachedTikTokPreview.mockReturnValue(null);
     fetchTikTokPreview.mockResolvedValue(successResponse);
 
-    render(
-      <TikTokCard
-        href="https://www.tiktok.com/@creator/video/1"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
+    render(<TikTokCard href="https://www.tiktok.com/@creator/video/1" />);
 
     expect(screen.getByTestId("tiktok-card-skeleton")).toBeInTheDocument();
 
@@ -51,7 +46,6 @@ describe("TikTokCard", () => {
       "https://www.tiktok.com/@creator/video/1"
     );
     expect(screen.getByText("Creator")).toBeInTheDocument();
-    expect(screen.queryByTestId("fallback")).toBeNull();
   });
 
   it("toggles long captions with Show more", async () => {
@@ -62,12 +56,7 @@ describe("TikTokCard", () => {
       title: longCaption,
     });
 
-    render(
-      <TikTokCard
-        href="https://www.tiktok.com/@creator/video/1"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
+    render(<TikTokCard href="https://www.tiktok.com/@creator/video/1" />);
 
     await waitFor(() => {
       expect(screen.getByTestId("tiktok-card")).toBeInTheDocument();
@@ -85,12 +74,7 @@ describe("TikTokCard", () => {
   it("uses cached data when fresh and skips fetching", async () => {
     getCachedTikTokPreview.mockReturnValue({ data: successResponse, isFresh: true });
 
-    render(
-      <TikTokCard
-        href="https://www.tiktok.com/@creator/video/1"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
+    render(<TikTokCard href="https://www.tiktok.com/@creator/video/1" />);
 
     await waitFor(() => {
       expect(screen.getByTestId("tiktok-card")).toBeInTheDocument();
@@ -103,12 +87,7 @@ describe("TikTokCard", () => {
     getCachedTikTokPreview.mockReturnValue({ data: { ...successResponse, title: "Old caption" }, isFresh: false });
     fetchTikTokPreview.mockResolvedValue({ ...successResponse, title: "Updated caption" });
 
-    render(
-      <TikTokCard
-        href="https://www.tiktok.com/@creator/video/1"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
+    render(<TikTokCard href="https://www.tiktok.com/@creator/video/1" />);
 
     await waitFor(() => {
       expect(fetchTikTokPreview).toHaveBeenCalled();
@@ -126,12 +105,7 @@ describe("TikTokCard", () => {
       canonicalUrl: "https://www.tiktok.com/@creator/video/1",
     });
 
-    render(
-      <TikTokCard
-        href="https://www.tiktok.com/@creator/video/1"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
+    render(<TikTokCard href="https://www.tiktok.com/@creator/video/1" />);
 
     await waitFor(() => {
       expect(screen.getByTestId("tiktok-card-unavailable")).toBeInTheDocument();
@@ -147,12 +121,7 @@ describe("TikTokCard", () => {
     getCachedTikTokPreview.mockReturnValue(null);
     fetchTikTokPreview.mockRejectedValue(new Error("network error"));
 
-    render(
-      <TikTokCard
-        href="https://www.tiktok.com/@creator/video/1"
-        renderFallback={() => <div data-testid="fallback">fallback</div>}
-      />
-    );
+    render(<TikTokCard href="https://www.tiktok.com/@creator/video/1" />);
 
     await waitFor(() => {
       expect(screen.getByTestId("tiktok-card-unavailable")).toBeInTheDocument();

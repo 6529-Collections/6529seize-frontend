@@ -97,11 +97,28 @@ export const createLinkRenderer = ({
       onQuoteClick,
       parsedUrl,
       renderOpenGraph,
+      renderDefault: renderDefaultAnchor,
     };
 
     if (match) {
-      const rendered = match.handler.render(match.payload, context, props);
-      return rendered ?? renderDefaultAnchor();
+      try {
+        const rendered = match.handler.render(match.payload, context);
+        if (rendered === null || rendered === undefined) {
+          throw new Error("Link handler returned no content");
+        }
+        return rendered;
+      } catch (error) {
+        try {
+          const ogContent = context.renderOpenGraph();
+          if (ogContent) {
+            return ogContent;
+          }
+        } catch {
+          // fall through to default anchor
+        }
+
+        return renderDefaultAnchor();
+      }
     }
 
     return renderDefaultAnchor();

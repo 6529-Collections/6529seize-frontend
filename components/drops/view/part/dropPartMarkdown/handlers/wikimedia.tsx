@@ -1,11 +1,10 @@
 import WikimediaCard from "@/components/waves/WikimediaCard";
 import { parseWikimediaLink } from "@/src/services/wikimedia/url";
-import type { LinkHandler } from "../linkTypes";
 
-export const createWikimediaHandler = (): LinkHandler<string> => ({
-  match: (href) => (parseWikimediaLink(href) ? href : null),
-  render: (_payload, context) => <WikimediaCard href={context.href} />,
-  display: "block",
-});
+import { createSimpleHandler } from "./simpleHandler";
 
-export type WikimediaHandler = ReturnType<typeof createWikimediaHandler>;
+export const createWikimediaHandler = () =>
+  createSimpleHandler({
+    match: (href) => Boolean(parseWikimediaLink(href)),
+    render: (href) => <WikimediaCard href={href} />,
+  });

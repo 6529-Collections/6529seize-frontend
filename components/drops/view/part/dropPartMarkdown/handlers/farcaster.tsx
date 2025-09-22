@@ -1,26 +1,19 @@
+import FarcasterCard from "@/components/waves/FarcasterCard";
 import { isFarcasterHost } from "@/src/services/farcaster/url";
 
-import FarcasterCard from "@/components/waves/FarcasterCard";
-import type { LinkHandler } from "../linkTypes";
+import { createSimpleHandler } from "./simpleHandler";
 
-const matchFarcasterLink = (href: string): URL | null => {
+const isFarcasterLink = (href: string): boolean => {
   try {
     const url = new URL(href);
-    return isFarcasterHost(url.hostname) ? url : null;
+    return isFarcasterHost(url.hostname);
   } catch {
-    return null;
+    return false;
   }
 };
 
-export const createFarcasterHandler = (): LinkHandler<URL> => ({
-  match: matchFarcasterLink,
-  render: (_payload, context) => (
-    <FarcasterCard
-      href={context.href}
-      renderFallback={() => context.renderOpenGraph()}
-    />
-  ),
-  display: "block",
-});
-
-export type FarcasterHandler = ReturnType<typeof createFarcasterHandler>;
+export const createFarcasterHandler = () =>
+  createSimpleHandler({
+    match: isFarcasterLink,
+    render: (href) => <FarcasterCard href={href} />,
+  });

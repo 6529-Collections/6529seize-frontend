@@ -23,7 +23,6 @@ import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 
 interface FarcasterCardProps {
   readonly href: string;
-  readonly renderFallback: () => ReactElement;
 }
 
 type SupportedPreview = Exclude<
@@ -475,10 +474,7 @@ const renderUnavailable = (
   );
 };
 
-export default function FarcasterCard({
-  href,
-  renderFallback,
-}: FarcasterCardProps) {
+export default function FarcasterCard({ href }: FarcasterCardProps) {
   const [state, setState] = useState<FarcasterCardState>({ status: "loading" });
 
   useEffect(() => {
@@ -516,7 +512,7 @@ export default function FarcasterCard({
   }, [href]);
 
   if (state.status === "fallback") {
-    return renderFallback();
+    throw new Error("Unsupported Farcaster preview");
   }
 
   if (state.status === "loading") {

@@ -1,10 +1,8 @@
-import { parsePepeLink, renderPepeLink, type PepeLinkResult } from "../pepe";
-import type { LinkHandler } from "../linkTypes";
+import { parsePepeLink, renderPepeLink } from "../pepe";
+import { createSimpleHandler } from "./simpleHandler";
 
-export const createPepeHandler = (): LinkHandler<PepeLinkResult> => ({
-  match: parsePepeLink,
-  render: (payload) => renderPepeLink(payload),
-  display: "block",
-});
-
-export type PepeHandler = ReturnType<typeof createPepeHandler>;
+export const createPepeHandler = () =>
+  createSimpleHandler({
+    match: (href) => Boolean(parsePepeLink(href)),
+    render: (href) => renderPepeLink(href),
+  });

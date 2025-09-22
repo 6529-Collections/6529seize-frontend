@@ -52,6 +52,11 @@ export const parsePepeLink = (href: string): PepeLinkResult | null => {
   }
 };
 
-export const renderPepeLink = (result: PepeLinkResult) => (
-  <PepeCard kind={result.kind} slug={result.slug} href={result.href} />
-);
+export const renderPepeLink = (href: string) => {
+  const result = parsePepeLink(href);
+  if (!result) {
+    throw new Error("Invalid Pepe link");
+  }
+
+  return <PepeCard kind={result.kind} slug={result.slug} href={result.href} />;
+};
