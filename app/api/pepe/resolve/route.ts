@@ -208,7 +208,7 @@ function absolutizeRelativeUrl(candidate: string, base: string): string {
 function slugifyName(name: string): string {
   return name
     .toLowerCase()
-    .replaceAll(/&/g, "and")
+    .replaceAll("&", "and")
     .replaceAll(/[^a-z0-9\s-]/g, "")
     .trim()
     .replaceAll(/\s+/g, "-")
@@ -415,7 +415,7 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
   }
 
   if (!scraped.asset) {
-    const normalized = slug.replaceAll(/-/g, "").toUpperCase();
+    const normalized = slug.replaceAll("-", "").toUpperCase();
     if (isCounterpartyAssetCode(normalized)) {
       scraped.asset = normalized;
     }
@@ -515,7 +515,7 @@ async function resolveCollection(slug: string): Promise<CollectionPreview> {
   const nextData = await scrapeNextData(href);
   const name =
     extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replaceAll(/-/g, " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
+    slug.replaceAll("-", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
   const image =
     extractFirstString(
       deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
@@ -536,7 +536,7 @@ async function resolveArtist(slug: string): Promise<ArtistPreview> {
   const nextData = await scrapeNextData(href);
   const name =
     extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replaceAll(/-/g, " ");
+    slug.replaceAll("-", " ");
   const image =
     extractFirstString(
       deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])
@@ -564,7 +564,7 @@ async function resolveSet(slug: string): Promise<SetPreview> {
   const nextData = await scrapeNextData(href);
   const name =
     extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replaceAll(/-/g, " ");
+    slug.replaceAll("-", " ");
   const image =
     extractFirstString(
       deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])

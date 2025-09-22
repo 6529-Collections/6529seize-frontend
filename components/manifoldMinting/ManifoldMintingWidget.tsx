@@ -327,7 +327,7 @@ export default function ManifoldMintingWidget(
         }}
         type="number"
         value={mintCount}
-        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}
+        onChange={(e) => setMintCount(parseInt(e.target.value))}
       />
     );
   }
@@ -394,7 +394,7 @@ export default function ManifoldMintingWidget(
     }
 
     const minted = merkleProofsMints.filter(Boolean).length;
-    const unminted = merkleProofsMints.filter((m) => !Boolean(m)).length;
+    const unminted = merkleProofsMints.filter((m) => !m).length;
 
     return (
       <>

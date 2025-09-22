@@ -271,7 +271,7 @@ function stripHtmlTags(input: string, maxLen = 20000): string {
   let inTag = false;
 
   for (let i = 0; i < s.length; i++) {
-    const ch = s.charCodeAt(i);
+    const ch = s.codePointAt(i);
     if (ch === 60) {
       // '<'
       inTag = true;
@@ -296,7 +296,7 @@ function sanitizeRecordValue(
   }
 
   const withoutTags = stripHtmlTags(value);
-  const collapsed = withoutTags.replace(/\s+/g, " ").trim();
+  const collapsed = withoutTags.replaceAll(/\s+/g, " ").trim();
   if (!collapsed) {
     return null;
   }
@@ -356,11 +356,11 @@ function buildGatewayUrl(
 
   switch (protocol) {
     case "ipfs":
-      return `https://cf-ipfs.com/ipfs/${value.replace(/^ipfs:\/\//i, "")}`;
+      return `https://cf-ipfs.com/ipfs/${value.replaceAll(/^ipfs:\/\//i, "")}`;
     case "ipns":
-      return `https://cf-ipfs.com/ipns/${value.replace(/^ipns:\/\//i, "")}`;
+      return `https://cf-ipfs.com/ipns/${value.replaceAll(/^ipns:\/\//i, "")}`;
     case "arweave":
-      return `https://arweave.net/${value.replace(/^ar:\/\//i, "")}`;
+      return `https://arweave.net/${value.replaceAll(/^ar:\/\//i, "")}`;
     default:
       return null;
   }
