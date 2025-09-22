@@ -10,7 +10,7 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-jest.mock("../../../app/api/open-graph/utils", () => {
+jest.mock("@/app/api/open-graph/utils", () => {
   return {
     buildResponse: jest.fn(),
     ensureUrlIsPublic: jest.fn(),
@@ -23,7 +23,7 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
-const ensModule = {
+const ensRouteModule = {
   detectEnsTarget: jest.fn(() => null),
   fetchEnsPreview: jest.fn(),
   EnsPreviewError: class extends Error {
@@ -35,19 +35,19 @@ const ensModule = {
   },
 };
 
-jest.mock("../../../app/api/open-graph/ens", () => ensModule);
+jest.mock("@/app/api/open-graph/ens", () => ensRouteModule);
 
-const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
+const utils = jest.requireMock("@/app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
 };
 
 const originalFetch = globalThis.fetch;
-type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
+type GetHandler = typeof import("@/app/api/open-graph/route").GET;
 let GET: GetHandler;
 
 beforeAll(async () => {
-  ({ GET } = await import("../../../app/api/open-graph/route"));
+  ({ GET } = await import("@/app/api/open-graph/route"));
 });
 
 describe("open-graph API route", () => {
@@ -55,7 +55,7 @@ describe("open-graph API route", () => {
     jest.clearAllMocks();
     globalThis.fetch = originalFetch;
     nextResponseJson.mockClear();
-    ensModule.detectEnsTarget.mockReturnValue(null);
+    ensRouteModule.detectEnsTarget.mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -190,11 +190,11 @@ describe("open-graph API route", () => {
 
   it("handles ENS previews when detected", async () => {
     const previewPayload = { type: "ens.name", name: "vitalik.eth" };
-    ensModule.detectEnsTarget.mockReturnValue({
+    ensRouteModule.detectEnsTarget.mockReturnValue({
       kind: "name",
       input: "vitalik.eth",
     });
-    ensModule.fetchEnsPreview.mockResolvedValue(previewPayload);
+    ensRouteModule.fetchEnsPreview.mockResolvedValue(previewPayload);
 
     const request = {
       nextUrl: new URL("https://app.local/api/open-graph?url=vitalik.eth"),
@@ -204,7 +204,7 @@ describe("open-graph API route", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(previewPayload);
-    expect(ensModule.fetchEnsPreview).toHaveBeenCalledWith({
+    expect(ensRouteModule.fetchEnsPreview).toHaveBeenCalledWith({
       kind: "name",
       input: "vitalik.eth",
     });

@@ -250,12 +250,13 @@ function normalizeEnsName(name: string): {
   normalized: string;
   display: string;
 } {
+  console.log("normalizeEnsName", `[${name}]`);
   try {
     const normalized = normalize(name);
     const display = toUnicode(normalized);
     return { normalized, display };
   } catch (error: any) {
-    console.error(error);
+    console.error("normalizeEnsName error", `[${name}]`, error);
     let message = "Invalid ENS name provided";
     if (error?.message) {
       message = `${message}: ${error.message}`;
