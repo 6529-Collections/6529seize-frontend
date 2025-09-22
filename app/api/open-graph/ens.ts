@@ -254,8 +254,13 @@ function normalizeEnsName(name: string): {
     const normalized = normalize(name);
     const display = toUnicode(normalized);
     return { normalized, display };
-  } catch {
-    throw new EnsPreviewError(400, "Invalid ENS name provided.");
+  } catch (error: any) {
+    console.error(error);
+    let message = "Invalid ENS name provided.";
+    if (error?.message) {
+      message = `${message}: ${error.message}`;
+    }
+    throw new EnsPreviewError(400, message);
   }
 }
 
