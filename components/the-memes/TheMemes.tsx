@@ -1,6 +1,7 @@
 "use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
+import { env } from "@/utils/env";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -27,7 +28,6 @@ import NFTImage from "../nft-image/NFTImage";
 import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
 import { VolumeTypeDropdown } from "./MemeShared";
 import styles from "./TheMemes.module.scss";
-import { env } from "@/utils/env";
 
 interface Meme {
   meme: number;
@@ -279,37 +279,6 @@ export default function TheMemesComponent() {
     return () => window.removeEventListener("scroll", checkScrollPosition);
   }, []);
 
-<<<<<<< HEAD
-  useEffect(() => {
-    const newTokenIds = [...nfts]
-      .map((nft) => nft.id)
-      .filter((id) => !nftBalances.some((b) => b.token_id === id));
-    if (connectedConsolidationKey && newTokenIds.length > 0) {
-      fetchAllPages(
-        `${env.API_ENDPOINT}/api/nft-owners/consolidation/${
-          connectedProfile?.consolidation_key
-        }?contract=${MEMES_CONTRACT}&token_id=${newTokenIds.join(",")}`
-      ).then((owners: NftOwner[]) => {
-        setNftBalances([...nftBalances, ...owners]);
-        setNftBalancesTokenIds(
-          new Set([...Array.from(nftBalancesTokenIds), ...newTokenIds])
-        );
-      });
-    }
-  }, [connectedConsolidationKey, nfts]);
-
-  useEffect(() => {
-    setNftBalances([]);
-    setNftBalancesTokenIds(new Set());
-    setConnectedConsolidationKey(
-      connectedProfile?.consolidation_key ??
-        connectedProfile?.wallets?.[0]?.wallet ??
-        ""
-    );
-  }, [connectedProfile]);
-
-=======
->>>>>>> main
   function getVolume(nft: NFTWithMemesExtendedData) {
     let vol = 0;
     switch (volumeType) {
