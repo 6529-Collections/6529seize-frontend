@@ -3,8 +3,13 @@ import { ApiWave } from "../../../../generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import { useContentTab } from "../../ContentTabContext";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
-import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronDoubleLeftIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import WavePicture from "../../../waves/WavePicture";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { createBreakpoint } from "react-use";
+
+// Breakpoint for mobile responsiveness (lg = 1024px)
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
   readonly wave: ApiWave;
 }
@@ -16,12 +21,39 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
 
+  // Navigation hooks for mobile back button
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === "S";
+
+  // Mobile back button handler - removes wave param to go back to list
+  const handleMobileBack = () => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("wave");
+    const newUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname || "/waves";
+    router.push(newUrl, { scroll: false });
+  };
+
   return (
     <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
       {/* Wave name header with toggle button */}
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-6 tw-py-3 tw-border-b tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-t-0">
         <div className="tw-flex tw-items-center tw-gap-x-3">
-          <div className="tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
+          {/* Mobile back button */}
+          {isMobile && (
+            <button
+              onClick={handleMobileBack}
+              className="tw-flex tw-items-center tw-bg-transparent tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-p-0"
+              aria-label="Go back"
+            >
+              <ArrowLeftIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+            </button>
+          )}
+          <div className="tw-size-6 lg:tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
             <WavePicture
               name={wave.name}
               picture={wave.picture}
@@ -30,7 +62,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
               }))}
             />
           </div>
-          <h1 className="tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0">
+          <h1 className="tw-text-sm lg:tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0 tw-truncate">
             {wave.name}
           </h1>
         </div>

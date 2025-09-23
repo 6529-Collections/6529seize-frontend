@@ -10,7 +10,11 @@ interface WebSidebarHeaderProps {
   readonly tooltipId: string;
 }
 
-function WebSidebarHeader({ collapsed, onToggle, tooltipId }: WebSidebarHeaderProps) {
+function WebSidebarHeader({
+  collapsed,
+  onToggle,
+  tooltipId,
+}: WebSidebarHeaderProps) {
   return (
     <div
       className={`tw-shrink-0 tw-h-12 ${

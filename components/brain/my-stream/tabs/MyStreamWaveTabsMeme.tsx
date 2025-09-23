@@ -15,8 +15,13 @@ import {
 } from "../../../../helpers/waves/time.utils";
 import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
-import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronDoubleLeftIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import WavePicture from "../../../waves/WavePicture";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { createBreakpoint } from "react-use";
+
+// Breakpoint for mobile responsiveness (lg = 1024px)
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 interface MyStreamWaveTabsMemeProps {
   readonly wave: ApiWave;
@@ -29,6 +34,13 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
   const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
+
+  // Navigation hooks for mobile back button
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === "S";
 
   // Wave hooks for countdown functionality
   const {
@@ -106,6 +118,16 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     setIsMemesModalOpen(true);
   };
 
+  // Mobile back button handler - removes wave param to go back to list
+  const handleMobileBack = () => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("wave");
+    const newUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname || "/waves";
+    router.push(newUrl, { scroll: false });
+  };
+
   return (
     <>
       {" "}
@@ -113,7 +135,17 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         {/* Title, toggle button and submit button */}
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4 tw-px-6 tw-py-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            <div className="tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
+            {/* Mobile back button */}
+            {isMobile && (
+              <button
+                onClick={handleMobileBack}
+                className="tw-flex tw-items-center tw-bg-transparent tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-p-0"
+                aria-label="Go back"
+              >
+                <ArrowLeftIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+              </button>
+            )}
+            <div className="tw-size-6 lg:tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
               <WavePicture
                 name={wave.name}
                 picture={wave.picture}
@@ -122,15 +154,17 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
                 }))}
               />
             </div>
-            <h1 className="tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0">
+            <h1 className="tw-text-sm lg:tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0 tw-truncate">
               {wave.name}
             </h1>
           </div>
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <MyStreamWaveTabsMemeSubmit
-              handleMemesSubmit={handleMemesSubmit}
-              wave={wave}
-            />
+            <div className="tw-hidden lg:tw-block">
+              <MyStreamWaveTabsMemeSubmit
+                handleMemesSubmit={handleMemesSubmit}
+                wave={wave}
+              />
+            </div>
             {/* Right sidebar toggle button */}
             <button
               type="button"

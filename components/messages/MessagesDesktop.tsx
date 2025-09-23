@@ -3,7 +3,7 @@
 import React, { ReactNode } from "react";
 import { ContentTabProvider } from "../brain/ContentTabContext";
 import { SidebarProvider } from "../../hooks/useSidebarState";
-import SharedDesktopLayout from "../shared/SharedDesktopLayout";
+import WavesMessagesLayout from "../shared/WavesMessagesLayout";
 
 interface Props {
   readonly children: ReactNode;
@@ -11,9 +11,9 @@ interface Props {
 
 const MessagesDesktop: React.FC<Props> = ({ children }) => {
   return (
-    <SharedDesktopLayout defaultPath="/messages" showLeftSidebar={true}>
+    <WavesMessagesLayout defaultPath="/messages" showLeftSidebar={true}>
       {children}
-    </SharedDesktopLayout>
+    </WavesMessagesLayout>
   );
 };
 

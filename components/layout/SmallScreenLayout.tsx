@@ -13,9 +13,17 @@ export default function SmallScreenLayout({ children }: Props) {
   // Simple menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Prevent body scroll when using this layout
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   return (
     <div className="tw-flex tw-flex-col tw-h-screen">
-      {/* Simple header bar with hamburger */}
+      {/* Fixed header bar with hamburger */}
       <SmallScreenHeader
         onMenuToggle={() => setIsMenuOpen(!isMenuOpen)}
         isMenuOpen={isMenuOpen}
@@ -35,7 +43,7 @@ export default function SmallScreenLayout({ children }: Props) {
         </div>
       )}
 
-      {/* Main content that grows to fill space */}
+      {/* Main scrollable area */}
       <main className={`tw-flex-1 tw-overflow-auto tw-transition-opacity tw-duration-300 ${isMenuOpen ? 'tw-opacity-40 tw-pointer-events-none' : ''}`}>
         {children}
       </main>

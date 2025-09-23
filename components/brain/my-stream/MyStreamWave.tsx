@@ -98,7 +98,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       <MyStreamWaveTabs wave={wave} />
 
       <div
-        className="tw-flex-grow tw-overflow-hidden"
+        className="tw-flex-grow tw-overflow-hidden tw-relative"
         role="tabpanel"
         id={getContentTabPanelId(activeContentTab)}
       >

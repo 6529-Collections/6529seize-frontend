@@ -23,10 +23,10 @@ const WebLeftSidebar: React.FC = () => {
   const isMessagesView = pathname?.startsWith("/messages");
 
   return (
-    <div className="tw-relative tw-w-80 tw-h-full">
+    <div className="tw-relative tw-w-full lg:tw-w-80 tw-h-full">
       <div
         ref={scrollContainerRef}
-        className="tw-flex tw-flex-col tw-overflow-y-auto tw-w-80 tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40"
+        className="tw-flex tw-flex-col tw-overflow-y-auto tw-w-full lg:tw-w-80 tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40"
         style={{ minHeight: "100%" }}
       >
         {!isMessagesView && (
