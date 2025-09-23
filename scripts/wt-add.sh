@@ -12,13 +12,14 @@ BASE_REF=${2:-$(git rev-parse --abbrev-ref HEAD)}
 TARGET_BRANCH=${3:-$WORKTREE_NAME}
 
 if git show-ref --verify --quiet "refs/heads/$TARGET_BRANCH"; then
-  echo "Error: branch '$TARGET_BRANCH' already exists. Choose a different worktree name or branch name."
-  exit 1
+  echo "Creating worktree '$WORKTREE_NAME' from existing branch '$TARGET_BRANCH'..."
+  git worktree add "../$WORKTREE_NAME" "$TARGET_BRANCH"
+else
+  echo "Creating worktree '$WORKTREE_NAME' from '$BASE_REF' on new branch '$TARGET_BRANCH'..."
+  git worktree add -b "$TARGET_BRANCH" "../$WORKTREE_NAME" "$BASE_REF"
 fi
 
-# 1. Create new worktree
-echo "Creating worktree '$WORKTREE_NAME' from '$BASE_REF' on branch '$TARGET_BRANCH'..."
-git worktree add -b "$TARGET_BRANCH" "../$WORKTREE_NAME" "$BASE_REF"
+echo "✓ Branch '$TARGET_BRANCH' ready in worktree '$WORKTREE_NAME'."
 
 # 2. Copy .env* files
 echo "Copying .env* files..."
