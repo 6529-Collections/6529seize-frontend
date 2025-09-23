@@ -803,3 +803,12 @@ export async function fetchFileContent(filePath: string): Promise<string> {
     return "";
   }
 }
+
+export const idStringToDisplay = (id: string) => {
+  if (!id) return id;
+  const num = Number(id);
+  if (!Number.isNaN(num) && Number.isInteger(num)) {
+    return num.toLocaleString();
+  }
+  return id;
+};
