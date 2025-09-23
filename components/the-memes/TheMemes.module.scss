@@ -67,11 +67,14 @@
   right: 0;
   cursor: pointer;
   z-index: 100;
-  width: 20px;
+  width: 20px !important;
 }
 
 .memePageTab {
-  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
+  color: color.scale(
+    variables.$font-color,
+    $lightness: -(variables.$darken-percentage)
+  );
   margin-right: 15px;
   cursor: pointer;
   &:hover {

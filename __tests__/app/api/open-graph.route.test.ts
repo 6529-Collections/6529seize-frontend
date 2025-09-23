@@ -1,4 +1,4 @@
-const nextResponseJson = jest.fn(
+const nextResponseJsonRoute = jest.fn(
   (body: unknown, init?: { status?: number }) => ({
     status: init?.status ?? 200,
     json: async () => body,
@@ -6,11 +6,11 @@ const nextResponseJson = jest.fn(
 );
 
 jest.mock("next/server", () => ({
-  NextResponse: { json: nextResponseJson },
+  NextResponse: { json: nextResponseJsonRoute },
   NextRequest: class {},
 }));
 
-jest.mock("../../../app/api/open-graph/utils", () => {
+jest.mock("@/app/api/open-graph/utils", () => {
   return {
     buildResponse: jest.fn(),
     ensureUrlIsPublic: jest.fn(),
@@ -23,28 +23,43 @@ jest.mock("../../../app/api/open-graph/utils", () => {
   };
 });
 
-const utils = jest.requireMock("../../../app/api/open-graph/utils") as {
+const ensRouteModule = {
+  detectEnsTarget: jest.fn(() => null),
+  fetchEnsPreview: jest.fn(),
+  EnsPreviewError: class extends Error {
+    status: number;
+    constructor(message: string, status = 400) {
+      super(message);
+      this.status = status;
+    }
+  },
+};
+
+jest.mock("@/app/api/open-graph/ens", () => ensRouteModule);
+
+const utils = jest.requireMock("@/app/api/open-graph/utils") as {
   buildResponse: jest.Mock;
   ensureUrlIsPublic: jest.Mock;
 };
 
-const originalFetch = global.fetch;
-type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
+const originalFetch = globalThis.fetch;
+type GetHandler = typeof import("@/app/api/open-graph/route").GET;
 let GET: GetHandler;
 
 beforeAll(async () => {
-  ({ GET } = await import("../../../app/api/open-graph/route"));
+  ({ GET } = await import("@/app/api/open-graph/route"));
 });
 
 describe("open-graph API route", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = originalFetch;
-    nextResponseJson.mockClear();
+    globalThis.fetch = originalFetch;
+    nextResponseJsonRoute.mockClear();
+    ensRouteModule.detectEnsTarget.mockReturnValue(null);
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   const createResponse = (
@@ -82,7 +97,9 @@ describe("open-graph API route", () => {
       headers: { location: "http://169.254.0.1/internal" },
     });
 
-    global.fetch = jest.fn().mockResolvedValueOnce(redirectResponse) as jest.MockedFunction<
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(redirectResponse) as jest.MockedFunction<
       typeof fetch
     >;
 
@@ -95,7 +112,7 @@ describe("open-graph API route", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(502);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
@@ -120,9 +137,11 @@ describe("open-graph API route", () => {
     const fetchMock = jest
       .fn()
       .mockResolvedValueOnce(redirectResponse)
-      .mockResolvedValueOnce(successResponse) as jest.MockedFunction<typeof fetch>;
+      .mockResolvedValueOnce(successResponse) as jest.MockedFunction<
+      typeof fetch
+    >;
 
-    global.fetch = fetchMock;
+    globalThis.fetch = fetchMock;
 
     const previewPayload = {
       requestUrl: "http://safe.example/article",
@@ -167,5 +186,28 @@ describe("open-graph API route", () => {
       html,
       "text/html"
     );
+  });
+
+  it("handles ENS previews when detected", async () => {
+    const previewPayload = { type: "ens.name", name: "vitalik.eth" };
+    ensRouteModule.detectEnsTarget.mockReturnValue({
+      kind: "name",
+      input: "vitalik.eth",
+    });
+    ensRouteModule.fetchEnsPreview.mockResolvedValue(previewPayload);
+
+    const request = {
+      nextUrl: new URL("https://app.local/api/open-graph?url=vitalik.eth"),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(previewPayload);
+    expect(ensRouteModule.fetchEnsPreview).toHaveBeenCalledWith({
+      kind: "name",
+      input: "vitalik.eth",
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 });
