@@ -1,7 +1,7 @@
-import { DYNAMIC_ROUTE_CONFIGS } from "../../hooks/breadcrumbs.config";
+import { DYNAMIC_ROUTE_CONFIGS } from "@/hooks/breadcrumbs.config";
 
 // Mock the API functions
-jest.mock("../../hooks/breadcrumbs.api", () => ({
+jest.mock("@/hooks/breadcrumbs.api", () => ({
   fetchGradientName: jest.fn(),
   fetchProfileHandle: jest.fn(),
   fetchWaveName: jest.fn(),
@@ -114,7 +114,7 @@ describe("breadcrumbs.config", () => {
       );
       expect(crumbs).toEqual([
         { display: "6529 Gradient", href: "/6529-gradient" },
-        { display: "Gradient 123" },
+        { display: "Gradient #123" },
       ]);
     });
   });
@@ -332,7 +332,7 @@ describe("breadcrumbs.config", () => {
       );
       expect(crumbs).toEqual([
         { display: "Meme Lab", href: "/meme-lab" },
-        { display: "Card 123 - Test Lab" },
+        { display: "Card #123 - Test Lab" },
       ]);
     });
 
@@ -346,7 +346,7 @@ describe("breadcrumbs.config", () => {
       );
       expect(crumbs).toEqual([
         { display: "Meme Lab", href: "/meme-lab" },
-        { display: "Card 123" },
+        { display: "Card #123" },
       ]);
     });
   });

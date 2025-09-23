@@ -253,7 +253,6 @@ function normalizeEnsName(name: string): {
   console.log("normalizeEnsName", `[${name}]`);
   try {
     const normalized = ens_normalize(name);
-    console.log("after normalize", `[${name}]`, `[${normalized}]`);
     const display = toUnicode(normalized);
     console.log("after toUnicode", `[${name}]`, `[${display}]`);
     return { normalized, display };

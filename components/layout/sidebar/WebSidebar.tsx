@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { usePathname } from "next/navigation";
 import WebSidebarNav from "./WebSidebarNav";
 import WebSidebarUser from "./WebSidebarUser";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
@@ -27,6 +28,7 @@ function WebSidebar({
   sidebarWidth,
 }: WebSidebarProps) {
   const navRef = useRef<{ closeSubmenu: () => void }>(null);
+  const pathname = usePathname();
   const { address } = useSeizeConnectContext();
   const { profile } = useIdentity({
     handleOrWallet: address || "",
@@ -35,22 +37,46 @@ function WebSidebar({
 
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
-    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+    if (typeof window !== "undefined") {
+      setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+    }
   }, []);
+
+  // Close sidebar on route change when on mobile
+  const prevPathnameRef = useRef(pathname);
+  useEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname;
+      if (isMobile && isOffcanvasOpen) {
+        onCloseOffcanvas();
+      }
+    }
+  }, [pathname, isMobile, isOffcanvasOpen, onCloseOffcanvas]);
 
   // ESC key closes off-canvas overlay
   useEffect(() => {
     if (!isMobile || !isOffcanvasOpen) return;
-    const onKey = (e: KeyboardEvent) =>
-      e.key === "Escape" && onCloseOffcanvas();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onCloseOffcanvas();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
   }, [isMobile, isOffcanvasOpen, onCloseOffcanvas]);
 
   // Sidebar is expanded on mobile when offcanvas is open
   const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
   const isDialog = isMobile && isOffcanvasOpen;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleToggle = () => {
+    // Close submenu immediately before toggling
+    navRef.current?.closeSubmenu();
+    onToggle();
+  };
 
   return (
     <>
@@ -78,32 +104,21 @@ function WebSidebar({
           <div className="tw-flex tw-flex-col tw-h-full tw-pt-3">
             <WebSidebarHeader
               collapsed={shouldShowCollapsed}
-              onToggle={() => {
-                // Close submenu immediately before toggling
-                navRef.current?.closeSubmenu();
-                onToggle();
-              }}
+              onToggle={handleToggle}
               tooltipId="sidebar-tooltip"
             />
 
             <div className="tw-flex-1">
-              <WebSidebarNav
-                ref={navRef}
-                isCollapsed={shouldShowCollapsed}
-              />
+              <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
             </div>
 
-            {/* QR Code Generator */}
-            <div className="tw-mt-1">
-              <HeaderShare isCollapsed={shouldShowCollapsed} />
-            </div>
+            <HeaderShare isCollapsed={shouldShowCollapsed} />
 
             <WebSidebarUser
               isCollapsed={shouldShowCollapsed}
               profile={profile}
             />
           </div>
-
         </div>
       </div>
       {!isTouchScreen && (

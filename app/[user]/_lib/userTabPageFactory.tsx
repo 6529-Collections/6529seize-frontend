@@ -8,7 +8,7 @@ import {
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 type TabProps = { profile: ApiIdentity };
 
@@ -32,7 +32,13 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     const profile: ApiIdentity = await getUserProfile({
       user: user.toLowerCase(),
       headers,
+    }).catch(() => {
+      notFound();
     });
+
+    if (!profile) {
+      notFound();
+    }
 
     const needsRedirect = userPageNeedsRedirect({
       profile,

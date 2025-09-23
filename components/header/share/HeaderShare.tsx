@@ -58,7 +58,7 @@ export default function HeaderShare({ isCollapsed = false }: { readonly isCollap
   }
 
   return (
-    <div className={`tailwind-scope tw-relative ${isCollapsed ? "tw-px-2" : "tw-px-4"}`}>
+    <div className={`tailwind-scope tw-relative tw-mt-1 ${isCollapsed ? "tw-px-2" : "tw-px-4"}`}>
       <button
         type="button"
         aria-label="QR Code"

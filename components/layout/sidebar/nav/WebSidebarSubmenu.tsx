@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { SidebarSection } from "@/components/navigation/navTypes";
+import { SIDEBAR_DIMENSIONS } from "@/constants/sidebar";
 
 interface WebSidebarSubmenuProps {
   readonly section: SidebarSection;
@@ -11,8 +12,6 @@ interface WebSidebarSubmenuProps {
   readonly pathname: string | null;
   readonly onClose: () => void;
 }
-
-// No offset needed - submenu should be flush with sidebar
 
 function WebSidebarSubmenu({
   section,
@@ -23,30 +22,36 @@ function WebSidebarSubmenu({
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Position submenu at fixed position - right after collapsed sidebar
-  const position = useMemo(() => {
-    return {
-      top: 0, // Always start from top for full-height submenu
-      left: 64 // Fixed 4rem (64px) - collapsed sidebar width
-    };
-  }, []);
+  const submenuPosition = {
+    top: 0,
+    left: `${SIDEBAR_DIMENSIONS.COLLAPSED_WIDTH_REM}rem`,
+  };
 
   // Memoize event handlers
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      onClose();
-    }
-  }, [onClose]);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    const target = event.target as Node;
-    if (
-      popoverRef.current &&
-      !popoverRef.current.contains(target) &&
-      !anchor.contains(target)
-    ) {
-      onClose();
-    }
-  }, [onClose, anchor, popoverRef]);
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(target) &&
+        !anchor.contains(target)
+      ) {
+        onClose();
+      }
+    },
+    [onClose, anchor]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -62,13 +67,10 @@ function WebSidebarSubmenu({
 
   // Combine all items from section and subsections
   const combinedItems = useMemo(() => {
-    const items = [...section.items];
-    if (section.subsections) {
-      section.subsections.forEach(sub => {
-        items.push(...sub.items);
-      });
-    }
-    return items;
+    return [
+      ...section.items,
+      ...(section.subsections?.flatMap(sub => sub.items) ?? [])
+    ];
   }, [section.items, section.subsections]);
 
   // SSR check - early return for server-side rendering
@@ -80,7 +82,7 @@ function WebSidebarSubmenu({
     <div
       ref={popoverRef}
       className="tw-fixed tw-z-[95] tw-bg-iron-950"
-      style={{ top: position.top, left: position.left }}
+      style={{ top: submenuPosition.top, left: submenuPosition.left }}
       role="presentation"
     >
       <div
@@ -95,20 +97,25 @@ function WebSidebarSubmenu({
           </h3>
         </div>
 
-        <div className="tw-p-3 tw-overflow-y-auto tw-h-[calc(100vh-56px)] tw-scrollbar-thin tw-scrollbar-thumb-iron-800 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-iron-700">
+        <div
+          className="tw-p-3 tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          style={{
+            height: `calc(100vh - ${SIDEBAR_DIMENSIONS.SUBMENU_HEADER_HEIGHT_REM}rem)`,
+          }}
+        >
           {combinedItems.map((item) => {
-            const baseClass = "tw-group tw-flex tw-items-center tw-no-underline tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-600 focus-visible:tw-ring-offset-1 tw-ring-offset-iron-950 tw-mb-1";
-
-            const stateClass = isActive(item.href)
-              ? "tw-text-white tw-bg-iron-800/80"
-              : "tw-text-iron-400 desktop-hover:hover:tw-bg-iron-850/50 desktop-hover:hover:tw-text-iron-200";
+            const isItemActive = isActive(item.href);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${baseClass} ${stateClass}`}
-                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`tw-group tw-flex tw-items-center tw-no-underline tw-rounded-lg tw-px-3 tw-py-2 tw-mb-1 tw-text-sm tw-font-medium tw-transition-all tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-600 focus-visible:tw-ring-offset-1 tw-ring-offset-iron-950 ${
+                  isItemActive
+                    ? "tw-text-white tw-bg-iron-800/80"
+                    : "tw-text-iron-400 desktop-hover:hover:tw-bg-iron-850/50 desktop-hover:hover:tw-text-iron-200"
+                }`}
+                aria-current={isItemActive ? "page" : undefined}
                 role="menuitem"
                 onClick={onClose}
               >

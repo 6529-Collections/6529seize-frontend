@@ -114,9 +114,13 @@ const WebSidebarNav = React.forwardRef<
   }, []);
 
   // Expose closeSubmenu to parent
-  useImperativeHandle(ref, () => ({
-    closeSubmenu
-  }), [closeSubmenu]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      closeSubmenu,
+    }),
+    [closeSubmenu]
+  );
 
   // Toggle section expansion
   const toggleSection = useCallback((key: string) => {
@@ -135,9 +139,9 @@ const WebSidebarNav = React.forwardRef<
     let activeSection: string | null = null;
     for (const section of sections) {
       const hasActiveItem =
-        section.items.some(item => pathname === item.href) ||
-        section.subsections?.some(sub =>
-          sub.items.some(item => pathname === item.href)
+        section.items.some((item) => pathname === item.href) ||
+        section.subsections?.some((sub) =>
+          sub.items.some((item) => pathname === item.href)
         );
 
       if (hasActiveItem) {
@@ -155,7 +159,7 @@ const WebSidebarNav = React.forwardRef<
   }, [pathname, sections]); // Run when pathname changes
 
   // Get the section for the active submenu
-  const activeSection = sections.find(s => s.key === activeSubmenu);
+  const activeSection = sections.find((s) => s.key === activeSubmenu);
 
   // Close submenu immediately when sidebar expands or pathname changes
   useEffect(() => {
@@ -171,7 +175,7 @@ const WebSidebarNav = React.forwardRef<
   return (
     <>
       <nav
-        className={`tw-flex tw-flex-1 tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden custom-scrollbar ${
+        className={`tw-flex tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${
           isCollapsed ? "tw-px-2" : "tw-px-4"
         }`}
         aria-label="Desktop navigation"
@@ -293,7 +297,10 @@ const WebSidebarNav = React.forwardRef<
 
           {/* Tools and About - Expandable */}
           {sections
-            .filter((section) => section.key !== "network" && section.key !== "collections")
+            .filter(
+              (section) =>
+                section.key !== "network" && section.key !== "collections"
+            )
             .map((section) => (
               <li key={section.key}>
                 <WebSidebarExpandable
@@ -330,10 +337,10 @@ const WebSidebarNav = React.forwardRef<
       </CommonAnimationWrapper>
       {activeSubmenu && activeSection && submenuAnchor && (
         <>
-          {/* Overlay for main content only - not covering the sidebar */}
+          {/* Overlay for main content */}
           <div
-            className="tw-fixed tw-inset-0 tw-bg-black/20 tw-z-[94]"
-            style={{ left: "288px" }} // 64px sidebar + 224px submenu
+            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
+            style={{ left: "18rem" }} // 4rem sidebar + 14rem submenu
             onClick={closeSubmenu}
           />
           <WebSidebarSubmenu
