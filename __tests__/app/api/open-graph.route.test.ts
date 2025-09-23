@@ -1,4 +1,4 @@
-const nextResponseJson = jest.fn(
+const nextResponseJsonRoute = jest.fn(
   (body: unknown, init?: { status?: number }) => ({
     status: init?.status ?? 200,
     json: async () => body,
@@ -6,7 +6,7 @@ const nextResponseJson = jest.fn(
 );
 
 jest.mock("next/server", () => ({
-  NextResponse: { json: nextResponseJson },
+  NextResponse: { json: nextResponseJsonRoute },
   NextRequest: class {},
 }));
 
@@ -341,5 +341,28 @@ describe("open-graph API route", () => {
       { error: "boom" },
       { status: 502 }
     );
+  });
+
+  it("handles ENS previews when detected", async () => {
+    const previewPayload = { type: "ens.name", name: "vitalik.eth" };
+    ensRouteModule.detectEnsTarget.mockReturnValue({
+      kind: "name",
+      input: "vitalik.eth",
+    });
+    ensRouteModule.fetchEnsPreview.mockResolvedValue(previewPayload);
+
+    const request = {
+      nextUrl: new URL("https://app.local/api/open-graph?url=vitalik.eth"),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(previewPayload);
+    expect(ensRouteModule.fetchEnsPreview).toHaveBeenCalledWith({
+      kind: "name",
+      input: "vitalik.eth",
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 });

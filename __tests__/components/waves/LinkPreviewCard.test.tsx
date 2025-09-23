@@ -7,6 +7,10 @@ const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
   <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
 ));
 
+const mockEnsPreviewCard = jest.fn(({ preview }: any) => (
+  <div data-testid="ens-card" data-type={preview?.type ?? "none"} />
+));
+
 jest.mock("../../../components/waves/OpenGraphPreview", () => {
   const actual = jest.requireActual("../../../components/waves/OpenGraphPreview");
   return {
@@ -15,6 +19,11 @@ jest.mock("../../../components/waves/OpenGraphPreview", () => {
     default: (props: any) => mockOpenGraphPreview(props),
   };
 });
+
+jest.mock("../../../components/waves/ens/EnsPreviewCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockEnsPreviewCard(props),
+}));
 
 jest.mock("../../../services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
@@ -86,5 +95,24 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
+  });
+
+  it("renders ENS previews when ENS data is returned", async () => {
+    fetchLinkPreview.mockResolvedValue({ type: "ens.name", name: "vitalik.eth" });
+
+    render(
+      <LinkPreviewCard
+        href="vitalik.eth"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockEnsPreviewCard).toHaveBeenCalledWith(
+        expect.objectContaining({ preview: expect.objectContaining({ type: "ens.name" }) })
+      );
+    });
+
+    expect(screen.queryByTestId("fallback")).toBeNull();
   });
 });
