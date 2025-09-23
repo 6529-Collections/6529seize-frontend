@@ -1,12 +1,12 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { Tooltip } from "react-tooltip";
-import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
+import { env } from "@/config/env";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
-import StormButton from "./StormButton";
-import CreateDropGifPicker from "./CreateDropGifPicker";
+import { Tooltip } from "react-tooltip";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import CreateDropGifPicker from "./CreateDropGifPicker";
+import StormButton from "./StormButton";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;

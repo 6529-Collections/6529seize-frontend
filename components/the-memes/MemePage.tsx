@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "./TheMemes.module.scss";
 
 import { MEMES_CONTRACT } from "@/constants";
@@ -94,23 +94,23 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   useEffect(() => {
     if (nftId) {
-      fetchUrl(
-        `${env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
-      ).then((response: DBResponse) => {
-        const nftMetas = response.data;
-        if (nftMetas.length === 1) {
-          setNftMeta(nftMetas[0]);
-          fetchUrl(
-            `${env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
-          ).then((response: DBResponse) => {
-            const mynft = response.data[0];
-            setNft(mynft);
-          });
-        } else {
-          setNftMeta(undefined);
-          setNftNotFound(true);
+      fetchUrl(`${env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`).then(
+        (response: DBResponse) => {
+          const nftMetas = response.data;
+          if (nftMetas.length === 1) {
+            setNftMeta(nftMetas[0]);
+            fetchUrl(
+              `${env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
+            ).then((response: DBResponse) => {
+              const mynft = response.data[0];
+              setNft(mynft);
+            });
+          } else {
+            setNftMeta(undefined);
+            setNftNotFound(true);
+          }
         }
-      });
+      );
     }
   }, [nftId]);
 

@@ -1,13 +1,13 @@
 "use client";
 
-import { env } from "@/utils/env";
-import React, {
+import { env } from "@/config/env";
+import {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   ReactNode,
+  useContext,
+  useEffect,
   useMemo,
+  useState,
 } from "react";
 import { ApiSeizeSettings } from "../generated/models/ApiSeizeSettings";
 import { fetchUrl } from "../services/6529api";
@@ -37,8 +37,7 @@ export const SeizeSettingsProvider = ({
       (settings: ApiSeizeSettings) => {
         setSeizeSettings({
           ...settings,
-          memes_wave_id:
-            env.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
+          memes_wave_id: env.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
         });
       }
     );

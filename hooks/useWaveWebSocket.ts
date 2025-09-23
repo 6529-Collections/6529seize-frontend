@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { useEffect, useRef, useState } from "react";
 import { WsMessageType } from "../helpers/Types";
 

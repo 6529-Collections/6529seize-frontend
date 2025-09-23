@@ -1,13 +1,13 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { Container, Row, Col } from "react-bootstrap";
+import { env } from "@/config/env";
 import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import { DBResponse } from "../../../entities/IDBResponse";
-import { fetchUrl } from "../../../services/6529api";
 import { NextGenCollection } from "../../../entities/INextgen";
-import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 import { areEqualAddresses } from "../../../helpers/Helpers";
+import { fetchUrl } from "../../../services/6529api";
+import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 
 export default function NextGenArtists() {
   const [artistCollections, setArtistCollections] = useState<

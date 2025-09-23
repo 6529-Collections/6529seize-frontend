@@ -1,4 +1,5 @@
 import { test as baseTest, expect, Page } from "@playwright/test";
+import { env } from "../config/env";
 
 // Extend the base test to include a global beforeEach hook
 export const test = baseTest.extend({
@@ -22,7 +23,7 @@ export async function login(page: Page, baseURL: string) {
   if (page.url().includes("/access")) {
     console.log("Redirected to /access, attempting login...");
 
-    const password = process.env.STAGING_PASSWORD || "";
+    const password = env.STAGING_PASSWORD || "";
     console.log(
       `Using password: ${
         password ? "*".repeat(password.length) : "ERROR: NOT SET IN ENV"

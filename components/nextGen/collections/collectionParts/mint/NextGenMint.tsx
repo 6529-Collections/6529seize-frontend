@@ -1,6 +1,5 @@
 "use client";
 
-import { env } from "@/utils/env";
 import { DELEGATION_ABI } from "@/abis";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
@@ -8,6 +7,7 @@ import {
   MINTING_USE_CASE,
 } from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import { env } from "@/config/env";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
 import { NextGenCollection } from "@/entities/INextgen";
 import { fromGWEI } from "@/helpers/Helpers";
@@ -351,8 +351,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}`}
-            className="decoration-hover-underline"
-          >
+            className="decoration-hover-underline">
             <h1 className="mb-0 font-color">{props.collection.name}</h1>
           </Link>
           <span className="font-larger">
@@ -380,8 +379,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         <Col
           sm={12}
           md={6}
-          className="no-padding d-flex align-items-start justify-content-start gap-3"
-        >
+          className="no-padding d-flex align-items-start justify-content-start gap-3">
           <Image
             unoptimized
             loading="eager"
@@ -406,8 +404,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             <Row className="pt-2">
               <Col className="d-flex gap-2">
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}
-                >
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
                   <span>Mint Cost:</span>
                   <span className="font-bolder">
                     {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
@@ -415,8 +412,7 @@ export default function NextGenMint(props: Readonly<Props>) {
                   </span>
                 </span>
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}
-                >
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
                   <span>Sales Model:</span>
                   <span className="font-bolder">{getSalesModel()}</span>
                 </span>

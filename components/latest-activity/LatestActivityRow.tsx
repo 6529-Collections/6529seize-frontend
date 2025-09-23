@@ -1,30 +1,4 @@
-import Image from "next/image";
-import styles from "./LatestActivity.module.scss";
-import { Transaction } from "../../entities/ITransaction";
-import {
-  areEqualAddresses,
-  areEqualURLS,
-  displayDecimal,
-  getDateDisplay,
-  isNextgenContract,
-  isGradientsContract,
-  isMemeLabContract,
-  isMemesContract,
-  isNullAddress,
-  numberWithCommas,
-  getRoyaltyImage,
-} from "../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MANIFOLD } from "../../constants";
-import { NFTLite } from "../../entities/INFT";
-import Address from "../address/Address";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
-import { NextGenCollection } from "../../entities/INextgen";
-import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
-import {
-  getNextGenIconUrl,
-  getNextGenImageUrl,
-} from "../nextGen/collections/nextgenToken/NextGenTokenImage";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   faCartPlus,
   faExchange,
@@ -34,9 +8,35 @@ import {
   faParachuteBox,
   faShoppingCart,
 } from "@fortawesome/free-solid-svg-icons";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { Tooltip } from "react-tooltip";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 import Link from "next/link";
+import { Tooltip } from "react-tooltip";
+import { MANIFOLD } from "../../constants";
+import { NextGenCollection } from "../../entities/INextgen";
+import { NFTLite } from "../../entities/INFT";
+import { Transaction } from "../../entities/ITransaction";
+import {
+  areEqualAddresses,
+  areEqualURLS,
+  displayDecimal,
+  getDateDisplay,
+  getRoyaltyImage,
+  isGradientsContract,
+  isMemeLabContract,
+  isMemesContract,
+  isNextgenContract,
+  isNullAddress,
+  numberWithCommas,
+} from "../../helpers/Helpers";
+import Address from "../address/Address";
+import {
+  getNextGenIconUrl,
+  getNextGenImageUrl,
+} from "../nextGen/collections/nextgenToken/NextGenTokenImage";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
+import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
+import styles from "./LatestActivity.module.scss";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {
   return Math.round((royalties / value) * 10000) / 10000;
@@ -70,8 +70,7 @@ export function printRoyalties(value: number, royalties: number, from: string) {
         place="top-end"
         opacity={1}
         variant="light"
-        className="tw-leading-tight"
-      >
+        className="tw-leading-tight">
         <div className="tw-flex tw-gap-3">
           <span>Royalties</span>
           <span>
@@ -99,16 +98,14 @@ export function printGas(
       <FontAwesomeIcon
         data-tooltip-id={id}
         className={styles.gasIcon}
-        icon={faGasPump}
-      ></FontAwesomeIcon>
+        icon={faGasPump}></FontAwesomeIcon>
       <Tooltip
         id={id}
         delayShow={150}
         place="top-end"
         opacity={1}
         variant="light"
-        className="tw-leading-tight"
-      >
+        className="tw-leading-tight">
         <div className="tw-flex tw-flex-col tw-gap-1">
           {[
             ["Gas", `${displayDecimal(gas, 5)}`],
@@ -117,8 +114,7 @@ export function printGas(
           ].map(([label, value]) => (
             <div
               key={label}
-              className="tw-flex tw-justify-between tw-w-full tw-gap-4"
-            >
+              className="tw-flex tw-justify-between tw-w-full tw-gap-4">
               <span className="tw-text-left tw-w-1/2">{label}</span>
               <span className="tw-text-right tw-w-1/2">{value}</span>
             </div>
@@ -280,8 +276,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       <a
         href={`/nextgen/token/${props.tr.token_id}/provenance`}
         target="_blank"
-        rel="noreferrer"
-      >
+        rel="noreferrer">
         {collectionName} #{normalized.token_id}
         <Image
           unoptimized
@@ -386,12 +381,10 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           target="_blank"
           rel="noreferrer"
-          className="tw-flex"
-        >
+          className="tw-flex">
           <FontAwesomeIcon
             className={styles.gasIcon}
-            icon={faExternalLinkSquare}
-          ></FontAwesomeIcon>
+            icon={faExternalLinkSquare}></FontAwesomeIcon>
         </Link>
       </span>
     );
@@ -448,8 +441,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
-      className={styles.latestActivityRow}
-    >
+      className={styles.latestActivityRow}>
       <td className="align-middle text-center">
         {getDateDisplay(new Date(props.tr.transaction_date))}
       </td>

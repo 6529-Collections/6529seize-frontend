@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname } from "next/navigation";
@@ -16,13 +16,13 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import styles from "./Header.module.scss";
+import HeaderDesktopNav from "./HeaderDesktopNav";
+import HeaderLogo from "./HeaderLogo";
+import HeaderMobileMenu from "./HeaderMobileMenu";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import HeaderOpenMobile from "./open-mobile/HeaderOpenMobile";
 import HeaderShare from "./share/HeaderShare";
 import HeaderUser from "./user/HeaderUser";
-import HeaderDesktopNav from "./HeaderDesktopNav";
-import HeaderLogo from "./HeaderLogo";
-import HeaderMobileMenu from "./HeaderMobileMenu";
 
 interface Props {
   onLoad?: () => void;
@@ -111,15 +111,15 @@ export default function Header(props: Readonly<Props>) {
 
   useEffect(() => {
     if (address) {
-      fetchUrl(
-        `${env.API_ENDPOINT}/api/consolidations/${address}`
-      ).then((response: DBResponse) => {
-        if (!response.data) {
-          setConsolidations([]);
-          return;
+      fetchUrl(`${env.API_ENDPOINT}/api/consolidations/${address}`).then(
+        (response: DBResponse) => {
+          if (!response.data) {
+            setConsolidations([]);
+            return;
+          }
+          setConsolidations(Array.from(response.data));
         }
-        setConsolidations(Array.from(response.data));
-      });
+      );
     } else {
       setConsolidations([]);
     }
@@ -166,8 +166,7 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 3 }}
                   xl={{ span: 2 }}
                   xxl={{ span: 3 }}
-                  className={`d-flex align-items-center justify-content-start`}
-                >
+                  className={`d-flex align-items-center justify-content-start`}>
                   <HeaderLogo
                     isSmall={props.isSmall}
                     isCapacitor={capacitor.isCapacitor}
@@ -182,13 +181,11 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 9 }}
                   xl={{ span: 10 }}
                   xxl={{ span: 9 }}
-                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}
-                >
+                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container className="no-padding">
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end no-padding`}
-                      >
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div className={styles.dMdNone}>
                           <div className="d-flex align-items-center">
                             <div className="tw-inline-flex tw-space-x-3 tw-mr-3">
@@ -201,16 +198,14 @@ export default function Header(props: Readonly<Props>) {
                               aria-label="Menu"
                               title="Menu"
                               onClick={() => setBurgerMenuOpen(true)}
-                              className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                            >
+                              className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
                               <FontAwesomeIcon icon={faBars} height={20} />
                             </button>
                           </div>
                         </div>
                         <Navbar
                           id="seize-navbar-nav"
-                          className={`tw-hidden ${styles.dMdBlock}`}
-                        >
+                          className={`tw-hidden ${styles.dMdBlock}`}>
                           <Nav className="ml-auto">
                             <HeaderDesktopNav
                               showWaves={showWaves}

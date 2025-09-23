@@ -1,10 +1,10 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { useState, useMemo, useCallback } from "react";
+import { env } from "@/config/env";
+import { useCallback, useMemo, useState } from "react";
 import { TraitsData } from "../types/TraitsData";
-import { ValidationOptions, ValidationResult } from "./validationTypes";
 import { validateTraitsData } from "./traitsValidation";
+import { ValidationOptions, ValidationResult } from "./validationTypes";
 
 /**
  * Custom hook for form validation

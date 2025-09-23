@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import GifPicker, { Theme } from "gif-picker-react";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 

@@ -6,12 +6,12 @@ import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDr
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { env } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { NFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
-import { env } from "@/utils/env";
 import {
   faChevronCircleDown,
   faChevronCircleUp,

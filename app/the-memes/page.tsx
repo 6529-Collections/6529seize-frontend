@@ -1,10 +1,9 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "@/styles/Home.module.scss";
 
-import React from "react";
-import { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
 import TheMemesComponent from "@/components/the-memes/TheMemes";
+import { Metadata } from "next";
 
 export default function TheMemesPage() {
   return (

@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { NextResponse } from "next/server";
 
 export async function GET() {

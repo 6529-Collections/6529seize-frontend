@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { useEffect, useState } from "react";
 
 const CURRENT = env.VERSION!; // baked into the bundle

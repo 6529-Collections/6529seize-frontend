@@ -1,10 +1,13 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import styles from "./NextGenAdmin.module.scss";
-import { useReadContract, useSignMessage } from "wagmi";
+import { env } from "@/config/env";
 import { useEffect, useRef, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { v4 as uuidv4 } from "uuid";
+import { useReadContract, useSignMessage } from "wagmi";
+import { NULL_ADDRESS } from "../../../constants";
+import { postData } from "../../../services/6529api";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import {
   FunctionSelectors,
   NEXTGEN_CHAIN_ID,
@@ -12,24 +15,21 @@ import {
   NEXTGEN_MINTER,
 } from "../nextgen_contracts";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
+  useCollectionAdmin,
+  useCollectionIndex,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useMinterContractWrite,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { v4 as uuidv4 } from "uuid";
-import { NULL_ADDRESS } from "../../../constants";
-import { postData } from "../../../services/6529api";
 import { printAdminErrors } from "./NextGenAdmin";
+import styles from "./NextGenAdmin.module.scss";
 import {
   NextGenAdminHeadingRow,
   NextGenAdminStatusFormGroup,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 interface Props {
   close: () => void;

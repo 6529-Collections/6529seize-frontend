@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { goerli, sepolia } from "wagmi/chains";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 

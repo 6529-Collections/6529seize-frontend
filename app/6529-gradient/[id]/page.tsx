@@ -1,10 +1,10 @@
-import { env } from "@/utils/env";
-import styles from "@/styles/Home.module.scss";
+import GradientPageComponent from "@/components/6529Gradient/GradientPage";
+import { getAppMetadata } from "@/components/providers/metadata";
+import { env } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { fetchUrl } from "@/services/6529api";
-import GradientPageComponent from "@/components/6529Gradient/GradientPage";
+import styles from "@/styles/Home.module.scss";
 import { Metadata } from "next";
-import { getAppMetadata } from "@/components/providers/metadata";
 
 export default async function GradientPage({
   params,

@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { API_AUTH_COOKIE } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";

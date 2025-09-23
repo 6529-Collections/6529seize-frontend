@@ -1,7 +1,7 @@
-import { env } from "@/utils/env";
-import React, { ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { env } from "@/config/env";
 import Head from "next/head";
+import { usePathname } from "next/navigation";
+import { ReactNode } from "react";
 import { PageSSRMetadata } from "../../helpers/Types";
 
 interface BaseLayoutProps {

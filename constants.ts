@@ -1,7 +1,6 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { mainnet } from "wagmi/chains";
 
-const PROJECT_NAME = "6529SEIZE";
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
 
 /**
@@ -13,7 +12,7 @@ function validateBaseEndpoint(): string {
 
   if (!baseEndpoint) {
     throw new Error(
-      'BASE_ENDPOINT environment variable is required. Please set it in your environment or .env.local file.'
+      "BASE_ENDPOINT environment variable is required. Please set it in your environment or .env.local file."
     );
   }
 
@@ -28,8 +27,9 @@ function validateBaseEndpoint(): string {
   }
 
   // Ensure it uses HTTPS in production (allow http for localhost)
-  const isLocalhost = baseEndpoint.includes('localhost') || baseEndpoint.includes('127.0.0.1');
-  if (validatedUrl.protocol !== 'https:' && !isLocalhost) {
+  const isLocalhost =
+    baseEndpoint.includes("localhost") || baseEndpoint.includes("127.0.0.1");
+  if (validatedUrl.protocol !== "https:" && !isLocalhost) {
     throw new Error(
       `BASE_ENDPOINT must use HTTPS protocol in production. Got: ${validatedUrl.protocol}//. Only localhost can use HTTP.`
     );
@@ -37,22 +37,36 @@ function validateBaseEndpoint(): string {
 
   // Validate against expected domains - prevent domain spoofing
   const allowedDomains = [
-    '6529.io',
-    'www.6529.io',
-    'staging.6529.io',
-    'localhost',
-    '127.0.0.1'
+    "6529.io",
+    "www.6529.io",
+    "staging.6529.io",
+    "localhost",
+    "127.0.0.1",
   ];
 
   const hostname = validatedUrl.hostname;
-  const isAllowedDomain = allowedDomains.some(domain =>
-    hostname === domain || hostname.endsWith(`.${domain}`)
+  const isAllowedDomain = allowedDomains.some(
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
   );
 
   if (!isAllowedDomain) {
     throw new Error(
-      `BASE_ENDPOINT domain not in allowlist. Got: ${hostname}. Allowed domains: ${allowedDomains.join(', ')}`
+      `BASE_ENDPOINT domain not in allowlist. Got: ${hostname}. Allowed domains: ${allowedDomains.join(
+        ", "
+      )}`
     );
+  }
+
+  // fail if query params are present
+  if (validatedUrl.search) {
+    throw new Error(
+      `BASE_ENDPOINT must not have query params. Got: ${validatedUrl.search}`
+    );
+  }
+
+  //remove trailing slash
+  if (baseEndpoint.endsWith("/")) {
+    return baseEndpoint.slice(0, -1);
   }
 
   return baseEndpoint;

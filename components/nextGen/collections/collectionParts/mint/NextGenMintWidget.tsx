@@ -1,10 +1,14 @@
 "use client";
 
-import { env } from "@/utils/env";
-import styles from "../../NextGen.module.scss";
+import { env } from "@/config/env";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
+import { NULL_ADDRESS } from "../../../../../constants";
+import { NextGenCollection } from "../../../../../entities/INextgen";
 import {
   areEqualAddresses,
   capitalizeFirstChar,
@@ -12,6 +16,9 @@ import {
   getNetworkName,
   isValidEthAddress,
 } from "../../../../../helpers/Helpers";
+import { fetchUrl } from "../../../../../services/6529api";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import DotLoader from "../../../../dotLoader/DotLoader";
 import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_MINTER } from "../../../nextgen_contracts";
 import {
@@ -19,20 +26,13 @@ import {
   Status,
   TokensPerAddress,
 } from "../../../nextgen_entities";
-import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
-import { useEffect, useState } from "react";
-import { NULL_ADDRESS } from "../../../../../constants";
-import { fetchUrl } from "../../../../../services/6529api";
 import {
   getStatusFromDates,
   useMintSharedState,
 } from "../../../nextgen_helpers";
-import { NextGenMintingFor } from "./NextGenMintShared";
-import { NextGenCollection } from "../../../../../entities/INextgen";
+import styles from "../../NextGen.module.scss";
 import { Spinner } from "./NextGenMint";
-import DotLoader from "../../../../dotLoader/DotLoader";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { NextGenMintingFor } from "./NextGenMintShared";
 
 export function getJsonData(keccak: string, data: string) {
   const parsed = JSON.parse(data);

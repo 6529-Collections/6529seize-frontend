@@ -1,103 +1,158 @@
-import { commonApiFetch } from "../../services/api/common-api";
-import { getStagingAuth, getAuthJwt } from "../../services/auth/auth.utils";
+// NOTE: API methods are required on-demand inside tests after env is mocked
 
-jest.mock("../../services/auth/auth.utils", () => ({
+jest.mock("@/services/auth/auth.utils", () => ({
   getStagingAuth: jest.fn(),
   getAuthJwt: jest.fn(),
 }));
 
+import { withMockedEnv } from "@/tests/utils/mock-env";
+
 describe("commonApiFetch", () => {
-  const originalEndpoint = process.env.API_ENDPOINT;
   beforeEach(() => {
     (global as any).fetch = jest.fn();
     jest.resetAllMocks();
-    process.env.API_ENDPOINT = "https://example.com";
-  });
-  afterAll(() => {
-    process.env.API_ENDPOINT = originalEndpoint;
   });
 
   it("builds url with params and headers", async () => {
-    (getStagingAuth as jest.Mock).mockReturnValue("s");
-    (getAuthJwt as jest.Mock).mockReturnValue("jwt");
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ result: 1 }),
-    });
-
-    const result = await commonApiFetch<{ result: number }>({
-      endpoint: "test",
-      params: { foo: "bar", typ: "nic" },
-    });
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "https://example.com/api/test?foo=bar&typ=cic",
+    await withMockedEnv(
       {
-        headers: {
-          "Content-Type": "application/json",
-          "x-6529-auth": "s",
-          Authorization: "Bearer jwt",
-        },
-        signal: undefined,
+        API_ENDPOINT: "https://example.com",
+        NEXT_PUBLIC_WEB3_MODAL_PROJECT_ID: "test-project-id",
+      },
+      async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          json: async () => ({ result: 1 }),
+        });
+
+        let commonApiFetch: any;
+        jest.isolateModules(() => {
+          const authMock = require("@/services/auth/auth.utils");
+          (authMock.getStagingAuth as jest.Mock).mockReturnValue("s");
+          (authMock.getAuthJwt as jest.Mock).mockReturnValue("jwt");
+          ({ commonApiFetch } = require("@/services/api/common-api"));
+        });
+
+        const result = await commonApiFetch<{ result: number }>({
+          endpoint: "test",
+          params: { foo: "bar", typ: "nic" },
+        });
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://example.com/api/test?foo=bar&typ=cic",
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "x-6529-auth": "s",
+              Authorization: "Bearer jwt",
+            }),
+            signal: undefined,
+          })
+        );
+        expect(result).toEqual({ result: 1 });
       }
     );
-    expect(result).toEqual({ result: 1 });
   });
 
   it("rejects with error body when not ok", async () => {
-    (getStagingAuth as jest.Mock).mockReturnValue(null);
-    (getAuthJwt as jest.Mock).mockReturnValue(null);
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: false,
-      statusText: "Bad",
-      json: async () => ({ error: "err" }),
-    });
+    await withMockedEnv(
+      {
+        API_ENDPOINT: "https://example.com",
+        NEXT_PUBLIC_WEB3_MODAL_PROJECT_ID: "test-project-id",
+      },
+      async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+          ok: false,
+          statusText: "Bad",
+          json: async () => ({ error: "err" }),
+        });
 
-    await expect(commonApiFetch({ endpoint: "bad" })).rejects.toBe("err");
+        let commonApiFetch: any;
+        jest.isolateModules(() => {
+          const authMock = require("@/services/auth/auth.utils");
+          (authMock.getStagingAuth as jest.Mock).mockReturnValue(null);
+          (authMock.getAuthJwt as jest.Mock).mockReturnValue(null);
+          ({ commonApiFetch } = require("@/services/api/common-api"));
+        });
+
+        await expect(commonApiFetch({ endpoint: "bad" })).rejects.toBe("err");
+      }
+    );
   });
 });
 
 describe("commonApiPost", () => {
-  const originalEndpoint = process.env.API_ENDPOINT;
   beforeEach(() => {
     (global as any).fetch = jest.fn();
-    process.env.API_ENDPOINT = "https://example.com";
-  });
-  afterAll(() => {
-    process.env.API_ENDPOINT = originalEndpoint;
+    jest.resetAllMocks();
   });
 
   it("posts data and returns json", async () => {
-    (getStagingAuth as jest.Mock).mockReturnValue("a");
-    (getAuthJwt as jest.Mock).mockReturnValue(null);
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ res: 1 }),
-    });
-    const { commonApiPost } = await import("../../services/api/common-api");
-    const result = await commonApiPost<{ v: number }, { res: number }>({
-      endpoint: "e",
-      body: { v: 1 },
-    });
-    expect(global.fetch).toHaveBeenCalledWith("https://example.com/api/e", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-6529-auth": "a" },
-      body: JSON.stringify({ v: 1 }),
-    });
-    expect(result).toEqual({ res: 1 });
+    await withMockedEnv(
+      {
+        API_ENDPOINT: "https://example.com",
+        NEXT_PUBLIC_WEB3_MODAL_PROJECT_ID: "test-project-id",
+      },
+      async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          json: async () => ({ res: 1 }),
+        });
+
+        let commonApiPost: any;
+        jest.isolateModules(() => {
+          const authMock = require("@/services/auth/auth.utils");
+          (authMock.getStagingAuth as jest.Mock).mockReturnValue("a");
+          (authMock.getAuthJwt as jest.Mock).mockReturnValue(null);
+          ({ commonApiPost } = require("@/services/api/common-api"));
+        });
+
+        const result = await commonApiPost<{ v: number }, { res: number }>({
+          endpoint: "e",
+          body: { v: 1 },
+        });
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://example.com/api/e",
+          expect.objectContaining({
+            method: "POST",
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "x-6529-auth": "a",
+            }),
+            body: JSON.stringify({ v: 1 }),
+          })
+        );
+        expect(result).toEqual({ res: 1 });
+      }
+    );
   });
 
   it("rejects on error", async () => {
-    (getStagingAuth as jest.Mock).mockReturnValue(null);
-    (getAuthJwt as jest.Mock).mockReturnValue(null);
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: false,
-      statusText: "B",
-      json: async () => ({ error: "err" }),
-    });
-    const { commonApiPost } = await import("../../services/api/common-api");
-    await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
-      "err"
+    await withMockedEnv(
+      {
+        API_ENDPOINT: "https://example.com",
+        NEXT_PUBLIC_WEB3_MODAL_PROJECT_ID: "test-project-id",
+      },
+      async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+          ok: false,
+          statusText: "B",
+          json: async () => ({ error: "err" }),
+        });
+
+        let commonApiPost: any;
+        jest.isolateModules(() => {
+          const authMock = require("@/services/auth/auth.utils");
+          (authMock.getStagingAuth as jest.Mock).mockReturnValue(null);
+          (authMock.getAuthJwt as jest.Mock).mockReturnValue(null);
+          ({ commonApiPost } = require("@/services/api/common-api"));
+        });
+
+        await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
+          "err"
+        );
+      }
     );
   });
 });

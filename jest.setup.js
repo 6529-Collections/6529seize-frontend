@@ -1,5 +1,5 @@
-import { TextEncoder, TextDecoder } from "util";
 import { config } from "dotenv";
+import { TextDecoder, TextEncoder } from "util";
 
 // Load environment variables for tests
 config({ path: ".env.development" });
@@ -83,10 +83,9 @@ if (typeof global.ResizeObserver === "undefined") {
   };
 }
 
-// Default endpoints needed for service tests
-process.env.BASE_ENDPOINT =
-  process.env.BASE_ENDPOINT || "https://6529.io";
-process.env.API_ENDPOINT = process.env.API_ENDPOINT || "https://example.com";
+// Default endpoints needed for service tests (set on process.env so config/env parses them)
+process.env.BASE_ENDPOINT ??= "https://6529.io";
+process.env.API_ENDPOINT ??= "https://example.com";
 
 // Mock ResizeObserver for react-tooltip
 global.ResizeObserver = class ResizeObserver {
@@ -113,12 +112,12 @@ if (typeof global.fetch === "undefined") {
 // Mock AbortController for Node.js environment - ensure it's available everywhere
 class MockAbortController {
   constructor() {
-    this.signal = { 
-      aborted: false, 
-      addEventListener: jest.fn(), 
+    this.signal = {
+      aborted: false,
+      addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
       reason: undefined,
-      throwIfAborted: jest.fn()
+      throwIfAborted: jest.fn(),
     };
   }
   abort(reason) {
@@ -130,7 +129,7 @@ class MockAbortController {
 // Set on all global objects to ensure it's available during module loading
 global.AbortController = MockAbortController;
 globalThis.AbortController = MockAbortController;
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.AbortController = MockAbortController;
 }
 

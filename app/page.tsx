@@ -3,12 +3,12 @@ import { fetchInitialActivityData } from "@/components/latest-activity/fetchInit
 import { isMintingActive } from "@/components/meme-calendar/meme-calendar.helpers";
 import { fetchInitialTokens } from "@/components/nextGen/collections/collectionParts/hooks/fetchInitialTokens";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { env } from "@/config/env";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import styles from "@/styles/Home.module.scss";
-import { env } from "@/utils/env";
 import { Metadata } from "next";
 
 export default async function HomePage() {

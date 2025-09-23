@@ -1,7 +1,7 @@
-import { env } from "@/utils/env";
-import styles from "@/styles/Home.module.scss";
-import RememeAddPage from "@/components/rememes/RememeAddPage";
 import { getAppMetadata } from "@/components/providers/metadata";
+import RememeAddPage from "@/components/rememes/RememeAddPage";
+import { env } from "@/config/env";
+import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
 export default function ReMemesAddPage() {

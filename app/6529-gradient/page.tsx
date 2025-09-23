@@ -1,7 +1,7 @@
-import { env } from "@/utils/env";
-import styles from "@/styles/Home.module.scss";
 import GradientsComponent from "@/components/6529Gradient/6529Gradient";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { env } from "@/config/env";
+import styles from "@/styles/Home.module.scss";
 import { Metadata } from "next";
 
 export default function GradientsPage() {

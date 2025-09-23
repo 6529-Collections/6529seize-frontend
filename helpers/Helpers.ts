@@ -1,4 +1,3 @@
-import { env } from "@/utils/env";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -7,6 +6,7 @@ import {
   USER_PAGE_TAB_META,
   UserPageTabType,
 } from "@/components/user/layout/UserPageTabs";
+import { env } from "@/config/env";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,

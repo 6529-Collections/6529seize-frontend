@@ -1,9 +1,9 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import React, { useState } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 
 interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;

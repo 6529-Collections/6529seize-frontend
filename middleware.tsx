@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { NextRequest, NextResponse } from "next/server";
 import { API_AUTH_COOKIE } from "./constants";
 

@@ -1,9 +1,9 @@
-import { env } from "@/utils/env";
-import { Transaction } from "../../entities/ITransaction";
+import { env } from "@/config/env";
+import { DBResponse } from "../../entities/IDBResponse";
 import { NFT } from "../../entities/INFT";
 import { NextGenCollection } from "../../entities/INextgen";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl, fetchAllPages } from "../../services/6529api";
+import { Transaction } from "../../entities/ITransaction";
+import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { commonApiFetch } from "../../services/api/common-api";
 
 export interface InitialActivityData {
@@ -28,9 +28,7 @@ export async function fetchInitialActivityData(
         fetchUrl(activityUrl) as Promise<DBResponse>,
 
         // Memes data
-        fetchUrl(
-          `${env.API_ENDPOINT}/api/memes_lite`
-        ) as Promise<DBResponse>,
+        fetchUrl(`${env.API_ENDPOINT}/api/memes_lite`) as Promise<DBResponse>,
 
         // Gradients data
         fetchAllPages(

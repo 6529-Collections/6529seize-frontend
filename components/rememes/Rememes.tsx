@@ -1,30 +1,30 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
-import styles from "./Rememes.module.scss";
-import { fetchUrl } from "@/services/6529api";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
-import { useEffect, useState } from "react";
-import { NFTLite, Rememe } from "@/entities/INFT";
-import { DBResponse } from "@/entities/IDBResponse";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useSetTitle } from "@/contexts/TitleContext";
+import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import RememeImage from "@/components/nft-image/RememeImage";
-import Image from "next/image";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
+import { env } from "@/config/env";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NFTLite, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
   numberWithCommas,
 } from "@/helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
-import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import { fetchUrl } from "@/services/6529api";
 import { faPlusCircle, faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import styles from "./Rememes.module.scss";
 
 const PAGE_SIZE = 40;
 
@@ -141,12 +141,10 @@ export default function Rememes() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
+        lg={{ span: 3 }}>
         <a
           href={`/rememes/${rememe.contract}/${rememe.id}`}
-          className="decoration-none scale-hover"
-        >
+          className="decoration-none scale-hover">
           <Container fluid>
             <Row>
               <RememeImage nft={rememe} animation={false} height={300} />
@@ -253,14 +251,12 @@ export default function Rememes() {
                 xs={12}
                 sm={4}
                 md={3}
-                className="d-flex justify-content-sm-end align-items-center"
-              >
+                className="d-flex justify-content-sm-end align-items-center">
                 <Button
                   className="seize-btn btn-white d-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto"
                   onClick={() => {
                     window.location.href = "/rememes/add";
-                  }}
-                >
+                  }}>
                   Add ReMeme{" "}
                   <FontAwesomeIcon
                     icon={faPlusCircle}
@@ -278,13 +274,11 @@ export default function Rememes() {
             {rememesLoaded && (
               <Row className="pt-2">
                 <Col
-                  className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-2 justify-content-between`}
-                >
+                  className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-2 justify-content-between`}>
                   <span className="d-flex align-items-center gap-1">
                     <Dropdown
                       className={styles.memeRefDropdown}
-                      drop={"down-centered"}
-                    >
+                      drop={"down-centered"}>
                       <Dropdown.Toggle>Sort: {selectedSorting}</Dropdown.Toggle>
                       <Dropdown.Menu>
                         {sorting.map((s) => (
@@ -292,8 +286,7 @@ export default function Rememes() {
                             key={`sorting-${s}`}
                             onClick={() => {
                               setSelectedSorting(s);
-                            }}
-                          >
+                            }}>
                             {s}
                           </Dropdown.Item>
                         ))}
@@ -317,8 +310,7 @@ export default function Rememes() {
                             backgroundColor: "#f8f9fa",
                             color: "#212529",
                             padding: "4px 8px",
-                          }}
-                        >
+                          }}>
                           Refresh results
                         </Tooltip>
                       </>
@@ -327,8 +319,7 @@ export default function Rememes() {
                   <span className="d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <Dropdown
                       className={styles.memeRefDropdown}
-                      drop={"down-centered"}
-                    >
+                      drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Token Type: {selectedTokenType}
                       </Dropdown.Toggle>
@@ -338,8 +329,7 @@ export default function Rememes() {
                             key={`token-type-${t}`}
                             onClick={() => {
                               setSelectedTokenType(t);
-                            }}
-                          >
+                            }}>
                             {t}
                           </Dropdown.Item>
                         ))}
@@ -347,8 +337,7 @@ export default function Rememes() {
                     </Dropdown>
                     <Dropdown
                       className={styles.memeRefDropdown}
-                      drop={"down-centered"}
-                    >
+                      drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Meme Reference:{" "}
                         {queryMemeId
@@ -365,8 +354,7 @@ export default function Rememes() {
                         <Dropdown.Item
                           onClick={() => {
                             setSelectedMeme(0);
-                          }}
-                        >
+                          }}>
                           All
                         </Dropdown.Item>
                         {memes.map((m) => (
@@ -374,8 +362,7 @@ export default function Rememes() {
                             key={`meme-${m.id}`}
                             onClick={() => {
                               setSelectedMeme(m.id);
-                            }}
-                          >
+                            }}>
                             #{m.id} - {m.name}
                           </Dropdown.Item>
                         ))}

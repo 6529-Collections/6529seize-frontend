@@ -1,8 +1,8 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { useEffect } from "react";
+import { env } from "@/config/env";
 import { AwsRum, AwsRumConfig } from "aws-rum-web";
+import { useEffect } from "react";
 
 interface AwsRumProviderProps {
   readonly children: React.ReactNode;

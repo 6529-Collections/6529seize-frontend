@@ -1,9 +1,9 @@
-import { env } from "@/utils/env";
-import styles from "@/styles/Home.module.scss";
-import RememePage from "@/components/rememes/RememePage";
-import { fetchUrl } from "@/services/6529api";
-import { formatAddress } from "@/helpers/Helpers";
 import { getAppMetadata } from "@/components/providers/metadata";
+import RememePage from "@/components/rememes/RememePage";
+import { env } from "@/config/env";
+import { formatAddress } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
 export default async function ReMeme({

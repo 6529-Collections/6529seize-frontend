@@ -1,7 +1,7 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { AllowlistToolResponse } from "../components/allowlist-tool/allowlist-tool.types";
-import { makeErrorToast } from "./distribution-plan.utils";
 import { getAuthJwt, removeAuthJwt } from "./auth/auth.utils";
+import { makeErrorToast } from "./distribution-plan.utils";
 
 const handleResponse = async <T>(
   res: Response
@@ -47,12 +47,9 @@ export async function distributionPlanApiFetch<T>(endpoint: string): Promise<{
     headers["Authorization"] = `Bearer ${auth}`;
   }
   try {
-    const res = await fetch(
-      `${env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
-      {
-        headers,
-      }
-    );
+    const res = await fetch(`${env.ALLOWLIST_API_ENDPOINT}${endpoint}`, {
+      headers,
+    });
 
     return await handleResponse<T>(res);
   } catch (error) {
@@ -82,14 +79,11 @@ export const distributionPlanApiPost = async <T>({
     headers["Authorization"] = `Bearer ${auth}`;
   }
   try {
-    const res = await fetch(
-      `${env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      }
-    );
+    const res = await fetch(`${env.ALLOWLIST_API_ENDPOINT}${endpoint}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
 
     return await handleResponse<T>(res);
   } catch (error) {
@@ -117,13 +111,10 @@ export const distributionPlanApiDelete = async <T>({
     headers["Authorization"] = `Bearer ${auth}`;
   }
   try {
-    const res = await fetch(
-      `${env.ALLOWLIST_API_ENDPOINT}${endpoint}`,
-      {
-        method: "DELETE",
-        headers,
-      }
-    );
+    const res = await fetch(`${env.ALLOWLIST_API_ENDPOINT}${endpoint}`, {
+      method: "DELETE",
+      headers,
+    });
     try {
       return await handleResponse<T>(res);
     } catch (e) {

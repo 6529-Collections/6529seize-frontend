@@ -1,19 +1,19 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
 import { AuthContext } from "../../auth/Auth";
+import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
+import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
 import WaveDropMobileMenuFollow from "./WaveDropMobileMenuFollow";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
-import WaveDropActionsRate from "./WaveDropActionsRate";
-import { DropSize } from "../../../helpers/waves/drop.helpers";
-import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -230,9 +230,15 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             onRated={closeMenu}
           />
         )}
-        {showOptions && onEdit && drop.drop_type !== ApiDropType.Participatory && (
-          <WaveDropMobileMenuEdit drop={drop} onEdit={onEdit} onEditTriggered={closeMenu} />
-        )}
+        {showOptions &&
+          onEdit &&
+          drop.drop_type !== ApiDropType.Participatory && (
+            <WaveDropMobileMenuEdit
+              drop={drop}
+              onEdit={onEdit}
+              onEditTriggered={closeMenu}
+            />
+          )}
         {showOptions && (
           <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "./MemeLab.module.scss";
 
 import { AuthContext } from "@/components/auth/Auth";
@@ -74,9 +74,7 @@ export default function LabCollection({
         if (responseNftMetas.length > 0) {
           const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
           fetchAllPages(
-            `${env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
-              ","
-            )}`
+            `${env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(",")}`
           ).then((responseNfts: any[]) => {
             setNfts(responseNfts);
             setNftsLoaded(true);

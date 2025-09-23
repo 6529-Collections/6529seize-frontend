@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "./MemeLab.module.scss";
 
 import { useAuth } from "@/components/auth/Auth";
@@ -130,37 +130,37 @@ export default function MemeLabPageComponent({
 
   useEffect(() => {
     if (nftId) {
-      fetchUrl(
-        `${env.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
-      ).then((response: DBResponse) => {
-        const nftMetas = response.data;
-        if (nftMetas.length === 1) {
-          setNftMeta(nftMetas[0]);
-          fetchUrl(
-            `${env.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
-          ).then((response: DBResponse) => {
-            const nft: LabNFT = response.data[0];
-            setNft(nft);
+      fetchUrl(`${env.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`).then(
+        (response: DBResponse) => {
+          const nftMetas = response.data;
+          if (nftMetas.length === 1) {
+            setNftMeta(nftMetas[0]);
+            fetchUrl(`${env.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`).then(
+              (response: DBResponse) => {
+                const nft: LabNFT = response.data[0];
+                setNft(nft);
 
-            if (nft.meme_references.length > 0) {
-              fetchUrl(
-                `${
-                  env.API_ENDPOINT
-                }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
-                  ","
-                )}`
-              ).then((response: DBResponse) => {
-                setOriginalMemes(response.data);
-                setOriginalMemesLoaded(true);
-              });
-            } else {
-              setOriginalMemesLoaded(true);
-            }
-          });
-        } else {
-          setNftMeta(undefined);
+                if (nft.meme_references.length > 0) {
+                  fetchUrl(
+                    `${
+                      env.API_ENDPOINT
+                    }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
+                      ","
+                    )}`
+                  ).then((response: DBResponse) => {
+                    setOriginalMemes(response.data);
+                    setOriginalMemesLoaded(true);
+                  });
+                } else {
+                  setOriginalMemesLoaded(true);
+                }
+              }
+            );
+          } else {
+            setNftMeta(undefined);
+          }
         }
-      });
+      );
     }
   }, [nftId]);
 
@@ -168,9 +168,9 @@ export default function MemeLabPageComponent({
     const wallets = connectedProfile?.wallets ?? [];
     if (wallets.length > 0 && nftId) {
       fetchUrl(
-        `${
-          env.API_ENDPOINT
-        }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`
+        `${env.API_ENDPOINT}/api/transactions_memelab?wallet=${wallets.join(
+          ","
+        )}&id=${nftId}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
         let countIn = 0;

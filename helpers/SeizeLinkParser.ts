@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 export interface SeizeQuoteLinkInfo {
   waveId: string;
   serialNo?: string;

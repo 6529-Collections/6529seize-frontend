@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { goerli, mainnet, sepolia } from "viem/chains";
 import {
   NEXTGEN_ADMIN_ABI,

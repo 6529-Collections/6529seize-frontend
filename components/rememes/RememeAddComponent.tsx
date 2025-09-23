@@ -1,27 +1,27 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { NFT } from "../../entities/INFT";
-import styles from "./Rememes.module.scss";
-import { Row, Col, Form, Container, Button, Dropdown } from "react-bootstrap";
-import { Nft, NftContract } from "./alchemy-sdk-types";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
-import { useEffect, useState } from "react";
-import {
-  areEqualAddresses,
-  formatAddress,
-  isValidEthAddress,
-} from "../../helpers/Helpers";
-import { useEnsName } from "wagmi";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import Image from "next/image";
-import { postData } from "../../services/6529api";
+import { env } from "@/config/env";
 import {
   faCheckCircle,
   faPlusCircle,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { useEnsName } from "wagmi";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
+import { NFT } from "../../entities/INFT";
+import {
+  areEqualAddresses,
+  formatAddress,
+  isValidEthAddress,
+} from "../../helpers/Helpers";
+import { postData } from "../../services/6529api";
+import { Nft, NftContract } from "./alchemy-sdk-types";
+import styles from "./Rememes.module.scss";
 
 interface AddRememe {
   contract: string;
@@ -222,8 +222,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                     onClick={() =>
                       setReferences((r) => r.filter((s) => s.id != m.id))
                     }
-                    data-tooltip-id={`clear-reference-${m.id}`}
-                  >
+                    data-tooltip-id={`clear-reference-${m.id}`}>
                     x
                   </span>
                   <Tooltip
@@ -234,8 +233,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                       backgroundColor: "#1F2937",
                       color: "white",
                       padding: "4px 8px",
-                    }}
-                  >
+                    }}>
                     Clear
                   </Tooltip>
                 </>
@@ -254,8 +252,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                   .map((m) => (
                     <Dropdown.Item
                       key={`add-rememe-meme-red-${m.id}`}
-                      onClick={() => addReference(m)}
-                    >
+                      onClick={() => addReference(m)}>
                       #{m.id} - {m.name}
                     </Dropdown.Item>
                   ))}
@@ -327,8 +324,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                               className="decoration-hover-underline"
                               href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
                               target="_blank"
-                              rel="noreferrer"
-                            >
+                              rel="noreferrer">
                               <Image
                                 unoptimized
                                 src="/opensea.png"
@@ -377,15 +373,13 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 className="seize-btn"
                 disabled={
                   !contract || !tokenIdDisplay || references.length === 0
-                }
-              >
+                }>
                 Validate
                 {verifying && (
                   <div className="d-inline">
                     <div
                       className={`spinner-border ${styles.loader}`}
-                      role="status"
-                    >
+                      role="status">
                       <span className="sr-only"></span>
                     </div>
                   </div>
@@ -409,8 +403,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                     setContractResponse(undefined);
                     props.verifiedRememe(undefined, []);
                   }}
-                  className="seize-btn-link"
-                >
+                  className="seize-btn-link">
                   Edit
                 </Button>
               </div>

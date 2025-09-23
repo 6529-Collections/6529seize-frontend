@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 const getHeaders = (

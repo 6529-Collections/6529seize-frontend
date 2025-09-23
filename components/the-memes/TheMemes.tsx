@@ -1,7 +1,7 @@
 "use client";
 
+import { env } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { env } from "@/utils/env";
 import {
   faChevronCircleDown,
   faChevronCircleUp,

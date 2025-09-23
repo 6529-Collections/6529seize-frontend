@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "@/styles/Home.module.scss";
 
 import MemeLabCollection from "@/components/memelab/MemeLabCollection";

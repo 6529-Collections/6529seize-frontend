@@ -1,10 +1,10 @@
 "use client";
 
-import { env } from "@/utils/env";
 import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
 } from "@/components/delegation/delegation-constants";
+import { env } from "@/config/env";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";

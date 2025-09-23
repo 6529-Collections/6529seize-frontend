@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "./Rememes.module.scss";
 
 import { useTitle } from "@/contexts/TitleContext";

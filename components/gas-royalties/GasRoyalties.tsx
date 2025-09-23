@@ -1,21 +1,21 @@
 "use client";
 
-import { env } from "@/utils/env";
-import styles from "./GasRoyalties.module.scss";
-import { Row, Col, Dropdown, Container } from "react-bootstrap";
-import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
-import DotLoader from "../dotLoader/DotLoader";
-import DownloadUrlWidget from "@/components/downloadUrlWidget/DownloadUrlWidget";
-import Image from "next/image";
-import { Tooltip } from "react-tooltip";
-import { useState, useEffect } from "react";
-import { fetchUrl } from "@/services/6529api";
-import { getDateFilters } from "@/helpers/Helpers";
-import { useRouter, usePathname } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DatePickerModal from "@/components/datePickerModal/DatePickerModal";
+import DownloadUrlWidget from "@/components/downloadUrlWidget/DownloadUrlWidget";
+import { env } from "@/config/env";
+import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
 import { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
+import { getDateFilters } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import DotLoader from "../dotLoader/DotLoader";
+import styles from "./GasRoyalties.module.scss";
 
 interface HeaderProps {
   title: string;
@@ -166,8 +166,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     );
                   }
                 }}
-                aria-label="The Memes"
-              >
+                aria-label="The Memes">
                 The Memes
               </span>
               <span
@@ -188,8 +187,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     );
                   }
                 }}
-                aria-label="Meme Lab"
-              >
+                aria-label="Meme Lab">
                 Meme Lab
               </span>
             </span>
@@ -220,8 +218,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       props.setSelectedArtist("");
-                    }}
-                  >
+                    }}>
                     All
                   </Dropdown.Item>
                   {artists.map((a) => (
@@ -229,8 +226,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                       key={`artist-${a.name.replaceAll(" ", "-")}`}
                       onClick={() => {
                         props.setSelectedArtist(a.name);
-                      }}
-                    >
+                      }}>
                       {a.name}
                     </Dropdown.Item>
                   ))}
@@ -259,8 +255,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                           } else {
                             props.setDateSelection(dateSelection);
                           }
-                        }}
-                      >
+                        }}>
                         {dateSelection}
                       </Dropdown.Item>
                     )
@@ -268,8 +263,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       setShowBlockPicker(true);
-                    }}
-                  >
+                    }}>
                     Custom Blocks
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -319,8 +313,7 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
     <a
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
-      rel="noreferrer"
-    >
+      rel="noreferrer">
       <span className="d-flex justify-content-center aling-items-center gap-3">
         <span>{props.token_id} -</span>
         <Image

@@ -1,14 +1,20 @@
 "use client";
 
-import { env } from "@/utils/env";
-import styles from "../../NextGen.module.scss";
+import { env } from "@/config/env";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
+import { useChainId, useWriteContract } from "wagmi";
+import { NextGenCollection } from "../../../../../entities/INextgen";
 import {
   areEqualAddresses,
   getNetworkName,
 } from "../../../../../helpers/Helpers";
+import { fetchUrl } from "../../../../../services/6529api";
+import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
 import {
   NEXTGEN_CHAIN_ID,
@@ -21,19 +27,13 @@ import {
   Status,
   TokensPerAddress,
 } from "../../../nextgen_entities";
-import { useChainId, useWriteContract } from "wagmi";
-import { useState, useEffect } from "react";
-import { fetchUrl } from "../../../../../services/6529api";
-import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
 import {
   getStatusFromDates,
   useMintSharedState,
 } from "../../../nextgen_helpers";
-import { NextGenMintingFor } from "./NextGenMintShared";
-import { NextGenCollection } from "../../../../../entities/INextgen";
+import styles from "../../NextGen.module.scss";
 import { Spinner } from "./NextGenMint";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { NextGenMintingFor } from "./NextGenMintShared";
 
 interface Props {
   collection: NextGenCollection;

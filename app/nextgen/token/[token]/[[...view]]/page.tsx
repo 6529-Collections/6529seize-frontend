@@ -1,5 +1,5 @@
-import { env } from "@/utils/env";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { env } from "@/config/env";
 import { NextgenCollectionView } from "@/enums";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import type { Metadata } from "next";

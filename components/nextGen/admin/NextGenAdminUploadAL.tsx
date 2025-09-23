@@ -1,26 +1,26 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { env } from "@/config/env";
+import { useEffect, useRef, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
-import { useEffect, useRef, useState } from "react";
 import { postFormData } from "../../../services/6529api";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { FunctionSelectors } from "../nextgen_contracts";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
+  useCollectionAdmin,
+  useCollectionIndex,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
-  NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 interface Props {
   close: () => void;
 }

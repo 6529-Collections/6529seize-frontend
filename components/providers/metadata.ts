@@ -1,7 +1,7 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
+import { VALIDATED_BASE_ENDPOINT } from "@/constants";
 import { PageSSRMetadata } from "@/helpers/Types";
 import { Metadata } from "next";
-import { VALIDATED_BASE_ENDPOINT } from "@/constants";
 
 export function getPageMetadata({
   componentMetadata,

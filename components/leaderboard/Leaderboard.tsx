@@ -1,24 +1,24 @@
 "use client";
 
-import { env } from "@/utils/env";
-import styles from "./Leaderboard.module.scss";
-import { useState, useEffect } from "react";
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
+import { env } from "@/config/env";
+import { LeaderboardFocus } from "@/enums";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { TDHCalc, GlobalTDHHistory } from "../../entities/ITDH";
+import { MemeSeason } from "../../entities/ISeason";
+import { GlobalTDHHistory, TDHCalc } from "../../entities/ITDH";
+import { ApiBlocksPage } from "../../generated/models/ApiBlocksPage";
 import { numberWithCommas } from "../../helpers/Helpers";
 import { fetchUrl } from "../../services/6529api";
+import { commonApiFetch } from "../../services/api/common-api";
+import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
-import DotLoader, { Spinner } from "../dotLoader/DotLoader";
-import { commonApiFetch } from "../../services/api/common-api";
-import { MemeSeason } from "../../entities/ISeason";
+import styles from "./Leaderboard.module.scss";
 import LeaderboardCardsCollectedComponent from "./LeaderboardCardsCollected";
 import LeaderboardInteractionsComponent from "./LeaderboardInteractions";
-import { ApiBlocksPage } from "../../generated/models/ApiBlocksPage";
-import { LeaderboardFocus } from "@/enums";
 
 export enum Content {
   ALL = "All",
@@ -37,8 +37,6 @@ export enum Collector {
   MEMELAB = "MemeLab",
   NEXTGEN = "NextGen",
 }
-
-
 
 export default function Leaderboard(
   props: Readonly<{
@@ -93,8 +91,7 @@ export default function Leaderboard(
   }, []);
 
   useEffect(() => {
-    let url = `${env.API_ENDPOINT
-      }/api/tdh_global_history?page_size=${1}`;
+    let url = `${env.API_ENDPOINT}/api/tdh_global_history?page_size=${1}`;
     fetchUrl(url).then((response: DBResponse) => {
       const tdhH = response.data[0];
       setGlobalTdhHistory(tdhH);
@@ -165,8 +162,6 @@ export default function Leaderboard(
       </Dropdown>
     );
   }
-
-
 
   return (
     <Container className={`pt-4`}>
@@ -251,8 +246,9 @@ export default function Leaderboard(
                 <span>
                   <span
                     onClick={() => props.setFocus(LeaderboardFocus.TDH)}
-                    className={`${styles.focus} ${props.focus != LeaderboardFocus.TDH ? styles.disabled : ""
-                      }`}>
+                    className={`${styles.focus} ${
+                      props.focus != LeaderboardFocus.TDH ? styles.disabled : ""
+                    }`}>
                     {LeaderboardFocus.TDH}
                   </span>
                 </span>
@@ -262,10 +258,11 @@ export default function Leaderboard(
                     onClick={() =>
                       props.setFocus(LeaderboardFocus.INTERACTIONS)
                     }
-                    className={`${styles.focus} ${props.focus != LeaderboardFocus.INTERACTIONS
+                    className={`${styles.focus} ${
+                      props.focus != LeaderboardFocus.INTERACTIONS
                         ? styles.disabled
                         : ""
-                      }`}>
+                    }`}>
                     {LeaderboardFocus.INTERACTIONS}
                   </span>
                 </span>

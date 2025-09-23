@@ -1,10 +1,13 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { useEffect, useState } from "react";
-import { Transaction } from "../entities/ITransaction";
-import { DBResponse } from "../entities/IDBResponse";
-import { fetchUrl } from "../services/6529api";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "../components/nextGen/nextgen_contracts";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
-import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
+import { DBResponse } from "../entities/IDBResponse";
+import { Transaction } from "../entities/ITransaction";
+import { fetchUrl } from "../services/6529api";
 
 export enum TypeFilter {
   ALL = "All",
@@ -26,10 +29,10 @@ interface UseActivityDataReturn {
   // Data
   activity: Transaction[];
   totalResults: number;
-  
+
   // Loading state
   fetching: boolean;
-  
+
   // Pagination
   page: number;
   setPage: (page: number) => void;
@@ -45,24 +48,29 @@ export function useActivityData(
     totalResults: number;
   }
 ): UseActivityDataReturn {
-  const [activity, setActivity] = useState<Transaction[]>(initialData?.activity || []);
+  const [activity, setActivity] = useState<Transaction[]>(
+    initialData?.activity || []
+  );
   const [page, setPage] = useState(initialPage);
-  const [totalResults, setTotalResults] = useState(initialData?.totalResults || 0);
+  const [totalResults, setTotalResults] = useState(
+    initialData?.totalResults || 0
+  );
   const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and filters are at defaults
     const hasInitialData = initialData && initialData.activity.length > 0;
-    const isDefaultFilters = typeFilter === TypeFilter.ALL && selectedContract === ContractFilter.ALL;
+    const isDefaultFilters =
+      typeFilter === TypeFilter.ALL && selectedContract === ContractFilter.ALL;
     const isInitialPage = page === initialPage;
-    
+
     if (hasInitialData && isDefaultFilters && isInitialPage) {
       return; // Use initial data, no fetch needed
     }
-    
+
     setFetching(true);
     let url = `${env.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
-    
+
     switch (typeFilter) {
       case TypeFilter.SALES:
         url += `&filter=sales`;
@@ -80,7 +88,7 @@ export function useActivityData(
         url += `&filter=burns`;
         break;
     }
-    
+
     switch (selectedContract) {
       case ContractFilter.MEMES:
         url += `&contract=${MEMES_CONTRACT}`;
@@ -92,7 +100,7 @@ export function useActivityData(
         url += `&contract=${GRADIENT_CONTRACT}`;
         break;
     }
-    
+
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setActivity(response.data);

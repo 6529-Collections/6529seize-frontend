@@ -1,8 +1,8 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { configureStore } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
-import { groupSlice } from "./groupSlice";
 import { editSlice } from "./editSlice";
+import { groupSlice } from "./groupSlice";
 
 export const makeStore = () =>
   configureStore({

@@ -1,12 +1,12 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "@/styles/Home.module.scss";
 
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import { commonApiFetch } from "@/services/api/common-api";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { Metadata } from "next";
 import TheMemesMint from "@/components/the-memes/TheMemesMint";
+import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import { Metadata } from "next";
 
 export default async function TheMemesMintPage() {
   const headers = await getAppCommonHeaders();

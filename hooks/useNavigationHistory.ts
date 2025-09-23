@@ -1,8 +1,8 @@
 "use client";
 
-import { env } from "@/utils/env";
-import { useState, useEffect } from "react";
+import { env } from "@/config/env";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface NavigationHistory {
   canGoBack: boolean;

@@ -1,8 +1,8 @@
 "use client";
 
-import { env } from "@/utils/env";
 import ClientOnly from "@/components/client-only/ClientOnly";
 import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
+import { env } from "@/config/env";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";

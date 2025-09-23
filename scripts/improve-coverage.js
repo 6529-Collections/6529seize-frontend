@@ -1,18 +1,18 @@
 import { execSync } from "child_process";
+import crypto from "crypto";
 import {
-  readFileSync,
-  existsSync,
-  openSync,
   closeSync,
-  readSync,
-  ftruncateSync,
-  writeSync,
+  existsSync,
   constants as fsConstants,
+  ftruncateSync,
+  openSync,
+  readFileSync,
+  readSync,
+  writeSync,
 } from "fs";
+import libCoverage from "istanbul-lib-coverage";
 import path from "path";
 import { fileURLToPath } from "url";
-import libCoverage from "istanbul-lib-coverage";
-import crypto from "crypto";
 
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,9 +24,9 @@ let PROCESS_ID, TOTAL_PROCESSES;
 if (process.argv.length >= 4) {
   PROCESS_ID = parseInt(process.argv[2]);
   TOTAL_PROCESSES = parseInt(process.argv[3]);
-} else if (process.env.PROCESS_ID && process.env.TOTAL_PROCESSES) {
-  PROCESS_ID = parseInt(process.env.PROCESS_ID);
-  TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES);
+} else if (env.PROCESS_ID && env.TOTAL_PROCESSES) {
+  PROCESS_ID = parseInt(env.PROCESS_ID);
+  TOTAL_PROCESSES = parseInt(env.TOTAL_PROCESSES);
 } else {
   console.error("Error: Process configuration not provided.");
   console.error("");
@@ -36,7 +36,9 @@ if (process.argv.length >= 4) {
   console.error("   npm run improve-coverage 0 8  # Process 0 of 8");
   console.error("");
   console.error("2. Set up environment variables:");
-  console.error("   source scripts/setup-coverage-env.sh <process_id> <total_processes>");
+  console.error(
+    "   source scripts/setup-coverage-env.sh <process_id> <total_processes>"
+  );
   console.error("   npm run improve-coverage");
   process.exit(1);
 }
@@ -52,26 +54,24 @@ if (isNaN(TOTAL_PROCESSES) || TOTAL_PROCESSES < 1) {
 }
 
 // Create unique progress file per process when running in parallel
-const progressFilename = ".coverage-progress.json"
+const progressFilename = ".coverage-progress.json";
 const progressPath = path.resolve(__dirname, "..", progressFilename);
 
 const COVERAGE_INCREMENT_PERCENT_ENV = parseFloat(
-  process.env.COVERAGE_INCREMENT_PERCENT_ENV
+  env.COVERAGE_INCREMENT_PERCENT_ENV
 );
 const COVERAGE_INCREMENT_PERCENT = !isNaN(COVERAGE_INCREMENT_PERCENT_ENV)
   ? COVERAGE_INCREMENT_PERCENT_ENV
   : 0;
 
 // Add time limit configuration
-const TIME_LIMIT_MINUTES_ENV = parseFloat(
-  process.env.TIME_LIMIT_MINUTES
-);
+const TIME_LIMIT_MINUTES_ENV = parseFloat(env.TIME_LIMIT_MINUTES);
 const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
   ? TIME_LIMIT_MINUTES_ENV
   : 60;
 
 // Number of files to suggest each iteration
-const FILE_SUGGESTION_COUNT_ENV = parseInt(process.env.FILE_SUGGESTION_COUNT);
+const FILE_SUGGESTION_COUNT_ENV = parseInt(env.FILE_SUGGESTION_COUNT);
 const FILE_SUGGESTION_COUNT = !isNaN(FILE_SUGGESTION_COUNT_ENV)
   ? FILE_SUGGESTION_COUNT_ENV
   : 10;
@@ -90,14 +90,14 @@ function getTotalCoverage(summary) {
 
 function getFileHash(filepath) {
   // Create a deterministic hash for the file path
-  return crypto.createHash('md5').update(filepath).digest('hex');
+  return crypto.createHash("md5").update(filepath).digest("hex");
 }
 
 function isFileAssignedToProcess(filepath, processId, totalProcesses) {
   // Convert hex hash to number and use modulo to assign to a process
   const hash = getFileHash(filepath);
   const hashNum = parseInt(hash.substring(0, 8), 16);
-  return (hashNum % totalProcesses) === processId;
+  return hashNum % totalProcesses === processId;
 }
 
 function getLowCoverageFiles(coverageData, limit = 1) {
@@ -111,7 +111,7 @@ function getLowCoverageFiles(coverageData, limit = 1) {
     .sort((a, b) => a.pct - b.pct);
 
   // Filter files assigned to this process
-  const assignedFiles = allLowCoverageFiles.filter(entry => 
+  const assignedFiles = allLowCoverageFiles.filter((entry) =>
     isFileAssignedToProcess(entry.file, PROCESS_ID, TOTAL_PROCESSES)
   );
 
@@ -276,7 +276,9 @@ function main() {
     // Ensure startTime is always set
     if (!startTime) {
       startTime = Date.now();
-      console.log("Warning: startTime was not set, initializing to current time.");
+      console.log(
+        "Warning: startTime was not set, initializing to current time."
+      );
     }
 
     if (fd === undefined) {
@@ -321,27 +323,26 @@ function main() {
     );
     console.log(`Final coverage: ${currentCoverage.toFixed(2)}%`);
   } else {
-    
     const nextFiles = getLowCoverageFiles(coverageData, FILE_SUGGESTION_COUNT);
     if (nextFiles.length > 0) {
-      console.log(
-        `\nAction: Add tests for:`
-      );
+      console.log(`\nAction: Add tests for:`);
       for (const file of nextFiles) {
         console.log(`- ${file}`);
       }
-      console.log(`to improve coverage. After each set of tests, re-run 'npm run improve-coverage' to get new suggestions. Continue until the time limit is reached.`)
+      console.log(
+        `to improve coverage. After each set of tests, re-run 'npm run improve-coverage' to get new suggestions. Continue until the time limit is reached.`
+      );
     } else {
       // Check if there are low coverage files, just not assigned to this process
       const map = createCoverageMap(coverageData);
-      const totalLowCoverageFiles = Object.entries(map.data)
-        .filter(([file, data]) => map.fileCoverageFor(file).toSummary().lines.pct < 80)
-        .length;
-      
+      const totalLowCoverageFiles = Object.entries(map.data).filter(
+        ([file, data]) => map.fileCoverageFor(file).toSummary().lines.pct < 80
+      ).length;
+
       if (TOTAL_PROCESSES > 1 && totalLowCoverageFiles > 0) {
         console.log(
           `\nInfo: No files assigned to process ${PROCESS_ID}. There are ${totalLowCoverageFiles} low coverage files ` +
-          `assigned to other processes. This process can rest while others work on coverage.`
+            `assigned to other processes. This process can rest while others work on coverage.`
         );
       } else {
         console.log(

@@ -1,6 +1,6 @@
-import { env } from "@/utils/env";
 import MemeLabComponent from "@/components/memelab/MemeLab";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { env } from "@/config/env";
 import styles from "@/styles/Home.module.scss";
 import { Metadata } from "next";
 

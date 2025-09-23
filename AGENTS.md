@@ -53,6 +53,7 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 - Follow existing code style and naming conventions.
 - Place tests in `__tests__` directories or alongside components as `ComponentName.test.tsx`.
 - Mock external dependencies and APIs in tests.
+- DO NOT add `__tests__` in tsconfig exclude
 
 ## Next.js Directory Structure
 

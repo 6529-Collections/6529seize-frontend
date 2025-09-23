@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,

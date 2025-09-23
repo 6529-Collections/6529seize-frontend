@@ -1,6 +1,6 @@
-import { env } from "@/utils/env";
 import { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
+import { env } from "@/config/env";
 import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
 import { AdapterCacheError, AdapterError } from "@/src/errors/adapter";
 import { logErrorSecurely } from "@/utils/error-sanitizer";

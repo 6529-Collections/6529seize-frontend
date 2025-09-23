@@ -7,227 +7,218 @@
  * - Enforces HTTPS in production
  * - Validates against domain allowlist
  * - Allows valid configurations
+ *
+ * They also assert that the exported value is the **normalized origin**
+ * (scheme + host [+ port], no path/query, no trailing slash).
  */
 
-// Mock process.env before importing constants
-const originalEnv = process.env;
+// Deterministic per-test env isolation (no shared cache/order issues)
+const withIsolatedEnv = (
+  overrides: Record<string, string | undefined>,
+  fn: () => void
+) => {
+  const snapshot: Record<string, string | undefined> = { ...process.env };
+  const apply = (key: string, val: string | undefined) => {
+    if (typeof val === "undefined") delete (process.env as any)[key];
+    else (process.env as any)[key] = val;
+  };
+
+  try {
+    // Apply overrides
+    Object.keys(overrides).forEach((k) => apply(k, overrides[k]));
+
+    // Load module in an isolated registry so no cache bleeds across tests
+    jest.isolateModules(() => fn());
+  } finally {
+    // Restore original env snapshot precisely
+    const currentKeys = new Set(Object.keys(process.env));
+    const snapshotKeys = new Set(Object.keys(snapshot));
+    // Remove keys that weren't originally present
+    for (const k of Array.from(currentKeys)) {
+      if (!snapshotKeys.has(k)) delete (process.env as any)[k];
+    }
+    // Restore original values
+    for (const k of Array.from(snapshotKeys)) {
+      const v = snapshot[k];
+      if (typeof v === "undefined") delete (process.env as any)[k];
+      else (process.env as any)[k] = v as string;
+    }
+  }
+};
+
+const importConstants = () => require("@/constants");
 
 describe("validateBaseEndpoint", () => {
-  beforeEach(() => {
-    // Reset process.env before each test
-    jest.resetModules();
-    process.env = { ...originalEnv };
-    // Clear the require cache for the constants module specifically
-    delete require.cache[require.resolve("../constants")];
-  });
-
-  afterAll(() => {
-    // Restore original environment
-    process.env = originalEnv;
-  });
-
   it("throws error when BASE_ENDPOINT is missing", () => {
-    // Remove the environment variable
-    delete process.env.BASE_ENDPOINT;
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT environment variable is required. Please set it in your environment or .env.local file.",
-    );
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: undefined }, () => {
+        importConstants();
+      })
+    ).toThrow(/BASE_ENDPOINT[\s\S]*Required/);
   });
 
   it("throws error when BASE_ENDPOINT is empty string", () => {
-    process.env.BASE_ENDPOINT = "";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT environment variable is required. Please set it in your environment or .env.local file.",
-    );
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "" }, () => {
+        importConstants();
+      })
+    ).toThrow(/BASE_ENDPOINT must be a valid URL/);
   });
 
   it("throws error for invalid URL format", () => {
-    process.env.BASE_ENDPOINT = "not-a-url";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT contains invalid URL format: not-a-url. Expected format: https://domain.com",
-    );
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "not-a-url" }, () => {
+        importConstants();
+      })
+    ).toThrow(/BASE_ENDPOINT must be a valid URL/);
   });
 
   it("throws error for malformed URLs", () => {
-    process.env.BASE_ENDPOINT = "https://";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT contains invalid URL format: https://. Expected format: https://domain.com",
-    );
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "https://" }, () => {
+        importConstants();
+      })
+    ).toThrow(/BASE_ENDPOINT must be a valid URL/);
   });
 
   it("throws error for non-HTTPS URLs in production (except localhost)", () => {
-    process.env.BASE_ENDPOINT = "http://example.com";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT must use HTTPS protocol in production. Got: http://. Only localhost can use HTTP.",
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "http://example.com" }, () => {
+        importConstants();
+      })
+    ).toThrow(
+      "BASE_ENDPOINT must use HTTPS protocol in production. Got: http://. Only localhost can use HTTP."
     );
   });
 
   it("throws error for FTP protocol", () => {
-    process.env.BASE_ENDPOINT = "ftp://6529.io";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT must use HTTPS protocol in production. Got: ftp://. Only localhost can use HTTP.",
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "ftp://6529.io" }, () => {
+        importConstants();
+      })
+    ).toThrow(
+      "BASE_ENDPOINT must use HTTPS protocol in production. Got: ftp://. Only localhost can use HTTP."
     );
   });
 
   it("throws error for non-allowlisted domain", () => {
-    process.env.BASE_ENDPOINT = "https://malicious.com";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT domain not in allowlist. Got: malicious.com. Allowed domains: 6529.io, www.6529.io, staging.6529.io, localhost, 127.0.0.1",
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "https://malicious.com" }, () => {
+        importConstants();
+      })
+    ).toThrow(
+      "BASE_ENDPOINT domain not in allowlist. Got: malicious.com. Allowed domains: 6529.io, www.6529.io, staging.6529.io, localhost, 127.0.0.1"
     );
   });
 
   it("throws error for subdomain of non-allowlisted domain", () => {
-    process.env.BASE_ENDPOINT = "https://fake.malicious.com";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT domain not in allowlist. Got: fake.malicious.com. Allowed domains: 6529.io, www.6529.io, staging.6529.io, localhost, 127.0.0.1",
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "https://fake.malicious.com" }, () => {
+        importConstants();
+      })
+    ).toThrow(
+      "BASE_ENDPOINT domain not in allowlist. Got: fake.malicious.com. Allowed domains: 6529.io, www.6529.io, staging.6529.io, localhost, 127.0.0.1"
     );
   });
 
   it("throws error for domain that ends with allowlisted domain but is not a subdomain", () => {
-    process.env.BASE_ENDPOINT = "https://fake6529.io";
-
-    expect(() => {
-      require("../constants");
-    }).toThrow(
-      "BASE_ENDPOINT domain not in allowlist. Got: fake6529.io. Allowed domains: 6529.io, www.6529.io, staging.6529.io, localhost, 127.0.0.1",
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "https://fake6529.io" }, () => {
+        importConstants();
+      })
+    ).toThrow(
+      "BASE_ENDPOINT domain not in allowlist. Got: fake6529.io. Allowed domains: 6529.io, www.6529.io, staging.6529.io, localhost, 127.0.0.1"
     );
   });
 
-  // Valid configuration tests
+  // Valid configuration tests (expect normalized origin)
   it("accepts valid HTTPS URL with 6529.io domain", () => {
-    process.env.BASE_ENDPOINT = "https://6529.io";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "https://6529.io" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://6529.io");
-    }).not.toThrow();
+    });
   });
 
   it("accepts valid HTTPS URL with www.6529.io domain", () => {
-    process.env.BASE_ENDPOINT = "https://www.6529.io";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "https://www.6529.io" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://www.6529.io");
-    }).not.toThrow();
+    });
   });
 
   it("accepts valid HTTPS URL with staging.6529.io domain", () => {
-    process.env.BASE_ENDPOINT = "https://staging.6529.io";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "https://staging.6529.io" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://staging.6529.io");
-    }).not.toThrow();
+    });
   });
 
   it("accepts HTTP localhost URLs", () => {
-    process.env.BASE_ENDPOINT = "http://localhost:3000";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "http://localhost:3000" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe("http://localhost:3000");
-    }).not.toThrow();
+    });
   });
 
   it("accepts HTTP 127.0.0.1 URLs", () => {
-    process.env.BASE_ENDPOINT = "http://127.0.0.1:3000";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "http://127.0.0.1:3000" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe("http://127.0.0.1:3000");
-    }).not.toThrow();
+    });
   });
 
   it("accepts HTTPS localhost URLs", () => {
-    process.env.BASE_ENDPOINT = "https://localhost:3000";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "https://localhost:3000" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://localhost:3000");
-    }).not.toThrow();
+    });
   });
 
   it("accepts valid subdomain of allowlisted domain", () => {
-    process.env.BASE_ENDPOINT = "https://api.6529.io";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "https://api.6529.io" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://api.6529.io");
-    }).not.toThrow();
+    });
   });
 
-  it("accepts URLs with paths and query parameters", () => {
-    process.env.BASE_ENDPOINT = "https://6529.io/app?ref=test";
-
-    expect(() => {
-      const constants = require("../constants");
-      expect(constants.VALIDATED_BASE_ENDPOINT).toBe(
-        "https://6529.io/app?ref=test",
-      );
-    }).not.toThrow();
+  it("throws error if query params are present", () => {
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "https://6529.io/app?ref=test" }, () => {
+        importConstants();
+      })
+    ).toThrow("BASE_ENDPOINT must not have query params. Got: ?ref=test");
   });
 
   it("validates immediately on module import (fail-fast behavior)", () => {
-    process.env.BASE_ENDPOINT = "invalid-url";
-
-    // The error should be thrown immediately when the module is imported
-    // not when the constant is accessed
-    expect(() => {
-      require("../constants");
-    }).toThrow();
+    expect(() =>
+      withIsolatedEnv({ BASE_ENDPOINT: "invalid-url" }, () => {
+        importConstants();
+      })
+    ).toThrow();
   });
 
   it("exports VALIDATED_BASE_ENDPOINT constant for valid configuration", () => {
-    process.env.BASE_ENDPOINT = "https://6529.io";
-
-    const constants = require("../constants");
-    expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://6529.io");
-    expect(typeof constants.VALIDATED_BASE_ENDPOINT).toBe("string");
+    withIsolatedEnv({ BASE_ENDPOINT: "https://6529.io" }, () => {
+      const constants = importConstants();
+      expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://6529.io");
+      expect(typeof constants.VALIDATED_BASE_ENDPOINT).toBe("string");
+    });
   });
 
   // Edge case tests
   it("handles URLs with non-standard ports", () => {
-    process.env.BASE_ENDPOINT = "https://staging.6529.io:8080";
-
-    expect(() => {
-      const constants = require("../constants");
+    withIsolatedEnv({ BASE_ENDPOINT: "https://staging.6529.io:8080" }, () => {
+      const constants = importConstants();
       expect(constants.VALIDATED_BASE_ENDPOINT).toBe(
-        "https://staging.6529.io:8080",
+        "https://staging.6529.io:8080"
       );
-    }).not.toThrow();
+    });
   });
 
-  it("handles URLs with trailing slashes", () => {
-    process.env.BASE_ENDPOINT = "https://6529.io/";
-
-    expect(() => {
-      const constants = require("../constants");
-      expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://6529.io/");
-    }).not.toThrow();
+  it("normalizes URLs with trailing slashes to origin without trailing slash", () => {
+    withIsolatedEnv({ BASE_ENDPOINT: "https://6529.io/" }, () => {
+      const constants = importConstants();
+      expect(constants.VALIDATED_BASE_ENDPOINT).toBe("https://6529.io");
+    });
   });
 });

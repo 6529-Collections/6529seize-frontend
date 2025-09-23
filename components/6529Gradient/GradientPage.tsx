@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 import styles from "./6529Gradient.module.scss";
 
 import Address from "@/components/address/Address";

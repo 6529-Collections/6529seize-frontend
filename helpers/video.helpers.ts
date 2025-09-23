@@ -1,7 +1,6 @@
-import { env } from "@/utils/env";
+import { env } from "@/config/env";
 const CLOUDFRONT_DOMAIN =
-  env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ??
-  "https://d3lqz0a4bldqgf.cloudfront.net";
+  env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ?? "https://d3lqz0a4bldqgf.cloudfront.net";
 
 export interface VideoConversions {
   readonly MP4_1080P: string;
