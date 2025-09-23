@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 
-export default function NotFound({ label }: { label?: string }) {
+export default function NotFound({ label }: { readonly label?: string }) {
   const { setTitle } = useTitle();
   useEffect(() => {
     const title = `404 - ${label?.toUpperCase() ?? "PAGE"} NOT FOUND`;

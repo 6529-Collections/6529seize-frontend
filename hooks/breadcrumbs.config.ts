@@ -1,3 +1,4 @@
+import { idStringToDisplay } from "@/helpers/Helpers";
 import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Still needed by crumbBuilders
 import {
   fetchCollectionName,
@@ -46,7 +47,7 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       ];
       const displayName = isLoading
         ? "Loading..."
-        : data?.name ?? `Gradient ${params.id}`;
+        : data?.name ?? `Gradient #${params.id}`;
       crumbs.push({ display: displayName });
       return crumbs;
     },
@@ -99,7 +100,7 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       } else if (params.id === "mint") {
         displayName = "Mint";
       } else {
-        displayName = data?.name ?? `Meme #${params.id}`;
+        displayName = data?.name ?? `Meme #${idStringToDisplay(params.id)}`;
       }
       crumbs.push({ display: displayName });
       return crumbs;
@@ -130,7 +131,7 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       const crumbs: Crumb[] = [{ display: "Nextgen", href: "/nextgen" }];
       const displayName = isLoading
         ? "Loading..."
-        : data?.name ?? `Nextgen ${params.id}`;
+        : data?.name ?? `Nextgen #${params.id}`;
       crumbs.push({ display: displayName });
       return crumbs;
     },
@@ -165,7 +166,7 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       const crumbs: Crumb[] = [{ display: "Rememes", href: "/rememes" }];
       const displayName = isLoading
         ? "Loading..."
-        : data?.name ?? `Rememe ${params.id}`;
+        : data?.name ?? `Rememe #${idStringToDisplay(params.id)}`;
       crumbs.push({ display: displayName });
       return crumbs;
     },
@@ -217,8 +218,8 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
         const displayName = isLoading
           ? "Loading..."
           : data?.name
-          ? `Card ${params.id} - ${data.name}`
-          : `Card ${params.id}`;
+          ? `Card #${idStringToDisplay(params.id)} - ${data.name}`
+          : `Card #${idStringToDisplay(params.id)}`;
         crumbs.push({ display: displayName });
       }
       return crumbs;
@@ -246,7 +247,7 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       ];
       const displayName = isLoading
         ? "Loading..."
-        : data?.name ?? `Collection ${params.id}`;
+        : data?.name ?? `Collection #${idStringToDisplay(params.id)}`;
       crumbs.push({ display: displayName });
       return crumbs;
     },
