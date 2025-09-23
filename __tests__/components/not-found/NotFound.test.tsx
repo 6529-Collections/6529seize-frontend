@@ -23,7 +23,7 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: ({ unoptimized, ...props }: any) => {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} />;
+    return <img {...props} alt="SummerGlasses" />;
   },
 }));
 

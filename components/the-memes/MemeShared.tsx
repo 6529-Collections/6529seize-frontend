@@ -39,7 +39,6 @@ async function getMetadataProps(
   let urlPath = "nfts";
   const idDisplay = idStringToDisplay(id);
   let name = `The Memes #${idDisplay}`;
-  console.log("hi i am name", name);
   let description = "Collections";
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";

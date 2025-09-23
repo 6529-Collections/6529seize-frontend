@@ -513,8 +513,8 @@ function ScreenshotCard({
   onScreenshot,
   isCapturing,
 }: {
-  onScreenshot: () => void;
-  isCapturing: boolean;
+  readonly onScreenshot: () => void;
+  readonly isCapturing: boolean;
 }) {
   return (
     <button
