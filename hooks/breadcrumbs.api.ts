@@ -18,7 +18,7 @@ export const fetchGradientName = async (
     return nftData ? { name: nftData.name } : null;
   } catch (error) {
     console.error("Error fetching gradient name:", error);
-    return { name: `Gradient ${id}` };
+    return { name: `Gradient #${id}` };
   }
 };
 
@@ -83,7 +83,7 @@ export const fetchNextgenName = async (
     return response?.name ? { name: response.name } : null;
   } catch (error) {
     console.error("Error fetching nextgen name:", error);
-    return { name: `Nextgen ${id}` };
+    return { name: `Nextgen #${id}` };
   }
 };
 
