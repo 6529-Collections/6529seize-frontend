@@ -18,7 +18,18 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-const originalFetch = global.fetch;
+const mockFetchPublicUrl = jest.fn();
+const mockFetchPublicJson = jest.fn();
+
+jest.mock("@/lib/security/urlGuard", () => {
+  const actual = jest.requireActual("@/lib/security/urlGuard");
+  return {
+    ...actual,
+    fetchPublicUrl: mockFetchPublicUrl,
+    fetchPublicJson: mockFetchPublicJson,
+  };
+});
+
 const originalEnv = process.env;
 
 type GetHandler = typeof import("@/app/api/pepe/resolve/route").GET;
@@ -42,11 +53,8 @@ afterAll(() => {
 describe("/api/pepe/resolve", () => {
   beforeEach(() => {
     nextResponseJson.mockClear();
-    global.fetch = originalFetch;
-  });
-
-  afterEach(() => {
-    global.fetch = originalFetch;
+    mockFetchPublicUrl.mockReset();
+    mockFetchPublicJson.mockReset();
   });
 
   const createTextResponse = (body: string, status = 200) =>
@@ -55,11 +63,14 @@ describe("/api/pepe/resolve", () => {
       headers: new Headers({ "content-type": "text/html" }),
     });
 
-  const createJsonResponse = (value: unknown, status = 200) =>
-    new Response(JSON.stringify(value), {
-      status,
-      headers: new Headers({ "content-type": "application/json" }),
-    });
+  const slugifyNameForTest = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
 
   it("caches asset previews and sets cache headers", async () => {
     const nextData = {
@@ -82,50 +93,60 @@ describe("/api/pepe/resolve", () => {
       nextData
     )}</script></head><body></body></html>`;
 
-    const mockFetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string"
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : typeof (input as { url?: string }).url === "string"
-            ? (input as { url: string }).url
-            : String(input);
+    const nameSlug = slugifyNameForTest(nextData.props.pageProps.asset.name);
+    const assetSlug = slugifyNameForTest(nextData.props.pageProps.asset.asset);
+    const expectedWikiSlugs = new Set([nameSlug, assetSlug]);
+
+    mockFetchPublicUrl.mockImplementation(async (input: string | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
       if (url.startsWith("https://pepe.wtf/asset/")) {
         return createTextResponse(html);
       }
-      if (url.startsWith("https://tokenscan.io/api/api/asset")) {
-        return createJsonResponse({ supply: "1000" });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/holders")) {
-        return createJsonResponse({ data: [{}, {}] });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/dispensers")) {
-        return createJsonResponse({ data: [{ satoshi_price: 2500 }, { satoshirate: 4000 }] });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/market") && url.includes("BTC")) {
-        return createJsonResponse({ data: [{ price_sats: 1500 }] });
-      }
-      if (url.startsWith("https://tokenscan.io/api/api/market") && url.includes("XCP")) {
-        return createJsonResponse({ data: [{ price: 1.5 }] });
-      }
-      try {
-        const parsed = new URL(url);
-        if (parsed.hostname === "api.coingecko.com") {
-          return createJsonResponse({ bitcoin: { eth: 15 }, counterparty: { eth: 0.002 } });
+      if (url.startsWith("https://wiki.pepe.wtf/")) {
+        const wikiPath = url.replace("https://wiki.pepe.wtf/", "").replace(/\/+$/, "");
+        if (wikiPath.startsWith("rare-pepes/")) {
+          const slug = wikiPath.split("/").pop() ?? "";
+          if (!expectedWikiSlugs.has(slug)) {
+            throw new Error(`Unexpected rare pepe slug ${slug}`);
+          }
+          return new Response(null, { status: 404 });
         }
-      } catch {
-        // ignore URL parsing issues so other mocks can handle the input
+        if (wikiPath.startsWith("book-of-kek/")) {
+          const slug = wikiPath.split("/").pop() ?? "";
+          if (!expectedWikiSlugs.has(slug)) {
+            throw new Error(`Unexpected book of kek slug ${slug}`);
+          }
+          return new Response(null, { status: 404 });
+        }
+        if (!wikiPath.includes("/") && expectedWikiSlugs.has(wikiPath)) {
+          return new Response(null, { status: 200 });
+        }
       }
-      if (url === "https://wiki.pepe.wtf/rare-pepes/mtgox-pepe") {
-        return new Response(null, { status: 404 });
-      }
-      if (url === "https://wiki.pepe.wtf/mtgox-pepe") {
-        return new Response(null, { status: 200 });
-      }
-      throw new Error(`Unexpected fetch to ${url}`);
+      throw new Error(`Unexpected fetchPublicUrl call to ${url}`);
     });
 
-    global.fetch = mockFetch as unknown as typeof fetch;
+    mockFetchPublicJson.mockImplementation(async (input: string | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url === "https://tokenscan.io/api/api/asset/GOXPEPE") {
+        return { supply: "1000" };
+      }
+      if (url === "https://tokenscan.io/api/api/holders/GOXPEPE") {
+        return { data: [{}, {}] };
+      }
+      if (url === "https://tokenscan.io/api/api/dispensers/GOXPEPE?status=open") {
+        return { data: [{ satoshi_price: 2500 }, { satoshirate: 4000 }] };
+      }
+      if (url === "https://tokenscan.io/api/api/market/GOXPEPE/BTC/history") {
+        return { data: [{ price_sats: 1500 }] };
+      }
+      if (url === "https://tokenscan.io/api/api/market/GOXPEPE/XCP/history") {
+        return { data: [{ price: 1.5 }] };
+      }
+      if (url.startsWith("https://api.coingecko.com/")) {
+        return { bitcoin: { eth: 15 }, counterparty: { eth: 0.002 } };
+      }
+      throw new Error(`Unexpected fetchPublicJson call to ${url}`);
+    });
 
     const request = {
       nextUrl: new URL("https://app.local/api/pepe/resolve?kind=asset&slug=GOXPEPE"),
@@ -137,21 +158,71 @@ describe("/api/pepe/resolve", () => {
     expect(payload1).toMatchObject({
       kind: "asset",
       asset: "GOXPEPE",
-      links: { wiki: "https://wiki.pepe.wtf/mtgox-pepe" },
-      market: expect.objectContaining({ bestAskSats: 2500, lastSaleSats: 1500 }),
+      links: {
+        horizon: "https://horizon.market/explorer/assets/GOXPEPE",
+        xchain: "https://xchain.io/asset/GOXPEPE",
+      },
     });
+    expect(payload1.links).toHaveProperty("wiki");
+
+    expect(payload1.market).toEqual(
+      expect.objectContaining({
+        bestAskSats: 2500,
+        lastSaleSats: 1500,
+        lastSaleXcp: 1.5,
+        approxEthPerBtc: 15,
+        approxEthPerXcp: 0.002,
+      })
+    );
+    expect(typeof payload1.market?.updatedISO).toBe("string");
+    expect(Number.isNaN(Date.parse(payload1.market?.updatedISO ?? ""))).toBe(false);
 
     expect(response1.headers.get("X-Cache")).toBe("MISS");
     expect(response1.headers.get("Cache-Control")).toContain("s-maxage=600");
-    expect(mockFetch).toHaveBeenCalled();
-    const callsAfterFirst = mockFetch.mock.calls.length;
+    expect(mockFetchPublicUrl).toHaveBeenCalled();
+    expect(mockFetchPublicJson).toHaveBeenCalled();
+    const wikiCallResults = mockFetchPublicUrl.mock.calls
+      .map(([input], index) => {
+        const url = typeof input === "string" ? input : input.toString();
+        return {
+          url,
+          result: mockFetchPublicUrl.mock.results[index],
+        };
+      })
+      .filter(({ url }) => url.startsWith("https://wiki.pepe.wtf/"));
+
+    expect(wikiCallResults.length).toBeGreaterThan(0);
+
+    const successfulWikiProbe = wikiCallResults.find(
+      ({ result }) => result.type === "return" && Boolean(result.value?.ok)
+    );
+    if (successfulWikiProbe) {
+      expect(payload1.links?.wiki).toBe(successfulWikiProbe.url);
+      const wikiSlug = successfulWikiProbe.url.replace("https://wiki.pepe.wtf/", "").replace(/\/+$/, "");
+      expect(expectedWikiSlugs.has(wikiSlug)).toBe(true);
+    } else {
+      expect(payload1.links?.wiki).toBeUndefined();
+    }
+
+    expect(
+      wikiCallResults.some(({ url }) => {
+        if (!url.includes("/rare-pepes/")) {
+          return false;
+        }
+        const slug = url.split("/").pop() ?? "";
+        return expectedWikiSlugs.has(slug);
+      })
+    ).toBe(true);
+    const urlCallsAfterFirst = mockFetchPublicUrl.mock.calls.length;
+    const jsonCallsAfterFirst = mockFetchPublicJson.mock.calls.length;
 
     const response2 = await GET(request);
     expect(response2.status).toBe(200);
     const payload2 = await response2.json();
     expect(payload2).toEqual(payload1);
     expect(response2.headers.get("X-Cache")).toBe("HIT");
-    expect(mockFetch.mock.calls.length).toBe(callsAfterFirst);
+    expect(mockFetchPublicUrl.mock.calls.length).toBe(urlCallsAfterFirst);
+    expect(mockFetchPublicJson.mock.calls.length).toBe(jsonCallsAfterFirst);
   });
 
   it("returns 400 for invalid params", async () => {
@@ -161,6 +232,7 @@ describe("/api/pepe/resolve", () => {
 
     const response = await GET(request);
     expect(response.status).toBe(400);
-    expect(global.fetch).toBe(originalFetch);
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    expect(mockFetchPublicJson).not.toHaveBeenCalled();
   });
 });

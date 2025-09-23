@@ -417,6 +417,9 @@ export default function OpenSeaCard({ href, data }: { readonly href: string; rea
     return renderCollectionCard(href, data);
   }
 
-  return renderTransactionCard(href, data);
-}
+  if (data.type === "opensea.tx") {
+    return renderTransactionCard(href, data);
+  }
 
+  return null;
+}
