@@ -160,17 +160,18 @@ export const createLinkRenderer = ({
       return false;
     }
 
+    const parsedUrl = parseUrl(href);
     const seizeMatch = findMatch(seizeHandlers, href);
     if (seizeMatch) {
       return seizeMatch.display === "block";
     }
 
     const match = findMatch(handlers, href);
-    if (!match) {
-      return false;
+    if (match) {
+      return match.display === "block";
     }
 
-    return match.display === "block";
+    return shouldUseOpenGraphPreview(href, parsedUrl);
   };
 
   return {

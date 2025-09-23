@@ -14,6 +14,7 @@ import {
   buildResponse,
 } from "./utils";
 import { createCompoundPlan, type PreviewPlan } from "./compound/service";
+import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
@@ -229,10 +230,26 @@ function createGenericPlan(url: URL): PreviewPlan {
 }
 
 export async function GET(request: NextRequest) {
+  const rawUrl = request.nextUrl.searchParams.get("url");
+
+  const ensTarget = detectEnsTarget(rawUrl);
+  if (ensTarget) {
+    try {
+      const preview = await fetchEnsPreview(ensTarget);
+      return NextResponse.json(preview);
+    } catch (error) {
+      if (error instanceof EnsPreviewError) {
+        return NextResponse.json({ error: error.message }, { status: error.status });
+      }
+      const message = error instanceof Error ? error.message : "Failed to fetch ENS preview";
+      return NextResponse.json({ error: message }, { status: 502 });
+    }
+  }
+
   let targetUrl: URL;
 
   try {
-    targetUrl = parsePublicUrl(request.nextUrl.searchParams.get("url"));
+    targetUrl = parsePublicUrl(rawUrl);
   } catch (error) {
     return handleGuardError(error);
   }

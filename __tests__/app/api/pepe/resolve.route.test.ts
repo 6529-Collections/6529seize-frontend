@@ -49,19 +49,17 @@ describe("/api/pepe/resolve", () => {
     global.fetch = originalFetch;
   });
 
-  const createTextResponse = (body: string, status = 200) => ({
-    status,
-    ok: status >= 200 && status < 300,
-    text: async () => body,
-    json: async () => JSON.parse(body),
-  });
+  const createTextResponse = (body: string, status = 200) =>
+    new Response(body, {
+      status,
+      headers: new Headers({ "content-type": "text/html" }),
+    });
 
-  const createJsonResponse = (value: unknown, status = 200) => ({
-    status,
-    ok: status >= 200 && status < 300,
-    json: async () => value,
-    text: async () => JSON.stringify(value),
-  });
+  const createJsonResponse = (value: unknown, status = 200) =>
+    new Response(JSON.stringify(value), {
+      status,
+      headers: new Headers({ "content-type": "application/json" }),
+    });
 
   it("caches asset previews and sets cache headers", async () => {
     const nextData = {
@@ -85,7 +83,13 @@ describe("/api/pepe/resolve", () => {
     )}</script></head><body></body></html>`;
 
     const mockFetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input.toString();
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : typeof (input as { url?: string }).url === "string"
+            ? (input as { url: string }).url
+            : String(input);
       if (url.startsWith("https://pepe.wtf/asset/")) {
         return createTextResponse(html);
       }
@@ -113,10 +117,10 @@ describe("/api/pepe/resolve", () => {
         // ignore URL parsing issues so other mocks can handle the input
       }
       if (url === "https://wiki.pepe.wtf/rare-pepes/mtgox-pepe") {
-        return { status: 404, ok: false } as Response;
+        return new Response(null, { status: 404 });
       }
       if (url === "https://wiki.pepe.wtf/mtgox-pepe") {
-        return { status: 200, ok: true } as Response;
+        return new Response(null, { status: 200 });
       }
       throw new Error(`Unexpected fetch to ${url}`);
     });

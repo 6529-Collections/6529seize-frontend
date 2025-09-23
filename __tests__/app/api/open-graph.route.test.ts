@@ -5,6 +5,8 @@ const nextResponseJsonRoute = jest.fn(
   })
 );
 
+const nextResponseJson = nextResponseJsonRoute;
+
 jest.mock("next/server", () => ({
   NextResponse: { json: nextResponseJsonRoute },
   NextRequest: class {},
@@ -37,6 +39,11 @@ jest.mock("../../../app/api/open-graph/compound/service", () => ({
   createCompoundPlan: jest.fn(() => null),
 }));
 
+jest.mock("@/app/api/open-graph/ens", () => ({
+  detectEnsTarget: jest.fn(),
+  fetchEnsPreview: jest.fn(),
+}));
+
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
 let GET: GetHandler;
 
@@ -52,6 +59,10 @@ let compound: {
   createCompoundPlan: jest.Mock;
 };
 let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
+let ensRouteModule: {
+  detectEnsTarget: jest.Mock;
+  fetchEnsPreview: jest.Mock;
+};
 
 const DEFAULT_USER_AGENT =
   "6529seize-link-preview/1.0 (+https://6529.io; Fetching public OpenGraph data)";
@@ -75,6 +86,10 @@ async function loadRoute(): Promise<void> {
     "../../../app/api/open-graph/compound/service"
   ) as {
     createCompoundPlan: jest.Mock;
+  };
+  ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
+    detectEnsTarget: jest.Mock;
+    fetchEnsPreview: jest.Mock;
   };
 }
 

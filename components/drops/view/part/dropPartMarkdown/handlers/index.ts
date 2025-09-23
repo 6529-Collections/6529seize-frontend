@@ -1,6 +1,7 @@
 import type { LinkHandler } from "../linkTypes";
 import { createArtBlocksHandler } from "./artBlocks";
 import { createCompoundHandler } from "./compound";
+import { createEnsHandler } from "./ens";
 import { createFarcasterHandler } from "./farcaster";
 import { createGifHandler } from "./gif";
 import { createGoogleWorkspaceHandler } from "./googleWorkspace";
@@ -14,6 +15,7 @@ export const createLinkHandlers = (): LinkHandler[] => [
   createYoutubeHandler(),
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
+  createEnsHandler(),
   createCompoundHandler(),
   createTwitterHandler(),
   createWikimediaHandler(),

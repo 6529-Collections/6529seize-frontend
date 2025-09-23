@@ -59,6 +59,15 @@ jest.mock("@/components/waves/LinkPreviewCard", () => ({
   ),
 }));
 
+const mockEnsLinkPreview = jest.fn(({ href }: { href: string }) => (
+  <div data-testid="ens-link-preview" data-href={href} />
+));
+
+jest.mock("@/components/waves/ens/EnsLinkPreview", () => ({
+  __esModule: true,
+  default: (props: any) => mockEnsLinkPreview(props),
+}));
+
 jest.mock("@/components/waves/FarcasterCard", () => ({
   __esModule: true,
   default: ({ href }: { href: string }) => (
@@ -208,12 +217,20 @@ describe("createLinkRenderer", () => {
     expect(screen.getByTestId("pepe-card")).toHaveAttribute("data-kind", "asset");
   });
 
-  it("renders Farcaster cards with fallback", () => {
+  it("renders Farcaster cards", () => {
     const { renderAnchor } = baseRenderer();
     const element = renderAnchor({ href: "https://warpcast.com/alice/0x123" } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("farcaster-card")).toHaveAttribute("data-href", "https://warpcast.com/alice/0x123");
-    expect(screen.getByTestId("opengraph")).toHaveAttribute("data-href", "https://warpcast.com/alice/0x123");
+    expect(screen.queryByTestId("opengraph")).toBeNull();
+  });
+
+  it("renders ENS previews", () => {
+    const { renderAnchor } = baseRenderer();
+    const element = renderAnchor({ href: "vitalik.eth" } as any);
+    render(<>{element}</>);
+    expect(mockEnsLinkPreview).toHaveBeenCalledWith({ href: "vitalik.eth" });
+    expect(screen.getByTestId("ens-link-preview")).toHaveAttribute("data-href", "vitalik.eth");
   });
 
   it("renders Open Graph preview for generic external links", () => {

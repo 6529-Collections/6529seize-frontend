@@ -8,6 +8,8 @@ import OpenGraphPreview, {
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
 import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import EnsPreviewCard from "./ens/EnsPreviewCard";
+import { isEnsPreview, type EnsPreview } from "./ens/types";
 
 interface LinkPreviewCardProps {
   readonly href: string;
@@ -17,7 +19,8 @@ interface LinkPreviewCardProps {
 type PreviewState =
   | { readonly type: "loading" }
   | { readonly type: "fallback" }
-  | { readonly type: "success"; readonly data: OpenGraphPreviewData };
+  | { readonly type: "success"; readonly data: OpenGraphPreviewData }
+  | { readonly type: "ens"; readonly data: EnsPreview };
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -51,6 +54,11 @@ export default function LinkPreviewCard({
     fetchLinkPreview(href)
       .then((response) => {
         if (!active) {
+          return;
+        }
+
+        if (isEnsPreview(response)) {
+          setState({ type: "ens", data: response });
           return;
         }
 
@@ -89,6 +97,16 @@ export default function LinkPreviewCard({
 
   if (state.type === "success") {
     return <OpenGraphPreview href={href} preview={state.data} />;
+  }
+
+  if (state.type === "ens") {
+    return (
+      <LinkPreviewCardLayout href={href}>
+        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          <EnsPreviewCard preview={state.data} />
+        </div>
+      </LinkPreviewCardLayout>
+    );
   }
 
   return <OpenGraphPreview href={href} preview={undefined} />;
