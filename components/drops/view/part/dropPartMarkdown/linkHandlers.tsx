@@ -4,26 +4,40 @@ import {
   ImgHTMLAttributes,
   type ReactElement,
 } from "react";
-import { ExtraProps } from "react-markdown";
 import { ErrorBoundary } from "react-error-boundary";
+import { ExtraProps } from "react-markdown";
 import { Tweet, type TwitterComponents } from "react-tweet";
 
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
-import { SeizeQuoteLinkInfo, parseSeizeQuoteLink, parseSeizeQueryLink } from "../../../../../helpers/SeizeLinkParser";
-import { parseArtBlocksLink } from "@/src/services/artblocks/url";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import {
+  SeizeQuoteLinkInfo,
+  parseSeizeQueryLink,
+  parseSeizeQuoteLink,
+} from "@/helpers/SeizeLinkParser";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
+import { parseArtBlocksLink } from "@/src/services/artblocks/url";
 
+import type { PepeLinkResult } from "./pepe";
+import { isPepeHost, parsePepeLink, renderPepeLink } from "./pepe";
 import { parseYoutubeLink } from "./youtube";
 import YoutubePreview from "./youtubePreview";
 
-type DropPartMarkdownImageComponent = typeof import("../DropPartMarkdownImage").default;
-type WaveDropQuoteWithSerialNoComponent = typeof import("../../../../waves/drops/WaveDropQuoteWithSerialNo").default;
-type WaveDropQuoteWithDropIdComponent = typeof import("../../../../waves/drops/WaveDropQuoteWithDropId").default;
-type GroupCardChatComponent = typeof import("../../../../groups/page/list/card/GroupCardChat").default;
-type WaveItemChatComponent = typeof import("../../../../waves/list/WaveItemChat").default;
-type DropItemChatComponent = typeof import("../../../../waves/drops/DropItemChat").default;
-type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHrefButtons").default;
-type LinkPreviewCardComponent = typeof import("../../../../waves/LinkPreviewCard").default;
+type DropPartMarkdownImageComponent =
+  typeof import("../DropPartMarkdownImage").default;
+type WaveDropQuoteWithSerialNoComponent =
+  typeof import("../../../../waves/drops/WaveDropQuoteWithSerialNo").default;
+type WaveDropQuoteWithDropIdComponent =
+  typeof import("../../../../waves/drops/WaveDropQuoteWithDropId").default;
+type GroupCardChatComponent =
+  typeof import("../../../../groups/page/list/card/GroupCardChat").default;
+type WaveItemChatComponent =
+  typeof import("../../../../waves/list/WaveItemChat").default;
+type DropItemChatComponent =
+  typeof import("../../../../waves/drops/DropItemChat").default;
+type ChatItemHrefButtonsComponent =
+  typeof import("../../../../waves/ChatItemHrefButtons").default;
+type LinkPreviewCardComponent =
+  typeof import("../../../../waves/LinkPreviewCard").default;
 
 const getDropPartMarkdownImage = (): DropPartMarkdownImageComponent => {
   const module = require("../DropPartMarkdownImage");
@@ -129,8 +143,7 @@ const renderTweetFallback = (href: string) => (
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-  >
+    className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
     <span className="tw-text-sm tw-font-medium tw-text-iron-100">
       Tweet unavailable
     </span>
@@ -140,7 +153,8 @@ const renderTweetFallback = (href: string) => (
 
 const renderTweetEmbed = (result: { href: string; tweetId: string }) => {
   const renderFallback = () => renderTweetFallback(result.href);
-  const TweetNotFound: TwitterComponents["TweetNotFound"] = () => renderFallback();
+  const TweetNotFound: TwitterComponents["TweetNotFound"] = () =>
+    renderFallback();
   const ChatItemHrefButtons = getChatItemHrefButtons();
 
   return (
@@ -177,7 +191,7 @@ const renderSeizeQuote = (
       <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
         <div className="tw-flex-1 tw-min-w-0">
           <WaveDropQuoteWithSerialNo
-            serialNo={parseInt(serialNo)}
+            serialNo={Number.parseInt(serialNo)}
             waveId={waveId}
             onQuoteClick={onQuoteClick}
           />
@@ -211,7 +225,6 @@ const renderSeizeQuote = (
 };
 
 const shouldUseOpenGraphPreview = (href: string): boolean => {
-
   try {
     const parsed = new URL(href);
     const protocol = parsed.protocol.toLowerCase();
@@ -230,11 +243,21 @@ const shouldUseOpenGraphPreview = (href: string): boolean => {
       "token.artblocks.io",
     ];
 
+    if (isPepeHost(hostname)) {
+      return false;
+    }
+
     if (
       hostname === "youtu.be" ||
-      youtubeDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
-      twitterDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain)) ||
-      artBlocksDomains.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+      youtubeDomains.some((domain) =>
+        matchesDomainOrSubdomain(hostname, domain)
+      ) ||
+      twitterDomains.some((domain) =>
+        matchesDomainOrSubdomain(hostname, domain)
+      ) ||
+      artBlocksDomains.some((domain) =>
+        matchesDomainOrSubdomain(hostname, domain)
+      )
     ) {
       return false;
     }
@@ -340,7 +363,10 @@ const createSmartLinkHandlers = (
     });
   }
 
-
+  handlers.push({
+    parse: parsePepeLink,
+    render: (result: PepeLinkResult) => renderPepeLink(result),
+  });
 
   return handlers;
 };
@@ -373,15 +399,11 @@ export interface LinkRenderer {
 }
 
 export const createLinkRenderer = ({
-  onQuoteClick
+  onQuoteClick,
 }: LinkRendererConfig): LinkRenderer => {
-  const smartLinkHandlers = createSmartLinkHandlers(
-    onQuoteClick
-  );
+  const smartLinkHandlers = createSmartLinkHandlers(onQuoteClick);
 
-  const renderImage: LinkRenderer["renderImage"] = ({
-    ...props
-  }) => {
+  const renderImage: LinkRenderer["renderImage"] = ({ ...props }) => {
     if (typeof props.src !== "string") {
       return null;
     }
@@ -390,9 +412,7 @@ export const createLinkRenderer = ({
     return <DropPartMarkdownImage src={props.src} />;
   };
 
-  const renderAnchor: LinkRenderer["renderAnchor"] = ({
-    ...props
-  }) => {
+  const renderAnchor: LinkRenderer["renderAnchor"] = ({ ...props }) => {
     const { href } = props;
     if (!href || !isValidLink(href)) {
       return null;
