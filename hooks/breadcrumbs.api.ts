@@ -62,9 +62,7 @@ export const fetchMemeName = async (
       params: { contract: MEMES_CONTRACT, id },
     });
     const nftData = response?.data?.[0];
-    return nftData?.name
-      ? { name: nftData.name }
-      : { name: `Meme #${idStringToDisplay(id)}` };
+    return nftData?.name ? { name: nftData.name } : null;
   } catch (error) {
     console.error("Error fetching meme name:", error);
     return { name: `Meme #${idStringToDisplay(id)}` };
