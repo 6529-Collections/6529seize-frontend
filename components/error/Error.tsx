@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect } from "react";
 
 export default function ErrorComponent() {
   const { setTitle } = useTitle();
@@ -32,9 +33,9 @@ export default function ErrorComponent() {
         Looks like something went wrong. Try again or reach out to us at{" "}
         <a href="mailto:support@6529.io">support@6529.io</a>
       </p>
-      <a href="/" className="tw-mt-4 tw-text-md tw-font-semibold">
+      <Link href="/" className="tw-mt-4 tw-text-md tw-font-semibold">
         TAKE ME HOME
-      </a>
+      </Link>
     </div>
   );
 }

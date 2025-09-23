@@ -58,7 +58,7 @@ describe("breadcrumbs.api", () => {
 
       const result = await fetchGradientName("123");
 
-      expect(result).toEqual({ name: "Gradient 123" });
+      expect(result).toEqual({ name: "Gradient #123" });
       expect(console.error).toHaveBeenCalledWith(
         "Error fetching gradient name:",
         expect.any(Error)
@@ -169,7 +169,7 @@ describe("breadcrumbs.api", () => {
 
       const result = await fetchMemeName("123");
 
-      expect(result).toEqual({ name: "Meme 123" });
+      expect(result).toEqual({ name: "Meme #123" });
       expect(console.error).toHaveBeenCalledWith(
         "Error fetching meme name:",
         expect.any(Error)
@@ -210,7 +210,7 @@ describe("breadcrumbs.api", () => {
 
       const result = await fetchNextgenName("123");
 
-      expect(result).toEqual({ name: "Nextgen 123" });
+      expect(result).toEqual({ name: "Nextgen #123" });
       expect(console.error).toHaveBeenCalledWith(
         "Error fetching nextgen name:",
         expect.any(Error)
@@ -244,7 +244,7 @@ describe("breadcrumbs.api", () => {
 
       const result = await fetchRememeName("contract123", "456");
 
-      expect(result).toEqual({ name: "Rememe 456" });
+      expect(result).toEqual({ name: "Rememe #456" });
       expect(console.error).toHaveBeenCalledWith(
         "Error fetching rememe name:",
         expect.any(Error)
@@ -256,7 +256,7 @@ describe("breadcrumbs.api", () => {
 
       const result = await fetchRememeName("contract123", "456");
 
-      expect(result).toEqual({ name: "Rememe 456" });
+      expect(result).toEqual({ name: "Rememe #456" });
     });
   });
 
@@ -286,7 +286,7 @@ describe("breadcrumbs.api", () => {
 
       const result = await fetchMemeLabName("123");
 
-      expect(result).toEqual({ name: "Meme Lab 123" });
+      expect(result).toEqual({ name: "Meme Lab #123" });
       expect(console.error).toHaveBeenCalledWith(
         "Error fetching meme lab name:",
         expect.any(Error)
@@ -320,7 +320,7 @@ describe("breadcrumbs.api", () => {
 
       const result = await fetchCollectionName("123");
 
-      expect(result).toEqual({ name: "Collection 123" });
+      expect(result).toEqual({ name: "Collection #123" });
       expect(console.error).toHaveBeenCalledWith(
         "Error fetching collection name:",
         expect.any(Error)

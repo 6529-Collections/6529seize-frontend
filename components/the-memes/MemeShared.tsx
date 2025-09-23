@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { MEMELAB_CONTRACT } from "../../constants";
 import { BaseNFT, VolumeType } from "../../entities/INFT";
-import { areEqualAddresses } from "../../helpers/Helpers";
+import { areEqualAddresses, idStringToDisplay } from "../../helpers/Helpers";
 import { fetchUrl } from "../../services/6529api";
 import { getAppMetadata } from "../providers/metadata";
 
@@ -37,11 +37,13 @@ async function getMetadataProps(
   isDistribution: boolean = false
 ) {
   let urlPath = "nfts";
-  let name = `The Memes #${id}`;
+  const idDisplay = idStringToDisplay(id);
+  let name = `The Memes #${idDisplay}`;
+  console.log("hi i am name", name);
   let description = "Collections";
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";
-    name = `Meme Lab #${id}`;
+    name = `Meme Lab #${idDisplay}`;
   }
   const response = await fetchUrl(
     `${process.env.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`

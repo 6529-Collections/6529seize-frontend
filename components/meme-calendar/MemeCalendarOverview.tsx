@@ -72,6 +72,7 @@ export default function MemeCalendarOverview({
  */
 interface MemeCalendarOverviewNextMintProps {
   readonly displayTz: DisplayTz;
+  readonly id?: number;
 }
 
 const TopControls = memo(function TopControls(props: {
@@ -132,15 +133,10 @@ const TopControls = memo(function TopControls(props: {
           {/* spacer so the camera can sit on the same row but push to the right when space exists */}
           <div className="tw-flex-1" />
 
-          <button
-            type="button"
-            onClick={onScreenshot}
-            disabled={isCapturing}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
-            aria-label="Screenshot"
-            title="Screenshot">
-            <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
-          </button>
+          <ScreenshotCard
+            onScreenshot={onScreenshot}
+            isCapturing={isCapturing}
+          />
         </>
       )}
     </div>
@@ -149,10 +145,12 @@ const TopControls = memo(function TopControls(props: {
 
 export function MemeCalendarOverviewNextMint({
   displayTz,
+  id,
 }: MemeCalendarOverviewNextMintProps) {
   const [now, setNow] = useState(new Date());
   const [isManualSelection, setIsManualSelection] = useState(false);
   const [selectedMintNumber, setSelectedMintNumber] = useState(() => {
+    if (id != null) return id;
     const upcomingInstant = getNextMintStart(new Date());
     const upcomingUtcDay = new Date(
       Date.UTC(
@@ -213,16 +211,31 @@ export function MemeCalendarOverviewNextMint({
   }, []);
 
   useEffect(() => {
-    if (!isManualSelection && selectedMintNumber !== canonicalNextMintNumber) {
-      setSelectedMintNumber(canonicalNextMintNumber);
+    if (id != null) {
+      setSelectedMintNumber(id);
+      setIsManualSelection(true);
     }
-  }, [canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
+  }, [id]);
 
   useEffect(() => {
-    if (isManualSelection && selectedMintNumber === canonicalNextMintNumber) {
+    if (
+      id == null &&
+      !isManualSelection &&
+      selectedMintNumber !== canonicalNextMintNumber
+    ) {
+      setSelectedMintNumber(canonicalNextMintNumber);
+    }
+  }, [id, canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
+
+  useEffect(() => {
+    if (
+      id == null &&
+      isManualSelection &&
+      selectedMintNumber === canonicalNextMintNumber
+    ) {
       setIsManualSelection(false);
     }
-  }, [canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
+  }, [id, canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
 
   const mintDetails = useMemo(
     () => getMintTimelineDetails(selectedMintNumber),
@@ -345,17 +358,27 @@ export function MemeCalendarOverviewNextMint({
         ref={cardRef}
         className="tw-p-4 tw-flex tw-flex-col tw-justify-between tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
         <div className="tw-space-y-1">
-          <TopControls
-            canonicalNextMintNumber={canonicalNextMintNumber}
-            selectedMintNumber={selectedMintNumber}
-            onSelect={handleMintSelection}
-            mintInputRef={mintInputRef}
-            onMintInputChange={handleMintInputChange}
-            onMintInputSubmit={handleMintInputSubmit}
-            onScreenshot={handleScreenshot}
-            isCapturing={isCapturing}
-          />
-          <div className="tw-text-sm tw-text-gray-400">{heading}</div>
+          {id == null && (
+            <TopControls
+              canonicalNextMintNumber={canonicalNextMintNumber}
+              selectedMintNumber={selectedMintNumber}
+              onSelect={handleMintSelection}
+              mintInputRef={mintInputRef}
+              onMintInputChange={handleMintInputChange}
+              onMintInputSubmit={handleMintInputSubmit}
+              onScreenshot={handleScreenshot}
+              isCapturing={isCapturing}
+            />
+          )}
+          <div className="tw-flex tw-items-center tw-gap-2 tw-justify-between">
+            <div className="tw-text-sm tw-text-gray-400">{heading}</div>
+            {id != null && (
+              <ScreenshotCard
+                onScreenshot={handleScreenshot}
+                isCapturing={isCapturing}
+              />
+            )}
+          </div>
           <div className="tw-flex tw-items-center tw-gap-2">
             <div className="!tw-text-3xl md:!tw-text-4xl tw-font-bold">
               #{mintDetails.mintNumber.toLocaleString()}
@@ -415,8 +438,7 @@ export function MemeCalendarOverviewUpcomingMints({
         </div>
       </div>
 
-      <div
-        className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 tw-transition-colors tw-duration-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 tw-transition-colors tw-duration-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         <table className="tw-w-full tw-text-sm">
           <thead></thead>
           <tbody>
@@ -485,4 +507,24 @@ function formatDurationParts(parts: DurationParts): string {
     segments.push(`${parts.s}s`);
   }
   return segments.join(" : ");
+}
+
+function ScreenshotCard({
+  onScreenshot,
+  isCapturing,
+}: {
+  onScreenshot: () => void;
+  isCapturing: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onScreenshot}
+      disabled={isCapturing}
+      className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
+      aria-label="Screenshot"
+      title="Screenshot">
+      <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
+    </button>
+  );
 }
