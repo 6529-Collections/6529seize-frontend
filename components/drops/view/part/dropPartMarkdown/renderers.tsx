@@ -5,7 +5,7 @@ import { Tweet, type TwitterComponents } from "react-tweet";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import type { SeizeQuoteLinkInfo } from "../../../../../helpers/SeizeLinkParser";
 
-import ChatItemHrefButtons from "../../../../waves/ChatItemHrefButtons";
+import LinkHandlerFrame from "../../../../waves/LinkHandlerFrame";
 import WaveDropQuoteWithDropId from "../../../../waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "../../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ensureTwitterLink } from "./twitter";
@@ -29,14 +29,13 @@ const renderTweetEmbed = (href: string) => {
   const renderFallback = () => <TweetFallback href={result.href} />;
   const TweetNotFound: TwitterComponents["TweetNotFound"] = () => renderFallback();
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+    <LinkHandlerFrame href={result.href}>
       <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
         <ErrorBoundary fallbackRender={() => renderFallback()}>
           <Tweet id={result.tweetId} components={{ TweetNotFound }} />
         </ErrorBoundary>
       </div>
-      <ChatItemHrefButtons href={result.href} />
-    </div>
+    </LinkHandlerFrame>
   );
 };
 
@@ -57,35 +56,29 @@ const renderSeizeQuote = (
 
   if (serialNo) {
     return (
-      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-        <div className="tw-flex-1 tw-min-w-0">
-          <WaveDropQuoteWithSerialNo
-            serialNo={parseInt(serialNo)}
-            waveId={waveId}
-            onQuoteClick={onQuoteClick}
-          />
-        </div>
-        <ChatItemHrefButtons href={href} hideLink />
-      </div>
+      <LinkHandlerFrame href={href} hideLink>
+        <WaveDropQuoteWithSerialNo
+          serialNo={parseInt(serialNo)}
+          waveId={waveId}
+          onQuoteClick={onQuoteClick}
+        />
+      </LinkHandlerFrame>
     );
   }
 
   if (dropId) {
     return (
-      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-        <div className="tw-flex-1 tw-min-w-0">
-          <WaveDropQuoteWithDropId
-            dropId={dropId}
-            partId={1}
-            maybeDrop={null}
-            onQuoteClick={onQuoteClick}
-          />
-        </div>
-        <ChatItemHrefButtons
-          href={href}
-          relativeHref={`/my-stream?wave=${waveId}&drop=${dropId}`}
+      <LinkHandlerFrame
+        href={href}
+        relativeHref={`/my-stream?wave=${waveId}&drop=${dropId}`}
+      >
+        <WaveDropQuoteWithDropId
+          dropId={dropId}
+          partId={1}
+          maybeDrop={null}
+          onQuoteClick={onQuoteClick}
         />
-      </div>
+      </LinkHandlerFrame>
     );
   }
 

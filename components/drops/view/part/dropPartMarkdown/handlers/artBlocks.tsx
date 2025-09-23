@@ -1,33 +1,33 @@
-import { useMemo } from "react";
-
-import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
-import { parseArtBlocksLink } from "@/src/services/artblocks/url";
+import {
+  parseArtBlocksLink,
+  type ArtBlocksTokenIdentifier,
+} from "@/src/services/artblocks/url";
+import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 
 import type { LinkHandler } from "../linkTypes";
 
-const ArtBlocksPreview = ({ href }: { href: string }) => {
-  const tokenId = useMemo(() => {
-    const parsed = parseArtBlocksLink(href);
-    if (!parsed) {
-      throw new Error("Invalid Art Blocks link");
-    }
-
-    return parsed;
-  }, [href]);
-
-  return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <ArtBlocksTokenCard href={href} id={tokenId} />
-      </div>
-      <ChatItemHrefButtons href={href} />
-    </div>
-  );
-};
+const ArtBlocksPreview = ({
+  href,
+  tokenId,
+}: {
+  readonly href: string;
+  readonly tokenId: ArtBlocksTokenIdentifier;
+}) => (
+  <LinkHandlerFrame href={href}>
+    <ArtBlocksTokenCard href={href} id={tokenId} />
+  </LinkHandlerFrame>
+);
 
 export const createArtBlocksHandler = (): LinkHandler => ({
   match: (href) => Boolean(parseArtBlocksLink(href)),
-  render: (href) => <ArtBlocksPreview href={href} />,
+  render: (href) => {
+    const tokenId = parseArtBlocksLink(href);
+    if (!tokenId) {
+      throw new Error("Invalid Art Blocks link");
+    }
+
+    return <ArtBlocksPreview href={href} tokenId={tokenId} />;
+  },
   display: "block",
 });

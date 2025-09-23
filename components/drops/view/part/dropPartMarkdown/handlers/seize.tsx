@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   parseSeizeQuoteLink,
@@ -39,6 +41,23 @@ const createSeizeQuoteHandler = (
   display: "block",
 });
 
+const createSeizeQueryHandler = <T,>(
+  extract: (href: string) => T | null,
+  onMissing: string,
+  render: (value: T, href: string) => ReactElement
+): LinkHandler => ({
+  match: (href) => Boolean(extract(href)),
+  render: (href) => {
+    const value = extract(href);
+    if (!value) {
+      throw new Error(onMissing);
+    }
+
+    return render(value, href);
+  },
+  display: "block",
+});
+
 const getGroupId = (href: string): string | null => {
   const result = parseSeizeQueryLink(href, "/network", ["group"]);
   if (!result || typeof result.group !== "string") {
@@ -48,18 +67,12 @@ const getGroupId = (href: string): string | null => {
   return result.group;
 };
 
-const createSeizeGroupHandler = (): LinkHandler => ({
-  match: (href) => Boolean(getGroupId(href)),
-  render: (href) => {
-    const groupId = getGroupId(href);
-    if (!groupId) {
-      throw new Error("Invalid seize group link");
-    }
-
-    return <GroupCardChat href={href} groupId={groupId} />;
-  },
-  display: "block",
-});
+const createSeizeGroupHandler = (): LinkHandler =>
+  createSeizeQueryHandler(
+    getGroupId,
+    "Invalid seize group link",
+    (groupId, href) => <GroupCardChat href={href} groupId={groupId} />
+  );
 
 const getWaveId = (href: string): string | null => {
   const result = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
@@ -70,18 +83,12 @@ const getWaveId = (href: string): string | null => {
   return result.wave;
 };
 
-const createSeizeWaveHandler = (): LinkHandler => ({
-  match: (href) => Boolean(getWaveId(href)),
-  render: (href) => {
-    const waveId = getWaveId(href);
-    if (!waveId) {
-      throw new Error("Invalid seize wave link");
-    }
-
-    return <WaveItemChat href={href} waveId={waveId} />;
-  },
-  display: "block",
-});
+const createSeizeWaveHandler = (): LinkHandler =>
+  createSeizeQueryHandler(
+    getWaveId,
+    "Invalid seize wave link",
+    (waveId, href) => <WaveItemChat href={href} waveId={waveId} />
+  );
 
 const getDropId = (href: string): string | null => {
   const result = parseSeizeQueryLink(href, "/my-stream", ["wave", "drop"], true);
@@ -92,18 +99,12 @@ const getDropId = (href: string): string | null => {
   return result.drop;
 };
 
-const createSeizeDropHandler = (): LinkHandler => ({
-  match: (href) => Boolean(getDropId(href)),
-  render: (href) => {
-    const dropId = getDropId(href);
-    if (!dropId) {
-      throw new Error("Invalid seize drop link");
-    }
-
-    return <DropItemChat href={href} dropId={dropId} />;
-  },
-  display: "block",
-});
+const createSeizeDropHandler = (): LinkHandler =>
+  createSeizeQueryHandler(
+    getDropId,
+    "Invalid seize drop link",
+    (dropId, href) => <DropItemChat href={href} dropId={dropId} />
+  );
 
 export const createSeizeHandlers = ({
   onQuoteClick,
