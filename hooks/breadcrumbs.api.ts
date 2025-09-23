@@ -1,3 +1,4 @@
+import { idStringToDisplay } from "@/helpers/Helpers";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../constants";
 import { NextGenToken } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
@@ -64,7 +65,7 @@ export const fetchMemeName = async (
     return nftData?.name ? { name: nftData.name } : null;
   } catch (error) {
     console.error("Error fetching meme name:", error);
-    return { name: `Meme ${id}` };
+    return { name: `Meme #${idStringToDisplay(id)}` };
   }
 };
 
@@ -100,10 +101,10 @@ export const fetchRememeName = async (
     if (response?.data?.length > 0) {
       return { name: response.data[0].metadata?.name };
     }
-    return { name: `Rememe ${id}` };
+    return { name: `Rememe #${idStringToDisplay(id)}` };
   } catch (error) {
     console.error("Error fetching rememe name:", error);
-    return { name: `Rememe ${id}` };
+    return { name: `Rememe #${idStringToDisplay(id)}` };
   }
 };
 
@@ -123,10 +124,10 @@ export const fetchMemeLabName = async (
     if (response?.data?.length > 0) {
       return { name: response.data[0].name };
     }
-    return { name: `Meme Lab ${id}` };
+    return { name: `Meme Lab #${idStringToDisplay(id)}` };
   } catch (error) {
     console.error("Error fetching meme lab name:", error);
-    return { name: `Meme Lab ${id}` };
+    return { name: `Meme Lab #${idStringToDisplay(id)}` };
   }
 };
 
@@ -145,6 +146,6 @@ export const fetchCollectionName = async (
     return collectionData?.name ? { name: collectionData.name } : null;
   } catch (error) {
     console.error("Error fetching collection name:", error);
-    return { name: `Collection ${id}` };
+    return { name: `Collection #${idStringToDisplay(id)}` };
   }
 };
