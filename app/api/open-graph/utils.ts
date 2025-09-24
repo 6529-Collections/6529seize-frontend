@@ -107,6 +107,83 @@ const GOOGLE_ACCESS_DENIED_PATTERNS = [
   "this file is not available",
 ];
 
+interface GooglePreviewRule {
+  readonly kind: GoogleWorkspaceKind;
+  readonly pattern: RegExp;
+  readonly allowedParams: ReadonlySet<string>;
+  readonly requiredParams?: ReadonlySet<string>;
+}
+
+const GOOGLE_PREVIEW_RULES: readonly GooglePreviewRule[] = [
+  {
+    kind: "docs",
+    pattern: /^\/document\/d\/[A-Za-z0-9_-]+\/preview$/i,
+    allowedParams: new Set<string>(),
+  },
+  {
+    kind: "slides",
+    pattern: /^\/presentation\/d\/[A-Za-z0-9_-]+\/preview$/i,
+    allowedParams: new Set<string>(),
+  },
+  {
+    kind: "sheets",
+    pattern: /^\/spreadsheets\/d\/[A-Za-z0-9_-]+\/htmlview$/i,
+    allowedParams: new Set<string>(["gid", "range"]),
+    requiredParams: new Set<string>(["gid"]),
+  },
+];
+
+function validateGooglePreviewUrl(rawUrl: string): URL | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return null;
+  }
+
+  if (parsed.protocol.toLowerCase() !== "https:") {
+    return null;
+  }
+
+  const hostname = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+  if (hostname !== GOOGLE_DOCS_HOST) {
+    return null;
+  }
+
+  if (parsed.hash) {
+    return null;
+  }
+
+  const matchingRule = GOOGLE_PREVIEW_RULES.find((rule) =>
+    rule.pattern.test(parsed.pathname)
+  );
+  if (!matchingRule) {
+    return null;
+  }
+
+  let hasUnexpectedParam = false;
+  parsed.searchParams.forEach((_, key) => {
+    if (!matchingRule.allowedParams.has(key)) {
+      hasUnexpectedParam = true;
+    }
+  });
+  if (hasUnexpectedParam) {
+    return null;
+  }
+
+  let missingRequired = false;
+  matchingRule.requiredParams?.forEach((key) => {
+    if (!parsed.searchParams.get(key)) {
+      missingRequired = true;
+    }
+  });
+  if (missingRequired) {
+    return null;
+  }
+
+  return parsed;
+}
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -367,11 +444,16 @@ async function fetchGooglePreviewHtml(url: string): Promise<{
   html: string | null;
   ok: boolean;
 }> {
+  const validatedUrl = validateGooglePreviewUrl(url);
+  if (!validatedUrl) {
+    return { html: null, ok: false };
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), GOOGLE_PREVIEW_TIMEOUT_MS);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(validatedUrl.toString(), {
       headers: {
         "user-agent": LINK_PREVIEW_USER_AGENT,
         accept: HTML_ACCEPT_HEADER,

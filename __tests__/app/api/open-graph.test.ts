@@ -140,6 +140,25 @@ describe("open-graph route helpers", () => {
     );
   });
 
+  it("avoids fetching previews for non-canonical Google Docs identifiers", async () => {
+    const resolvedUrl = new URL(
+      "https://docs.google.com/document/d/abc%2Fdef/edit"
+    );
+
+    const result = await buildGoogleWorkspaceResponse(
+      resolvedUrl,
+      "<html><head><title>Fallback</title></head></html>",
+      resolvedUrl
+    );
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      type: "google.docs",
+      availability: "restricted",
+      title: "Untitled Doc",
+    });
+  });
+
   it("builds a Google Sheets preview and marks restricted access on failure", async () => {
     mockFetch.mockResolvedValueOnce(
       Promise.resolve(
