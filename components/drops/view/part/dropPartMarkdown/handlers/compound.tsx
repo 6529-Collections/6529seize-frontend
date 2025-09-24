@@ -1,10 +1,7 @@
 import CompoundPreview from "@/components/waves/CompoundPreview";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import type { LinkHandler } from "../linkTypes";
-
-const matchesDomainOrSubdomain = (host: string, domain: string): boolean => {
-  return host === domain || host.endsWith(`.${domain}`);
-};
 
 const isCompoundLink = (href: string): boolean => {
   try {

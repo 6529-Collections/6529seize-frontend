@@ -1,3 +1,4 @@
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import {
   decodeEventLog,
@@ -1061,7 +1062,7 @@ function detectCompoundTarget(url: URL): CompoundTarget | null {
   const hostname = url.hostname.toLowerCase();
   const pathname = url.pathname.replace(/\/+$/, "").toLowerCase() || "/";
 
-  if (hostname.endsWith("app.compound.finance")) {
+  if (matchesDomainOrSubdomain(hostname, "app.compound.finance")) {
     if (pathname.startsWith("/account")) {
       const addressParam = url.searchParams.get("address");
       const normalized = addressParam ? normalizeAddress(addressParam) : null;
@@ -1081,7 +1082,7 @@ function detectCompoundTarget(url: URL): CompoundTarget | null {
     }
   }
 
-  if (hostname.endsWith("etherscan.io")) {
+  if (matchesDomainOrSubdomain(hostname, "etherscan.io")) {
     if (pathname.startsWith("/tx/")) {
       const hash = pathname.split("/")[2];
       if (hash && isPossibleTxHash(hash)) {
