@@ -123,6 +123,10 @@ export default function WaveDropVoteSlider({
 }: WaveDropVoteSliderProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const isMini = size === SingleWaveDropVoteSize.MINI;
+  const hitAreaPadding = isMini ? 16 : 24;
+  const thumbHitWidth = isMini ? 72 : 96;
+  const thumbHitHeight = isMini ? 48 : 64;
 
   const getTheme = (rank: number | null): SliderTheme => {
     if (rank === 1 || rank === 2 || rank === 3) {
@@ -172,10 +176,17 @@ export default function WaveDropVoteSlider({
 
   return (
     <div
-      className={`tw-flex tw-items-center [touch-action:none] ${size === SingleWaveDropVoteSize.MINI ? 'tw-h-6' : 'tw-h-9'}`}
+      className={`tw-flex tw-items-center [touch-action:none] ${
+        size === SingleWaveDropVoteSize.MINI ? "tw-h-6" : "tw-h-9"
+      }`}
       onClick={(e) => e.stopPropagation()}>
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
-        <div className={`tw-relative tw-h-[6px] tw-group ${size === SingleWaveDropVoteSize.MINI ? 'tw-mt-3' : 'tw-mt-6 sm:tw-mt-0'}`}>
+        <div
+          className={`tw-relative tw-h-[6px] tw-group ${
+            size === SingleWaveDropVoteSize.MINI
+              ? "tw-mt-3"
+              : "tw-mt-6 sm:tw-mt-0"
+          }`}>
           {/* Base range input for track clicks */}
           <input
             type="range"
@@ -188,7 +199,11 @@ export default function WaveDropVoteSlider({
               // Force immediate focus to allow dragging without double-tap
               e.currentTarget.focus();
             }}
-            className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-appearance-none tw-cursor-pointer tw-opacity-0 tw-z-10"
+            className="tw-absolute tw-left-0 tw-right-0 tw-w-full tw-appearance-none tw-cursor-pointer tw-opacity-0 tw-z-10"
+            style={{
+              top: -hitAreaPadding,
+              bottom: -hitAreaPadding,
+            }}
           />
 
           {/* Track and progress */}
@@ -209,9 +224,11 @@ export default function WaveDropVoteSlider({
 
           {/* Thumb hit area */}
           <div
-            className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-z-30"
+            className="tw-absolute tw-left-0 tw-right-0 tw-z-30"
             style={{
-              clipPath: `circle(10px at ${currentPercentage}% 50%)`,
+              top: -hitAreaPadding,
+              bottom: -hitAreaPadding,
+              clipPath: `ellipse(${thumbHitWidth / 2}px ${thumbHitHeight / 2}px at ${currentPercentage}% 50%)`,
             }}>
             <input
               type="range"
@@ -237,7 +254,7 @@ export default function WaveDropVoteSlider({
                 e.stopPropagation();
                 setIsDragging(false);
               }}
-              className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-appearance-none tw-cursor-pointer tw-opacity-0"
+              className="tw-absolute tw-inset-y-0 tw-left-0 tw-right-0 tw-w-full tw-appearance-none tw-cursor-pointer tw-opacity-0"
             />
           </div>
 
@@ -280,8 +297,8 @@ export default function WaveDropVoteSlider({
               </div>
 
               <motion.div
-                className={`tw-w-4 tw-h-4 tw-rounded-full 
-                  tw-bg-gradient-to-b tw-from-gray-700 tw-to-gray-800
+                className={`tw-w-5 tw-h-5 tw-rounded-full 
+                  ${theme.thumb.background}
                   tw-border-2 ${theme.thumb.border} 
                   tw-shadow-lg tw-transition-shadow
                   after:tw-content-[''] after:tw-absolute after:tw-inset-0 
