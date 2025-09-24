@@ -258,6 +258,89 @@ const mapWarpcastUser = (
   };
 };
 
+type WarpcastCastData = NonNullable<
+  NonNullable<WarpcastCastResponse["result"]>["cast"]
+>;
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === "string" ? value : undefined;
+
+const asNumber = (value: unknown): number | undefined =>
+  typeof value === "number" ? value : undefined;
+
+const mapCastEmbed = (
+  embed: WarpcastCastEmbed
+): NonNullable<FarcasterCastPreview["cast"]["embeds"]>[number] | null => {
+  const url = asString(embed.url);
+  const type = asString(embed.type);
+  const imageUrl = asString(embed.metadata?.image);
+
+  if (!url && !imageUrl) {
+    return null;
+  }
+
+  if (type === "image" || (imageUrl && !type)) {
+    return {
+      type: "image",
+      url,
+      previewImageUrl: imageUrl ?? url,
+    };
+  }
+
+  return {
+    type: "link",
+    url,
+    previewImageUrl: imageUrl,
+  };
+};
+
+const mapCastEmbeds = (
+  embeds: WarpcastCastData["embeds"]
+): FarcasterCastPreview["cast"]["embeds"] => {
+  if (!Array.isArray(embeds)) {
+    return undefined;
+  }
+
+  return embeds
+    .map(mapCastEmbed)
+    .filter(
+      (value): value is NonNullable<ReturnType<typeof mapCastEmbed>> =>
+        value !== null
+    );
+};
+
+const mapCastAuthor = (
+  author: WarpcastCastAuthor | undefined
+): FarcasterCastPreview["cast"]["author"] => ({
+  fid: asNumber(author?.fid),
+  username: asString(author?.username),
+  displayName: asString(author?.displayName),
+  avatarUrl: asString(author?.pfp?.url),
+});
+
+const mapCastChannel = (
+  channel: WarpcastCastData["channel"]
+): FarcasterCastPreview["cast"]["channel"] => {
+  if (!channel) {
+    return null;
+  }
+
+  return {
+    id: asString(channel.id),
+    name: asString(channel.name),
+    iconUrl: asString(channel.imageUrl),
+  };
+};
+
+const mapCastReactions = (
+  reactions: WarpcastCastData["reactions"],
+  replies: WarpcastCastData["replies"]
+): FarcasterCastPreview["cast"]["reactions"] => ({
+  likes: asNumber(reactions?.likes),
+  recasts: asNumber(reactions?.recasts),
+  replies: asNumber(replies?.count),
+});
+
 const mapWarpcastCast = (
   data: WarpcastCastResponse | null,
   canonicalUrl: string
@@ -268,88 +351,16 @@ const mapWarpcastCast = (
     return null;
   }
 
-  const embeds: FarcasterCastPreview["cast"]["embeds"] = Array.isArray(cast.embeds)
-    ? cast.embeds
-        .map((embed) => {
-          const url = typeof embed.url === "string" ? embed.url : undefined;
-          const type = typeof embed.type === "string" ? embed.type : undefined;
-          const imageUrl =
-            typeof embed.metadata?.image === "string"
-              ? embed.metadata.image
-              : undefined;
-
-          if (!url && !imageUrl) {
-            return null;
-          }
-
-          if (type === "image" || (imageUrl && !type)) {
-            return {
-              type: "image" as const,
-              url,
-              previewImageUrl: imageUrl ?? url,
-            };
-          }
-
-          return {
-            type: "link" as const,
-            url,
-            previewImageUrl: imageUrl,
-          };
-        })
-        .filter((value): value is NonNullable<typeof value> => Boolean(value))
-    : undefined;
-
   return {
     type: "cast",
     canonicalUrl,
     cast: {
-      author: {
-        fid: typeof cast.author?.fid === "number" ? cast.author.fid : undefined,
-        username:
-          typeof cast.author?.username === "string"
-            ? cast.author.username
-            : undefined,
-        displayName:
-          typeof cast.author?.displayName === "string"
-            ? cast.author.displayName
-            : undefined,
-        avatarUrl:
-          typeof cast.author?.pfp?.url === "string"
-            ? cast.author.pfp.url
-            : undefined,
-      },
-      text: typeof cast.text === "string" ? cast.text : undefined,
-      timestamp:
-        typeof cast.timestamp === "string" ? cast.timestamp : undefined,
-      channel: cast.channel
-        ? {
-            id:
-              typeof cast.channel.id === "string" ? cast.channel.id : undefined,
-            name:
-              typeof cast.channel.name === "string"
-                ? cast.channel.name
-                : undefined,
-            iconUrl:
-              typeof cast.channel.imageUrl === "string"
-                ? cast.channel.imageUrl
-                : undefined,
-          }
-        : null,
-      embeds,
-      reactions: {
-        likes:
-          typeof cast.reactions?.likes === "number"
-            ? cast.reactions.likes
-            : undefined,
-        recasts:
-          typeof cast.reactions?.recasts === "number"
-            ? cast.reactions.recasts
-            : undefined,
-        replies:
-          typeof cast.replies?.count === "number"
-            ? cast.replies.count
-            : undefined,
-      },
+      author: mapCastAuthor(cast.author),
+      text: asString(cast.text),
+      timestamp: asString(cast.timestamp),
+      channel: mapCastChannel(cast.channel),
+      embeds: mapCastEmbeds(cast.embeds),
+      reactions: mapCastReactions(cast.reactions, cast.replies),
     },
   };
 };
