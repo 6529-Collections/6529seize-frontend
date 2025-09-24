@@ -231,14 +231,14 @@ async function fetchV2MarketState(
   });
 
   const cTokenDecimalsRaw = marketResults[0] as number;
-  const exchangeRateStored = marketResults[1] as bigint;
-  const totalBorrows = marketResults[2] as bigint;
-  const totalReserves = marketResults[3] as bigint;
-  const totalSupply = marketResults[4] as bigint;
-  const cash = marketResults[5] as bigint;
-  const reserveFactorMantissa = marketResults[6] as bigint;
-  const supplyRatePerBlock = marketResults[7] as bigint;
-  const borrowRatePerBlock = marketResults[8] as bigint;
+  const exchangeRateStored = marketResults[1] ;
+  const totalBorrows = marketResults[2] ;
+  const totalReserves = marketResults[3] ;
+  const totalSupply = marketResults[4] ;
+  const cash = marketResults[5] ;
+  const reserveFactorMantissa = marketResults[6] ;
+  const supplyRatePerBlock = marketResults[7] ;
+  const borrowRatePerBlock = marketResults[8] ;
 
   const [_, collateralFactorMantissa] = await publicClient.readContract({
     address: compoundRegistry.comptroller as Address,
@@ -271,14 +271,14 @@ async function fetchV2MarketState(
   const exchangeRateScale = getExchangeRateScale(underlyingDecimals, cTokenDecimals);
   const tvlUnderlying = (cash ?? BIGINT_ZERO) + (totalBorrows ?? BIGINT_ZERO) - (totalReserves ?? BIGINT_ZERO);
 
-  const supplyApy = calculateApyFromRatePerBlock(supplyRatePerBlock as bigint);
-  const borrowApy = calculateApyFromRatePerBlock(borrowRatePerBlock as bigint);
+  const supplyApy = calculateApyFromRatePerBlock(supplyRatePerBlock);
+  const borrowApy = calculateApyFromRatePerBlock(borrowRatePerBlock);
   const utilization = calculateUtilization(
     totalBorrows ?? BIGINT_ZERO,
     tvlUnderlying
   );
-  const collateralFactor = formatMantissa(collateralFactorMantissa as bigint);
-  const reserveFactor = formatMantissa(reserveFactorMantissa as bigint);
+  const collateralFactor = formatMantissa(collateralFactorMantissa);
+  const reserveFactor = formatMantissa(reserveFactorMantissa);
   const exchangeRate = formatUnitsWithPrecision(
     exchangeRateStored ?? BIGINT_ZERO,
     exchangeRateScale,
@@ -309,7 +309,7 @@ async function fetchV2MarketState(
     totalSupply: totalSupply ?? BIGINT_ZERO,
     cash: cash ?? BIGINT_ZERO,
     reserveFactorMantissa: reserveFactorMantissa ?? BIGINT_ZERO,
-    collateralFactorMantissa: collateralFactorMantissa as bigint,
+    collateralFactorMantissa: collateralFactorMantissa ,
     underlyingPrice: underlyingPrice ?? null,
     metrics: {
       supplyApy,
@@ -341,7 +341,7 @@ async function fetchV3MarketState(
 
   const decimalsRaw = marketCoreResults[0] as number;
   const totalsBasic = marketCoreResults[1] as unknown;
-  const utilizationRaw = marketCoreResults[2] as bigint;
+  const utilizationRaw = marketCoreResults[2] ;
   const numAssetsRaw = marketCoreResults[3] as number;
   const priceFeedAddress = marketCoreResults[4] as Address;
 
@@ -432,7 +432,7 @@ async function fetchV3MarketState(
               ],
             });
 
-            const priceValue = priceResults[0] as bigint;
+            const priceValue = priceResults[0] ;
             const priceDecimals = Number(priceResults[1] ?? 8);
             if (priceValue && priceValue > BIGINT_ZERO) {
               usdPrice = formatUnitsWithPrecision(priceValue, priceDecimals, 6);
@@ -485,7 +485,7 @@ async function fetchV3MarketState(
           },
         ],
       });
-      basePrice = basePriceResults[0] as bigint;
+      basePrice = basePriceResults[0] ;
       basePriceDecimals = Number(basePriceResults[1] ?? 8);
     } catch {
       basePrice = null;
@@ -493,8 +493,8 @@ async function fetchV3MarketState(
     }
   }
 
-  const supplyApy = calculateApyFromRatePerSecond(supplyRate as bigint);
-  const borrowApy = calculateApyFromRatePerSecond(borrowRate as bigint);
+  const supplyApy = calculateApyFromRatePerSecond(supplyRate );
+  const borrowApy = calculateApyFromRatePerSecond(borrowRate );
   const utilization = formatMantissa(utilizationValue);
   const totalSupplyBaseDisplay = formatUnitsWithPrecision(
     totalSupplyBase,
@@ -517,9 +517,9 @@ async function fetchV3MarketState(
   return {
     config: market,
     decimals,
-    supplyRate: supplyRate as bigint,
-    borrowRate: borrowRate as bigint,
-    utilization: utilizationRaw as bigint,
+    supplyRate: supplyRate ,
+    borrowRate: borrowRate ,
+    utilization: utilizationRaw ,
     totalSupplyBase,
     totalBorrowBase,
     basePrice,
@@ -607,8 +607,8 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
         ],
       });
 
-      const balance = balanceResult as bigint;
-      const borrowBalance = borrowResult as bigint;
+      const balance = balanceResult ;
+      const borrowBalance = borrowResult ;
       const exchangeRateScale = getExchangeRateScale(
         state.config.underlying.decimals,
         state.cTokenDecimals
@@ -658,10 +658,10 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
     args: [address],
   });
 
-  const liquidityUsd = formatUnitsWithPrecision(liquidityRaw as bigint, 18, 2);
-  const shortfallUsd = formatUnitsWithPrecision(shortfallRaw as bigint, 18, 2);
-  const liquidityValue = liquidityRaw as bigint;
-  const shortfallValue = shortfallRaw as bigint;
+  const liquidityUsd = formatUnitsWithPrecision(liquidityRaw , 18, 2);
+  const shortfallUsd = formatUnitsWithPrecision(shortfallRaw , 18, 2);
+  const liquidityValue = liquidityRaw ;
+  const shortfallValue = shortfallRaw ;
 
   let healthLabel = "safe";
   if (shortfallValue > BIGINT_ZERO) {
@@ -726,7 +726,7 @@ async function fetchV3Account(address: Address): Promise<{
         ],
       });
 
-      const baseSupplyRaw = balanceResult as bigint;
+      const baseSupplyRaw = balanceResult ;
       const baseSupply = formatUnitsWithPrecision(
         baseSupplyRaw,
         state.config.base.decimals,
@@ -735,7 +735,7 @@ async function fetchV3Account(address: Address): Promise<{
       let baseBorrow = "0";
       let baseBorrowRaw = BIGINT_ZERO;
       try {
-        baseBorrowRaw = borrowResult as bigint;
+        baseBorrowRaw = borrowResult ;
         baseBorrow = formatUnitsWithPrecision(
           baseBorrowRaw,
           state.config.base.decimals,
@@ -883,7 +883,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
       switch (decoded.eventName) {
         case "Mint": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.mintAmount as bigint,
+            decoded.args.mintAmount ,
             underlyingDecimals,
             6
           );
@@ -903,7 +903,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
         }
         case "Redeem": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.redeemAmount as bigint,
+            decoded.args.redeemAmount ,
             underlyingDecimals,
             6
           );
@@ -923,7 +923,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
         }
         case "Borrow": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.borrowAmount as bigint,
+            decoded.args.borrowAmount ,
             underlyingDecimals,
             6
           );
@@ -943,7 +943,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
         }
         case "RepayBorrow": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.repayAmount as bigint,
+            decoded.args.repayAmount ,
             underlyingDecimals,
             6
           );
@@ -963,7 +963,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
         }
         case "LiquidateBorrow": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.repayAmount as bigint,
+            decoded.args.repayAmount ,
             underlyingDecimals,
             6
           );
@@ -991,7 +991,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
       switch (decoded.eventName) {
         case "Supply": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.amount as bigint,
+            decoded.args.amount ,
             market.base.decimals,
             6
           );
@@ -1011,7 +1011,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
         }
         case "Withdraw": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.amount as bigint,
+            decoded.args.amount ,
             market.base.decimals,
             6
           );
@@ -1031,7 +1031,7 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
         }
         case "AbsorbCollateral": {
           const amount = formatUnitsWithPrecision(
-            decoded.args.collateralAbsorbed as bigint,
+            decoded.args.collateralAbsorbed ,
             market.base.decimals,
             6
           );
