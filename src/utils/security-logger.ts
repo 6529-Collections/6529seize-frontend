@@ -44,7 +44,7 @@ export const sanitizeErrorMessage = (message: string): string => {
         "***JWT***"
       )
       // Remove any remaining potential sensitive hex data
-      .replace(/\b0x[a-fA-F0-9]{8,}\b/g, "0x***HEX***")
+      .replaceAll(/\b0x[a-fA-F0-9]{8,}\b/g, "0x***HEX***")
   );
 };
 
@@ -111,7 +111,7 @@ export const logSecurityEvent = (
     ...context,
     // Always include user agent for browser compatibility analysis
     userAgent:
-      typeof navigator !== "undefined" ? navigator.userAgent : "server-side",
+      typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
   });
 };
 
@@ -161,7 +161,7 @@ export const logError = (context: string, error: Error): void => {
     console.error("[SEIZE_CONNECT_ERROR]", {
       ...errorInfo,
       userAgent:
-        typeof navigator !== "undefined" ? navigator.userAgent : "server-side",
+        typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
     });
   } else {
     // Development: Include stack trace but still sanitize sensitive data
@@ -172,7 +172,7 @@ export const logError = (context: string, error: Error): void => {
         ? sanitizeErrorMessage(stringifyCause(error.cause))
         : undefined,
       userAgent:
-        typeof navigator !== "undefined" ? navigator.userAgent : "server-side",
+        typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
     });
   }
 };
@@ -187,7 +187,7 @@ export const createConnectionEventContext = (
   timestamp: new Date().toISOString(),
   source,
   userAgent:
-    typeof navigator !== "undefined" ? navigator.userAgent : "server-side",
+    typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
 });
 
 /**
@@ -206,7 +206,7 @@ export const createValidationEventContext = (
   addressLength,
   addressFormat,
   userAgent:
-    typeof navigator !== "undefined" ? navigator.userAgent : "server-side",
+    typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
 });
 
 /**
@@ -221,5 +221,5 @@ export const createErrorEventContext = (
   source,
   errorCode,
   userAgent:
-    typeof navigator !== "undefined" ? navigator.userAgent : "server-side",
+    typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
 });

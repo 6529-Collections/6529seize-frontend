@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { TextDecoder, TextEncoder } from "util";
+import { TextDecoder, TextEncoder } from "node:util";
 
 // Load environment variables for tests
 config({ path: ".env.development" });
@@ -150,7 +150,7 @@ class MockAbortController {
 // Set on all global objects to ensure it's available during module loading
 global.AbortController = MockAbortController;
 globalThis.AbortController = MockAbortController;
-if (typeof window !== "undefined") {
+if (typeof globalThis !== "undefined") {
   window.AbortController = MockAbortController;
 }
 

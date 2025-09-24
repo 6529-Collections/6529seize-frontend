@@ -95,7 +95,7 @@ describe("LatestActivity", () => {
     mockCommonApiFetch.mockResolvedValue({ data: [] });
 
     // Mock window.scrollTo
-    Object.defineProperty(window, "scrollTo", {
+    Object.defineProperty(globalThis, "scrollTo", {
       value: mockScrollTo,
       writable: true,
     });

@@ -28,7 +28,7 @@ it("fetches all pages and maps nfts", async () => {
     },
   ];
   let call = 0;
-  global.fetch = jest.fn(() =>
+  globalThis.fetch = jest.fn(() =>
     Promise.resolve({ json: () => Promise.resolve(responses[call++]) })
   ) as any;
   const result = await getNftsForContractAndOwner(sepolia.id, "0xc", "0xowner");

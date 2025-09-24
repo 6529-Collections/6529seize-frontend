@@ -5,7 +5,7 @@ jest.mock("next/link", () => ({
 }));
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => <img {...props} alt={props.alt ?? "header-image"} />,
 }));
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -106,7 +106,7 @@ function setup(options: any = {}) {
     appWalletsSupported: options.appWalletsSupported || false,
   });
   (useAuth as jest.Mock).mockReturnValue({
-    showWaves: options.showWaves !== undefined ? options.showWaves : true,
+    showWaves: options.showWaves === undefined ? true : options.showWaves,
   });
   useIsMobileScreen.mockReturnValue(!!options.mobile);
   (fetchUrl as jest.Mock).mockResolvedValue({ data: options.consolidations });
@@ -258,7 +258,7 @@ describe("Header", () => {
     expect(screen.getByTestId("mobile-menu")).toHaveClass("burgerMenuOpen");
 
     // Simulate window resize
-    fireEvent(window, new Event("resize"));
+    fireEvent(globalThis as any, new Event("resize"));
 
     // Menu should close after resize
     expect(screen.getByTestId("mobile-menu")).not.toHaveClass("burgerMenuOpen");

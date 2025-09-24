@@ -752,14 +752,14 @@ describe("SeizeConnectContext Security Logging", () => {
       });
 
       // Check that all security log calls include timestamps
-      consoleWarnSpy.mock.calls
-        .filter((call) => call[0] === "[SEIZE_SECURITY_EVENT]")
-        .forEach((call) => {
-          expect(call[1]).toHaveProperty("timestamp");
-          expect(call[1].timestamp).toMatch(
-            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
-          );
-        });
+      for (const call of consoleWarnSpy.mock.calls.filter(
+        (call) => call[0] === "[SEIZE_SECURITY_EVENT]"
+      )) {
+        expect(call[1]).toHaveProperty("timestamp");
+        expect(call[1].timestamp).toMatch(
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+        );
+      }
     });
 
     it("includes user agent in all log entries when logging enabled", async () => {
@@ -786,11 +786,11 @@ describe("SeizeConnectContext Security Logging", () => {
       });
 
       // Check that all security log calls include user agent
-      consoleWarnSpy.mock.calls
-        .filter((call) => call[0] === "[SEIZE_SECURITY_EVENT]")
-        .forEach((call) => {
-          expect(call[1]).toHaveProperty("userAgent");
-        });
+      for (const call of consoleWarnSpy.mock.calls.filter(
+        (call) => call[0] === "[SEIZE_SECURITY_EVENT]"
+      )) {
+        expect(call[1]).toHaveProperty("userAgent");
+      }
     });
   });
 

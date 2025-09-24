@@ -39,7 +39,7 @@ describe("useWaveWebSocket", () => {
 
   it("connects and sends subscribe message", async () => {
     const { result } = renderHook(() => useWaveWebSocket("wave1"));
-    const instance = (global.WebSocket as jest.Mock).mock.results[0]
+    const instance = (globalThis.WebSocket as jest.Mock).mock.results[0]
       .value as MockWebSocket;
     act(() => {
       instance.triggerOpen();
@@ -53,9 +53,9 @@ describe("useWaveWebSocket", () => {
   });
 
   it("schedules reconnect on close", () => {
-    const spy = jest.spyOn(global, "setTimeout");
+    const spy = jest.spyOn(globalThis, "setTimeout");
     renderHook(() => useWaveWebSocket("wave1"));
-    const instance = (global.WebSocket as jest.Mock).mock.results[0]
+    const instance = (globalThis.WebSocket as jest.Mock).mock.results[0]
       .value as MockWebSocket;
     act(() => {
       instance.onclose && instance.onclose({});
@@ -65,7 +65,7 @@ describe("useWaveWebSocket", () => {
 
   it("disconnect stops reconnecting", () => {
     const { result } = renderHook(() => useWaveWebSocket("wave1"));
-    const instance = (global.WebSocket as jest.Mock).mock.results[0]
+    const instance = (globalThis.WebSocket as jest.Mock).mock.results[0]
       .value as MockWebSocket;
     act(() => {
       result.current.disconnect();

@@ -28,7 +28,7 @@ describe("CreateDropGifPicker", () => {
     const { publicEnv } = require("@/config/env");
     render(
       <CreateDropGifPicker
-        tenorApiKey={publicEnv.TENOR_API_KEY!}
+        tenorApiKey={publicEnv.TENOR_API_KEY}
         show={true}
         setShow={setShow}
         onSelect={onSelect}

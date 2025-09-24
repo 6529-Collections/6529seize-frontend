@@ -24,7 +24,7 @@ describe("commonApi utility methods", () => {
     });
     const res = await commonApiPut({ endpoint: "e", body: { a: 1 } });
     expect(res).toEqual({ ok: 1 });
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/e",
       {
         method: "PUT",
@@ -48,7 +48,7 @@ describe("commonApi utility methods", () => {
       body: { a: 1 },
     });
     expect(res).toEqual({ r: 2 });
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/del",
       {
         method: "DELETE",
@@ -65,7 +65,7 @@ describe("commonApi utility methods", () => {
   it("commonApiDelete sends DELETE request", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({ ok: true });
     await commonApiDelete({ endpoint: "x" });
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/x",
       {
         method: "DELETE",
@@ -87,7 +87,7 @@ describe("commonApi utility methods", () => {
     const { commonApiPostForm } = await import("@/services/api/common-api");
     const result = await commonApiPostForm({ endpoint: "f", body: form });
     expect(result).toEqual({ res: 3 });
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/f",
       {
         method: "POST",

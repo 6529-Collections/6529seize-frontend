@@ -22,7 +22,6 @@ jest.mock("@/components/pagination/Pagination", () => (props: any) => (
 ));
 
 jest.mock("react-bootstrap", () => {
-  const React = require("react");
   const RB: any = {
     Container: (p: any) => <div data-testid="container" {...p} />,
     Row: (p: any) => <div data-testid="row" {...p} />,

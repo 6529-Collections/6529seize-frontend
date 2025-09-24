@@ -19,7 +19,7 @@ describe("commonApiPostWithoutBodyAndResponse", () => {
       json: async () => ({}),
     });
     await commonApiPostWithoutBodyAndResponse({ endpoint: "e" });
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/e",
       {
         method: "POST",

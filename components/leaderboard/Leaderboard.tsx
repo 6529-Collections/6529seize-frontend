@@ -247,7 +247,9 @@ export default function Leaderboard(
                   <span
                     onClick={() => props.setFocus(LeaderboardFocus.TDH)}
                     className={`${styles.focus} ${
-                      props.focus != LeaderboardFocus.TDH ? styles.disabled : ""
+                      props.focus === LeaderboardFocus.TDH
+                        ? ""
+                        : styles.disabled
                     }`}>
                     {LeaderboardFocus.TDH}
                   </span>
@@ -259,9 +261,9 @@ export default function Leaderboard(
                       props.setFocus(LeaderboardFocus.INTERACTIONS)
                     }
                     className={`${styles.focus} ${
-                      props.focus != LeaderboardFocus.INTERACTIONS
-                        ? styles.disabled
-                        : ""
+                      props.focus === LeaderboardFocus.INTERACTIONS
+                        ? ""
+                        : styles.disabled
                     }`}>
                     {LeaderboardFocus.INTERACTIONS}
                   </span>

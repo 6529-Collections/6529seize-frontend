@@ -78,8 +78,7 @@ describe("useTraitsValidation", () => {
     });
     rerender({ t: traits });
 
-    const lastOptions =
-      mockValidate.mock.calls[mockValidate.mock.calls.length - 1][1];
+    const lastOptions = mockValidate.mock.calls.at(-1)?.[1];
     expect(lastOptions.touchedFields.has("artist")).toBe(true);
     expect(result.current.touchedFields.has("artist")).toBe(true);
   });
@@ -138,7 +137,7 @@ describe("useTraitsValidation", () => {
       .spyOn(document, "querySelector")
       .mockReturnValue(element);
     const scrollSpy = jest
-      .spyOn(window, "scrollTo")
+      .spyOn(globalThis, "scrollTo")
       .mockImplementation(() => {});
 
     const { result } = renderHook(() => useTraitsValidation(traits, traits));

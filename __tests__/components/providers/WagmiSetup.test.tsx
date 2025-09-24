@@ -124,7 +124,7 @@ describe("WagmiSetup Security Tests", () => {
     jest.useFakeTimers();
 
     // Add unhandled rejection handler for expected errors
-    global.addEventListener("unhandledrejection", (event) => {
+    globalThis.addEventListener("unhandledrejection", (event) => {
       // Prevent default behavior for expected test errors
       event.preventDefault();
     });
@@ -249,7 +249,9 @@ describe("WagmiSetup Security Tests", () => {
 
     it("should not expose internal error details via alert()", async () => {
       // Spy on window.alert to ensure it's never called
-      const alertSpy = jest.spyOn(window, "alert").mockImplementation(() => {});
+      const alertSpy = jest
+        .spyOn(globalThis, "alert")
+        .mockImplementation(() => {});
 
       await act(async () => {
         render(
@@ -312,13 +314,13 @@ describe("WagmiSetup Security Tests", () => {
       });
 
       // Check that any console.error calls don't contain sensitive patterns
-      consoleErrorSpy.mock.calls.forEach((call) => {
+      for (const call of consoleErrorSpy.mock.calls) {
         const loggedContent = call.join(" ");
         expect(loggedContent).not.toMatch(/jwt[_-]?token/i);
         expect(loggedContent).not.toMatch(/api[_-]?key/i);
         expect(loggedContent).not.toMatch(/secret/i);
         expect(loggedContent).not.toMatch(/password/i);
-      });
+      }
 
       consoleErrorSpy.mockRestore();
     });

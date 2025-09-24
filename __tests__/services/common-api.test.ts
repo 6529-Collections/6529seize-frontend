@@ -25,7 +25,7 @@ describe("commonApiFetch", () => {
       params: { foo: "bar", typ: "nic" },
     });
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/test?foo=bar&typ=cic",
       {
         headers: {
@@ -69,7 +69,7 @@ describe("commonApiPost", () => {
       endpoint: "e",
       body: { v: 1 },
     });
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/e",
       {
         method: "POST",

@@ -39,7 +39,6 @@ jest.mock("../../../../helpers/AllowlistToolHelpers", () => ({
 }));
 
 jest.mock("react-bootstrap", () => {
-  const React = require("react");
   return {
     Container: (p: any) => <div data-testid="container" {...p} />,
     Row: (p: any) => <div data-testid="row" {...p} />,

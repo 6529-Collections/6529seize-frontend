@@ -196,12 +196,10 @@ describe("DistributionPage", () => {
       await waitFor(() => {
         const mintCountdown = screen.getByTestId("mint-countdown");
         expect(mintCountdown).toBeInTheDocument();
-        expect(mintCountdown.getAttribute("data-nft-id")).toBe("456");
-        expect(mintCountdown.getAttribute("data-hide-mint-btn")).toBe("false");
-        expect(mintCountdown.getAttribute("data-is-full-width")).toBe("false");
-        expect(mintCountdown.getAttribute("data-show-only-if-active")).toBe(
-          "true"
-        );
+        expect(mintCountdown.dataset.nftId).toBe("456");
+        expect(mintCountdown.dataset.hideMintBtn).toBe("false");
+        expect(mintCountdown.dataset.isFullWidth).toBe("false");
+        expect(mintCountdown.dataset.showOnlyIfActive).toBe("true");
       });
     });
 
@@ -563,13 +561,11 @@ describe("DistributionPage", () => {
         () => {
           const addressComponent = screen.getByTestId("address-component");
           expect(addressComponent).toBeInTheDocument();
-          expect(addressComponent.getAttribute("data-wallet")).toBe(
+          expect(addressComponent.dataset.wallet).toBe(
             "0x1234567890123456789012345678901234567890"
           );
-          expect(addressComponent.getAttribute("data-display")).toBe(
-            "TestUser1"
-          );
-          expect(addressComponent.getAttribute("data-hide-copy")).toBe("true");
+          expect(addressComponent.dataset.display).toBe("TestUser1");
+          expect(addressComponent.dataset.hideCopy).toBe("true");
         },
         { timeout: 5000 }
       );
@@ -587,9 +583,9 @@ describe("DistributionPage", () => {
       await waitFor(() => {
         const scrollButton = screen.getByTestId("scroll-to-button");
         expect(scrollButton).toBeInTheDocument();
-        expect(scrollButton.getAttribute("data-threshold")).toBe("500");
-        expect(scrollButton.getAttribute("data-to")).toBe("distribution-table");
-        expect(scrollButton.getAttribute("data-offset")).toBe("0");
+        expect(scrollButton.dataset.threshold).toBe("500");
+        expect(scrollButton.dataset.to).toBe("distribution-table");
+        expect(scrollButton.dataset.offset).toBe("0");
       });
     });
   });
@@ -684,8 +680,7 @@ describe("DistributionPage", () => {
 
       // Should maintain search parameters
       await waitFor(() => {
-        const lastCall =
-          mockFetchUrl.mock.calls[mockFetchUrl.mock.calls.length - 1][0];
+        const lastCall = mockFetchUrl.mock.calls.at(-1)?.[0];
         expect(lastCall).toContain("&search=0x123,0x456");
         expect(lastCall).toContain("&page=2");
       });

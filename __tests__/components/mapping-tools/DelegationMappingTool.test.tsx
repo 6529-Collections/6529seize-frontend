@@ -1,5 +1,7 @@
 import DelegationMappingTool from "@/components/mapping-tools/DelegationMappingTool";
-import { fireEvent, render } from "@testing-library/react";
+import { fetchAllPages } from "@/services/6529api";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("react-bootstrap", () => ({
   Container: (props: any) => <div {...props} />,
@@ -41,10 +43,6 @@ describe("DelegationMappingTool drag and drop", () => {
     expect(spy).toHaveBeenCalled();
   });
 });
-
-import { fetchAllPages } from "@/services/6529api";
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 jest.mock("@/services/6529api", () => ({
   fetchAllPages: jest.fn(() => Promise.resolve([])),

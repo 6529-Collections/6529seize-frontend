@@ -36,14 +36,14 @@ beforeEach(() => {
 });
 
 test("shows view all link when not on network page", async () => {
-  window.location.pathname = "/";
+  globalThis.location.pathname = "/";
   render(<Leaderboard focus={LeaderboardFocus.TDH} setFocus={jest.fn()} />);
   await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
   expect(screen.getByText("View All")).toBeInTheDocument();
 });
 
 test("renders seasons and switches focus", async () => {
-  window.history.pushState({}, "", "/network");
+  globalThis.history.pushState({}, "", "/network");
   commonApiFetch.mockResolvedValue([{ id: 1, display: "S1" }]);
   const setFocus = jest.fn();
   const user = userEvent.setup();

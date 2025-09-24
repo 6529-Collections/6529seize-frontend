@@ -26,7 +26,9 @@ export default function AwsRumProvider({
       const APPLICATION_ID = publicEnv.AWS_RUM_APP_ID;
       const APPLICATION_REGION = publicEnv.AWS_RUM_REGION || "us-east-1";
       const APPLICATION_VERSION = publicEnv.VERSION || "1.0.0";
-      const SAMPLE_RATE = parseFloat(publicEnv.AWS_RUM_SAMPLE_RATE || "0.2");
+      const SAMPLE_RATE = Number.parseFloat(
+        publicEnv.AWS_RUM_SAMPLE_RATE || "0.2"
+      );
 
       if (!APPLICATION_ID) {
         console.log(

@@ -45,6 +45,22 @@ function buildInput(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
+function expectParseToThrowWith(value: string | undefined, expected: string) {
+  const schema = freshImportPublicEnvSchema();
+  const input = buildInput(
+    value === undefined
+      ? { BASE_ENDPOINT: undefined }
+      : { BASE_ENDPOINT: value }
+  );
+  expect(() => schema.parse(input)).toThrow(expected);
+}
+
+function expectParseToSucceed(value: string) {
+  const schema = freshImportPublicEnvSchema();
+  const parsed = schema.parse(buildInput({ BASE_ENDPOINT: value }));
+  expect(parsed.BASE_ENDPOINT).toBe(value);
+}
+
 describe("publicEnvSchema BASE_ENDPOINT (Zod)", () => {
   beforeEach(() => {
     process.env = { ...originalEnv };
@@ -61,22 +77,6 @@ describe("publicEnvSchema BASE_ENDPOINT (Zod)", () => {
     "BASE_ENDPOINT must use HTTPS protocol. Got: %s//. Only localhost can use HTTP.";
   const ALLOWLIST_MSG =
     "BASE_ENDPOINT domain not in allowlist. Got: %s. Allowed domains: 6529.io, www.6529.io, staging.6529.io, localhost, 127.0.0.1";
-
-  function expectParseToThrowWith(value: string | undefined, expected: string) {
-    const schema = freshImportPublicEnvSchema();
-    const input = buildInput(
-      value === undefined
-        ? { BASE_ENDPOINT: undefined }
-        : { BASE_ENDPOINT: value }
-    );
-    expect(() => schema.parse(input)).toThrow(expected);
-  }
-
-  function expectParseToSucceed(value: string) {
-    const schema = freshImportPublicEnvSchema();
-    const parsed = schema.parse(buildInput({ BASE_ENDPOINT: value }));
-    expect(parsed.BASE_ENDPOINT).toBe(value);
-  }
 
   it("throws when BASE_ENDPOINT is missing", () => {
     expectParseToThrowWith(undefined, REQUIRED_MSG);

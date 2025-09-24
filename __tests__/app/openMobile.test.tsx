@@ -20,10 +20,12 @@ describe("OpenMobilePage", () => {
   it("deep links and allows going back", async () => {
     render(<OpenMobilePage />);
     await waitFor(() => {
-      expect(window.location.href).toBe("testmobile6529://navigate/foo-bar");
+      expect(globalThis.location.href).toBe(
+        "testmobile6529://navigate/foo-bar"
+      );
     });
 
     await userEvent.click(screen.getByText("Back to 6529.io"));
-    expect(window.location.href).toBe("https://example.com/foo-bar");
+    expect(globalThis.location.href).toBe("https://example.com/foo-bar");
   });
 });

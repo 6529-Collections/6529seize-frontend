@@ -129,9 +129,7 @@ describe("CreateDropActions", () => {
     // The metadata button is the first button (without aria-label)
     const buttons = screen.getAllByRole("button");
     const metadataButton = buttons.find(
-      (button) =>
-        !button.getAttribute("aria-label") &&
-        !button.getAttribute("data-testid")
+      (button) => !button.dataset.ariaLabel && !button.dataset.testid
     );
     await userEvent.click(metadataButton!);
 
@@ -194,7 +192,7 @@ describe("CreateDropActions", () => {
 
     expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
 
-    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.keyDown(globalThis as any, { key: "Escape" });
 
     await waitFor(() => {
       expect(screen.queryByTestId("gif-picker")).not.toBeInTheDocument();
@@ -222,9 +220,7 @@ describe("CreateDropActions", () => {
 
     const buttons = screen.getAllByRole("button");
     const metadataButton = buttons.find(
-      (button) =>
-        !button.getAttribute("aria-label") &&
-        !button.getAttribute("data-testid")
+      (button) => !button.dataset.ariaLabel && !button.dataset.testid
     );
     expect(metadataButton).toHaveClass("tw-text-[#FEDF89]");
   });
@@ -307,7 +303,10 @@ describe("CreateDropActions", () => {
   });
 
   it("cleans up event listeners on unmount", async () => {
-    const removeEventListenerSpy = jest.spyOn(window, "removeEventListener");
+    const removeEventListenerSpy = jest.spyOn(
+      globalThis,
+      "removeEventListener"
+    );
 
     const { unmount } = render(
       <CreateDropActions {...defaultProps} showOptions={true} />

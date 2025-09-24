@@ -121,7 +121,7 @@ jest.mock("@/helpers/Helpers", () => ({
 describe("more helper utilities", () => {
   test("formatNumberWithCommasOrDash returns dash for invalid values", () => {
     expect(formatNumberWithCommasOrDash(0)).toBe("-");
-    expect(formatNumberWithCommasOrDash(NaN as any)).toBe("-");
+    expect(formatNumberWithCommasOrDash(Number.NaN)).toBe("-");
     expect(formatNumberWithCommasOrDash(1000)).toBe("1,000");
   });
 
@@ -130,7 +130,7 @@ describe("more helper utilities", () => {
     const text = printMintDate(d);
     expect(text).toContain("2024");
     expect(text).toContain("Jan");
-    expect(printMintDate(undefined)).toBe("-");
+    expect(printMintDate()).toBe("-");
   });
 
   test("removeBaseEndpoint strips prefix", () => {

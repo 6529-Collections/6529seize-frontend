@@ -176,15 +176,14 @@ describe("Security Logger", () => {
       const error = new Error(
         "Failed with address 0x742d35Cc6634C0532925a3b8D362Ad5C32B8B73D"
       );
-      error.stack =
-        "Error: Failed with address 0x742d35Cc6634C0532925a3b8D362Ad5C32B8B73D\\n    at test";
+      error.stack = String.raw`Error: Failed with address 0x742d35Cc6634C0532925a3b8D362Ad5C32B8B73D\n    at test`;
 
       logError("test-context", error);
 
       expect(mockConsoleError).toHaveBeenCalledWith(
         "[SEIZE_CONNECT_ERROR]",
         expect.objectContaining({
-          stack: "Error: Failed with address 0x***REDACTED***\\n    at test",
+          stack: String.raw`Error: Failed with address 0x***REDACTED***\n    at test`,
         })
       );
     });
@@ -194,7 +193,7 @@ describe("Security Logger", () => {
       publicEnv.NODE_ENV = "production";
 
       const error = new Error("Test error");
-      error.stack = "Error: Test error\\n    at test";
+      error.stack = String.raw`Error: Test error\n    at test`;
 
       logError("test-context", error);
 
@@ -541,9 +540,9 @@ describe("Security Logger", () => {
       );
 
       // Should not have stack property in production
-      expect(
-        mockConsoleError.mock.calls[mockConsoleError.mock.calls.length - 1][1]
-      ).not.toHaveProperty("stack");
+      expect(mockConsoleError.mock.calls.at(-1)?.[1]).not.toHaveProperty(
+        "stack"
+      );
 
       // Restore environment
       (global as any).navigator = originalNavigator;
