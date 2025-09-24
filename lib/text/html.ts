@@ -126,14 +126,42 @@ export function sanitizeHtmlToText(value: string, options: StripHtmlTagsOptions 
 }
 
 function removeResidualTags(value: string): string {
-  const tagPattern = /<[^>]*>/g;
-  let output = value;
-  let previous: string;
-  do {
-    previous = output;
-    output = output.replace(tagPattern, "");
-  } while (output !== previous);
-  return output.replace(/</g, "");
+  if (!value.includes("<")) {
+    return value;
+  }
+
+  const output: string[] = [];
+  let insideTag = false;
+  let pending: string[] = [];
+
+  for (const char of value) {
+    if (insideTag) {
+      pending.push(char);
+      if (char === ">") {
+        insideTag = false;
+        pending = [];
+      }
+      continue;
+    }
+
+    if (char === "<") {
+      insideTag = true;
+      pending = ["<"];
+      continue;
+    }
+
+    output.push(char);
+  }
+
+  if (insideTag && pending.length > 0) {
+    for (const char of pending) {
+      if (char !== "<") {
+        output.push(char);
+      }
+    }
+  }
+
+  return output.join("");
 }
 
 function getTagIdentifier(rawTag: string): string | null {

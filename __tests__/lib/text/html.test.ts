@@ -25,6 +25,7 @@ describe("stripHtmlTags", () => {
     const result = stripHtmlTags(input, { maxLength: 15 });
     expect(result).toBe("xxxxxxxxxx");
   });
+
 });
 
 describe("decodeHtmlEntities", () => {
@@ -43,6 +44,16 @@ describe("sanitizeHtmlToText", () => {
   it("removes tags and decodes entities in a single step", () => {
     const input = "<strong>Safe &amp; Sound</strong>";
     expect(sanitizeHtmlToText(input, { preserveTagSpacing: true })).toBe("Safe & Sound");
+  });
+
+  it("preserves text around decoded angle brackets", () => {
+    const input = "Value &lt; without closing";
+    expect(sanitizeHtmlToText(input)).toBe("Value  without closing");
+  });
+
+  it("removes long sequences of decoded brackets", () => {
+    const input = "&lt;".repeat(128);
+    expect(sanitizeHtmlToText(input)).toBe("");
   });
 });
 
