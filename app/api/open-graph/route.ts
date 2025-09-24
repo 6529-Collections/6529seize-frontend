@@ -67,36 +67,54 @@ function findHostOverrides(hostname: string): HostOverrides | undefined {
   );
 }
 
+function applyHeaderRemovals(
+  headers: Record<string, string>,
+  toRemove?: readonly string[]
+): void {
+  if (!toRemove) {
+    return;
+  }
+
+  for (const header of toRemove) {
+    delete headers[header.toLowerCase()];
+  }
+}
+
+function applyHeaderAssignments(
+  headers: Record<string, string>,
+  entries?: Record<string, string | undefined>
+): void {
+  if (!entries) {
+    return;
+  }
+
+  for (const [key, value] of Object.entries(entries)) {
+    const normalizedKey = key.toLowerCase();
+    if (typeof value === "string" && value.length > 0) {
+      headers[normalizedKey] = value;
+    } else {
+      delete headers[normalizedKey];
+    }
+  }
+}
+
 function createFetchConfig(url: URL): {
   headers: Record<string, string>;
   userAgent: string;
 } {
-  const headers: Record<string, string> = { ...HTML_FETCH_HEADERS };
-  let userAgent = USER_AGENT;
-
   const overrides = findHostOverrides(url.hostname);
-  if (overrides) {
-    if (overrides.headers?.remove) {
-      for (const toRemove of overrides.headers.remove) {
-        delete headers[toRemove.toLowerCase()];
-      }
+  const headers: Record<string, string> = { ...HTML_FETCH_HEADERS };
+  const userAgent = overrides?.userAgent ?? USER_AGENT;
+
+  if (!overrides?.headers) {
+    return {
+      headers,
+      userAgent,
+    };
   }
 
-  if (overrides.headers?.set) {
-      for (const [key, value] of Object.entries(overrides.headers.set)) {
-        const normalizedKey = key.toLowerCase();
-        if (typeof value === "string" && value.length > 0) {
-          headers[normalizedKey] = value;
-        } else {
-          delete headers[normalizedKey];
-        }
-      }
-    }
-
-    if (overrides.userAgent) {
-      userAgent = overrides.userAgent;
-    }
-  }
+  applyHeaderRemovals(headers, overrides.headers.remove);
+  applyHeaderAssignments(headers, overrides.headers.set);
 
   return {
     headers,
