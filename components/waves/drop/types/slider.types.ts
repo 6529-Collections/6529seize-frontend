@@ -106,3 +106,14 @@ export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
     },
   },
 } as const;
+
+const isRankTheme = (rank: number | null): rank is Exclude<RankKey, "default"> =>
+  rank === 1 || rank === 2 || rank === 3;
+
+export const getSliderTheme = (rank: number | null): SliderTheme => {
+  if (isRankTheme(rank)) {
+    return SLIDER_THEMES[rank];
+  }
+
+  return SLIDER_THEMES.default;
+};

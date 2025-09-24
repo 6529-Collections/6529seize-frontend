@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import { SliderTheme, SLIDER_THEMES } from "./types/slider.types";
+import { getSliderTheme } from "./types/slider.types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
@@ -22,6 +22,29 @@ interface PresetMark {
   label: string;
   position: number;
 }
+
+type ProgressBarStyle = {
+  left: string;
+  width: string;
+};
+
+const getProgressBarStyle = (
+  voteValue: number,
+  currentPercentage: number,
+  zeroPercentage: number
+): ProgressBarStyle => {
+  if (voteValue >= 0) {
+    return {
+      left: `${zeroPercentage}%`,
+      width: `${currentPercentage - zeroPercentage}%`,
+    };
+  }
+
+  return {
+    left: `${currentPercentage}%`,
+    width: `${zeroPercentage - currentPercentage}%`,
+  };
+};
 
 const transformToLog = (
   value: number,
@@ -127,15 +150,7 @@ export default function WaveDropVoteSlider({
   const hitAreaPadding = isMini ? 16 : 24;
   const thumbHitWidth = isMini ? 72 : 96;
   const thumbHitHeight = isMini ? 48 : 64;
-
-  const getTheme = (rank: number | null): SliderTheme => {
-    if (rank === 1 || rank === 2 || rank === 3) {
-      return SLIDER_THEMES[rank];
-    }
-    return SLIDER_THEMES.default;
-  };
-
-  const theme = getTheme(rank);
+  const theme = getSliderTheme(rank);
 
   const handleSliderChange = (newValue: number) => {
     const transformedValue = transformFromLog(newValue, minValue, maxValue);
@@ -145,15 +160,15 @@ export default function WaveDropVoteSlider({
   const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
   const logValue = transformToLog(numericVoteValue, minValue, maxValue);
 
-  const zeroPercentage =
-    minValue === 0 && maxValue === 0
-      ? 50
-      : ((0 - minValue) / (maxValue - minValue)) * 100;
+  const isZeroRange = minValue === 0 && maxValue === 0;
 
-  const currentPercentage =
-    minValue === 0 && maxValue === 0 && logValue === 0
-      ? 50
-      : ((logValue - minValue) / (maxValue - minValue)) * 100;
+  const zeroPercentage = isZeroRange
+    ? 50
+    : ((0 - minValue) / (maxValue - minValue)) * 100;
+
+  const currentPercentage = isZeroRange && logValue === 0
+    ? 50
+    : ((logValue - minValue) / (maxValue - minValue)) * 100;
 
   const x = useMotionValue(currentPercentage);
   const xSmooth = useSpring(x, { damping: 20, stiffness: 300 });
@@ -163,29 +178,22 @@ export default function WaveDropVoteSlider({
     x.set(currentPercentage);
   }, [currentPercentage]);
 
-  const progressBarStyle =
-    numericVoteValue >= 0
-      ? {
-          left: `${zeroPercentage}%`,
-          width: `${currentPercentage - zeroPercentage}%`,
-        }
-      : {
-          left: `${currentPercentage}%`,
-          width: `${zeroPercentage - currentPercentage}%`,
-        };
+  const progressBarStyle = getProgressBarStyle(
+    numericVoteValue,
+    currentPercentage,
+    zeroPercentage
+  );
 
   return (
     <div
       className={`tw-flex tw-items-center [touch-action:none] ${
-        size === SingleWaveDropVoteSize.MINI ? "tw-h-6" : "tw-h-9"
+        isMini ? "tw-h-6" : "tw-h-9"
       }`}
       onClick={(e) => e.stopPropagation()}>
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
         <div
           className={`tw-relative tw-h-[6px] tw-group ${
-            size === SingleWaveDropVoteSize.MINI
-              ? "tw-mt-3"
-              : "tw-mt-6 sm:tw-mt-0"
+            isMini ? "tw-mt-3" : "tw-mt-6 sm:tw-mt-0"
           }`}>
           {/* Base range input for track clicks */}
           <input
