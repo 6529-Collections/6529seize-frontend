@@ -7,6 +7,7 @@ import {
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
+import { escapeRegExp } from "@/lib/text/regex";
 import type {
   FarcasterCastPreview,
   FarcasterChannelPreview,
@@ -473,24 +474,24 @@ const fetchChannelPreview = async (
 const hasFrameMeta = (html: string): boolean =>
   /<meta[^>]+name=["']fc:frame["'][^>]*>/i.test(html);
 
-const escapeRegExp = (value: string): string =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 const extractMetaContent = (html: string, name: string): string | undefined => {
   const pattern = new RegExp(
-    `<meta[^>]+name=["']${escapeRegExp(name)}["'][^>]*content=["']([^"']+)["'][^>]*>`,
+    String.raw`<meta[^>]+name=["']${escapeRegExp(name)}["'][^>]*content=["']([^"']+)["'][^>]*>`,
     "i"
   );
-  const match = pattern.exec(html);
-  if (match && match[1]) {
-    return match[1].trim();
+  const rawContent = pattern.exec(html)?.[1];
+  if (!rawContent) {
+    return undefined;
   }
-  return undefined;
+  return rawContent.trim();
 };
 
 const extractTitle = (html: string): string | undefined => {
-  const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-  return match && match[1] ? match[1].trim() : undefined;
+  const rawTitle = /<title[^>]*>([^<]*)<\/title>/i.exec(html)?.[1];
+  if (!rawTitle) {
+    return undefined;
+  }
+  return rawTitle.trim();
 };
 
 const resolveUrl = (base: string, value: string | undefined): string | undefined => {
