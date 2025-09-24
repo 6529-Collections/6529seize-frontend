@@ -2,6 +2,7 @@ import type { AnchorHTMLAttributes } from "react";
 import { ExtraProps } from "react-markdown";
 
 import { isLikelyEnsTarget } from "@/lib/ens/detect";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 const parseUrl = (href: string): URL | null => {
   try {
@@ -21,9 +22,9 @@ const shouldUseOpenGraphPreview = (href: string, parsedUrl?: URL | null): boolea
     return false;
   }
 
-  const hostname = url.hostname.toLowerCase();
+  const hostname = url.hostname;
 
-  if (hostname.endsWith("artblocks.io")) {
+  if (matchesDomainOrSubdomain(hostname, "artblocks.io")) {
     const path = url.pathname.toLowerCase();
     if (path.startsWith("/project/")) {
       return false;
