@@ -391,9 +391,9 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
       "token_name",
       "symbol",
       "token",
-    ])
-      .map((value) => (typeof value === "string" ? value : null))
-      .filter((value): value is string => Boolean(value));
+    ]).filter(
+      (value): value is string => typeof value === "string" && value.length > 0
+    );
 
     scraped.name = extractFirstString(names) ?? undefined;
     scraped.artist = extractFirstString(artists) ?? undefined;
