@@ -100,7 +100,7 @@ const IPFS_GATEWAY = trimTrailingSlashes(process.env.IPFS_GATEWAY || "https://ip
 
 function trimTrailingSlashes(value: string): string {
   let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+  while (end > 0 && value.codePointAt(end - 1) === 47) {
     end -= 1;
   }
   return end === value.length ? value : value.slice(0, end);
@@ -220,11 +220,11 @@ function normalizeImageUrl(candidate: unknown, base: string): string | null {
 function slugifyName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9\s-]/g, "")
+    .replaceAll(/&/g, "and")
+    .replaceAll(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/-+/g, "-");
 }
 
 function deepFindAll(value: unknown, keys: string[], results: unknown[] = []): unknown[] {
