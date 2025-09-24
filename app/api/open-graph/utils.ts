@@ -117,17 +117,17 @@ interface GooglePreviewRule {
 const GOOGLE_PREVIEW_RULES: readonly GooglePreviewRule[] = [
   {
     kind: "docs",
-    pattern: /^\/document\/d\/[A-Za-z0-9_-]+\/preview$/i,
+    pattern: /^\/document\/d\/[A-Z0-9_-]+\/preview$/i,
     allowedParams: new Set<string>(),
   },
   {
     kind: "slides",
-    pattern: /^\/presentation\/d\/[A-Za-z0-9_-]+\/preview$/i,
+    pattern: /^\/presentation\/d\/[A-Z0-9_-]+\/preview$/i,
     allowedParams: new Set<string>(),
   },
   {
     kind: "sheets",
-    pattern: /^\/spreadsheets\/d\/[A-Za-z0-9_-]+\/htmlview$/i,
+    pattern: /^\/spreadsheets\/d\/[A-Z0-9_-]+\/htmlview$/i,
     allowedParams: new Set<string>(["gid", "range"]),
     requiredParams: new Set<string>(["gid"]),
   },
