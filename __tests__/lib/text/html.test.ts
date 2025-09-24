@@ -1,4 +1,9 @@
-import { decodeHtmlEntities, sanitizeHtmlToText, stripHtmlTags } from "@/lib/text/html";
+import {
+  decodeHtmlEntities,
+  replaceHtmlBreaksWithNewlines,
+  sanitizeHtmlToText,
+  stripHtmlTags,
+} from "@/lib/text/html";
 
 describe("stripHtmlTags", () => {
   it("removes script tags even across multiple lines", () => {
@@ -38,5 +43,27 @@ describe("sanitizeHtmlToText", () => {
   it("removes tags and decodes entities in a single step", () => {
     const input = "<strong>Safe &amp; Sound</strong>";
     expect(sanitizeHtmlToText(input, { preserveTagSpacing: true })).toBe("Safe & Sound");
+  });
+});
+
+describe("replaceHtmlBreaksWithNewlines", () => {
+  it("converts common break tags to newlines", () => {
+    const input = "First<br>Second</p>Third";
+    expect(replaceHtmlBreaksWithNewlines(input)).toBe("First\nSecond\nThird");
+  });
+
+  it("ignores unrelated tags and preserves them for follow-up sanitizers", () => {
+    const input = "<div>Start</div><br />Middle<span>End</span>";
+    expect(replaceHtmlBreaksWithNewlines(input)).toBe("<div>Start</div>\nMiddle<span>End</span>");
+  });
+
+  it("handles tags with attributes and mixed casing", () => {
+    const input = "<BR class=\"foo\">Alpha</P >Beta";
+    expect(replaceHtmlBreaksWithNewlines(input)).toBe("\nAlpha\nBeta");
+  });
+
+  it("leaves partial tags untouched", () => {
+    const input = "Broken<br";
+    expect(replaceHtmlBreaksWithNewlines(input)).toBe("Broken<br");
   });
 });

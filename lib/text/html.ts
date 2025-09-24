@@ -59,6 +59,47 @@ export function stripHtmlTags(value: string, options: StripHtmlTagsOptions = {})
 }
 
 /**
+ * Replaces break-like HTML tags with newline characters without using complex regular expressions.
+ * Keeps other tags untouched so callers can continue to run standard sanitizers afterwards.
+ */
+export function replaceHtmlBreaksWithNewlines(value: string): string {
+  if (!value.includes("<")) {
+    return value;
+  }
+
+  let result = "";
+  let index = 0;
+
+  while (index < value.length) {
+    const char = value[index];
+    if (char !== "<") {
+      result += char;
+      index += 1;
+      continue;
+    }
+
+    const closeIndex = value.indexOf(">", index + 1);
+    if (closeIndex === -1) {
+      result += value.slice(index);
+      break;
+    }
+
+    const rawTag = value.slice(index + 1, closeIndex);
+    const identifier = getTagIdentifier(rawTag);
+
+    if (identifier === "br" || identifier === "/p") {
+      result += "\n";
+    } else {
+      result += `<${rawTag}>`;
+    }
+
+    index = closeIndex + 1;
+  }
+
+  return result;
+}
+
+/**
  * Decodes a limited set of known HTML entities and numeric references.
  * Unknown entities are removed to avoid re-introducing unsafe sequences.
  */
@@ -93,4 +134,65 @@ function removeResidualTags(value: string): string {
     output = output.replace(tagPattern, "");
   } while (output !== previous);
   return output.replace(/</g, "");
+}
+
+function getTagIdentifier(rawTag: string): string | null {
+  let start = 0;
+  const length = rawTag.length;
+
+  while (start < length && isWhitespace(rawTag[start])) {
+    start += 1;
+  }
+
+  if (start >= length) {
+    return null;
+  }
+
+  let closing = false;
+  if (rawTag[start] === "/") {
+    closing = true;
+    start += 1;
+  }
+
+  while (start < length && isWhitespace(rawTag[start])) {
+    start += 1;
+  }
+
+  if (start >= length) {
+    return null;
+  }
+
+  let name = "";
+  while (start < length) {
+    const char = rawTag[start];
+    if (!isTagNameChar(char)) {
+      break;
+    }
+    name += char.toLowerCase();
+    start += 1;
+  }
+
+  if (!name) {
+    return null;
+  }
+
+  return closing ? `/${name}` : name;
+}
+
+function isWhitespace(char: string): boolean {
+  return (
+    char === " " ||
+    char === "\n" ||
+    char === "\r" ||
+    char === "\t" ||
+    char === "\f"
+  );
+}
+
+function isTagNameChar(char: string): boolean {
+  const code = char.charCodeAt(0);
+  const isLower = code >= 97 && code <= 122;
+  const isUpper = code >= 65 && code <= 90;
+  const isDigit = code >= 48 && code <= 57;
+  return isLower || isUpper || isDigit || char === "-" || char === "_";
 }

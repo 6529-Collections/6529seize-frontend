@@ -6,7 +6,11 @@ import {
   fetchPublicUrl,
   parsePublicUrl,
 } from "@/lib/security/urlGuard";
-import { decodeHtmlEntities, stripHtmlTags } from "@/lib/text/html";
+import {
+  decodeHtmlEntities,
+  replaceHtmlBreaksWithNewlines,
+  stripHtmlTags,
+} from "@/lib/text/html";
 import type { FetchPublicUrlOptions, UrlGuardOptions } from "@/lib/security/urlGuard";
 import type {
   TikTokPreviewKind,
@@ -95,9 +99,7 @@ function sanitizeTrackingParams(url: URL): void {
 }
 
 function stripHtml(value: string): string {
-  const withBreaks = value
-    .replace(/<\s*br\s*\/?\s*>/gi, "\n")
-    .replace(/<\s*\/p\s*>/gi, "\n");
+  const withBreaks = replaceHtmlBreaksWithNewlines(value);
   return stripHtmlTags(withBreaks, { preserveTagSpacing: true });
 }
 
