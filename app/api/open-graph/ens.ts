@@ -8,7 +8,8 @@ import {
   TEXT_RECORD_KEYS,
   TextRecordKey,
 } from "@/components/waves/ens/types";
-import { detectEnsTarget, type EnsTarget } from "@/lib/ens/detect";
+import type { EnsTarget } from "@/lib/ens/detect";
+import { stripHtmlTags } from "@/lib/text/html";
 import { ens_normalize } from "@adraffy/ens-normalize";
 import * as contentHash from "@ensdomains/content-hash";
 import { toUnicode } from "punycode";
@@ -112,8 +113,6 @@ export class EnsPreviewError extends Error {
   }
 }
 
-type RecordSanitizer = (value: string | null) => string | null;
-
 type ContenthashResult = EnsContenthash | null;
 
 type NullableAddress = string | null | undefined;
@@ -164,29 +163,6 @@ function normalizeEnsName(name: string): {
   }
 }
 
-function stripHtmlTags(input: string, maxLen = 20000): string {
-  // Cap input to avoid huge worst-cases
-  const s = input.length > maxLen ? input.slice(0, maxLen) : input;
-  let out = "";
-  let inTag = false;
-
-  for (let i = 0; i < s.length; i++) {
-    const ch = s.codePointAt(i);
-    if (ch === 60) {
-      // '<'
-      inTag = true;
-      continue;
-    }
-    if (ch === 62) {
-      // '>'
-      inTag = false;
-      continue;
-    }
-    if (!inTag) out += s[i];
-  }
-  return out;
-}
-
 function sanitizeRecordValue(
   value: string | null,
   key: TextRecordKey
@@ -195,7 +171,7 @@ function sanitizeRecordValue(
     return null;
   }
 
-  const withoutTags = stripHtmlTags(value);
+  const withoutTags = stripHtmlTags(value, { maxLength: 20000 });
   const collapsed = withoutTags.replaceAll(/\s+/g, " ").trim();
   if (!collapsed) {
     return null;

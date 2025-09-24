@@ -6,6 +6,7 @@ import {
   fetchPublicUrl,
   parsePublicUrl,
 } from "@/lib/security/urlGuard";
+import { decodeHtmlEntities, stripHtmlTags } from "@/lib/text/html";
 import type { FetchPublicUrlOptions, UrlGuardOptions } from "@/lib/security/urlGuard";
 import type {
   TikTokPreviewKind,
@@ -97,34 +98,7 @@ function stripHtml(value: string): string {
   const withBreaks = value
     .replace(/<\s*br\s*\/?\s*>/gi, "\n")
     .replace(/<\s*\/p\s*>/gi, "\n");
-  return withBreaks.replace(/<[^>]*>/g, "");
-}
-
-function decodeHtmlEntities(value: string): string {
-  return value.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_, entity: string) => {
-    if (entity.startsWith("#x") || entity.startsWith("#X")) {
-      const codePoint = Number.parseInt(entity.slice(2), 16);
-      return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
-    }
-    if (entity.startsWith("#")) {
-      const codePoint = Number.parseInt(entity.slice(1), 10);
-      return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
-    }
-    switch (entity) {
-      case "amp":
-        return "&";
-      case "lt":
-        return "<";
-      case "gt":
-        return ">";
-      case "quot":
-        return '"';
-      case "apos":
-        return "'";
-      default:
-        return "";
-    }
-  });
+  return stripHtmlTags(withBreaks, { preserveTagSpacing: true });
 }
 
 function sanitizeCaption(value: string | undefined): string | null {

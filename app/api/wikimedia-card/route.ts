@@ -10,6 +10,7 @@ import {
   parsePublicUrl,
   type UrlGuardHostPolicy,
 } from "@/lib/security/urlGuard";
+import { sanitizeHtmlToText } from "@/lib/text/html";
 
 const USER_AGENT = "6529seize-wikimedia-preview/1.0 (+https://6529.io)";
 const REQUEST_TIMEOUT_MS = 8000;
@@ -488,65 +489,8 @@ const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
   throw new Error("Unsupported Wikimedia host");
 };
 
-const stripHtmlTags = (value: string): string => {
-  let inTag = false;
-  const chars: string[] = [];
-  let pendingSpace = false;
-
-  for (let index = 0; index < value.length; index += 1) {
-    const current = value[index];
-
-    if (current === "<") {
-      inTag = true;
-      pendingSpace = chars.length > 0;
-      continue;
-    }
-
-    if (current === ">") {
-      inTag = false;
-      continue;
-    }
-
-    if (inTag) {
-      continue;
-    }
-
-    if (pendingSpace && chars[chars.length - 1] !== " ") {
-      chars.push(" ");
-    }
-    pendingSpace = false;
-    chars.push(current);
-  }
-
-  return chars.join("");
-};
-
 const sanitizeHtml = (value: string): string => {
-  return stripHtmlTags(value)
-    .replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_match, entity) => {
-      if (entity.startsWith("#x") || entity.startsWith("#X")) {
-        const codePoint = Number.parseInt(entity.slice(2), 16);
-        return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
-      }
-      if (entity.startsWith("#")) {
-        const codePoint = Number.parseInt(entity.slice(1), 10);
-        return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
-      }
-      switch (entity) {
-        case "amp":
-          return "&";
-        case "lt":
-          return "<";
-        case "gt":
-          return ">";
-        case "quot":
-          return '"';
-        case "apos":
-          return "'";
-        default:
-          return "";
-      }
-    })
+  return sanitizeHtmlToText(value, { preserveTagSpacing: true })
     .replace(/\s+/g, " ")
     .trim();
 };
