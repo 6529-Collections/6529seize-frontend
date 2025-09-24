@@ -1,5 +1,5 @@
-import React from "react";
 import { generateMetadata } from "@/app/tools/app-wallets/[app-wallet-address]/page";
+import React from "react";
 
 jest.mock("next/dynamic", () => () => (p: any) => (
   <div data-testid="wallet" {...p} />
@@ -28,9 +28,8 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 describe("App Wallet page", () => {
   it("exposes metadata", async () => {
-    process.env.BASE_ENDPOINT = "https://base.test";
     const meta = await generateMetadata({
-      params: { "app-wallet-address": "0xdef" },
+      params: Promise.resolve({ "app-wallet-address": "0xdef" }),
     });
     expect(meta.title).toEqual("fmt-0xdef | App Wallets");
     expect(meta.description).toEqual("Tools | 6529.io");

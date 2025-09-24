@@ -1,12 +1,13 @@
 "use client";
 
-import React, {
+import { publicEnv } from "@/config/env";
+import {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   ReactNode,
+  useContext,
+  useEffect,
   useMemo,
+  useState,
 } from "react";
 import { ApiSeizeSettings } from "../generated/models/ApiSeizeSettings";
 import { fetchUrl } from "../services/6529api";
@@ -32,12 +33,12 @@ export const SeizeSettingsProvider = ({
   });
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/settings`).then(
+    fetchUrl(`${publicEnv.API_ENDPOINT}/api/settings`).then(
       (settings: ApiSeizeSettings) => {
         setSeizeSettings({
           ...settings,
           memes_wave_id:
-            process.env.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
+            publicEnv.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
         });
       }
     );

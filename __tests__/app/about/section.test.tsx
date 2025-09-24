@@ -2,11 +2,10 @@
  * @jest-environment jsdom
  */
 
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import AboutPage, { generateMetadata } from "@/app/about/[section]/page";
-import { redirect, notFound } from "next/navigation";
 import { AboutSection } from "@/enums";
+import { render, screen } from "@testing-library/react";
+import { notFound, redirect } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
@@ -17,10 +16,6 @@ jest.mock("@/components/about/About", () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="about-component" />),
 }));
-
-beforeAll(() => {
-  process.env.BASE_ENDPOINT = "https://test.6529.io";
-});
 
 describe("AboutPage", () => {
   beforeEach(() => {

@@ -1,26 +1,27 @@
 "use client";
 
-import styles from "./Rememes.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import Image from "next/image";
-import { useState, useEffect } from "react";
-import { NFT } from "../../entities/INFT";
-import { fetchUrl, postData } from "../../services/6529api";
-import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
-import { useSignMessage } from "wagmi";
-import { DBResponse } from "../../entities/IDBResponse";
-import { ConsolidatedTDH } from "../../entities/ITDH";
-import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useAuth } from "../auth/Auth";
-import { commonApiFetch } from "../../services/api/common-api";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { useSeizeSettings } from "../../contexts/SeizeSettingsContext";
-import { useSetTitle } from "../../contexts/TitleContext";
+import { publicEnv } from "@/config/env";
 import {
   faCheckCircle,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+import { useSignMessage } from "wagmi";
+import { useSeizeSettings } from "../../contexts/SeizeSettingsContext";
+import { useSetTitle } from "../../contexts/TitleContext";
+import { DBResponse } from "../../entities/IDBResponse";
+import { NFT } from "../../entities/INFT";
+import { ConsolidatedTDH } from "../../entities/ITDH";
+import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
+import { fetchUrl, postData } from "../../services/6529api";
+import { commonApiFetch } from "../../services/api/common-api";
+import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
+import styles from "./Rememes.module.scss";
 
 interface CheckList {
   status: boolean;
@@ -110,7 +111,7 @@ export default function RememeAddPage() {
   }, [signMessage.isError]);
 
   useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
+    fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
       (response: DBResponse) => {
         setMemes(response.data);
         setMemesLoaded(true);
@@ -136,7 +137,7 @@ export default function RememeAddPage() {
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
       setSubmitting(true);
-      postData(`${process.env.API_ENDPOINT}/api/rememes/add`, {
+      postData(`${publicEnv.API_ENDPOINT}/api/rememes/add`, {
         address: address,
         signature: signMessage.data,
         rememe: buildRememeObject(),
@@ -232,8 +233,7 @@ export default function RememeAddPage() {
                       {checkList.map((note, index) => (
                         <li
                           key={`ve-${index}`}
-                          className={`d-flex align-items-center gap-2`}
-                        >
+                          className={`d-flex align-items-center gap-2`}>
                           {note.status ? (
                             <FontAwesomeIcon
                               icon={faCheckCircle}
@@ -256,8 +256,7 @@ export default function RememeAddPage() {
                       {signErrors.map((se, index) => (
                         <li
                           key={`se-${index}`}
-                          className={`d-flex align-items-center gap-2`}
-                        >
+                          className={`d-flex align-items-center gap-2`}>
                           <FontAwesomeIcon
                             icon={faTimesCircle}
                             className={styles.unverifiedIcon}
@@ -291,8 +290,7 @@ export default function RememeAddPage() {
                             message: JSON.stringify(buildRememeObject()),
                           });
                         }
-                      }}
-                    >
+                      }}>
                       Add Rememe
                     </Button>
                   </span>
@@ -300,8 +298,7 @@ export default function RememeAddPage() {
                   <Button
                     className="seize-btn btn-white"
                     disabled={seizeConnectOpen}
-                    onClick={() => seizeConnect()}
-                  >
+                    onClick={() => seizeConnect()}>
                     {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
                   </Button>
                 )}
@@ -315,8 +312,7 @@ export default function RememeAddPage() {
                   <div className="d-inline">
                     <div
                       className={`spinner-border ${styles.loader}`}
-                      role="status"
-                    >
+                      role="status">
                       <span className="sr-only"></span>
                     </div>
                   </div>
@@ -351,8 +347,7 @@ export default function RememeAddPage() {
                     <Col
                       xs={12}
                       className="pt-2"
-                      key={`submission-result-error-${index}`}
-                    >
+                      key={`submission-result-error-${index}`}>
                       {e}
                     </Col>
                   ))}
@@ -366,20 +361,14 @@ export default function RememeAddPage() {
                         <Col
                           xs={12}
                           className="pt-1 pb-1"
-                          key={`submission-result-token-${t.id}`}
-                        >
+                          key={`submission-result-token-${t.id}`}>
                           #{t.id} - {t.name}
                           &nbsp;&nbsp;
                           <a
                             className="font-color"
-                            href={`${
-                              process.env.BASE_ENDPOINT
-                                ? process.env.BASE_ENDPOINT
-                                : "https://6529.io"
-                            }/rememes/${submissionResult.contract}/${t.id}`}
+                            href={`${publicEnv.BASE_ENDPOINT}/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             view
                           </a>
                         </Col>
@@ -391,8 +380,7 @@ export default function RememeAddPage() {
                           className="seize-btn btn-white"
                           onClick={() => {
                             location.reload();
-                          }}
-                        >
+                          }}>
                           Add Another
                         </Button>
                       </Col>

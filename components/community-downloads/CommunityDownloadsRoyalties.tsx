@@ -1,5 +1,6 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import CommunityDownloadsComponent from "./CommunityDownloadsComponent";
 
@@ -9,7 +10,7 @@ export default function CommunityDownloadsRoyalties() {
   return (
     <CommunityDownloadsComponent
       title="Royalties"
-      url={`${process.env.API_ENDPOINT}/api/royalties/uploads`}
+      url={`${publicEnv.API_ENDPOINT}/api/royalties/uploads`}
     />
   );
 }

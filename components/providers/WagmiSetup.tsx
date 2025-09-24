@@ -1,6 +1,5 @@
 "use client";
 
-import { VALIDATED_BASE_ENDPOINT } from "@/constants";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { AppKitValidationError } from "@/src/errors/appkit-initialization";
 import {
@@ -62,7 +61,7 @@ export default function WagmiSetup({
   const createAdapterWithWallets = useCallback(
     (wallets: AppWallet[]): WagmiAdapter => {
       // Basic validation - let util handle detailed validation
-      if (!VALIDATED_BASE_ENDPOINT || !adapterManager) {
+      if (!adapterManager) {
         throw new AppKitValidationError("Internal API failed");
       }
 

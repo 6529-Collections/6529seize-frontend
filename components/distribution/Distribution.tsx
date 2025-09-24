@@ -9,6 +9,7 @@ import {
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
 import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
+import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
 import { Distribution, DistributionPhoto } from "@/entities/IDistribution";
@@ -68,7 +69,7 @@ export default function DistributionPage(props: Readonly<Props>) {
     setFetching(true);
     const walletFilter =
       searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
-    const distributionUrl = `${process.env.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
+    const distributionUrl = `${publicEnv.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
     fetchUrl(distributionUrl).then((r: DBResponse) => {
       setTotalResults(r.count);
       const mydistributions: Distribution[] = r.data;
@@ -87,7 +88,7 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   useEffect(() => {
     if (nftId) {
-      const distributionPhotosUrl = `${process.env.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
+      const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
 
       fetchAllPages(distributionPhotosUrl).then((distributionPhotos: any[]) => {
         setDistributionPhotos(distributionPhotos);
@@ -116,8 +117,7 @@ export default function DistributionPage(props: Readonly<Props>) {
           wrap={false}
           touch={true}
           fade={true}
-          className={styles.distributionCarousel}
-        >
+          className={styles.distributionCarousel}>
           {distributionPhotos.map((dp) => (
             <Carousel.Item key={dp.id}>
               <Image
@@ -172,8 +172,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                     <th colSpan={2}></th>
                     <th
                       colSpan={distributionsPhases.length}
-                      className="text-center"
-                    >
+                      className="text-center">
                       ALLOWLIST SPOTS
                     </th>
                     <th colSpan={2} className="text-center">
@@ -272,8 +271,7 @@ export default function DistributionPage(props: Readonly<Props>) {
           <a
             href="https://x.com/6529Collections"
             target="_blank"
-            rel="noreferrer"
-          >
+            rel="noreferrer">
             &#64;6529Collections
           </a>{" "}
           account on X for drop updates.
