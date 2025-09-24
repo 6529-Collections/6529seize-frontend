@@ -26,7 +26,18 @@ function normalizeInputToUrl(input: RequestInfo | URL): URL {
     return new URL(input.url);
   }
 
-  return new URL(String(input));
+  if (typeof input === "object" && input !== null) {
+    const maybeUrl = (input as { url?: unknown }).url;
+    if (typeof maybeUrl === "string") {
+      return new URL(maybeUrl);
+    }
+
+    if (maybeUrl instanceof URL) {
+      return new URL(maybeUrl.toString());
+    }
+  }
+
+  throw new UrlGuardError("Unsupported request input type.", "invalid-url");
 }
 
 function ensureHttpsDefaultPort(url: URL): void {
@@ -54,6 +65,18 @@ const PROXY_FETCH_OPTIONS: FetchPublicUrlOptions = {
   fetchImpl: httpsOnlyFetch,
 };
 
+function ensureAllowedHttps(url: URL): NextResponse | null {
+  try {
+    ensureHttpsDefaultPort(url);
+    return null;
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      return mapGuardErrorToResponse(error);
+    }
+    throw error;
+  }
+}
+
 function mapGuardErrorToResponse(error: UrlGuardError): NextResponse {
   switch (error.kind) {
     case "missing-url":
@@ -78,20 +101,36 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
   }
 
-  let remoteUrl: URL;
+  const remoteResult = parseRemoteUrl(target);
+  if ("response" in remoteResult) {
+    return remoteResult.response;
+  }
+
+  return proxyImage(remoteResult.url);
+}
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+function parseRemoteUrl(target: string): { url: URL } | { response: NextResponse } {
   try {
-    remoteUrl = parsePublicUrl(target, { allowedProtocols: ["https:"] });
+    const parsed = parsePublicUrl(target, { allowedProtocols: ["https:"] });
+    const guardResponse = ensureAllowedHttps(parsed);
+    if (guardResponse) {
+      return { response: guardResponse };
+    }
+    return { url: parsed };
   } catch (error) {
     if (error instanceof UrlGuardError) {
-      return mapGuardErrorToResponse(error);
+      return { response: mapGuardErrorToResponse(error) };
     }
-    return NextResponse.json({ error: "Invalid image url" }, { status: 400 });
+    return {
+      response: NextResponse.json({ error: "Invalid image url" }, { status: 400 }),
+    };
   }
+}
 
-  if (remoteUrl.port && remoteUrl.port !== "443") {
-    return NextResponse.json({ error: "Unsupported image host" }, { status: 400 });
-  }
-
+async function proxyImage(remoteUrl: URL): Promise<NextResponse> {
   try {
     const response = await fetchPublicUrl(
       remoteUrl,
@@ -104,8 +143,9 @@ export async function GET(request: NextRequest) {
     );
 
     const finalUrl = response.url ? new URL(response.url) : remoteUrl;
-    if (finalUrl.port && finalUrl.port !== "443") {
-      return NextResponse.json({ error: "Unsupported image host" }, { status: 400 });
+    const guardResponse = ensureAllowedHttps(finalUrl);
+    if (guardResponse) {
+      return guardResponse;
     }
 
     if (!response.ok || !response.body) {
@@ -138,6 +178,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Failed to proxy image" }, { status: 502 });
   }
 }
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
