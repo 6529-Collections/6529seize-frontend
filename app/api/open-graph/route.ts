@@ -133,6 +133,102 @@ const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   error instanceof UrlGuardError ||
   (typeof error === "object" && error !== null && (error as { name?: string }).name === "UrlGuardError");
 
+type FetchConfig = ReturnType<typeof createFetchConfig>;
+
+async function fetchWithTimeout(url: URL, { headers, userAgent }: FetchConfig): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  headers["user-agent"] = userAgent;
+
+  try {
+    return await fetch(url.toString(), {
+      headers,
+      signal: controller.signal,
+      redirect: "manual",
+    });
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      throw error;
+    }
+
+    if ((error as { name?: string }).name === "AbortError") {
+      throw new UrlGuardError("Request timed out.", "timeout", 504, { cause: error });
+    }
+
+    throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, { cause: error });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function resolveRedirect(
+  response: Response,
+  currentUrl: URL,
+  redirectCount: number
+): URL | undefined {
+  if (!REDIRECT_STATUS_CODES.has(response.status)) {
+    return undefined;
+  }
+
+  if (redirectCount >= MAX_REDIRECTS) {
+    throw new UrlGuardError("Too many redirects.", "too-many-redirects", 502);
+  }
+
+  const location = response.headers.get("location");
+  if (!location) {
+    throw new UrlGuardError(
+      "Redirect response missing location header.",
+      "redirect-location-missing",
+      502
+    );
+  }
+
+  try {
+    return new URL(location, currentUrl);
+  } catch (error) {
+    throw new UrlGuardError(
+      "Redirect response has invalid location.",
+      "redirect-location-invalid",
+      502,
+      { cause: error }
+    );
+  }
+}
+
+function ensureSuccessfulResponse(response: Response): void {
+  if (!response.ok) {
+    throw new UrlGuardError(
+      `Request failed with status ${response.status}`,
+      "fetch-failed",
+      response.status
+    );
+  }
+}
+
+async function extractHtmlResponse(
+  response: Response,
+  fallbackUrl: URL
+): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
+  try {
+    const html = await response.text();
+    const contentType = response.headers.get("content-type");
+    const finalUrl = response.url || fallbackUrl.toString();
+
+    return {
+      html,
+      contentType,
+      finalUrl,
+    };
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      throw error;
+    }
+
+    throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, { cause: error });
+  }
+}
+
 async function fetchHtml(
   url: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
@@ -142,80 +238,18 @@ async function fetchHtml(
   while (true) {
     await assertPublicUrl(currentUrl, PUBLIC_URL_OPTIONS);
 
-    const { headers, userAgent } = createFetchConfig(currentUrl);
-    headers["user-agent"] = userAgent;
+    const response = await fetchWithTimeout(currentUrl, createFetchConfig(currentUrl));
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-    try {
-      const response = await fetch(currentUrl.toString(), {
-        headers,
-        signal: controller.signal,
-        redirect: "manual",
-      });
-
-      if (REDIRECT_STATUS_CODES.has(response.status)) {
-        if (redirectCount >= MAX_REDIRECTS) {
-          throw new UrlGuardError("Too many redirects.", "too-many-redirects", 502);
-        }
-
-        const location = response.headers.get("location");
-        if (!location) {
-          throw new UrlGuardError(
-            "Redirect response missing location header.",
-            "redirect-location-missing",
-            502
-          );
-        }
-
-        let nextUrl: URL;
-        try {
-          nextUrl = new URL(location, currentUrl);
-        } catch (error) {
-          throw new UrlGuardError(
-            "Redirect response has invalid location.",
-            "redirect-location-invalid",
-            502,
-            { cause: error }
-          );
-        }
-
-        currentUrl = nextUrl;
-        redirectCount += 1;
-        continue;
-      }
-
-      if (!response.ok) {
-        throw new UrlGuardError(
-          `Request failed with status ${response.status}`,
-          "fetch-failed",
-          response.status
-        );
-      }
-
-      const contentType = response.headers.get("content-type");
-      const finalUrl = response.url || currentUrl.toString();
-      const html = await response.text();
-
-      return {
-        html,
-        contentType,
-        finalUrl,
-      };
-    } catch (error) {
-      if (error instanceof UrlGuardError) {
-        throw error;
-      }
-
-      if ((error as { name?: string }).name === "AbortError") {
-        throw new UrlGuardError("Request timed out.", "timeout", 504, { cause: error });
-      }
-
-      throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, { cause: error });
-    } finally {
-      clearTimeout(timeoutId);
+    const redirectTarget = resolveRedirect(response, currentUrl, redirectCount);
+    if (redirectTarget) {
+      currentUrl = redirectTarget;
+      redirectCount += 1;
+      continue;
     }
+
+    ensureSuccessfulResponse(response);
+
+    return extractHtmlResponse(response, currentUrl);
   }
 }
 
