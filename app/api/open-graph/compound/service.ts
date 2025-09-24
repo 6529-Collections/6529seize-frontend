@@ -853,213 +853,14 @@ function decodeV3Event(log: { address: Address; data: `0x${string}`; topics: rea
 
 async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
   const transaction = await publicClient.getTransaction({ hash });
-
-  let receipt;
-  let status: "success" | "reverted" | "pending" = "pending";
-  let blockNumber: number | null = null;
-
-  try {
-    receipt = await publicClient.getTransactionReceipt({ hash });
-    status = receipt.status;
-    blockNumber = Number(receipt.blockNumber ?? BIGINT_ZERO);
-  } catch {
-    receipt = null;
-    status = "pending";
-  }
-
-  let summary: any = null;
-
-  const logs = receipt?.logs ?? [];
-
-  for (const log of logs) {
-    const address = getAddress(log.address);
-    if (v2MarketsByAddress.has(address.toLowerCase() as Address)) {
-      const decoded = decodeV2Event(log);
-      if (!decoded) {
-        continue;
-      }
-      const market = v2MarketsByAddress.get(address.toLowerCase() as Address)!;
-      const underlyingDecimals = market.underlying.decimals;
-      switch (decoded.eventName) {
-        case "Mint": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.mintAmount ,
-            underlyingDecimals,
-            6
-          );
-          summary = {
-            version: "v2",
-            action: "supply",
-            market: {
-              address: address,
-              symbol: market.symbol,
-            },
-            amount,
-            token: market.underlying.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-        case "Redeem": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.redeemAmount ,
-            underlyingDecimals,
-            6
-          );
-          summary = {
-            version: "v2",
-            action: "redeem",
-            market: {
-              address: address,
-              symbol: market.symbol,
-            },
-            amount,
-            token: market.underlying.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-        case "Borrow": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.borrowAmount ,
-            underlyingDecimals,
-            6
-          );
-          summary = {
-            version: "v2",
-            action: "borrow",
-            market: {
-              address: address,
-              symbol: market.symbol,
-            },
-            amount,
-            token: market.underlying.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-        case "RepayBorrow": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.repayAmount ,
-            underlyingDecimals,
-            6
-          );
-          summary = {
-            version: "v2",
-            action: "repay",
-            market: {
-              address: address,
-              symbol: market.symbol,
-            },
-            amount,
-            token: market.underlying.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-        case "LiquidateBorrow": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.repayAmount ,
-            underlyingDecimals,
-            6
-          );
-          summary = {
-            version: "v2",
-            action: "liquidate",
-            market: {
-              address: address,
-              symbol: market.symbol,
-            },
-            amount,
-            token: market.underlying.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-      }
-    } else if (v3MarketsByAddress.has(address.toLowerCase() as Address)) {
-      const decoded = decodeV3Event(log);
-      if (!decoded) {
-        continue;
-      }
-      const market = v3MarketsByAddress.get(address.toLowerCase() as Address)!;
-      switch (decoded.eventName) {
-        case "Supply": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.amount ,
-            market.base.decimals,
-            6
-          );
-          summary = {
-            version: "v3",
-            action: "supply",
-            market: {
-              address: address,
-              symbol: `${market.base.symbol}(Comet)`,
-            },
-            amount,
-            token: market.base.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-        case "Withdraw": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.amount ,
-            market.base.decimals,
-            6
-          );
-          summary = {
-            version: "v3",
-            action: "withdraw",
-            market: {
-              address: address,
-              symbol: `${market.base.symbol}(Comet)`,
-            },
-            amount,
-            token: market.base.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-        case "AbsorbCollateral": {
-          const amount = formatUnitsWithPrecision(
-            decoded.args.collateralAbsorbed ,
-            market.base.decimals,
-            6
-          );
-          summary = {
-            version: "v3",
-            action: "liquidate",
-            market: {
-              address: address,
-              symbol: `${market.base.symbol}(Comet)`,
-            },
-            amount,
-            token: market.base.symbol,
-            from: transaction.from ? getAddress(transaction.from) : undefined,
-            to: transaction.to ? getAddress(transaction.to) : undefined,
-          };
-          break;
-        }
-      }
-    }
-    if (summary) {
-      break;
-    }
-  }
+  const { receipt, status, blockNumber } = await getTransactionReceiptDetails(hash);
+  const participants = extractTransactionParticipants(transaction);
+  const summary = buildCompoundSummaryFromLogs(receipt?.logs ?? [], participants);
 
   return {
     type: "compound.tx",
     chainId: 1,
-    hash: hash,
+    hash,
     status,
     blockNumber: blockNumber ?? undefined,
     summary: summary ?? undefined,
@@ -1067,6 +868,199 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
       etherscan: `https://etherscan.io/tx/${hash}`,
     },
   } as LinkPreviewResponse;
+}
+
+type PublicClientReceipt = Awaited<ReturnType<typeof publicClient.getTransactionReceipt>>;
+
+type ReceiptDetails = {
+  readonly receipt: PublicClientReceipt | null;
+  readonly status: "success" | "reverted" | "pending";
+  readonly blockNumber: number | null;
+};
+
+type CompoundTransactionSummary = {
+  readonly version: "v2" | "v3";
+  readonly action: CompoundSummaryAction;
+  readonly market: {
+    readonly address: Address;
+    readonly symbol: string;
+  };
+  readonly amount: string;
+  readonly token: string;
+  readonly from?: Address;
+  readonly to?: Address;
+};
+
+type CompoundSummaryAction =
+  | "supply"
+  | "redeem"
+  | "borrow"
+  | "repay"
+  | "liquidate"
+  | "withdraw";
+
+type TxParticipants = {
+  readonly from?: Address;
+  readonly to?: Address;
+};
+
+async function getTransactionReceiptDetails(hash: Hash): Promise<ReceiptDetails> {
+  try {
+    const receipt = await publicClient.getTransactionReceipt({ hash });
+    return {
+      receipt,
+      status: receipt.status,
+      blockNumber: Number(receipt.blockNumber ?? BIGINT_ZERO),
+    };
+  } catch {
+    return {
+      receipt: null,
+      status: "pending",
+      blockNumber: null,
+    };
+  }
+}
+
+function extractTransactionParticipants(transaction: {
+  readonly from?: string | null;
+  readonly to?: string | null;
+}): TxParticipants {
+  return {
+    from: transaction.from ? getAddress(transaction.from) : undefined,
+    to: transaction.to ? getAddress(transaction.to) : undefined,
+  };
+}
+
+function buildCompoundSummaryFromLogs(
+  logs: readonly {
+    readonly address: Address;
+    readonly data: `0x${string}`;
+    readonly topics: readonly `0x${string}`[];
+  }[],
+  participants: TxParticipants
+): CompoundTransactionSummary | null {
+  for (const log of logs) {
+    const summary = buildV2Summary(log, participants) ?? buildV3Summary(log, participants);
+    if (summary) {
+      return summary;
+    }
+  }
+  return null;
+}
+
+const V2_EVENT_SUMMARIES = {
+  Mint: { action: "supply", amountKey: "mintAmount" },
+  Redeem: { action: "redeem", amountKey: "redeemAmount" },
+  Borrow: { action: "borrow", amountKey: "borrowAmount" },
+  RepayBorrow: { action: "repay", amountKey: "repayAmount" },
+  LiquidateBorrow: { action: "liquidate", amountKey: "repayAmount" },
+} as const;
+
+type V2EventName = keyof typeof V2_EVENT_SUMMARIES;
+
+const V3_EVENT_SUMMARIES = {
+  Supply: { action: "supply", amountKey: "amount" },
+  Withdraw: { action: "withdraw", amountKey: "amount" },
+  AbsorbCollateral: { action: "liquidate", amountKey: "collateralAbsorbed" },
+} as const;
+
+type V3EventName = keyof typeof V3_EVENT_SUMMARIES;
+
+function buildV2Summary(
+  log: {
+    readonly address: Address;
+    readonly data: `0x${string}`;
+    readonly topics: readonly `0x${string}`[];
+  },
+  participants: TxParticipants
+): CompoundTransactionSummary | null {
+  const address = getAddress(log.address);
+  const lower = address.toLowerCase() as Address;
+  if (!v2MarketsByAddress.has(lower)) {
+    return null;
+  }
+  const decoded = decodeV2Event(log);
+  if (!decoded) {
+    return null;
+  }
+  const market = v2MarketsByAddress.get(lower)!;
+  const eventName = decoded.eventName as V2EventName;
+  const config = V2_EVENT_SUMMARIES[eventName];
+  if (!config) {
+    return null;
+  }
+  const amountRaw = decoded.args[
+    config.amountKey as keyof typeof decoded.args
+  ] as bigint;
+  const amount = formatUnitsWithPrecision(amountRaw, market.underlying.decimals, 6);
+  return createCompoundSummary({
+    version: "v2",
+    action: config.action,
+    marketSymbol: market.symbol,
+    marketAddress: address,
+    amount,
+    token: market.underlying.symbol,
+    participants,
+  });
+}
+
+function buildV3Summary(
+  log: {
+    readonly address: Address;
+    readonly data: `0x${string}`;
+    readonly topics: readonly `0x${string}`[];
+  },
+  participants: TxParticipants
+): CompoundTransactionSummary | null {
+  const address = getAddress(log.address);
+  const lower = address.toLowerCase() as Address;
+  if (!v3MarketsByAddress.has(lower)) {
+    return null;
+  }
+  const decoded = decodeV3Event(log);
+  if (!decoded) {
+    return null;
+  }
+  const market = v3MarketsByAddress.get(lower)!;
+  const eventName = decoded.eventName as V3EventName;
+  const config = V3_EVENT_SUMMARIES[eventName];
+  if (!config) {
+    return null;
+  }
+  const amountRaw = decoded.args[
+    config.amountKey as keyof typeof decoded.args
+  ] as bigint;
+  const amount = formatUnitsWithPrecision(amountRaw, market.base.decimals, 6);
+  return createCompoundSummary({
+    version: "v3",
+    action: config.action,
+    marketSymbol: `${market.base.symbol}(Comet)`,
+    marketAddress: address,
+    amount,
+    token: market.base.symbol,
+    participants,
+  });
+}
+
+function createCompoundSummary(options: {
+  readonly version: "v2" | "v3";
+  readonly action: CompoundSummaryAction;
+  readonly marketSymbol: string;
+  readonly marketAddress: Address;
+  readonly amount: string;
+  readonly token: string;
+  readonly participants: TxParticipants;
+}): CompoundTransactionSummary {
+  const { marketSymbol, marketAddress, participants, ...rest } = options;
+  return {
+    ...rest,
+    market: {
+      address: marketAddress,
+      symbol: marketSymbol,
+    },
+    from: participants.from,
+    to: participants.to,
+  };
 }
 
 function detectCompoundTarget(url: URL): CompoundTarget | null {
