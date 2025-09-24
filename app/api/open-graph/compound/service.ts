@@ -90,11 +90,22 @@ function formatNumber(value: number, precision = 6): string {
   return trimTrailingZeros(fixed);
 }
 
-function trimTrailingZeros(value: string): string {
+export function trimTrailingZeros(value: string): string {
   if (!value.includes(".")) {
     return value;
   }
-  return value.replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1");
+  const decimalIndex = value.indexOf(".");
+  let end = value.length - 1;
+
+  while (end > decimalIndex && value[end] === "0") {
+    end -= 1;
+  }
+
+  if (end === decimalIndex) {
+    return value.slice(0, decimalIndex);
+  }
+
+  return value.slice(0, end + 1);
 }
 
 function formatUnitsWithPrecision(
