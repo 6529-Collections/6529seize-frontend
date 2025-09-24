@@ -31,7 +31,7 @@ function formatPercent(value?: string): string {
     return value;
   }
   const percent = (numeric * 100).toFixed(2);
-  return `${percent.replace(/\.00$/, "").replace(/(\.\d*?)0+$/, "$1")}%`;
+  return `${parseFloat(percent)}%`;
 }
 
 function formatNumber(value?: string): string {
