@@ -1063,51 +1063,101 @@ function createCompoundSummary(options: {
   };
 }
 
+function detectAppCompoundAccount(url: URL, pathname: string): CompoundTarget | null {
+  if (!pathname.startsWith("/account")) {
+    return null;
+  }
+
+  const addressParam = url.searchParams.get("address");
+  const normalized = addressParam ? normalizeAddress(addressParam) : null;
+
+  if (!normalized) {
+    return null;
+  }
+
+  return { kind: "account", address: normalized };
+}
+
+function detectAppCompoundMarket(pathname: string): CompoundTarget | null {
+  const v2 = v2MarketsByPath.get(pathname);
+  if (v2) {
+    return { kind: "market", version: "v2", market: v2 };
+  }
+
+  const v3 = v3MarketsByPath.get(pathname);
+  if (v3) {
+    return { kind: "market", version: "v3", market: v3 };
+  }
+
+  return null;
+}
+
+function detectAppCompoundTarget(url: URL, pathname: string): CompoundTarget | null {
+  const account = detectAppCompoundAccount(url, pathname);
+  if (account) {
+    return account;
+  }
+
+  return detectAppCompoundMarket(pathname);
+}
+
+function detectEtherscanTx(pathname: string): CompoundTarget | null {
+  if (!pathname.startsWith("/tx/")) {
+    return null;
+  }
+
+  const hash = pathname.split("/")[2];
+  if (!hash || !isPossibleTxHash(hash)) {
+    return null;
+  }
+
+  return { kind: "tx", hash: hash as Address };
+}
+
+function detectEtherscanMarket(pathname: string): CompoundTarget | null {
+  if (!pathname.startsWith("/address/")) {
+    return null;
+  }
+
+  const raw = pathname.split("/")[2];
+  const normalized = raw ? normalizeAddress(raw) : null;
+  if (!normalized) {
+    return null;
+  }
+
+  const lower = normalized.toLowerCase() as Address;
+  const v2 = v2MarketsByAddress.get(lower);
+  if (v2) {
+    return { kind: "market", version: "v2", market: v2 };
+  }
+
+  const v3 = v3MarketsByAddress.get(lower);
+  if (v3) {
+    return { kind: "market", version: "v3", market: v3 };
+  }
+
+  return null;
+}
+
+function detectEtherscanCompoundTarget(pathname: string): CompoundTarget | null {
+  const txTarget = detectEtherscanTx(pathname);
+  if (txTarget) {
+    return txTarget;
+  }
+
+  return detectEtherscanMarket(pathname);
+}
+
 function detectCompoundTarget(url: URL): CompoundTarget | null {
   const hostname = url.hostname.toLowerCase();
   const pathname = url.pathname.replace(/\/+$/, "").toLowerCase() || "/";
 
   if (matchesDomainOrSubdomain(hostname, "app.compound.finance")) {
-    if (pathname.startsWith("/account")) {
-      const addressParam = url.searchParams.get("address");
-      const normalized = addressParam ? normalizeAddress(addressParam) : null;
-      if (normalized) {
-        return { kind: "account", address: normalized };
-      }
-    }
-
-    const v2 = v2MarketsByPath.get(pathname);
-    if (v2) {
-      return { kind: "market", version: "v2", market: v2 };
-    }
-
-    const v3 = v3MarketsByPath.get(pathname);
-    if (v3) {
-      return { kind: "market", version: "v3", market: v3 };
-    }
+    return detectAppCompoundTarget(url, pathname);
   }
 
   if (matchesDomainOrSubdomain(hostname, "etherscan.io")) {
-    if (pathname.startsWith("/tx/")) {
-      const hash = pathname.split("/")[2];
-      if (hash && isPossibleTxHash(hash)) {
-        return { kind: "tx", hash: hash as Address };
-      }
-    }
-
-    if (pathname.startsWith("/address/")) {
-      const raw = pathname.split("/")[2];
-      const normalized = raw ? normalizeAddress(raw) : null;
-      if (normalized) {
-        const lower = normalized.toLowerCase() as Address;
-        if (v2MarketsByAddress.has(lower)) {
-          return { kind: "market", version: "v2", market: v2MarketsByAddress.get(lower)! };
-        }
-        if (v3MarketsByAddress.has(lower)) {
-          return { kind: "market", version: "v3", market: v3MarketsByAddress.get(lower)! };
-        }
-      }
-    }
+    return detectEtherscanCompoundTarget(pathname);
   }
 
   return null;
