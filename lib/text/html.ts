@@ -55,7 +55,7 @@ export function stripHtmlTags(value: string, options: StripHtmlTagsOptions = {})
     output.push(char);
   }
 
-  return output.join("");
+  return removeResidualTags(output.join(""));
 }
 
 /**
@@ -81,5 +81,16 @@ export function decodeHtmlEntities(value: string): string {
  * Convenience helper that removes HTML tags and decodes entities in one go.
  */
 export function sanitizeHtmlToText(value: string, options: StripHtmlTagsOptions = {}): string {
-  return decodeHtmlEntities(stripHtmlTags(value, options));
+  return removeResidualTags(decodeHtmlEntities(stripHtmlTags(value, options)));
+}
+
+function removeResidualTags(value: string): string {
+  const tagPattern = /<[^>]*>/g;
+  let output = value;
+  let previous: string;
+  do {
+    previous = output;
+    output = output.replace(tagPattern, "");
+  } while (output !== previous);
+  return output.replace(/</g, "");
 }
