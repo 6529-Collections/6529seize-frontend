@@ -62,18 +62,20 @@ export default function CreateWaveDrops({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-6">
+    <div className="tw-flex tw-flex-col tw-gap-y-8">
       <CreateWaveDropsTypes
         requiredTypes={drops.requiredTypes}
         onRequiredTypeChange={onRequiredTypeChange}
       />
-      <CreateWaveDropsMetadata
-        requiredMetadata={drops.requiredMetadata}
-        errors={errors}
-        onRequiredMetadataChange={onRequiredMetadataChange}
-      />
+      <div className="tw-border-t tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-b-0 tw-pt-6">
+        <CreateWaveDropsMetadata
+          requiredMetadata={drops.requiredMetadata}
+          errors={errors}
+          onRequiredMetadataChange={onRequiredMetadataChange}
+        />
+      </div>
       {isNotChatType && (
-        <div className="tw-flex tw-flex-col tw-gap-y-2">
+        <div className="tw-border-t tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-b-0 tw-pt-6 tw-flex tw-flex-col tw-gap-y-2">
           <div className="tw-group tw-w-full tw-relative">
             <input
               type="text"
@@ -107,7 +109,7 @@ export default function CreateWaveDrops({
       )}
       {/* Terms of Service section */}
       {isNotChatType && (
-        <div className="tw-border-t tw-border-iron-800 tw-pt-6">
+        <div className="tw-border-t tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-b-0 tw-pt-6">
           <CreateWaveTermsOfService
             waveType={waveType}
             terms={drops.terms}
