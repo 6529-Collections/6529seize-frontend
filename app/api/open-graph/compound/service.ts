@@ -821,7 +821,7 @@ function decodeV2Event(log: { address: Address; data: `0x${string}`; topics: rea
   try {
     const topics =
       (log.topics.length === 0
-        ? ([] as [])
+        ? []
         : ([...log.topics] as [`0x${string}`, ...`0x${string}`[]])) as
       [] | [`0x${string}`, ...`0x${string}`[]];
     return decodeEventLog({
@@ -838,7 +838,7 @@ function decodeV3Event(log: { address: Address; data: `0x${string}`; topics: rea
   try {
     const topics =
       (log.topics.length === 0
-        ? ([] as [])
+        ? []
         : ([...log.topics] as [`0x${string}`, ...`0x${string}`[]])) as
       [] | [`0x${string}`, ...`0x${string}`[]];
     return decodeEventLog({
