@@ -100,7 +100,10 @@ const nextConfig = {
     BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
     ALCHEMY_API_KEY: publicEnv.ALCHEMY_API_KEY,
     VERSION,
-    NEXTGEN_CHAIN_ID: publicEnv.NEXTGEN_CHAIN_ID,
+    NEXTGEN_CHAIN_ID:
+      publicEnv.NEXTGEN_CHAIN_ID !== undefined
+        ? String(publicEnv.NEXTGEN_CHAIN_ID)
+        : undefined,
     MOBILE_APP_SCHEME: publicEnv.MOBILE_APP_SCHEME,
     CORE_SCHEME: publicEnv.CORE_SCHEME,
     IPFS_API_ENDPOINT: publicEnv.IPFS_API_ENDPOINT,
