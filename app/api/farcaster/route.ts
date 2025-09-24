@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   UrlGuardError,
   assertPublicUrl,
+  fetchPublicUrl,
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
@@ -493,61 +494,50 @@ const resolveUrl = (base: string, value: string | undefined): string | undefined
   }
 };
 
+const shouldPropagateUrlGuardError = (error: UrlGuardError): boolean =>
+  error.kind === "host-not-allowed" ||
+  error.kind === "dns-lookup-failed" ||
+  error.kind === "ip-not-allowed";
+
 const fetchHtml = async (
   url: URL
 ): Promise<{ html: string; finalUrl: string } | null> => {
-  let currentUrl = url;
-  let redirects = 0;
-
-  while (redirects <= MAX_REDIRECTS) {
-    await assertPublicUrl(currentUrl, PUBLIC_URL_OPTIONS);
-
-    const { controller, cancel } = createAbortController(FETCH_TIMEOUT_MS);
-
-    try {
-      const response = await fetch(currentUrl.toString(), {
+  try {
+    const response = await fetchPublicUrl(
+      url,
+      {
         method: "GET",
         headers: {
           accept: HTML_ACCEPT_HEADER,
-          "user-agent": USER_AGENT,
         },
-        redirect: "manual",
-        signal: controller.signal,
-      });
-
-      if (REDIRECT_STATUS_CODES.has(response.status)) {
-        const location = response.headers.get("location");
-        if (!location) {
-          return null;
-        }
-
-        currentUrl = new URL(location, currentUrl);
-        redirects += 1;
-        continue;
+      },
+      {
+        ...PUBLIC_URL_OPTIONS,
+        maxRedirects: MAX_REDIRECTS,
+        timeoutMs: FETCH_TIMEOUT_MS,
+        redirectStatusCodes: REDIRECT_STATUS_CODES,
+        userAgent: USER_AGENT,
       }
+    );
 
-      if (!response.ok) {
-        return null;
-      }
+    if (!response.ok) {
+      return null;
+    }
 
-      const html = await response.text();
-      return { html, finalUrl: currentUrl.toString() };
-    } catch (error) {
-      if ((error as { name?: string }).name === "AbortError") {
-        return null;
-      }
-
-      if (error instanceof UrlGuardError) {
+    const html = await response.text();
+    const finalUrl = response.url || url.toString();
+    return { html, finalUrl };
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      if (shouldPropagateUrlGuardError(error)) {
         throw error;
       }
 
       return null;
-    } finally {
-      cancel();
     }
-  }
 
-  return null;
+    return null;
+  }
 };
 
 const detectFramePreview = async (

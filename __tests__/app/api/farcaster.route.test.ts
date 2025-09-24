@@ -10,36 +10,54 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-jest.mock("@/lib/security/urlGuard", () => {
-  const actual = jest.requireActual("@/lib/security/urlGuard");
-  return {
-    ...actual,
-    parsePublicUrl: jest.fn((value: string | null) => {
-      if (!value) {
-        throw new actual.UrlGuardError("missing", "missing-url", 400);
-      }
-      return new URL(value);
-    }),
-    assertPublicUrl: jest.fn(),
-  };
-});
+class MockUrlGuardError extends Error {
+  readonly kind: string;
+  readonly statusCode: number;
 
-const { parsePublicUrl, assertPublicUrl } = jest.requireMock(
-  "@/lib/security/urlGuard"
-) as {
-  parsePublicUrl: jest.Mock;
-  assertPublicUrl: jest.Mock;
+  constructor(message: string, kind: string, statusCode = 400) {
+    super(message);
+    this.name = "UrlGuardError";
+    this.kind = kind;
+    this.statusCode = statusCode;
+  }
+}
+
+const createDefaultParsePublicUrl = (value: string | null) => {
+  if (!value) {
+    throw new MockUrlGuardError("missing", "missing-url", 400);
+  }
+  return new URL(value);
 };
+
+const parsePublicUrlMock = jest.fn(createDefaultParsePublicUrl);
+const assertPublicUrlMock = jest.fn();
+const mockFetchPublicUrl = jest.fn();
+
+jest.mock("@/lib/security/urlGuard", () => ({
+  UrlGuardError: MockUrlGuardError,
+  parsePublicUrl: parsePublicUrlMock,
+  assertPublicUrl: assertPublicUrlMock,
+  fetchPublicUrl: mockFetchPublicUrl,
+}));
+
+const UrlGuardError = MockUrlGuardError;
 
 const originalFetch = global.fetch;
 const mockFetch = jest.fn();
 
 let GET: typeof import("../../app/api/farcaster/route").GET;
-let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
+
+const resetUrlGuardMocks = () => {
+  parsePublicUrlMock.mockReset();
+  parsePublicUrlMock.mockImplementation(createDefaultParsePublicUrl);
+  assertPublicUrlMock.mockReset();
+  assertPublicUrlMock.mockResolvedValue(undefined);
+  mockFetchPublicUrl.mockReset();
+};
 
 const loadRoute = async () => {
   jest.resetModules();
-  ({ UrlGuardError } = jest.requireActual("@/lib/security/urlGuard"));
+  resetUrlGuardMocks();
   ({ GET } = await import("../../../app/api/farcaster/route"));
 };
 
@@ -49,7 +67,6 @@ describe("farcaster API route", () => {
     mockFetch.mockReset();
     global.fetch = mockFetch as unknown as typeof fetch;
     await loadRoute();
-    assertPublicUrl.mockResolvedValue(undefined);
   });
 
   afterAll(() => {
@@ -57,7 +74,7 @@ describe("farcaster API route", () => {
   });
 
   it("returns 400 when url is missing", async () => {
-    parsePublicUrl.mockImplementationOnce(() => {
+    parsePublicUrlMock.mockImplementationOnce(() => {
       throw new UrlGuardError("missing", "missing-url", 400);
     });
 
@@ -153,24 +170,26 @@ describe("farcaster API route", () => {
   });
 
   it("detects frame previews for generic URLs", async () => {
-    mockFetch.mockResolvedValueOnce(
-      Promise.resolve({
+    mockFetchPublicUrl.mockImplementation(async (input) => {
+      const requestedUrl = typeof input === "string" ? input : input.toString();
+      expect(requestedUrl).toBe("https://example.com/frame");
+      const html = `
+        <html>
+          <head>
+            <meta name="fc:frame" content="1" />
+            <meta name="fc:frame:image" content="/image.png" />
+            <meta name="fc:frame:button:1" content="Open" />
+            <meta name="og:title" content="Example Frame" />
+          </head>
+        </html>
+      `;
+
+      return {
         ok: true,
-        status: 200,
-        text: async () => `
-          <html>
-            <head>
-              <meta name="fc:frame" content="1" />
-              <meta name="fc:frame:image" content="/image.png" />
-              <meta name="fc:frame:button:1" content="Open" />
-            </head>
-          </html>
-        `,
-        headers: {
-          get: () => null,
-        },
-      })
-    );
+        url: "https://example.com/frame",
+        text: async () => html,
+      };
+    });
 
     const request = {
       nextUrl: new URL("https://api.local/farcaster?url=https://example.com/frame"),
@@ -180,11 +199,47 @@ describe("farcaster API route", () => {
 
     expect(response.status).toBe(200);
     const payload = await response.json();
+    expect(mockFetchPublicUrl).toHaveBeenCalled();
     expect(payload).toEqual(
       expect.objectContaining({
         type: "frame",
         frame: expect.objectContaining({ frameUrl: "https://example.com/frame" }),
       })
     );
+    const [calledUrl, init, options] = mockFetchPublicUrl.mock.calls[0];
+    expect(calledUrl).toEqual(new URL("https://example.com/frame"));
+    expect(init).toEqual(expect.objectContaining({ method: "GET" }));
+    expect(options).toEqual(expect.objectContaining({ userAgent: expect.any(String) }));
+  });
+
+  it("returns unsupported when frame fetch fails", async () => {
+    mockFetchPublicUrl.mockRejectedValueOnce(new Error("network failure"));
+
+    const request = {
+      nextUrl: new URL("https://api.local/farcaster?url=https://example.com/frame"),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    const payload = await response.json();
+    expect(payload).toEqual({ type: "unsupported" });
+    expect(mockFetchPublicUrl).toHaveBeenCalled();
+  });
+
+  it("propagates guard errors for blocked hosts", async () => {
+    parsePublicUrlMock.mockImplementationOnce(() => {
+      throw new UrlGuardError("blocked", "host-not-allowed", 403);
+    });
+
+    const request = {
+      nextUrl: new URL("https://api.local/farcaster?url=https://example.com/frame"),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(403);
+    const payload = await response.json();
+    expect(payload).toEqual({ error: "blocked" });
   });
 });
