@@ -322,9 +322,14 @@ describe("DistributionPage", () => {
 
       await waitFor(() => {
         const images = screen.getAllByRole("img");
-        const distributionImages = images.filter((img) =>
-          img.getAttribute("src")?.includes("example.com")
-        );
+        const distributionImages = images.filter((img) => {
+          const src = img.getAttribute("src");
+          try {
+            return src ? new URL(src).host === "example.com" : false;
+          } catch {
+            return false;
+          }
+        });
         expect(distributionImages).toHaveLength(2);
         expect(distributionImages[0]).toHaveAttribute(
           "src",

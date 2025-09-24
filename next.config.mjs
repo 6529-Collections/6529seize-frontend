@@ -1,6 +1,11 @@
 import dotenv from "dotenv";
+import { execSync } from "node:child_process";
 
 const mode = process.env.NODE_ENV;
+if (!process.env.__LOG_ENV_ONCE__) {
+  process.env.__LOG_ENV_ONCE__ = "1";
+  console.log("NODE_ENV", process.env.NODE_ENV);
+}
 
 if (mode) {
   dotenv.config({ path: `.env.${mode}` });
@@ -10,6 +15,21 @@ dotenv.config({ path: `.env` });
 // Import compiled CJS schema so we can read the shape (keys) in Node
 import schemaMod from "./config/env.schema.runtime.cjs";
 const { publicEnvSchema } = schemaMod;
+
+// Ensure VERSION exists before parsing env so Zod sees it
+let VERSION = process.env.VERSION;
+let LOAD_S3;
+
+if (VERSION) {
+  LOAD_S3 = true;
+} else {
+  LOAD_S3 = false;
+  try {
+    VERSION = execSync("git rev-parse HEAD").toString().trim();
+  } catch {
+    VERSION = "6529seize";
+  }
+}
 
 // Build a public runtime object by iterating schema keys
 const shape = publicEnvSchema._def.shape();
@@ -23,23 +43,6 @@ const parsed = publicEnvSchema.safeParse(publicRuntime);
 if (!parsed.success) throw parsed.error;
 
 const publicEnv = parsed.data;
-
-let VERSION = publicEnv.VERSION;
-let LOAD_S3;
-
-if (VERSION) {
-  LOAD_S3 = true;
-} else {
-  LOAD_S3 = false;
-  try {
-    VERSION = require("node:child_process")
-      .execSync("git rev-parse HEAD")
-      .toString()
-      .trim();
-  } catch {
-    VERSION = "6529seize";
-  }
-}
 
 const securityHeaders = [
   {

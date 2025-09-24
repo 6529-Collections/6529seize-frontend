@@ -46,7 +46,7 @@ async function findAvailablePort() {
 async function run() {
   try {
     const port = await findAvailablePort();
-    const env = { ...process.env, PORT: String(port), NODE_ENV: "development" };
+    const env = { ...process.env, PORT: String(port) };
     console.log(`Starting Next.js dev server on port ${port}...`);
 
     const child = spawn(
