@@ -34,94 +34,154 @@ function createSecurityHeaders(apiEndpoint = "") {
   ];
 }
 
+// ─────────────────────────────────────────────────────────────
+// Helpers to remove duplication
+// ─────────────────────────────────────────────────────────────
+const schemaMod = require("./config/env.schema.runtime.cjs");
+const { publicEnvSchema } = schemaMod;
+
+function computeVersionFromEnvOrGit() {
+  let VERSION = process.env.VERSION;
+  if (VERSION) {
+    logOnce("VERSION (explicit)", VERSION);
+    return VERSION;
+  }
+  try {
+    VERSION = execSync("git rev-parse HEAD").toString().trim();
+    logOnce("VERSION (from git HEAD)", VERSION);
+  } catch {
+    VERSION = "6529seize";
+    logOnce("VERSION (default)", VERSION);
+  }
+  return VERSION;
+}
+
+function resolveAssetsFlagFromEnv() {
+  return (
+    (process.env.ASSETS_FROM_S3 ?? "false").toString().toLowerCase() === "true"
+  );
+}
+
+function persistBakedArtifacts(publicEnv, ASSETS_FROM_S3) {
+  try {
+    fs.mkdirSync(".next", { recursive: true });
+    fs.writeFileSync(
+      ".next/PUBLIC_RUNTIME.json",
+      JSON.stringify(publicEnv),
+      "utf8"
+    );
+    fs.writeFileSync(
+      ".next/ASSETS_FROM_S3",
+      ASSETS_FROM_S3 ? "true" : "false",
+      "utf8"
+    );
+  } catch {}
+}
+
+function loadBakedRuntimeConfig(VERSION) {
+  let baked = {};
+  if (process.env.PUBLIC_RUNTIME) {
+    baked = JSON.parse(process.env.PUBLIC_RUNTIME);
+  } else if (fs.existsSync(".next/PUBLIC_RUNTIME.json")) {
+    baked = JSON.parse(fs.readFileSync(".next/PUBLIC_RUNTIME.json", "utf8"));
+  }
+  const parsed = publicEnvSchema.safeParse({ ...baked, VERSION });
+  if (!parsed.success) throw parsed.error; // FAIL-FAST
+  return parsed.data;
+}
+
+function loadAssetsFlagAtRuntime() {
+  let flag = (process.env.ASSETS_FROM_S3 ?? "").toString().toLowerCase();
+  if (!flag && fs.existsSync(".next/ASSETS_FROM_S3")) {
+    flag = fs.readFileSync(".next/ASSETS_FROM_S3", "utf8").trim().toLowerCase();
+  }
+  return flag === "true";
+}
+
+function sharedConfig(publicEnv, assetPrefix) {
+  return {
+    assetPrefix,
+    reactStrictMode: false,
+    compress: true,
+    productionBrowserSourceMaps: true,
+    sassOptions: { quietDeps: true },
+    experimental: {
+      webpackMemoryOptimizations: true,
+      webpackBuildWorker: true,
+    },
+    images: {
+      loader: "default",
+      domains: [
+        "6529.io",
+        "arweave.net",
+        "localhost",
+        "media.generator.seize.io",
+        "d3lqz0a4bldqgf.cloudfront.net",
+      ],
+      minimumCacheTTL: 86400,
+    },
+    transpilePackages: ["react-tweet"],
+    poweredByHeader: false,
+    async headers() {
+      return [
+        {
+          source: "/:path*",
+          headers: createSecurityHeaders(publicEnv.API_ENDPOINT),
+        },
+      ];
+    },
+    webpack: (config, { dev, isServer }) => {
+      config.resolve.alias.canvas = false;
+      config.resolve.alias.encoding = false;
+      config.resolve.alias["@react-native-async-storage/async-storage"] = false;
+      config.resolve.alias["react-native"] = false;
+      if (!dev && !isServer) config.devtool = "source-map";
+      return config;
+    },
+    turbopack: {
+      resolveAlias: {
+        canvas: "./stubs/empty.js",
+        encoding: "./stubs/empty.js",
+        "@react-native-async-storage/async-storage": "./stubs/empty.js",
+        "react-native": "./stubs/empty.js",
+      },
+    },
+  };
+}
+
 const nextConfigFactory = (phase) => {
   const mode = process.env.NODE_ENV;
   logOnce("NODE_ENV", mode);
 
-  // Build & Dev phases: validate from process.env and bake config
+  // Build & Dev phases
   if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) {
     if (mode) dotenv.config({ path: `.env.${mode}` });
     dotenv.config({ path: `.env` });
 
-    const schemaMod = require("./config/env.schema.runtime.cjs");
-    const { publicEnvSchema } = schemaMod;
-
-    let VERSION = process.env.VERSION;
-    if (VERSION) {
-      logOnce("VERSION (explicit)", VERSION);
-    } else {
-      try {
-        VERSION = execSync("git rev-parse HEAD").toString().trim();
-        logOnce("VERSION (from git HEAD)", VERSION);
-      } catch {
-        VERSION = "6529seize";
-        logOnce("VERSION (default)", VERSION);
-      }
-    }
-
-    // Single source of truth for asset hosting: ASSETS_FROM_S3 only
-    const ASSETS_FROM_S3 =
-      (process.env.ASSETS_FROM_S3 ?? "false").toString().toLowerCase() ===
-      "true";
+    const VERSION = computeVersionFromEnvOrGit();
+    const ASSETS_FROM_S3 = resolveAssetsFlagFromEnv();
     logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3);
 
-    // Build public runtime from schema keys
+    // Prepare and validate public runtime from process.env
     const shape = publicEnvSchema._def.shape();
-    /** @type {Record<string, any>} */
     const publicRuntime = {};
-    for (const key of Object.keys(shape)) {
-      publicRuntime[key] = process.env[key];
-    }
+    for (const key of Object.keys(shape)) publicRuntime[key] = process.env[key];
     publicRuntime.VERSION = VERSION;
 
     const parsed = publicEnvSchema.safeParse(publicRuntime);
     if (!parsed.success) throw parsed.error; // FAIL-FAST at build
-
     const publicEnv = parsed.data;
 
-    // persist baked runtime config for production server
-    try {
-      fs.mkdirSync(".next", { recursive: true });
-      fs.writeFileSync(
-        ".next/PUBLIC_RUNTIME.json",
-        JSON.stringify(publicEnv),
-        "utf8"
-      );
-    } catch {}
+    // Persist baked artifacts for runtime
+    persistBakedArtifacts(publicEnv, ASSETS_FROM_S3);
 
-    // persist assets flag for production server
-    try {
-      fs.writeFileSync(
-        ".next/ASSETS_FROM_S3",
-        ASSETS_FROM_S3 ? "true" : "false",
-        "utf8"
-      );
-    } catch {}
+    // Compose config
+    const assetPrefix = ASSETS_FROM_S3
+      ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
+      : "";
 
-    const nextConfig = {
-      assetPrefix: ASSETS_FROM_S3
-        ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
-        : "",
-      reactStrictMode: false,
-      compress: true,
-      productionBrowserSourceMaps: true,
-      sassOptions: { quietDeps: true },
-      experimental: {
-        webpackMemoryOptimizations: true,
-        webpackBuildWorker: true,
-      },
-      images: {
-        loader: "default",
-        domains: [
-          "6529.io",
-          "arweave.net",
-          "localhost",
-          "media.generator.seize.io",
-          "d3lqz0a4bldqgf.cloudfront.net",
-        ],
-        minimumCacheTTL: 86400,
-      },
-      transpilePackages: ["react-tweet"],
+    return {
+      ...sharedConfig(publicEnv, assetPrefix),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
@@ -158,131 +218,27 @@ const nextConfigFactory = (phase) => {
       async generateBuildId() {
         return VERSION;
       },
-      poweredByHeader: false,
-      async headers() {
-        return [
-          {
-            source: "/:path*",
-            headers: createSecurityHeaders(publicEnv.API_ENDPOINT),
-          },
-        ];
-      },
-      webpack: (config, { dev, isServer }) => {
-        config.resolve.alias.canvas = false;
-        config.resolve.alias.encoding = false;
-        config.resolve.alias[
-          "@react-native-async-storage/async-storage"
-        ] = false;
-        config.resolve.alias["react-native"] = false;
-        if (!dev && !isServer) config.devtool = "source-map";
-        return config;
-      },
-      turbopack: {
-        resolveAlias: {
-          canvas: "./stubs/empty.js",
-          encoding: "./stubs/empty.js",
-          "@react-native-async-storage/async-storage": "./stubs/empty.js",
-          "react-native": "./stubs/empty.js",
-        },
-      },
     };
-
-    return nextConfig;
   }
 
-  // Production server phase: validate baked PUBLIC_RUNTIME and use BUILD_ID
+  // Production server phase
   if (phase === PHASE_PRODUCTION_SERVER) {
-    const buildId = fs.readFileSync(".next/BUILD_ID", "utf8").trim();
-    logOnce("VERSION (from BUILD_ID)", buildId);
-    const VERSION = buildId;
+    const VERSION = fs.readFileSync(".next/BUILD_ID", "utf8").trim();
+    logOnce("VERSION (from BUILD_ID)", VERSION);
 
-    // Validate baked config (fail-fast). This guarantees runtime matches build.
-    const schemaMod = require("./config/env.schema.runtime.cjs");
-    const { publicEnvSchema } = schemaMod;
-    let baked = {};
-    if (process.env.PUBLIC_RUNTIME) {
-      baked = JSON.parse(process.env.PUBLIC_RUNTIME);
-    } else if (fs.existsSync(".next/PUBLIC_RUNTIME.json")) {
-      baked = JSON.parse(fs.readFileSync(".next/PUBLIC_RUNTIME.json", "utf8"));
-    }
-    const parsed = publicEnvSchema.safeParse({ ...baked, VERSION });
-    if (!parsed.success) throw parsed.error; // FAIL-FAST at runtime
-    const publicEnv = parsed.data;
-
-    let ASSETS_FROM_S3 = (process.env.ASSETS_FROM_S3 ?? "")
-      .toString()
-      .toLowerCase();
-    if (!ASSETS_FROM_S3 && fs.existsSync(".next/ASSETS_FROM_S3")) {
-      ASSETS_FROM_S3 = fs
-        .readFileSync(".next/ASSETS_FROM_S3", "utf8")
-        .trim()
-        .toLowerCase();
-    }
-    ASSETS_FROM_S3 = ASSETS_FROM_S3 === "true";
+    const publicEnv = loadBakedRuntimeConfig(VERSION); // FAIL-FAST inside
+    const ASSETS_FROM_S3 = loadAssetsFlagAtRuntime();
     logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3);
 
-    const nextConfig = {
-      assetPrefix: ASSETS_FROM_S3
-        ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
-        : "",
-      reactStrictMode: false,
-      compress: true,
-      productionBrowserSourceMaps: true,
-      sassOptions: { quietDeps: true },
-      experimental: {
-        webpackMemoryOptimizations: true,
-        webpackBuildWorker: true,
-      },
-      images: {
-        loader: "default",
-        domains: [
-          "6529.io",
-          "arweave.net",
-          "localhost",
-          "media.generator.seize.io",
-          "d3lqz0a4bldqgf.cloudfront.net",
-        ],
-        minimumCacheTTL: 86400,
-      },
-      transpilePackages: ["react-tweet"],
-      poweredByHeader: false,
-      async headers() {
-        return [
-          {
-            source: "/:path*",
-            headers: createSecurityHeaders(publicEnv.API_ENDPOINT),
-          },
-        ];
-      },
-      webpack: (config, { dev, isServer }) => {
-        config.resolve.alias.canvas = false;
-        config.resolve.alias.encoding = false;
-        config.resolve.alias[
-          "@react-native-async-storage/async-storage"
-        ] = false;
-        config.resolve.alias["react-native"] = false;
-        if (!dev && !isServer) config.devtool = "source-map";
-        return config;
-      },
-      turbopack: {
-        resolveAlias: {
-          canvas: "./stubs/empty.js",
-          encoding: "./stubs/empty.js",
-          "@react-native-async-storage/async-storage": "./stubs/empty.js",
-          "react-native": "./stubs/empty.js",
-        },
-      },
-    };
+    const assetPrefix = ASSETS_FROM_S3
+      ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
+      : "";
 
-    return nextConfig;
+    return sharedConfig(publicEnv, assetPrefix);
   }
 
   // Fallback (shouldn’t happen)
-  return {
-    reactStrictMode: false,
-    compress: true,
-    poweredByHeader: false,
-  };
+  return { reactStrictMode: false, compress: true, poweredByHeader: false };
 };
 
 export default nextConfigFactory;
