@@ -24,6 +24,11 @@ import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
+import {
+  findReactionIndex,
+  removeUserFromReactions,
+  type ReactionEntry,
+} from "./reaction-utils";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
@@ -195,27 +200,27 @@ export function WaveDropReaction({
               return draft;
             }
 
-            const reactions = draft.reactions ? [...draft.reactions] : [];
-            const userId = connectedProfile?.id;
-
-            const reactionsWithoutUser = reactions
-              .map((entry) => ({
-                ...entry,
-                profiles: entry.profiles.filter((profile) =>
-                  userId ? profile.id !== userId : true
-                ),
-              }))
-              .filter((entry) => entry.profiles.length > 0);
+            const reactions = (
+              draft.reactions ? [...draft.reactions] : []
+            ) as ReactionEntry[];
+            const userId = connectedProfile?.id ?? null;
+            const reactionsWithoutUser = removeUserFromReactions(
+              reactions,
+              userId
+            );
 
             if (willSelect && userProfileMin) {
-              const existingIndex = reactionsWithoutUser.findIndex(
-                (entry) => entry.reaction === reaction.reaction
+              const existingIndex = findReactionIndex(
+                reactionsWithoutUser,
+                reaction.reaction
               );
 
               if (existingIndex >= 0) {
-                reactionsWithoutUser[existingIndex].profiles.push(
-                  userProfileMin
-                );
+                const target = reactionsWithoutUser[existingIndex];
+                reactionsWithoutUser[existingIndex] = {
+                  ...target,
+                  profiles: [...target.profiles, userProfileMin],
+                };
               } else {
                 reactionsWithoutUser.push({
                   reaction: reaction.reaction,

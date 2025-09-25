@@ -15,61 +15,11 @@ import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
-
-type ReactionEntry = {
-  reaction: string;
-  profiles: ApiProfileMin[];
-  [key: string]: unknown;
-};
-
-const duplicateProfilesWithoutUser = (
-  profiles: ApiProfileMin[],
-  userId: string | null
-): ApiProfileMin[] => {
-  if (!userId) {
-    return [...profiles];
-  }
-
-  const filteredProfiles: ApiProfileMin[] = [];
-
-  for (const profile of profiles) {
-    if (profile.id !== userId) {
-      filteredProfiles.push(profile);
-    }
-  }
-
-  return filteredProfiles;
-};
-
-const removeUserFromReactions = (
-  entries: ReactionEntry[],
-  userId: string | null
-): ReactionEntry[] => {
-  const sanitizedEntries: ReactionEntry[] = [];
-
-  for (const entry of entries) {
-    const filteredProfiles = duplicateProfilesWithoutUser(entry.profiles, userId);
-
-    if (filteredProfiles.length > 0) {
-      sanitizedEntries.push({
-        ...entry,
-        profiles: filteredProfiles,
-      });
-    }
-  }
-
-  return sanitizedEntries;
-};
-
-const findReactionIndex = (entries: ReactionEntry[], reactionCode: string) => {
-  for (let index = 0; index < entries.length; index += 1) {
-    if (entries[index].reaction === reactionCode) {
-      return index;
-    }
-  }
-
-  return -1;
-};
+import {
+  findReactionIndex,
+  removeUserFromReactions,
+  type ReactionEntry,
+} from "./reaction-utils";
 
 const WaveDropActionsAddReaction: React.FC<{
   drop: ApiDrop;
