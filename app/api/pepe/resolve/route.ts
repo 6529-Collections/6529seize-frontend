@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import { NextRequest, NextResponse } from "next/server";
 
+import { publicEnv } from "@/config/env";
 import LruTtlCache from "@/lib/cache/lruTtl";
 
 const TOKENSCAN_BASE = "https://tokenscan.io/api";
@@ -86,8 +87,8 @@ const readNumber = (value: string | undefined, fallback: number): number => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
-const ttlMinutes = readNumber(process.env.PEPE_CACHE_TTL_MINUTES, 10);
-const cacheMaxItems = readNumber(process.env.PEPE_CACHE_MAX_ITEMS, 500);
+const ttlMinutes = readNumber(publicEnv.PEPE_CACHE_TTL_MINUTES, 10);
+const cacheMaxItems = readNumber(publicEnv.PEPE_CACHE_MAX_ITEMS, 500);
 const cache = new LruTtlCache<string, Preview>({
   max: cacheMaxItems,
   ttlMs: ttlMinutes * 60 * 1000,
@@ -106,8 +107,9 @@ const trimSlashes = (s: string): string => {
 
 const USER_AGENT =
   "6529seize-pepe-card/1.0 (+https://6529.io; fetching pepe.wtf previews)";
+
 const IPFS_GATEWAY = trimSlashes(
-  process.env.IPFS_GATEWAY || "https://ipfs.io/ipfs/"
+  publicEnv.IPFS_GATEWAY_ENDPOINT || "https://ipfs.io/ipfs/"
 );
 
 function isCounterpartyAssetCode(value: string): boolean {

@@ -2,6 +2,7 @@ import { mockGradientCollection } from "@/__tests__/fixtures/gradientFixtures";
 import GradientPageComponent from "@/components/6529Gradient/GradientPage";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
+import { GRADIENT_CONTRACT } from "@/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -57,7 +58,6 @@ const routerReplace = jest.fn();
 });
 
 // Import the constant for testing
-import { GRADIENT_CONTRACT } from "@/constants";
 
 const tx = {
   from_address: "0x0",
@@ -130,10 +130,10 @@ describe("GradientPage", () => {
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
 
     expect(fetchUrl).toHaveBeenCalledWith(
-      `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
+      "https://api.test.6529.io/api/nfts/gradients?&page_size=101"
     );
     expect(fetchUrl).toHaveBeenCalledWith(
-      `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=1`
+      `https://api.test.6529.io/api/transactions?contract=${GRADIENT_CONTRACT}&id=1`
     );
   });
 

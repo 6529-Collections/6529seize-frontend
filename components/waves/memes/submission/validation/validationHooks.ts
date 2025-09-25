@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { publicEnv } from "@/config/env";
+import { useCallback, useMemo, useState } from "react";
 import { TraitsData } from "../types/TraitsData";
-import { ValidationOptions, ValidationResult } from "./validationTypes";
 import { validateTraitsData } from "./traitsValidation";
+import { ValidationOptions, ValidationResult } from "./validationTypes";
 
 /**
  * Custom hook for form validation
@@ -140,7 +141,7 @@ export function useTraitsValidation(
           behavior: "smooth",
         });
       }
-    } else if (process.env.NODE_ENV === "development") {
+    } else if (publicEnv.NODE_ENV === "development") {
       // Only log in development for debugging
       console.warn(`Could not find element to focus for field: ${field}`);
     }

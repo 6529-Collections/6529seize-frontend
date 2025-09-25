@@ -19,24 +19,12 @@ jest.mock("next/server", () => ({
 }));
 
 const originalFetch = globalThis.fetch;
-const originalEnv = process.env;
 
 type GetHandler = typeof import("@/app/api/pepe/resolve/route").GET;
 let GET: GetHandler;
 
 beforeAll(async () => {
-  process.env = {
-    ...originalEnv,
-    PEPE_CACHE_TTL_MINUTES: "10",
-    PEPE_CACHE_MAX_ITEMS: "500",
-    IPFS_GATEWAY: "https://ipfs.io/ipfs/",
-  };
-
   ({ GET } = await import("@/app/api/pepe/resolve/route"));
-});
-
-afterAll(() => {
-  process.env = originalEnv;
 });
 
 describe("/api/pepe/resolve", () => {

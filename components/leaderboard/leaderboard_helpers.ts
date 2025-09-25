@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { publicEnv } from "@/config/env";
+import { useCallback, useEffect, useState } from "react";
+import { CICType } from "../../entities/IProfile";
 import { SortDirection } from "../../entities/ISort";
 import { cicToType } from "../../helpers/Helpers";
 import { commonApiFetch } from "../../services/api/common-api";
-import { Content, Collector } from "./Leaderboard";
-import { CICType } from "../../entities/IProfile";
+import { Collector, Content } from "./Leaderboard";
 
 export const LEADERBOARD_PAGE_SIZE = 50;
 
@@ -179,7 +180,7 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
     setTotalResults(data.count);
     setLeaderboard(data.data);
     setIsLoading(false);
-    setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
+    setMyFetchUrl(`${publicEnv.API_ENDPOINT}/api/${data.url}`);
   }, [
     page,
     sort.sort,

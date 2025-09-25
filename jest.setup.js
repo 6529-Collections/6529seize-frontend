@@ -1,5 +1,5 @@
-import { TextEncoder, TextDecoder } from "util";
 import { config } from "dotenv";
+import { TextDecoder, TextEncoder } from "node:util";
 
 // Load environment variables for tests
 config({ path: ".env.development" });
@@ -83,10 +83,30 @@ if (typeof global.ResizeObserver === "undefined") {
   };
 }
 
-// Default endpoints needed for service tests
-process.env.BASE_ENDPOINT =
-  process.env.BASE_ENDPOINT || "https://6529.io";
-process.env.API_ENDPOINT = process.env.API_ENDPOINT || "https://example.com";
+/**
+ * Provide a sane default PUBLIC_RUNTIME blob for tests that indirectly import config/env.
+ * Individual tests can override by mocking `@/config/env` or by setting PUBLIC_RUNTIME themselves
+ * before requiring modules under test.
+ */
+if (!process.env.PUBLIC_RUNTIME) {
+  process.env.PUBLIC_RUNTIME = JSON.stringify({
+    NODE_ENV: "test",
+    VERSION: "test-version",
+    API_ENDPOINT: "https://api.test.6529.io",
+    BASE_ENDPOINT: "https://test.6529.io",
+    ALLOWLIST_API_ENDPOINT: "https://allowlist-api.test.6529.io",
+    ALCHEMY_API_KEY: "test-alchemy-api-key",
+    NEXTGEN_CHAIN_ID: 1,
+    MOBILE_APP_SCHEME: "testmobile6529",
+    CORE_SCHEME: "testcore6529",
+    IPFS_API_ENDPOINT: "https://api-ipfs.test.6529.io",
+    IPFS_GATEWAY_ENDPOINT: "https://ipfs.test.6529.io",
+    IPFS_MFS_PATH: "testfiles",
+    TENOR_API_KEY: "test-tenor-api-key",
+    WS_ENDPOINT: "wss://ws.test.6529.io",
+    DEV_MODE_MEMES_WAVE_ID: "test-memes-wave-id",
+  });
+}
 
 // Mock ResizeObserver for react-tooltip
 global.ResizeObserver = class ResizeObserver {
@@ -113,12 +133,12 @@ if (typeof global.fetch === "undefined") {
 // Mock AbortController for Node.js environment - ensure it's available everywhere
 class MockAbortController {
   constructor() {
-    this.signal = { 
-      aborted: false, 
-      addEventListener: jest.fn(), 
+    this.signal = {
+      aborted: false,
+      addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
       reason: undefined,
-      throwIfAborted: jest.fn()
+      throwIfAborted: jest.fn(),
     };
   }
   abort(reason) {
@@ -130,7 +150,7 @@ class MockAbortController {
 // Set on all global objects to ensure it's available during module loading
 global.AbortController = MockAbortController;
 globalThis.AbortController = MockAbortController;
-if (typeof window !== 'undefined') {
+if (typeof globalThis !== "undefined") {
   window.AbortController = MockAbortController;
 }
 

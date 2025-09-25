@@ -1,6 +1,6 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import LevelsClient from "@/app/network/levels/page.client";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 // Mock child components
 jest.mock("@/components/levels/ProgressChart", () => () => (
@@ -45,45 +45,17 @@ describe("LevelsPage (App Router)", () => {
   });
 
   it("exports correct metadata", async () => {
-    // Store original environment
-    const originalEnv = process.env.BASE_ENDPOINT;
-    
-    // Reset modules to ensure fresh import with new environment
-    jest.resetModules();
-    
-    // Set valid BASE_ENDPOINT from allowlist before importing
-    process.env.BASE_ENDPOINT = "https://staging.6529.io";
-    
-    try {
-      // Clear require cache for metadata-related modules
-      delete require.cache[require.resolve("@/constants")];
-      delete require.cache[require.resolve("@/components/providers/metadata")];
-      delete require.cache[require.resolve("@/app/network/levels/page")];
-      
-      // Import generateMetadata with new environment
-      const { generateMetadata } = require("@/app/network/levels/page");
-      
-      const metadata = await generateMetadata();
-      expect(metadata).toMatchObject({
+    const { generateMetadata } = require("@/app/network/levels/page");
+    const metadata = await generateMetadata();
+    expect(metadata).toMatchObject({
+      title: "Levels",
+      description: expect.stringContaining("Network"),
+      twitter: { card: "summary" },
+      openGraph: {
         title: "Levels",
         description: expect.stringContaining("Network"),
-        twitter: { card: "summary" },
-        openGraph: {
-          title: "Levels",
-          description: expect.stringContaining("Network"),
-          images: ["https://staging.6529.io/6529io.png"],
-        },
-      });
-    } finally {
-      // Restore original environment
-      if (originalEnv) {
-        process.env.BASE_ENDPOINT = originalEnv;
-      } else {
-        delete process.env.BASE_ENDPOINT;
-      }
-      
-      // Reset modules again to ensure clean state for other tests
-      jest.resetModules();
-    }
+        images: ["https://test.6529.io/6529io.png"],
+      },
+    });
   });
 });

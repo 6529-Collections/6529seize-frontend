@@ -33,7 +33,9 @@ async function findAvailablePort() {
       return port;
     }
     if (offset === 0) {
-      console.log(`Port ${port} busy, searching for the next available port...`);
+      console.log(
+        `Port ${port} busy, searching for the next available port...`
+      );
     }
   }
   throw new Error(

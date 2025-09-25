@@ -17,6 +17,7 @@ import {
   getStatusFromDates,
   useCollectionMintCount,
 } from "@/components/nextGen/nextgen_helpers";
+import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
@@ -67,8 +68,7 @@ export function NextGenBackToCollectionPageLink(
   return (
     <Link
       href={link}
-      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2"
-    >
+      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
       <FontAwesomeIcon icon={faArrowCircleLeft} className={styles.backIcon} />
       {content}
     </Link>
@@ -90,7 +90,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   const [collectionLoaded, setCollectionLoaded] = useState(false);
 
   useEffect(() => {
-    const url = `${process.env.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
+    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
     fetchUrl(url).then((response: CollectionWithMerkle) => {
       if (response) {
         setCollection(response);
@@ -120,11 +120,9 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
-            )}/mint`}
-          >
+            )}/mint`}>
             <button
-              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}
-            >
+              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}>
               {getButtonLabel()}
             </button>
           </Link>
@@ -186,8 +184,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getAllowlistClassName()}`}
-        >
+          } ${getAllowlistClassName()}`}>
           ALLOWLIST {alStatus}
         </span>
       )}
@@ -195,8 +192,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getPublicStatusClassName()}`}
-        >
+          } ${getPublicStatusClassName()}`}>
           PUBLIC PHASE {publicStatus}
         </span>
       )}
@@ -249,8 +245,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
                 }
                 target="_blank"
-                rel="noreferrer"
-              >
+                rel="noreferrer">
                 <Image
                   unoptimized
                   className={styles.marketplace}
@@ -263,8 +258,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getBlurCollectionLink()}
                 target="_blank"
-                rel="noreferrer"
-              >
+                rel="noreferrer">
                 <Image
                   unoptimized
                   className={styles.marketplace}
@@ -277,8 +271,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getMagicEdenCollectionLink()}
                 target="_blank"
-                rel="noreferrer"
-              >
+                rel="noreferrer">
                 <Image
                   unoptimized
                   className={styles.marketplace}
@@ -319,8 +312,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           <Col
             className="pt-3 d-flex flex-column align-items-center"
             sm={12}
-            md={6}
-          >
+            md={6}>
             <NextGenCountdown collection={props.collection} />
           </Col>
         )}

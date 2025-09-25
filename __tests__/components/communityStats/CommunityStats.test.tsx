@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
 import CommunityStats from "@/components/communityStats/CommunityStats";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { render, screen, waitFor } from "@testing-library/react";
 
 const fetchUrlMock = jest.fn();
 
@@ -13,7 +13,6 @@ jest.mock("react-chartjs-2", () => ({
 }));
 
 function setup() {
-  process.env.API_ENDPOINT = "https://api.test";
   const latest = {
     date: new Date("2024-01-02"),
     block: 0,
@@ -64,7 +63,7 @@ describe("CommunityStats", () => {
 
     await waitFor(() => expect(fetchUrlMock).toHaveBeenCalled());
     expect(fetchUrlMock).toHaveBeenCalledWith(
-      `https://api.test/api/tdh_global_history?page_size=10&page=1`
+      `https://api.test.6529.io/api/tdh_global_history?page_size=10&page=1`
     );
 
     await waitFor(() => {

@@ -1,11 +1,16 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { renderHook, act } from "@testing-library/react";
 import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
   useSharedState,
-} from "../../../components/gas-royalties/GasRoyalties";
-import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "../../../enums";
+} from "@/components/gas-royalties/GasRoyalties";
+import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+} from "@testing-library/react";
 import { usePathname, useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -14,29 +19,18 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock the fetchUrl function at the top level
-jest.mock("../../../services/6529api", () => ({
+jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn().mockResolvedValue([]),
 }));
 
-// Mock environment variables to ensure consistent API endpoint
-const ORIGINAL_ENV = process.env;
-beforeAll(() => {
-  jest.resetModules();
-  process.env = { ...ORIGINAL_ENV, API_ENDPOINT: 'https://api.6529.io' };
-});
-
-afterAll(() => {
-  process.env = ORIGINAL_ENV;
-});
-
 // Get reference to the mocked function for test setup
-const { fetchUrl: mockFetchUrl } = jest.requireMock("../../../services/6529api");
+const { fetchUrl: mockFetchUrl } = jest.requireMock("@/services/6529api");
 
-jest.mock("../../../components/dotLoader/DotLoader", () => () => (
+jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <span data-testid="loader" />
 ));
 jest.mock(
-  "../../../components/downloadUrlWidget/DownloadUrlWidget",
+  "@/components/downloadUrlWidget/DownloadUrlWidget",
   () => (props: any) =>
     (
       <button
@@ -47,7 +41,7 @@ jest.mock(
     )
 );
 jest.mock(
-  "../../../components/datePickerModal/DatePickerModal",
+  "@/components/datePickerModal/DatePickerModal",
   () => (props: any) => <div data-testid={`${props.mode}-picker`} />
 );
 jest.mock("next/image", () => ({
@@ -73,8 +67,6 @@ beforeEach(() => {
     ok: true,
     json: () => Promise.resolve([]),
   });
-  // Ensure API endpoint is consistent for each test
-  process.env.API_ENDPOINT = 'https://api.6529.io';
 });
 
 describe("GasRoyaltiesHeader", () => {
@@ -82,7 +74,7 @@ describe("GasRoyaltiesHeader", () => {
     const pathname = "/meme-gas";
     const push = jest.fn();
     const mockGetUrl = jest.fn(() => "https://test.6529.io/file");
-    
+
     (useRouter as jest.Mock).mockReturnValue({ push });
     (usePathname as jest.Mock).mockReturnValue(pathname);
 
@@ -106,10 +98,10 @@ describe("GasRoyaltiesHeader", () => {
         setBlocks={jest.fn()}
       />
     );
-    
+
     const download = await screen.findByTestId("download");
-    expect(download.getAttribute("data-name")).toBe("gas_the-memes_today.csv");
-    expect(download.getAttribute("data-url")).toBe(
+    expect(download.dataset.name).toBe("gas_the-memes_today.csv");
+    expect(download.dataset.url).toBe(
       "https://test.6529.io/file&download=true"
     );
     expect(mockGetUrl).toHaveBeenCalledWith();
@@ -118,7 +110,7 @@ describe("GasRoyaltiesHeader", () => {
   it("triggers focus change when collection tabs are clicked", () => {
     const pathname = "/meme-gas";
     const push = jest.fn();
-    
+
     (useRouter as jest.Mock).mockReturnValue({ push });
     (usePathname as jest.Mock).mockReturnValue(pathname);
 
@@ -142,7 +134,7 @@ describe("GasRoyaltiesHeader", () => {
         setBlocks={jest.fn()}
       />
     );
-    
+
     const memeLab = screen.getByText("Meme Lab");
     fireEvent.click(memeLab);
     expect(push).toHaveBeenCalledWith(
@@ -159,7 +151,7 @@ describe("GasRoyaltiesHeader", () => {
   it("handles keyboard navigation for collection tabs", () => {
     const pathname = "/meme-gas";
     const push = jest.fn();
-    
+
     (useRouter as jest.Mock).mockReturnValue({ push });
     (usePathname as jest.Mock).mockReturnValue(pathname);
 
@@ -183,9 +175,9 @@ describe("GasRoyaltiesHeader", () => {
         setBlocks={jest.fn()}
       />
     );
-    
+
     const memeLab = screen.getByText("Meme Lab");
-    
+
     // Test Enter key
     fireEvent.keyDown(memeLab, { key: "Enter" });
     expect(push).toHaveBeenCalledWith(
@@ -274,7 +266,7 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     let download = screen.getByTestId("download");
-    expect(download.getAttribute("data-name")).toBe("gas_the-memes_primary-sales.csv");
+    expect(download.dataset.name).toBe("gas_the-memes_primary-sales.csv");
 
     // Test memelab focus
     rerender(
@@ -298,7 +290,7 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     download = screen.getByTestId("download");
-    expect(download.getAttribute("data-name")).toBe("gas_meme-lab_last-7-days.csv");
+    expect(download.dataset.name).toBe("gas_meme-lab_last-7-days.csv");
   });
 });
 
@@ -313,16 +305,16 @@ describe("GasRoyaltiesTokenImage", () => {
         note="This is a note"
       />
     );
-    
+
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/memes/1");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noreferrer");
-    
+
     const image = screen.getByAltText("Meme1");
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("src", "img.png");
-    
+
     expect(screen.getByText("1 -")).toBeInTheDocument();
     expect(screen.getAllByTestId(/^tooltip-/)).toHaveLength(2);
   });
@@ -336,14 +328,14 @@ describe("GasRoyaltiesTokenImage", () => {
         thumbnail="test.jpg"
       />
     );
-    
+
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/memelab/42");
-    
+
     const image = screen.getByAltText("Test Meme");
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("src", "test.jpg");
-    
+
     expect(screen.getByText("42 -")).toBeInTheDocument();
     // Only one tooltip (for image) when no note
     expect(screen.getAllByTestId(/^tooltip-/)).toHaveLength(1);
@@ -359,7 +351,7 @@ describe("GasRoyaltiesTokenImage", () => {
         note="Test note"
       />
     );
-    
+
     expect(screen.getByTestId("tooltip-token-image-123")).toBeInTheDocument();
     expect(screen.getByTestId("tooltip-token-info-123")).toBeInTheDocument();
   });
@@ -368,27 +360,27 @@ describe("GasRoyaltiesTokenImage", () => {
 describe("useSharedState", () => {
   it("builds url with primary sales", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       result.current.setIsPrimary(true);
     });
-    
+
     expect(result.current.getUrl("gas")).toBe(
-      `https://api.6529.io/api/gas/collection/memes?&primary=true`
+      `https://api.test.6529.io/api/gas/collection/memes?&primary=true`
     );
   });
 
   it("builds url with custom blocks", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       result.current.getSharedProps().setBlocks(10, 20);
     });
-    
+
     expect(result.current.getUrl("gas")).toBe(
-      `https://api.6529.io/api/gas/collection/memes?&from_block=10&to_block=20`
+      `https://api.test.6529.io/api/gas/collection/memes?&from_block=10&to_block=20`
     );
     expect(result.current.isCustomBlocks).toBe(true);
     expect(result.current.isPrimary).toBe(false);
@@ -396,30 +388,32 @@ describe("useSharedState", () => {
 
   it("builds url with custom dates", () => {
     const { result } = renderHook(() => useSharedState());
-    const fromDate = new Date('2023-01-01');
-    const toDate = new Date('2023-01-31');
-    
+    const fromDate = new Date("2023-01-01");
+    const toDate = new Date("2023-01-31");
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMELAB);
       result.current.getSharedProps().setDates(fromDate, toDate);
     });
-    
+
     expect(result.current.getUrl("royalties")).toContain(
-      "https://api.6529.io/api/royalties/collection/memelab?"
+      "https://api.test.6529.io/api/royalties/collection/memelab?"
     );
-    expect(result.current.dateSelection).toBe(DateIntervalsSelection.CUSTOM_DATES);
+    expect(result.current.dateSelection).toBe(
+      DateIntervalsSelection.CUSTOM_DATES
+    );
     expect(result.current.isPrimary).toBe(false);
     expect(result.current.isCustomBlocks).toBe(false);
   });
 
   it("builds url with artist filter", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       result.current.setSelectedArtist("Test Artist");
     });
-    
+
     expect(result.current.getUrl("gas")).toContain("&artist=Test Artist");
   });
 
@@ -430,12 +424,12 @@ describe("useSharedState", () => {
 
   it("switches between memes and memelab collections", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
     });
     expect(result.current.getUrl("gas")).toContain("/collection/memes");
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMELAB);
     });
@@ -444,15 +438,15 @@ describe("useSharedState", () => {
 
   it("manages state correctly with getSharedProps", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       result.current.setSelectedArtist("Artist 1");
       result.current.setIsPrimary(true);
     });
-    
+
     const sharedProps = result.current.getSharedProps();
-    
+
     expect(sharedProps.selected_artist).toBe("Artist 1");
     expect(sharedProps.is_primary).toBe(true);
     expect(sharedProps.is_custom_blocks).toBe(false);
@@ -463,12 +457,14 @@ describe("useSharedState", () => {
 
   it("initializes with correct default values", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     expect(result.current.selectedArtist).toBe("");
     expect(result.current.isPrimary).toBe(false);
     expect(result.current.isCustomBlocks).toBe(false);
     expect(result.current.fetching).toBe(true);
-    expect(result.current.dateSelection).toBe(DateIntervalsSelection.THIS_MONTH);
+    expect(result.current.dateSelection).toBe(
+      DateIntervalsSelection.THIS_MONTH
+    );
     expect(result.current.collectionFocus).toBeUndefined();
   });
 });
@@ -484,31 +480,31 @@ describe("Security and Error Handling - Fail Fast Patterns", () => {
         thumbnail="invalid.png"
       />
     );
-    
+
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/memes/-1");
     expect(screen.getByText("-1 -")).toBeInTheDocument();
   });
-  
+
   it("handles URL generation errors without crashing", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     // Test with undefined collection focus - should return empty string
     expect(result.current.getUrl("gas")).toBe("");
-    
+
     // Test with invalid API path
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
     });
-    
+
     // Should handle empty/null API path gracefully
     expect(() => result.current.getUrl("")).not.toThrow();
     expect(() => result.current.getUrl(undefined as any)).not.toThrow();
   });
-  
+
   it("maintains state integrity during rapid updates", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     // Rapid state changes should not cause inconsistent state
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
@@ -517,29 +513,34 @@ describe("Security and Error Handling - Fail Fast Patterns", () => {
       result.current.getSharedProps().setDates(new Date(), new Date()); // Should reset both
       result.current.setSelectedArtist("Artist");
     });
-    
+
     // Final state should be consistent
     expect(result.current.isPrimary).toBe(false);
     expect(result.current.isCustomBlocks).toBe(false);
     expect(result.current.selectedArtist).toBe("Artist");
-    expect(result.current.dateSelection).toBe(DateIntervalsSelection.CUSTOM_DATES);
+    expect(result.current.dateSelection).toBe(
+      DateIntervalsSelection.CUSTOM_DATES
+    );
   });
-  
+
   it("rejects malformed date inputs gracefully", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       // Invalid date objects should not crash the component
-      result.current.getSharedProps().setDates(new Date("invalid"), new Date("also-invalid"));
+      result.current
+        .getSharedProps()
+        .setDates(new Date("invalid"), new Date("also-invalid"));
     });
-    
+
     // Component should handle invalid dates by not including them in URL
     const url = result.current.getUrl("gas");
     expect(url).toContain("collection/memes");
-    expect(result.current.dateSelection).toBe(DateIntervalsSelection.CUSTOM_DATES);
+    expect(result.current.dateSelection).toBe(
+      DateIntervalsSelection.CUSTOM_DATES
+    );
   });
-
 });
 
 describe("Legacy Error Handling and Edge Cases", () => {
@@ -575,7 +576,7 @@ describe("Legacy Error Handling and Edge Cases", () => {
     // Mock successful API call
     (mockFetchUrl as jest.Mock).mockResolvedValueOnce([
       { name: "Artist 1" },
-      { name: "Artist 2" }
+      { name: "Artist 2" },
     ]);
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (usePathname as jest.Mock).mockReturnValue("/test");
@@ -600,7 +601,7 @@ describe("Legacy Error Handling and Edge Cases", () => {
         setBlocks={jest.fn()}
       />
     );
-    
+
     // Wait for the async API call to complete
     await act(async () => {
       await Promise.resolve();
@@ -610,14 +611,16 @@ describe("Legacy Error Handling and Edge Cases", () => {
     expect(screen.getByText("Meme")).toBeInTheDocument();
     expect(screen.getByText("Gas")).toBeInTheDocument();
     expect(mockFetchUrl).toHaveBeenCalledWith(
-      "https://api.6529.io/api/memes/artists_names"
+      "https://api.test.6529.io/api/memes/artists_names"
     );
   });
 
   it("handles token image with invalid props gracefully", () => {
     // Suppress console.error for this specific test case to avoid noise
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
     expect(() =>
       render(
         <GasRoyaltiesTokenImage
@@ -628,26 +631,28 @@ describe("Legacy Error Handling and Edge Cases", () => {
         />
       )
     ).not.toThrow();
-    
+
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "//0"); // Empty path results in double slash
     expect(screen.getByText("0 -")).toBeInTheDocument();
-    
+
     // Clean up console spy
     consoleSpy.mockRestore();
   });
 
   it("handles state updates in rapid succession", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       result.current.setIsPrimary(true);
       result.current.setSelectedArtist("Artist 1");
       result.current.setDateSelection(DateIntervalsSelection.LAST_7);
     });
-    
-    expect(result.current.collectionFocus).toBe(GasRoyaltiesCollectionFocus.MEMES);
+
+    expect(result.current.collectionFocus).toBe(
+      GasRoyaltiesCollectionFocus.MEMES
+    );
     expect(result.current.isPrimary).toBe(true);
     expect(result.current.selectedArtist).toBe("Artist 1");
     expect(result.current.dateSelection).toBe(DateIntervalsSelection.LAST_7);
@@ -655,40 +660,42 @@ describe("Legacy Error Handling and Edge Cases", () => {
 
   it("maintains state consistency when switching between primary and custom modes", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       result.current.setIsPrimary(true);
     });
-    
+
     expect(result.current.isPrimary).toBe(true);
     expect(result.current.isCustomBlocks).toBe(false);
-    
+
     // Switching to custom blocks should disable primary
     act(() => {
       result.current.getSharedProps().setBlocks(1, 100);
     });
-    
+
     expect(result.current.isPrimary).toBe(false);
     expect(result.current.isCustomBlocks).toBe(true);
-    
+
     // Switching to custom dates should disable both primary and custom blocks
     act(() => {
       result.current.getSharedProps().setDates(new Date(), new Date());
     });
-    
+
     expect(result.current.isPrimary).toBe(false);
     expect(result.current.isCustomBlocks).toBe(false);
-    expect(result.current.dateSelection).toBe(DateIntervalsSelection.CUSTOM_DATES);
+    expect(result.current.dateSelection).toBe(
+      DateIntervalsSelection.CUSTOM_DATES
+    );
   });
 
   it("handles undefined/null values in URL generation", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
     });
-    
+
     // Test with empty/undefined values
     expect(result.current.getUrl("")).toContain("api//collection/memes");
     expect(result.current.getUrl("gas")).toContain("api/gas/collection/memes");
@@ -741,7 +748,7 @@ describe("Legacy Error Handling and Edge Cases", () => {
         />
       </div>
     );
-    
+
     // Verify unique tooltip IDs
     expect(screen.getByTestId("tooltip-token-image-1")).toBeInTheDocument();
     expect(screen.getByTestId("tooltip-token-image-2")).toBeInTheDocument();
@@ -753,38 +760,40 @@ describe("Legacy Error Handling and Edge Cases", () => {
 describe("TypeScript Compliance and Type Safety", () => {
   it("useSharedState hook returns correctly typed values", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     // Verify all return values have correct types
-    expect(typeof result.current.selectedArtist).toBe('string');
-    expect(typeof result.current.fetching).toBe('boolean');
-    expect(typeof result.current.isPrimary).toBe('boolean');
-    expect(typeof result.current.isCustomBlocks).toBe('boolean');
-    expect(typeof result.current.showDatePicker).toBe('boolean');
-    expect(typeof result.current.showBlockPicker).toBe('boolean');
-    
+    expect(typeof result.current.selectedArtist).toBe("string");
+    expect(typeof result.current.fetching).toBe("boolean");
+    expect(typeof result.current.isPrimary).toBe("boolean");
+    expect(typeof result.current.isCustomBlocks).toBe("boolean");
+    expect(typeof result.current.showDatePicker).toBe("boolean");
+    expect(typeof result.current.showBlockPicker).toBe("boolean");
+
     // Function type checks
-    expect(typeof result.current.setSelectedArtist).toBe('function');
-    expect(typeof result.current.setIsPrimary).toBe('function');
-    expect(typeof result.current.setIsCustomBlocks).toBe('function');
-    expect(typeof result.current.getUrl).toBe('function');
-    expect(typeof result.current.getSharedProps).toBe('function');
+    expect(typeof result.current.setSelectedArtist).toBe("function");
+    expect(typeof result.current.setIsPrimary).toBe("function");
+    expect(typeof result.current.setIsCustomBlocks).toBe("function");
+    expect(typeof result.current.getUrl).toBe("function");
+    expect(typeof result.current.getSharedProps).toBe("function");
   });
-  
+
   it("handles enum values correctly", () => {
     const { result } = renderHook(() => useSharedState());
-    
+
     act(() => {
       result.current.setCollectionFocus(GasRoyaltiesCollectionFocus.MEMES);
       result.current.setDateSelection(DateIntervalsSelection.LAST_7);
     });
-    
-    expect(result.current.collectionFocus).toBe(GasRoyaltiesCollectionFocus.MEMES);
+
+    expect(result.current.collectionFocus).toBe(
+      GasRoyaltiesCollectionFocus.MEMES
+    );
     expect(result.current.dateSelection).toBe(DateIntervalsSelection.LAST_7);
-    
+
     const url = result.current.getUrl("gas");
     expect(url).toContain("/collection/memes");
   });
-  
+
   it("maintains type safety with optional props", () => {
     // Test TokenImage component with optional note prop
     const { rerender } = render(
@@ -796,9 +805,9 @@ describe("TypeScript Compliance and Type Safety", () => {
         note="Has note"
       />
     );
-    
+
     expect(screen.getByTestId("tooltip-token-info-1")).toBeInTheDocument();
-    
+
     // Rerender without note
     rerender(
       <GasRoyaltiesTokenImage
@@ -808,7 +817,9 @@ describe("TypeScript Compliance and Type Safety", () => {
         thumbnail="test.png"
       />
     );
-    
-    expect(screen.queryByTestId("tooltip-token-info-1")).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByTestId("tooltip-token-info-1")
+    ).not.toBeInTheDocument();
   });
 });
