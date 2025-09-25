@@ -22,7 +22,7 @@
   "overrides": [
     {
       "files": ["**/*.{ts,tsx}"],
-      "excludedFiles": ["scripts/**", "next.config.*"],
+      "excludedFiles": ["scripts/**", "next.config.*", "config/env.ts"],
       "rules": {
         "no-restricted-syntax": [
           "error",

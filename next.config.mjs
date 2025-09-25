@@ -29,7 +29,6 @@ if (VERSION) {
   logOnce("VERSION (explicit)", VERSION);
   LOAD_S3 = true;
 } else {
-  LOAD_S3 = false;
   try {
     VERSION = execSync("git rev-parse HEAD").toString().trim();
     logOnce("VERSION (from git HEAD)", VERSION);
@@ -37,8 +36,7 @@ if (VERSION) {
     VERSION = "6529seize";
     logOnce("VERSION (default)", VERSION);
   }
-
-  process.env.VERSION = VERSION;
+  LOAD_S3 = false;
 }
 
 // Build a public runtime object by iterating schema keys
@@ -48,6 +46,9 @@ const publicRuntime = {};
 for (const key of Object.keys(shape)) {
   publicRuntime[key] = process.env[key];
 }
+
+// inject VERSION explicitly
+publicRuntime.VERSION = VERSION;
 
 const parsed = publicEnvSchema.safeParse(publicRuntime);
 if (!parsed.success) throw parsed.error;
