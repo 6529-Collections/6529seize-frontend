@@ -137,16 +137,18 @@ const fetchWarpcastJson = async <T>(
     }
 
     if (!response.ok) {
-      return null;
+      throw new Error(`Warpcast request failed with status ${response.status}`);
     }
 
     return (await response.json()) as T;
   } catch (error) {
     if ((error as { name?: string }).name === "AbortError") {
-      return null;
+      throw new Error("Warpcast request aborted");
     }
 
-    return null;
+    throw error instanceof Error
+      ? error
+      : new Error("Warpcast request failed");
   } finally {
     cancel();
   }
@@ -537,7 +539,13 @@ const fetchHtml = async (
     );
 
     if (!response.ok) {
-      return null;
+      if (response.status === 404) {
+        return null;
+      }
+
+      throw new Error(
+        `Frame fetch failed with status ${response.status}`
+      );
     }
 
     const html = await response.text();
@@ -552,7 +560,9 @@ const fetchHtml = async (
       return null;
     }
 
-    return null;
+    throw error instanceof Error
+      ? error
+      : new Error("Failed to fetch frame HTML");
   }
 };
 
