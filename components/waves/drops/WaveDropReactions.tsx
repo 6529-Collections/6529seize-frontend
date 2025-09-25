@@ -71,19 +71,18 @@ export function WaveDropReaction({
 
   useEffect(() => {
     const nextTotal = reaction.profiles.length;
-    setTotal((current) => (current === nextTotal ? current : nextTotal));
-  }, [reaction.profiles.length]);
+    const nextHandles = reaction.profiles.map((p) => p.handle ?? p.id);
 
-  useEffect(() => {
+    setTotal((current) => (current === nextTotal ? current : nextTotal));
+
     setHandles((current) => {
-      const nextHandles = reaction.profiles.map((p) => p.handle ?? p.id);
       const sameLength = current.length === nextHandles.length;
       const sameValues = sameLength
         ? current.every((value, index) => value === nextHandles[index])
         : false;
       return sameValues ? current : nextHandles;
     });
-  }, [reaction.profiles]);
+  }, [reaction.profiles, reaction.profiles.length]);
 
   useEffect(() => {
     const isSelected =
