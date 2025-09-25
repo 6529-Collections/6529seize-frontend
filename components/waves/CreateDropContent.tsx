@@ -53,7 +53,7 @@ import { CreateDropSubmit } from "./CreateDropSubmit";
 import { DropPrivileges } from "../../hooks/useDropPriviledges";
 
 import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
-import { useDropMetadata } from "./hooks/useDropMetadata";
+import { useDropMetadata, generateMetadataId } from "./hooks/useDropMetadata";
 import {
   getMissingRequirements,
   MissingRequirements,
@@ -77,18 +77,21 @@ const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
 
 export type CreateDropMetadataType =
   | {
+    readonly id: string;
     key: string;
     readonly type: ApiWaveMetadataType.String;
     value: string | null;
     readonly required: boolean;
   }
   | {
+    readonly id: string;
     key: string;
     readonly type: ApiWaveMetadataType.Number;
     value: number | null;
     readonly required: boolean;
   }
   | {
+    readonly id: string;
     key: string;
     readonly type: null;
     value: string | null;
@@ -113,6 +116,64 @@ interface CreateDropContentProps {
 }
 
 const useBreakpoint = createBreakpoint({ MD: 640, S: 0 });
+
+const isMetadataValuePresent = (value: string | number | null): boolean => {
+  if (value === null || value === undefined) {
+    return false;
+  }
+
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+
+  return true;
+};
+
+const hasMetadataContent = (metadata: CreateDropMetadataType[]): boolean =>
+  metadata.some((item) => isMetadataValuePresent(item.value));
+
+const hasSubmissionContent = ({
+  markdown,
+  files,
+  parts,
+  hasMetadata,
+}: {
+  readonly markdown: string | null;
+  readonly files: File[];
+  readonly parts: CreateDropPart[];
+  readonly hasMetadata: boolean;
+}): boolean => {
+  if (markdown && markdown.trim().length > 0) {
+    return true;
+  }
+
+  if (files.length > 0) {
+    return true;
+  }
+
+  if (parts.length > 0) {
+    return true;
+  }
+
+  return hasMetadata;
+};
+
+const ensurePartsWithFallback = (
+  parts: CreateDropPart[],
+  shouldAddPlaceholder: boolean
+): CreateDropPart[] => {
+  if (parts.length > 0 || !shouldAddPlaceholder) {
+    return parts;
+  }
+
+  return [
+    {
+      content: null,
+      quoted_drop: null,
+      media: [],
+    },
+  ];
+};
 
 const getPartMentions = (
   markdown: string | null,
@@ -414,6 +475,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
 
+  const { metadata, setMetadata, initialMetadata } = useDropMetadata({
+    isDropMode,
+    requiredMetadata: wave.participation.required_metadata,
+  });
+
+  const hasMetadata = useMemo(
+    () => hasMetadataContent(metadata),
+    [metadata]
+  );
+
   const getMarkdown = useMemo(
     () =>
       editorState?.read(() =>
@@ -448,9 +519,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return true;
   };
 
-  const getCanSubmit = () =>
-    !!(!!getMarkdown || !!files.length || !!drop?.parts.length) &&
-    !!(drop?.parts.length ? getCanSubmitStorm() : true);
+  const getCanSubmit = () => {
+    const dropParts = drop?.parts ?? [];
+
+    return (
+      hasSubmissionContent({
+        markdown: getMarkdown,
+        files,
+        parts: dropParts,
+        hasMetadata,
+      }) && !!(dropParts.length ? getCanSubmitStorm() : true)
+    );
+  };
 
   const getHaveMarkdownOrFile = () => !!getMarkdown || !!files.length;
 
@@ -461,7 +541,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) ?? 0) >= 24000;
 
   const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
-  const canSubmit = useMemo(() => getCanSubmit(), [getMarkdown, files, drop]);
+  const canSubmit = useMemo(() => getCanSubmit(), [getMarkdown, files, drop, hasMetadata]);
   const canAddPart = useMemo(() => getCanAddPart(), [getMarkdown, files, drop]);
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
@@ -485,11 +565,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   };
 
-  const { metadata, setMetadata, initialMetadata } = useDropMetadata({
-    isDropMode,
-    requiredMetadata: wave.participation.required_metadata,
-  });
-
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
 
   const getReplyTo = () => {
@@ -505,10 +580,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const getInitialDrop = (): CreateDropConfig | null => {
     const markdown = getMarkdown;
     if (!markdown?.length && !files.length) {
+      const baseParts = drop?.parts.length ? drop.parts : [];
       return {
         title: null,
         reply_to: getReplyTo(),
-        parts: drop?.parts.length ? drop.parts : [],
+        parts: ensurePartsWithFallback(baseParts, hasMetadata),
         mentioned_users: drop?.mentioned_users ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: convertMetadataToDropMetadata(metadata),
@@ -554,11 +630,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     allMentions: ApiDropMentionedUser[],
     allNfts: ReferencedNft[]
   ): CreateDropConfig => {
-    return {
-      title: null,
-      drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
-      reply_to: getReplyTo(),
-      parts: [
+    const parts = ensurePartsWithFallback(
+      [
         ...(drop?.parts ?? []),
         {
           content: markdown?.length ? markdown : null,
@@ -572,6 +645,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           media: files,
         },
       ],
+      hasMetadata
+    );
+
+    return {
+      title: null,
+      drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
+      reply_to: getReplyTo(),
+      parts,
       mentioned_users: allMentions,
       referenced_nfts: allNfts,
       metadata: convertMetadataToDropMetadata(metadata),
@@ -940,6 +1021,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setMetadata([
       ...metadata,
       {
+        id: generateMetadataId(),
         key: "",
         type: null,
         value: null,
@@ -1078,4 +1160,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 export default memo(CreateDropContent);
 
 // Export internal helpers for testing
-export { handleDropPart, convertMetadataToDropMetadata };
+export {
+  handleDropPart,
+  convertMetadataToDropMetadata,
+  hasMetadataContent,
+  hasSubmissionContent,
+  ensurePartsWithFallback,
+};
