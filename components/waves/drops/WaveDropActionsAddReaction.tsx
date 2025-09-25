@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { createPortal } from "react-dom";
@@ -11,6 +11,10 @@ import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog
 import { commonApiPost } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
 
 const WaveDropActionsAddReaction: React.FC<{
   drop: ApiDrop;
@@ -23,30 +27,148 @@ const WaveDropActionsAddReaction: React.FC<{
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null); // Ref for container
   const { emojiMap, categories, categoryIcons } = useEmoji();
-  const { setToast } = useAuth();
+  const { setToast, connectedProfile } = useAuth();
+  const { applyOptimisticDropUpdate } = useMyStream();
+  const rollbackRef = useRef<(() => void) | null>(null);
+
+  const toProfileMin = useCallback(
+    (profile: ApiIdentity | null): ApiProfileMin | null => {
+      if (!profile) {
+        return null;
+      }
+
+      const fallbackId = profile.primary_wallet ?? "";
+
+      return {
+        id: profile.id ?? fallbackId,
+        handle: profile.handle ?? null,
+        pfp: profile.pfp ?? null,
+        banner1_color: profile.banner1 ?? null,
+        banner2_color: profile.banner2 ?? null,
+        cic: profile.cic ?? 0,
+        rep: profile.rep ?? 0,
+        tdh: profile.tdh ?? 0,
+        tdh_rate: profile.tdh_rate ?? 0,
+        level: profile.level ?? 0,
+        primary_address: profile.primary_wallet ?? "",
+        subscribed_actions: [],
+        archived: false,
+        active_main_stage_submission_ids:
+          profile.active_main_stage_submission_ids ?? [],
+        winner_main_stage_drop_ids:
+          profile.winner_main_stage_drop_ids ?? [],
+      };
+    },
+    []
+  );
+
+  const applyOptimisticReaction = useCallback(
+    (reactionCode: string) => {
+      if (!applyOptimisticDropUpdate || !drop.wave?.id) {
+        return null;
+      }
+
+      const profileMin = toProfileMin(connectedProfile);
+      if (!profileMin) {
+        return null;
+      }
+
+      const userId = profileMin.id;
+
+      const handle = applyOptimisticDropUpdate({
+        waveId: drop.wave.id,
+        dropId: drop.id,
+        update: (draft) => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+
+          const reactions = draft.reactions ? [...draft.reactions] : [];
+          const reactionsWithoutUser = reactions
+            .map((entry) => ({
+              ...entry,
+              profiles: entry.profiles.filter((profile) =>
+                userId ? profile.id !== userId : true
+              ),
+            }))
+            .filter((entry) => entry.profiles.length > 0);
+
+          const targetIndex = reactionsWithoutUser.findIndex(
+            (entry) => entry.reaction === reactionCode
+          );
+
+          if (targetIndex >= 0) {
+            reactionsWithoutUser[targetIndex] = {
+              ...reactionsWithoutUser[targetIndex],
+              profiles: [...reactionsWithoutUser[targetIndex].profiles, profileMin],
+            };
+          } else {
+            reactionsWithoutUser.push({
+              reaction: reactionCode,
+              profiles: [profileMin],
+            });
+          }
+
+          draft.reactions = reactionsWithoutUser;
+
+          const baseContext =
+            draft.context_profile_context ??
+            drop.context_profile_context ?? {
+              rating: 0,
+              min_rating: 0,
+              max_rating: 0,
+              reaction: null,
+            };
+
+          draft.context_profile_context = {
+            ...baseContext,
+            reaction: reactionCode,
+          };
+
+          return draft;
+        },
+      });
+
+      return handle?.rollback ?? null;
+    },
+    [
+      applyOptimisticDropUpdate,
+      connectedProfile,
+      drop.context_profile_context,
+      drop.id,
+      drop.wave?.id,
+      toProfileMin,
+    ]
+  );
 
   const handleEmojiSelect = async (emoji: { native?: string; id?: string }) => {
     const emojiText = `:${emoji.id}:`;
-    await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-      endpoint: `drops/${drop.id}/reaction`,
-      body: {
-        reaction: emojiText,
-      },
-    })
-      .catch((error) => {
-        let errorMessage = "Error adding reaction";
-        if (typeof error === "string") {
-          errorMessage = error;
-        }
-        setToast({
-          message: errorMessage,
-          type: "error",
-        });
-      })
-      .finally(() => {
-        onAddReaction?.();
-        setShowPicker(false);
+    setShowPicker(false);
+
+    rollbackRef.current?.();
+    rollbackRef.current = applyOptimisticReaction(emojiText);
+
+    try {
+      await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+        endpoint: `drops/${drop.id}/reaction`,
+        body: {
+          reaction: emojiText,
+        },
       });
+      rollbackRef.current = null;
+      onAddReaction?.();
+    } catch (error) {
+      let errorMessage = "Error adding reaction";
+      if (typeof error === "string") {
+        errorMessage = error;
+      }
+      setToast({
+        message: errorMessage,
+        type: "error",
+      });
+      rollbackRef.current?.();
+      rollbackRef.current = null;
+    }
   };
 
   useEffect(() => {

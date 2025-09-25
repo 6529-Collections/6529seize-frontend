@@ -20,6 +20,10 @@ import {
 import { useAuth } from "../../auth/Auth";
 import clsx from "clsx";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
@@ -48,26 +52,49 @@ export function WaveDropReaction({
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
+  const { applyOptimisticDropUpdate } = useMyStream();
+  const rollbackRef = useRef<(() => void) | null>(null);
 
-  // initial
-  const initialTotal = reaction.profiles.length;
-  const initialTotalRef = useRef(initialTotal);
-
-  const initialSelected =
-    reaction.reaction === drop.context_profile_context?.reaction;
-  const [total, setTotal] = useState(initialTotal);
-  const [selected, setSelected] = useState(initialSelected);
+  const [total, setTotal] = useState(reaction.profiles.length);
+  const [selected, setSelected] = useState(
+    reaction.reaction === drop.context_profile_context?.reaction
+  );
   const [handles, setHandles] = useState(
     reaction.profiles.map((p) => p.handle ?? p.id)
   );
   const [animate, setAnimate] = useState(false);
+  const previousTotalRef = useRef(total);
 
   useEffect(() => {
-    if (total !== initialTotalRef.current) {
+    const nextTotal = reaction.profiles.length;
+    setTotal((current) => (current === nextTotal ? current : nextTotal));
+  }, [reaction.profiles.length]);
+
+  useEffect(() => {
+    setHandles((current) => {
+      const nextHandles = reaction.profiles.map((p) => p.handle ?? p.id);
+      const sameLength = current.length === nextHandles.length;
+      const sameValues = sameLength
+        ? current.every((value, index) => value === nextHandles[index])
+        : false;
+      return sameValues ? current : nextHandles;
+    });
+  }, [reaction.profiles]);
+
+  useEffect(() => {
+    const isSelected =
+      reaction.reaction === drop.context_profile_context?.reaction;
+    setSelected((current) => (current === isSelected ? current : isSelected));
+  }, [drop.context_profile_context?.reaction, reaction.reaction]);
+
+  useEffect(() => {
+    if (total !== previousTotalRef.current) {
       setAnimate(true);
       const timeout = setTimeout(() => setAnimate(false), 100);
+      previousTotalRef.current = total;
       return () => clearTimeout(timeout);
     }
+    previousTotalRef.current = total;
   }, [total]);
 
   // derive emoji ID
@@ -120,16 +147,135 @@ export function WaveDropReaction({
     return { emojiNode: null, emojiNodeTooltip: null };
   }, [emojiId, emojiMap, findNativeEmoji]);
 
-  // click handler: wait for API, then update via stream
+  const toProfileMin = useCallback(
+    (profile: ApiIdentity | null): ApiProfileMin | null => {
+      if (!profile) {
+        return null;
+      }
+
+      const fallbackId = profile.primary_wallet ?? "";
+
+      return {
+        id: profile.id ?? fallbackId,
+        handle: profile.handle ?? null,
+        pfp: profile.pfp ?? null,
+        banner1_color: profile.banner1 ?? null,
+        banner2_color: profile.banner2 ?? null,
+        cic: profile.cic ?? 0,
+        rep: profile.rep ?? 0,
+        tdh: profile.tdh ?? 0,
+        tdh_rate: profile.tdh_rate ?? 0,
+        level: profile.level ?? 0,
+        primary_address: profile.primary_wallet ?? "",
+        subscribed_actions: [],
+        archived: false,
+        active_main_stage_submission_ids:
+          profile.active_main_stage_submission_ids ?? [],
+        winner_main_stage_drop_ids:
+          profile.winner_main_stage_drop_ids ?? [],
+      };
+    },
+    []
+  );
+
+  const applyOptimisticReactionChange = useCallback(
+    (willSelect: boolean) => {
+      if (!drop.wave?.id || !applyOptimisticDropUpdate) {
+        return;
+      }
+
+      const userProfileMin = toProfileMin(connectedProfile);
+
+      rollbackRef.current =
+        applyOptimisticDropUpdate({
+          waveId: drop.wave.id,
+          dropId: drop.id,
+          update: (draft) => {
+            if (draft.type !== DropSize.FULL) {
+              return draft;
+            }
+
+            const reactions = draft.reactions ? [...draft.reactions] : [];
+            const userId = connectedProfile?.id;
+
+            const reactionsWithoutUser = reactions
+              .map((entry) => ({
+                ...entry,
+                profiles: entry.profiles.filter((profile) =>
+                  userId ? profile.id !== userId : true
+                ),
+              }))
+              .filter((entry) => entry.profiles.length > 0);
+
+            if (willSelect && userProfileMin) {
+              const existingIndex = reactionsWithoutUser.findIndex(
+                (entry) => entry.reaction === reaction.reaction
+              );
+
+              if (existingIndex >= 0) {
+                reactionsWithoutUser[existingIndex].profiles.push(
+                  userProfileMin
+                );
+              } else {
+                reactionsWithoutUser.push({
+                  reaction: reaction.reaction,
+                  profiles: [userProfileMin],
+                });
+              }
+            }
+
+            draft.reactions = reactionsWithoutUser;
+            const existingContext =
+              draft.context_profile_context ??
+              drop.context_profile_context ?? {
+                rating: 0,
+                min_rating: 0,
+                max_rating: 0,
+                reaction: null,
+              };
+
+            draft.context_profile_context = {
+              ...existingContext,
+              reaction: willSelect ? reaction.reaction : null,
+            };
+
+            return draft;
+          },
+        })?.rollback ?? null;
+    },
+    [
+      applyOptimisticDropUpdate,
+      connectedProfile,
+      drop.id,
+      drop.wave?.id,
+      drop.context_profile_context,
+      reaction.reaction,
+      toProfileMin,
+    ]
+  );
+
   const handleClick = useCallback(async () => {
+    const resolvedHandle =
+      connectedProfile?.handle ?? connectedProfile?.id ?? "";
+
     // optimistic update
     setSelected((s) => !s);
-    setTotal((n) => n + (selected ? -1 : +1));
+    setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
     if (selected) {
-      setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+      setHandles((h) =>
+        resolvedHandle ? h.filter((value) => value !== resolvedHandle) : h
+      );
     } else {
-      setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+      setHandles((h) => {
+        if (!resolvedHandle) {
+          return h;
+        }
+        const nextHandles = [...h, resolvedHandle];
+        return Array.from(new Set(nextHandles));
+      });
     }
+
+    applyOptimisticReactionChange(!selected);
 
     try {
       const body = { reaction: reaction.reaction };
@@ -151,14 +297,29 @@ export function WaveDropReaction({
 
       // optimistic revert
       setSelected((s) => !s);
-      setTotal((n) => n + (selected ? +1 : -1));
+      setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
       if (!selected) {
-        setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+        setHandles((h) =>
+          resolvedHandle ? h.filter((value) => value !== resolvedHandle) : h
+        );
       } else {
-        setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+        setHandles((h) =>
+          resolvedHandle ? Array.from(new Set([...h, resolvedHandle])) : h
+        );
       }
+      rollbackRef.current?.();
+      rollbackRef.current = null;
     }
-  }, [selected, drop.id, reaction.reaction, setToast]);
+    rollbackRef.current = null;
+  }, [
+    applyOptimisticReactionChange,
+    connectedProfile?.handle,
+    connectedProfile?.id,
+    drop.id,
+    reaction.reaction,
+    selected,
+    setToast,
+  ]);
 
   // tooltip text
   const tooltipText = useMemo(() => {

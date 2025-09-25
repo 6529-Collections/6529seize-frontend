@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
+import { Drop } from "../../../helpers/waves/drop.helpers";
 import { WaveMessages, WaveMessagesUpdate } from "./types";
 
 export type Listener = (data: WaveMessages | undefined) => void;
@@ -137,6 +138,50 @@ function useWaveMessagesStore() {
     [processQueue] // Dependency: processQueue
   );
 
+  const cloneDrop = (drop: Drop): Drop =>
+    JSON.parse(JSON.stringify(drop)) as Drop;
+
+  const optimisticUpdateDrop = useCallback(
+    ({
+      waveId,
+      dropId,
+      update,
+    }: {
+      waveId: string;
+      dropId: string;
+      update: (draft: Drop) => Drop | void;
+    }): { rollback: () => void } | null => {
+      const wave = waveMessages[waveId];
+      if (!wave) {
+        return null;
+      }
+
+      const existingDrop = wave.drops.find((drop) => drop.id === dropId);
+      if (!existingDrop) {
+        return null;
+      }
+
+      const original = cloneDrop(existingDrop);
+      const draft = cloneDrop(existingDrop);
+      const updated = update(draft) ?? draft;
+
+      updateData({
+        key: waveId,
+        drops: [updated],
+      });
+
+      const rollback = () => {
+        updateData({
+          key: waveId,
+          drops: [original],
+        });
+      };
+
+      return { rollback };
+    },
+    [waveMessages, updateData]
+  );
+
   const removeDrop = useCallback(
     (waveId: string, dropId: string) => {
       let notify: WaveMessages | undefined;
@@ -196,7 +241,14 @@ function useWaveMessagesStore() {
     });
   }, [waveMessages]); // Run when the store state changes
 
-  return { getData, subscribe, unsubscribe, updateData, removeDrop };
+  return {
+    getData,
+    subscribe,
+    unsubscribe,
+    updateData,
+    removeDrop,
+    optimisticUpdateDrop,
+  };
 }
 
 export default useWaveMessagesStore;

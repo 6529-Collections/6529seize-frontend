@@ -4,6 +4,12 @@ import WaveDropReactions from "../../../../components/waves/drops/WaveDropReacti
 import { useEmoji } from "../../../../contexts/EmojiContext";
 import * as commonApi from "../../../../services/api/common-api"; // Import directly to mock methods
 
+jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
+  useMyStream: jest.fn(() => ({
+    applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
+  })),
+}));
+
 // Mock useEmoji with sample emojiMap and findNativeEmoji
 jest.mock("../../../../contexts/EmojiContext", () => ({
   useEmoji: jest.fn(),
