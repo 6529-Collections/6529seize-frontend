@@ -110,6 +110,9 @@ interface LayoutContextType {
   // Style for homepage feed view (excludes header/breadcrumbs, includes tabs)
   homepageFeedStyle: React.CSSProperties;
 
+  // Style for small screen layout feed (includes header and tabs)
+  smallScreenFeedStyle: React.CSSProperties;
+
   // Style for mobile waves view
   mobileWavesViewStyle: React.CSSProperties;
 
@@ -143,6 +146,7 @@ const LayoutContext = createContext<LayoutContextType>({
   notificationsViewStyle: {}, // Empty style object as default
   myStreamFeedStyle: {}, // Empty style object as default
   homepageFeedStyle: {}, // Empty style object as default
+  smallScreenFeedStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
   mobileAboutViewStyle: {}, // Empty style object as default
 });
@@ -416,6 +420,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     return calculateHeightStyle("myStreamFeed", homepageSpaces, 0);
   }, [spaces]);
 
+  // Small screen layout feed style (properly accounts for header)
+  const smallScreenFeedStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    // For small screen: includes actual header space and tabs
+    return calculateHeightStyle("myStreamFeed", spaces, 0);
+  }, [spaces]);
+
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
     return calculateHeightStyle("mobileWaves", spaces, 0);
@@ -441,6 +452,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       notificationsViewStyle,
       myStreamFeedStyle,
       homepageFeedStyle,
+      smallScreenFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
     }),
@@ -457,6 +469,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       notificationsViewStyle,
       myStreamFeedStyle,
       homepageFeedStyle,
+      smallScreenFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
     ]

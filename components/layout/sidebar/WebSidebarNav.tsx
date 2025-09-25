@@ -175,9 +175,7 @@ const WebSidebarNav = React.forwardRef<
   return (
     <>
       <nav
-        className={`tw-flex tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${
-          isCollapsed ? "tw-px-2" : "tw-px-4"
-        }`}
+        className="tw-flex tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-pr-2 tw-pl-1"
         aria-label="Desktop navigation"
       >
         <ul className="tw-list-none tw-m-0 tw-p-0">
@@ -342,6 +340,15 @@ const WebSidebarNav = React.forwardRef<
             className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
             style={{ left: "18rem" }} // 4rem sidebar + 14rem submenu
             onClick={closeSubmenu}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                e.preventDefault();
+                closeSubmenu();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Close submenu"
           />
           <WebSidebarSubmenu
             section={activeSection}

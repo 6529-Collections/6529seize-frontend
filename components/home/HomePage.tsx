@@ -1,25 +1,22 @@
 "use client";
 
+import React, { useCallback } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
-import { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
-import { isMintingActive } from "../meme-calendar/meme-calendar.helpers";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { useDropModal } from "@/hooks/useDropModal";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import HomePageTabs from "./HomePageTabs";
+import { isMintingActive } from "../meme-calendar/meme-calendar.helpers";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -36,54 +33,14 @@ export default function HomePage({
   initialTokens,
   isMemeMintingActive,
 }: HomePageProps) {
-  const { isApp } = useDeviceInfo();
+  const { isApp, hasTouchScreen } = useDeviceInfo();
   const { isAuthenticated } = useSeizeConnectContext();
-  const [activeTab, setActiveTab] = useState<"feed" | "latest">(
-    isAuthenticated ? "feed" : "latest"
-  );
   const { registerRef } = useLayout();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
+  const { drop, isDropOpen, onDropClose } = useDropModal();
 
-  // Drop modal logic
-  const dropId = searchParams?.get("drop") ?? undefined;
-
-  const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: dropId }],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${dropId}`,
-      }),
-    placeholderData: keepPreviousData,
-    enabled: !!dropId,
-  });
-
-  const onDropClose = () => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    params.delete("drop");
-    const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || "/";
-    router.replace(newUrl, { scroll: false });
-  };
-
-  const isDropOpen = !!dropId && !!drop;
-
-  // Update active tab when authentication state changes
-  useEffect(() => {
-    setActiveTab(isAuthenticated ? "feed" : "latest");
-  }, [isAuthenticated]);
-
-  // Handle escape key for drop modal
-  useEffect(() => {
-    if (!isDropOpen) return;
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDropClose();
-    };
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, [isDropOpen, onDropClose]);
+  // Get active tab from URL for conditional rendering
+  const activeTab = (searchParams?.get("tab") as "feed" | "latest") || "latest";
 
   // Callback ref for registration with LayoutContext
   const setTabsRef = useCallback(
@@ -99,13 +56,12 @@ export default function HomePage({
   }
 
   return (
-    <div className="tw-h-full tw-min-h-screen">
-      {/* Drop Modal - positioned to respect sidebar */}
-      {isDropOpen && (
+    <div className="tw-h-full">
+      {isDropOpen && drop && (
         <div
           className="tw-fixed tw-inset-0 tw-z-[49] tw-bg-black"
           style={{
-            left: "var(--left-rail)", // Start after sidebar
+            left: hasTouchScreen ? 0 : "var(--left-rail)", // 0 for mobile, sidebar offset for desktop
             transition: "none",
           }}>
           <BrainDesktopDrop
@@ -121,15 +77,11 @@ export default function HomePage({
       )}
 
       {/* Tab Navigation */}
-      <HomePageTabs
-        ref={setTabsRef}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+      <HomePageTabs ref={setTabsRef} hasTouchScreen={hasTouchScreen} />
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-min-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 xl:tw-px-8">
+          <div className="tw-min-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
             {isAuthenticated ? (
               <HomeFeed />
             ) : (
@@ -159,7 +111,7 @@ export default function HomePage({
         ) : (
           <Home
             featuredNft={featuredNft}
-            isMemeMintingActive={isMintingActive()}
+            isMemeMintingActive={isMemeMintingActive || isMintingActive()}
             featuredNextgen={featuredNextgen}
             initialActivityData={initialActivityData}
             initialTokens={initialTokens}

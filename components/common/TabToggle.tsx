@@ -38,7 +38,7 @@ export const TabToggle: React.FC<TabToggleProps> = ({
               : ""
           } ${
             activeKey === option.key
-              ? "tw-text-white tw-border-primary-400"
+              ? "tw-text-white tw-border-primary-300"
               : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 tw-border-transparent"
           }`}
         >

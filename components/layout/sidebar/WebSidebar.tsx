@@ -84,7 +84,14 @@ function WebSidebar({
         <div
           className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
           onClick={onCloseOffcanvas}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onCloseOffcanvas();
+            }
+          }}
           role="button"
+          tabIndex={0}
           aria-label="Close menu overlay"
         />
       )}
@@ -96,7 +103,7 @@ function WebSidebar({
         aria-modal={isDialog ? "true" : undefined}
       >
         <div
-          className="tw-relative tw-z-50 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-all tw-duration-300 tw-ease-out tw-overflow-hidden"
+          className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-[width] tw-duration-300 tw-ease-in-out"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
           ref={scrollContainerRef}
@@ -108,16 +115,18 @@ function WebSidebar({
               tooltipId="sidebar-tooltip"
             />
 
-            <div className="tw-flex-1">
-              <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
+            <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+              <div className="tw-flex-1">
+                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
+              </div>
+
+              <HeaderShare isCollapsed={shouldShowCollapsed} />
+
+              <WebSidebarUser
+                isCollapsed={shouldShowCollapsed}
+                profile={profile}
+              />
             </div>
-
-            <HeaderShare isCollapsed={shouldShowCollapsed} />
-
-            <WebSidebarUser
-              isCollapsed={shouldShowCollapsed}
-              profile={profile}
-            />
           </div>
         </div>
       </div>

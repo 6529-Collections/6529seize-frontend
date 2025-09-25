@@ -10,7 +10,7 @@ export const SIDEBAR_DIMENSIONS = {
   SUBMENU_HEADER_HEIGHT_REM: 3.5, // 3.5rem = 56px
 } as const;
 
-export const SIDEBAR_BREAKPOINT = 1024; // lg breakpoint
+export const SIDEBAR_BREAKPOINT = 1280; // xl breakpoint
 
 export const COLLECTIONS_ROUTES = [
   "/the-memes",
