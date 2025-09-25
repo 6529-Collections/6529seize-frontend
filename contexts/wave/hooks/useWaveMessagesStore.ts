@@ -6,9 +6,9 @@ import { Drop } from "../../../helpers/waves/drop.helpers";
 import { WaveMessages, WaveMessagesUpdate } from "./types";
 
 type DropChange = {
-  key: keyof Drop;
-  originalValue: Drop[keyof Drop] | undefined;
-  optimisticValue: Drop[keyof Drop] | undefined;
+  key: string;
+  originalValue: unknown;
+  optimisticValue: unknown;
   originalHasKey: boolean;
   optimisticHasKey: boolean;
 };
@@ -32,26 +32,27 @@ const cloneValue = <T>(value: T): T => {
   return JSON.parse(JSON.stringify(value)) as T;
 };
 
+const toDropRecord = (drop: Drop): Record<string, unknown> =>
+  drop as unknown as Record<string, unknown>;
+
 const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
   const keys = new Set([
     ...Object.keys(original),
     ...Object.keys(updated),
   ]);
   const changes: DropChange[] = [];
+  const originalRecord = toDropRecord(original);
+  const updatedRecord = toDropRecord(updated);
 
   keys.forEach((key) => {
     const originalHasKey = Object.prototype.hasOwnProperty.call(original, key);
     const optimisticHasKey = Object.prototype.hasOwnProperty.call(updated, key);
-    const originalValue = originalHasKey
-      ? (original as Record<string, Drop[keyof Drop]>)[key]
-      : undefined;
-    const optimisticValue = optimisticHasKey
-      ? (updated as Record<string, Drop[keyof Drop]>)[key]
-      : undefined;
+    const originalValue = originalHasKey ? originalRecord[key] : undefined;
+    const optimisticValue = optimisticHasKey ? updatedRecord[key] : undefined;
 
     if (!valuesEqual(originalValue, optimisticValue)) {
       changes.push({
-        key: key as keyof Drop,
+        key,
         originalValue: cloneValue(originalValue),
         optimisticValue: cloneValue(optimisticValue),
         originalHasKey,
@@ -251,6 +252,7 @@ function useWaveMessagesStore() {
         }
 
         let nextDrop = cloneDrop(latestDrop);
+        const nextDropRecord = toDropRecord(nextDrop);
         let shouldRollback = false;
 
         changes.forEach(
@@ -266,7 +268,7 @@ function useWaveMessagesStore() {
               key
             );
             const currentValue = currentHasKey
-              ? (nextDrop as Record<string, Drop[keyof Drop]>)[key]
+              ? nextDropRecord[key]
               : undefined;
 
             if (optimisticHasKey) {
@@ -278,11 +280,9 @@ function useWaveMessagesStore() {
             }
 
             if (originalHasKey) {
-              (nextDrop as Record<string, Drop[keyof Drop]>)[key] = cloneValue(
-                originalValue
-              );
+              nextDropRecord[key] = cloneValue(originalValue);
             } else {
-              delete (nextDrop as Record<string, Drop[keyof Drop]>)[key];
+              delete nextDropRecord[key];
             }
 
             shouldRollback = true;
