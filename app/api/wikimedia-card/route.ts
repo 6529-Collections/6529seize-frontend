@@ -303,7 +303,7 @@ const normalizeTitle = (title: string): string => {
   if (!trimmed) {
     return "";
   }
-  return trimmed.replace(/\s+/g, "_");
+  return trimmed.replaceAll(/\s+/g, "_");
 };
 
 const resolveWikipediaTitle = async (
@@ -383,10 +383,10 @@ const extractCommonsFileName = (url: URL): string | null => {
     if (segments[2] === "thumb" && segments.length >= 6) {
       return decodeURIComponent(segments[5]);
     }
-    return decodeURIComponent(segments[segments.length - 1]);
+    return decodeURIComponent(segments.at(-1)!);
   }
 
-  return decodeURIComponent(segments[segments.length - 1]);
+  return decodeURIComponent(segments.at(-1)!);
 };
 
 const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
@@ -491,7 +491,7 @@ const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
 
 const sanitizeHtml = (value: string): string => {
   return sanitizeHtmlToText(value, { preserveTagSpacing: true })
-    .replace(/\s+/g, " ")
+    .replaceAll(/\s+/g, " ")
     .trim();
 };
 
