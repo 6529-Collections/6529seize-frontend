@@ -518,6 +518,7 @@ function ScreenshotCard({
 }) {
   return (
     <button
+      data-ignore-screenshot
       type="button"
       onClick={onScreenshot}
       disabled={isCapturing}
