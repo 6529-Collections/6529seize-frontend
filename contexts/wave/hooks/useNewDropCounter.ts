@@ -15,25 +15,22 @@ export interface MinimalWaveNewDropsCount {
 }
 
 export function getNewestTimestamp(
-  cached: number | null | undefined,
-  server: number | null | undefined
+  cached: number | null | undefined = null,
+  server: number | null | undefined = null
 ): number | null {
-  const cachedValue = cached ?? null;
-  const serverValue = server ?? null;
-
-  if (cachedValue === null && serverValue === null) {
+  if (cached == null && server == null) {
     return null;
   }
 
-  if (cachedValue === null) {
-    return serverValue;
+  if (cached == null) {
+    return server;
   }
 
-  if (serverValue === null) {
-    return cachedValue;
+  if (server == null) {
+    return cached;
   }
 
-  return Math.max(cachedValue, serverValue);
+  return Math.max(cached, server);
 }
 
 /**
