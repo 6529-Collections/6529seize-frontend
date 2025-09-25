@@ -34,7 +34,10 @@ describe('CreateWaveDrops', () => {
         setDrops={setDrops}
       />
     );
-    await user.type(screen.getByLabelText(/Number of applications/i), '3');
+    await user.type(
+      screen.getByLabelText(/Maximum number of simultaneous submissions/i),
+      '3'
+    );
     expect(setDrops).toHaveBeenLastCalledWith(expect.objectContaining({ noOfApplicationsAllowedPerParticipant: 3 }));
 
     await user.click(screen.getByTestId('types'));
