@@ -3,20 +3,19 @@
 import React, { useCallback } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import BrainDesktopDrop from "../brain/BrainDesktopDrop";
-import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
-import { useDropModal } from "@/hooks/useDropModal";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import HomePageTabs from "./HomePageTabs";
-import { isMintingActive } from "../meme-calendar/meme-calendar.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import HeaderUserConnect from "../header/user/HeaderUserConnect";
+import Image from "next/image";
+import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import { useSearchParams } from "next/navigation";
+import { useDropModal } from "@/hooks/useDropModal";
+import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -111,7 +110,7 @@ export default function HomePage({
         ) : (
           <Home
             featuredNft={featuredNft}
-            isMemeMintingActive={isMemeMintingActive || isMintingActive()}
+            isMemeMintingActive={isMemeMintingActive}
             featuredNextgen={featuredNextgen}
             initialActivityData={initialActivityData}
             initialTokens={initialTokens}
