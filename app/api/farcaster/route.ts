@@ -472,18 +472,22 @@ const fetchChannelPreview = async (
 };
 
 const hasFrameMeta = (html: string): boolean =>
-  /<meta[^>]+name=["']fc:frame["'][^>]*>/i.test(html);
+  /<meta[^>]+(?:name|property)=["']fc:frame["'][^>]*>/i.test(html);
 
 const extractMetaContent = (html: string, name: string): string | undefined => {
-  const pattern = new RegExp(
-    String.raw`<meta[^>]+name=["']${escapeRegExp(name)}["'][^>]*content=["']([^"']+)["'][^>]*>`,
+  const metaPattern = new RegExp(
+    String.raw`<meta[^>]+(?:name|property)=["']${escapeRegExp(name)}["'][^>]*>`,
     "i"
   );
-  const rawContent = pattern.exec(html)?.[1];
-  if (!rawContent) {
+  const metaTag = metaPattern.exec(html)?.[0];
+  if (!metaTag) {
     return undefined;
   }
-  return rawContent.trim();
+  const contentMatch = /content=["']([^"']+)["']/i.exec(metaTag);
+  if (!contentMatch) {
+    return undefined;
+  }
+  return contentMatch[1].trim();
 };
 
 const extractTitle = (html: string): string | undefined => {
