@@ -105,7 +105,7 @@ describe('SingleWaveDropVoteSlider', () => {
   it('applies default theme for no rank', () => {
     const { container } = render(<SingleWaveDropVoteSlider {...defaultProps} />);
     
-    const progressBar = container.querySelector('.tw-bg-gradient-to-r.tw-from-iron-300\\/20');
+    const progressBar = container.querySelector('.tw-bg-gradient-to-r.tw-from-primary-500.tw-via-primary-400');
     expect(progressBar).toBeInTheDocument();
   });
 
