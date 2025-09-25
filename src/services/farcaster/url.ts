@@ -123,6 +123,10 @@ export const parseFarcasterResource = (
     return null;
   }
 
+  if (host === "farcaster.xyz" && segments[0] === "u") {
+    return segments.length > 1 ? parseUserSegments(segments.slice(1)) : null;
+  }
+
   if (segments[0] === "~") {
     return parseChannelSegments(segments);
   }
