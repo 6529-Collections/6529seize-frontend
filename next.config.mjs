@@ -110,6 +110,7 @@ const nextConfigFactory = (phase) => {
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
         ALCHEMY_API_KEY: publicEnv.ALCHEMY_API_KEY,
         VERSION,
+        ASSETS_FROM_S3: String(ASSETS_FROM_S3),
         NEXTGEN_CHAIN_ID:
           publicEnv.NEXTGEN_CHAIN_ID === undefined
             ? undefined
