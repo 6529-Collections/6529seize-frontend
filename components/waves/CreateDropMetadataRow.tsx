@@ -138,7 +138,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
                 ? "tw-text-iron-600 tw-cursor-not-allowed"
                 : "tw-text-iron-400 hover:tw-text-error"
             }`}
-            data-tooltip-id={`metadata-action-${index}`}
+            data-tooltip-id={`metadata-action-${metadata.id}`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -155,7 +155,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
           </button>
         </div>
         <Tooltip
-          id={`metadata-action-${index}`}
+          id={`metadata-action-${metadata.id}`}
           style={{
             backgroundColor: "#1F2937",
             color: "white",

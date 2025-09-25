@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import useDmWavesList from "../../../hooks/useDmWavesList";
 import useNewDropCounter, {
   MinimalWaveNewDropsCount,
+  getNewestTimestamp,
 } from "./useNewDropCounter";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
@@ -33,10 +34,10 @@ function useEnhancedDmWavesList(activeWaveId: string | null) {
     (wave: ApiWave): MinimalWave => {
       const newDropsData = {
         count: newDropsCounts[wave.id]?.count ?? 0,
-        latestDropTimestamp:
-          newDropsCounts[wave.id]?.latestDropTimestamp ??
-          wave.metrics.latest_drop_timestamp ??
-          null,
+        latestDropTimestamp: getNewestTimestamp(
+          newDropsCounts[wave.id]?.latestDropTimestamp,
+          wave.metrics.latest_drop_timestamp ?? null
+        ),
       };
       return {
         id: wave.id,

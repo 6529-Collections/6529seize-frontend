@@ -5,18 +5,21 @@ import { ApiWaveMetadataType } from "../../../generated/models/ApiWaveMetadataTy
 
 type CreateDropMetadataType =
   | {
+      readonly id: string;
       key: string;
       readonly type: ApiWaveMetadataType.String;
       value: string | null;
       readonly required: boolean;
     }
   | {
+      readonly id: string;
       key: string;
       readonly type: ApiWaveMetadataType.Number;
       value: number | null;
       readonly required: boolean;
     }
   | {
+      readonly id: string;
       key: string;
       readonly type: null;
       value: string | null;
@@ -38,10 +41,16 @@ const isValueSet = (md: CreateDropMetadataType): boolean => {
   return false;
 };
 
+export const generateMetadataId = () =>
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
+
 const createInitialDropMetadata = (
   requiredMetadata: UseDropMetadataProps["requiredMetadata"]
 ) => {
   return requiredMetadata.map((md) => ({
+    id: generateMetadataId(),
     key: md.name,
     type: md.type,
     value: null,

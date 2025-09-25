@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import useWavesList from "../../../hooks/useWavesList";
 import useNewDropCounter, {
   MinimalWaveNewDropsCount,
+  getNewestTimestamp,
 } from "./useNewDropCounter";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
@@ -31,10 +32,10 @@ function useEnhancedWavesList(activeWaveId: string | null) {
     (wave: ApiWave & { isPinned?: boolean }): MinimalWave => {
       const newDrops = {
         count: newDropsCounts[wave.id]?.count ?? 0,
-        latestDropTimestamp:
-          newDropsCounts[wave.id]?.latestDropTimestamp ??
-          wave.metrics.latest_drop_timestamp ??
-          null,
+        latestDropTimestamp: getNewestTimestamp(
+          newDropsCounts[wave.id]?.latestDropTimestamp,
+          wave.metrics.latest_drop_timestamp ?? null
+        ),
       };
       return {
         id: wave.id,
