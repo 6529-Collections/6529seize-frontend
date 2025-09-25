@@ -39,6 +39,8 @@ if (VERSION) {
   LOAD_S3 = false;
 }
 
+logOnce("LOAD_S3", LOAD_S3);
+
 // Build a public runtime object by iterating schema keys
 const shape = publicEnvSchema._def.shape();
 /** @type {Record<string, any>} */
