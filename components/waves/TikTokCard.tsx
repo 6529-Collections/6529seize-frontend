@@ -82,13 +82,13 @@ function buildAuthorLink(
 
 export default function TikTokCard({ href }: TikTokCardProps) {
   const [state, setState] = useState<TikTokCardState>({ status: "loading" });
-  const [isCaptionExpanded, setCaptionExpanded] = useState(false);
+  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
 
   useEffect(() => {
     let active = true;
 
-    setCaptionExpanded(false);
+    setIsCaptionExpanded(false);
     setThumbnailError(false);
 
     const cached = getCachedTikTokPreview(href);
@@ -302,7 +302,7 @@ export default function TikTokCard({ href }: TikTokCardProps) {
                   <button
                     type="button"
                     className="tw-text-xs tw-font-semibold tw-text-primary-400 tw-bg-transparent tw-border-0 tw-p-0 tw-cursor-pointer hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                    onClick={() => setCaptionExpanded((prev) => !prev)}
+                    onClick={() => setIsCaptionExpanded((prev) => !prev)}
                     aria-expanded={isCaptionExpanded}>
                     {isCaptionExpanded ? "Show less" : "Show more"}
                   </button>
