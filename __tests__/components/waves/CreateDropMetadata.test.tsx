@@ -8,14 +8,14 @@ jest.mock('../../../components/waves/CreateDropMetadataRow', () => ({
 }));
 
 describe('CreateDropMetadata', () => {
-  const base = { key: 'k', value: 'v' } as any;
+  const base = { id: 'meta-1', key: 'k', value: 'v' } as any;
 
   it('renders rows and triggers actions', () => {
     const close = jest.fn();
     const onAdd = jest.fn();
     render(
       <CreateDropMetadata
-        metadata={[base, base]}
+        metadata={[base, { ...base, id: 'meta-2' }]}
         missingRequiredMetadataKeys={[]}
         disabled={false}
         closeMetadata={close}

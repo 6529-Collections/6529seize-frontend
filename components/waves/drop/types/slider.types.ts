@@ -84,22 +84,36 @@ export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
   },
   default: {
     track: {
-      background: "tw-bg-gradient-to-r tw-from-iron-700/50 tw-via-iron-600/30 tw-to-iron-700/50",
-      hover: "group-hover:tw-from-iron-600/60 group-hover:tw-via-iron-500/40 group-hover:tw-to-iron-600/60",
+      background:
+        "tw-bg-gradient-to-r tw-from-iron-600/70 tw-via-iron-500/60 tw-to-iron-600/70",
+      hover:
+        "group-hover:tw-from-iron-500/80 group-hover:tw-via-iron-400/70 group-hover:tw-to-iron-500/80",
     },
     progress: {
-      background: "tw-bg-gradient-to-r tw-from-iron-300/20 tw-via-iron-200/30 tw-to-iron-300/20",
-      glow: "tw-shadow-[0_0_15px_rgba(255,255,255,0.08)]",
+      background:
+        "tw-bg-gradient-to-r tw-from-primary-500 tw-via-primary-400 tw-to-primary-500",
+      glow: "tw-shadow-[0_0_20px_rgba(64,106,254,0.35)]",
     },
     thumb: {
-      background: "tw-bg-gradient-to-b tw-from-iron-300 tw-to-iron-400",
-      glow: "tw-shadow-[0_0_15px_rgba(255,255,255,0.15)]",
-      border: "tw-border-iron-300",
-      hover: "hover:tw-shadow-[0_0_20px_rgba(255,255,255,0.25)]",
+      background: "tw-bg-gradient-to-b tw-from-primary-200 tw-to-primary-500",
+      glow: "tw-shadow-[0_0_20px_rgba(64,106,254,0.35)]",
+      border: "tw-border-primary-300",
+      hover: "hover:tw-shadow-[0_0_24px_rgba(64,106,254,0.45)]",
     },
     tooltip: {
-      background: "tw-bg-iron-600",
-      text: "tw-text-iron-100",
+      background: "tw-bg-iron-650",
+      text: "tw-text-white",
     },
   },
-} as const; 
+} as const;
+
+const isRankTheme = (rank: number | null): rank is Exclude<RankKey, "default"> =>
+  rank === 1 || rank === 2 || rank === 3;
+
+export const getSliderTheme = (rank: number | null): SliderTheme => {
+  if (isRankTheme(rank)) {
+    return SLIDER_THEMES[rank];
+  }
+
+  return SLIDER_THEMES.default;
+};

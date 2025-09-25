@@ -207,10 +207,12 @@ export function useWaveDropsLeaderboard({
   }, [data, sort]);
 
   useEffect(() => {
-    if (processedDrops.length > 0 || (data && !data.pages?.length)) {
-      setDrops(processedDrops);
-      setHasInitialized(true);
+    if (!data?.pages) {
+      return;
     }
+
+    setDrops(processedDrops);
+    setHasInitialized(true);
   }, [processedDrops, data]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);

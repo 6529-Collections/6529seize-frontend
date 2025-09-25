@@ -2,7 +2,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import CreateDropMetadataRow from '../../../components/waves/CreateDropMetadataRow';
 
-const baseMeta = { key: 'a', value: '1', type: 'TEXT', required: false } as any;
+const baseMeta = {
+  id: 'meta-1',
+  key: 'a',
+  value: '1',
+  type: 'TEXT',
+  required: false,
+} as any;
 
 test('calls handlers for key and value changes', () => {
   const onKey = jest.fn();
