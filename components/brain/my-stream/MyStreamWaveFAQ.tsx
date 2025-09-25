@@ -30,7 +30,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
   }, [setActiveContentTab]);
 
   const containerClassName = useMemo(() => {
-    return "tw-w-full tw-flex tw-flex-col lg:tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-desktop-hover:hover:desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
+    return "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-desktop-hover:hover:desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
   }, []);
 
   return (

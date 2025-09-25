@@ -58,18 +58,29 @@ export default function HeaderShare({ isCollapsed = false }: { readonly isCollap
   }
 
   return (
-    <div className={`tailwind-scope tw-relative tw-mt-1 ${isCollapsed ? "tw-px-2" : "tw-px-4"}`}>
+    <div className="tailwind-scope tw-relative tw-mt-1 tw-pl-1 tw-pr-2">
       <button
         type="button"
         aria-label="QR Code"
         title="QR Code"
         onClick={() => setShowQRModal(true)}
-        className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-3 tw-gap-4 tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent ${
-          isCollapsed ? "tw-justify-center" : "tw-justify-start"
-        }`}
+        className={`tw-w-full tw-block tw-text-left tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-2 tw-text-iron-400 tw-bg-transparent ${
+          isCollapsed ? "desktop-hover:hover:tw-text-white" : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+        } active:tw-bg-transparent`}
+        data-tooltip-id="sidebar-tooltip"
+        data-tooltip-content="Share"
+        data-tooltip-hidden={!isCollapsed}
       >
-        <ShareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-        {!isCollapsed && <span>Share</span>}
+        <div className={`tw-flex tw-items-center tw-w-full tw-h-full ${isCollapsed ? "" : "tw-gap-x-2"}`}>
+          <div className="tw-w-10 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0">
+            <ShareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+          </div>
+          <span className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 ${
+            isCollapsed ? "tw-opacity-0 tw-w-0" : "tw-opacity-100 tw-flex-1"
+          }`}>
+            Share
+          </span>
+        </div>
       </button>
       <HeaderQRModal show={showQRModal} onClose={() => setShowQRModal(false)} />
     </div>

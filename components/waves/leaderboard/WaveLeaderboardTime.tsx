@@ -60,7 +60,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     )?.timestamp ?? null;
 
   return (
-    <div className="tw-mb-2 lg:tw-mb-4">
+    <div className="tw-mb-2">
       {multiDecision ? (
         // For multi-decision and memes waves: Show expandable timeline
         <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">

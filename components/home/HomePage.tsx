@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -12,11 +12,8 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import Image from "next/image";
 import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { useSearchParams } from "next/navigation";
+import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
@@ -39,46 +36,10 @@ export default function HomePage({
   const { isAuthenticated } = useSeizeConnectContext();
   const { registerRef } = useLayout();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
+  const { drop, isDropOpen, onDropClose } = useDropModal();
 
   // Get active tab from URL for conditional rendering
-  const activeTab = (searchParams?.get('tab') as 'feed' | 'latest') || 'latest';
-
-  // Drop modal logic
-  const dropId = searchParams?.get("drop") ?? undefined;
-
-  const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: dropId }],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${dropId}`,
-      }),
-    placeholderData: keepPreviousData,
-    enabled: !!dropId,
-  });
-
-  const onDropClose = () => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    params.delete("drop");
-    const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || "/";
-    router.replace(newUrl, { scroll: false });
-  };
-
-  const isDropOpen = !!dropId && !!drop;
-
-
-  // Handle escape key for drop modal
-  useEffect(() => {
-    if (!isDropOpen) return;
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDropClose();
-    };
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, [isDropOpen, onDropClose]);
+  const activeTab = (searchParams?.get("tab") as "feed" | "latest") || "latest";
 
   // Callback ref for registration with LayoutContext
   const setTabsRef = useCallback(
@@ -95,7 +56,7 @@ export default function HomePage({
 
   return (
     <div className="tw-h-full">
-      {isDropOpen && (
+      {isDropOpen && drop && (
         <div
           className="tw-fixed tw-inset-0 tw-z-[49] tw-bg-black"
           style={{
@@ -116,14 +77,11 @@ export default function HomePage({
       )}
 
       {/* Tab Navigation */}
-      <HomePageTabs
-        ref={setTabsRef}
-        hasTouchScreen={hasTouchScreen}
-      />
+      <HomePageTabs ref={setTabsRef} hasTouchScreen={hasTouchScreen} />
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-min-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 xl:tw-px-8">
+          <div className="tw-min-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
             {isAuthenticated ? (
               <HomeFeed />
             ) : (

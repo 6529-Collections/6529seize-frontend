@@ -35,13 +35,10 @@ function WebSidebarExpandable({
   // Track which subsection is expanded (only one at a time)
   const [expandedSubsection, setExpandedSubsection] = useState<string | null>(null);
 
-  // Initialize with active subsection
+  // Sync expanded subsection with active route
   useEffect(() => {
-    if (activeSubsection && !expandedSubsection) {
-      setExpandedSubsection(activeSubsection);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSubsection]); // Only run when activeSubsection changes
+    setExpandedSubsection(activeSubsection);
+  }, [activeSubsection]);
 
   // Handle subsection toggle - closes others when opening one
   const handleSubsectionToggle = useCallback((subsectionName: string, isExpanded: boolean) => {
@@ -88,7 +85,7 @@ function WebSidebarExpandable({
       {/* Section Children - Animated container */}
       {!collapsed && (
         <div
-          className={`tw-grid tw-transition-[grid-template-rows] tw-duration-300 tw-ease-out tw-mt-1 ${
+          className={`tw-grid tw-transition-[grid-template-rows] tw-duration-300 tw-ease-out ${
             expanded ? "tw-grid-rows-[1fr]" : "tw-grid-rows-[0fr]"
           }`}
         >
@@ -107,7 +104,7 @@ function WebSidebarExpandable({
             <Link
               key={item.name}
               href={item.href}
-              className={`tw-w-[calc(100%-2.6rem)] tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-justify-start tw-ml-[2.6rem] tw-pl-3 tw-pr-3 tw-h-11 tw-text-base ${
+              className={`tw-w-[calc(100%-2.75rem)] tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-justify-start tw-ml-[2.75rem] tw-pl-3 tw-pr-3 tw-h-11 tw-text-base ${
                 isActive(item.href)
                   ? "tw-text-white tw-bg-iron-900 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-900"
                   : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
