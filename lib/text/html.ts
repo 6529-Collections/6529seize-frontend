@@ -221,7 +221,10 @@ function isWhitespace(char: string): boolean {
 }
 
 function isTagNameChar(char: string): boolean {
-  const code = char.charCodeAt(0);
+  const code = char.codePointAt(0);
+  if (code === undefined) {
+    return false;
+  }
   const isLower = code >= 97 && code <= 122;
   const isUpper = code >= 65 && code <= 90;
   const isDigit = code >= 48 && code <= 57;

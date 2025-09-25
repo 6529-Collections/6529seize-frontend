@@ -1,5 +1,5 @@
 const REG_EXP_ESCAPE_PATTERN = /[.*+?^${}()|[\]\\]/g;
-const REG_EXP_ESCAPE_PREFIX = String.fromCharCode(92);
+const REG_EXP_ESCAPE_PREFIX = String.fromCodePoint(92);
 
 /**
  * Escapes characters with special meaning in regular expressions so the input can be safely embedded.
