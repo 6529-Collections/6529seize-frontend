@@ -37,6 +37,9 @@ const TIKTOK_URL_GUARD_OPTIONS: UrlGuardOptions = {
   },
 };
 
+const TIKTOK_UNSUPPORTED_MESSAGE = "The provided URL is not a supported TikTok link.";
+const INVALID_URL_MESSAGE = "The provided url parameter is not a valid URL.";
+
 const TIKTOK_FETCH_OPTIONS: FetchPublicUrlOptions = {
   policy: {
     allowedHosts: TIKTOK_ALLOWED_HOSTS,
@@ -72,6 +75,100 @@ interface TikTokOEmbedResponse {
 interface NormalizedTikTokUrl {
   readonly canonicalUrl: string;
   readonly kind: TikTokPreviewKind;
+}
+
+type HandlerResult<T> = { ok: true; value: T } | { ok: false; response: NextResponse };
+
+function mapGuardErrorToResponse(error: UrlGuardError): NextResponse {
+  const message =
+    error.kind === "host-not-allowed" || error.kind === "ip-not-allowed"
+      ? TIKTOK_UNSUPPORTED_MESSAGE
+      : error.message;
+  return NextResponse.json({ error: message }, { status: error.statusCode });
+}
+
+function parseRequestUrl(rawUrl: string): HandlerResult<URL> {
+  try {
+    return { ok: true, value: parsePublicUrl(rawUrl) };
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      return {
+        ok: false,
+        response: NextResponse.json({ error: error.message }, { status: error.statusCode }),
+      };
+    }
+
+    return {
+      ok: false,
+      response: NextResponse.json({ error: INVALID_URL_MESSAGE }, { status: 400 }),
+    };
+  }
+}
+
+async function ensureTikTokUrlAllowed(url: URL): Promise<HandlerResult<URL>> {
+  try {
+    await assertPublicUrl(url, TIKTOK_URL_GUARD_OPTIONS);
+    return { ok: true, value: url };
+  } catch (error) {
+    if (error instanceof UrlGuardError) {
+      return { ok: false, response: mapGuardErrorToResponse(error) };
+    }
+
+    return {
+      ok: false,
+      response: NextResponse.json({ error: TIKTOK_UNSUPPORTED_MESSAGE }, { status: 400 }),
+    };
+  }
+}
+
+async function normalizeTikTokLink(url: URL): Promise<HandlerResult<NormalizedTikTokUrl>> {
+  try {
+    const normalized = await normalizeTikTokUrl(url);
+    return { ok: true, value: normalized };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : TIKTOK_UNSUPPORTED_MESSAGE;
+
+    return {
+      ok: false,
+      response: NextResponse.json({ error: message }, { status: 400 }),
+    };
+  }
+}
+
+function getCachedPreviewResponse(canonicalUrl: string): NextResponse | null {
+  const cached = cache.get(canonicalUrl);
+  if (!cached) {
+    return null;
+  }
+
+  if (cached.expiresAt <= Date.now()) {
+    scheduleRevalidation(canonicalUrl);
+  }
+
+  return NextResponse.json(cached.data, { status: cached.status });
+}
+
+async function resolveTikTokPreview(normalized: NormalizedTikTokUrl): Promise<NextResponse> {
+  const cachedResponse = getCachedPreviewResponse(normalized.canonicalUrl);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const { data, status } = await fetchTikTokPreview(normalized.canonicalUrl);
+    cache.set(normalized.canonicalUrl, {
+      data,
+      status,
+      expiresAt: Date.now() + CACHE_TTL_MS,
+      revalidating: false,
+    });
+    return NextResponse.json(data, { status });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to fetch TikTok preview at this time.";
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 }
 
 function isNumeric(value: string | undefined): boolean {
@@ -317,89 +414,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "A url query parameter is required." }, { status: 400 });
   }
 
-  let parsedUrl: URL;
-  try {
-    parsedUrl = parsePublicUrl(rawUrl);
-  } catch (error) {
-    if (error instanceof UrlGuardError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
-    }
-
-    return NextResponse.json(
-      { error: "The provided url parameter is not a valid URL." },
-      { status: 400 }
-    );
+  const parsedResult = parseRequestUrl(rawUrl);
+  if (!parsedResult.ok) {
+    return parsedResult.response;
   }
 
-  try {
-    await assertPublicUrl(parsedUrl, TIKTOK_URL_GUARD_OPTIONS);
-  } catch (error) {
-    if (error instanceof UrlGuardError) {
-      const message =
-        error.kind === "host-not-allowed" || error.kind === "ip-not-allowed"
-          ? "The provided URL is not a supported TikTok link."
-          : error.message;
-      return NextResponse.json({ error: message }, { status: error.statusCode });
-    }
-
-    return NextResponse.json(
-      { error: "The provided URL is not a supported TikTok link." },
-      { status: 400 }
-    );
+  const guardResult = await ensureTikTokUrlAllowed(parsedResult.value);
+  if (!guardResult.ok) {
+    return guardResult.response;
   }
 
-  let normalized: NormalizedTikTokUrl;
-  try {
-    normalized = await normalizeTikTokUrl(parsedUrl);
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "The provided URL is not a supported TikTok link.";
-    return NextResponse.json({ error: message }, { status: 400 });
+  const normalizedResult = await normalizeTikTokLink(parsedResult.value);
+  if (!normalizedResult.ok) {
+    return normalizedResult.response;
   }
 
-  try {
-    await assertPublicUrl(new URL(normalized.canonicalUrl), TIKTOK_URL_GUARD_OPTIONS);
-  } catch (error) {
-    if (error instanceof UrlGuardError) {
-      const message =
-        error.kind === "host-not-allowed" || error.kind === "ip-not-allowed"
-          ? "The provided URL is not a supported TikTok link."
-          : error.message;
-      return NextResponse.json({ error: message }, { status: error.statusCode });
-    }
-
-    return NextResponse.json(
-      { error: "The provided URL is not a supported TikTok link." },
-      { status: 400 }
-    );
+  const canonicalUrl = new URL(normalizedResult.value.canonicalUrl);
+  const canonicalGuardResult = await ensureTikTokUrlAllowed(canonicalUrl);
+  if (!canonicalGuardResult.ok) {
+    return canonicalGuardResult.response;
   }
 
-  const cached = cache.get(normalized.canonicalUrl);
-  if (cached) {
-    if (cached.expiresAt > Date.now()) {
-      return NextResponse.json(cached.data, { status: cached.status });
-    }
-
-    scheduleRevalidation(normalized.canonicalUrl);
-    return NextResponse.json(cached.data, { status: cached.status });
-  }
-
-  try {
-    const { data, status } = await fetchTikTokPreview(normalized.canonicalUrl);
-    cache.set(normalized.canonicalUrl, {
-      data,
-      status,
-      expiresAt: Date.now() + CACHE_TTL_MS,
-      revalidating: false,
-    });
-    return NextResponse.json(data, { status });
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Unable to fetch TikTok preview at this time.";
-    return NextResponse.json({ error: message }, { status: 502 });
-  }
+  return resolveTikTokPreview(normalizedResult.value);
 }
 
 export const dynamic = "force-dynamic";
