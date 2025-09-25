@@ -133,14 +133,12 @@ const renderImageGrid = (
     return null;
   }
 
-  const gridClass =
-    images.length === 1
-      ? "tw-flex"
-      : images.length === 2
-      ? "tw-grid tw-grid-cols-2 tw-gap-2"
-      : images.length === 3
-      ? "tw-grid tw-grid-cols-3 tw-gap-2"
-      : "tw-grid tw-grid-cols-2 tw-gap-2";
+  let gridClass = "tw-grid tw-grid-cols-2 tw-gap-2";
+  if (images.length === 1) {
+    gridClass = "tw-flex";
+  } else if (images.length === 3) {
+    gridClass = "tw-grid tw-grid-cols-3 tw-gap-2";
+  }
 
   return (
     <div className={gridClass}>

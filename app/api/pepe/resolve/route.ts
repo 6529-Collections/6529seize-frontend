@@ -550,7 +550,7 @@ async function resolveCollection(slug: string): Promise<CollectionPreview> {
   const href = `https://pepe.wtf/collection/${encodeURIComponent(slug)}`;
   const { nextData, metaImages } = await scrapeNextData(href);
   const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replaceAll("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    slug.replaceAll("-", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
   let image = normalizeImageUrl(
     extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])),
     href
