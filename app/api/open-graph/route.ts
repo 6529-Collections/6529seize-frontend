@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   UrlGuardError,
   assertPublicUrl,
+  fetchPublicUrl,
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
@@ -27,14 +28,12 @@ const HTML_FETCH_HEADERS = {
 
 const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
   blockedHosts: ["localhost", "127.0.0.1", "::1"],
-  blockedHostSuffixes: [".local", ".internal"],
+  blockedHostSuffixes: [".local", ".internal", ".lan", ".intra", ".corp", ".home", ".test"],
 };
 
 const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
   policy: PUBLIC_URL_POLICY,
 };
-
-const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
 
 type HeaderOverrides = {
   readonly set?: Record<string, string | undefined>;
@@ -132,69 +131,51 @@ const cache = new Map<string, CacheEntry>();
 const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   error instanceof UrlGuardError ||
   (typeof error === "object" && error !== null && (error as { name?: string }).name === "UrlGuardError");
+type FetchInput = Parameters<typeof fetch>[0];
 
-type FetchConfig = ReturnType<typeof createFetchConfig>;
-
-async function fetchWithTimeout(url: URL, { headers, userAgent }: FetchConfig): Promise<Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-  headers["user-agent"] = userAgent;
-
-  try {
-    return await fetch(url.toString(), {
-      headers,
-      signal: controller.signal,
-      redirect: "manual",
-    });
-  } catch (error) {
-    if (error instanceof UrlGuardError) {
-      throw error;
-    }
-
-    if ((error as { name?: string }).name === "AbortError") {
-      throw new UrlGuardError("Request timed out.", "timeout", 504, { cause: error });
-    }
-
-    throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, { cause: error });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-function resolveRedirect(
-  response: Response,
-  currentUrl: URL,
-  redirectCount: number
-): URL | undefined {
-  if (!REDIRECT_STATUS_CODES.has(response.status)) {
-    return undefined;
+const resolveRequestUrl = (input: FetchInput): URL => {
+  if (typeof input === "string") {
+    return new URL(input);
   }
 
-  if (redirectCount >= MAX_REDIRECTS) {
-    throw new UrlGuardError("Too many redirects.", "too-many-redirects", 502);
+  if (input instanceof URL) {
+    return input;
   }
 
-  const location = response.headers.get("location");
-  if (!location) {
-    throw new UrlGuardError(
-      "Redirect response missing location header.",
-      "redirect-location-missing",
-      502
-    );
+  if (typeof Request !== "undefined" && input instanceof Request) {
+    return new URL(input.url);
   }
 
-  try {
-    return new URL(location, currentUrl);
-  } catch (error) {
-    throw new UrlGuardError(
-      "Redirect response has invalid location.",
-      "redirect-location-invalid",
-      502,
-      { cause: error }
-    );
+  return new URL(String(input));
+};
+
+// Apply host-specific header overrides while letting fetchPublicUrl enforce SSRF guardrails.
+const hostAwareFetch: typeof fetch = async (input, init = {}) => {
+  const targetUrl = resolveRequestUrl(input);
+  const { headers: baseHeaders, userAgent } = createFetchConfig(targetUrl);
+
+  const headers = new Headers(init.headers);
+  const keysToReset = new Set([
+    ...Object.keys(HTML_FETCH_HEADERS),
+    ...Object.keys(baseHeaders),
+    "user-agent",
+  ]);
+
+  for (const key of keysToReset) {
+    headers.delete(key);
   }
-}
+
+  for (const [key, value] of Object.entries(baseHeaders)) {
+    headers.set(key, value);
+  }
+
+  headers.set("user-agent", userAgent);
+
+  return fetch(input, {
+    ...init,
+    headers,
+  });
+};
 
 function ensureSuccessfulResponse(response: Response): void {
   if (!response.ok) {
@@ -232,25 +213,20 @@ async function extractHtmlResponse(
 async function fetchHtml(
   url: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
-  let currentUrl = url;
-  let redirectCount = 0;
-
-  while (true) {
-    await assertPublicUrl(currentUrl, PUBLIC_URL_OPTIONS);
-
-    const response = await fetchWithTimeout(currentUrl, createFetchConfig(currentUrl));
-
-    const redirectTarget = resolveRedirect(response, currentUrl, redirectCount);
-    if (redirectTarget) {
-      currentUrl = redirectTarget;
-      redirectCount += 1;
-      continue;
+  const response = await fetchPublicUrl(
+    url,
+    {},
+    {
+      ...PUBLIC_URL_OPTIONS,
+      timeoutMs: FETCH_TIMEOUT_MS,
+      maxRedirects: MAX_REDIRECTS,
+      fetchImpl: hostAwareFetch,
     }
+  );
 
-    ensureSuccessfulResponse(response);
+  ensureSuccessfulResponse(response);
 
-    return extractHtmlResponse(response, currentUrl);
-  }
+  return extractHtmlResponse(response, url);
 }
 
 function handleGuardError(error: unknown, fallbackStatus = 400) {

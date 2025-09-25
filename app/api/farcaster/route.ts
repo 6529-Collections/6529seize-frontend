@@ -40,7 +40,7 @@ const HTML_ACCEPT_HEADER =
 
 const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
   blockedHosts: ["localhost", "127.0.0.1", "::1"],
-  blockedHostSuffixes: [".local", ".internal"],
+  blockedHostSuffixes: [".local", ".internal", ".lan", ".intra", ".corp", ".home", ".test"],
 };
 
 const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
