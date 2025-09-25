@@ -58,7 +58,7 @@ const renderSeizeQuote = (
     return (
       <LinkHandlerFrame href={href} hideLink>
         <WaveDropQuoteWithSerialNo
-          serialNo={parseInt(serialNo)}
+          serialNo={Number.parseInt(serialNo, 10)}
           waveId={waveId}
           onQuoteClick={onQuoteClick}
         />
