@@ -323,7 +323,16 @@ describe("DistributionPage", () => {
         const distributionImages = images.filter((img) => {
           const src = img.getAttribute("src");
           try {
-            return src ? new URL(src).host === "example.com" : false;
+            if (!src) return false;
+            const allowedDomains = ["example.com"];
+            const hostname = new URL(src).hostname;
+            return (
+              allowedDomains.includes(hostname) ||
+              allowedDomains.some(
+                (domain) =>
+                  hostname === domain || hostname.endsWith(`.${domain}`)
+              )
+            );
           } catch {
             return false;
           }

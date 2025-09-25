@@ -8,7 +8,23 @@ import { validateBaseEndpoint } from "./env.schema.validation";
  *  - explicitly exposed in next.config.mjs -> export default { env: { ... } }
  */
 export const publicEnvSchema = z.object({
+  /**
+   * ────────────────
+   * CORE / ENVIRONMENT
+   * ────────────────
+   */
   NODE_ENV: z.enum(["development", "production", "test", "local"]).optional(),
+  VERSION: z.string().optional(),
+
+  /**
+   * ────────────────
+   * API ENDPOINTS
+   *   • REQUIRED
+   *   • OPTIONAL
+   * ────────────────
+   */
+  // REQUIRED
+  ALLOWLIST_API_ENDPOINT: z.string().url(),
   API_ENDPOINT: z.string().url(),
   BASE_ENDPOINT: z
     .string({
@@ -17,42 +33,87 @@ export const publicEnvSchema = z.object({
     })
     .url("BASE_ENDPOINT must be a valid URL")
     .superRefine(validateBaseEndpoint),
-  ALLOWLIST_API_ENDPOINT: z.string().url(),
+  // OPTIONAL
+  WS_ENDPOINT: z.string().url("WS_ENDPOINT must be a valid URL").optional(),
+
+  /**
+   * ────────────────
+   * API KEYS / CREDENTIALS
+   *   • REQUIRED
+   *   • OPTIONAL
+   * ────────────────
+   */
+  // REQUIRED
   ALCHEMY_API_KEY: z.string().min(1, "ALCHEMY_API_KEY is required"),
-  NEXTGEN_CHAIN_ID: z.coerce.number().int().positive().optional(),
-  MOBILE_APP_SCHEME: z.string().optional(),
-  CORE_SCHEME: z.string().optional(),
+  // OPTIONAL
+  STAGING_API_KEY: z.string().optional(),
+  TENOR_API_KEY: z.string().optional(),
+
+  /**
+   * ────────────────
+   * IPFS CONFIG
+   *   • REQUIRED
+   *   • OPTIONAL
+   * ────────────────
+   */
+  // REQUIRED
   IPFS_API_ENDPOINT: z.string().url("IPFS_API_ENDPOINT must be a valid URL"),
   IPFS_GATEWAY_ENDPOINT: z
     .string()
     .url("IPFS_GATEWAY_ENDPOINT must be a valid URL"),
+  // OPTIONAL
   IPFS_MFS_PATH: z.string().optional(),
-  TENOR_API_KEY: z.string().optional(),
-  WS_ENDPOINT: z.string().url("WS_ENDPOINT must be a valid URL").optional(),
+
+  /**
+   * ────────────────
+   * AUTH / DEV MODE (all optional)
+   * ────────────────
+   */
+  CORE_SCHEME: z.string().optional(),
+  DEV_MODE_AUTH_JWT: z.string().optional(),
   DEV_MODE_MEMES_WAVE_ID: z.string().optional(),
   DEV_MODE_WALLET_ADDRESS: z.string().optional(),
-  DEV_MODE_AUTH_JWT: z.string().optional(),
+  MOBILE_APP_SCHEME: z.string().optional(),
+  NEXTGEN_CHAIN_ID: z.coerce.number().int().positive().optional(),
   USE_DEV_AUTH: z.string().optional(),
-  STAGING_API_KEY: z.string().optional(),
-  VERSION: z.string().optional(),
+
+  /**
+   * ────────────────
+   * FEATURES / FLAGS (all optional)
+   * ────────────────
+   */
+  ENABLE_SECURITY_LOGGING: z.string().optional(),
+  FEATURE_AB_CARD: z.string().optional(),
+  NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),
+  NEXT_PUBLIC_DEBUG_NAV: z.string().optional(),
+  NEXT_PUBLIC_FEATURE_AB_CARD: z.string().optional(),
+  NEXT_PUBLIC_VITE_FEATURE_AB_CARD: z.string().optional(),
+  VITE_FEATURE_AB_CARD: z.string().optional(),
+
+  /**
+   * ────────────────
+   * CACHE / PERFORMANCE (all optional)
+   * ────────────────
+   */
+  PEPE_CACHE_MAX_ITEMS: z.string().optional(),
+  PEPE_CACHE_TTL_MINUTES: z.string().optional(),
+
+  /**
+   * ────────────────
+   * MONITORING / ANALYTICS (all optional)
+   * ────────────────
+   */
   AWS_RUM_APP_ID: z.string().optional(),
   AWS_RUM_REGION: z.string().optional(),
   AWS_RUM_SAMPLE_RATE: z.string().optional(),
 
+  /**
+   * ────────────────
+   * PORTS / RUNTIME (all optional)
+   * ────────────────
+   */
   PORT: z.coerce.number().int().positive().optional(),
   PORT_SEARCH_LIMIT: z.coerce.number().int().positive().optional(),
-
-  NEXT_PUBLIC_FEATURE_AB_CARD: z.string().optional(),
-  NEXT_PUBLIC_VITE_FEATURE_AB_CARD: z.string().optional(),
-  VITE_FEATURE_AB_CARD: z.string().optional(),
-  FEATURE_AB_CARD: z.string().optional(),
-  ENABLE_SECURITY_LOGGING: z.string().optional(),
-
-  PEPE_CACHE_TTL_MINUTES: z.string().optional(),
-  PEPE_CACHE_MAX_ITEMS: z.string().optional(),
-
-  NEXT_PUBLIC_DEBUG_NAV: z.string().optional(),
-  NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
