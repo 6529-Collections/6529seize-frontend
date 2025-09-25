@@ -38,7 +38,7 @@ const MENU = [
       { label: "Meme Gas", path: "/meme-gas?focus=the-memes" },
       { label: "API", path: "/tools/api", dividerBefore: true },
       { label: "EMMA", path: "/emma" },
-      { label: "Block Finder", path: "/meme-blocks" },
+      { label: "Block Finder", path: "/tools/block-finder" },
       { label: "Open Data", path: "/open-data" },
     ],
   },

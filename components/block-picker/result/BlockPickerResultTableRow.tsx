@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { PredictBlockNumbersResponseApiModel } from "@/app/meme-blocks/page.client";
+import { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+import { useState } from "react";
 import BlockPickerResultTableRowModal from "./BlockPickerResultTableRowModal";
 
 export default function BlockPickerResultTableRow({
