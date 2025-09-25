@@ -1,5 +1,6 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import {
   faChevronCircleDown,
@@ -169,7 +170,7 @@ export default function TheMemesComponent() {
     if (selectedSeason > 0) {
       seasonFilter = `&season=${selectedSeason}`;
     }
-    return `${process.env.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
+    return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
   };
 
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);

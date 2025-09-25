@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { publicEnv } from "@/config/env";
 import { AwsRum, AwsRumConfig } from "aws-rum-web";
+import { useEffect } from "react";
 
 interface AwsRumProviderProps {
   readonly children: React.ReactNode;
@@ -15,17 +16,19 @@ export default function AwsRumProvider({
     if (typeof window === "undefined") return;
 
     // Skip initialization in development mode to avoid noise
-    if (process.env.NODE_ENV === "development") {
+    if (publicEnv.NODE_ENV === "development") {
       console.log("AWS RUM: Skipped initialization in development mode");
       return;
     }
 
     try {
       // Check if required environment variables are set
-      const APPLICATION_ID = process.env.AWS_RUM_APP_ID;
-      const APPLICATION_REGION = process.env.AWS_RUM_REGION || "us-east-1";
-      const APPLICATION_VERSION = process.env.VERSION || "1.0.0";
-      const SAMPLE_RATE = parseFloat(process.env.AWS_RUM_SAMPLE_RATE || "0.2");
+      const APPLICATION_ID = publicEnv.AWS_RUM_APP_ID;
+      const APPLICATION_REGION = publicEnv.AWS_RUM_REGION || "us-east-1";
+      const APPLICATION_VERSION = publicEnv.VERSION || "1.0.0";
+      const SAMPLE_RATE = Number.parseFloat(
+        publicEnv.AWS_RUM_SAMPLE_RATE || "0.2"
+      );
 
       if (!APPLICATION_ID) {
         console.log(

@@ -1,9 +1,9 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import TheMemesMintPage, { generateMetadata } from "@/app/the-memes/mint/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 jest.mock("next/dynamic", () => () => (props: any) => (
   <div data-testid="dynamic" {...props} />
@@ -40,7 +40,6 @@ const nft = { id: 1, name: "Meme", mint_date: "2020-01-01" } as any;
 describe("TheMemesMintPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.BASE_ENDPOINT = "https://test.6529.io";
   });
 
   it("renders minting component and calls API", async () => {
@@ -73,7 +72,7 @@ describe("TheMemesMintPage", () => {
         title: "Mint | The Memes",
         description: "Collections | 6529.io",
       },
-      other: { version: "" },
+      other: { version: "test-version" },
       twitter: {
         card: "summary_large_image",
       },

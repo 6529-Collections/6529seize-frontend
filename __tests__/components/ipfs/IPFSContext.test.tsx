@@ -1,28 +1,17 @@
-import { renderHook, waitFor } from "@testing-library/react";
-import { render } from "@testing-library/react";
-import React from "react";
 import {
   IpfsProvider,
-  useIpfsService,
   resolveIpfsUrl,
-} from "../../../components/ipfs/IPFSContext";
-import IpfsService from "../../../components/ipfs/IPFSService";
+  useIpfsService,
+} from "@/components/ipfs/IPFSContext";
+import IpfsService from "@/components/ipfs/IPFSService";
+import { render, renderHook, waitFor } from "@testing-library/react";
 
-jest.mock("../../../components/ipfs/IPFSService");
+jest.mock("@/components/ipfs/IPFSService");
 
 const MockIpfsService = IpfsService as jest.MockedClass<typeof IpfsService>;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  process.env.IPFS_API_ENDPOINT = "https://test.6529.io";
-  process.env.IPFS_GATEWAY_ENDPOINT = "https://gateway";
-  process.env.IPFS_MFS_PATH = "files";
-});
-
-afterAll(() => {
-  delete process.env.IPFS_API_ENDPOINT;
-  delete process.env.IPFS_GATEWAY_ENDPOINT;
-  delete process.env.IPFS_MFS_PATH;
 });
 
 describe("IpfsContext", () => {
@@ -38,8 +27,8 @@ describe("IpfsContext", () => {
 
     await waitFor(() => expect(MockIpfsService).toHaveBeenCalled());
     expect(MockIpfsService).toHaveBeenCalledWith({
-      apiEndpoint: "https://test.6529.io",
-      mfsPath: "files",
+      apiEndpoint: "https://api-ipfs.test.6529.io",
+      mfsPath: "testfiles",
     });
     expect(init).toHaveBeenCalled();
   });
@@ -54,12 +43,13 @@ describe("IpfsContext", () => {
 
   it("resolves ipfs urls to gateway", async () => {
     const url = await resolveIpfsUrl("ipfs://abc");
-    expect(url).toBe("https://gateway/ipfs/abc");
+    expect(url).toBe("https://ipfs.test.6529.io/ipfs/abc");
   });
 
   it("returns original url if env missing", async () => {
-    delete process.env.IPFS_API_ENDPOINT;
-    delete process.env.IPFS_GATEWAY_ENDPOINT;
+    const { publicEnv } = require("@/config/env");
+    publicEnv.IPFS_GATEWAY_ENDPOINT = undefined;
+    publicEnv.IPFS_API_ENDPOINT = undefined;
     const consoleSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});

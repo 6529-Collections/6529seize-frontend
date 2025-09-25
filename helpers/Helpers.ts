@@ -6,6 +6,7 @@ import {
   USER_PAGE_TAB_META,
   UserPageTabType,
 } from "@/components/user/layout/UserPageTabs";
+import { publicEnv } from "@/config/env";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -775,7 +776,7 @@ export const wait = async (ms: number): Promise<void> => {
 };
 
 export const removeBaseEndpoint = (link: string) => {
-  return link.replace(process.env.BASE_ENDPOINT ?? "", "");
+  return link.replace(publicEnv.BASE_ENDPOINT ?? "", "");
 };
 
 export const getMetadataForUserPage = (

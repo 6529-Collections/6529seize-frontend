@@ -1,9 +1,9 @@
-import React from "react";
-import { render } from "@testing-library/react";
 import Page, {
   generateMetadata,
 } from "@/app/tools/app-wallets/import-wallet/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { render } from "@testing-library/react";
+import React from "react";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="import" />);
 jest.mock("@/components/app-wallets/AppWalletImport", () => () => (
@@ -45,7 +45,6 @@ describe("Import App Wallet Page", () => {
   });
 
   it("exposes metadata", async () => {
-    process.env.BASE_ENDPOINT = "https://base.test";
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("App Wallets | Import");
     expect(metadata.description).toEqual("Tools | 6529.io");

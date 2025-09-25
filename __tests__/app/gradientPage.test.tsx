@@ -1,4 +1,3 @@
-import React from "react";
 import { generateMetadata } from "@/app/6529-gradient/[id]/page";
 import { fetchUrl } from "@/services/6529api";
 
@@ -31,8 +30,6 @@ jest.mock("@/components/nft-navigation/NftNavigation", () => () => <></>);
 describe("generateMetadata", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.API_ENDPOINT = "https://api.6529.io";
-    process.env.BASE_ENDPOINT = "https://base.6529.io";
   });
 
   it("returns metadata with thumbnail if available", async () => {
@@ -80,6 +77,6 @@ describe("generateMetadata", () => {
       ? metadata.openGraph.images
       : [metadata.openGraph?.images];
 
-    expect(images?.[0]).toBe("https://base.6529.io/6529io.png");
+    expect(images?.[0]).toBe("https://test.6529.io/6529io.png");
   });
 });

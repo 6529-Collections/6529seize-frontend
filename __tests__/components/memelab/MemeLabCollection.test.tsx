@@ -29,7 +29,6 @@ beforeEach(() => {
   (useRouter as jest.Mock).mockReturnValue({
     replace: routerReplace,
   });
-  process.env.API_ENDPOINT = "https://api.test";
 });
 
 const collectionName = "Cool Collection";

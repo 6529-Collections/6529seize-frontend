@@ -1,6 +1,4 @@
-import { render, act } from "@testing-library/react";
-
-const ORIGINAL_ENV_VERSION = process.env.VERSION;
+import { act, render } from "@testing-library/react";
 
 describe("useIsVersionStale", () => {
   beforeEach(() => {
@@ -8,19 +6,15 @@ describe("useIsVersionStale", () => {
     (global as any).fetch = jest.fn();
   });
 
-  afterEach(() => {
-    jest.clearAllTimers();
-    process.env.VERSION = ORIGINAL_ENV_VERSION;
-  });
-
   function TestComponent({ interval }: { interval?: number }) {
-    const { useIsVersionStale } = require("../../hooks/useIsVersionStale");
+    const { useIsVersionStale } = require("@/hooks/useIsVersionStale");
     const stale = useIsVersionStale(interval);
     return <span>{stale ? "stale" : "fresh"}</span>;
   }
 
   it("shows fresh when versions match", async () => {
-    process.env.VERSION = "1.0.0";
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VERSION = "1.0.0";
     (global.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({ version: "1.0.0" }),
     });
@@ -32,7 +26,8 @@ describe("useIsVersionStale", () => {
   });
 
   it("shows stale when versions differ", async () => {
-    process.env.VERSION = "1.0.0";
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VERSION = "1.0.0";
     (global.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({ version: "2.0.0" }),
     });

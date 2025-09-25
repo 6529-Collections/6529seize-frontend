@@ -8,6 +8,8 @@
  * - Typed message subscriptions
  */
 
+import { publicEnv } from "@/config/env";
+
 // Types
 export * from "./WebSocketTypes";
 
@@ -17,8 +19,8 @@ export { useWebSocket } from "./useWebSocket";
 // Default configuration
 export const DEFAULT_WEBSOCKET_CONFIG = {
   url:
-    process.env.WS_ENDPOINT ??
-    process.env.API_ENDPOINT?.replace("https://api", "wss://ws") ??
+    publicEnv.WS_ENDPOINT ??
+    publicEnv.API_ENDPOINT?.replace("https://api", "wss://ws") ??
     "wss://default-fallback-url",
   reconnectDelay: 2000,
   maxReconnectAttempts: 20,

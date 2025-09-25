@@ -1,13 +1,10 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import { useSelector } from "react-redux";
-import { useQuery } from "@tanstack/react-query";
 import { generateMetadata } from "@/app/network/page";
 import CommunityMembers from "@/components/community/CommunityMembers";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-
-// Ensure BASE_ENDPOINT is set
-process.env.BASE_ENDPOINT = "https://example.com";
+import { useQuery } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import { useSelector } from "react-redux";
 
 // Mocks
 jest.mock("react-redux", () => ({

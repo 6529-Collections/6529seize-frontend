@@ -2,6 +2,7 @@
 
 import ClientOnly from "@/components/client-only/ClientOnly";
 import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
+import { publicEnv } from "@/config/env";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,7 +17,7 @@ export default function OpenMobilePage() {
       return;
     }
 
-    const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
+    const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
     const decoded = decodeURIComponent(pathParam);
     const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${decoded}`;
 

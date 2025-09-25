@@ -1,9 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 
-// Set BASE_ENDPOINT before importing components that use constants.ts
-process.env.BASE_ENDPOINT = "https://6529.io";
-
 import { AcceptConnectionSharing } from "@/app/accept-connection-sharing/page.client";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";

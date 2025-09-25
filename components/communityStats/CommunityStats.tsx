@@ -1,23 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import { DBResponse } from "@/entities/IDBResponse";
-import { fetchUrl } from "@/services/6529api";
-import { GlobalTDHHistory } from "@/entities/ITDH";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  BarElement,
-} from "chart.js";
-import { numberWithCommas } from "../../helpers/Helpers";
+import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { DBResponse } from "@/entities/IDBResponse";
+import { GlobalTDHHistory } from "@/entities/ITDH";
+import { fetchUrl } from "@/services/6529api";
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
+} from "chart.js";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import { Bar } from "react-chartjs-2";
+import { numberWithCommas } from "../../helpers/Helpers";
 
 ChartJS.register(
   CategoryScale,
@@ -102,7 +103,7 @@ export default function CommunityStats() {
   }
 
   useEffect(() => {
-    let url = `${process.env.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
+    let url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
     fetchUrl(url).then((response: DBResponse) => {
       const tdhH = response.data.reverse();
       setTdhHistory(tdhH);

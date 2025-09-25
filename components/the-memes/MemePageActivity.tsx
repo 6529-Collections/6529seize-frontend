@@ -1,17 +1,18 @@
 "use client";
 
-import styles from "./TheMemes.module.scss";
-import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import { NFT } from "../../entities/INFT";
-import { numberWithCommas } from "../../helpers/Helpers";
+import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
-import { TypeFilter } from "../../hooks/useActivityData";
-import LatestActivityRow from "../latest-activity/LatestActivityRow";
+import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
+import { NFT } from "../../entities/INFT";
 import { Transaction } from "../../entities/ITransaction";
+import { numberWithCommas } from "../../helpers/Helpers";
+import { TypeFilter } from "../../hooks/useActivityData";
+import { fetchUrl } from "../../services/6529api";
+import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import Pagination from "../pagination/Pagination";
+import styles from "./TheMemes.module.scss";
 
 export function MemePageActivity(props: {
   show: boolean;
@@ -27,7 +28,7 @@ export function MemePageActivity(props: {
 
   useEffect(() => {
     if (props.nft) {
-      let url = `${process.env.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&id=${props.nft.id}&page_size=${props.pageSize}&page=${activityPage}`;
+      let url = `${publicEnv.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&id=${props.nft.id}&page_size=${props.pageSize}&page=${activityPage}`;
       switch (activityTypeFilter) {
         case TypeFilter.SALES:
           url += `&filter=sales`;

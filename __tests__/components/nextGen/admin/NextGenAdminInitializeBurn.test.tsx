@@ -1,20 +1,19 @@
 // @ts-nocheck
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import NextGenAdminInitializeBurn from "@/components/nextGen/admin/NextGenAdminInitializeBurn";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import NextGenAdminInitializeBurn from "../../../../components/nextGen/admin/NextGenAdminInitializeBurn";
 
-jest.mock(
-  "../../../../components/nextGen/NextGenContractWriteStatus",
-  () => () => <div data-testid="write-status" />
-);
+jest.mock("@/components/nextGen/NextGenContractWriteStatus", () => () => (
+  <div data-testid="write-status" />
+));
 
-jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-jest.mock("../../../../services/6529api", () => ({ postData: jest.fn() }));
+jest.mock("@/services/6529api", () => ({ postData: jest.fn() }));
 
-jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   useGlobalAdmin: jest.fn(),
   useFunctionAdmin: jest.fn(),
   useCollectionIndex: jest.fn(),
@@ -31,17 +30,17 @@ jest.mock("wagmi", () => ({
   useSignMessage: jest.fn(),
 }));
 
-import { useSeizeConnectContext } from "../../../../components/auth/SeizeConnectContext";
-import { postData } from "../../../../services/6529api";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
-  useParsedCollectionIndex,
   getCollectionIdsForAddress,
+  useCollectionAdmin,
+  useCollectionIndex,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useMinterContractWrite,
-} from "../../../../components/nextGen/nextgen_helpers";
+  useParsedCollectionIndex,
+} from "@/components/nextGen/nextgen_helpers";
+import { postData } from "@/services/6529api";
 import { useReadContract, useSignMessage } from "wagmi";
 
 const signMessageState: any = {
@@ -81,7 +80,6 @@ beforeEach(() => {
   (useSignMessage as jest.Mock).mockImplementation(() => signMessageState);
   (useReadContract as jest.Mock).mockReturnValue({ data: false });
   (useMinterContractWrite as jest.Mock).mockReturnValue(contractWriteState);
-  process.env.API_ENDPOINT = "https://test.6529.io";
 });
 
 function renderComponent() {

@@ -1,16 +1,17 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import {
   CapacitorBarcodeScanner,
   CapacitorBarcodeScannerTypeHint,
 } from "@capacitor/barcode-scanner";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { useAuth } from "../../auth/Auth";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { areEqualURLS } from "../../../helpers/Helpers";
+import useCapacitor from "../../../hooks/useCapacitor";
 import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
+import { useAuth } from "../../auth/Auth";
 
 export default function HeaderQRScanner({
   onScanSuccess,
@@ -19,8 +20,8 @@ export default function HeaderQRScanner({
   readonly onScanSuccess: () => void;
   readonly appSidebar?: boolean;
 }) {
-  const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
-  const baseEndpoint = process.env.BASE_ENDPOINT ?? "https://6529.io";
+  const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
+  const baseEndpoint = publicEnv.BASE_ENDPOINT ?? "https://6529.io";
 
   const { setToast } = useAuth();
   const capacitor = useCapacitor();
@@ -155,8 +156,7 @@ export default function HeaderQRScanner({
       <button
         onClick={startScan}
         className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-zinc-300 active:tw-bg-zinc-700 active:tw-text-zinc-200 tw-rounded-lg tw-transition-colors tw-duration-200"
-        aria-label="Scan QR Code"
-      >
+        aria-label="Scan QR Code">
         <HeaderQRScannerIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
         <span>Scan QR Code</span>
       </button>
@@ -171,8 +171,7 @@ export default function HeaderQRScanner({
         aria-label="QR Code Scanner"
         title="QR Code Scanner"
         onClick={startScan}
-        className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
-      >
+        className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
         <HeaderQRScannerIcon />
       </button>
     </div>

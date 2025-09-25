@@ -1,6 +1,7 @@
 import { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
-import { CW_PROJECT_ID, VALIDATED_BASE_ENDPOINT } from "@/constants";
+import { publicEnv } from "@/config/env";
+import { CW_PROJECT_ID } from "@/constants";
 import { AdapterCacheError, AdapterError } from "@/src/errors/adapter";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
@@ -24,7 +25,7 @@ export interface AppKitInitializationResult {
  * Debug logger helper to reduce conditional complexity
  */
 function debugLog(message: string, ...args: any[]): void {
-  if (process.env.NODE_ENV === "development") {
+  if (publicEnv.NODE_ENV === "development") {
     console.log(`[AppKitInitialization] ${message}`, ...args);
   }
 }
@@ -92,7 +93,7 @@ function buildAppKitConfig(adapter: WagmiAdapter) {
     metadata: {
       name: "6529.io",
       description: "6529.io",
-      url: VALIDATED_BASE_ENDPOINT,
+      url: publicEnv.BASE_ENDPOINT,
       icons: [
         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
       ],

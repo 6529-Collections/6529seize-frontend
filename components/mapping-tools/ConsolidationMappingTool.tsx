@@ -1,13 +1,14 @@
 "use client";
 
-import styles from "./MappingTool.module.scss";
-import { Form, Row, Col, Button, Container } from "react-bootstrap";
+import { publicEnv } from "@/config/env";
+import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
-import { fetchAllPages } from "../../services/6529api";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Consolidation } from "../../entities/IDelegation";
 import { areEqualAddresses } from "../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
+import { fetchAllPages } from "../../services/6529api";
+import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
 
@@ -136,7 +137,7 @@ export default function ConsolidationMappingTool() {
       });
     }
     if (processing) {
-      const initialUrl = `${process.env.API_ENDPOINT}/api/consolidations`;
+      const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
       fetchConsolidations(initialUrl);
     }
   }, [processing]);

@@ -1,9 +1,9 @@
-import { render } from "@testing-library/react";
+import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
 import CommunityDownloadsTDH, {
   VIEW,
 } from "@/components/community-downloads/CommunityDownloadsTDH";
-import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { render } from "@testing-library/react";
 
 jest.mock(
   "@/components/community-downloads/CommunityDownloadsComponent",
@@ -18,7 +18,6 @@ const ComponentMock = CommunityDownloadsComponent as jest.Mock;
 describe("CommunityDownloadsTDH", () => {
   beforeEach(() => {
     ComponentMock.mockClear();
-    process.env.API_ENDPOINT = "https://api.test";
   });
 
   it("uses consolidated uploads for CONSOLIDATION view", () => {
@@ -30,7 +29,7 @@ describe("CommunityDownloadsTDH", () => {
     const calls = ComponentMock.mock.calls;
     const match = calls.find(
       ([props]) =>
-        props.url === "https://api.test/api/consolidated_uploads" &&
+        props.url === "https://api.test.6529.io/api/consolidated_uploads" &&
         props.title === "Consolidated Network Metrics"
     );
     expect(match).toBeTruthy();
@@ -45,7 +44,7 @@ describe("CommunityDownloadsTDH", () => {
     const props = ComponentMock.mock.calls[0][0];
     expect(props).toEqual(
       expect.objectContaining({
-        url: "https://api.test/api/uploads",
+        url: "https://api.test.6529.io/api/uploads",
         title: "Network Metrics",
       })
     );

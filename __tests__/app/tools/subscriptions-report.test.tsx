@@ -1,8 +1,8 @@
-import React from "react";
-import { render, waitFor } from "@testing-library/react";
 import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
+import { render, waitFor } from "@testing-library/react";
+import React from "react";
 
 jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   __esModule: true,
@@ -82,7 +82,6 @@ describe("Subscriptions report page", () => {
   });
 
   it("exposes metadata", async () => {
-    process.env.BASE_ENDPOINT = "https://base.test";
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("Subscriptions Report");
     expect(metadata.description).toEqual("Tools | 6529.io");

@@ -1,3 +1,4 @@
+import { publicEnv } from "@/config/env";
 import { TraitsData } from "../submission/types/TraitsData";
 
 /**
@@ -410,7 +411,7 @@ export const traitDefinitions: readonly SectionDefinition[] = [
 
 // Runtime schema validation function - called in development only
 function validateSchema(schema: readonly SectionDefinition[]): void {
-  if (process.env.NODE_ENV !== "production") {
+  if (publicEnv.NODE_ENV !== "production") {
     try {
       // Validate sections
       schema.forEach((section, sectionIndex) => {
@@ -462,7 +463,7 @@ function validateSchema(schema: readonly SectionDefinition[]): void {
     } catch (error) {
       console.error("Schema validation failed:", error);
       // In development, we could throw to make the error more visible
-      if (process.env.NODE_ENV === "development") {
+      if (publicEnv.NODE_ENV === "development") {
         throw error;
       }
     }

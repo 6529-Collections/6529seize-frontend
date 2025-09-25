@@ -1,10 +1,10 @@
-import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { useAuth } from "@/components/auth/Auth";
 import HeaderQRScanner from "@/components/header/share/HeaderQRScanner";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useAuth } from "@/components/auth/Auth";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 jest.mock("@/hooks/useCapacitor");
 jest.mock("@/components/auth/Auth");
@@ -28,8 +28,6 @@ const { CapacitorBarcodeScanner } = require("@capacitor/barcode-scanner");
 describe("HeaderQRScanner", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.BASE_ENDPOINT = "https://6529.io";
-    process.env.MOBILE_APP_SCHEME = "mobile6529";
     mockedAuth.mockReturnValue({ setToast: jest.fn() });
   });
 
@@ -46,7 +44,7 @@ describe("HeaderQRScanner", () => {
     const toast = jest.fn();
     mockedAuth.mockReturnValue({ setToast: toast });
     (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({
-      ScanResult: "https://6529.io/profile",
+      ScanResult: "https://test.6529.io/profile",
     });
 
     render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
@@ -64,7 +62,7 @@ describe("HeaderQRScanner", () => {
     const onScan = jest.fn();
     mockedAuth.mockReturnValue({ setToast: jest.fn() });
     (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({
-      ScanResult: "mobile6529://navigate/foo/bar?x=1",
+      ScanResult: "testmobile6529://navigate/foo/bar?x=1",
     });
 
     render(<HeaderQRScanner onScanSuccess={onScan} />);

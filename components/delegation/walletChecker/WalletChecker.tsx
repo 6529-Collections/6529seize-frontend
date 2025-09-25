@@ -1,5 +1,6 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import {
   faCheck,
   faPlusCircle,
@@ -95,7 +96,7 @@ export default function WalletCheckerComponent(
   }, [walletAddressFromEns.data]);
 
   function fetchDelegations(address: string) {
-    const url = `${process.env.API_ENDPOINT}/api/delegations/${address}`;
+    const url = `${publicEnv.API_ENDPOINT}/api/delegations/${address}`;
     fetchUrl(url).then((response: DBResponse) => {
       setDelegations(
         [...response.data].filter(
@@ -218,7 +219,7 @@ export default function WalletCheckerComponent(
   }, [consolidationsLoaded]);
 
   function fetchConsolidatedWallets(address: string) {
-    const url = `${process.env.API_ENDPOINT}/api/consolidations/${address}`;
+    const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${address}`;
     fetchUrl(url).then((response: DBResponse) => {
       const myConsolidatedWallets: {
         address: string;
@@ -245,13 +246,13 @@ export default function WalletCheckerComponent(
   }
 
   function fetchConsolidations(address: string) {
-    const url = `${process.env.API_ENDPOINT}/api/consolidations/${address}?show_incomplete=true`;
+    const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${address}?show_incomplete=true`;
     fetchUrl(url).then((response1: DBResponse) => {
       if (response1.data.length > 0) {
         const newWallet = areEqualAddresses(address, response1.data[0].wallet1)
           ? response1.data[0].wallet2
           : response1.data[0].wallet1;
-        const newUrl = `${process.env.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
+        const newUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
         fetchUrl(newUrl).then((response2: DBResponse) => {
           setAllConsolidations([...response1.data, ...response2.data]);
         });

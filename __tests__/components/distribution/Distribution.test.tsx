@@ -1,8 +1,8 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import React from "react";
 import DistributionPage from "@/components/distribution/Distribution";
 import { MEMES_CONTRACT } from "@/constants";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
 
 // Mock useParams to return different values for different tests
 const mockUseParams = jest.fn(() => ({ id: "123" }));
@@ -28,123 +28,137 @@ jest.mock("next/image", () => ({
 }));
 
 // Mock child components
-jest.mock("@/components/the-memes/MemePageMintCountdown", () => 
-  ({ nft_id, hide_mint_btn, is_full_width, show_only_if_active }: any) => (
-    <div 
-      data-testid="mint-countdown" 
-      data-nft-id={nft_id}
-      data-hide-mint-btn={hide_mint_btn}
-      data-is-full-width={is_full_width}
-      data-show-only-if-active={show_only_if_active}
-    />
-  )
+jest.mock(
+  "@/components/the-memes/MemePageMintCountdown",
+  () =>
+    ({ nft_id, hide_mint_btn, is_full_width, show_only_if_active }: any) =>
+      (
+        <div
+          data-testid="mint-countdown"
+          data-nft-id={nft_id}
+          data-hide-mint-btn={hide_mint_btn}
+          data-is-full-width={is_full_width}
+          data-show-only-if-active={show_only_if_active}
+        />
+      )
 );
 
-jest.mock("@/components/address/Address", () => 
-  ({ wallets, display, hideCopy }: any) => (
-    <div 
-      data-testid="address-component"
-      data-wallet={wallets?.[0]}
-      data-display={display}
-      data-hide-copy={hideCopy}
-    >
-      {display || wallets?.[0]}
-    </div>
-  )
+jest.mock(
+  "@/components/address/Address",
+  () =>
+    ({ wallets, display, hideCopy }: any) =>
+      (
+        <div
+          data-testid="address-component"
+          data-wallet={wallets?.[0]}
+          data-display={display}
+          data-hide-copy={hideCopy}>
+          {display || wallets?.[0]}
+        </div>
+      )
 );
 
 jest.mock("@/components/searchModal/SearchModal", () => ({
-  SearchWalletsDisplay: ({ searchWallets, setSearchWallets, setShowSearchModal }: any) => (
+  SearchWalletsDisplay: ({
+    searchWallets,
+    setSearchWallets,
+    setShowSearchModal,
+  }: any) => (
     <div data-testid="search-wallets-display">
-      <button 
+      <button
         onClick={() => setShowSearchModal(true)}
-        data-testid="open-search-modal"
-      >
+        data-testid="open-search-modal">
         Search ({searchWallets.length})
       </button>
       {searchWallets.length > 0 && (
-        <button 
-          onClick={() => setSearchWallets([])}
-          data-testid="clear-search"
-        >
+        <button onClick={() => setSearchWallets([])} data-testid="clear-search">
           Clear
         </button>
       )}
     </div>
   ),
-  SearchModalDisplay: ({ show, setShow, searchWallets, setSearchWallets }: any) => (
+  SearchModalDisplay: ({
+    show,
+    setShow,
+    searchWallets,
+    setSearchWallets,
+  }: any) =>
     show ? (
       <div data-testid="search-modal">
-        <button 
-          onClick={() => setShow(false)}
-          data-testid="close-modal"
-        >
+        <button onClick={() => setShow(false)} data-testid="close-modal">
           Close
         </button>
-        <button 
-          onClick={() => setSearchWallets(['0x123', '0x456'])}
-          data-testid="add-wallets"
-        >
+        <button
+          onClick={() => setSearchWallets(["0x123", "0x456"])}
+          data-testid="add-wallets">
           Add Test Wallets
         </button>
       </div>
-    ) : null
-  ),
+    ) : null,
 }));
 
-jest.mock("@/components/pagination/Pagination", () => 
-  ({ page, pageSize, totalResults, setPage }: any) => (
-    <div data-testid="pagination">
-      <span>Page {page} of {Math.ceil(totalResults / pageSize)}</span>
-      <button 
-        onClick={() => setPage(page + 1)}
-        data-testid="next-page"
-        disabled={page >= Math.ceil(totalResults / pageSize)}
-      >
-        Next
-      </button>
-    </div>
-  )
+jest.mock(
+  "@/components/pagination/Pagination",
+  () =>
+    ({ page, pageSize, totalResults, setPage }: any) =>
+      (
+        <div data-testid="pagination">
+          <span>
+            Page {page} of {Math.ceil(totalResults / pageSize)}
+          </span>
+          <button
+            onClick={() => setPage(page + 1)}
+            data-testid="next-page"
+            disabled={page >= Math.ceil(totalResults / pageSize)}>
+            Next
+          </button>
+        </div>
+      )
 );
 
 jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <div data-testid="dot-loader">Loading...</div>
 ));
 
-jest.mock("@/components/scrollTo/ScrollToButton", () => 
-  ({ threshold, to, offset }: any) => (
-    <div data-testid="scroll-to-button" data-threshold={threshold} data-to={to} data-offset={offset} />
-  )
+jest.mock(
+  "@/components/scrollTo/ScrollToButton",
+  () =>
+    ({ threshold, to, offset }: any) =>
+      (
+        <div
+          data-testid="scroll-to-button"
+          data-threshold={threshold}
+          data-to={to}
+          data-offset={offset}
+        />
+      )
 );
-
-// Mock environment variable
-process.env.API_ENDPOINT = 'https://api.test.com';
 
 // Sample test data
 const mockDistributionData = [
   {
-    wallet: '0x1234567890123456789012345678901234567890',
-    wallet_display: 'TestUser1',
-    phases: ['phase1', 'airdrop'],
+    wallet: "0x1234567890123456789012345678901234567890",
+    wallet_display: "TestUser1",
+    phases: ["phase1", "airdrop"],
     airdrops: 5,
-    allowlist: [{ phase: 'phase1', spots: 10 }],
+    allowlist: [{ phase: "phase1", spots: 10 }],
     minted: 3,
-    total_count: 15
+    total_count: 15,
   },
   {
-    wallet: '0x0987654321098765432109876543210987654321',
-    wallet_display: 'TestUser2',
-    phases: ['phase1'],
+    wallet: "0x0987654321098765432109876543210987654321",
+    wallet_display: "TestUser2",
+    phases: ["phase1"],
     airdrops: 0,
-    allowlist: [{ phase: 'phase1', spots: 5 }],
+    allowlist: [{ phase: "phase1", spots: 5 }],
     minted: 0,
-    total_count: 5
-  }
+    total_count: 5,
+  },
 ];
 
 const mockDistributionPhotos = [
-  { id: 1, link: 'https://example.com/photo1.jpg' },
-  { id: 2, link: 'https://example.com/photo2.jpg' }
+  { id: 1, link: "https://example.com/photo1.jpg" },
+  { id: 2, link: "https://example.com/photo2.jpg" },
 ];
 
 describe("DistributionPage", () => {
@@ -159,12 +173,14 @@ describe("DistributionPage", () => {
     it("renders with correct header and nft id", async () => {
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
-      
-      render(<DistributionPage header="Test Collection" contract="0x123" link="" />);
-      
+
+      render(
+        <DistributionPage header="Test Collection" contract="0x123" link="" />
+      );
+
       await waitFor(() => {
-        expect(screen.getByText('Test Collection')).toBeInTheDocument();
-        expect(screen.getByText('Card #123 Distribution')).toBeInTheDocument();
+        expect(screen.getByText("Test Collection")).toBeInTheDocument();
+        expect(screen.getByText("Card #123 Distribution")).toBeInTheDocument();
       });
     });
 
@@ -172,27 +188,29 @@ describe("DistributionPage", () => {
       mockUseParams.mockReturnValue({ id: "456" });
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
-      
-      render(<DistributionPage header="Memes" contract={MEMES_CONTRACT} link="" />);
-      
+
+      render(
+        <DistributionPage header="Memes" contract={MEMES_CONTRACT} link="" />
+      );
+
       await waitFor(() => {
-        const mintCountdown = screen.getByTestId('mint-countdown');
+        const mintCountdown = screen.getByTestId("mint-countdown");
         expect(mintCountdown).toBeInTheDocument();
-        expect(mintCountdown.getAttribute('data-nft-id')).toBe('456');
-        expect(mintCountdown.getAttribute('data-hide-mint-btn')).toBe('false');
-        expect(mintCountdown.getAttribute('data-is-full-width')).toBe('false');
-        expect(mintCountdown.getAttribute('data-show-only-if-active')).toBe('true');
+        expect(mintCountdown.dataset.nftId).toBe("456");
+        expect(mintCountdown.dataset.hideMintBtn).toBe("false");
+        expect(mintCountdown.dataset.isFullWidth).toBe("false");
+        expect(mintCountdown.dataset.showOnlyIfActive).toBe("true");
       });
     });
 
     it("does not show mint countdown for non-memes contract", async () => {
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
-      
+
       render(<DistributionPage header="Other" contract="0x999" link="" />);
-      
+
       await waitFor(() => {
-        expect(screen.queryByTestId('mint-countdown')).not.toBeInTheDocument();
+        expect(screen.queryByTestId("mint-countdown")).not.toBeInTheDocument();
       });
     });
   });
@@ -201,13 +219,15 @@ describe("DistributionPage", () => {
     it("shows empty message when no data and no search", async () => {
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        expect(screen.getByText(/Distribution Plan will be made available soon/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Distribution Plan will be made available soon/)
+        ).toBeInTheDocument();
         expect(screen.getByText(/check back later/)).toBeInTheDocument();
-        expect(screen.getByAltText('SummerGlasses')).toBeInTheDocument();
+        expect(screen.getByAltText("SummerGlasses")).toBeInTheDocument();
       });
     });
 
@@ -217,20 +237,22 @@ describe("DistributionPage", () => {
       mockFetchUrl
         .mockResolvedValueOnce({ count: 1, data: [mockDistributionData[0]] }) // Initial load with data
         .mockResolvedValueOnce({ count: 0, data: [] }); // After search
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('open-search-modal')).toBeInTheDocument();
+        expect(screen.getByTestId("open-search-modal")).toBeInTheDocument();
       });
 
       // Open search modal and add wallets
-      await user.click(screen.getByTestId('open-search-modal'));
-      await user.click(screen.getByTestId('add-wallets'));
-      await user.click(screen.getByTestId('close-modal'));
-      
+      await user.click(screen.getByTestId("open-search-modal"));
+      await user.click(screen.getByTestId("add-wallets"));
+      await user.click(screen.getByTestId("close-modal"));
+
       await waitFor(() => {
-        expect(screen.getByText(/No results found for the search criteria/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/No results found for the search criteria/)
+        ).toBeInTheDocument();
       });
     });
   });
@@ -239,65 +261,91 @@ describe("DistributionPage", () => {
     it("displays distribution table with data", async () => {
       mockFetchAllPages.mockResolvedValue(mockDistributionPhotos);
       mockFetchUrl.mockResolvedValue({ count: 2, data: mockDistributionData });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
-      await waitFor(() => {
-        // Check table headers
-        expect(screen.getByText('ALLOWLIST SPOTS')).toBeInTheDocument();
-        expect(screen.getByText('ACTUAL')).toBeInTheDocument();
-        expect(screen.getByText('Phase1')).toBeInTheDocument();
-        expect(screen.getByText('Airdrop')).toBeInTheDocument();
-        expect(screen.getByText('Minted')).toBeInTheDocument();
-        expect(screen.getByText('Total')).toBeInTheDocument();
-        
-        // Check wallet data
-        expect(screen.getByText('TestUser1')).toBeInTheDocument();
-        expect(screen.getByText('TestUser2')).toBeInTheDocument();
-        
-        // Check counts
-        expect(screen.getByText('x2')).toBeInTheDocument(); // Total results
-      }, { timeout: 5000 });
+
+      await waitFor(
+        () => {
+          // Check table headers
+          expect(screen.getByText("ALLOWLIST SPOTS")).toBeInTheDocument();
+          expect(screen.getByText("ACTUAL")).toBeInTheDocument();
+          expect(screen.getByText("Phase1")).toBeInTheDocument();
+          expect(screen.getByText("Airdrop")).toBeInTheDocument();
+          expect(screen.getByText("Minted")).toBeInTheDocument();
+          expect(screen.getByText("Total")).toBeInTheDocument();
+
+          // Check wallet data
+          expect(screen.getByText("TestUser1")).toBeInTheDocument();
+          expect(screen.getByText("TestUser2")).toBeInTheDocument();
+
+          // Check counts
+          expect(screen.getByText("x2")).toBeInTheDocument(); // Total results
+        },
+        { timeout: 5000 }
+      );
     });
 
     it("shows loading state during data fetch", async () => {
       let resolvePromise: (value: any) => void;
-      const fetchPromise = new Promise(resolve => {
+      const fetchPromise = new Promise((resolve) => {
         resolvePromise = resolve;
       });
-      
+
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockReturnValue(fetchPromise);
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       // Wait for component to mount and try to fetch
       await waitFor(() => {
         expect(mockFetchAllPages).toHaveBeenCalled();
       });
-      
+
       // Resolve the promise
       resolvePromise!({ count: 1, data: [mockDistributionData[0]] });
-      
+
       await waitFor(() => {
-        expect(screen.getByText('TestUser1')).toBeInTheDocument();
+        expect(screen.getByText("TestUser1")).toBeInTheDocument();
       });
     });
 
     it("displays distribution photos in carousel", async () => {
       mockFetchAllPages.mockResolvedValue(mockDistributionPhotos);
-      mockFetchUrl.mockResolvedValue({ count: 1, data: mockDistributionData.slice(0, 1) });
-      
+      mockFetchUrl.mockResolvedValue({
+        count: 1,
+        data: mockDistributionData.slice(0, 1),
+      });
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        const images = screen.getAllByRole('img');
-        const distributionImages = images.filter(img => 
-          img.getAttribute('src')?.includes('example.com')
-        );
+        const images = screen.getAllByRole("img");
+        const distributionImages = images.filter((img) => {
+          const src = img.getAttribute("src");
+          try {
+            if (!src) return false;
+            const allowedDomains = ["example.com"];
+            const hostname = new URL(src).hostname;
+            return (
+              allowedDomains.includes(hostname) ||
+              allowedDomains.some(
+                (domain) =>
+                  hostname === domain || hostname.endsWith(`.${domain}`)
+              )
+            );
+          } catch {
+            return false;
+          }
+        });
         expect(distributionImages).toHaveLength(2);
-        expect(distributionImages[0]).toHaveAttribute('src', 'https://example.com/photo1.jpg');
-        expect(distributionImages[1]).toHaveAttribute('src', 'https://example.com/photo2.jpg');
+        expect(distributionImages[0]).toHaveAttribute(
+          "src",
+          "https://example.com/photo1.jpg"
+        );
+        expect(distributionImages[1]).toHaveAttribute(
+          "src",
+          "https://example.com/photo2.jpg"
+        );
       });
     });
   });
@@ -305,40 +353,43 @@ describe("DistributionPage", () => {
   describe("Phase Calculations", () => {
     it("correctly calculates and displays phase counts", async () => {
       mockFetchAllPages.mockResolvedValue([]);
-      mockFetchUrl.mockResolvedValue({ count: 1, data: [mockDistributionData[0]] });
-      
+      mockFetchUrl.mockResolvedValue({
+        count: 1,
+        data: [mockDistributionData[0]],
+      });
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
         // Should show allowlist spots for phase1
-        expect(screen.getByText('10')).toBeInTheDocument();
+        expect(screen.getByText("10")).toBeInTheDocument();
         // Should show airdrop count
-        expect(screen.getByText('5')).toBeInTheDocument();
+        expect(screen.getByText("5")).toBeInTheDocument();
         // Should show minted count
-        expect(screen.getByText('3')).toBeInTheDocument();
+        expect(screen.getByText("3")).toBeInTheDocument();
         // Should show total count
-        expect(screen.getByText('15')).toBeInTheDocument();
+        expect(screen.getByText("15")).toBeInTheDocument();
       });
     });
 
     it("shows dash for zero counts", async () => {
       const dataWithZeros = {
-        wallet: '0x123',
-        wallet_display: 'TestUser',
-        phases: ['phase1'],
+        wallet: "0x123",
+        wallet_display: "TestUser",
+        phases: ["phase1"],
         airdrops: 0,
         allowlist: [],
         minted: 0,
-        total_count: 0
+        total_count: 0,
       };
-      
+
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 1, data: [dataWithZeros] });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        const dashElements = screen.getAllByText('-');
+        const dashElements = screen.getAllByText("-");
         expect(dashElements.length).toBeGreaterThan(0);
       });
     });
@@ -351,26 +402,28 @@ describe("DistributionPage", () => {
       mockFetchUrl
         .mockResolvedValueOnce({ count: 1, data: [mockDistributionData[0]] }) // Initial load with data
         .mockResolvedValueOnce({ count: 1, data: [mockDistributionData[0]] }); // After search
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       // Wait for initial load with data so search component renders
       await waitFor(() => {
-        expect(screen.getByTestId('search-wallets-display')).toBeInTheDocument();
+        expect(
+          screen.getByTestId("search-wallets-display")
+        ).toBeInTheDocument();
       });
 
       // Open search modal
-      await user.click(screen.getByTestId('open-search-modal'));
-      expect(screen.getByTestId('search-modal')).toBeInTheDocument();
-      
+      await user.click(screen.getByTestId("open-search-modal"));
+      expect(screen.getByTestId("search-modal")).toBeInTheDocument();
+
       // Add wallets
-      await user.click(screen.getByTestId('add-wallets'));
-      await user.click(screen.getByTestId('close-modal'));
-      
+      await user.click(screen.getByTestId("add-wallets"));
+      await user.click(screen.getByTestId("close-modal"));
+
       // Should trigger new API call with search params
       await waitFor(() => {
         expect(mockFetchUrl).toHaveBeenCalledWith(
-          expect.stringContaining('&search=0x123,0x456')
+          expect.stringContaining("&search=0x123,0x456")
         );
       });
     });
@@ -378,25 +431,30 @@ describe("DistributionPage", () => {
     it("clears search results", async () => {
       const user = userEvent.setup();
       mockFetchAllPages.mockResolvedValue([]);
-      mockFetchUrl.mockResolvedValue({ count: 1, data: [mockDistributionData[0]] });
-      
+      mockFetchUrl.mockResolvedValue({
+        count: 1,
+        data: [mockDistributionData[0]],
+      });
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       // Wait for component to load with data
       await waitFor(() => {
-        expect(screen.getByTestId('search-wallets-display')).toBeInTheDocument();
+        expect(
+          screen.getByTestId("search-wallets-display")
+        ).toBeInTheDocument();
       });
-      
+
       // Add search wallets first
-      await user.click(screen.getByTestId('open-search-modal'));
-      await user.click(screen.getByTestId('add-wallets'));
-      await user.click(screen.getByTestId('close-modal'));
-      
+      await user.click(screen.getByTestId("open-search-modal"));
+      await user.click(screen.getByTestId("add-wallets"));
+      await user.click(screen.getByTestId("close-modal"));
+
       // Clear search
-      await user.click(screen.getByTestId('clear-search'));
-      
+      await user.click(screen.getByTestId("clear-search"));
+
       await waitFor(() => {
-        expect(screen.getByText('Search (0)')).toBeInTheDocument();
+        expect(screen.getByText("Search (0)")).toBeInTheDocument();
       });
     });
   });
@@ -404,12 +462,15 @@ describe("DistributionPage", () => {
   describe("Pagination", () => {
     it("shows pagination when total results exceed page size", async () => {
       mockFetchAllPages.mockResolvedValue([]);
-      mockFetchUrl.mockResolvedValue({ count: 200, data: mockDistributionData });
-      
+      mockFetchUrl.mockResolvedValue({
+        count: 200,
+        data: mockDistributionData,
+      });
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('pagination')).toBeInTheDocument();
+        expect(screen.getByTestId("pagination")).toBeInTheDocument();
         expect(screen.getByText(/Page 1 of 2/)).toBeInTheDocument();
       });
     });
@@ -420,18 +481,18 @@ describe("DistributionPage", () => {
       mockFetchUrl
         .mockResolvedValueOnce({ count: 200, data: mockDistributionData })
         .mockResolvedValueOnce({ count: 200, data: [mockDistributionData[1]] });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('next-page')).toBeInTheDocument();
+        expect(screen.getByTestId("next-page")).toBeInTheDocument();
       });
 
-      await user.click(screen.getByTestId('next-page'));
-      
+      await user.click(screen.getByTestId("next-page"));
+
       await waitFor(() => {
         expect(mockFetchUrl).toHaveBeenCalledWith(
-          expect.stringContaining('&page=2')
+          expect.stringContaining("&page=2")
         );
       });
     });
@@ -439,11 +500,11 @@ describe("DistributionPage", () => {
     it("does not show pagination when results fit on one page", async () => {
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 50, data: mockDistributionData });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        expect(screen.queryByTestId('pagination')).not.toBeInTheDocument();
+        expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
       });
     });
   });
@@ -453,15 +514,15 @@ describe("DistributionPage", () => {
       mockUseParams.mockReturnValue({ id: "789" });
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
-      
+
       render(<DistributionPage header="Test" contract="0xABC" link="" />);
-      
+
       await waitFor(() => {
         expect(mockFetchAllPages).toHaveBeenCalledWith(
-          'https://api.test.com/api/distribution_photos/0xABC/789'
+          "https://api.test.6529.io/api/distribution_photos/0xABC/789"
         );
         expect(mockFetchUrl).toHaveBeenCalledWith(
-          'https://api.test.com/api/distributions?card_id=789&contract=0xABC&page=1'
+          "https://api.test.6529.io/api/distributions?card_id=789&contract=0xABC&page=1"
         );
       });
     });
@@ -472,22 +533,24 @@ describe("DistributionPage", () => {
       mockFetchUrl
         .mockResolvedValueOnce({ count: 1, data: [mockDistributionData[0]] })
         .mockResolvedValueOnce({ count: 0, data: [] });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       // Wait for initial load with data
       await waitFor(() => {
-        expect(screen.getByTestId('search-wallets-display')).toBeInTheDocument();
+        expect(
+          screen.getByTestId("search-wallets-display")
+        ).toBeInTheDocument();
       });
-      
+
       // Add search wallets
-      await user.click(screen.getByTestId('open-search-modal'));
-      await user.click(screen.getByTestId('add-wallets'));
-      await user.click(screen.getByTestId('close-modal'));
-      
+      await user.click(screen.getByTestId("open-search-modal"));
+      await user.click(screen.getByTestId("add-wallets"));
+      await user.click(screen.getByTestId("close-modal"));
+
       await waitFor(() => {
         expect(mockFetchUrl).toHaveBeenLastCalledWith(
-          expect.stringContaining('&search=0x123,0x456')
+          expect.stringContaining("&search=0x123,0x456")
         );
       });
     });
@@ -496,43 +559,54 @@ describe("DistributionPage", () => {
   describe("Component Integration", () => {
     it("renders address component with correct props", async () => {
       mockFetchAllPages.mockResolvedValue([]);
-      mockFetchUrl.mockResolvedValue({ count: 1, data: [mockDistributionData[0]] });
-      
+      mockFetchUrl.mockResolvedValue({
+        count: 1,
+        data: [mockDistributionData[0]],
+      });
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
-      await waitFor(() => {
-        const addressComponent = screen.getByTestId('address-component');
-        expect(addressComponent).toBeInTheDocument();
-        expect(addressComponent.getAttribute('data-wallet')).toBe('0x1234567890123456789012345678901234567890');
-        expect(addressComponent.getAttribute('data-display')).toBe('TestUser1');
-        expect(addressComponent.getAttribute('data-hide-copy')).toBe('true');
-      }, { timeout: 5000 });
+
+      await waitFor(
+        () => {
+          const addressComponent = screen.getByTestId("address-component");
+          expect(addressComponent).toBeInTheDocument();
+          expect(addressComponent.dataset.wallet).toBe(
+            "0x1234567890123456789012345678901234567890"
+          );
+          expect(addressComponent.dataset.display).toBe("TestUser1");
+          expect(addressComponent.dataset.hideCopy).toBe("true");
+        },
+        { timeout: 5000 }
+      );
     });
 
     it("renders scroll to button with correct props", async () => {
       mockFetchAllPages.mockResolvedValue([]);
-      mockFetchUrl.mockResolvedValue({ count: 1, data: [mockDistributionData[0]] });
-      
+      mockFetchUrl.mockResolvedValue({
+        count: 1,
+        data: [mockDistributionData[0]],
+      });
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       await waitFor(() => {
-        const scrollButton = screen.getByTestId('scroll-to-button');
+        const scrollButton = screen.getByTestId("scroll-to-button");
         expect(scrollButton).toBeInTheDocument();
-        expect(scrollButton.getAttribute('data-threshold')).toBe('500');
-        expect(scrollButton.getAttribute('data-to')).toBe('distribution-table');
-        expect(scrollButton.getAttribute('data-offset')).toBe('0');
+        expect(scrollButton.dataset.threshold).toBe("500");
+        expect(scrollButton.dataset.to).toBe("distribution-table");
+        expect(scrollButton.dataset.offset).toBe("0");
       });
     });
   });
 
   describe("Error Handling", () => {
     it("handles missing nft id parameter", () => {
-      mockUseParams.mockReturnValue({ id: undefined });
+      mockUseParams.mockReturnValue({ id: "" });
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       // Should not make API calls without nft id
       expect(mockFetchAllPages).not.toHaveBeenCalled();
       expect(mockFetchUrl).not.toHaveBeenCalled();
@@ -542,11 +616,13 @@ describe("DistributionPage", () => {
       mockUseParams.mockReturnValue({ id: "invalid" });
       mockFetchAllPages.mockResolvedValue([]);
       mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
-      
-      render(<DistributionPage header="Test" contract={MEMES_CONTRACT} link="" />);
-      
+
+      render(
+        <DistributionPage header="Test" contract={MEMES_CONTRACT} link="" />
+      );
+
       await waitFor(() => {
-        expect(screen.queryByTestId('mint-countdown')).not.toBeInTheDocument();
+        expect(screen.queryByTestId("mint-countdown")).not.toBeInTheDocument();
       });
     });
   });
@@ -555,24 +631,29 @@ describe("DistributionPage", () => {
     it("resets to page 1 when search changes", async () => {
       const user = userEvent.setup();
       mockFetchAllPages.mockResolvedValue([]);
-      mockFetchUrl.mockResolvedValue({ count: 1, data: [mockDistributionData[0]] });
-      
+      mockFetchUrl.mockResolvedValue({
+        count: 1,
+        data: [mockDistributionData[0]],
+      });
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       // Wait for initial load with data
       await waitFor(() => {
-        expect(screen.getByTestId('search-wallets-display')).toBeInTheDocument();
+        expect(
+          screen.getByTestId("search-wallets-display")
+        ).toBeInTheDocument();
       });
-      
+
       // Add search wallets
-      await user.click(screen.getByTestId('open-search-modal'));
-      await user.click(screen.getByTestId('add-wallets'));
-      await user.click(screen.getByTestId('close-modal'));
-      
+      await user.click(screen.getByTestId("open-search-modal"));
+      await user.click(screen.getByTestId("add-wallets"));
+      await user.click(screen.getByTestId("close-modal"));
+
       // Should make API call with page 1
       await waitFor(() => {
         expect(mockFetchUrl).toHaveBeenCalledWith(
-          expect.stringContaining('&page=1')
+          expect.stringContaining("&page=1")
         );
       });
     });
@@ -584,31 +665,33 @@ describe("DistributionPage", () => {
         .mockResolvedValueOnce({ count: 200, data: mockDistributionData })
         .mockResolvedValueOnce({ count: 200, data: mockDistributionData })
         .mockResolvedValueOnce({ count: 200, data: [mockDistributionData[1]] });
-      
+
       render(<DistributionPage header="Test" contract="0x123" link="" />);
-      
+
       // Wait for initial load with data
       await waitFor(() => {
-        expect(screen.getByTestId('search-wallets-display')).toBeInTheDocument();
+        expect(
+          screen.getByTestId("search-wallets-display")
+        ).toBeInTheDocument();
       });
-      
+
       // Add search wallets
-      await user.click(screen.getByTestId('open-search-modal'));
-      await user.click(screen.getByTestId('add-wallets'));
-      await user.click(screen.getByTestId('close-modal'));
-      
+      await user.click(screen.getByTestId("open-search-modal"));
+      await user.click(screen.getByTestId("add-wallets"));
+      await user.click(screen.getByTestId("close-modal"));
+
       // Navigate to next page
       await waitFor(() => {
-        expect(screen.getByTestId('next-page')).toBeInTheDocument();
+        expect(screen.getByTestId("next-page")).toBeInTheDocument();
       });
-      
-      await user.click(screen.getByTestId('next-page'));
-      
+
+      await user.click(screen.getByTestId("next-page"));
+
       // Should maintain search parameters
       await waitFor(() => {
-        const lastCall = mockFetchUrl.mock.calls[mockFetchUrl.mock.calls.length - 1][0];
-        expect(lastCall).toContain('&search=0x123,0x456');
-        expect(lastCall).toContain('&page=2');
+        const lastCall = mockFetchUrl.mock.calls.at(-1)?.[0];
+        expect(lastCall).toContain("&search=0x123,0x456");
+        expect(lastCall).toContain("&page=2");
       });
     });
   });

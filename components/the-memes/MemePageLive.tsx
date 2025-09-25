@@ -1,5 +1,6 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -281,7 +282,7 @@ export function MemePageLiveSubMenu(props: {
   useEffect(() => {
     if (props.nft) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
+        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
       ).then((response: DBResponse) => {
         setMemeLabNfts(response.data);
         setMemeLabNftsLoaded(true);
@@ -301,7 +302,7 @@ export function MemePageLiveSubMenu(props: {
       sort = "&sort=created_at&sort_direction=desc";
     }
     fetchUrl(
-      `${process.env.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
+      `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
     ).then((response: DBResponse) => {
       setRememesTotalResults(response.count);
       setRememes(response.data);

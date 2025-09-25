@@ -1,5 +1,6 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
@@ -18,7 +19,7 @@ export default function AccessPage() {
   useEffect(() => {
     if (!image) {
       const apiAuth = getStagingAuth();
-      fetch(`${process.env.API_ENDPOINT}/api/`, {
+      fetch(`${publicEnv.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
       }).then((r: any) => {
         r.json().then((response: any) => {
@@ -35,7 +36,7 @@ export default function AccessPage() {
   function doLogin(target: HTMLInputElement) {
     target.select();
     const pass = target.value;
-    fetch(`${process.env.API_ENDPOINT}/api/`, {
+    fetch(`${publicEnv.API_ENDPOINT}/api/`, {
       headers: { "x-6529-auth": pass },
     }).then((r: any) => {
       if (r.status === 401) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,
@@ -21,7 +22,7 @@ type TitleContextType = {
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
-export const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes("staging")
+export const DEFAULT_TITLE = publicEnv.BASE_ENDPOINT?.includes("staging")
   ? "6529 Staging"
   : "6529.io";
 

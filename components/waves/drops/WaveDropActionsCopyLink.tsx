@@ -1,8 +1,9 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import React, { useState } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 
 interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;
@@ -20,7 +21,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   const copyToClipboard = () => {
     if (isTemporaryDrop(drop)) return;
 
-    const dropLink = `${process.env.BASE_ENDPOINT}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
+    const dropLink = `${publicEnv.BASE_ENDPOINT}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

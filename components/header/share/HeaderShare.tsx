@@ -1,30 +1,27 @@
 "use client";
 
-import styles from "./HeaderShare.module.scss";
-import {
-  faCopy,
-  faExternalLink,
-} from "@fortawesome/free-solid-svg-icons";
+import { publicEnv } from "@/config/env";
+import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ShareIcon } from "@heroicons/react/24/outline";
+import yaml from "js-yaml";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
+import { useElectron } from "../../../hooks/useElectron";
 import {
   getRefreshToken,
   getWalletAddress,
   getWalletRole,
 } from "../../../services/auth/auth.utils";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import { Tooltip } from "react-tooltip";
-import { useElectron } from "../../../hooks/useElectron";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import yaml from "js-yaml";
+import styles from "./HeaderShare.module.scss";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
-import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
-
 const QRCode = require("qrcode");
 
 enum Mode {
@@ -48,7 +45,11 @@ const squareStyle = {
   justifyContent: "center",
 };
 
-export default function HeaderShare({ isCollapsed = false }: { readonly isCollapsed?: boolean }) {
+export default function HeaderShare({
+  isCollapsed = false,
+}: {
+  readonly isCollapsed?: boolean;
+}) {
   const capacitor = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
@@ -58,7 +59,10 @@ export default function HeaderShare({ isCollapsed = false }: { readonly isCollap
   }
 
   return (
-    <div className={`tailwind-scope tw-relative tw-mt-1 ${isCollapsed ? "tw-px-2" : "tw-px-4"}`}>
+    <div
+      className={`tailwind-scope tw-relative tw-mt-1 ${
+        isCollapsed ? "tw-px-2" : "tw-px-4"
+      }`}>
       <button
         type="button"
         aria-label="QR Code"
@@ -66,8 +70,7 @@ export default function HeaderShare({ isCollapsed = false }: { readonly isCollap
         onClick={() => setShowQRModal(true)}
         className={`tw-w-full tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-3 tw-gap-4 tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-transparent ${
           isCollapsed ? "tw-justify-center" : "tw-justify-start"
-        }`}
-      >
+        }`}>
         <ShareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
         {!isCollapsed && <span>Share</span>}
       </button>
@@ -124,8 +127,8 @@ function HeaderQRModal({
       routerPath += `?${searchParamsString}`;
     }
 
-    const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
-    const coreScheme = process.env.CORE_SCHEME ?? "core6529";
+    const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
+    const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
 
     const browserUrl = `${window.location.origin}${routerPath}`;
     const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
@@ -220,8 +223,7 @@ function HeaderQRModal({
         <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
           <a
             href={url}
-            className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8"
-          >
+            className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
             <Image
               unoptimized
               priority
@@ -234,8 +236,7 @@ function HeaderQRModal({
             />
             <Button
               variant="primary"
-              className="tw-flex tw-items-center tw-gap-2 tw-w-full"
-            >
+              className="tw-flex tw-items-center tw-gap-2 tw-w-full">
               <FontAwesomeIcon icon={faExternalLink} />
               <div className="no-wrap">Open in 6529 Core</div>
             </Button>
@@ -293,8 +294,7 @@ function HeaderQRModal({
           content = (
             <div
               className="tw-p-10 tw-flex tw-flex-col tw-gap-12 tw-items-center tw-justify-center"
-              style={squareStyle}
-            >
+              style={squareStyle}>
               <ShareMobileApp platform="ios" />
               <ShareMobileApp platform="android" />
             </div>
@@ -346,8 +346,7 @@ function HeaderQRModal({
       onHide={onClose}
       keyboard
       centered
-      data-testid="header-share-modal"
-    >
+      data-testid="header-share-modal">
       <Modal.Body className={styles.modalBody}>
         <ModalMenu
           isShareConnection={!!getRefreshToken()}
@@ -384,23 +383,20 @@ function ModalMenu({
           <Button
             className={activeTab === Mode.SHARE ? styles.disabledMenuBtn : ""}
             variant={activeTab === Mode.SHARE ? "light" : "outline-light"}
-            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
-          >
+            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}>
             Share Connection
           </Button>
         )}
         <Button
           className={activeTab === Mode.NAVIGATE ? styles.disabledMenuBtn : ""}
           variant={activeTab === Mode.NAVIGATE ? "light" : "outline-light"}
-          onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}
-        >
+          onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
           Current URL
         </Button>
         <Button
           className={activeTab === Mode.APPS ? styles.disabledMenuBtn : ""}
           variant={activeTab === Mode.APPS ? "light" : "outline-light"}
-          onClick={() => onTabChange(Mode.APPS, SubMode.APP)}
-        >
+          onClick={() => onTabChange(Mode.APPS, SubMode.APP)}>
           6529 Apps
         </Button>
       </div>
@@ -408,8 +404,7 @@ function ModalMenu({
       <div className="mt-3 d-flex gap-2">
         <Button
           variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
-          onClick={() => onTabChange(activeTab, SubMode.APP)}
-        >
+          onClick={() => onTabChange(activeTab, SubMode.APP)}>
           <span className="font-smaller">6529 Mobile</span>
         </Button>
         {activeTab === Mode.NAVIGATE && (
@@ -417,16 +412,14 @@ function ModalMenu({
             variant={
               activeSubTab === SubMode.BROWSER ? "light" : "outline-light"
             }
-            onClick={() => onTabChange(activeTab, SubMode.BROWSER)}
-          >
+            onClick={() => onTabChange(activeTab, SubMode.BROWSER)}>
             <span className="font-smaller">Browser</span>
           </Button>
         )}
         {!isElectron && (
           <Button
             variant={activeSubTab === SubMode.CORE ? "light" : "outline-light"}
-            onClick={() => onTabChange(activeTab, SubMode.CORE)}
-          >
+            onClick={() => onTabChange(activeTab, SubMode.CORE)}>
             <span className="font-smaller">6529 Core</span>
           </Button>
         )}
@@ -559,8 +552,7 @@ function CoreAppDownload({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-w-full tw-bg-black tw-px-5 tw-py-3 tw-border tw-border-solid tw-border-white tw-rounded-lg decoration-none tw-flex tw-items-center tw-gap-4 hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
-    >
+      className="tw-w-full tw-bg-black tw-px-5 tw-py-3 tw-border tw-border-solid tw-border-white tw-rounded-lg decoration-none tw-flex tw-items-center tw-gap-4 hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out">
       <div className="tw-bg-white tw-rounded-full tw-p-4">
         <Image
           unoptimized

@@ -1,20 +1,15 @@
-import { commonApiFetch } from "../../services/api/common-api";
-import { getStagingAuth, getAuthJwt } from "../../services/auth/auth.utils";
+import { commonApiFetch } from "@/services/api/common-api";
+import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 
-jest.mock("../../services/auth/auth.utils", () => ({
+jest.mock("@/services/auth/auth.utils", () => ({
   getStagingAuth: jest.fn(),
   getAuthJwt: jest.fn(),
 }));
 
 describe("commonApiFetch", () => {
-  const originalEndpoint = process.env.API_ENDPOINT;
   beforeEach(() => {
     (global as any).fetch = jest.fn();
     jest.resetAllMocks();
-    process.env.API_ENDPOINT = "https://example.com";
-  });
-  afterAll(() => {
-    process.env.API_ENDPOINT = originalEndpoint;
   });
 
   it("builds url with params and headers", async () => {
@@ -30,8 +25,8 @@ describe("commonApiFetch", () => {
       params: { foo: "bar", typ: "nic" },
     });
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      "https://example.com/api/test?foo=bar&typ=cic",
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/test?foo=bar&typ=cic",
       {
         headers: {
           "Content-Type": "application/json",
@@ -58,13 +53,8 @@ describe("commonApiFetch", () => {
 });
 
 describe("commonApiPost", () => {
-  const originalEndpoint = process.env.API_ENDPOINT;
   beforeEach(() => {
     (global as any).fetch = jest.fn();
-    process.env.API_ENDPOINT = "https://example.com";
-  });
-  afterAll(() => {
-    process.env.API_ENDPOINT = originalEndpoint;
   });
 
   it("posts data and returns json", async () => {
@@ -74,16 +64,19 @@ describe("commonApiPost", () => {
       ok: true,
       json: async () => ({ res: 1 }),
     });
-    const { commonApiPost } = await import("../../services/api/common-api");
+    const { commonApiPost } = await import("@/services/api/common-api");
     const result = await commonApiPost<{ v: number }, { res: number }>({
       endpoint: "e",
       body: { v: 1 },
     });
-    expect(global.fetch).toHaveBeenCalledWith("https://example.com/api/e", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-6529-auth": "a" },
-      body: JSON.stringify({ v: 1 }),
-    });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/e",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-6529-auth": "a" },
+        body: JSON.stringify({ v: 1 }),
+      }
+    );
     expect(result).toEqual({ res: 1 });
   });
 
@@ -95,7 +88,7 @@ describe("commonApiPost", () => {
       statusText: "B",
       json: async () => ({ error: "err" }),
     });
-    const { commonApiPost } = await import("../../services/api/common-api");
+    const { commonApiPost } = await import("@/services/api/common-api");
     await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
       "err"
     );
