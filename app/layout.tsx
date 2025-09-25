@@ -38,27 +38,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
-        <link
-          rel="preconnect"
-          href="https://d3lqz0a4bldqgf.cloudfront.net"
-          crossOrigin=""
-        />
-        <link
-          rel="preconnect"
-          href="https://media.artblocks.io"
-          crossOrigin=""
-        />
-        <link
-          rel="preconnect"
-          href="https://media-proxy.artblocks.io"
-          crossOrigin=""
-        />
+        <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
+        <link rel="preconnect" href="https://media.artblocks.io" />
+        <link rel="preconnect" href="https://media-proxy.artblocks.io" />
         {isUsingStaticAssets && (
-          <link
-            rel="preconnect"
-            href="https://dnclu2fna0b2b.cloudfront.net"
-            crossOrigin=""
-          />
+          <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
         )}
       </head>
       <body>
