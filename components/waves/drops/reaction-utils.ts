@@ -1,10 +1,24 @@
 import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiDropReaction } from "../../../generated/models/ApiDropReaction";
 
 export type ReactionEntry = {
   reaction: string;
   profiles: ApiProfileMin[];
   [key: string]: unknown;
+};
+
+export const cloneReactionEntries = (
+  reactions: readonly ApiDropReaction[] | null | undefined
+): ReactionEntry[] => {
+  if (!reactions || reactions.length === 0) {
+    return [];
+  }
+
+  return reactions.map((reaction) => ({
+    ...reaction,
+    profiles: [...reaction.profiles],
+  }));
 };
 
 export const duplicateProfilesWithoutUser = (

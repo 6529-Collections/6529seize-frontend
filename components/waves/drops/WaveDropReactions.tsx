@@ -24,6 +24,7 @@ import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
 import {
   findReactionIndex,
+  cloneReactionEntries,
   removeUserFromReactions,
   toProfileMin,
   type ReactionEntry,
@@ -167,9 +168,7 @@ export function WaveDropReaction({
               return draft;
             }
 
-            const reactions = (
-              draft.reactions ? [...draft.reactions] : []
-            ) as ReactionEntry[];
+            const reactions = cloneReactionEntries(draft.reactions);
             const userId = connectedProfile?.id ?? null;
             const reactionsWithoutUser = removeUserFromReactions(
               reactions,
