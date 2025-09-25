@@ -332,7 +332,6 @@ function useWaveMessagesStore() {
 
       // Notify listeners *after* state update is triggered
       // Note: state updates might be async, listeners get the *new* state idea
-      // For more robust notification, you might useEffect on `store` change
       const keyListeners = listenersRef.current[waveId];
 
       if (keyListeners && notify) {
@@ -342,22 +341,6 @@ function useWaveMessagesStore() {
     },
     [waveMessages]
   );
-
-  // Optional: Effect to notify listeners if state changes outside updateData
-  // This is a more robust way to ensure listeners are called *after* the state has definitively updated.
-  useEffect(() => {
-    // This effect runs after each render where `store` might have changed.
-    // We iterate through all tracked keys in listenersRef.
-    for (const key of Object.keys(listenersRef.current)) {
-      const keyListeners = listenersRef.current[key];
-      const currentValue = waveMessages[key]; // Get the current value from the updated store
-      if (keyListeners) {
-        keyListeners.forEach((listener) => listener(currentValue));
-        // Be cautious: This might notify even if the specific key didn't change,
-        // if the store object reference changed. The selector hook below handles this.
-      }
-    }
-  }, [waveMessages]); // Run when the store state changes
 
   return {
     getData,
