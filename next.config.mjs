@@ -47,10 +47,8 @@ const nextConfigFactory = (phase) => {
     const { publicEnvSchema } = schemaMod;
 
     let VERSION = process.env.VERSION;
-    let LOAD_S3;
     if (VERSION) {
       logOnce("VERSION (explicit)", VERSION);
-      LOAD_S3 = true;
     } else {
       try {
         VERSION = execSync("git rev-parse HEAD").toString().trim();
@@ -59,9 +57,13 @@ const nextConfigFactory = (phase) => {
         VERSION = "6529seize";
         logOnce("VERSION (default)", VERSION);
       }
-      LOAD_S3 = false;
     }
-    logOnce("LOAD_S3", LOAD_S3);
+
+    // Single source of truth for asset hosting: ASSETS_FROM_S3 only
+    const ASSETS_FROM_S3 =
+      (process.env.ASSETS_FROM_S3 ?? "false").toString().toLowerCase() ===
+      "true";
+    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3);
 
     // Build public runtime from schema keys
     const shape = publicEnvSchema._def.shape();
@@ -78,7 +80,7 @@ const nextConfigFactory = (phase) => {
     const publicEnv = parsed.data;
 
     const nextConfig = {
-      assetPrefix: LOAD_S3
+      assetPrefix: ASSETS_FROM_S3
         ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
         : "",
       reactStrictMode: false,
@@ -184,8 +186,15 @@ const nextConfigFactory = (phase) => {
     if (!parsed.success) throw parsed.error; // FAIL-FAST at runtime
     const publicEnv = parsed.data;
 
+    const ASSETS_FROM_S3 =
+      (process.env.ASSETS_FROM_S3 ?? "false").toString().toLowerCase() ===
+      "true";
+    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3);
+
     const nextConfig = {
-      assetPrefix: `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`,
+      assetPrefix: ASSETS_FROM_S3
+        ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
+        : "",
       reactStrictMode: false,
       compress: true,
       productionBrowserSourceMaps: true,
