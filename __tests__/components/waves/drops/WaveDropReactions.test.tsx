@@ -26,9 +26,17 @@ jest.mock("../../../../services/api/common-api", () => ({
 }));
 
 describe("WaveDropReactions", () => {
+  const getMyStreamMock = () =>
+    (require("../../../../contexts/wave/MyStreamContext") as {
+      useMyStream: jest.Mock;
+    }).useMyStream;
+
   beforeEach(() => {
-    // Reset mocks before each test
-    jest.resetAllMocks();
+    // Reset call history without removing default implementations
+    jest.clearAllMocks();
+    getMyStreamMock().mockReturnValue({
+      applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
+    });
   });
 
   it("renders multiple WaveDropReaction buttons", () => {

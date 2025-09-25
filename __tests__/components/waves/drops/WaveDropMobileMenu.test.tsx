@@ -8,6 +8,7 @@ jest.mock("../../../../components/waves/drops/WaveDropMobileMenuDelete", () => (
 jest.mock("../../../../components/waves/drops/WaveDropMobileMenuFollow", () => () => <div data-testid="follow" />);
 jest.mock("../../../../components/waves/drops/WaveDropMobileMenuOpen", () => () => <div data-testid="open" />);
 jest.mock("../../../../components/waves/drops/WaveDropActionsRate", () => () => <div data-testid="clap" />);
+jest.mock("../../../../components/waves/drops/WaveDropActionsAddReaction", () => () => <div data-testid="add-reaction" />);
 jest.mock("../../../../components/utils/select/dropdown/CommonDropdownItemsMobileWrapper", () => (props: any) => props.isOpen ? <div data-testid="wrapper">{props.children}</div> : null);
 
 jest.mock("../../../../contexts/SeizeSettingsContext", () => ({ useSeizeSettings: () => ({ isMemesWave: jest.fn().mockReturnValue(true) }) }));
