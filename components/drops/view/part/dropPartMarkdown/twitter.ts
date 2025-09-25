@@ -2,7 +2,7 @@ const twitterRegex =
   /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/;
 
 export const parseTwitterLink = (href: string): { href: string; tweetId: string } | null => {
-  const match = href.match(twitterRegex);
+  const match = twitterRegex.exec(href);
   if (!match) {
     return null;
   }
