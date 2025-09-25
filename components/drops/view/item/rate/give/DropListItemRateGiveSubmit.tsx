@@ -103,13 +103,7 @@ export default function DropListItemRateGiveSubmit({
     if (applyOptimisticDropUpdate && drop.wave?.id) {
       const previousHasRating = previousRate !== 0;
       const newHasRating = newRate !== 0;
-      const ratersCountDelta = previousHasRating
-        ? newHasRating
-          ? 0
-          : -1
-        : newHasRating
-          ? 1
-          : 0;
+      const ratersCountDelta = Number(newHasRating) - Number(previousHasRating);
       const ratingDelta = newRate - previousRate;
 
       optimisticRollbackRef.current?.();
