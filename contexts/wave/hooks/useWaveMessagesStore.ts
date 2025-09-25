@@ -32,8 +32,9 @@ const cloneValue = <T>(value: T): T => {
   return structuredClone(value);
 };
 
-const toDropRecord = (drop: Drop): Record<string, unknown> =>
-  drop as unknown as Record<string, unknown>;
+type DropRecord = Drop & Record<string, unknown>;
+
+const toDropRecord = (drop: Drop): DropRecord => drop as DropRecord;
 
 const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
   const keys = new Set([
