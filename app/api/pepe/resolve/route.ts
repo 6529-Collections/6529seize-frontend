@@ -220,7 +220,7 @@ function normalizeImageUrl(candidate: unknown, base: string): string | null {
 function slugifyName(name: string): string {
   return name
     .toLowerCase()
-    .replaceAll(/&/g, "and")
+    .replaceAll("&", "and")
     .replaceAll(/[^a-z0-9\s-]/g, "")
     .trim()
     .replaceAll(/\s+/g, "-")
@@ -272,14 +272,12 @@ async function scrapeNextData(url: string): Promise<ScrapeNextDataResult> {
 
   const metaImages = new Set<string>();
   for (const selector of metaImageSelectors) {
-    $(selector)
-      .toArray()
-      .forEach((element: any) => {
-        const content = $(element).attr("content");
-        if (content && content.trim()) {
-          metaImages.add(content.trim());
-        }
-      });
+    for (const element of $(selector).toArray()) {
+      const content = $(element).attr("content");
+      if (content && content.trim()) {
+        metaImages.add(content.trim());
+      }
+    }
   }
 
   const raw = $('script#__NEXT_DATA__').first().text();

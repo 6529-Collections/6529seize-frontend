@@ -161,24 +161,18 @@ function validateGooglePreviewUrl(rawUrl: string): URL | null {
     return null;
   }
 
-  let hasUnexpectedParam = false;
-  parsed.searchParams.forEach((_, key) => {
+  for (const key of parsed.searchParams.keys()) {
     if (!matchingRule.allowedParams.has(key)) {
-      hasUnexpectedParam = true;
+      return null;
     }
-  });
-  if (hasUnexpectedParam) {
-    return null;
   }
 
-  let missingRequired = false;
-  matchingRule.requiredParams?.forEach((key) => {
-    if (!parsed.searchParams.get(key)) {
-      missingRequired = true;
+  if (matchingRule.requiredParams) {
+    for (const key of matchingRule.requiredParams) {
+      if (!parsed.searchParams.get(key)) {
+        return null;
+      }
     }
-  });
-  if (missingRequired) {
-    return null;
   }
 
   return parsed;
@@ -396,19 +390,35 @@ function isGoogleAccessRestricted(html: string | null | undefined): boolean {
   return GOOGLE_ACCESS_DENIED_PATTERNS.some((pattern) => normalized.includes(pattern));
 }
 
-async function readLimitedResponse(
+function truncateToLimit(value: string, byteLimit: number): string {
+  return value.length > byteLimit ? value.slice(0, byteLimit) : value;
+}
+
+async function readTextResponse(
   response: Response,
   byteLimit: number
 ): Promise<string> {
-  if (!response.body) {
-    const text = await response.text();
-    return text.length > byteLimit ? text.slice(0, byteLimit) : text;
-  }
+  const text = await response.text();
+  return truncateToLimit(text, byteLimit);
+}
 
-  const reader = response.body.getReader();
+async function cancelReader(
+  reader: ReadableStreamDefaultReader<Uint8Array>
+): Promise<void> {
+  try {
+    await reader.cancel();
+  } catch {
+    // ignore cancellation errors
+  }
+}
+
+async function readStreamResponse(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  byteLimit: number
+): Promise<string> {
   const decoder = new TextDecoder();
-  let result = "";
   let total = 0;
+  let result = "";
 
   while (total < byteLimit) {
     const { done, value } = await reader.read();
@@ -416,28 +426,33 @@ async function readLimitedResponse(
       break;
     }
 
-    if (value) {
-      total += value.byteLength;
-      result += decoder.decode(value, { stream: true });
+    if (!value) {
+      continue;
+    }
 
-      if (total >= byteLimit) {
-        try {
-          await reader.cancel();
-        } catch {
-          // ignore cancellation errors
-        }
-        break;
-      }
+    total += value.byteLength;
+    result += decoder.decode(value, { stream: true });
+
+    if (total >= byteLimit) {
+      await cancelReader(reader);
+      break;
     }
   }
 
   result += decoder.decode();
+  return truncateToLimit(result, byteLimit);
+}
 
-  if (result.length > byteLimit) {
-    return result.slice(0, byteLimit);
+async function readLimitedResponse(
+  response: Response,
+  byteLimit: number
+): Promise<string> {
+  if (!response.body) {
+    return readTextResponse(response, byteLimit);
   }
 
-  return result;
+  const reader = response.body.getReader();
+  return readStreamResponse(reader, byteLimit);
 }
 
 async function fetchGooglePreviewHtml(url: string): Promise<{
@@ -492,22 +507,26 @@ function deriveGoogleAvailability(
   return "public";
 }
 
+function buildTitleCandidates(html: string | null): Array<string | undefined> {
+  if (!html) {
+    return [];
+  }
+
+  return [
+    extractFirstMetaContent(html, TITLE_KEYS),
+    extractTitleTag(html),
+  ];
+}
+
 function pickGoogleTitle(
   previewHtml: string | null,
   initialHtml: string,
   fallback: string
 ): string {
-  const candidates: Array<string | undefined> = [];
-
-  if (previewHtml) {
-    candidates.push(extractFirstMetaContent(previewHtml, TITLE_KEYS));
-    candidates.push(extractTitleTag(previewHtml));
-  }
-
-  if (initialHtml) {
-    candidates.push(extractFirstMetaContent(initialHtml, TITLE_KEYS));
-    candidates.push(extractTitleTag(initialHtml));
-  }
+  const candidates = [
+    ...buildTitleCandidates(previewHtml),
+    ...buildTitleCandidates(initialHtml),
+  ];
 
   const selected = candidates.find(
     (value) => typeof value === "string" && value.trim().length > 0
