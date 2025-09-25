@@ -1,11 +1,16 @@
 import dotenv from "dotenv";
 import { execSync } from "node:child_process";
 
-const mode = process.env.NODE_ENV;
-if (!process.env.__LOG_ENV_ONCE__) {
-  process.env.__LOG_ENV_ONCE__ = "1";
-  console.log("NODE_ENV", process.env.NODE_ENV);
+function logOnce(label, message) {
+  if (!process.env[`__LOG_${label}_ONCE__`]) {
+    process.env[`__LOG_${label}_ONCE__`] = "1";
+    process.env.__LOG_ENV_ONCE__ = "1";
+    console.log(`${label}: ${message}`);
+  }
 }
+
+const mode = process.env.NODE_ENV;
+logOnce("NODE_ENV", mode);
 
 if (mode) {
   dotenv.config({ path: `.env.${mode}` });
@@ -21,14 +26,19 @@ let VERSION = process.env.VERSION;
 let LOAD_S3;
 
 if (VERSION) {
+  logOnce("VERSION (explicit)", VERSION);
   LOAD_S3 = true;
 } else {
   LOAD_S3 = false;
   try {
     VERSION = execSync("git rev-parse HEAD").toString().trim();
+    logOnce("VERSION (from git HEAD)", VERSION);
   } catch {
     VERSION = "6529seize";
+    logOnce("VERSION (default)", VERSION);
   }
+
+  process.env.VERSION = VERSION;
 }
 
 // Build a public runtime object by iterating schema keys
