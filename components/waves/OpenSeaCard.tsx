@@ -367,8 +367,10 @@ const renderTransactionCard = (href: string, data: OpenSeaTransactionResponse) =
 
   const summaryRows: Array<{ label: string; value?: string }> = [];
   if (summary?.item) {
-    summaryRows.push({ label: "Token", value: `${shorten(summary.item.contract)} #${summary.item.tokenId}` });
-    summaryRows.push({ label: "Standard", value: summary.item.standard });
+    summaryRows.push(
+      { label: "Token", value: `${shorten(summary.item.contract)} #${summary.item.tokenId}` },
+      { label: "Standard", value: summary.item.standard }
+    );
   }
   if (summary?.price) {
     summaryRows.push({ label: "Price", value: `${summary.price.amount} ${summary.price.asset}` });
