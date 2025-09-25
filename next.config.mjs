@@ -167,6 +167,7 @@ const nextConfigFactory = (phase) => {
     const publicRuntime = {};
     for (const key of Object.keys(shape)) publicRuntime[key] = process.env[key];
     publicRuntime.VERSION = VERSION;
+    publicRuntime.ASSETS_FROM_S3 = String(ASSETS_FROM_S3);
 
     const parsed = publicEnvSchema.safeParse(publicRuntime);
     if (!parsed.success) throw parsed.error; // FAIL-FAST at build
