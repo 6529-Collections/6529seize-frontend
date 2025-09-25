@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Poppins } from "next/font/google";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
-import BlockPickerDateSelect from "@/components/block-picker/BlockPickerDateSelect";
-import BlockPickerBlockNumberIncludes from "@/components/block-picker/BlockPickerBlockNumberIncludes";
-import { distributionPlanApiPost } from "@/services/distribution-plan-api";
-import BlockPickerResult from "@/components/block-picker/result/BlockPickerResult";
-import { useTitle } from "@/contexts/TitleContext";
 import { useAuth } from "@/components/auth/Auth";
+import BlockPickerBlockNumberIncludes from "@/components/block-picker/BlockPickerBlockNumberIncludes";
+import BlockPickerDateSelect from "@/components/block-picker/BlockPickerDateSelect";
+import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
+import BlockPickerResult from "@/components/block-picker/result/BlockPickerResult";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { useTitle } from "@/contexts/TitleContext";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
+import { Poppins } from "next/font/google";
+import { useEffect, useState } from "react";
 
 export interface PredictBlockNumbersResponseApiModel {
   readonly blockNumberIncludes: number;
@@ -100,7 +100,7 @@ export default function BlockPickerClient() {
 
       const response =
         await distributionPlanApiPost<PredictBlockNumbersResponseApiModel>({
-          endpoint: "block-numbers/predict",
+          endpoint: "/block-numbers/predict",
           body: {
             timestamp: timestamp.toISOString(),
             endTimestamp: endTimestamp.toISOString(),
