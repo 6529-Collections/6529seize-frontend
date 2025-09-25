@@ -62,7 +62,7 @@ export interface FetchPublicUrlOptions extends UrlGuardOptions {
 
 const DEFAULT_PROTOCOLS = ["http:", "https:"];
 const DEFAULT_REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
-const DISALLOWED_HOST_PATTERNS = ["localhost", "127.0.0.1", "::1"];
+const DISALLOWED_HOST_PATTERNS: ReadonlySet<string> = new Set(["localhost", "127.0.0.1", "::1"]);
 
 const PRIVATE_IPV4_RANGES: ReadonlyArray<[number, number]> = [
   [ipv4ToInt("0.0.0.0"), ipv4ToInt("0.255.255.255")],
@@ -277,7 +277,7 @@ export async function assertPublicUrl(url: URL, options: UrlGuardOptions = {}): 
 
   const lowerHost = hostname.toLowerCase();
   if (
-    DISALLOWED_HOST_PATTERNS.includes(lowerHost) ||
+    DISALLOWED_HOST_PATTERNS.has(lowerHost) ||
     lowerHost.endsWith(".localhost") ||
     lowerHost.endsWith(".local") ||
     isSuspiciousIpFormat(lowerHost) ||
