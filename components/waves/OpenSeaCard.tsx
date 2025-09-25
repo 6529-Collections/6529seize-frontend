@@ -106,39 +106,40 @@ const formatAttributeValue = (value: unknown): string => {
   if (value === null || value === undefined) {
     return "";
   }
-  if (typeof value === "string") {
-    return value;
-  }
-  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
-    return String(value);
-  }
   if (Array.isArray(value)) {
     return value
       .map((entry) => formatAttributeValue(entry))
       .filter((entry) => entry.length > 0)
       .join(", ");
   }
-  if (typeof value === "symbol") {
-    return value.toString();
-  }
-  if (typeof value === "function") {
-    return value.name ? `[function ${value.name}]` : "function";
-  }
   if (value instanceof Date) {
     return value.toISOString();
   }
-  if (value && typeof value === "object") {
-    try {
-      return JSON.stringify(value);
-    } catch {
-      const fallback = (value as { toString?: () => string }).toString?.();
-      if (typeof fallback === "string" && fallback !== "[object Object]") {
-        return fallback;
+
+  switch (typeof value) {
+    case "string":
+      return value;
+    case "number":
+    case "boolean":
+    case "bigint":
+      return String(value);
+    case "symbol":
+      return value.toString();
+    case "function":
+      return value.name ? `[function ${value.name}]` : "function";
+    case "object":
+      try {
+        return JSON.stringify(value);
+      } catch {
+        const fallback = (value as { toString?: () => string }).toString?.();
+        if (typeof fallback === "string" && fallback !== "[object Object]") {
+          return fallback;
+        }
+        return "[unserializable object]";
       }
-      return "[unserializable object]";
-    }
+    default:
+      return "";
   }
-  return "";
 };
 
 const formatRoyalties = (royalties?: OpenSeaRoyaltyInfo | null) => {
