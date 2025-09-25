@@ -34,8 +34,8 @@ function WebSidebarHeader({
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`tw-group tw-absolute tw-size-8 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)] ${
-          collapsed ? " -tw-right-8  tw-rounded-r-lg" : " tw-rounded-l-lg tw-right-0"
+        className={`tw-group tw-absolute tw-size-8 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)] ${
+          collapsed ? " -tw-right-8" : "tw-right-4"
         }`}
         aria-label={collapsed ? "Expand" : "Collapse"}
         aria-expanded={!collapsed}
@@ -44,7 +44,7 @@ function WebSidebarHeader({
       >
         <ChevronDoubleLeftIcon
           strokeWidth={2}
-          className={`tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 tw-flex-shrink-0 tw-text-iron-200 group-hover:hover:tw-text-white tw-transition-all tw-duration-200 ${
+          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-200 group-hover:hover:tw-text-white tw-transition-all tw-duration-200 ${
             collapsed ? "tw-rotate-180" : ""
           }`}
         />

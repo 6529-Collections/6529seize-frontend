@@ -132,7 +132,14 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
           <div
             className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
             onClick={closeRightSidebar}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                e.preventDefault();
+                closeRightSidebar();
+              }
+            }}
             role="button"
+            tabIndex={0}
             aria-label="Close sidebar overlay"
           />
           <BrainRightSidebar

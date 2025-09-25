@@ -340,6 +340,15 @@ const WebSidebarNav = React.forwardRef<
             className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
             style={{ left: "18rem" }} // 4rem sidebar + 14rem submenu
             onClick={closeSubmenu}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                e.preventDefault();
+                closeSubmenu();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Close submenu"
           />
           <WebSidebarSubmenu
             section={activeSection}

@@ -84,7 +84,14 @@ function WebSidebar({
         <div
           className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
           onClick={onCloseOffcanvas}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onCloseOffcanvas();
+            }
+          }}
           role="button"
+          tabIndex={0}
           aria-label="Close menu overlay"
         />
       )}
@@ -110,9 +117,7 @@ function WebSidebar({
 
             <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
               <div className="tw-flex-1">
-                <div onClick={isMobile ? onCloseOffcanvas : undefined}>
-            <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
-          </div>
+                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
               </div>
 
               <HeaderShare isCollapsed={shouldShowCollapsed} />
