@@ -1,5 +1,5 @@
+import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
 import { render, screen, waitFor } from "@testing-library/react";
-import NextGenTokenOnChain from "../../../../components/nextGen/collections/NextGenTokenOnChain";
 
 // Mock react-bootstrap
 jest.mock("react-bootstrap", () => ({
@@ -23,10 +23,10 @@ jest.mock("wagmi", () => ({
 }));
 
 // Mock other components
-jest.mock("../../../../components/dotLoader/DotLoader", () => () => (
+jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <div data-testid="dot-loader">Loading...</div>
 ));
-jest.mock("../../../../components/address/Address", () => (props: any) => (
+jest.mock("@/components/address/Address", () => (props: any) => (
   <div data-testid="address">{props.display || "Address"}</div>
 ));
 jest.mock("@fortawesome/react-fontawesome", () => ({
@@ -39,14 +39,14 @@ jest.mock("react-tooltip", () => ({
 }));
 
 // Mock hooks
-jest.mock("../../../../hooks/useCapacitor", () => () => ({ platform: "web" }));
-jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/hooks/useCapacitor", () => () => ({ platform: "web" }));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x123" }),
 }));
-jest.mock("../../../../hooks/useIdentity", () => ({
+jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: () => ({ profile: { handle: "testuser" } }),
 }));
-jest.mock("../../../../components/cookies/CookieConsentContext", () => ({
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(() => ({
     showCookieConsent: false,
     country: "US",
@@ -56,12 +56,14 @@ jest.mock("../../../../components/cookies/CookieConsentContext", () => ({
 }));
 
 // Mock helpers
-jest.mock("../../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   areEqualAddresses: jest.fn((a, b) => a?.toLowerCase() === b?.toLowerCase()),
 }));
 
-jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
-  formatNameForUrl: jest.fn((name) => name.toLowerCase().replace(/\s+/g, "-")),
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
+  formatNameForUrl: jest.fn((name) =>
+    name.toLowerCase().replaceAll(/\s+/g, "-")
+  ),
   getOpenseaLink: jest.fn(() => "https://opensea.io/test"),
 }));
 
