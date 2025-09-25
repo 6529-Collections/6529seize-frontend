@@ -94,9 +94,38 @@ const formatSupply = (supply?: OpenSeaItemSupply | null) => {
     return undefined;
   }
   if (supply.total) {
-    return `${supply.total}${supply.standard ? ` (${supply.standard})` : ""}`;
+    if (supply.standard) {
+      return `${supply.total} (${supply.standard})`;
+    }
+    return supply.total;
   }
   return supply.standard;
+};
+
+const formatAttributeValue = (value: unknown): string => {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => formatAttributeValue(entry))
+      .filter((entry) => entry.length > 0)
+      .join(", ");
+  }
+  if (value && typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  if (typeof value === "symbol") {
+    return value.toString();
+  }
+  return String(value ?? "");
 };
 
 const formatRoyalties = (royalties?: OpenSeaRoyaltyInfo | null) => {
@@ -195,7 +224,7 @@ const AttributeList = ({
               </span>
             ) : null}
             <span className="tw-text-xs tw-font-semibold tw-text-iron-100 tw-break-words">
-              {String(value)}
+              {formatAttributeValue(value)}
             </span>
           </div>
         );
