@@ -183,7 +183,7 @@ function escapeRegExp(value: string): string {
 }
 
 function decodeHtmlEntities(value: string): string {
-  return value.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_, entity: string) => {
+  return value.replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_, entity: string) => {
     if (entity.startsWith("#x") || entity.startsWith("#X")) {
       const codePoint = parseInt(entity.slice(2), 16);
       return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);

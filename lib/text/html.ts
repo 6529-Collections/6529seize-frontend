@@ -43,8 +43,11 @@ export function stripHtmlTags(value: string, options: StripHtmlTagsOptions = {})
       continue;
     }
 
-    if (pendingSpace && output[output.length - 1] !== " ") {
-      output.push(" ");
+    if (pendingSpace) {
+      const lastChar = output.at(-1);
+      if (lastChar !== " ") {
+        output.push(" ");
+      }
     }
     pendingSpace = false;
 
@@ -100,7 +103,7 @@ export function replaceHtmlBreaksWithNewlines(value: string): string {
  * Unknown entities are removed to avoid re-introducing unsafe sequences.
  */
 export function decodeHtmlEntities(value: string): string {
-  return value.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_match, entity: string) => {
+  return value.replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_match, entity: string) => {
     if (entity.startsWith("#x") || entity.startsWith("#X")) {
       const codePoint = Number.parseInt(entity.slice(2), 16);
       return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
@@ -149,15 +152,19 @@ function removeResidualTags(value: string): string {
     output.push(char);
   }
 
-  if (insideTag && pending.length > 0) {
-    for (const char of pending) {
-      if (char !== "<") {
-        output.push(char);
-      }
-    }
+  if (insideTag) {
+    appendPendingWithoutOpeningBracket(output, pending);
   }
 
   return output.join("");
+}
+
+function appendPendingWithoutOpeningBracket(output: string[], pending: readonly string[]): void {
+  for (const char of pending) {
+    if (char !== "<") {
+      output.push(char);
+    }
+  }
 }
 
 function getTagIdentifier(rawTag: string): string | null {
