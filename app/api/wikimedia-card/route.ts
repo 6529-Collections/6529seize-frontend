@@ -147,7 +147,7 @@ const isAllowedWikimediaHost = (hostname: string): boolean => {
 
 const stripTrailingDots = (value: string): string => {
   let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 46) {
+  while (end > 0 && value.codePointAt(end - 1) === 46) {
     end -= 1;
   }
   return end === value.length ? value : value.slice(0, end);
