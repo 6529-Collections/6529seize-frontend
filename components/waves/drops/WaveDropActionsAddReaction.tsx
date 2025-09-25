@@ -12,12 +12,11 @@ import { commonApiPost } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
 import { useMyStream } from "../../../contexts/wave/MyStreamContext";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
 import {
   findReactionIndex,
   removeUserFromReactions,
+  toProfileMin,
   type ReactionEntry,
 } from "./reaction-utils";
 
@@ -35,37 +34,6 @@ const WaveDropActionsAddReaction: React.FC<{
   const { setToast, connectedProfile } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
   const rollbackRef = useRef<(() => void) | null>(null);
-
-  const toProfileMin = useCallback(
-    (profile: ApiIdentity | null): ApiProfileMin | null => {
-      if (!profile) {
-        return null;
-      }
-
-      const fallbackId = profile.primary_wallet ?? "";
-
-      return {
-        id: profile.id ?? fallbackId,
-        handle: profile.handle ?? null,
-        pfp: profile.pfp ?? null,
-        banner1_color: profile.banner1 ?? null,
-        banner2_color: profile.banner2 ?? null,
-        cic: profile.cic ?? 0,
-        rep: profile.rep ?? 0,
-        tdh: profile.tdh ?? 0,
-        tdh_rate: profile.tdh_rate ?? 0,
-        level: profile.level ?? 0,
-        primary_address: profile.primary_wallet ?? "",
-        subscribed_actions: [],
-        archived: false,
-        active_main_stage_submission_ids:
-          profile.active_main_stage_submission_ids ?? [],
-        winner_main_stage_drop_ids:
-          profile.winner_main_stage_drop_ids ?? [],
-      };
-    },
-    []
-  );
 
   const applyOptimisticReaction = useCallback(
     (reactionCode: string) => {
@@ -141,7 +109,6 @@ const WaveDropActionsAddReaction: React.FC<{
       drop.context_profile_context,
       drop.id,
       drop.wave?.id,
-      toProfileMin,
     ]
   );
 

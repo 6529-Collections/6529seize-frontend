@@ -21,12 +21,11 @@ import { useAuth } from "../../auth/Auth";
 import clsx from "clsx";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
 import { useMyStream } from "../../../contexts/wave/MyStreamContext";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
 import {
   findReactionIndex,
   removeUserFromReactions,
+  toProfileMin,
   type ReactionEntry,
 } from "./reaction-utils";
 
@@ -152,37 +151,6 @@ export function WaveDropReaction({
     return { emojiNode: null, emojiNodeTooltip: null };
   }, [emojiId, emojiMap, findNativeEmoji]);
 
-  const toProfileMin = useCallback(
-    (profile: ApiIdentity | null): ApiProfileMin | null => {
-      if (!profile) {
-        return null;
-      }
-
-      const fallbackId = profile.primary_wallet ?? "";
-
-      return {
-        id: profile.id ?? fallbackId,
-        handle: profile.handle ?? null,
-        pfp: profile.pfp ?? null,
-        banner1_color: profile.banner1 ?? null,
-        banner2_color: profile.banner2 ?? null,
-        cic: profile.cic ?? 0,
-        rep: profile.rep ?? 0,
-        tdh: profile.tdh ?? 0,
-        tdh_rate: profile.tdh_rate ?? 0,
-        level: profile.level ?? 0,
-        primary_address: profile.primary_wallet ?? "",
-        subscribed_actions: [],
-        archived: false,
-        active_main_stage_submission_ids:
-          profile.active_main_stage_submission_ids ?? [],
-        winner_main_stage_drop_ids:
-          profile.winner_main_stage_drop_ids ?? [],
-      };
-    },
-    []
-  );
-
   const applyOptimisticReactionChange = useCallback(
     (willSelect: boolean) => {
       if (!drop.wave?.id || !applyOptimisticDropUpdate) {
@@ -255,7 +223,6 @@ export function WaveDropReaction({
       drop.wave?.id,
       drop.context_profile_context,
       reaction.reaction,
-      toProfileMin,
     ]
   );
 

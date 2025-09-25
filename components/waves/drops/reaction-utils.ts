@@ -1,3 +1,4 @@
+import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 
 export type ReactionEntry = {
@@ -56,4 +57,33 @@ export const findReactionIndex = (
   }
 
   return -1;
+};
+
+export const toProfileMin = (
+  profile: ApiIdentity | null
+): ApiProfileMin | null => {
+  if (!profile) {
+    return null;
+  }
+
+  const fallbackId = profile.primary_wallet ?? "";
+
+  return {
+    id: profile.id ?? fallbackId,
+    handle: profile.handle ?? null,
+    pfp: profile.pfp ?? null,
+    banner1_color: profile.banner1 ?? null,
+    banner2_color: profile.banner2 ?? null,
+    cic: profile.cic ?? 0,
+    rep: profile.rep ?? 0,
+    tdh: profile.tdh ?? 0,
+    tdh_rate: profile.tdh_rate ?? 0,
+    level: profile.level ?? 0,
+    primary_address: profile.primary_wallet ?? "",
+    subscribed_actions: [],
+    archived: false,
+    active_main_stage_submission_ids:
+      profile.active_main_stage_submission_ids ?? [],
+    winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids ?? [],
+  };
 };
