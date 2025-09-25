@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -35,15 +35,15 @@ export default function HomePage({
   initialTokens,
   isMemeMintingActive,
 }: HomePageProps) {
-  const { isApp } = useDeviceInfo();
+  const { isApp, hasTouchScreen } = useDeviceInfo();
   const { isAuthenticated } = useSeizeConnectContext();
-  const [activeTab, setActiveTab] = useState<"feed" | "latest">(
-    isAuthenticated ? "feed" : "latest"
-  );
   const { registerRef } = useLayout();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+
+  // Get active tab from URL for conditional rendering
+  const activeTab = (searchParams?.get('tab') as 'feed' | 'latest') || 'latest';
 
   // Drop modal logic
   const dropId = searchParams?.get("drop") ?? undefined;
@@ -69,10 +69,6 @@ export default function HomePage({
 
   const isDropOpen = !!dropId && !!drop;
 
-  // Update active tab when authentication state changes
-  useEffect(() => {
-    setActiveTab(isAuthenticated ? "feed" : "latest");
-  }, [isAuthenticated]);
 
   // Handle escape key for drop modal
   useEffect(() => {
@@ -98,13 +94,12 @@ export default function HomePage({
   }
 
   return (
-    <div className="tw-h-full tw-min-h-screen">
-      {/* Drop Modal - positioned to respect sidebar */}
+    <div className="tw-h-full">
       {isDropOpen && (
         <div
           className="tw-fixed tw-inset-0 tw-z-[49] tw-bg-black"
           style={{
-            left: "var(--left-rail)", // Start after sidebar
+            left: hasTouchScreen ? 0 : "var(--left-rail)", // 0 for mobile, sidebar offset for desktop
             transition: "none",
           }}
         >
@@ -123,8 +118,7 @@ export default function HomePage({
       {/* Tab Navigation */}
       <HomePageTabs
         ref={setTabsRef}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        hasTouchScreen={hasTouchScreen}
       />
 
       <div className="tw-h-full">

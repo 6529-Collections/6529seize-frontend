@@ -13,9 +13,9 @@ import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 export default function HomeFeed() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-  const { homepageFeedStyle } = useLayout();
+  const { homepageFeedStyle, smallScreenFeedStyle } = useLayout();
   const router = useRouter();
-  const { isApp } = useDeviceInfo();
+  const { isApp, hasTouchScreen } = useDeviceInfo();
 
   const onDropContentClick = (drop: ExtendedDrop) => {
     // Navigate to waves for desktop, my-stream for app
@@ -73,7 +73,7 @@ export default function HomeFeed() {
   };
 
   return (
-    <div style={homepageFeedStyle}>
+    <div style={hasTouchScreen ? smallScreenFeedStyle : homepageFeedStyle}>
       <BrainContent
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}

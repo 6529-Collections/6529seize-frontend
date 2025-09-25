@@ -15,8 +15,8 @@ export default function SmallScreenHeader({
   isMenuOpen,
 }: SmallScreenHeaderProps) {
   return (
-    <header className="tailwind-scope tw-flex-shrink-0 tw-z-50 tw-bg-black tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
-      <div className="tw-flex tw-items-center tw-justify-between tw-h-16 tw-px-4">
+    <header className="tailwind-scope tw-flex-shrink-0 tw-bg-black tw-border-b tw-border-iron-900 tw-border-solid tw-border-x-0 tw-border-t-0">
+      <div className="tw-flex tw-items-center tw-justify-between tw-h-16 tw-px-5">
         <Link href="/" className="tw-flex tw-items-center">
           <Image
             unoptimized
@@ -32,7 +32,7 @@ export default function SmallScreenHeader({
         {!isMenuOpen && (
           <button
             onClick={onMenuToggle}
-            className="tw-p-2 tw-rounded-lg tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid"
+            className="tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid"
             aria-label="Open menu"
           >
             <Bars3Icon className="tw-h-5 tw-w-5 tw-text-iron-300 tw-flex-shrink-0" />

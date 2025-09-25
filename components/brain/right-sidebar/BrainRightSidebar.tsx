@@ -60,7 +60,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
         lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0"
     >
       {/* Close button */}
-      <div className="tw-absolute tw-top-4 -tw-left-6 tw-z-10">
+      <div className="tw-absolute tw-top-3 -tw-left-6 tw-z-10">
         <button
           type="button"
           onClick={closeRightSidebar}

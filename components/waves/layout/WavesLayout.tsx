@@ -3,7 +3,7 @@
 import { ReactNode, useContext, useMemo } from "react";
 import Head from "next/head";
 import { AuthContext } from "../../auth/Auth";
-import { useLayout, LayoutProvider } from "../../brain/my-stream/layout/LayoutContext";
+import { useLayout } from "../../brain/my-stream/layout/LayoutContext";
 import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 import Image from "next/image";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
@@ -137,9 +137,5 @@ export default function WavesLayout({
 }: {
   readonly children: ReactNode;
 }) {
-  return (
-    <LayoutProvider>
-      <WavesLayoutContent>{children}</WavesLayoutContent>
-    </LayoutProvider>
-  );
+  return <WavesLayoutContent>{children}</WavesLayoutContent>;
 }
