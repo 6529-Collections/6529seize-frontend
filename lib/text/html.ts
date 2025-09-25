@@ -28,29 +28,25 @@ export function stripHtmlTags(value: string, options: StripHtmlTagsOptions = {})
   const output: string[] = [];
 
   for (const char of input) {
+    if (insideTag) {
+      insideTag = char !== ">";
+      continue;
+    }
+
     if (char === "<") {
       insideTag = true;
-      if (preserveTagSpacing) {
-        pendingSpace = output.length > 0;
-      }
+      pendingSpace = preserveTagSpacing && output.length > 0;
       continue;
     }
 
     if (char === ">") {
-      insideTag = false;
       continue;
     }
 
-    if (insideTag) {
-      continue;
+    if (pendingSpace && output[output.length - 1] !== " ") {
+      output.push(" ");
     }
-
-    if (preserveTagSpacing && pendingSpace) {
-      if (output[output.length - 1] !== " ") {
-        output.push(" ");
-      }
-      pendingSpace = false;
-    }
+    pendingSpace = false;
 
     output.push(char);
   }
