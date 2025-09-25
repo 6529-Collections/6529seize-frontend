@@ -15,6 +15,7 @@ export const publicEnvSchema = z.object({
    */
   NODE_ENV: z.enum(["development", "production", "test", "local"]).optional(),
   VERSION: z.string().optional(),
+  ASSETS_FROM_S3: z.enum(["true", "false"]).optional(),
 
   /**
    * ────────────────
