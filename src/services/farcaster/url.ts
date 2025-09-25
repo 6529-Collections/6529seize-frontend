@@ -50,6 +50,64 @@ const isBlockedProfilePath = (segment: string): boolean =>
 export const isFarcasterHost = (host: string): boolean =>
   FARCASTER_HOSTS.has(normalizeHost(host));
 
+const parseChannelSegments = (
+  segments: readonly string[]
+): FarcasterResourceIdentifier | null => {
+  const [, segment, channel, castHash] = segments;
+
+  if (segment !== "channel" || !channel) {
+    return null;
+  }
+
+  if (segments.length === 3) {
+    return {
+      type: "channel",
+      channel,
+      canonicalUrl: buildCanonicalUrl(["~", "channel", channel]),
+    };
+  }
+
+  if (segments.length === 4 && castHash) {
+    return {
+      type: "cast",
+      castHash,
+      channel,
+      canonicalUrl: buildCanonicalUrl(["~", "channel", channel, castHash]),
+    };
+  }
+
+  return null;
+};
+
+const parseUserSegments = (
+  segments: readonly string[]
+): FarcasterResourceIdentifier | null => {
+  const [username, castHash] = segments;
+
+  if (!username || isBlockedProfilePath(username)) {
+    return null;
+  }
+
+  if (segments.length === 1) {
+    return {
+      type: "profile",
+      username,
+      canonicalUrl: buildCanonicalUrl([username]),
+    };
+  }
+
+  if (segments.length === 2 && castHash && !isBlockedProfilePath(castHash)) {
+    return {
+      type: "cast",
+      username,
+      castHash,
+      canonicalUrl: buildCanonicalUrl([username, castHash]),
+    };
+  }
+
+  return null;
+};
+
 export const parseFarcasterResource = (
   url: URL
 ): FarcasterResourceIdentifier | null => {
@@ -66,83 +124,10 @@ export const parseFarcasterResource = (
   }
 
   if (segments[0] === "~") {
-    if (segments.length < 2) {
-      return null;
-    }
-
-    const second = segments[1];
-
-    if (second !== "channel") {
-      return null;
-    }
-
-    if (segments.length === 2) {
-      return null;
-    }
-
-    const channel = segments[2];
-
-    if (!channel) {
-      return null;
-    }
-
-    if (segments.length === 3) {
-      return {
-        type: "channel",
-        channel,
-        canonicalUrl: buildCanonicalUrl(["~", "channel", channel]),
-      };
-    }
-
-    if (segments.length === 4) {
-      const castHash = segments[3];
-      if (!castHash) {
-        return null;
-      }
-
-      return {
-        type: "cast",
-        castHash,
-        channel,
-        canonicalUrl: buildCanonicalUrl(["~", "channel", channel, castHash]),
-      };
-    }
-
-    return null;
+    return parseChannelSegments(segments);
   }
 
-  if (segments.length === 1) {
-    const username = segments[0];
-    if (!username || isBlockedProfilePath(username)) {
-      return null;
-    }
-
-    return {
-      type: "profile",
-      username,
-      canonicalUrl: buildCanonicalUrl([username]),
-    };
-  }
-
-  if (segments.length === 2) {
-    const [username, castHash] = segments;
-    if (!username || !castHash) {
-      return null;
-    }
-
-    if (isBlockedProfilePath(castHash)) {
-      return null;
-    }
-
-    return {
-      type: "cast",
-      username,
-      castHash,
-      canonicalUrl: buildCanonicalUrl([username, castHash]),
-    };
-  }
-
-  return null;
+  return parseUserSegments(segments);
 };
 
 export const isPotentialFarcasterUrl = (url: URL): boolean => {
