@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 
+import clsx from "clsx";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -38,13 +40,13 @@ const PRODUCT_CONFIG: Record<
   },
 };
 
-const actionButtonBaseClasses =
-  "tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
-
-const primaryButtonClasses =
-  "tw-bg-primary-500 tw-text-iron-900 hover:tw-bg-primary-400";
-const secondaryButtonClasses =
-  "tw-bg-transparent tw-text-iron-100 hover:tw-border-iron-400";
+const getActionButtonClasses = (variant: "primary" | "secondary") =>
+  clsx(
+    "tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60",
+    variant === "primary"
+      ? "tw-border-primary-500 tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400"
+      : "tw-border-iron-700 tw-bg-transparent tw-text-iron-100 hover:tw-border-primary-400 hover:tw-text-primary-200"
+  );
 
 export default function GoogleWorkspaceCard({
   href,
@@ -90,12 +92,22 @@ export default function GoogleWorkspaceCard({
   }, [data.title, productConfig.fallbackTitle]);
 
   const thumbnailAlt = `Preview image of ${productName}: ${displayTitle}`;
-  const previewUrl =
-    "embedPub" in data.links && typeof data.links.embedPub === "string"
-      ? data.links.embedPub
-      : data.links.preview;
-  const canShowPreview = typeof previewUrl === "string" && previewUrl.length > 0;
+  const previewUrl = useMemo(() => {
+    const rawEmbedUrl =
+      "embedPub" in data.links && typeof data.links.embedPub === "string"
+        ? data.links.embedPub
+        : undefined;
+    if (rawEmbedUrl && rawEmbedUrl.length > 0) {
+      return rawEmbedUrl;
+    }
+
+    return typeof data.links.preview === "string" && data.links.preview.length > 0
+      ? data.links.preview
+      : undefined;
+  }, [data.links]);
+  const canShowPreview = Boolean(previewUrl);
   const viewLiveActive = showPreview && canShowPreview;
+  const activePreviewUrl = viewLiveActive ? previewUrl : undefined;
 
   const domain = useMemo(() => {
     try {
@@ -107,7 +119,10 @@ export default function GoogleWorkspaceCard({
   }, [data.links.open]);
 
   const openLabel = `Open in ${productName}`;
-  const downloadUrl = (data.links as { exportPdf?: string }).exportPdf;
+  const downloadUrl =
+    "exportPdf" in data.links && typeof data.links.exportPdf === "string"
+      ? data.links.exportPdf
+      : undefined;
 
   const handleTogglePreview = () => {
     if (!canShowPreview) {
@@ -122,10 +137,7 @@ export default function GoogleWorkspaceCard({
         <div className="tw-flex tw-flex-col tw-gap-4">
           <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
             <div className="md:tw-w-64 md:tw-flex-shrink-0">
-              <div
-                className="tw-relative tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60"
-                style={{ paddingTop: "56.25%" }}
-              >
+              <div className="tw-relative tw-w-full tw-aspect-video tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
                 {data.thumbnail && !imageError ? (
                   <Image
                     src={data.thumbnail}
@@ -170,7 +182,8 @@ export default function GoogleWorkspaceCard({
               href={data.links.open}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${actionButtonBaseClasses} ${primaryButtonClasses}`}
+              prefetch={false}
+              className={getActionButtonClasses("primary")}
               aria-label={`${openLabel} (opens in a new tab)`}
             >
               {openLabel}
@@ -179,12 +192,13 @@ export default function GoogleWorkspaceCard({
               <button
                 type="button"
                 onClick={handleTogglePreview}
-                className={`${actionButtonBaseClasses} ${secondaryButtonClasses}`}
+                className={getActionButtonClasses("secondary")}
                 aria-controls={previewContainerId}
                 aria-expanded={viewLiveActive}
+                aria-pressed={viewLiveActive}
                 aria-label={`${viewLiveActive ? "Hide" : "View"} live preview for ${productName}`}
               >
-                {viewLiveActive ? "Hide live preview" : "View live"}
+                {viewLiveActive ? "Hide live preview" : "View live preview"}
               </button>
             ) : null}
             {downloadUrl ? (
@@ -192,18 +206,24 @@ export default function GoogleWorkspaceCard({
                 href={downloadUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${actionButtonBaseClasses} ${secondaryButtonClasses}`}
+                prefetch={false}
+                className={getActionButtonClasses("secondary")}
                 aria-label={`Download ${productName} as PDF (opens in a new tab)`}
               >
                 Download PDF
               </Link>
             ) : null}
           </div>
-          {viewLiveActive ? (
-            <div className="tw-space-y-3" id={previewContainerId}>
-              <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/30 tw-p-2">
+          {activePreviewUrl ? (
+            <div
+              className="tw-space-y-3"
+              id={previewContainerId}
+              role="region"
+              aria-label={`${productName} live preview`}
+            >
+              <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/30 tw-p-2">
                 <iframe
-                  src={previewUrl}
+                  src={activePreviewUrl}
                   title={`${productName} live preview`}
                   className="tw-h-72 tw-w-full tw-rounded tw-border-0 tw-bg-iron-900"
                   sandbox="allow-scripts allow-same-origin allow-presentation"
