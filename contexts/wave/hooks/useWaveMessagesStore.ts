@@ -29,7 +29,7 @@ const cloneValue = <T>(value: T): T => {
     return value;
   }
 
-  return JSON.parse(JSON.stringify(value)) as T;
+  return structuredClone(value);
 };
 
 const toDropRecord = (drop: Drop): Record<string, unknown> =>
@@ -44,9 +44,9 @@ const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
   const originalRecord = toDropRecord(original);
   const updatedRecord = toDropRecord(updated);
 
-  keys.forEach((key) => {
-    const originalHasKey = Object.prototype.hasOwnProperty.call(original, key);
-    const optimisticHasKey = Object.prototype.hasOwnProperty.call(updated, key);
+  for (const key of keys) {
+    const originalHasKey = Object.hasOwn(original, key);
+    const optimisticHasKey = Object.hasOwn(updated, key);
     const originalValue = originalHasKey ? originalRecord[key] : undefined;
     const optimisticValue = optimisticHasKey ? updatedRecord[key] : undefined;
 
@@ -59,7 +59,7 @@ const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
         optimisticHasKey,
       });
     }
-  });
+  }
 
   return changes;
 };
@@ -203,8 +203,7 @@ function useWaveMessagesStore() {
     [processQueue] // Dependency: processQueue
   );
 
-  const cloneDrop = (drop: Drop): Drop =>
-    JSON.parse(JSON.stringify(drop)) as Drop;
+  const cloneDrop = (drop: Drop): Drop => cloneValue(drop);
 
   const optimisticUpdateDrop = useCallback(
     ({
@@ -255,28 +254,24 @@ function useWaveMessagesStore() {
         const nextDropRecord = toDropRecord(nextDrop);
         let shouldRollback = false;
 
-        changes.forEach(
-          ({
-            key,
-            originalHasKey,
-            optimisticHasKey,
-            originalValue,
-            optimisticValue,
-          }) => {
-            const currentHasKey = Object.prototype.hasOwnProperty.call(
-              nextDrop,
-              key
-            );
+        for (const {
+          key,
+          originalHasKey,
+          optimisticHasKey,
+          originalValue,
+          optimisticValue,
+        } of changes) {
+          const currentHasKey = Object.hasOwn(nextDrop, key);
             const currentValue = currentHasKey
               ? nextDropRecord[key]
               : undefined;
 
             if (optimisticHasKey) {
               if (!valuesEqual(currentValue, optimisticValue)) {
-                return;
+                continue;
               }
             } else if (currentHasKey) {
-              return;
+              continue;
             }
 
             if (originalHasKey) {
@@ -286,8 +281,7 @@ function useWaveMessagesStore() {
             }
 
             shouldRollback = true;
-          }
-        );
+        }
 
         if (!shouldRollback) {
           return;
@@ -354,7 +348,7 @@ function useWaveMessagesStore() {
   useEffect(() => {
     // This effect runs after each render where `store` might have changed.
     // We iterate through all tracked keys in listenersRef.
-    Object.keys(listenersRef.current).forEach((key) => {
+    for (const key of Object.keys(listenersRef.current)) {
       const keyListeners = listenersRef.current[key];
       const currentValue = waveMessages[key]; // Get the current value from the updated store
       if (keyListeners) {
@@ -362,7 +356,7 @@ function useWaveMessagesStore() {
         // Be cautious: This might notify even if the specific key didn't change,
         // if the store object reference changed. The selector hook below handles this.
       }
-    });
+    }
   }, [waveMessages]); // Run when the store state changes
 
   return {
