@@ -117,7 +117,7 @@ function migrateIndexFile(indexFile) {
   const newImportPath = path
     .relative(process.cwd(), newFile)
     .replace(/\.tsx$/, "")
-    .replace(/\\/g, "/"); // for Windows
+    .replaceAll("\\", "/"); // for Windows
 
   updateImportsInTests(oldImportPath, newImportPath);
 

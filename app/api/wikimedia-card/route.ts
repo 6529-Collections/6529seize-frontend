@@ -67,7 +67,7 @@ const decodeFragment = (fragment: string): { raw: string; display: string } | un
     decoded = fragment;
   }
 
-  const display = decoded.replace(/_/g, " ").trim();
+  const display = decoded.replaceAll("_", " ").trim();
   if (!display) {
     return undefined;
   }

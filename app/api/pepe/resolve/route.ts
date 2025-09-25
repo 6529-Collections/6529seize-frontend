@@ -432,7 +432,7 @@ async function scrapePepeAssetPage(slug: string): Promise<ScrapedAsset> {
   }
 
   if (!scraped.asset) {
-    const normalized = slug.replace(/-/g, "").toUpperCase();
+    const normalized = slug.replaceAll("-", "").toUpperCase();
     if (isCounterpartyAssetCode(normalized)) {
       scraped.asset = normalized;
     }
@@ -505,13 +505,17 @@ async function findWikiLink(name?: string, series?: number | null): Promise<stri
   if (series && Number.isFinite(series)) {
     const seriesSlug = `series-${series}`;
     if (isValidSlug(seriesSlug)) {
-      candidates.push(`https://wiki.pepe.wtf/rare-pepes/${seriesSlug}/${slug}`);
-      candidates.push(`https://wiki.pepe.wtf/book-of-kek/${seriesSlug}/${slug}`);
+      candidates.push(
+        `https://wiki.pepe.wtf/rare-pepes/${seriesSlug}/${slug}`,
+        `https://wiki.pepe.wtf/book-of-kek/${seriesSlug}/${slug}`,
+      );
     }
   }
 
-  candidates.push(`https://wiki.pepe.wtf/rare-pepes/${slug}`);
-  candidates.push(`https://wiki.pepe.wtf/${slug}`);
+  candidates.push(
+    `https://wiki.pepe.wtf/rare-pepes/${slug}`,
+    `https://wiki.pepe.wtf/${slug}`,
+  );
 
   for (const candidate of candidates) {
     const match = await probeWikiUrl(candidate);
@@ -546,7 +550,7 @@ async function resolveCollection(slug: string): Promise<CollectionPreview> {
   const href = `https://pepe.wtf/collection/${encodeURIComponent(slug)}`;
   const { nextData, metaImages } = await scrapeNextData(href);
   const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ??
-    slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    slug.replaceAll("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
   let image = normalizeImageUrl(
     extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])),
     href
@@ -569,7 +573,7 @@ async function resolveCollection(slug: string): Promise<CollectionPreview> {
 async function resolveArtist(slug: string): Promise<ArtistPreview> {
   const href = `https://pepe.wtf/artists/${encodeURIComponent(slug)}`;
   const { nextData, metaImages } = await scrapeNextData(href);
-  const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replace(/-/g, " ");
+  const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replaceAll("-", " ");
   let image = normalizeImageUrl(
     extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])),
     href
@@ -597,7 +601,7 @@ async function resolveArtist(slug: string): Promise<ArtistPreview> {
 async function resolveSet(slug: string): Promise<SetPreview> {
   const href = `https://pepe.wtf/sets/${encodeURIComponent(slug)}`;
   const { nextData, metaImages } = await scrapeNextData(href);
-  const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replace(/-/g, " ");
+  const name = extractFirstString(deepFindAll(nextData, ["name", "title"])) ?? slug.replaceAll("-", " ");
   let image = normalizeImageUrl(
     extractFirstString(deepFindAll(nextData, ["image", "thumbnail_url", "imageUrl", "imageURL"])),
     href
