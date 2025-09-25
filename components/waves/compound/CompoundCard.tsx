@@ -31,7 +31,7 @@ function formatPercent(value?: string): string {
     return value;
   }
   const percent = (numeric * 100).toFixed(2);
-  return `${parseFloat(percent)}%`;
+  return `${Number.parseFloat(percent)}%`;
 }
 
 function formatNumber(value?: string): string {
@@ -395,12 +395,12 @@ export default function CompoundCard({ href, response }: CompoundCardProps) {
   if (isCompoundMarket(response)) {
     content =
       response.version === "v2"
-        ? renderMarketV2(response as CompoundMarketV2Response)
-        : renderMarketV3(response as CompoundMarketV3Response);
+        ? renderMarketV2(response)
+        : renderMarketV3(response);
   } else if (isCompoundAccount(response)) {
-    content = renderAccount(response as CompoundAccountResponse);
+    content = renderAccount(response);
   } else if (isCompoundTx(response)) {
-    content = renderTx(response as CompoundTxResponse);
+    content = renderTx(response);
   }
 
   if (!content) {

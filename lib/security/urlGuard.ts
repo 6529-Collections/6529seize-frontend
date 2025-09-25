@@ -277,7 +277,7 @@ export async function assertPublicUrl(url: URL, options: UrlGuardOptions = {}): 
 
   const lowerHost = hostname.toLowerCase();
   if (
-    DISALLOWED_HOST_PATTERNS.some((pattern) => lowerHost === pattern) ||
+    DISALLOWED_HOST_PATTERNS.includes(lowerHost) ||
     lowerHost.endsWith(".localhost") ||
     lowerHost.endsWith(".local") ||
     isSuspiciousIpFormat(lowerHost) ||
