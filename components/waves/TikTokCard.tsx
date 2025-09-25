@@ -34,8 +34,7 @@ function extractUsername(url: string | null | undefined): string | null {
 
   try {
     const parsed = new URL(url);
-    const segments = parsed.pathname.split("/").filter((segment) => segment.length > 0);
-    const first = segments[0];
+    const first = parsed.pathname.split("/").find((segment) => segment.length > 0);
     if (first && first.startsWith("@")) {
       return first;
     }
