@@ -14,6 +14,25 @@ export interface MinimalWaveNewDropsCount {
   readonly latestDropTimestamp: number | null;
 }
 
+export function getNewestTimestamp(
+  cached: number | null | undefined = null,
+  server: number | null | undefined = null
+): number | null {
+  if (cached == null && server == null) {
+    return null;
+  }
+
+  if (cached == null) {
+    return server;
+  }
+
+  if (server == null) {
+    return cached;
+  }
+
+  return Math.max(cached, server);
+}
+
 /**
  * Hook to manage new drop counts via WebSockets
  *
@@ -41,11 +60,11 @@ function useNewDropCounter(
         ...prev,
         [waveId]: {
           count: 0,
-          latestDropTimestamp:
-            prev[waveId]?.latestDropTimestamp ??
+          latestDropTimestamp: getNewestTimestamp(
+            prev[waveId]?.latestDropTimestamp,
             waves.find((wave) => wave.id === waveId)?.metrics
-              .latest_drop_timestamp ??
-            null,
+              .latest_drop_timestamp ?? null
+          ),
         },
       }));
     },
@@ -53,12 +72,15 @@ function useNewDropCounter(
   );
   // Reset counts for all waves
   const resetAllWavesNewDropsCount = useCallback(() => {
-    setNewDropsCounts(() => {
+    setNewDropsCounts((prev) => {
       const newCounts: Record<string, MinimalWaveNewDropsCount> = {};
       waves.forEach((wave) => {
         newCounts[wave.id] = {
           count: 0,
-          latestDropTimestamp: wave.metrics.latest_drop_timestamp ?? null,
+          latestDropTimestamp: getNewestTimestamp(
+            prev[wave.id]?.latestDropTimestamp,
+            wave.metrics.latest_drop_timestamp ?? null
+          ),
         };
       });
       return newCounts;
