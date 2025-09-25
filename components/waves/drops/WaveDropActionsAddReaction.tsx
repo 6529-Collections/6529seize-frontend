@@ -18,7 +18,6 @@ import {
   cloneReactionEntries,
   removeUserFromReactions,
   toProfileMin,
-  type ReactionEntry,
 } from "./reaction-utils";
 
 const WaveDropActionsAddReaction: React.FC<{
@@ -119,14 +118,13 @@ const WaveDropActionsAddReaction: React.FC<{
     rollbackRef.current = applyOptimisticReaction(emojiText);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      throw new Error("Error adding reaction");
-      // await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-      //   endpoint: `drops/${drop.id}/reaction`,
-      //   body: {
-      //     reaction: emojiText,
-      //   },
-      // });
+
+      await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+        endpoint: `drops/${drop.id}/reaction`,
+        body: {
+          reaction: emojiText,
+        },
+      });
       rollbackRef.current = null;
       onAddReaction?.();
     } catch (error) {
@@ -181,9 +179,8 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const mobileContent = (
     <button
-      className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
-        !canReact ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
-      } tw-transition-colors tw-duration-200`}
+      className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${!canReact ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
+        } tw-transition-colors tw-duration-200`}
       onClick={onReact}
       disabled={!canReact}
     >
@@ -212,9 +209,8 @@ const WaveDropActionsAddReaction: React.FC<{
     <>
       <button
         ref={buttonRef}
-        className={`picker-button tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
-          !canReact ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
-        } hover:tw-text-[#FFCC22]`}
+        className={`picker-button tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${!canReact ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
+          } hover:tw-text-[#FFCC22]`}
         onClick={onReact}
         disabled={!canReact}
         aria-label="Add reaction to drop"
@@ -223,9 +219,8 @@ const WaveDropActionsAddReaction: React.FC<{
         }
       >
         <svg
-          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
-            !canReact ? "tw-opacity-50" : ""
-          }`}
+          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${!canReact ? "tw-opacity-50" : ""
+            }`}
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
           viewBox="0 0 24 24"
