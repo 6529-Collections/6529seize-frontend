@@ -70,9 +70,13 @@ export default function GoogleWorkspaceCard({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    if (typeof globalThis.addEventListener !== "function") {
+      return;
+    }
+
+    globalThis.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      globalThis.removeEventListener?.("keydown", handleKeyDown);
     };
   }, [showPreview]);
 
