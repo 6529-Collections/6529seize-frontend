@@ -133,6 +133,32 @@ const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   (typeof error === "object" && error !== null && (error as { name?: string }).name === "UrlGuardError");
 type FetchInput = Parameters<typeof fetch>[0];
 
+const isRequestLike = (value: unknown): value is { url: string } => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const { url } = value as { url?: unknown };
+  return typeof url === "string" && url.length > 0;
+};
+
+const stringifiesToUrl = (value: unknown): string | null => {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    typeof (value as { toString?: unknown }).toString !== "function"
+  ) {
+    return null;
+  }
+
+  try {
+    const raw = (value as { toString: () => string }).toString();
+    return typeof raw === "string" && !raw.startsWith("[object ") && raw.length > 0 ? raw : null;
+  } catch {
+    return null;
+  }
+};
+
 const resolveRequestUrl = (input: FetchInput): URL => {
   if (typeof input === "string") {
     return new URL(input);
@@ -146,7 +172,16 @@ const resolveRequestUrl = (input: FetchInput): URL => {
     return new URL(input.url);
   }
 
-  return new URL(String(input));
+  if (isRequestLike(input)) {
+    return new URL(input.url);
+  }
+
+  const stringified = stringifiesToUrl(input);
+  if (stringified) {
+    return new URL(stringified);
+  }
+
+  throw new UrlGuardError("Unsupported fetch input provided.", "invalid-url", 400);
 };
 
 // Apply host-specific header overrides while letting fetchPublicUrl enforce SSRF guardrails.
