@@ -103,6 +103,9 @@ const formatSupply = (supply?: OpenSeaItemSupply | null) => {
 };
 
 const formatAttributeValue = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return "";
+  }
   if (typeof value === "string") {
     return value;
   }
@@ -115,17 +118,27 @@ const formatAttributeValue = (value: unknown): string => {
       .filter((entry) => entry.length > 0)
       .join(", ");
   }
+  if (typeof value === "symbol") {
+    return value.toString();
+  }
+  if (typeof value === "function") {
+    return value.name ? `[function ${value.name}]` : "function";
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
   if (value && typeof value === "object") {
     try {
       return JSON.stringify(value);
     } catch {
-      return String(value);
+      const fallback = (value as { toString?: () => string }).toString?.();
+      if (typeof fallback === "string" && fallback !== "[object Object]") {
+        return fallback;
+      }
+      return "[unserializable object]";
     }
   }
-  if (typeof value === "symbol") {
-    return value.toString();
-  }
-  return String(value ?? "");
+  return "";
 };
 
 const formatRoyalties = (royalties?: OpenSeaRoyaltyInfo | null) => {
