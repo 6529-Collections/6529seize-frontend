@@ -37,10 +37,9 @@ type DropRecord = Drop & Record<string, unknown>;
 const toDropRecord = (drop: Drop): DropRecord => drop as DropRecord;
 
 const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
-  const keys = new Set([
-    ...Object.keys(original),
-    ...Object.keys(updated),
-  ]);
+  const keys = Array.from(
+    new Set([...Object.keys(original), ...Object.keys(updated)])
+  );
   const changes: DropChange[] = [];
   const originalRecord = toDropRecord(original);
   const updatedRecord = toDropRecord(updated);

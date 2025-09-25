@@ -119,12 +119,14 @@ const WaveDropActionsAddReaction: React.FC<{
     rollbackRef.current = applyOptimisticReaction(emojiText);
 
     try {
-      await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-        endpoint: `drops/${drop.id}/reaction`,
-        body: {
-          reaction: emojiText,
-        },
-      });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      throw new Error("Error adding reaction");
+      // await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+      //   endpoint: `drops/${drop.id}/reaction`,
+      //   body: {
+      //     reaction: emojiText,
+      //   },
+      // });
       rollbackRef.current = null;
       onAddReaction?.();
     } catch (error) {
