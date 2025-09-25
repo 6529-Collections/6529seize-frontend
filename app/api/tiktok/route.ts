@@ -109,7 +109,7 @@ function sanitizeCaption(value: string | undefined): string | null {
   }
   const decoded = decodeHtmlEntities(value);
   const withoutTags = stripHtml(decoded);
-  const normalized = withoutTags.replace(/\s+/g, " ").trim();
+  const normalized = withoutTags.replaceAll(/\s+/g, " ").trim();
   if (!normalized) {
     return null;
   }
@@ -121,7 +121,7 @@ function sanitizeText(value: string | undefined): string | null {
     return null;
   }
   const trimmed = value.trim();
-  return trimmed ? trimmed : null;
+  return trimmed || null;
 }
 
 function ensureCanonicalHost(hostname: string): string {
