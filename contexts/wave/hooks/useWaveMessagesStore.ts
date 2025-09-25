@@ -5,6 +5,64 @@ import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
 import { Drop } from "../../../helpers/waves/drop.helpers";
 import { WaveMessages, WaveMessagesUpdate } from "./types";
 
+type DropChange = {
+  key: keyof Drop;
+  originalValue: Drop[keyof Drop] | undefined;
+  optimisticValue: Drop[keyof Drop] | undefined;
+  originalHasKey: boolean;
+  optimisticHasKey: boolean;
+};
+
+const serializeValue = (value: unknown): string => {
+  if (value === undefined) {
+    return "__undefined__";
+  }
+  return JSON.stringify(value);
+};
+
+const valuesEqual = (left: unknown, right: unknown): boolean => {
+  return serializeValue(left) === serializeValue(right);
+};
+
+const cloneValue = <T>(value: T): T => {
+  if (value === undefined) {
+    return value;
+  }
+
+  return JSON.parse(JSON.stringify(value)) as T;
+};
+
+const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
+  const keys = new Set([
+    ...Object.keys(original),
+    ...Object.keys(updated),
+  ]);
+  const changes: DropChange[] = [];
+
+  keys.forEach((key) => {
+    const originalHasKey = Object.prototype.hasOwnProperty.call(original, key);
+    const optimisticHasKey = Object.prototype.hasOwnProperty.call(updated, key);
+    const originalValue = originalHasKey
+      ? (original as Record<string, Drop[keyof Drop]>)[key]
+      : undefined;
+    const optimisticValue = optimisticHasKey
+      ? (updated as Record<string, Drop[keyof Drop]>)[key]
+      : undefined;
+
+    if (!valuesEqual(originalValue, optimisticValue)) {
+      changes.push({
+        key: key as keyof Drop,
+        originalValue: cloneValue(originalValue),
+        optimisticValue: cloneValue(optimisticValue),
+        originalHasKey,
+        optimisticHasKey,
+      });
+    }
+  });
+
+  return changes;
+};
+
 export type Listener = (data: WaveMessages | undefined) => void;
 
 type Listeners = Set<Listener>; // Keep internal types non-exported
@@ -14,10 +72,14 @@ function useWaveMessagesStore() {
   const [waveMessages, setWaveMessages] = useState<
     Record<string, WaveMessages>
   >({});
+  const waveMessagesRef = useRef<Record<string, WaveMessages>>({});
   // Use useRef to keep listeners stable across renders
   const listenersRef = useRef<KeyListeners>({});
   const updateQueueRef = useRef<WaveMessagesUpdate[]>([]);
   const isProcessingRef = useRef<boolean>(false);
+  useEffect(() => {
+    waveMessagesRef.current = waveMessages;
+  }, [waveMessages]);
 
   // Stable function to get data for a key
   const getData = useCallback(
@@ -106,10 +168,12 @@ function useWaveMessagesStore() {
       }
 
       notifyValue = updatedWaveMessages; // Capture the value to notify
-      return {
+      const nextState = {
         ...newWaveMessages,
         [update.key]: updatedWaveMessages,
       };
+      waveMessagesRef.current = nextState;
+      return nextState;
     });
 
     // Notify listeners after the state update for this item
@@ -164,6 +228,11 @@ function useWaveMessagesStore() {
       const original = cloneDrop(existingDrop);
       const draft = cloneDrop(existingDrop);
       const updated = update(draft) ?? draft;
+      const changes = collectDropChanges(original, updated);
+
+      if (changes.length === 0) {
+        return null;
+      }
 
       updateData({
         key: waveId,
@@ -171,9 +240,62 @@ function useWaveMessagesStore() {
       });
 
       const rollback = () => {
+        const latestWave = waveMessagesRef.current[waveId];
+        if (!latestWave) {
+          return;
+        }
+
+        const latestDrop = latestWave.drops.find((drop) => drop.id === dropId);
+        if (!latestDrop) {
+          return;
+        }
+
+        let nextDrop = cloneDrop(latestDrop);
+        let shouldRollback = false;
+
+        changes.forEach(
+          ({
+            key,
+            originalHasKey,
+            optimisticHasKey,
+            originalValue,
+            optimisticValue,
+          }) => {
+            const currentHasKey = Object.prototype.hasOwnProperty.call(
+              nextDrop,
+              key
+            );
+            const currentValue = currentHasKey
+              ? (nextDrop as Record<string, Drop[keyof Drop]>)[key]
+              : undefined;
+
+            if (optimisticHasKey) {
+              if (!valuesEqual(currentValue, optimisticValue)) {
+                return;
+              }
+            } else if (currentHasKey) {
+              return;
+            }
+
+            if (originalHasKey) {
+              (nextDrop as Record<string, Drop[keyof Drop]>)[key] = cloneValue(
+                originalValue
+              );
+            } else {
+              delete (nextDrop as Record<string, Drop[keyof Drop]>)[key];
+            }
+
+            shouldRollback = true;
+          }
+        );
+
+        if (!shouldRollback) {
+          return;
+        }
+
         updateData({
           key: waveId,
-          drops: [original],
+          drops: [nextDrop],
         });
       };
 
@@ -206,10 +328,12 @@ function useWaveMessagesStore() {
         };
 
         notify = updatedWaveMessages;
-        return {
+        const nextState = {
           ...newWaveMessages,
           [waveId]: updatedWaveMessages,
         };
+        waveMessagesRef.current = nextState;
+        return nextState;
       });
 
       // Notify listeners *after* state update is triggered
