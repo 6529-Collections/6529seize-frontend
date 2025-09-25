@@ -79,6 +79,25 @@ const nextConfigFactory = (phase) => {
 
     const publicEnv = parsed.data;
 
+    // persist baked runtime config for production server
+    try {
+      fs.mkdirSync(".next", { recursive: true });
+      fs.writeFileSync(
+        ".next/PUBLIC_RUNTIME.json",
+        JSON.stringify(publicEnv),
+        "utf8"
+      );
+    } catch {}
+
+    // persist assets flag for production server
+    try {
+      fs.writeFileSync(
+        ".next/ASSETS_FROM_S3",
+        ASSETS_FROM_S3 ? "true" : "false",
+        "utf8"
+      );
+    } catch {}
+
     const nextConfig = {
       assetPrefix: ASSETS_FROM_S3
         ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
@@ -180,16 +199,26 @@ const nextConfigFactory = (phase) => {
     // Validate baked config (fail-fast). This guarantees runtime matches build.
     const schemaMod = require("./config/env.schema.runtime.cjs");
     const { publicEnvSchema } = schemaMod;
-    const baked = process.env.PUBLIC_RUNTIME
-      ? JSON.parse(process.env.PUBLIC_RUNTIME)
-      : {};
+    let baked = {};
+    if (process.env.PUBLIC_RUNTIME) {
+      baked = JSON.parse(process.env.PUBLIC_RUNTIME);
+    } else if (fs.existsSync(".next/PUBLIC_RUNTIME.json")) {
+      baked = JSON.parse(fs.readFileSync(".next/PUBLIC_RUNTIME.json", "utf8"));
+    }
     const parsed = publicEnvSchema.safeParse({ ...baked, VERSION });
     if (!parsed.success) throw parsed.error; // FAIL-FAST at runtime
     const publicEnv = parsed.data;
 
-    const ASSETS_FROM_S3 =
-      (process.env.ASSETS_FROM_S3 ?? "false").toString().toLowerCase() ===
-      "true";
+    let ASSETS_FROM_S3 = (process.env.ASSETS_FROM_S3 ?? "")
+      .toString()
+      .toLowerCase();
+    if (!ASSETS_FROM_S3 && fs.existsSync(".next/ASSETS_FROM_S3")) {
+      ASSETS_FROM_S3 = fs
+        .readFileSync(".next/ASSETS_FROM_S3", "utf8")
+        .trim()
+        .toLowerCase();
+    }
+    ASSETS_FROM_S3 = ASSETS_FROM_S3 === "true";
     logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3);
 
     const nextConfig = {
