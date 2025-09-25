@@ -18,5 +18,20 @@
         "argsIgnorePattern": "^_"
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "excludedFiles": ["scripts/**", "next.config.*"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "MemberExpression[object.name='process'][property.name='env']",
+            "message": "Accessing process.env is restricted. Use environment variables safely."
+          }
+        ]
+      }
+    }
+  ]
 }

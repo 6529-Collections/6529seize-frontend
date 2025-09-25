@@ -1,9 +1,9 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import ReMeme, { generateMetadata } from "@/app/rememes/[contract]/[id]/page";
 import { AuthContext } from "@/components/auth/Auth";
-import { fetchUrl } from "@/services/6529api";
 import { formatAddress } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 jest.mock("@/services/6529api");
 jest.mock("@/helpers/Helpers");
@@ -61,7 +61,7 @@ describe("ReMeme page", () => {
       ],
     });
 
-    const resolved = await ReMeme({ params: props });
+    const resolved = await ReMeme({ params: Promise.resolve(props) });
 
     render(<TestProvider>{resolved}</TestProvider>);
 
@@ -80,7 +80,12 @@ describe("ReMeme page", () => {
 
     render(
       <TestProvider>
-        <ReMeme params={{ contract: pageProps.contract, id: pageProps.id }} />
+        <ReMeme
+          params={Promise.resolve({
+            contract: pageProps.contract,
+            id: pageProps.id,
+          })}
+        />
       </TestProvider>
     );
 
@@ -96,8 +101,6 @@ describe("ReMeme generateMetadata", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.API_ENDPOINT = "https://api.test.com";
-    process.env.BASE_ENDPOINT = "https://test.com";
     mockFormatAddress.mockReturnValue("0x123...abc");
   });
 
@@ -106,25 +109,25 @@ describe("ReMeme generateMetadata", () => {
       data: [
         {
           metadata: { name: "Custom ReMeme Name" },
-          image: "https://test.com/custom-image.png",
+          image: "https://test.6529.io/custom-image.png",
         },
       ],
     };
     mockFetchUrl.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
-      params: { contract: "0x123abc", id: "456" },
+      params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
     expect(mockFetchUrl).toHaveBeenCalledWith(
-      "https://api.test.com/api/rememes?contract=0x123abc&id=456"
+      "https://api.test.6529.io/api/rememes?contract=0x123abc&id=456"
     );
     expect(result.title).toBe("Custom ReMeme Name");
     expect(result.description).toContain("ReMemes");
     const imgs = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];
-    expect(imgs?.[0]).toBe("https://test.com/custom-image.png");
+    expect(imgs?.[0]).toBe("https://test.6529.io/custom-image.png");
   });
 
   it("returns metadata with default name and image when API returns empty data", async () => {
@@ -132,7 +135,7 @@ describe("ReMeme generateMetadata", () => {
     mockFetchUrl.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
-      params: { contract: "0x123abc", id: "456" },
+      params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
     expect(mockFormatAddress).toHaveBeenCalledWith("0x123abc");
@@ -140,21 +143,21 @@ describe("ReMeme generateMetadata", () => {
     const imgs2 = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];
-    expect(imgs2?.[0]).toBe("https://test.com/6529io.png");
+    expect(imgs2?.[0]).toBe("https://test.6529.io/6529io.png");
   });
 
   it("returns default metadata when API returns null", async () => {
     mockFetchUrl.mockResolvedValue(null);
 
     const result = await generateMetadata({
-      params: { contract: "0x123abc", id: "456" },
+      params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
     expect(result.title).toBe("0x123...abc #456");
     const imgs3 = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];
-    expect(imgs3?.[0]).toBe("https://test.com/6529io.png");
+    expect(imgs3?.[0]).toBe("https://test.6529.io/6529io.png");
   });
 
   it("handles data with partial metadata", async () => {
@@ -169,7 +172,7 @@ describe("ReMeme generateMetadata", () => {
     mockFetchUrl.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
-      params: { contract: "0x123abc", id: "456" },
+      params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
     expect(result.title).toBe("0x123...abc #456");
@@ -191,13 +194,13 @@ describe("ReMeme generateMetadata", () => {
     mockFetchUrl.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
-      params: { contract: "0x123abc", id: "456" },
+      params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
     // When image is null, it falls back to the default image (6529io.png), not the re-memes fallback
     const imgs5 = Array.isArray(result.openGraph?.images)
       ? result.openGraph?.images
       : [result.openGraph?.images];
-    expect(imgs5?.[0]).toBe("https://test.com/6529io.png");
+    expect(imgs5?.[0]).toBe("https://test.6529.io/6529io.png");
   });
 });

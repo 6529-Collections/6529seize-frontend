@@ -11,6 +11,7 @@ import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketpla
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import { NftPageStats } from "@/components/nftAttributes/NftStats";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
+import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { DBResponse } from "@/entities/IDBResponse";
@@ -71,7 +72,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
         }
       });
     }
-    const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
+    const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
     fetchNfts(initialUrlNfts, []);
   }, []);
 
@@ -89,7 +90,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   useEffect(() => {
     if (id) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
+        `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
       });

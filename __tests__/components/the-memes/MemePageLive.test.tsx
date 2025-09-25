@@ -1,17 +1,17 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import {
-  MemePageLiveSubMenu,
-  MemePageLiveRightMenu,
-} from "@/components/the-memes/MemePageLive";
-import { NFT, MemesExtendedData, Rememe } from "@/entities/INFT";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
+import {
+  MemePageLiveRightMenu,
+  MemePageLiveSubMenu,
+} from "@/components/the-memes/MemePageLive";
+import { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("next/image", () => ({
   __esModule: true,
   default: ({ unoptimized, priority, ...props }: any) => (
-    <img 
-      alt={props.alt ?? ""} 
+    <img
+      alt={props.alt ?? ""}
       {...props}
       data-unoptimized={unoptimized}
       data-priority={priority}
@@ -53,7 +53,6 @@ jest.mock("@/services/api/common-api", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
-  process.env.API_ENDPOINT = "https://test.6529.io";
 });
 
 afterEach(() => {
@@ -169,7 +168,7 @@ describe("MemePageLiveSubMenu sorting", () => {
     render(<MemePageLiveSubMenu show nft={nft} />);
 
     expect(mockFetchUrl).toHaveBeenCalledWith(
-      `https://test.6529.io/api/nfts_memelab?sort_direction=asc&meme_id=${nft.id}`
+      `https://api.test.6529.io/api/nfts_memelab?sort_direction=asc&meme_id=${nft.id}`
     );
     await waitFor(() =>
       expect(screen.getByText("Random Rememe")).toBeInTheDocument()

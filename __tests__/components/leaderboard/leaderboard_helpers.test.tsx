@@ -1,13 +1,13 @@
 import { render, waitFor } from "@testing-library/react";
 import {
+  Collector,
+  Content,
+} from "../../../components/leaderboard/Leaderboard";
+import {
   getLeaderboardDownloadFileName,
   useFetchLeaderboard,
 } from "../../../components/leaderboard/leaderboard_helpers";
 import { SortDirection } from "../../../entities/ISort";
-import {
-  Content,
-  Collector,
-} from "../../../components/leaderboard/Leaderboard";
 
 jest.mock("../../../services/api/common-api", () => ({
   commonApiFetch: jest.fn(() =>
@@ -40,12 +40,11 @@ describe("leaderboard helpers", () => {
   });
 
   it("fetches data", async () => {
-    process.env.API_ENDPOINT = "https://test.6529.io";
     const { findByTestId } = render(<TestComponent />);
     const div = await findByTestId("url");
     await waitFor(() =>
       expect(div.textContent).toBe(
-        "https://test.6529.io/api/endpoint?page_size=50&page=1&sort=level&sort_direction=ASC&search=a"
+        "https://api.test.6529.io/api/endpoint?page_size=50&page=1&sort=level&sort_direction=ASC&search=a"
       )
     );
   });

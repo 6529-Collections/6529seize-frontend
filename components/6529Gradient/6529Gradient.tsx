@@ -6,6 +6,7 @@ import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDr
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { NFT } from "@/entities/INFT";
@@ -57,7 +58,7 @@ export default function GradientsComponent() {
     setSort(sortParam);
     setSortDir(dirParam);
 
-    const url = `${process.env.API_ENDPOINT}/api/nfts/gradients?page_size=101`;
+    const url = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?page_size=101`;
     fetchAllPages(url).then((raw: GradientNFT[]) => {
       setNftsRaw(raw);
       setNftsLoaded(true);

@@ -1,5 +1,3 @@
-import { render, screen } from "@testing-library/react";
-import React from "react";
 import GroupsPage, {
   generateMetadata as generateGroupsMetadata,
 } from "@/app/network/groups/page";
@@ -7,6 +5,8 @@ import CommunityMetricsPage, {
   generateMetadata as generateMetricsMetadata,
 } from "@/app/network/metrics/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 // ✅ Mock next/navigation
 jest.mock("next/navigation", () => ({
@@ -57,7 +57,6 @@ jest.mock("@/contexts/TitleContext", () => ({
 describe("network pages render", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.BASE_ENDPOINT = "https://base.test";
   });
 
   it("renders Groups page", () => {

@@ -1,7 +1,7 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
 let clickAwayCb: () => void;
 let escapeCb: () => void;
@@ -15,7 +15,6 @@ const useWaves = jest.fn();
 const useLocalPreference = jest.fn();
 
 jest.mock("react-use", () => {
-  const React = require("react");
   return {
     useClickAway: (_ref: any, cb: () => void) => {
       clickAwayCb = cb;

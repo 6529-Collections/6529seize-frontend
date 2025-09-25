@@ -1,5 +1,7 @@
-import { render, fireEvent } from "@testing-library/react";
-import DelegationMappingTool from "../../../components/mapping-tools/DelegationMappingTool";
+import DelegationMappingTool from "@/components/mapping-tools/DelegationMappingTool";
+import { fetchAllPages } from "@/services/6529api";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("react-bootstrap", () => ({
   Container: (props: any) => <div {...props} />,
@@ -42,11 +44,7 @@ describe("DelegationMappingTool drag and drop", () => {
   });
 });
 
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { fetchAllPages } from "../../../services/6529api";
-
-jest.mock("../../../services/6529api", () => ({
+jest.mock("@/services/6529api", () => ({
   fetchAllPages: jest.fn(() => Promise.resolve([])),
 }));
 jest.mock("csv-parser", () => () => {
@@ -76,7 +74,6 @@ Object.defineProperty(window, "FileReader", {
 });
 
 it("processes file on submit", async () => {
-  process.env.API_ENDPOINT = "https://test.6529.io";
   render(<DelegationMappingTool />);
   const input = document.querySelector(
     'input[type="file"]'

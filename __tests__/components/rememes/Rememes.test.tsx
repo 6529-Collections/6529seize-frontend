@@ -1,9 +1,8 @@
-import React from "react";
+import Rememes, { RememeSort } from "@/components/rememes/Rememes";
+import { TitleProvider } from "@/contexts/TitleContext";
+import { fetchUrl } from "@/services/6529api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Rememes, { RememeSort } from "@/components/rememes/Rememes";
-import { fetchUrl } from "@/services/6529api";
-import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -57,7 +56,6 @@ jest.mock("react-tooltip", () => ({
 describe("Rememes component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.API_ENDPOINT = "https://test.6529.io";
     global.fetch = jest.fn(() => Promise.resolve({ json: () => ({}) } as any));
   });
 
@@ -69,14 +67,14 @@ describe("Rememes component", () => {
     );
     await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
     expect(fetchUrl).toHaveBeenCalledWith(
-      "https://test.6529.io/api/rememes?page_size=40&page=1"
+      "https://api.test.6529.io/api/rememes?page_size=40&page=1"
     );
     await screen.findByText("Sort: Random");
     await userEvent.click(screen.getByText("Sort: Random"));
     await userEvent.click(screen.getByText(RememeSort.CREATED_ASC));
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenLastCalledWith(
-        "https://test.6529.io/api/rememes?page_size=40&page=1&sort=created_at&sort_direction=desc"
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&sort=created_at&sort_direction=desc"
       )
     );
   });

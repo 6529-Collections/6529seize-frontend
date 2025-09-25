@@ -3,6 +3,8 @@
  * Prevents exposure of sensitive data like JWT tokens, API keys, and secrets
  */
 
+import { publicEnv } from "@/config/env";
+
 // Patterns that indicate sensitive data in error messages
 const SENSITIVE_PATTERNS = [
   /jwt[_-]?token/i,
@@ -21,7 +23,7 @@ const SENSITIVE_PATTERNS = [
   /session[_-]?id/i,
   /cookie/i,
   /x-api-key/i,
-  /x-auth-token/i
+  /x-auth-token/i,
 ];
 
 // Patterns for common JWT formats
@@ -29,9 +31,9 @@ const JWT_PATTERN = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
 
 // Patterns for common API key formats
 const API_KEY_PATTERNS = [
-  /sk_[a-zA-Z0-9]{32,}/g,  // Stripe-like secret keys
-  /pk_[a-zA-Z0-9]{32,}/g,  // Public keys
-  /[a-f0-9]{32,64}/g,      // Hex strings (potential API keys/hashes)
+  /sk_[a-zA-Z0-9]{32,}/g, // Stripe-like secret keys
+  /pk_[a-zA-Z0-9]{32,}/g, // Public keys
+  /[a-f0-9]{32,64}/g, // Hex strings (potential API keys/hashes)
 ];
 
 /**
@@ -44,12 +46,12 @@ const containsSensitiveData = (text: string): boolean => {
   }
 
   // Check for sensitive keyword patterns
-  if (SENSITIVE_PATTERNS.some(pattern => pattern.test(text))) {
+  if (SENSITIVE_PATTERNS.some((pattern) => pattern.test(text))) {
     return true;
   }
 
   // Check for API key patterns
-  if (API_KEY_PATTERNS.some(pattern => pattern.test(text))) {
+  if (API_KEY_PATTERNS.some((pattern) => pattern.test(text))) {
     return true;
   }
 
@@ -61,45 +63,51 @@ const containsSensitiveData = (text: string): boolean => {
  */
 const getAdapterErrorMessage = (error: Error): string | null => {
   const errorName = (error as any)?.constructor?.name;
-  
-  if (!['AdapterError', 'AdapterCacheError', 'AdapterCleanupError'].includes(errorName)) {
+
+  if (
+    !["AdapterError", "AdapterCacheError", "AdapterCleanupError"].includes(
+      errorName
+    )
+  ) {
     return null;
   }
 
   // Map adapter-specific errors to user-friendly messages
-  if (error.message.includes('CACHE_')) {
-    return 'Wallet connection data needs to be refreshed. Please try connecting again.';
+  if (error.message.includes("CACHE_")) {
+    return "Wallet connection data needs to be refreshed. Please try connecting again.";
   }
-  if (error.message.includes('CLEANUP_')) {
-    return 'Wallet disconnection in progress. Please wait a moment before reconnecting.';
+  if (error.message.includes("CLEANUP_")) {
+    return "Wallet disconnection in progress. Please wait a moment before reconnecting.";
   }
-  if (error.message.includes('Adapter creation failed')) {
-    return 'Unable to initialize wallet connection. Please refresh the page and try again.';
+  if (error.message.includes("Adapter creation failed")) {
+    return "Unable to initialize wallet connection. Please refresh the page and try again.";
   }
-  if (errorName === 'AdapterCacheError') {
-    return 'Wallet connection cache needs to be cleared. Please refresh the page.';
+  if (errorName === "AdapterCacheError") {
+    return "Wallet connection cache needs to be cleared. Please refresh the page.";
   }
-  if (errorName === 'AdapterCleanupError') {
-    return 'Previous wallet connection is still being cleaned up. Please wait and try again.';
+  if (errorName === "AdapterCleanupError") {
+    return "Previous wallet connection is still being cleaned up. Please wait and try again.";
   }
-  
+
   // Default for unknown adapter errors
-  return 'Wallet connection service is temporarily unavailable. Please try again.';
+  return "Wallet connection service is temporarily unavailable. Please try again.";
 };
 
 /**
  * Extracts error message and string representation from unknown error
  */
-const extractErrorMessage = (error: unknown): { message: string; errorString: string } => {
+const extractErrorMessage = (
+  error: unknown
+): { message: string; errorString: string } => {
   if (error instanceof Error) {
     return { message: error.message, errorString: error.toString() };
   }
-  
-  if (typeof error === 'string') {
+
+  if (typeof error === "string") {
     return { message: error, errorString: error };
   }
-  
-  if (typeof error === 'object') {
+
+  if (typeof error === "object") {
     try {
       const errorString = JSON.stringify(error);
       const message = (error as any).message || (error as any).error || "";
@@ -108,7 +116,7 @@ const extractErrorMessage = (error: unknown): { message: string; errorString: st
       return { message: "", errorString: "Complex error object" };
     }
   }
-  
+
   return { message: "", errorString: "" };
 };
 
@@ -116,16 +124,37 @@ const extractErrorMessage = (error: unknown): { message: string; errorString: st
  * Error pattern mappings for common error types
  */
 const ERROR_PATTERNS = [
-  { pattern: /network/i, message: "Network error. Please check your connection and try again." },
+  {
+    pattern: /network/i,
+    message: "Network error. Please check your connection and try again.",
+  },
   { pattern: /timeout/i, message: "Request timed out. Please try again." },
-  { pattern: /unauthorized|forbidden/i, message: "Authorization failed. Please reconnect your wallet." },
-  { pattern: /invalid/i, message: "Invalid request. Please check your input and try again." },
+  {
+    pattern: /unauthorized|forbidden/i,
+    message: "Authorization failed. Please reconnect your wallet.",
+  },
+  {
+    pattern: /invalid/i,
+    message: "Invalid request. Please check your input and try again.",
+  },
   { pattern: /not found/i, message: "Requested resource not found." },
-  { pattern: /rate limit/i, message: "Too many requests. Please wait a moment and try again." },
-  { pattern: /wallet|metamask/i, message: "Wallet error. Please check your wallet connection." },
-  { pattern: /signature|sign/i, message: "Signature request failed. Please try again." },
+  {
+    pattern: /rate limit/i,
+    message: "Too many requests. Please wait a moment and try again.",
+  },
+  {
+    pattern: /wallet|metamask/i,
+    message: "Wallet error. Please check your wallet connection.",
+  },
+  {
+    pattern: /signature|sign/i,
+    message: "Signature request failed. Please try again.",
+  },
   { pattern: /rejected|denied/i, message: "Request was rejected." },
-  { pattern: /balance|insufficient/i, message: "Insufficient balance for this operation." }
+  {
+    pattern: /balance|insufficient/i,
+    message: "Insufficient balance for this operation.",
+  },
 ];
 
 /**
@@ -146,7 +175,7 @@ export const sanitizeErrorForUser = (error: unknown): string => {
   }
 
   const { message, errorString } = extractErrorMessage(error);
-  
+
   if (!message && !errorString) {
     return "An unexpected error occurred. Please try again.";
   }
@@ -179,8 +208,8 @@ export const sanitizeErrorForUser = (error: unknown): string => {
  */
 export const logErrorSecurely = (context: string, error: unknown): void => {
   const timestamp = new Date().toISOString();
-  
-  if (process.env.NODE_ENV === 'development') {
+
+  if (publicEnv.NODE_ENV === "development") {
     // In development, log full error for debugging
     console.error(`[${timestamp}] [${context}]`, error);
     return;
@@ -189,11 +218,10 @@ export const logErrorSecurely = (context: string, error: unknown): void => {
   // In production, we should never log sensitive data to console
   // Instead, log a sanitized version
   const sanitizedMessage = sanitizeErrorForUser(error);
-  
 
   // TODO: Integrate with secure logging service (e.g., Sentry, DataDog, CloudWatch)
   // For now, we'll use console.error with sanitized data only
-  if (process.env.NODE_ENV !== 'test') {
+  if (publicEnv.NODE_ENV !== "test") {
     // Avoid console spam in tests
     console.error(`[${timestamp}] [${context}] Error:`, sanitizedMessage);
   }
@@ -212,16 +240,20 @@ export const logErrorSecurely = (context: string, error: unknown): void => {
  * Useful for displaying error codes without exposing sensitive data
  */
 export const getErrorCode = (error: unknown): string | null => {
-  if (!error || typeof error !== 'object') {
+  if (!error || typeof error !== "object") {
     return null;
   }
 
   const errorObj = error as any;
-  
+
   // Check for common error code properties
-  const code = errorObj.code || errorObj.errorCode || errorObj.status || errorObj.statusCode;
-  
-  if (code && (typeof code === 'string' || typeof code === 'number')) {
+  const code =
+    errorObj.code ||
+    errorObj.errorCode ||
+    errorObj.status ||
+    errorObj.statusCode;
+
+  if (code && (typeof code === "string" || typeof code === "number")) {
     // Ensure the code doesn't contain sensitive data
     const codeStr = code.toString();
     if (!containsSensitiveData(codeStr) && codeStr.length < 50) {
@@ -235,9 +267,12 @@ export const getErrorCode = (error: unknown): string | null => {
 /**
  * Creates a user-friendly error message with optional error code
  */
-export const formatErrorMessage = (error: unknown, includeCode: boolean = false): string => {
+export const formatErrorMessage = (
+  error: unknown,
+  includeCode: boolean = false
+): string => {
   const message = sanitizeErrorForUser(error);
-  
+
   if (includeCode) {
     const code = getErrorCode(error);
     if (code) {

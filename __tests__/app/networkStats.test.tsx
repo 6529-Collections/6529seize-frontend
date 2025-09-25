@@ -1,7 +1,7 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import CommunityStatsPage, { generateMetadata } from "@/app/network/stats/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 // ✅ Mocks
 jest.mock("react-bootstrap", () => ({
@@ -40,10 +40,6 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 describe("CommunityStats page", () => {
-  beforeEach(() => {
-    process.env.BASE_ENDPOINT = "https://base.test";
-  });
-
   const renderPage = () =>
     render(
       <AuthContext.Provider value={{} as any}>

@@ -1,11 +1,11 @@
-import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { AuthContext } from "@/components/auth/Auth";
 import MemePage from "@/components/the-memes/MemePage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
-import { AuthContext } from "@/components/auth/Auth";
-import { useRouter } from "next/navigation";
 import { fetchUrl } from "@/services/6529api";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -18,10 +18,12 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(() => Promise.resolve({
-    memes: [{ id: 1, tdh: 100 }],
-    memes_ranks: [{ id: 1, rank: 1 }],
-  })),
+  commonApiFetch: jest.fn(() =>
+    Promise.resolve({
+      memes: [{ id: 1, tdh: 100 }],
+      memes_ranks: [{ id: 1, rank: 1 }],
+    })
+  ),
 }));
 
 jest.mock("@/components/the-memes/MemePageLive", () => ({
@@ -280,7 +282,7 @@ describe("MemePage search params handling", () => {
 
   it("updates URL when activeTab changes", async () => {
     renderPage();
-    
+
     await waitFor(() =>
       expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
     );
@@ -288,7 +290,9 @@ describe("MemePage search params handling", () => {
     const artButton = screen.getByRole("button", { name: "The Art" });
     await userEvent.click(artButton);
 
-    expect(mockPush).toHaveBeenCalledWith(`/the-memes/1?focus=${MEME_FOCUS.THE_ART}`);
+    expect(mockPush).toHaveBeenCalledWith(
+      `/the-memes/1?focus=${MEME_FOCUS.THE_ART}`
+    );
   });
 });
 
@@ -299,15 +303,15 @@ describe("MemePage API interactions", () => {
 
   it("fetches NFT metadata on mount", async () => {
     renderPage();
-    
+
     expect(fetchUrl).toHaveBeenCalledWith(
-      `${process.env.API_ENDPOINT}/api/memes_extended_data?id=1`
+      "https://api.test.6529.io/api/memes_extended_data?id=1"
     );
   });
 
   it("fetches NFT data after metadata loads", async () => {
     renderPage();
-    
+
     await waitFor(() => {
       expect(fetchUrl).toHaveBeenCalledWith(
         expect.stringContaining("/api/nfts?id=1&contract=")
@@ -324,11 +328,11 @@ describe("MemePage API interactions", () => {
     });
 
     renderPage();
-    
+
     // Should not make the second NFT call when metadata is empty
     await waitFor(() => {
       const calls = (fetchUrl as jest.Mock).mock.calls;
-      const nftCalls = calls.filter(call => call[0].includes("/api/nfts?"));
+      const nftCalls = calls.filter((call) => call[0].includes("/api/nfts?"));
       expect(nftCalls).toHaveLength(0);
     });
   });
@@ -357,8 +361,18 @@ describe("MemePage wallet integration", () => {
       classification: "PSEUDONYM" as any,
       sub_classification: null,
       wallets: [
-        { wallet: "0x123", ens: null, wallet_displayed: "0x123", is_primary: true },
-        { wallet: "0x456", ens: null, wallet_displayed: "0x456", is_primary: false }
+        {
+          wallet: "0x123",
+          ens: null,
+          wallet_displayed: "0x123",
+          is_primary: true,
+        },
+        {
+          wallet: "0x456",
+          ens: null,
+          wallet_displayed: "0x456",
+          is_primary: false,
+        },
       ],
     };
 
@@ -384,7 +398,9 @@ describe("MemePage wallet integration", () => {
 
     await waitFor(() => {
       const calls = (fetchUrl as jest.Mock).mock.calls;
-      const transactionCalls = calls.filter(call => call[0].includes("/api/transactions"));
+      const transactionCalls = calls.filter((call) =>
+        call[0].includes("/api/transactions")
+      );
       expect(transactionCalls.length).toBeGreaterThan(0);
       expect(transactionCalls[0][0]).toContain("wallet=0x123,0x456");
     });
@@ -433,7 +449,9 @@ describe("MemePage wallet integration", () => {
     // Should not make transactions call
     await waitFor(() => {
       const calls = (fetchUrl as jest.Mock).mock.calls;
-      const transactionCalls = calls.filter(call => call[0].includes("/api/transactions"));
+      const transactionCalls = calls.filter((call) =>
+        call[0].includes("/api/transactions")
+      );
       expect(transactionCalls).toHaveLength(0);
     });
   });
@@ -442,9 +460,9 @@ describe("MemePage wallet integration", () => {
 describe("MemePage loading states", () => {
   it("renders without crashing during loading", () => {
     (fetchUrl as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
-    
+
     renderPage();
-    
+
     // Should render title and basic structure even while loading
     expect(screen.getByText("Memes")).toBeInTheDocument();
   });
@@ -460,24 +478,32 @@ describe("MemePage loading states", () => {
       }
       return Promise.resolve({ data: [] });
     });
-    
+
     renderPage();
-    
+
     // Wait for data to load and content to render
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole("button", { name: "Live" })
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 });
 
 describe("MemePage navigation integration", () => {
   it("displays season and card information when data loads", async () => {
     renderPage();
-    
-    await waitFor(() => {
-      expect(screen.getByText(/SZN1/)).toBeInTheDocument();
-      expect(screen.getByText(/Card 1/)).toBeInTheDocument();
-      expect(screen.getByText("Meme")).toBeInTheDocument();
-    }, { timeout: 5000 });
+
+    await waitFor(
+      () => {
+        expect(screen.getByText(/SZN1/)).toBeInTheDocument();
+        expect(screen.getByText(/Card 1/)).toBeInTheDocument();
+        expect(screen.getByText("Meme")).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 });

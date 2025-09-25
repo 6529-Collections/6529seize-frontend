@@ -1,7 +1,6 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import RememeAddPage from "../../../components/rememes/RememeAddPage";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import RememeAddPage from "../../../components/rememes/RememeAddPage";
 
 // Mock react-bootstrap
 jest.mock("react-bootstrap", () => ({
@@ -14,7 +13,9 @@ jest.mock("react-bootstrap", () => ({
 // Mock Next.js Image component
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => (
+    <img {...props} alt={props.alt ?? "rememe-add-page"} />
+  ),
 }));
 
 // Mock wagmi hooks
@@ -76,7 +77,7 @@ jest.mock("../../../services/api/common-api", () => ({
 
 jest.mock("../../../helpers/Helpers", () => ({
   areEqualAddresses: jest.fn((a, b) => a?.toLowerCase() === b?.toLowerCase()),
-  numberWithCommas: jest.fn((n) => n.toLocaleString('en-US')),
+  numberWithCommas: jest.fn((n) => n.toLocaleString("en-US")),
 }));
 
 // Get mocked functions
@@ -410,7 +411,7 @@ describe("RememeAddPage", () => {
     renderComponent();
 
     expect(mockFetchUrl).toHaveBeenCalledWith(
-      `${process.env.API_ENDPOINT}/api/memes_lite`
+      "https://api.test.6529.io/api/memes_lite"
     );
   });
 

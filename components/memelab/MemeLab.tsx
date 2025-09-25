@@ -11,6 +11,7 @@ import {
   SortButton,
   printVolumeTypeDropdown,
 } from "@/components/the-memes/TheMemes";
+import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
@@ -467,7 +468,7 @@ export default function MemeLabComponent() {
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
-    const nftsUrl = `${process.env.API_ENDPOINT}/api/lab_extended_data`;
+    const nftsUrl = `${publicEnv.API_ENDPOINT}/api/lab_extended_data`;
     fetchAllPages(nftsUrl).then((responseNftMetas: LabExtendedData[]) => {
       setNftMetas(responseNftMetas);
       const myCollections: string[] = [];
@@ -480,9 +481,7 @@ export default function MemeLabComponent() {
       if (responseNftMetas.length > 0) {
         const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
         fetchAllPages(
-          `${process.env.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
-            ","
-          )}`
+          `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(",")}`
         ).then((responseNfts: any[]) => {
           setNfts(responseNfts);
         });

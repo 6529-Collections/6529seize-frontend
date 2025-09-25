@@ -87,3 +87,6 @@ claude.md
 .claude/commands/
 test.html
 .claude/
+
+# generated env schema for Node runtime
+/config/env.schema.runtime.cjs

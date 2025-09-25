@@ -1,8 +1,8 @@
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -128,36 +128,36 @@ require("next/navigation").useSearchParams = mockUseSearchParams;
 require("@/services/6529api").fetchUrl = mockFetchUrl;
 require("@/services/6529api").fetchAllPages = mockFetchAllPages;
 require("@/components/auth/Auth").useAuth = mockUseAuth;
-require("@/components/cookies/CookieConsentContext").useCookieConsent = mockUseCookieConsent;
+require("@/components/cookies/CookieConsentContext").useCookieConsent =
+  mockUseCookieConsent;
 require("@/hooks/useCapacitor").default = mockUseCapacitor;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  process.env.API_ENDPOINT = "https://test.6529.io";
-  
+
   // Setup default mock returns
   mockUseSearchParams.mockReturnValue({
     get: jest.fn().mockReturnValue(null),
   });
-  
+
   mockUseRouter.mockReturnValue({
     replace: jest.fn(),
   });
-  
+
   mockUseAuth.mockReturnValue({
     connectedProfile: {
       wallets: ["0xabc"],
     },
   });
-  
+
   mockUseCookieConsent.mockReturnValue({
     country: "US",
   });
-  
+
   mockUseCapacitor.mockReturnValue({
     isIos: false,
   });
-  
+
   mockFetchAllPages.mockResolvedValue([]);
   mockFetchUrl.mockResolvedValue({ data: [], count: 0 });
 });
@@ -172,9 +172,7 @@ const renderWithQueryClient = (component: React.ReactElement) => {
     },
   });
   return render(
-    <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
   );
 };
 
@@ -248,7 +246,7 @@ function createMockNft(overrides: any = {}) {
       animation_details: { format: "MP4" },
     },
   };
-  
+
   return {
     data: [{ ...defaultNft, ...overrides }],
   };
@@ -285,12 +283,14 @@ function setupMockApiCalls(balance = 1) {
   const nft = createMockNft();
   const transactions = createMockTransactions(balance);
   const activity = { data: [], count: 0 };
-  
+
   mockFetchUrl.mockImplementation((url: string) => {
     if (url.includes("lab_extended_data")) return Promise.resolve(meta);
     if (url.includes("nfts_memelab")) return Promise.resolve(nft);
-    if (url.includes("transactions_memelab") && url.includes("wallet=")) return Promise.resolve(transactions);
-    if (url.includes("transactions_memelab") && url.includes("page_size")) return Promise.resolve(activity);
+    if (url.includes("transactions_memelab") && url.includes("wallet="))
+      return Promise.resolve(transactions);
+    if (url.includes("transactions_memelab") && url.includes("page_size"))
+      return Promise.resolve(activity);
     if (url.includes("nft_history")) return Promise.resolve({ data: [] });
     return Promise.resolve({ data: [] });
   });
@@ -299,50 +299,50 @@ function setupMockApiCalls(balance = 1) {
 describe("MemeLabPageComponent", () => {
   it("renders without crashing", async () => {
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     expect(screen.getByText("Meme")).toBeInTheDocument();
     expect(screen.getByText("Lab")).toBeInTheDocument();
   });
 
   it("fetches lab extended data on mount", async () => {
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
-        "https://test.6529.io/api/lab_extended_data?id=1"
+        "https://api.test.6529.io/api/lab_extended_data?id=1"
       );
     });
   });
 
   it("fetches nft data after metadata loads", async () => {
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
-        "https://test.6529.io/api/nfts_memelab?id=1"
+        "https://api.test.6529.io/api/nfts_memelab?id=1"
       );
     });
   });
 
   it("shows user balance when wallet is connected", async () => {
     setupMockApiCalls(2);
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
         expect.stringContaining("transactions_memelab?wallet=0xabc&id=1")
@@ -357,44 +357,51 @@ describe("MemeLabPageComponent", () => {
         return null;
       }),
     });
-    
+
     setupMockApiCalls(1);
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
-    await waitFor(() => {
-      expect(mockFetchUrl).toHaveBeenCalledWith(
-        expect.stringContaining("transactions_memelab?wallet=0xabc")
-      );
-    }, { timeout: 5000 });
+
+    await waitFor(
+      () => {
+        expect(mockFetchUrl).toHaveBeenCalledWith(
+          expect.stringContaining("transactions_memelab?wallet=0xabc")
+        );
+      },
+      { timeout: 5000 }
+    );
   });
 
   it("fetches activity data for activity tab", async () => {
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
-        expect.stringMatching(/transactions_memelab.*id=1.*page_size=25.*page=1/)
+        expect.stringMatching(
+          /transactions_memelab.*id=1.*page_size=25.*page=1/
+        )
       );
     });
   });
 
   it("fetches NFT history data", async () => {
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     await waitFor(() => {
       expect(mockFetchAllPages).toHaveBeenCalledWith(
-        expect.stringContaining("nft_history/0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb/1")
+        expect.stringContaining(
+          "nft_history/0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb/1"
+        )
       );
     });
   });
@@ -406,13 +413,13 @@ describe("MemeLabPageComponent", () => {
         return null;
       }),
     });
-    
+
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     // Should set active tab based on URL param
     expect(mockUseRouter().replace).toHaveBeenCalledWith(
       expect.stringContaining(`focus=${MEME_FOCUS.ACTIVITY}`)
@@ -421,14 +428,15 @@ describe("MemeLabPageComponent", () => {
 
   it("handles empty metadata response", async () => {
     mockFetchUrl.mockImplementation((url: string) => {
-      if (url.includes("lab_extended_data")) return Promise.resolve({ data: [] });
+      if (url.includes("lab_extended_data"))
+        return Promise.resolve({ data: [] });
       return Promise.resolve({ data: [] });
     });
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     // Should handle no metadata gracefully
     expect(screen.getByText("Meme")).toBeInTheDocument();
     expect(screen.getByText("Lab")).toBeInTheDocument();
@@ -477,19 +485,22 @@ describe("MemeLabPageComponent", () => {
         },
       ],
     };
-    
+
     mockFetchUrl.mockImplementation((url: string) => {
-      if (url.includes("lab_extended_data")) return Promise.resolve(createMockMeta());
+      if (url.includes("lab_extended_data"))
+        return Promise.resolve(createMockMeta());
       if (url.includes("nfts_memelab")) return Promise.resolve(createMockNft());
-      if (url.includes("transactions_memelab") && url.includes("wallet=")) return Promise.resolve(transactions);
-      if (url.includes("transactions_memelab") && url.includes("page_size")) return Promise.resolve({ data: [], count: 0 });
+      if (url.includes("transactions_memelab") && url.includes("wallet="))
+        return Promise.resolve(transactions);
+      if (url.includes("transactions_memelab") && url.includes("page_size"))
+        return Promise.resolve({ data: [], count: 0 });
       return Promise.resolve({ data: [] });
     });
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
         expect.stringContaining("transactions_memelab?wallet=0xabc&id=1")
@@ -501,13 +512,13 @@ describe("MemeLabPageComponent", () => {
     mockUseAuth.mockReturnValue({
       connectedProfile: null,
     });
-    
+
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     // Should not fetch user transactions when wallet not connected
     expect(mockFetchUrl).not.toHaveBeenCalledWith(
       expect.stringContaining("transactions_memelab?wallet=")
@@ -520,41 +531,42 @@ describe("MemeLabPageComponent", () => {
       title: "Test Title",
       setTitle: mockSetTitle,
     });
-    
+
     setupMockApiCalls();
-    
+
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
-    
+
     await waitFor(() => {
       expect(mockSetTitle).toHaveBeenCalled();
     });
   });
 
-  describe("Data loading states", () => {    
+  describe("Data loading states", () => {
     it("renders basic structure before data loads", async () => {
       mockFetchUrl.mockResolvedValue({ data: [] });
       mockFetchAllPages.mockResolvedValue([]);
-      
+
       await act(async () => {
         renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
       });
-      
+
       expect(screen.getByText("Meme")).toBeInTheDocument();
       expect(screen.getByText("Lab")).toBeInTheDocument();
     });
 
     it("does not render NFT content when no metadata is available", async () => {
       mockFetchUrl.mockImplementation((url: string) => {
-        if (url.includes("lab_extended_data")) return Promise.resolve({ data: [] });
+        if (url.includes("lab_extended_data"))
+          return Promise.resolve({ data: [] });
         return Promise.resolve({ data: [], count: 0 });
       });
-      
+
       await act(async () => {
         renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
       });
-      
+
       expect(screen.getByText("Meme")).toBeInTheDocument();
       expect(screen.getByText("Lab")).toBeInTheDocument();
       // Should not render NFT-specific content without metadata
@@ -569,13 +581,13 @@ describe("MemeLabPageComponent", () => {
       mockUseRouter.mockReturnValue({
         replace: mockReplace,
       });
-      
+
       setupMockApiCalls();
-      
+
       await act(async () => {
         renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
       });
-      
+
       // Should update URL with default focus
       await waitFor(() => {
         expect(mockReplace).toHaveBeenCalledWith(

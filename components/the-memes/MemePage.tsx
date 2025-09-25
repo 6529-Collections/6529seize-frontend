@@ -10,6 +10,7 @@ import { Col, Container, Row } from "react-bootstrap";
 import { AuthContext } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import { publicEnv } from "@/config/env";
 import { useTitle } from "@/contexts/TitleContext";
 import { MemesExtendedData, NFT, NftRank, NftTDH } from "@/entities/INFT";
 import { ConsolidatedTDH } from "@/entities/ITDH";
@@ -94,13 +95,13 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   useEffect(() => {
     if (nftId) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
+        `${publicEnv.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
       ).then((response: DBResponse) => {
         const nftMetas = response.data;
         if (nftMetas.length === 1) {
           setNftMeta(nftMetas[0]);
           fetchUrl(
-            `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
+            `${publicEnv.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
           ).then((response: DBResponse) => {
             const mynft = response.data[0];
             setNft(mynft);
@@ -131,7 +132,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     if (connectedWallets.length && nftId) {
       fetchUrl(
         `${
-          process.env.API_ENDPOINT
+          publicEnv.API_ENDPOINT
         }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
           ","
         )}&id=${nftId}`
