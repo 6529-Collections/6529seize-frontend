@@ -2,6 +2,40 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WaveDropActionsAddReaction from "../../../../components/waves/drops/WaveDropActionsAddReaction";
 
+const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
+const setToastMock = jest.fn();
+
+jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
+  useMyStream: jest.fn(() => ({
+    applyOptimisticDropUpdate: applyOptimisticDropUpdateMock,
+  })),
+}));
+
+jest.mock("../../../../components/auth/Auth", () => ({
+  useAuth: jest.fn(() => ({
+    setToast: setToastMock,
+    connectedProfile: {
+      id: "identity-1",
+      handle: "user",
+      pfp: null,
+      banner1: null,
+      banner2: null,
+      cic: 0,
+      rep: 0,
+      tdh: 0,
+      tdh_rate: 0,
+      level: 0,
+      primary_wallet: "0xuser",
+      active_main_stage_submission_ids: [],
+      winner_main_stage_drop_ids: [],
+    },
+  })),
+}));
+
+jest.mock("../../../../services/api/common-api", () => ({
+  commonApiPost: jest.fn(() => Promise.resolve({})),
+}));
+
 // Mock emoji-mart/react Picker and emoji-mart/data
 jest.mock("@emoji-mart/react", () => ({
   __esModule: true,
@@ -27,10 +61,22 @@ jest.mock("../../../../contexts/EmojiContext", () => ({
 }));
 
 // Mock drop object
-const mockDrop = { id: "12345" } as any;
-const tempDrop = { id: "temp-001" } as any;
+const mockDrop = {
+  id: "12345",
+  wave: { id: "wave-1" },
+  context_profile_context: { reaction: null },
+} as any;
+const tempDrop = {
+  id: "temp-001",
+  wave: { id: "wave-1" },
+  context_profile_context: { reaction: null },
+} as any;
 
 describe("WaveDropActionsAddReaction", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("renders desktop button", () => {
     render(<WaveDropActionsAddReaction drop={mockDrop} />);
     expect(
