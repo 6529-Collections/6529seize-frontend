@@ -26,7 +26,11 @@ export function parseSeizeQueryLink(
   try {
     const url = new URL(href);
 
-    if (url.origin !== publicEnv.BASE_ENDPOINT) return null;
+    const allowedOrigins = new Set(
+      [publicEnv.BASE_ENDPOINT, process.env.BASE_ENDPOINT].filter(Boolean)
+    );
+
+    if (!allowedOrigins.has(url.origin)) return null;
     if (url.pathname !== path) return null;
 
     if (exact) {

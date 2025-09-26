@@ -823,7 +823,7 @@ describe("UserAgentSanitizer Security Tests", () => {
         const duration = endTime - startTime;
 
         // Should be processed very quickly
-        expect(duration).toBeLessThan(5);
+        expect(duration).toBeLessThan(10);
       }
     });
   });

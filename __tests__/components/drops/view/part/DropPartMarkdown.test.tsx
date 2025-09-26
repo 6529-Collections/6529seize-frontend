@@ -1,10 +1,20 @@
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
+import { publicEnv } from "@/config/env";
 import {
   fetchYoutubePreview,
   type YoutubeOEmbedResponse,
 } from "@/services/api/youtube";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+const FALLBACK_BASE_ENDPOINT = "https://6529.io";
+const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
+const originalArtBlocksFlags = {
+  VITE_FEATURE_AB_CARD: publicEnv.VITE_FEATURE_AB_CARD,
+  NEXT_PUBLIC_VITE_FEATURE_AB_CARD: publicEnv.NEXT_PUBLIC_VITE_FEATURE_AB_CARD,
+  NEXT_PUBLIC_FEATURE_AB_CARD: publicEnv.NEXT_PUBLIC_FEATURE_AB_CARD,
+  FEATURE_AB_CARD: publicEnv.FEATURE_AB_CARD,
+};
 
 jest.mock("@/hooks/isMobileScreen", () => () => false);
 jest.mock("@/contexts/EmojiContext", () => ({
@@ -51,6 +61,10 @@ const mockArtBlocksTokenCard = jest.fn((props: any) => (
   />
 ));
 
+const mockFarcasterCard = jest.fn(({ href }: any) => (
+  <div data-testid="farcaster-card" data-href={href} />
+));
+
 jest.mock("@/components/waves/LinkPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockLinkPreviewCard(props),
@@ -61,9 +75,22 @@ jest.mock("@/src/components/waves/ArtBlocksTokenCard", () => ({
   default: (props: any) => mockArtBlocksTokenCard(props),
 }));
 
+jest.mock("@/components/waves/FarcasterCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockFarcasterCard(props),
+}));
+
+jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
+  __esModule: true,
+  default: ({ href, relativeHref }: { href: string; relativeHref?: string }) => (
+    <div data-testid="chat-item-buttons" data-href={href} data-relative-href={relativeHref} />
+  ),
+}));
+
 beforeEach(() => {
   mockLinkPreviewCard.mockClear();
   mockArtBlocksTokenCard.mockClear();
+  mockFarcasterCard.mockClear();
 });
 
 afterEach(() => {
@@ -73,6 +100,15 @@ afterEach(() => {
 describe("DropPartMarkdown", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    publicEnv.BASE_ENDPOINT =
+      originalBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;
+    publicEnv.VITE_FEATURE_AB_CARD =
+      originalArtBlocksFlags.VITE_FEATURE_AB_CARD;
+    publicEnv.NEXT_PUBLIC_VITE_FEATURE_AB_CARD =
+      originalArtBlocksFlags.NEXT_PUBLIC_VITE_FEATURE_AB_CARD;
+    publicEnv.NEXT_PUBLIC_FEATURE_AB_CARD =
+      originalArtBlocksFlags.NEXT_PUBLIC_FEATURE_AB_CARD;
+    publicEnv.FEATURE_AB_CARD = originalArtBlocksFlags.FEATURE_AB_CARD;
   });
 
   it("renders gif embeds", () => {
@@ -111,7 +147,6 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders Art Blocks token card when feature enabled", async () => {
-    const { publicEnv } = require("@/config/env");
     publicEnv.VITE_FEATURE_AB_CARD = "true";
     const content = "[token](https://www.artblocks.io/token/662000)";
 
@@ -133,8 +168,43 @@ describe("DropPartMarkdown", () => {
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
   });
 
+  it("renders Farcaster card for Warpcast links", () => {
+    const content = "[cast](https://warpcast.com/alice/0x123)";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mockFarcasterCard).toHaveBeenCalledTimes(1);
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    const call = mockFarcasterCard.mock.calls[0][0];
+    expect(call.href).toBe("https://warpcast.com/alice/0x123");
+  });
+
+  it("falls back to regular link when Art Blocks URL is not supported", () => {
+    const content = "[token](https://www.artblocks.io/project/662000)";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    const link = screen.getByRole("link", { name: "token" });
+    expect(link).toHaveAttribute("href", "https://www.artblocks.io/project/662000");
+  });
+
   it("falls back to regular link when Art Blocks card disabled", () => {
-    const { publicEnv } = require("@/config/env");
     publicEnv.VITE_FEATURE_AB_CARD = "false";
     const content = "[token](https://www.artblocks.io/token/662000)";
 
@@ -150,10 +220,7 @@ describe("DropPartMarkdown", () => {
     expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const link = screen.getByRole("link", { name: "token" });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://www.artblocks.io/token/662000"
-    );
+    expect(link).toHaveAttribute("href", "https://www.artblocks.io/token/662000");
   });
 
   it("renders a fallback link when tweet data is unavailable", async () => {

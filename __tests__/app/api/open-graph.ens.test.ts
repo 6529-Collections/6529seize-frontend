@@ -21,7 +21,7 @@ jest.mock("viem/chains", () => ({ mainnet: { id: 1 } }));
 jest.mock("@ensdomains/content-hash", () => ({
   getCodec: jest.fn(() => undefined),
   decode: jest.fn(() => ""),
-}));
+}), { virtual: true });
 
 const ensModule = require("@/app/api/open-graph/ens");
 

@@ -70,7 +70,7 @@ export const EmojiProvider = ({ children }: { children: React.ReactNode }) => {
         const mappedEmojis = emojiList.map((id) => ({
           id,
           name: id,
-          keywords: id.replace(/_/g, " "),
+          keywords: id.replaceAll("_", " "),
           skins: [
             {
               src: `https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/${id}.webp`,

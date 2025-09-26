@@ -1,14 +1,7 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import useWaveMessagesStore from '../../../../contexts/wave/hooks/useWaveMessagesStore';
 
 describe('useWaveMessagesStore', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   const baseDrop = {
     id: 'd1',
     wave: { id: 'wave1' },
@@ -20,7 +13,7 @@ describe('useWaveMessagesStore', () => {
     type: 'FULL',
   } as any;
 
-  it('allows subscription and updates data', () => {
+  it('allows subscription and updates data', async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
 
@@ -30,16 +23,17 @@ describe('useWaveMessagesStore', () => {
     act(() => {
       result.current.updateData({ key: 'wave1', drops: [baseDrop] } as any);
     });
-    act(() => {
-      jest.runOnlyPendingTimers();
-    });
 
     const data = result.current.getData('wave1');
     expect(data?.drops[0].id).toBe('d1');
-    expect(listener).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'wave1' }));
+    await waitFor(() =>
+      expect(listener).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'wave1' })
+      )
+    );
   });
 
-  it('removes drops and notifies listeners', () => {
+  it('removes drops and exposes updated state', async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
 
@@ -47,13 +41,21 @@ describe('useWaveMessagesStore', () => {
     act(() => {
       result.current.updateData({ key: 'wave1', drops: [baseDrop] } as any);
     });
-    act(() => {
-      jest.runOnlyPendingTimers();
-    });
+    await waitFor(() =>
+      expect(listener).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'wave1' })
+      )
+    );
     listener.mockClear();
 
     act(() => result.current.removeDrop('wave1', 'd1'));
     expect(result.current.getData('wave1')?.drops).toHaveLength(0);
-    expect(listener).toHaveBeenCalledWith(expect.objectContaining({ drops: [] }));
+    expect(listener).not.toHaveBeenCalled();
+
+    const lateListener = jest.fn();
+    act(() => result.current.subscribe('wave1', lateListener));
+    expect(lateListener).toHaveBeenCalledWith(
+      expect.objectContaining({ drops: [] })
+    );
   });
 });

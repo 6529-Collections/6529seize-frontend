@@ -146,8 +146,8 @@ function DropPartMarkdown({
       type MarkdownRendererProps<T extends ElementType> = ComponentPropsWithoutRef<T> &
         ExtraProps & { children?: ReactNode; className?: string };
 
-      const createHeadingRenderer = <T extends ElementType>(Tag: T) =>
-        ({
+      const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
+        const HeadingRenderer = ({
           children,
           className,
           ...props
@@ -164,6 +164,11 @@ function DropPartMarkdown({
             </TagComponent>
           );
         };
+
+        HeadingRenderer.displayName = `MarkdownHeading(${typeof Tag === "string" ? Tag : "component"})`;
+
+        return HeadingRenderer;
+      };
 
       return {
         h1: createHeadingRenderer("h1"),

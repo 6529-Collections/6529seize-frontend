@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from "react";
 
-import ChatItemHrefButtons from "../ChatItemHrefButtons";
+import LinkHandlerFrame from "../LinkHandlerFrame";
 
 export type PepeKind = "asset" | "collection" | "artist" | "set";
 
@@ -114,39 +114,33 @@ const formatters = {
 
 function renderLoadingState(href: string) {
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
-          <div className="tw-aspect-square tw-w-16 tw-rounded-md tw-bg-iron-800 tw-animate-pulse" />
-          <div className="tw-flex-1 tw-space-y-2">
-            <div className="tw-h-4 tw-w-2/3 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-            <div className="tw-h-3 tw-w-1/3 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-            <div className="tw-h-3 tw-w-1/2 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-          </div>
+    <LinkHandlerFrame href={href}>
+      <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+        <div className="tw-aspect-square tw-w-16 tw-rounded-md tw-bg-iron-800 tw-animate-pulse" />
+        <div className="tw-flex-1 tw-space-y-2">
+          <div className="tw-h-4 tw-w-2/3 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
+          <div className="tw-h-3 tw-w-1/3 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
+          <div className="tw-h-3 tw-w-1/2 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
         </div>
       </div>
-      <ChatItemHrefButtons href={href} />
-    </div>
+    </LinkHandlerFrame>
   );
 }
 
 function renderFallback(href: string) {
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-          className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-          aria-label="Open pepe.wtf"
-        >
-          <span className="tw-text-sm tw-font-medium tw-text-iron-100">Open on pepe.wtf</span>
-          <span className="tw-text-xs tw-text-iron-400">{href}</span>
-        </a>
-      </div>
-      <ChatItemHrefButtons href={href} />
-    </div>
+    <LinkHandlerFrame href={href}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        aria-label="Open pepe.wtf"
+      >
+        <span className="tw-text-sm tw-font-medium tw-text-iron-100">Open on pepe.wtf</span>
+        <span className="tw-text-xs tw-text-iron-400">{href}</span>
+      </a>
+    </LinkHandlerFrame>
   );
 }
 
@@ -169,36 +163,33 @@ function renderCollection(preview: PepeCollectionPreview) {
   const title = preview.name ?? preview.slug;
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
-          {renderImage(preview.image, title)}
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
-              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
-              <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
-                Collection
-              </span>
-            </div>
-            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-              <Stat label="Items" value={formatters.int(preview.stats?.items ?? null)} />
-              <Stat label="Floor" value={formatters.sats(preview.stats?.floorSats ?? null)} />
-            </div>
-            <div className="tw-mt-2">
-              <a
-                className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                href={preview.href}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-              >
-                Browse on pepe.wtf
-              </a>
-            </div>
+    <LinkHandlerFrame href={preview.href}>
+      <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+        {renderImage(preview.image, title)}
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
+            <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
+              Collection
+            </span>
+          </div>
+          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
+            <Stat label="Items" value={formatters.int(preview.stats?.items ?? null)} />
+            <Stat label="Floor" value={formatters.sats(preview.stats?.floorSats ?? null)} />
+          </div>
+          <div className="tw-mt-2">
+            <a
+              className="tw-text-xs tw-text-primary-300 hover:tw-underline"
+              href={preview.href}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              Browse on pepe.wtf
+            </a>
           </div>
         </div>
       </div>
-      <ChatItemHrefButtons href={preview.href} />
-    </div>
+    </LinkHandlerFrame>
   );
 }
 
@@ -207,36 +198,33 @@ function renderArtist(preview: PepeArtistPreview) {
   const collections = preview.stats?.collections?.slice(0, 3)?.join(" · ");
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
-          {renderImage(preview.image, title)}
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
-              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
-              <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
-                Artist
-              </span>
-            </div>
-            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-              <Stat label="Unique cards" value={formatters.int(preview.stats?.uniqueCards ?? null)} />
-              <Stat label="Collections" value={collections ?? null} />
-            </div>
-            <div className="tw-mt-2">
-              <a
-                className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                href={preview.href}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-              >
-                Browse artist on pepe.wtf
-              </a>
-            </div>
+    <LinkHandlerFrame href={preview.href}>
+      <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+        {renderImage(preview.image, title)}
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
+            <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
+              Artist
+            </span>
+          </div>
+          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
+            <Stat label="Unique cards" value={formatters.int(preview.stats?.uniqueCards ?? null)} />
+            <Stat label="Collections" value={collections ?? null} />
+          </div>
+          <div className="tw-mt-2">
+            <a
+              className="tw-text-xs tw-text-primary-300 hover:tw-underline"
+              href={preview.href}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              Browse artist on pepe.wtf
+            </a>
           </div>
         </div>
       </div>
-      <ChatItemHrefButtons href={preview.href} />
-    </div>
+    </LinkHandlerFrame>
   );
 }
 
@@ -244,46 +232,43 @@ function renderSet(preview: PepeSetPreview) {
   const title = preview.name ?? preview.slug;
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
-          {renderImage(preview.image, title)}
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
-              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
-              <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
-                Set
-              </span>
-            </div>
-            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-              <Stat label="Items" value={formatters.int(preview.stats?.items ?? null)} />
-              <Stat label="Full set floor" value={formatters.sats(preview.stats?.fullSetFloorSats ?? null)} />
-            </div>
-            <div className="tw-mt-2 tw-flex tw-gap-3 tw-flex-wrap">
+    <LinkHandlerFrame href={preview.href}>
+      <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+        {renderImage(preview.image, title)}
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
+            <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
+              Set
+            </span>
+          </div>
+          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
+            <Stat label="Items" value={formatters.int(preview.stats?.items ?? null)} />
+            <Stat label="Full set floor" value={formatters.sats(preview.stats?.fullSetFloorSats ?? null)} />
+          </div>
+          <div className="tw-mt-2 tw-flex tw-gap-3 tw-flex-wrap">
+            <a
+              className="tw-text-xs tw-text-primary-300 hover:tw-underline"
+              href={preview.href}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              Open set on pepe.wtf
+            </a>
+            {preview.links?.wiki ? (
               <a
                 className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                href={preview.href}
+                href={preview.links.wiki}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
               >
-                Open set on pepe.wtf
+                Lore
               </a>
-              {preview.links?.wiki ? (
-                <a
-                  className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                  href={preview.links.wiki}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  Lore
-                </a>
-              ) : null}
-            </div>
+            ) : null}
           </div>
         </div>
       </div>
-      <ChatItemHrefButtons href={preview.href} />
-    </div>
+    </LinkHandlerFrame>
   );
 }
 
@@ -323,76 +308,73 @@ function renderAsset(preview: PepeAssetPreview, originalHref: string) {
     null;
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
-          {renderImage(preview.image, name)}
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
-              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{name}</p>
-              {chips.map((chip) => (
-                <span
-                  key={chip}
-                  className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200"
-                >
-                  {chip}
-                </span>
-              ))}
-            </div>
-            <p className="tw-mt-0.5 tw-mb-0 tw-text-xs tw-text-iron-300 tw-truncate">
-              {[preview.artist, seriesCard].filter(Boolean).join(" · ")}
-            </p>
-            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-              <Stat label="Supply" value={formatters.int(preview.supply ?? null)} />
-              <Stat label="Holders" value={formatters.int(preview.holders ?? null)} />
-              <Stat label="List" value={[bestAskPrimary, bestAskEth].filter(Boolean).join(" ")} />
-              <Stat label="Last sale" value={[lastSalePrimary, lastSaleEth].filter(Boolean).join(" ")} />
-            </div>
-            <div className="tw-mt-2 tw-flex tw-gap-3 tw-flex-wrap">
+    <LinkHandlerFrame href={originalHref}>
+      <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+        {renderImage(preview.image, name)}
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{name}</p>
+            {chips.map((chip) => (
+              <span
+                key={chip}
+                className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+          <p className="tw-mt-0.5 tw-mb-0 tw-text-xs tw-text-iron-300 tw-truncate">
+            {[preview.artist, seriesCard].filter(Boolean).join(" · ")}
+          </p>
+          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
+            <Stat label="Supply" value={formatters.int(preview.supply ?? null)} />
+            <Stat label="Holders" value={formatters.int(preview.holders ?? null)} />
+            <Stat label="List" value={[bestAskPrimary, bestAskEth].filter(Boolean).join(" ")} />
+            <Stat label="Last sale" value={[lastSalePrimary, lastSaleEth].filter(Boolean).join(" ")} />
+          </div>
+          <div className="tw-mt-2 tw-flex tw-gap-3 tw-flex-wrap">
+            <a
+              className="tw-text-xs tw-text-primary-300 hover:tw-underline"
+              href={preview.href}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              Open on pepe.wtf
+            </a>
+            {preview.links?.horizon ? (
               <a
                 className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                href={preview.href}
+                href={preview.links.horizon}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
               >
-                Open on pepe.wtf
+                View on Horizon
               </a>
-              {preview.links?.horizon ? (
-                <a
-                  className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                  href={preview.links.horizon}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  View on Horizon
-                </a>
-              ) : null}
-              {preview.links?.xchain ? (
-                <a
-                  className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                  href={preview.links.xchain}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  View on XChain
-                </a>
-              ) : null}
-              {preview.links?.wiki ? (
-                <a
-                  className="tw-text-xs tw-text-primary-300 hover:tw-underline"
-                  href={preview.links.wiki}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  Lore
-                </a>
-              ) : null}
-            </div>
+            ) : null}
+            {preview.links?.xchain ? (
+              <a
+                className="tw-text-xs tw-text-primary-300 hover:tw-underline"
+                href={preview.links.xchain}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+              >
+                View on XChain
+              </a>
+            ) : null}
+            {preview.links?.wiki ? (
+              <a
+                className="tw-text-xs tw-text-primary-300 hover:tw-underline"
+                href={preview.links.wiki}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+              >
+                Lore
+              </a>
+            ) : null}
           </div>
         </div>
       </div>
-      <ChatItemHrefButtons href={originalHref} />
-    </div>
+    </LinkHandlerFrame>
   );
 }
 

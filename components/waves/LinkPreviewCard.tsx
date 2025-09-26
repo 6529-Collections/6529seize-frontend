@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, type ReactElement } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 
-import { fetchLinkPreview } from "../../services/api/link-preview-api";
 import OpenGraphPreview, {
   hasOpenGraphContent,
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
+import { fetchLinkPreview } from "../../services/api/link-preview-api";
 import EnsPreviewCard from "./ens/EnsPreviewCard";
 import { isEnsPreview, type EnsPreview } from "./ens/types";
 
@@ -18,9 +18,9 @@ interface LinkPreviewCardProps {
 
 type PreviewState =
   | { readonly type: "loading" }
-  | { readonly type: "ens"; readonly data: EnsPreview }
+  | { readonly type: "fallback" }
   | { readonly type: "success"; readonly data: OpenGraphPreviewData }
-  | { readonly type: "fallback" };
+  | { readonly type: "ens"; readonly data: EnsPreview };
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -44,9 +44,7 @@ export default function LinkPreviewCard({
   href,
   renderFallback,
 }: LinkPreviewCardProps) {
-  const [state, setState] = useState<PreviewState>({
-    type: "loading",
-  });
+  const [state, setState] = useState<PreviewState>({ type: "loading" });
 
   useEffect(() => {
     let active = true;
@@ -55,6 +53,10 @@ export default function LinkPreviewCard({
 
     fetchLinkPreview(href)
       .then((response) => {
+        if (!active) {
+          return;
+        }
+
         if (isEnsPreview(response)) {
           setState({ type: "ens", data: response });
           return;
@@ -63,12 +65,12 @@ export default function LinkPreviewCard({
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
           setState({ type: "success", data: previewData });
-        } else {
-          setState({ type: "fallback" });
+          return;
         }
+
+        setState({ type: "fallback" });
       })
-      .catch((e) => {
-        console.error("LinkPreviewCard error", e);
+      .catch(() => {
         if (active) {
           setState({ type: "fallback" });
         }
@@ -93,19 +95,19 @@ export default function LinkPreviewCard({
     );
   }
 
+  if (state.type === "success") {
+    return <OpenGraphPreview href={href} preview={state.data} />;
+  }
+
   if (state.type === "ens") {
     return (
       <LinkPreviewCardLayout href={href}>
-        <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
-          data-testid="ens-preview-card">
+        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <EnsPreviewCard preview={state.data} />
         </div>
       </LinkPreviewCardLayout>
     );
   }
 
-  const preview = state.type === "success" ? state.data : undefined;
-
-  return <OpenGraphPreview href={href} preview={preview} />;
+  return <OpenGraphPreview href={href} preview={undefined} />;
 }

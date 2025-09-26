@@ -1,11 +1,4 @@
-import type { PepeKind } from "@/components/waves/pepe/PepeCard";
-
-type PepeCardComponent = typeof import("@/components/waves/pepe/PepeCard").default;
-
-const getPepeCard = (): PepeCardComponent => {
-  const module = require("@/components/waves/pepe/PepeCard");
-  return module.default as PepeCardComponent;
-};
+import PepeCard, { type PepeKind } from "@/components/waves/pepe/PepeCard";
 
 export type PepeLinkResult = {
   readonly kind: PepeKind;
@@ -59,7 +52,6 @@ export const parsePepeLink = (href: string): PepeLinkResult | null => {
   }
 };
 
-export const renderPepeLink = (result: PepeLinkResult) => {
-  const PepeCard = getPepeCard();
-  return <PepeCard kind={result.kind} slug={result.slug} href={result.href} />;
+export const renderPepeLink = (link: PepeLinkResult) => {
+  return <PepeCard kind={link.kind} slug={link.slug} href={link.href} />;
 };

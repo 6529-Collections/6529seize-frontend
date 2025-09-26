@@ -1,4 +1,4 @@
-import { PredictBlockNumbersResponseApiModel } from "@/app/meme-blocks/page.client";
+import { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
 import BlockPickerResultHeader from "./BlockPickerResultHeader";
 import BlockPickerResultTable from "./BlockPickerResultTable";
 
@@ -7,16 +7,18 @@ export default function BlockPickerResult({
   timestamp,
   predictedBlocks,
 }: {
-  blocknumber: number;
-  timestamp: number;
+  blocknumber?: number;
+  timestamp?: number;
   predictedBlocks: PredictBlockNumbersResponseApiModel[];
 }) {
   return (
     <div>
-      <BlockPickerResultHeader
-        blocknumber={blocknumber}
-        timestamp={timestamp}
-      />
+      {!!blocknumber && !!timestamp && (
+        <BlockPickerResultHeader
+          blocknumber={blocknumber}
+          timestamp={timestamp}
+        />
+      )}
       {!!predictedBlocks.length && (
         <BlockPickerResultTable predictedBlocks={predictedBlocks} />
       )}

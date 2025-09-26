@@ -114,8 +114,8 @@ const extractTraitsFromMetadata = (
     // Normalize the key by removing spaces, dashes, and converting to lowercase
     const normalizedKey = item.data_key
       .replace(/[\s-_]+/g, "")
-      .replace(/points-/g, "points")
-      .replace(/type-/g, "type");
+      .replaceAll("points-", "points")
+      .replaceAll("type-", "type");
 
     const value = item.data_value;
 
