@@ -289,7 +289,7 @@ export default function HeaderMobileMenu({
               {printMobileHr()}
               {printMobileRow("API", "/tools/api")}
               {printMobileRow("EMMA", "/emma")}
-              {printMobileRow("Block Finder", "/meme-blocks")}
+              {printMobileRow("Block Finder", "/tools/block-finder")}
               {printMobileRow("Open Data", "/open-data")}
               {printMobileHr()}
             </Container>

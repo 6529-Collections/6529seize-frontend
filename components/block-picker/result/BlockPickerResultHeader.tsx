@@ -1,4 +1,5 @@
-import Countdown from "../../distribution-plan-tool/common/Countdown";
+import Countdown from "@/components/distribution-plan-tool/common/Countdown";
+import { BlockPickerAdvancedItemBlockLink } from "../advanced/BlockPickerAdvancedItemBlock";
 
 export default function BlockPickerResultHeader({
   timestamp,
@@ -12,10 +13,13 @@ export default function BlockPickerResultHeader({
       <div className="sm:tw-flex sm:tw-items-baseline sm:tw-justify-between">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-space-x-1">
-            <span className="tw-text-base tw-text-white tw-font-semibold">
-              {blocknumber}
+            <span className="tw-text-base tw-text-lg tw-text-white tw-font-semibold">
+              <BlockPickerAdvancedItemBlockLink
+                block={blocknumber}
+                blockParts={[blocknumber.toString()]}
+              />
             </span>
-            <span className="tw-mt-0.5 tw-font-light tw-text-sm tw-text-neutral-300">
+            <span className="tw-mt-0.5 tw-text-neutral-300">
               is the closest predicted block to{" "}
               {new Date(timestamp).toLocaleString(undefined, {
                 month: "short",
@@ -23,13 +27,13 @@ export default function BlockPickerResultHeader({
                 year: "numeric",
                 hour: "numeric",
                 minute: "numeric",
-                hour12: true,
+                second: "numeric",
               })}
             </span>
           </div>
         </div>
       </div>
-      <div className="tw-mt-0.5 tw-text-sm tw-text-white tw-font-semibold">
+      <div className="tw-mt-1 tw-text-sm tw-text-white tw-font-semibold">
         <Countdown timestamp={timestamp} />
       </div>
     </div>
