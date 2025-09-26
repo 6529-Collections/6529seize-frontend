@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants";
 
 const redirectMappings = [
@@ -114,9 +115,9 @@ export async function middleware(req: NextRequest) {
 
     if (pathname != "/access" && pathname != "/restricted") {
       const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
-        value: process.env.STAGING_API_KEY ?? "",
+        value: publicEnv.STAGING_API_KEY ?? "",
       };
-      const r = await fetch(`${process.env.API_ENDPOINT}/api/`, {
+      const r = await fetch(`${publicEnv.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
       });
 

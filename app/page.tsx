@@ -3,6 +3,7 @@ import { fetchInitialActivityData } from "@/components/latest-activity/fetchInit
 import { isMintingActive } from "@/components/meme-calendar/meme-calendar.helpers";
 import { fetchInitialTokens } from "@/components/nextGen/collections/collectionParts/hooks/fetchInitialTokens";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
@@ -48,7 +49,7 @@ export default async function HomePage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    ogImage: `${process.env.BASE_ENDPOINT}/6529io-banner.png`,
+    ogImage: `${publicEnv.BASE_ENDPOINT}/6529io-banner.png`,
     twitterCard: "summary_large_image",
   });
 }

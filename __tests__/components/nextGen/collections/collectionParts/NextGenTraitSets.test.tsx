@@ -1,13 +1,12 @@
-import React from "react";
+import NextGenTraitSets from "@/components/nextGen/collections/collectionParts/NextGenTraitSets";
 import { render, screen, waitFor } from "@testing-library/react";
-import NextGenTraitSets from "../../../../../components/nextGen/collections/collectionParts/NextGenTraitSets";
+import React from "react";
 
-jest.mock("../../../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
 jest.mock("react-bootstrap", () => {
-  const React = require("react");
   const RB: any = {
     Container: (p: any) => <div {...p} />,
     Row: (p: any) => <div {...p} />,
@@ -32,21 +31,20 @@ jest.mock("next/image", () => ({
   ),
 }));
 
-jest.mock("../../../../../components/dotLoader/DotLoader", () => () => (
+jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <div data-testid="loader" />
 ));
 
-
-jest.mock("../../../../../helpers/AllowlistToolHelpers", () => ({
+jest.mock("@/helpers/AllowlistToolHelpers", () => ({
   getRandomObjectId: () => "id",
 }));
 
-jest.mock("../../../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   formatNameForUrl: (s: string) => s,
   normalizeNextgenTokenID: (id: number) => ({ token_id: id }),
 }));
 
-const { commonApiFetch } = require("../../../../../services/api/common-api");
+const { commonApiFetch } = require("@/services/api/common-api");
 
 const collection = { id: 1, name: "Collection" } as any;
 

@@ -13,13 +13,13 @@ import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 import DropPartMarkdownImage from "../DropPartMarkdownImage";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
+import type { LinkHandler } from "./linkTypes";
 import {
   isValidLink,
   parseUrl,
   renderExternalOrInternalLink,
   shouldUseOpenGraphPreview,
 } from "./linkUtils";
-import type { LinkHandler } from "./linkTypes";
 
 export interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;

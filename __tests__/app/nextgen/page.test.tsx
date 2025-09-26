@@ -3,8 +3,6 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
-process.env.BASE_ENDPOINT = "http://localhost";
-
 // Import after mocks are set up if you prefer; require works fine too
 const {
   default: NextGenPage,

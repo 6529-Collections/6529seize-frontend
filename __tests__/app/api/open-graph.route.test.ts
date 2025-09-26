@@ -1,3 +1,5 @@
+import { publicEnv } from "@/config/env";
+
 const nextResponseJsonRoute = jest.fn(
   (body: unknown, init?: { status?: number }) => ({
     status: init?.status ?? 200,
@@ -94,6 +96,8 @@ async function loadRoute(): Promise<void> {
 }
 
 describe("open-graph API route", () => {
+  const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
+
   beforeEach(async () => {
     nextResponseJson.mockClear();
     jest.clearAllMocks();
@@ -103,10 +107,15 @@ describe("open-graph API route", () => {
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
     global.fetch = mockFetch as unknown as typeof fetch;
+    publicEnv.BASE_ENDPOINT = "https://6529.io";
   });
 
   afterAll(() => {
     global.fetch = originalFetch;
+  });
+
+  afterEach(() => {
+    publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
   });
 
   const createResponse = (

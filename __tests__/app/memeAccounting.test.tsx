@@ -1,10 +1,10 @@
 // @ts-nocheck
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import MemeAccountingPage, {
   generateMetadata,
 } from "@/app/meme-accounting/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 jest.mock("@/components/gas-royalties/Royalties", () => () => (
   <div data-testid="royalties" />
@@ -53,7 +53,6 @@ describe("MemeAccountingPage", () => {
   });
 
   it("exposes correct metadata", async () => {
-    process.env.BASE_ENDPOINT = "https://example.com";
     const metadata = await generateMetadata({
       searchParams: { focus: "the-memes" },
     });

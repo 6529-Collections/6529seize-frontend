@@ -27,9 +27,9 @@ describe("shouldUseOpenGraphPreview", () => {
     ).toBe(true);
   });
 
-  it("allows previews for other paths on Art Blocks domains", () => {
+  it("falls back for other paths on Art Blocks domains", () => {
     expect(
       shouldUseOpenGraphPreview("https://artblocks.io/token/662000")
-    ).toBe(true);
+    ).toBe(false);
   });
 });

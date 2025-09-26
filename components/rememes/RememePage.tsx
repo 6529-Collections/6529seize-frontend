@@ -2,6 +2,7 @@
 
 import styles from "./Rememes.module.scss";
 
+import { publicEnv } from "@/config/env";
 import { useTitle } from "@/contexts/TitleContext";
 import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -138,7 +139,7 @@ export default function RememePage(props: Readonly<Props>) {
   useEffect(() => {
     if (props.contract && props.id) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
+        `${publicEnv.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
       ).then((response: DBResponse) => {
         if (response.data.length === 1) {
           setRememe(response.data[0]);
@@ -155,7 +156,7 @@ export default function RememePage(props: Readonly<Props>) {
     if (rememe) {
       fetchAllPages(
         `${
-          process.env.API_ENDPOINT
+          publicEnv.API_ENDPOINT
         }/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
           ","
         )}`

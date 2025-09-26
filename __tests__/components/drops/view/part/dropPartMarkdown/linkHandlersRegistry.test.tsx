@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 
 import { createLinkRenderer } from "@/components/drops/view/part/dropPartMarkdown/linkHandlers";
+import { publicEnv } from "@/config/env";
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => ({
   __esModule: true,
@@ -107,18 +108,23 @@ const onQuoteClick = jest.fn();
 const baseRenderer = () => createLinkRenderer({ onQuoteClick });
 
 describe("createLinkRenderer", () => {
-  const originalBaseEndpoint = process.env.BASE_ENDPOINT;
+  const FALLBACK_BASE_ENDPOINT = "https://6529.io";
+  const originalBaseEndpointEnv = publicEnv.BASE_ENDPOINT;
+  const originalProcessBaseEndpoint = process.env.BASE_ENDPOINT;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.BASE_ENDPOINT = "https://6529.io";
+    publicEnv.BASE_ENDPOINT =
+      originalProcessBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;
+    process.env.BASE_ENDPOINT = publicEnv.BASE_ENDPOINT;
   });
 
   afterEach(() => {
-    if (originalBaseEndpoint === undefined) {
+    publicEnv.BASE_ENDPOINT = originalBaseEndpointEnv;
+    if (originalProcessBaseEndpoint === undefined) {
       delete process.env.BASE_ENDPOINT;
     } else {
-      process.env.BASE_ENDPOINT = originalBaseEndpoint;
+      process.env.BASE_ENDPOINT = originalProcessBaseEndpoint;
     }
   });
 

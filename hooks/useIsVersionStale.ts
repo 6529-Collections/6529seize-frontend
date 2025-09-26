@@ -1,8 +1,9 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
 
-const CURRENT = process.env.VERSION!; // baked into the bundle
+const CURRENT = publicEnv.VERSION!; // baked into the bundle
 
 export function useIsVersionStale(interval = 120_000) {
   const [stale, setStale] = useState(false);

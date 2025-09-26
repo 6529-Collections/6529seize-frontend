@@ -4,21 +4,13 @@ jest.mock("next/server", () => ({
   },
 }));
 
-import { NextResponse } from "next/server";
 import { GET } from "@/app/api/version/route";
+import { NextResponse } from "next/server";
 
 const jsonMock = NextResponse.json as jest.Mock;
 
 describe("GET version route", () => {
-  const originalEnv = process.env.VERSION;
-
-  afterEach(() => {
-    process.env.VERSION = originalEnv;
-    jest.clearAllMocks();
-  });
-
   it("returns version from env and disables cache", async () => {
-    process.env.VERSION = "test-version";
     const expected = { foo: "bar" }; // placeholder return object
     jsonMock.mockReturnValue(expected);
 
@@ -31,7 +23,8 @@ describe("GET version route", () => {
   });
 
   it("returns default version when env variable is undefined", async () => {
-    delete process.env.VERSION;
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VERSION = undefined;
     const expected = { foo: "bar" };
     jsonMock.mockReturnValue(expected);
 
