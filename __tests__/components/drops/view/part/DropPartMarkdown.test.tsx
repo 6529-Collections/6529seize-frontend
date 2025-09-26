@@ -1,39 +1,30 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import DropPartMarkdown from "../../../../../components/drops/view/part/DropPartMarkdown";
+import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 import {
   fetchYoutubePreview,
   type YoutubeOEmbedResponse,
 } from "@/services/api/youtube";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
-const FALLBACK_BASE_ENDPOINT = "https://6529.io";
-const originalBaseEndpoint = process.env.BASE_ENDPOINT;
-const originalAbFeature = process.env.VITE_FEATURE_AB_CARD;
-const originalAbFeatureNext = process.env.NEXT_PUBLIC_FEATURE_AB_CARD;
-const originalAbFeatureNextVite = process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD;
-const originalAbFeatureGeneric = process.env.FEATURE_AB_CARD;
-
-jest.mock("../../../../../hooks/isMobileScreen", () => () => false);
-jest.mock("../../../../../contexts/EmojiContext", () => ({
+jest.mock("@/hooks/isMobileScreen", () => () => false);
+jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: () => ({ emojiMap: [] }),
 }));
 
-const tweetMock = jest.fn(
-  ({ id, components, onError }: any) => {
-    if (id === "1111111111") {
-      throw new Error("boom");
-    }
-
-    if (id === "2222222222") {
-      const error = new Error("not found");
-      onError?.(error);
-      const NotFound = components?.TweetNotFound;
-      return NotFound ? <NotFound error={error} /> : null;
-    }
-
-    return <div>tweet:{id}</div>;
+const tweetMock = jest.fn(({ id, components, onError }: any) => {
+  if (id === "1111111111") {
+    throw new Error("boom");
   }
-);
+
+  if (id === "2222222222") {
+    const error = new Error("not found");
+    onError?.(error);
+    const NotFound = components?.TweetNotFound;
+    return NotFound ? <NotFound error={error} /> : null;
+  }
+
+  return <div>tweet:{id}</div>;
+});
 
 jest.mock("react-tweet", () => ({
   Tweet: (props: any) => tweetMock(props),
@@ -42,8 +33,9 @@ jest.mock("@/services/api/youtube", () => ({
   fetchYoutubePreview: jest.fn(),
 }));
 
-const mockFetchYoutubePreview =
-  fetchYoutubePreview as jest.MockedFunction<typeof fetchYoutubePreview>;
+const mockFetchYoutubePreview = fetchYoutubePreview as jest.MockedFunction<
+  typeof fetchYoutubePreview
+>;
 
 const mockLinkPreviewCard = jest.fn(({ renderFallback, href }: any) => (
   <div data-testid="link-preview" data-href={href}>
@@ -52,10 +44,14 @@ const mockLinkPreviewCard = jest.fn(({ renderFallback, href }: any) => (
 ));
 
 const mockArtBlocksTokenCard = jest.fn((props: any) => (
-  <div data-testid="artblocks-card" data-href={props.href} data-token={props.id?.tokenId} />
+  <div
+    data-testid="artblocks-card"
+    data-href={props.href}
+    data-token={props.id?.tokenId}
+  />
 ));
 
-jest.mock("../../../../../components/waves/LinkPreviewCard", () => ({
+jest.mock("@/components/waves/LinkPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockLinkPreviewCard(props),
 }));
@@ -77,59 +73,6 @@ afterEach(() => {
 describe("DropPartMarkdown", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    if (originalBaseEndpoint === undefined) {
-      process.env.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
-    } else {
-      process.env.BASE_ENDPOINT = originalBaseEndpoint;
-    }
-    if (originalAbFeature === undefined) {
-      delete process.env.VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.VITE_FEATURE_AB_CARD = originalAbFeature;
-    }
-    if (originalAbFeatureNext === undefined) {
-      delete process.env.NEXT_PUBLIC_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_FEATURE_AB_CARD = originalAbFeatureNext;
-    }
-    if (originalAbFeatureNextVite === undefined) {
-      delete process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD = originalAbFeatureNextVite;
-    }
-    if (originalAbFeatureGeneric === undefined) {
-      delete process.env.FEATURE_AB_CARD;
-    } else {
-      process.env.FEATURE_AB_CARD = originalAbFeatureGeneric;
-    }
-  });
-
-  afterEach(() => {
-    if (originalBaseEndpoint === undefined) {
-      delete process.env.BASE_ENDPOINT;
-    } else {
-      process.env.BASE_ENDPOINT = originalBaseEndpoint;
-    }
-    if (originalAbFeature === undefined) {
-      delete process.env.VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.VITE_FEATURE_AB_CARD = originalAbFeature;
-    }
-    if (originalAbFeatureNext === undefined) {
-      delete process.env.NEXT_PUBLIC_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_FEATURE_AB_CARD = originalAbFeatureNext;
-    }
-    if (originalAbFeatureNextVite === undefined) {
-      delete process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD;
-    } else {
-      process.env.NEXT_PUBLIC_VITE_FEATURE_AB_CARD = originalAbFeatureNextVite;
-    }
-    if (originalAbFeatureGeneric === undefined) {
-      delete process.env.FEATURE_AB_CARD;
-    } else {
-      process.env.FEATURE_AB_CARD = originalAbFeatureGeneric;
-    }
   });
 
   it("renders gif embeds", () => {
@@ -149,7 +92,6 @@ describe("DropPartMarkdown", () => {
   });
 
   it("handles external links", () => {
-    process.env.BASE_ENDPOINT = "https://example.com";
     const content = "[link](https://google.com)";
     render(
       <DropPartMarkdown
@@ -169,7 +111,8 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders Art Blocks token card when feature enabled", async () => {
-    process.env.VITE_FEATURE_AB_CARD = "true";
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VITE_FEATURE_AB_CARD = "true";
     const content = "[token](https://www.artblocks.io/token/662000)";
 
     render(
@@ -181,7 +124,9 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    await waitFor(() => expect(mockArtBlocksTokenCard).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(mockArtBlocksTokenCard).toHaveBeenCalledTimes(1)
+    );
     const call = mockArtBlocksTokenCard.mock.calls[0][0];
     expect(call.href).toBe("https://www.artblocks.io/token/662000");
     expect(call.id).toEqual({ tokenId: "662000" });
@@ -189,7 +134,8 @@ describe("DropPartMarkdown", () => {
   });
 
   it("falls back to regular link when Art Blocks card disabled", () => {
-    process.env.VITE_FEATURE_AB_CARD = "false";
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VITE_FEATURE_AB_CARD = "false";
     const content = "[token](https://www.artblocks.io/token/662000)";
 
     render(
@@ -204,12 +150,14 @@ describe("DropPartMarkdown", () => {
     expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const link = screen.getByRole("link", { name: "token" });
-    expect(link).toHaveAttribute("href", "https://www.artblocks.io/token/662000");
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.artblocks.io/token/662000"
+    );
   });
 
   it("renders a fallback link when tweet data is unavailable", async () => {
-    const content =
-      "[tweet](https://twitter.com/someuser/status/2222222222)";
+    const content = "[tweet](https://twitter.com/someuser/status/2222222222)";
 
     render(
       <DropPartMarkdown

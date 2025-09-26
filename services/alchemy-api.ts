@@ -1,3 +1,4 @@
+import { publicEnv } from "@/config/env";
 import { goerli, sepolia } from "wagmi/chains";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 
@@ -25,7 +26,7 @@ export async function getNftsForContractAndOwner(
     path = "eth-goerli";
   }
 
-  let url = `https://${path}.g.alchemy.com/nft/v3/${process.env.ALCHEMY_API_KEY}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
+  let url = `https://${path}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
   if (pageKey) {
     url += `&pageKey=${pageKey}`;
   }

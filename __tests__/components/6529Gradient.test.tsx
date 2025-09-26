@@ -59,7 +59,6 @@ const nftData = [
 (fetchAllPages as jest.Mock).mockResolvedValue(nftData);
 
 beforeEach(() => {
-  process.env.API_ENDPOINT = "https://api.test";
   jest.clearAllMocks();
   (fetchAllPages as jest.Mock).mockResolvedValue(nftData);
 });
@@ -78,7 +77,7 @@ describe("GradientsComponent", () => {
 
     await waitFor(() => expect(fetchAllPages).toHaveBeenCalled());
     expect(fetchAllPages).toHaveBeenCalledWith(
-      "https://api.test/api/nfts/gradients?page_size=101"
+      "https://api.test.6529.io/api/nfts/gradients?page_size=101"
     );
 
     let links = await screen.findAllByRole("link");

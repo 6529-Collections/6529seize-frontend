@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { publicEnv } from "@/config/env";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface NavigationHistory {
   canGoBack: boolean;
@@ -14,7 +15,8 @@ interface NavigationHistory {
 
 // DEBUG LOGGER
 const DEBUG_NAV =
-  typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
+  typeof globalThis !== "undefined" &&
+  publicEnv.NEXT_PUBLIC_DEBUG_NAV === "true";
 const dlog = (...args: unknown[]): void => {
   if (DEBUG_NAV) console.log("[useNavigationHistory]", ...args);
 };

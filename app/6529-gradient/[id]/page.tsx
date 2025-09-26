@@ -1,9 +1,10 @@
-import styles from "@/styles/Home.module.scss";
+import GradientPageComponent from "@/components/6529Gradient/GradientPage";
+import { getAppMetadata } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { fetchUrl } from "@/services/6529api";
-import GradientPageComponent from "@/components/6529Gradient/GradientPage";
+import styles from "@/styles/Home.module.scss";
 import { Metadata } from "next";
-import { getAppMetadata } from "@/components/providers/metadata";
 
 export default async function GradientPage({
   params,
@@ -26,9 +27,9 @@ export async function generateMetadata({
   const { id } = await params;
 
   let title = `6529 Gradient #${id}`;
-  let ogImage = `${process.env.BASE_ENDPOINT}/6529io.png`;
+  let ogImage = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
   const response = await fetchUrl(
-    `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
+    `${publicEnv.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
   );
   if (response?.data?.length > 0) {
     if (response.data[0].thumbnail) {

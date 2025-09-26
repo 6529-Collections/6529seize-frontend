@@ -1,7 +1,7 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import ReMemes, { generateMetadata } from "@/app/rememes/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -39,13 +39,12 @@ describe("ReMemes page", () => {
   });
 
   it("exposes metadata", async () => {
-    process.env.BASE_ENDPOINT = "https://test.com";
     const meta = await generateMetadata();
     expect(meta.title).toBe("ReMemes");
     expect(meta.description).toContain("Collections");
     const images = Array.isArray(meta.openGraph?.images)
       ? meta.openGraph?.images
       : [meta.openGraph?.images];
-    expect(images?.[0]).toBe(`${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`);
+    expect(images?.[0]).toBe("https://test.6529.io/re-memes-b.jpeg");
   });
 });

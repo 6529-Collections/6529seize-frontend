@@ -1,13 +1,14 @@
-import React from "react";
+import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
+import RememePage from "@/components/rememes/RememePage";
+import { TitleProvider } from "@/contexts/TitleContext";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RememePage from "@/components/rememes/RememePage";
-import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => (
+    <img {...props} alt={props.alt ?? "rememe-page-component"} />
+  ),
 }));
 jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,

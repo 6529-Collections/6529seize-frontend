@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NextGenAdminInitializeExternalBurnSwap from "../../../../components/nextGen/admin/NextGenAdminInitializeExternalBurnSwap";
 
@@ -23,17 +23,17 @@ jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
 jest.mock("uuid", () => ({ v4: () => "uuid" }));
 jest.mock("wagmi", () => ({ useSignMessage: jest.fn() }));
 
+import { useSignMessage } from "wagmi";
 import { useSeizeConnectContext } from "../../../../components/auth/SeizeConnectContext";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
+  useCollectionAdmin,
+  useCollectionIndex,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useMinterContractWrite,
   useParsedCollectionIndex,
 } from "../../../../components/nextGen/nextgen_helpers";
-import { useSignMessage } from "wagmi";
 
 const signMessageState: any = {
   signMessage: jest.fn(),
@@ -62,7 +62,6 @@ beforeEach(() => {
   (getCollectionIdsForAddress as jest.Mock).mockReturnValue(["1"]);
   (useSignMessage as jest.Mock).mockReturnValue(signMessageState);
   (useMinterContractWrite as jest.Mock).mockReturnValue(contractWriteState);
-  process.env.API_ENDPOINT = "https://test.6529.io";
 });
 
 function renderComponent() {
