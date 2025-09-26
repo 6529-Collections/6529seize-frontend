@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { createPortal } from "react-dom";
@@ -11,6 +11,14 @@ import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog
 import { commonApiPost } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
+import {
+  findReactionIndex,
+  cloneReactionEntries,
+  removeUserFromReactions,
+  toProfileMin,
+} from "./reaction-utils";
 
 const WaveDropActionsAddReaction: React.FC<{
   drop: ApiDrop;
@@ -23,30 +31,114 @@ const WaveDropActionsAddReaction: React.FC<{
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null); // Ref for container
   const { emojiMap, categories, categoryIcons } = useEmoji();
-  const { setToast } = useAuth();
+  const { setToast, connectedProfile } = useAuth();
+  const { applyOptimisticDropUpdate } = useMyStream();
+  const rollbackRef = useRef<(() => void) | null>(null);
+
+  const applyOptimisticReaction = useCallback(
+    (reactionCode: string) => {
+      if (!applyOptimisticDropUpdate || !drop.wave?.id) {
+        return null;
+      }
+
+      const profileMin = toProfileMin(connectedProfile);
+      if (!profileMin) {
+        return null;
+      }
+
+      const userId = profileMin.id;
+
+      const handle = applyOptimisticDropUpdate({
+        waveId: drop.wave.id,
+        dropId: drop.id,
+        update: (draft) => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+
+          const reactions = cloneReactionEntries(draft.reactions);
+          const reactionsWithoutUser = removeUserFromReactions(
+            reactions,
+            userId ?? null
+          );
+
+          const targetIndex = findReactionIndex(
+            reactionsWithoutUser,
+            reactionCode
+          );
+
+          if (targetIndex >= 0) {
+            reactionsWithoutUser[targetIndex] = {
+              ...reactionsWithoutUser[targetIndex],
+              profiles: [...reactionsWithoutUser[targetIndex].profiles, profileMin],
+            };
+          } else {
+            reactionsWithoutUser.push({
+              reaction: reactionCode,
+              profiles: [profileMin],
+            });
+          }
+
+          draft.reactions = reactionsWithoutUser;
+
+          const baseContext =
+            draft.context_profile_context ??
+            drop.context_profile_context ?? {
+              rating: 0,
+              min_rating: 0,
+              max_rating: 0,
+              reaction: null,
+            };
+
+          draft.context_profile_context = {
+            ...baseContext,
+            reaction: reactionCode,
+          };
+
+          return draft;
+        },
+      });
+
+      return handle?.rollback ?? null;
+    },
+    [
+      applyOptimisticDropUpdate,
+      connectedProfile,
+      drop.context_profile_context,
+      drop.id,
+      drop.wave?.id,
+    ]
+  );
 
   const handleEmojiSelect = async (emoji: { native?: string; id?: string }) => {
     const emojiText = `:${emoji.id}:`;
-    await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-      endpoint: `drops/${drop.id}/reaction`,
-      body: {
-        reaction: emojiText,
-      },
-    })
-      .catch((error) => {
-        let errorMessage = "Error adding reaction";
-        if (typeof error === "string") {
-          errorMessage = error;
-        }
-        setToast({
-          message: errorMessage,
-          type: "error",
-        });
-      })
-      .finally(() => {
-        onAddReaction?.();
-        setShowPicker(false);
+    setShowPicker(false);
+
+    rollbackRef.current?.();
+    rollbackRef.current = applyOptimisticReaction(emojiText);
+
+    try {
+
+      await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+        endpoint: `drops/${drop.id}/reaction`,
+        body: {
+          reaction: emojiText,
+        },
       });
+      rollbackRef.current = null;
+      onAddReaction?.();
+    } catch (error) {
+      let errorMessage = "Error adding reaction";
+      if (typeof error === "string") {
+        errorMessage = error;
+      }
+      setToast({
+        message: errorMessage,
+        type: "error",
+      });
+      rollbackRef.current?.();
+      rollbackRef.current = null;
+    }
   };
 
   useEffect(() => {
@@ -87,9 +179,8 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const mobileContent = (
     <button
-      className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
-        !canReact ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
-      } tw-transition-colors tw-duration-200`}
+      className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${!canReact ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
+        } tw-transition-colors tw-duration-200`}
       onClick={onReact}
       disabled={!canReact}
     >
@@ -118,9 +209,8 @@ const WaveDropActionsAddReaction: React.FC<{
     <>
       <button
         ref={buttonRef}
-        className={`picker-button tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
-          !canReact ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
-        } hover:tw-text-[#FFCC22]`}
+        className={`picker-button tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${!canReact ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
+          } hover:tw-text-[#FFCC22]`}
         onClick={onReact}
         disabled={!canReact}
         aria-label="Add reaction to drop"
@@ -129,9 +219,8 @@ const WaveDropActionsAddReaction: React.FC<{
         }
       >
         <svg
-          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
-            !canReact ? "tw-opacity-50" : ""
-          }`}
+          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${!canReact ? "tw-opacity-50" : ""
+            }`}
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
           viewBox="0 0 24 24"
