@@ -1,24 +1,23 @@
-jest.mock("next/font/google", () => ({ Poppins: () => () => null }));
 jest.mock(
   "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper",
   () => ({ __esModule: true, default: (p: any) => <>{p.children}</> })
 );
+import { BlockPickerTimeWindow } from "@/app/tools/block-finder/page.client";
+import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
-import { BlockPickerTimeWindow } from "@/app/meme-blocks/page.client";
 
-jest.mock(
-  "@/components/block-picker/BlockPickerTimeWindowSelectList",
-  () => (props: any) =>
-    (
-      <button
-        data-testid="option"
-        onClick={() => props.setTimeWindow(BlockPickerTimeWindow.ONE_MINUTE)}
-      />
-    )
-);
-
+jest.mock("@/components/block-picker/BlockPickerTimeWindowSelectList", () => {
+  const BlockPickerTimeWindowSelectMock = (props: any) => (
+    <button
+      data-testid="option"
+      onClick={() => props.setTimeWindow(BlockPickerTimeWindow.ONE_MINUTE)}
+    />
+  );
+  BlockPickerTimeWindowSelectMock.displayName =
+    "MockedBlockPickerTimeWindowSelectList";
+  return BlockPickerTimeWindowSelectMock;
+});
 jest.mock("framer-motion", () => ({
   motion: { div: (p: any) => <div {...p} /> },
   useAnimate: () => [jest.fn(), jest.fn()],

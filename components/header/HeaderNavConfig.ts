@@ -190,6 +190,6 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
 export const toolsBottomItems: NavLink[] = [
   { name: "API", path: "/tools/api" },
   { name: "EMMA", path: "/emma" },
-  { name: "Block Finder", path: "/meme-blocks" },
+  { name: "Block Finder", path: "/tools/block-finder" },
   { name: "Open Data", path: "/open-data" },
 ];

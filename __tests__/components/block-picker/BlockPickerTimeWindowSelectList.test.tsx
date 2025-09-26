@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { BlockPickerTimeWindow } from "@/app/tools/block-finder/page.client";
 import BlockPickerTimeWindowSelectList from "@/components/block-picker/BlockPickerTimeWindowSelectList";
-import { BlockPickerTimeWindow } from "@/app/meme-blocks/page.client";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("next/font/google", () => ({
   Poppins: () => ({ className: "poppins" }),
