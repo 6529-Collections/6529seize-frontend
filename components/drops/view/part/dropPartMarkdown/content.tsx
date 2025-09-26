@@ -52,8 +52,8 @@ export interface MarkdownContentRenderers {
 type DropListItemContentPartComponent = typeof import("../../item/content/DropListItemContentPart").default;
 
 const getDropListItemContentPart = (): DropListItemContentPartComponent => {
-  const module = require("../../item/content/DropListItemContentPart");
-  return module.default as DropListItemContentPartComponent;
+  const dropListItemContentPartModule = require("../../item/content/DropListItemContentPart");
+  return dropListItemContentPartModule.default as DropListItemContentPartComponent;
 };
 
 const emojiRegex = /(:\w+:)/g;

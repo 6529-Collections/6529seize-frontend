@@ -9,7 +9,6 @@ import {
   faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
-import { getFileInfoFromUrl } from "../../helpers/file.helpers";
 
 interface Props {
   href: string;

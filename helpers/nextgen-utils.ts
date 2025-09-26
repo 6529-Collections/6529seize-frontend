@@ -1,5 +1,5 @@
 export function formatNameForUrl(name: string) {
-  return name.replace(/ /g, "-").toLowerCase();
+  return name.replaceAll(" ", "-").toLowerCase();
 }
 
 export function normalizeNextgenTokenID(tokenId: number) {
