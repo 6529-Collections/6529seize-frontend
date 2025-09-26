@@ -17,6 +17,7 @@ import {
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 import { parseArtBlocksLink } from "@/src/services/artblocks/url";
 
+import { publicEnv } from "@/config/env";
 import type { PepeLinkResult } from "./pepe";
 import { isPepeHost, parsePepeLink, renderPepeLink } from "./pepe";
 import { parseYoutubeLink } from "./youtube";
@@ -115,7 +116,7 @@ const parseFeatureFlagValue = (value: string): boolean => {
 
 const isArtBlocksCardEnabled = (): boolean => {
   for (const flagName of ART_BLOCKS_FLAG_CANDIDATES) {
-    const value = process.env[flagName];
+    const value = publicEnv[flagName];
     if (value !== undefined) {
       return parseFeatureFlagValue(value);
     }
@@ -272,7 +273,7 @@ const renderExternalOrInternalLink = (
   href: string,
   props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
 ) => {
-  const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
+  const baseEndpoint = publicEnv.BASE_ENDPOINT;
   const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
   const { onClick, ...restProps } = props;
   const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {

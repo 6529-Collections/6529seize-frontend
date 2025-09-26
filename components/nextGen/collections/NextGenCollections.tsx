@@ -1,13 +1,14 @@
 "use client";
 
+import Pagination from "@/components/pagination/Pagination";
+import { publicEnv } from "@/config/env";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NextGenCollection } from "@/entities/INextgen";
+import { fetchUrl } from "@/services/6529api";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import styles from "./NextGen.module.scss";
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
-import { useState, useEffect } from "react";
-import { DBResponse } from "../../../entities/IDBResponse";
-import { fetchUrl } from "../../../services/6529api";
-import { NextGenCollection } from "../../../entities/INextgen";
-import Pagination from "../../pagination/Pagination";
 
 const PAGE_SIZE = 25;
 
@@ -35,7 +36,7 @@ export default function NextGenCollections() {
       statusFilter = `&status=${selectedStatus}`;
     }
 
-    let url = `${process.env.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
+    let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setCollections(response.data);

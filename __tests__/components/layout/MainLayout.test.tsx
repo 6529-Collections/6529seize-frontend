@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 const usePathname = jest.fn();
 const useDeviceInfo = jest.fn();
@@ -59,6 +58,9 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 jest.mock("@/contexts/ScrollPositionContext", () => ({
   ScrollPositionProvider: ({ children }: any) => <>{children}</>,
 }));
+jest.mock("@/config/env", () => ({
+  publicEnv: { BASE_ENDPOINT: "https://base" },
+}));
 
 const MainLayout = require("@/components/layout/MainLayout").default;
 
@@ -71,7 +73,6 @@ const metadata = {
 
 beforeEach(() => {
   useAuth.mockReturnValue({});
-  process.env.BASE_ENDPOINT = "https://base";
 });
 
 afterEach(() => {

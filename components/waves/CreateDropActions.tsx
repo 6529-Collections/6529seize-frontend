@@ -1,11 +1,12 @@
 "use client";
 
-import { Tooltip } from "react-tooltip";
-import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
+import { publicEnv } from "@/config/env";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
-import StormButton from "./StormButton";
-import CreateDropGifPicker from "./CreateDropGifPicker";
+import { Tooltip } from "react-tooltip";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import CreateDropGifPicker from "./CreateDropGifPicker";
+import StormButton from "./StormButton";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;
@@ -36,7 +37,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     onGifDrop,
   }) => {
     const isMobile = useIsMobileScreen();
-    const gifPickerKey = process.env.TENOR_API_KEY;
+    const gifPickerKey = publicEnv.TENOR_API_KEY;
     const gifPickerEnabled = !!gifPickerKey;
     const [showGifPicker, setShowGifPicker] = useState(false);
 
@@ -256,6 +257,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
         </div>
         {gifPickerEnabled && (
           <CreateDropGifPicker
+            tenorApiKey={gifPickerKey}
             show={showGifPicker}
             setShow={setShowGifPicker}
             onSelect={(gif) => {

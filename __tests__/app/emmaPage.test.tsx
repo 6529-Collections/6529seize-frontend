@@ -1,7 +1,6 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import DistributionPlanTool, { generateMetadata } from "@/app/emma/page";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { render, screen } from "@testing-library/react";
 
 jest.mock(
   "@/components/distribution-plan-tool/connect/distribution-plan-tool-connect",
@@ -28,7 +27,6 @@ describe("EMMA page", () => {
   });
 
   it("exports metadata", async () => {
-    process.env.BASE_ENDPOINT = "https://test.com";
     const metadata = await generateMetadata();
     expect(metadata.title).toBe("EMMA");
     expect(metadata.description).toBe("Tools | 6529.io");

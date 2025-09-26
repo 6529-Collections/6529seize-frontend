@@ -1,7 +1,7 @@
-import React from "react";
 import PrenodesPage, { generateMetadata } from "@/app/network/prenodes/page";
-import { render } from "@testing-library/react";
 import { AuthContext } from "@/components/auth/Auth";
+import { render } from "@testing-library/react";
+import React from "react";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
@@ -30,11 +30,9 @@ describe("prenodes page", () => {
         <PrenodesPage />
       </AuthContext.Provider>
     );
-    // Component renders successfully with TitleContext
   });
 
   it("has correct metadata", async () => {
-    process.env.BASE_ENDPOINT = "https://base.test";
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("Prenodes");
     expect(metadata.description).toEqual("Network | 6529.io");
