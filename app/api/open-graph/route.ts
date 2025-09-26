@@ -196,9 +196,9 @@ const hostAwareFetch: typeof fetch = async (input, init = {}) => {
     "user-agent",
   ]);
 
-  for (const key of keysToReset) {
+  keysToReset.forEach((key) => {
     headers.delete(key);
-  }
+  });
 
   for (const [key, value] of Object.entries(baseHeaders)) {
     headers.set(key, value);

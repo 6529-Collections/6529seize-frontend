@@ -161,14 +161,14 @@ function validateGooglePreviewUrl(rawUrl: string): URL | null {
     return null;
   }
 
-  for (const key of parsed.searchParams.keys()) {
+  for (const key of Array.from(parsed.searchParams.keys())) {
     if (!matchingRule.allowedParams.has(key)) {
       return null;
     }
   }
 
   if (matchingRule.requiredParams) {
-    for (const key of matchingRule.requiredParams) {
+    for (const key of Array.from(matchingRule.requiredParams)) {
       if (!parsed.searchParams.get(key)) {
         return null;
       }

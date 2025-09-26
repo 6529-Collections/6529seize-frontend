@@ -114,9 +114,8 @@ describe("createLinkRenderer", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    publicEnv.BASE_ENDPOINT =
-      originalProcessBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;
-    process.env.BASE_ENDPOINT = publicEnv.BASE_ENDPOINT;
+    publicEnv.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
+    process.env.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
   });
 
   afterEach(() => {

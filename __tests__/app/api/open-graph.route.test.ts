@@ -1,5 +1,7 @@
 import { publicEnv } from "@/config/env";
 
+const mockFetchPublicUrl = jest.fn();
+
 const nextResponseJsonRoute = jest.fn(
   (body: unknown, init?: { status?: number }) => ({
     status: init?.status ?? 200,
@@ -34,6 +36,7 @@ jest.mock("@/lib/security/urlGuard", () => {
       return new URL(value);
     }),
     assertPublicUrl: jest.fn(),
+    fetchPublicUrl: mockFetchPublicUrl,
   };
 });
 
@@ -56,6 +59,7 @@ let utils: {
 let guard: {
   parsePublicUrl: jest.Mock;
   assertPublicUrl: jest.Mock;
+  fetchPublicUrl: jest.Mock;
 };
 let compound: {
   createCompoundPlan: jest.Mock;
@@ -83,6 +87,7 @@ async function loadRoute(): Promise<void> {
   guard = jest.requireMock("@/lib/security/urlGuard") as {
     parsePublicUrl: jest.Mock;
     assertPublicUrl: jest.Mock;
+    fetchPublicUrl: jest.Mock;
   };
   compound = jest.requireMock(
     "../../../app/api/open-graph/compound/service"
@@ -97,17 +102,20 @@ async function loadRoute(): Promise<void> {
 
 describe("open-graph API route", () => {
   const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
+  const originalProcessBaseEndpoint = process.env.BASE_ENDPOINT;
 
   beforeEach(async () => {
     nextResponseJson.mockClear();
     jest.clearAllMocks();
     await loadRoute();
     guard.assertPublicUrl.mockResolvedValue(undefined);
+    mockFetchPublicUrl.mockReset();
     compound.createCompoundPlan.mockReturnValue(null);
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
     global.fetch = mockFetch as unknown as typeof fetch;
     publicEnv.BASE_ENDPOINT = "https://6529.io";
+    process.env.BASE_ENDPOINT = "https://6529.io";
   });
 
   afterAll(() => {
@@ -116,6 +124,11 @@ describe("open-graph API route", () => {
 
   afterEach(() => {
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
+    if (originalProcessBaseEndpoint === undefined) {
+      delete process.env.BASE_ENDPOINT;
+    } else {
+      process.env.BASE_ENDPOINT = originalProcessBaseEndpoint;
+    }
   });
 
   const createResponse = (
@@ -175,7 +188,15 @@ describe("open-graph API route", () => {
       url: "https://cdn.safe.example/page",
     });
 
-    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(async (url, init = {}, options = {}) => {
+      expect(url).toEqual(new URL("http://safe.example/article"));
+      expect(options).toEqual(
+        expect.objectContaining({ fetchImpl: expect.any(Function) })
+      );
+      const result = await options.fetchImpl?.(url, init);
+      return (result ?? fetchResponse) as any;
+    });
     utils.buildResponse.mockReturnValue(responsePayload);
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
@@ -195,16 +216,15 @@ describe("open-graph API route", () => {
     expect(await first.json()).toEqual(responsePayload);
     expect(second.status).toBe(200);
     expect(await second.json()).toEqual(responsePayload);
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [fetchUrl, fetchInit] = mockFetch.mock.calls[0];
-    expect(fetchUrl).toBe("http://safe.example/article");
-    expect(fetchInit?.headers).toEqual(
-      expect.objectContaining({
-        accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "user-agent": DEFAULT_USER_AGENT,
-      })
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[0].toString()).toBe("http://safe.example/article");
+    const headers = fetchCall[1]?.headers as Headers;
+    expect(headers.get("accept")).toBe(
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
     );
+    expect(headers.get("user-agent")).toBe(DEFAULT_USER_AGENT);
     expect(guard.assertPublicUrl.mock.calls.length).toBeGreaterThanOrEqual(3);
     expect(utils.buildResponse).toHaveBeenCalledWith(
       new URL("https://cdn.safe.example/page"),
@@ -226,7 +246,16 @@ describe("open-graph API route", () => {
       url: "https://www.facebook.com/some-post",
     });
 
-    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(async (url, init = {}, options = {}) => {
+      expect(url).toEqual(
+        new URL(
+          "https://www.facebook.com/20531316728/posts/10154009990506729/"
+        )
+      );
+      const result = await options.fetchImpl?.(url, init);
+      return (result ?? fetchResponse) as any;
+    });
     utils.buildResponse.mockReturnValue(responsePayload);
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
@@ -239,19 +268,19 @@ describe("open-graph API route", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [fetchUrl, fetchInit] = mockFetch.mock.calls[0];
-    expect(fetchUrl).toBe(
+    const fbFetchCall = mockFetch.mock.calls[0];
+    expect(fbFetchCall[0].toString()).toBe(
       "https://www.facebook.com/20531316728/posts/10154009990506729/"
     );
-    expect(fetchInit?.headers).toEqual(
-      expect.objectContaining({
-        referer: "https://www.facebook.com/",
-        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      })
+    const fbHeaders = fbFetchCall[1]?.headers as Headers;
+    expect(fbHeaders.get("referer")).toBe("https://www.facebook.com/");
+    expect(fbHeaders.get("accept")).toBe(
+      "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
     );
-    expect(fetchInit?.headers?.["sec-fetch-mode"]).toBeUndefined();
-    expect(fetchInit?.headers?.["user-agent"]).toBe(
+    expect(fbHeaders.get("sec-fetch-mode")).toBeNull();
+    expect(fbHeaders.get("user-agent")).toBe(
       "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
     );
   });
@@ -287,7 +316,11 @@ describe("open-graph API route", () => {
       url: "https://docs.google.com/document/d/abc/edit",
     });
 
-    mockFetch.mockResolvedValueOnce(Promise.resolve(fetchResponse));
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(async (url, init = {}, options = {}) => {
+      const result = await options.fetchImpl?.(url, init);
+      return (result ?? fetchResponse) as any;
+    });
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(googlePayload);
 
     const request = {
@@ -301,6 +334,7 @@ describe("open-graph API route", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(googlePayload);
     expect(utils.buildResponse).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
   });
 
   it("uses compound plan when available", async () => {
@@ -323,12 +357,13 @@ describe("open-graph API route", () => {
     expect(second.status).toBe(200);
     expect(await second.json()).toEqual(compoundData);
     expect(execute).toHaveBeenCalledTimes(1);
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
     expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
   it("returns 502 when fetch fails unexpectedly", async () => {
-    mockFetch.mockRejectedValueOnce(new Error("boom"));
+    mockFetchPublicUrl.mockRejectedValueOnce(new Error("Failed to fetch URL."));
 
     const request = {
       nextUrl: new URL(
@@ -343,6 +378,8 @@ describe("open-graph API route", () => {
       { error: "Failed to fetch URL." },
       { status: 502 }
     );
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("returns 502 when plan execution fails", async () => {

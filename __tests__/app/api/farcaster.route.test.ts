@@ -212,7 +212,7 @@ describe("farcaster API route", () => {
     expect(options).toEqual(expect.objectContaining({ userAgent: expect.any(String) }));
   });
 
-  it("returns unsupported when frame fetch fails", async () => {
+  it("returns error when frame fetch fails", async () => {
     mockFetchPublicUrl.mockRejectedValueOnce(new Error("network failure"));
 
     const request = {
@@ -221,9 +221,9 @@ describe("farcaster API route", () => {
 
     const response = await GET(request);
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(502);
     const payload = await response.json();
-    expect(payload).toEqual({ type: "unsupported" });
+    expect(payload).toEqual({ error: "network failure" });
     expect(mockFetchPublicUrl).toHaveBeenCalled();
   });
 
