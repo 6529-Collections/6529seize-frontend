@@ -17,6 +17,7 @@ jest.mock('next/image', () => ({
   default: function MockNextImage({
     alt = '',
     unoptimized: _unoptimized,
+    fill: _fill,
     ...rest
   }: any) {
     return <img alt={alt} {...rest} />;
@@ -137,4 +138,5 @@ describe('OpenGraphPreview', () => {
       'https://cdn.example.com/secure.png'
     );
   });
+
 });

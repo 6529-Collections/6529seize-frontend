@@ -65,7 +65,7 @@ export async function generateMetadata({
     )
   ) {
     const title = (mySection as string)
-      .replace(/-/g, " ")
+      .replaceAll("-", " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
     return getAppMetadata({
       title,

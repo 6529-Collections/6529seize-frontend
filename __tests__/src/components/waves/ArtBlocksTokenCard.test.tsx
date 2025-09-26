@@ -119,6 +119,10 @@ describe("ArtBlocksTokenCard", () => {
       "sandbox",
       "allow-scripts allow-same-origin allow-pointer-lock"
     );
+    expect(iframe).toHaveAttribute(
+      "src",
+      "https://live.artblocks.io/token/flagship-7"
+    );
     expect(iframe).toHaveAttribute("referrerpolicy", "no-referrer");
     expect(iframe).toHaveAttribute("allow", "autoplay; encrypted-media");
 

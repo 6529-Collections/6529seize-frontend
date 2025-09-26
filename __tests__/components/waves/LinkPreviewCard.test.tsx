@@ -36,7 +36,7 @@ describe("LinkPreviewCard", () => {
     jest.clearAllMocks();
   });
 
-  it("renders preview when metadata is available", async () => {
+  it("renders OpenGraph preview when metadata is available", async () => {
     fetchLinkPreview.mockResolvedValue({
       title: "Example Title",
       description: "Example description",
@@ -51,10 +51,7 @@ describe("LinkPreviewCard", () => {
     );
 
     expect(mockOpenGraphPreview).toHaveBeenCalledWith(
-      expect.objectContaining({
-        href: "https://example.com/article",
-        preview: undefined,
-      })
+      expect.objectContaining({ href: "https://example.com/article", preview: undefined })
     );
 
     await waitFor(() =>
@@ -70,7 +67,7 @@ describe("LinkPreviewCard", () => {
     expect(screen.queryByTestId("fallback")).toBeNull();
   });
 
-  it("uses fallback when preview has no useful content", async () => {
+  it("renders fallback when preview lacks useful content", async () => {
     fetchLinkPreview.mockResolvedValue({});
 
     render(
@@ -85,7 +82,7 @@ describe("LinkPreviewCard", () => {
     });
   });
 
-  it("uses fallback when request fails", async () => {
+  it("renders fallback when request fails", async () => {
     fetchLinkPreview.mockRejectedValue(new Error("network"));
 
     render(

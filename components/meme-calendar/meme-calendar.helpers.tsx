@@ -817,7 +817,7 @@ export function createIcsDataUrl(
     `DTSTART:${dtStart}`,
     `DTEND:${dtEnd}`,
     `SUMMARY:${title} Minting`,
-    `DESCRIPTION:${description.replace(/\n/g, "\\n")}`,
+    `DESCRIPTION:${description.replaceAll("\n", "\\n")}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");

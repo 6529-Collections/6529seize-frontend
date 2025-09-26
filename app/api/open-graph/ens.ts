@@ -8,6 +8,8 @@ import {
   TEXT_RECORD_KEYS,
   TextRecordKey,
 } from "@/components/waves/ens/types";
+import type { EnsTarget } from "@/lib/ens/detect";
+import { stripHtmlTags } from "@/lib/text/html";
 import { ens_normalize } from "@adraffy/ens-normalize";
 import * as contentHash from "@ensdomains/content-hash";
 import { toUnicode } from "punycode";
@@ -111,12 +113,6 @@ export class EnsPreviewError extends Error {
   }
 }
 
-type EnsTarget =
-  | { readonly kind: "name"; readonly input: string }
-  | { readonly kind: "address"; readonly input: string };
-
-type RecordSanitizer = (value: string | null) => string | null;
-
 type ContenthashResult = EnsContenthash | null;
 
 type NullableAddress = string | null | undefined;
@@ -149,103 +145,6 @@ function storeCache<T>(
   cache.set(key, { data, expiresAt: now() + ttlMs });
 }
 
-const ENS_NAME_PATTERN = /\.eth$/i;
-const ENS_REVERSE_PATTERN = /\.addr\.reverse$/i;
-
-function extractEnsNameFromUrl(url: URL): string | null {
-  const hostname = url.hostname.toLowerCase();
-  const segments = url.pathname
-    .split("/")
-    .map((segment) => segment.trim())
-    .filter((segment) => segment.length > 0);
-
-  if (hostname === "app.ens.domains") {
-    if (segments.length === 1) {
-      return decodeURIComponent(segments[0]);
-    }
-    if (segments.length >= 2) {
-      if (segments[0] === "name" || segments[0] === "address") {
-        return decodeURIComponent(segments[1]);
-      }
-    }
-  }
-
-  if (hostname === "etherscan.io" && segments.length >= 2) {
-    if (segments[0] === "address") {
-      return decodeURIComponent(segments[1]);
-    }
-  }
-
-  return null;
-}
-
-function extractAddressCandidate(value: string): string | null {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  if (trimmed.startsWith("0x") && isAddress(trimmed)) {
-    return getAddress(trimmed);
-  }
-
-  try {
-    const parsed = new URL(trimmed);
-    const fromPath = extractEnsNameFromUrl(parsed);
-    if (fromPath && fromPath.startsWith("0x") && isAddress(fromPath)) {
-      return getAddress(fromPath);
-    }
-  } catch {
-    // ignore
-  }
-
-  return null;
-}
-
-function extractNameCandidate(value: string): string | null {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    const parsed = new URL(trimmed);
-    const fromUrl = extractEnsNameFromUrl(parsed);
-    if (
-      fromUrl &&
-      (ENS_NAME_PATTERN.test(fromUrl) || ENS_REVERSE_PATTERN.test(fromUrl))
-    ) {
-      return fromUrl;
-    }
-  } catch {
-    // ignore
-  }
-
-  if (ENS_NAME_PATTERN.test(trimmed) || ENS_REVERSE_PATTERN.test(trimmed)) {
-    return trimmed;
-  }
-
-  return null;
-}
-
-export function detectEnsTarget(raw: string | null): EnsTarget | null {
-  if (!raw) {
-    return null;
-  }
-
-  const address = extractAddressCandidate(raw);
-  if (address) {
-    return { kind: "address", input: address };
-  }
-
-  const name = extractNameCandidate(raw);
-  if (name) {
-    return { kind: "name", input: name };
-  }
-
-  return null;
-}
-
 function normalizeEnsName(name: string): {
   normalized: string;
   display: string;
@@ -264,29 +163,6 @@ function normalizeEnsName(name: string): {
   }
 }
 
-function stripHtmlTags(input: string, maxLen = 20000): string {
-  // Cap input to avoid huge worst-cases
-  const s = input.length > maxLen ? input.slice(0, maxLen) : input;
-  let out = "";
-  let inTag = false;
-
-  for (let i = 0; i < s.length; i++) {
-    const ch = s.codePointAt(i);
-    if (ch === 60) {
-      // '<'
-      inTag = true;
-      continue;
-    }
-    if (ch === 62) {
-      // '>'
-      inTag = false;
-      continue;
-    }
-    if (!inTag) out += s[i];
-  }
-  return out;
-}
-
 function sanitizeRecordValue(
   value: string | null,
   key: TextRecordKey
@@ -295,7 +171,7 @@ function sanitizeRecordValue(
     return null;
   }
 
-  const withoutTags = stripHtmlTags(value);
+  const withoutTags = stripHtmlTags(value, { maxLength: 20000 });
   const collapsed = withoutTags.replaceAll(/\s+/g, " ").trim();
   if (!collapsed) {
     return null;
@@ -730,3 +606,5 @@ export function __clearEnsCachesForTesting(): void {
   addressCache.clear();
   ownershipCache.clear();
 }
+
+export { detectEnsTarget } from "@/lib/ens/detect";

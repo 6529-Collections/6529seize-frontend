@@ -1,17 +1,12 @@
-import { useEffect, useState, type ReactElement } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   fetchYoutubePreview,
   YoutubeOEmbedResponse,
 } from "@/services/api/youtube";
 
-import { getYoutubeFetchUrl } from "./youtube";
+import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 
-type ChatItemHrefButtonsComponent = typeof import("../../../../waves/ChatItemHrefButtons").default;
-
-const getChatItemHrefButtons = (): ChatItemHrefButtonsComponent => {
-  const module = require("../../../../waves/ChatItemHrefButtons");
-  return module.default as ChatItemHrefButtonsComponent;
-};
+import { getYoutubeFetchUrl, parseYoutubeLink } from "./youtube";
 
 const normalizeYoutubeHtml = (html: string): string => {
   let normalized = html.replace(/width="[^"]*"/i, 'width="100%"');
@@ -37,15 +32,15 @@ const normalizeYoutubeHtml = (html: string): string => {
 
 export interface YoutubePreviewProps {
   readonly href: string;
-  readonly videoId: string;
-  readonly renderFallback: () => ReactElement | null;
 }
 
-const YoutubePreview = ({
-  href,
-  videoId,
-  renderFallback,
-}: YoutubePreviewProps) => {
+const YoutubePreview = ({ href }: YoutubePreviewProps) => {
+  const linkInfo = useMemo(() => parseYoutubeLink(href), [href]);
+  if (!linkInfo) {
+    throw new Error("Invalid YouTube link");
+  }
+
+  const { videoId } = linkInfo;
   const [preview, setPreview] = useState<YoutubeOEmbedResponse | null>(null);
   const [hasError, setHasError] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
@@ -94,10 +89,8 @@ const YoutubePreview = ({
   }, [href, videoId]);
 
   if (hasError) {
-    return renderFallback();
+    throw new Error("Failed to load YouTube preview");
   }
-
-  const ChatItemHrefButtons = getChatItemHrefButtons();
 
   if (!preview) {
     return (

@@ -1,11 +1,9 @@
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
+
 export interface YoutubeLinkInfo {
   readonly videoId: string;
   readonly url: string;
 }
-
-const matchesDomainOrSubdomain = (host: string, domain: string): boolean => {
-  return host === domain || host.endsWith(`.${domain}`);
-};
 
 export const parseYoutubeLink = (href: string): YoutubeLinkInfo | null => {
   try {

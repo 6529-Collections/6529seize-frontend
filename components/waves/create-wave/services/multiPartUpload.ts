@@ -175,7 +175,7 @@ export async function multiPartUpload({
 
       // 2.3) Extract ETag
       const eTagHeader = s3Resp.headers.etag;
-      const eTag = eTagHeader ? eTagHeader.replace(/"/g, "") : "";
+      const eTag = eTagHeader ? eTagHeader.replaceAll("\"", "") : "";
       if (!eTag) {
         throw new Error(`No ETag returned for part ${partNumber}`);
       }
