@@ -146,7 +146,7 @@ export default function BlockFinderClient() {
       if (!response.ok) {
         let message = "Failed to predict block numbers";
         const errorResponse = await response.json().catch(() => null);
-        if (errorResponse && errorResponse.message) {
+        if (errorResponse?.message) {
           message = `${message}: ${errorResponse.message}`;
         }
         throw new Error(message);

@@ -8,8 +8,8 @@ export default function BlockPickerAdvancedItemBlock({
   block,
   blockParts,
 }: {
-  block: number;
-  blockParts: number;
+  readonly block: number;
+  readonly blockParts: number;
 }) {
   const number = block.toString();
   const match = blockParts.toString();
@@ -73,8 +73,8 @@ export function BlockPickerAdvancedItemBlockLink({
   block,
   blockParts,
 }: {
-  block: number;
-  blockParts: (string | React.JSX.Element)[];
+  readonly block: number;
+  readonly blockParts: (string | React.JSX.Element)[];
 }) {
   return (
     <Link
