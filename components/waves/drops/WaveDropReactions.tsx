@@ -20,6 +20,14 @@ import {
 import { useAuth } from "../../auth/Auth";
 import clsx from "clsx";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
+import {
+  findReactionIndex,
+  cloneReactionEntries,
+  removeUserFromReactions,
+  toProfileMin,
+} from "./reaction-utils";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
@@ -48,26 +56,48 @@ export function WaveDropReaction({
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
+  const { applyOptimisticDropUpdate } = useMyStream();
+  const rollbackRef = useRef<(() => void) | null>(null);
 
-  // initial
-  const initialTotal = reaction.profiles.length;
-  const initialTotalRef = useRef(initialTotal);
-
-  const initialSelected =
-    reaction.reaction === drop.context_profile_context?.reaction;
-  const [total, setTotal] = useState(initialTotal);
-  const [selected, setSelected] = useState(initialSelected);
+  const [total, setTotal] = useState(reaction.profiles.length);
+  const [selected, setSelected] = useState(
+    reaction.reaction === drop.context_profile_context?.reaction
+  );
   const [handles, setHandles] = useState(
     reaction.profiles.map((p) => p.handle ?? p.id)
   );
   const [animate, setAnimate] = useState(false);
+  const previousTotalRef = useRef(total);
 
   useEffect(() => {
-    if (total !== initialTotalRef.current) {
+    const nextTotal = reaction.profiles.length;
+    const nextHandles = reaction.profiles.map((p) => p.handle ?? p.id);
+
+    setTotal((current) => (current === nextTotal ? current : nextTotal));
+
+    setHandles((current) => {
+      const sameLength = current.length === nextHandles.length;
+      const sameValues = sameLength
+        ? current.every((value, index) => value === nextHandles[index])
+        : false;
+      return sameValues ? current : nextHandles;
+    });
+  }, [reaction.profiles, reaction.profiles.length]);
+
+  useEffect(() => {
+    const isSelected =
+      reaction.reaction === drop.context_profile_context?.reaction;
+    setSelected((current) => (current === isSelected ? current : isSelected));
+  }, [drop.context_profile_context?.reaction, reaction.reaction]);
+
+  useEffect(() => {
+    if (total !== previousTotalRef.current) {
       setAnimate(true);
       const timeout = setTimeout(() => setAnimate(false), 100);
+      previousTotalRef.current = total;
       return () => clearTimeout(timeout);
     }
+    previousTotalRef.current = total;
   }, [total]);
 
   // derive emoji ID
@@ -120,16 +150,101 @@ export function WaveDropReaction({
     return { emojiNode: null, emojiNodeTooltip: null };
   }, [emojiId, emojiMap, findNativeEmoji]);
 
-  // click handler: wait for API, then update via stream
+  const applyOptimisticReactionChange = useCallback(
+    (willSelect: boolean) => {
+      if (!drop.wave?.id || !applyOptimisticDropUpdate) {
+        return;
+      }
+
+      const userProfileMin = toProfileMin(connectedProfile);
+
+      rollbackRef.current =
+        applyOptimisticDropUpdate({
+          waveId: drop.wave.id,
+          dropId: drop.id,
+          update: (draft) => {
+            if (draft.type !== DropSize.FULL) {
+              return draft;
+            }
+
+            const reactions = cloneReactionEntries(draft.reactions);
+            const userId = connectedProfile?.id ?? null;
+            const reactionsWithoutUser = removeUserFromReactions(
+              reactions,
+              userId
+            );
+
+            if (willSelect && userProfileMin) {
+              const existingIndex = findReactionIndex(
+                reactionsWithoutUser,
+                reaction.reaction
+              );
+
+              if (existingIndex >= 0) {
+                const target = reactionsWithoutUser[existingIndex];
+                reactionsWithoutUser[existingIndex] = {
+                  ...target,
+                  profiles: [...target.profiles, userProfileMin],
+                };
+              } else {
+                reactionsWithoutUser.push({
+                  reaction: reaction.reaction,
+                  profiles: [userProfileMin],
+                });
+              }
+            }
+
+            draft.reactions = reactionsWithoutUser;
+            const existingContext =
+              draft.context_profile_context ??
+              drop.context_profile_context ?? {
+                rating: 0,
+                min_rating: 0,
+                max_rating: 0,
+                reaction: null,
+              };
+
+            draft.context_profile_context = {
+              ...existingContext,
+              reaction: willSelect ? reaction.reaction : null,
+            };
+
+            return draft;
+          },
+        })?.rollback ?? null;
+    },
+    [
+      applyOptimisticDropUpdate,
+      connectedProfile,
+      drop.id,
+      drop.wave?.id,
+      drop.context_profile_context,
+      reaction.reaction,
+    ]
+  );
+
   const handleClick = useCallback(async () => {
+    const resolvedHandle =
+      connectedProfile?.handle ?? connectedProfile?.id ?? "";
+
     // optimistic update
     setSelected((s) => !s);
-    setTotal((n) => n + (selected ? -1 : +1));
+    setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
     if (selected) {
-      setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+      setHandles((h) =>
+        resolvedHandle ? h.filter((value) => value !== resolvedHandle) : h
+      );
     } else {
-      setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+      setHandles((h) => {
+        if (!resolvedHandle) {
+          return h;
+        }
+        const nextHandles = [...h, resolvedHandle];
+        return Array.from(new Set(nextHandles));
+      });
     }
+
+    applyOptimisticReactionChange(!selected);
 
     try {
       const body = { reaction: reaction.reaction };
@@ -151,14 +266,29 @@ export function WaveDropReaction({
 
       // optimistic revert
       setSelected((s) => !s);
-      setTotal((n) => n + (selected ? +1 : -1));
+      setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
       if (!selected) {
-        setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+        setHandles((h) =>
+          resolvedHandle ? h.filter((value) => value !== resolvedHandle) : h
+        );
       } else {
-        setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+        setHandles((h) =>
+          resolvedHandle ? Array.from(new Set([...h, resolvedHandle])) : h
+        );
       }
+      rollbackRef.current?.();
+      rollbackRef.current = null;
     }
-  }, [selected, drop.id, reaction.reaction, setToast]);
+    rollbackRef.current = null;
+  }, [
+    applyOptimisticReactionChange,
+    connectedProfile?.handle,
+    connectedProfile?.id,
+    drop.id,
+    reaction.reaction,
+    selected,
+    setToast,
+  ]);
 
   // tooltip text
   const tooltipText = useMemo(() => {
@@ -216,7 +346,7 @@ export function WaveDropReaction({
       <Tooltip
         id={`reaction-${drop.id}-${emojiId}`}
         delayShow={250}
-       place="bottom"
+        place="bottom"
         opacity={1}
         style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}>
         <div className="tw-flex tw-items-center tw-gap-2">

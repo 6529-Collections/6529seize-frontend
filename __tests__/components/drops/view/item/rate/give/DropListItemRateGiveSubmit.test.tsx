@@ -6,6 +6,7 @@ import { ReactQueryWrapperContext } from '../../../../../../../components/react-
 import { useMutation } from '@tanstack/react-query';
 import { useDropInteractionRules } from '../../../../../../../hooks/drops/useDropInteractionRules';
 import { DropVoteState } from '../../../../../../../hooks/drops/types';
+import { useMyStream } from '../../../../../../../contexts/wave/MyStreamContext';
 
 jest.useFakeTimers();
 
@@ -28,9 +29,18 @@ jest.mock('../../../../../../../hooks/drops/useDropInteractionRules', () => ({ u
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
 
+jest.mock('../../../../../../../contexts/wave/MyStreamContext', () => ({
+  useMyStream: jest.fn(() => ({
+    applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
+  })),
+}));
+
 const mutateAsync = jest.fn();
 (useMutation as jest.Mock).mockReturnValue({ mutateAsync });
 (useDropInteractionRules as jest.Mock).mockReturnValue({ voteState: DropVoteState.CAN_VOTE });
+(useMyStream as jest.Mock).mockReturnValue({
+  applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
+});
 
 const auth = { requestAuth: jest.fn().mockResolvedValue({ success: true }), setToast: jest.fn(), connectedProfile: { handle: 'me' } } as any;
 const wrapper = ({ children }: any) => (
