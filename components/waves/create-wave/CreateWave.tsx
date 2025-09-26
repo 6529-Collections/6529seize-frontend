@@ -31,9 +31,11 @@ import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function CreateWave({
   profile,
   onBack,
+  onSuccess,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
+  readonly onSuccess?: () => void;
 }) {
   const router = useRouter();
   const { isIos, keyboardVisible } = useCapacitor();
@@ -82,6 +84,7 @@ export default function CreateWave({
     onSuccess: (response) => {
       waitAndInvalidateDrops();
       onWaveCreated();
+      onSuccess?.();
       router.push(`/my-stream?wave=${response.id}`);
     },
     onError: (error) => {
@@ -272,8 +275,9 @@ export default function CreateWave({
       onBack={onBack}
       title={`Create Wave ${
         config.overview.name ? `"${config.overview.name}"` : ""
-      }`}>
-      <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
+      }`}
+    >
+      <div className="tw-mt-4 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
         <div className="tw-1/4">
           <CreateWavesMainSteps
             activeStep={step}
@@ -282,9 +286,8 @@ export default function CreateWave({
           />
         </div>
         <div
-          className={`tw-flex-1 ${
-            isIos && !keyboardVisible ? "tw-mb-10" : ""
-          }`}>
+          className={`tw-flex-1 ${isIos && !keyboardVisible ? "tw-mb-10" : ""}`}
+        >
           <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
             <div className="tw-relative tw-h-full">
               <div className="tw-flex tw-flex-col tw-h-full">

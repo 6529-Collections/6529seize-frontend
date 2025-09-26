@@ -181,11 +181,13 @@ a {
   color: variables.$font-color;
 }
 
-a:hover {
-  color: color.scale(
-    variables.$font-color,
-    $lightness: -(variables.$darken-percentage)
-  );
+@media (hover: hover) {
+  a:hover {
+    color: color.scale(
+      variables.$font-color,
+      $lightness: -(variables.$darken-percentage)
+    );
+  }
 }
 
 @media only screen and (max-width: 1200px) {
