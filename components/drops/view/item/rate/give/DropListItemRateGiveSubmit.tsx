@@ -9,6 +9,8 @@ import dynamic from "next/dynamic";
 import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
 import { DropVoteState } from "../../../../../../hooks/drops/types";
+import { DropSize } from "../../../../../../helpers/waves/drop.helpers";
+import { useMyStream } from "../../../../../../contexts/wave/MyStreamContext";
 
 export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.NOT_LOGGED_IN]: "Connect your wallet to rate",
@@ -48,6 +50,8 @@ export default function DropListItemRateGiveSubmit({
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { voteState } = useDropInteractionRules(drop);
+  const { applyOptimisticDropUpdate } = useMyStream();
+  const optimisticRollbackRef = useRef<(() => void) | null>(null);
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
@@ -60,8 +64,11 @@ export default function DropListItemRateGiveSubmit({
       }),
     onSuccess: (response: ApiDrop) => {
       onSuccessfulRateChange();
+      optimisticRollbackRef.current = null;
     },
     onError: (error) => {
+      optimisticRollbackRef.current?.();
+      optimisticRollbackRef.current = null;
       setToast({
         message: error as unknown as string,
         type: "error",
@@ -93,6 +100,53 @@ export default function DropListItemRateGiveSubmit({
     const rateIncrement = rate * clickCount;
     const newRate = previousRate + rateIncrement;
 
+    if (applyOptimisticDropUpdate && drop.wave?.id) {
+      const previousHasRating = previousRate !== 0;
+      const newHasRating = newRate !== 0;
+      const ratersCountDelta = Number(newHasRating) - Number(previousHasRating);
+      const ratingDelta = newRate - previousRate;
+
+      optimisticRollbackRef.current?.();
+      const handle = applyOptimisticDropUpdate({
+        waveId: drop.wave.id,
+        dropId: drop.id,
+        update: (draft) => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+          const baseContext =
+            draft.context_profile_context ??
+            drop.context_profile_context ?? {
+              rating: 0,
+              min_rating: 0,
+              max_rating: 0,
+              reaction: null,
+            };
+
+          draft.context_profile_context = {
+            ...baseContext,
+            rating: newRate,
+          };
+
+          const currentRating =
+            typeof draft.rating === "number" ? draft.rating : 0;
+          draft.rating = currentRating + ratingDelta;
+
+          if (typeof draft.realtime_rating === "number") {
+            draft.realtime_rating = draft.realtime_rating + ratingDelta;
+          }
+
+          const currentRaters =
+            typeof draft.raters_count === "number" ? draft.raters_count : 0;
+          draft.raters_count = Math.max(0, currentRaters + ratersCountDelta);
+
+          return draft;
+        },
+      });
+
+      optimisticRollbackRef.current = handle?.rollback ?? null;
+    }
+
     await rateChangeMutation.mutateAsync({
       rate: newRate,
       category: DEFAULT_DROP_RATE_CATEGORY,
@@ -107,6 +161,7 @@ export default function DropListItemRateGiveSubmit({
     rateChangeMutation,
     voteState,
     setToast,
+    applyOptimisticDropUpdate,
   ]);
 
   useEffect(() => {

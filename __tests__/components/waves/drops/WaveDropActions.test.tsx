@@ -13,6 +13,7 @@ jest.mock('../../../../components/waves/drops/WaveDropActionsCopyLink', () => ()
 jest.mock('../../../../components/waves/drops/WaveDropActionsOptions', () => () => <div data-testid="options" />);
 jest.mock('../../../../components/waves/drops/WaveDropActionsOpen', () => () => <div data-testid="open" />);
 jest.mock('../../../../components/waves/drops/WaveDropFollowAuthor', () => () => <div data-testid="follow" />);
+jest.mock('../../../../components/waves/drops/WaveDropActionsAddReaction', () => () => <div data-testid="add-reaction" />);
 
 jest.mock('../../../../hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
 jest.mock('../../../../contexts/SeizeSettingsContext', () => ({ useSeizeSettings: jest.fn() }));

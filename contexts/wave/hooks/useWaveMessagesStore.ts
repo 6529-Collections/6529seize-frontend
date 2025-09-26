@@ -2,7 +2,67 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
+import { Drop } from "../../../helpers/waves/drop.helpers";
 import { WaveMessages, WaveMessagesUpdate } from "./types";
+
+type DropChange = {
+  key: string;
+  originalValue: unknown;
+  optimisticValue: unknown;
+  originalHasKey: boolean;
+  optimisticHasKey: boolean;
+};
+
+const serializeValue = (value: unknown): string => {
+  if (value === undefined) {
+    return "__undefined__";
+  }
+  return JSON.stringify(value);
+};
+
+const valuesEqual = (left: unknown, right: unknown): boolean => {
+  return serializeValue(left) === serializeValue(right);
+};
+
+const cloneValue = <T>(value: T): T => {
+  if (value === undefined) {
+    return value;
+  }
+
+  return structuredClone(value);
+};
+
+type DropRecord = Drop & Record<string, unknown>;
+
+const toDropRecord = (drop: Drop): DropRecord => drop as DropRecord;
+
+const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
+  const keys = Array.from(
+    new Set([...Object.keys(original), ...Object.keys(updated)])
+  );
+  const changes: DropChange[] = [];
+  const originalRecord = toDropRecord(original);
+  const updatedRecord = toDropRecord(updated);
+
+  for (const key of keys) {
+    const originalHasKey = Object.hasOwn(original, key);
+    const optimisticHasKey = Object.hasOwn(updated, key);
+    const originalValue = originalHasKey ? originalRecord[key] : undefined;
+    const optimisticValue = optimisticHasKey ? updatedRecord[key] : undefined;
+
+    if (!valuesEqual(originalValue, optimisticValue)) {
+      changes.push({
+        key,
+        originalValue: cloneValue(originalValue),
+        optimisticValue: cloneValue(optimisticValue),
+        originalHasKey,
+        optimisticHasKey,
+      });
+    }
+  }
+
+  return changes;
+};
 
 export type Listener = (data: WaveMessages | undefined) => void;
 
@@ -13,10 +73,14 @@ function useWaveMessagesStore() {
   const [waveMessages, setWaveMessages] = useState<
     Record<string, WaveMessages>
   >({});
+  const waveMessagesRef = useRef<Record<string, WaveMessages>>({});
   // Use useRef to keep listeners stable across renders
   const listenersRef = useRef<KeyListeners>({});
   const updateQueueRef = useRef<WaveMessagesUpdate[]>([]);
   const isProcessingRef = useRef<boolean>(false);
+  useEffect(() => {
+    waveMessagesRef.current = waveMessages;
+  }, [waveMessages]);
 
   // Stable function to get data for a key
   const getData = useCallback(
@@ -105,10 +169,12 @@ function useWaveMessagesStore() {
       }
 
       notifyValue = updatedWaveMessages; // Capture the value to notify
-      return {
+      const nextState = {
         ...newWaveMessages,
         [update.key]: updatedWaveMessages,
       };
+      waveMessagesRef.current = nextState;
+      return nextState;
     });
 
     // Notify listeners after the state update for this item
@@ -137,6 +203,101 @@ function useWaveMessagesStore() {
     [processQueue] // Dependency: processQueue
   );
 
+  const cloneDrop = (drop: Drop): Drop => cloneValue(drop);
+
+  const optimisticUpdateDrop = useCallback(
+    ({
+      waveId,
+      dropId,
+      update,
+    }: {
+      waveId: string;
+      dropId: string;
+      update: (draft: Drop) => Drop | void;
+    }): { rollback: () => void } | null => {
+      const wave = waveMessages[waveId];
+      if (!wave) {
+        return null;
+      }
+
+      const existingDrop = wave.drops.find((drop) => drop.id === dropId);
+      if (!existingDrop) {
+        return null;
+      }
+
+      const original = cloneDrop(existingDrop);
+      const draft = cloneDrop(existingDrop);
+      const updated = update(draft) ?? draft;
+      const changes = collectDropChanges(original, updated);
+
+      if (changes.length === 0) {
+        return null;
+      }
+
+      updateData({
+        key: waveId,
+        drops: [updated],
+      });
+
+      const rollback = () => {
+        const latestWave = waveMessagesRef.current[waveId];
+        if (!latestWave) {
+          return;
+        }
+
+        const latestDrop = latestWave.drops.find((drop) => drop.id === dropId);
+        if (!latestDrop) {
+          return;
+        }
+
+        let nextDrop = cloneDrop(latestDrop);
+        const nextDropRecord = toDropRecord(nextDrop);
+        let shouldRollback = false;
+
+        for (const {
+          key,
+          originalHasKey,
+          optimisticHasKey,
+          originalValue,
+          optimisticValue,
+        } of changes) {
+          const currentHasKey = Object.hasOwn(nextDrop, key);
+            const currentValue = currentHasKey
+              ? nextDropRecord[key]
+              : undefined;
+
+            if (optimisticHasKey) {
+              if (!valuesEqual(currentValue, optimisticValue)) {
+                continue;
+              }
+            } else if (currentHasKey) {
+              continue;
+            }
+
+            if (originalHasKey) {
+              nextDropRecord[key] = cloneValue(originalValue);
+            } else {
+              delete nextDropRecord[key];
+            }
+
+            shouldRollback = true;
+        }
+
+        if (!shouldRollback) {
+          return;
+        }
+
+        updateData({
+          key: waveId,
+          drops: [nextDrop],
+        });
+      };
+
+      return { rollback };
+    },
+    [waveMessages, updateData]
+  );
+
   const removeDrop = useCallback(
     (waveId: string, dropId: string) => {
       let notify: WaveMessages | undefined;
@@ -161,15 +322,16 @@ function useWaveMessagesStore() {
         };
 
         notify = updatedWaveMessages;
-        return {
+        const nextState = {
           ...newWaveMessages,
           [waveId]: updatedWaveMessages,
         };
+        waveMessagesRef.current = nextState;
+        return nextState;
       });
 
       // Notify listeners *after* state update is triggered
       // Note: state updates might be async, listeners get the *new* state idea
-      // For more robust notification, you might useEffect on `store` change
       const keyListeners = listenersRef.current[waveId];
 
       if (keyListeners && notify) {
@@ -180,23 +342,14 @@ function useWaveMessagesStore() {
     [waveMessages]
   );
 
-  // Optional: Effect to notify listeners if state changes outside updateData
-  // This is a more robust way to ensure listeners are called *after* the state has definitively updated.
-  useEffect(() => {
-    // This effect runs after each render where `store` might have changed.
-    // We iterate through all tracked keys in listenersRef.
-    Object.keys(listenersRef.current).forEach((key) => {
-      const keyListeners = listenersRef.current[key];
-      const currentValue = waveMessages[key]; // Get the current value from the updated store
-      if (keyListeners) {
-        keyListeners.forEach((listener) => listener(currentValue));
-        // Be cautious: This might notify even if the specific key didn't change,
-        // if the store object reference changed. The selector hook below handles this.
-      }
-    });
-  }, [waveMessages]); // Run when the store state changes
-
-  return { getData, subscribe, unsubscribe, updateData, removeDrop };
+  return {
+    getData,
+    subscribe,
+    unsubscribe,
+    updateData,
+    removeDrop,
+    optimisticUpdateDrop,
+  };
 }
 
 export default useWaveMessagesStore;
