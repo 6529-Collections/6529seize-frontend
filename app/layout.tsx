@@ -15,7 +15,6 @@ import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { Viewport } from "next";
-import Head from "next/head";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./error-page";
 
@@ -33,14 +32,19 @@ export default function RootLayout({
 }: {
   readonly children: React.ReactNode;
 }) {
+  const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
+
   return (
     <html lang="en">
-      <Head>
-        <link rel="preconnect" href={publicEnv.API_ENDPOINT} />
+      <head>
+        <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
         <link rel="preconnect" href="https://media.artblocks.io" />
         <link rel="preconnect" href="https://media-proxy.artblocks.io" />
-      </Head>
+        {isUsingStaticAssets && (
+          <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
+        )}
+      </head>
       <body>
         <AwsRumProvider>
           <StoreSetup>
