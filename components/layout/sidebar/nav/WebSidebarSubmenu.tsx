@@ -38,7 +38,7 @@ function WebSidebarSubmenu({
   );
 
   const handleClickOutside = useCallback(
-    (event: MouseEvent) => {
+    (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node | null;
       if (!target) return;
 
@@ -56,10 +56,12 @@ function WebSidebarSubmenu({
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [handleKeyDown, handleClickOutside]);
 
@@ -110,7 +112,7 @@ function WebSidebarSubmenu({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`tw-group tw-flex tw-items-center tw-no-underline tw-rounded-lg tw-px-3 tw-py-2 tw-mb-1 tw-text-sm tw-transition-all tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-600 focus-visible:tw-ring-offset-1 tw-ring-offset-iron-950 ${
+                className={`tw-group tw-flex tw-items-center tw-no-underline tw-rounded-lg tw-px-3 tw-py-2 tw-mb-1 tw-text-sm tw-transition-all tw-duration-150 tw-touch-action-manipulation focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-600 focus-visible:tw-ring-offset-1 tw-ring-offset-iron-950 ${
                   isItemActive
                     ? "tw-text-white tw-bg-iron-800/80 tw-font-semibold"
                     : "tw-text-iron-400 desktop-hover:hover:tw-bg-iron-850/50 desktop-hover:hover:tw-text-iron-200 tw-font-medium"

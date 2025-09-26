@@ -130,7 +130,7 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
       {isRightSidebarOpen && !isDropOpen && waveId && (
         <>
           <div
-            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
+            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[49]"
             onClick={closeRightSidebar}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {

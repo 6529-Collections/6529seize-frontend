@@ -1,7 +1,6 @@
 "use client";
 
 import React, { type CSSProperties, type ReactNode, useMemo } from "react";
-import { usePathname } from "next/navigation";
 import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 
@@ -14,7 +13,6 @@ interface WebLayoutProps {
 }
 
 const WebLayout = ({ children }: WebLayoutProps) => {
-  const pathname = usePathname();
   const {
     isMobile,
     isCollapsed,
@@ -27,6 +25,7 @@ const WebLayout = ({ children }: WebLayoutProps) => {
   const rootStyle = useMemo<LayoutCssVars>(
     () => ({
       "--left-rail": sidebarWidth,
+      height: "100dvh",
     }),
     [sidebarWidth]
   );
@@ -37,7 +36,7 @@ const WebLayout = ({ children }: WebLayoutProps) => {
 
   return (
     <div
-      className="tw-flex tw-h-screen tw-relative tw-overflow-x-hidden"
+      className="tw-flex tw-relative tw-overflow-x-hidden"
       style={rootStyle}>
       <div className="tailwind-scope">
         <WebSidebar

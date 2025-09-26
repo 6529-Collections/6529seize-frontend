@@ -54,17 +54,17 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 
   return (
     <div
-      className="tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-bg-iron-950 tw-flex tw-flex-col
+      className="tw-fixed tw-inset-y-0 tw-right-0 tw-z-[50] tw-bg-iron-950 tw-flex tw-flex-col
         tw-w-[20.5rem] tw-shadow-2xl
         lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100
         lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0"
     >
       {/* Close button */}
-      <div className="tw-absolute tw-top-3 -tw-left-6 tw-z-10">
+      <div className="tw-absolute tw-top-3 -tw-left-4 tw-z-10">
         <button
           type="button"
           onClick={closeRightSidebar}
-          className="tw-group tw-size-8 tw-rounded-lg tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-650 tw-border tw-border-iron-650 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
+          className="tw-group tw-size-8 tw-rounded-full tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-650 tw-border tw-border-iron-650 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
           aria-label="Close sidebar"
         >
           <ChevronDoubleRightIcon

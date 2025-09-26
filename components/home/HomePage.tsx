@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -9,13 +9,13 @@ import HomePageTabs from "./HomePageTabs";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import Image from "next/image";
+import ConnectWallet from "../common/ConnectWallet";
 import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
-import { useSearchParams } from "next/navigation";
 import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+
+const HOME_TAB_STORAGE_KEY = "home.activeTab";
 
 interface HomePageProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -35,11 +35,31 @@ export default function HomePage({
   const { isApp, hasTouchScreen } = useDeviceInfo();
   const { isAuthenticated } = useSeizeConnectContext();
   const { registerRef } = useLayout();
-  const searchParams = useSearchParams();
   const { drop, isDropOpen, onDropClose } = useDropModal();
+  const [activeTab, setActiveTab] = useState<"feed" | "latest">("latest");
 
-  // Get active tab from URL for conditional rendering
-  const activeTab = (searchParams?.get("tab") as "feed" | "latest") || "latest";
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const savedTab = window.localStorage.getItem(HOME_TAB_STORAGE_KEY);
+      if (savedTab === "feed" || savedTab === "latest") {
+        setActiveTab(savedTab);
+      }
+    } catch (error) {
+      console.warn("Failed to read home tab from storage", error);
+    }
+  }, []);
+
+  const handleTabChange = useCallback((tab: "feed" | "latest") => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(HOME_TAB_STORAGE_KEY, tab);
+      } catch (error) {
+        console.warn("Failed to persist home tab to storage", error);
+      }
+    }
+  }, []);
 
   // Callback ref for registration with LayoutContext
   const setTabsRef = useCallback(
@@ -76,37 +96,16 @@ export default function HomePage({
         </div>
       )}
 
-      {/* Tab Navigation */}
-      <HomePageTabs ref={setTabsRef} hasTouchScreen={hasTouchScreen} />
+      <HomePageTabs
+        ref={setTabsRef}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
           <div className="tw-min-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
-            {isAuthenticated ? (
-              <HomeFeed />
-            ) : (
-              <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-[calc(100vh-56px)]">
-                <Image
-                  unoptimized
-                  priority
-                  loading="eager"
-                  src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
-                  alt="Brain"
-                  width={304}
-                  height={450}
-                  className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
-                />
-                <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-                  <h1 className="tw-text-xl tw-font-bold">
-                    This content is only available to connected wallets.
-                  </h1>
-                  <p className="tw-text-base tw-text-gray-400">
-                    Connect your wallet to continue.
-                  </p>
-                  <HeaderUserConnect />
-                </div>
-              </div>
-            )}
+            {isAuthenticated ? <HomeFeed /> : <ConnectWallet />}
           </div>
         ) : (
           <Home

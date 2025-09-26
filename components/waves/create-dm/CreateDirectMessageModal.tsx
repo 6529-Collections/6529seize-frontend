@@ -24,14 +24,14 @@ export default function CreateDirectMessageModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-flex tw-items-center tw-justify-center tw-z-[9999] tw-p-4"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-flex tw-items-start lg:tw-items-center tw-justify-center tw-z-[9999] tw-p-4"
           onClick={onClose}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-3xl tw-max-h-[90vh] tw-overflow-hidden tw-shadow-2xl"
+            className="tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-3xl tw-max-h-[90vh] tw-shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -49,7 +49,7 @@ export default function CreateDirectMessageModal({
             </div>
 
             {/* Modal Content */}
-            <div className="tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(90vh-80px)]">
+            <div className="tw-max-h-[calc(90vh-80px)]">
               <div className="tw-px-6 tw-pb-8">
                 <CreateDirectMessage profile={profile} onBack={onClose} onSuccess={onClose} />
               </div>

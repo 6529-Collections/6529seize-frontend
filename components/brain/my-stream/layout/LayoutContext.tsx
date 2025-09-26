@@ -56,7 +56,7 @@ const calculateHeightStyle = (
   spaces: LayoutSpaces,
   capacitorSpace: number // Accept specific space value
 ): React.CSSProperties => {
-  const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
+  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -354,7 +354,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px`,
+      height: `calc(100dvh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
       display: "flex",
     };
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);

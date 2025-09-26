@@ -45,15 +45,15 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
       {/* Wave name header with toggle button */}
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-py-3 tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
-        <div className="tw-flex tw-items-center tw-gap-x-3">
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
           {/* Mobile back button */}
           {isMobile && (
             <button
               onClick={handleMobileBack}
-              className="tw-flex tw-items-center tw-bg-transparent tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-p-0"
+              className="tw-flex tw-items-centertw-h-full tw-px-2.5 -tw-ml-2.5 tw-bg-transparent tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-p-0"
               aria-label="Go back"
             >
-              <ArrowLeftIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+              <ArrowLeftIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
             </button>
           )}
           <div className="tw-size-6 lg:tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
@@ -73,7 +73,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         <button
           type="button"
           onClick={toggleRightSidebar}
-          className="tw-group tw-size-8 tw-rounded-lg tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
+          className="tw-group tw-size-8 tw-rounded-full tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
           aria-label="Toggle right sidebar"
         >
           <ChevronDoubleLeftIcon

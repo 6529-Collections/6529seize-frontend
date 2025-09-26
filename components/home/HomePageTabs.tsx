@@ -1,67 +1,54 @@
 "use client";
 
-import React, { forwardRef, useCallback } from "react";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import React, { forwardRef } from "react";
 
 type TabType = "feed" | "latest";
 
 interface HomePageTabsProps {
-  hasTouchScreen?: boolean;
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
 }
 
 const HomePageTabs = forwardRef<HTMLDivElement, HomePageTabsProps>(
-  ({ hasTouchScreen = false }, ref) => {
-    const searchParams = useSearchParams();
-    const pathname = usePathname();
-    const router = useRouter();
-
-    // Get active tab from URL, default to "latest"
-    const activeTab = (searchParams?.get('tab') as TabType) || 'latest';
-
-    // Handle tab changes by updating URL
-    const handleTabChange = useCallback((tab: TabType) => {
-      const params = new URLSearchParams(searchParams?.toString() || '');
-      params.set('tab', tab);
-      router.push(`${pathname}?${params.toString()}`);
-    }, [searchParams, pathname, router]);
+  ({ activeTab, onTabChange }, ref) => {
     return (
       <div
         ref={ref}
-        className="tailwind-scope tw-pl-6 tw-pr-6 tw-sticky tw-top-0 tw-z-20 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-900 tw-border-x-0 tw-border-t-0"
+        className="tailwind-scope md:tw-px-8 tw-sticky tw-top-0 tw-z-20 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0"
       >
-        <div className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar">
-          <div className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4">
+        <div className="tw-flex tw-overflow-x-auto horizontal-menu-hide-scrollbar tw-w-full">
+          <div className="tw-flex  tw-justify-center tw-w-full md:tw-w-auto tw-gap-x-4 md:tw-gap-x-6">
             <button
-              onClick={() => handleTabChange("feed")}
-              className={`tw-no-underline tw-flex tw-items-center tw-justify-center tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
+              onClick={() => onTabChange("feed")}
+              className={`tw-p-0 tw-group tw-text-base tw-leading-5 tw-font-semibold tw-bg-transparent tw-flex-1 tw-border-0 ${
                 activeTab === "feed" ? "tw-pointer-events-none" : ""
               }`}
             >
-              <div
-                className={
+              <span
+                className={`tw-block md:tw-inline-block tw-border-b-2 tw-border-solid tw-border-x-0 tw-border-t-0 tw-py-4 ${
                   activeTab === "feed"
-                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-5 tw-px-1"
-                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-5 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-                }
+                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-px-1 tw-border-primary-300"
+                    : "tw-text-iron-500 group-hover:desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-px-1 tw-border-transparent tw-transition tw-duration-300 tw-ease-out"
+                }`}
               >
                 My Feed
-              </div>
+              </span>
             </button>
             <button
-              onClick={() => handleTabChange("latest")}
-              className={`tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold tw-bg-transparent tw-border-0 ${
+              onClick={() => onTabChange("latest")}
+              className={`tw-p-0 tw-group tw-text-base tw-leading-5 tw-font-semibold tw-bg-transparent tw-flex-1 tw-border-0 ${
                 activeTab === "latest" ? "tw-pointer-events-none" : ""
               }`}
             >
-              <div
-                className={
+              <span
+                className={`tw-block md:tw-inline-block tw-border-b-2 tw-border-solid tw-border-x-0 tw-border-t-0 tw-py-4 ${
                   activeTab === "latest"
-                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-py-5 tw-px-1"
-                    : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-py-5 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-                }
+                    ? "tw-text-iron-50 tw-whitespace-nowrap tw-font-semibold tw-px-1 tw-border-primary-300"
+                    : "tw-text-iron-500 group-hover:desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-px-1 tw-border-transparent tw-transition tw-duration-300 tw-ease-out"
+                }`}
               >
                 Latest Drop
-              </div>
+              </span>
             </button>
           </div>
         </div>
