@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
@@ -76,12 +77,12 @@ export function BlockPickerAdvancedItemBlockLink({
   blockParts: (string | React.JSX.Element)[];
 }) {
   return (
-    <a
+    <Link
       className="tw-underline-offset-2 tw-underline tw-transition tw-duration-300 tw-ease-out"
       href={`https://etherscan.io/block/countdown/${block}`}
       target="_blank"
       rel="noreferrer">
       {blockParts}
-    </a>
+    </Link>
   );
 }
