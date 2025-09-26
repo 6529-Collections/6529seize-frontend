@@ -5,6 +5,7 @@ import {
   $createParagraphNode,
   $getSelection,
   $insertNodes,
+  $isNodeSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
@@ -30,6 +31,40 @@ export default function EnterKeyPlugin({
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
+    const insertParagraph = ({ forceParagraph = false } = {}) => {
+      editor.update(() => {
+        const currentSelection = $getSelection();
+
+        if ($isRangeSelection(currentSelection)) {
+          currentSelection.insertParagraph();
+
+          if (forceParagraph) {
+            const updatedSelection = $getSelection();
+            if ($isRangeSelection(updatedSelection)) {
+              const topLevelElement = updatedSelection.anchor
+                .getNode()
+                .getTopLevelElementOrThrow();
+
+              if ($isHeadingNode(topLevelElement)) {
+                const paragraphNode = $createParagraphNode();
+                paragraphNode.append(...topLevelElement.getChildren());
+                topLevelElement.replace(paragraphNode);
+                paragraphNode.selectStart();
+              }
+            }
+          }
+
+          return;
+        }
+
+        if ($isNodeSelection(currentSelection)) {
+          const paragraphNode = $createParagraphNode();
+          $insertNodes([paragraphNode]);
+          paragraphNode.selectStart();
+        }
+      });
+    };
+
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
@@ -56,23 +91,15 @@ export default function EnterKeyPlugin({
           }
           if ($isHeadingNode(parentNode) && event?.shiftKey) {
             event.preventDefault();
-            editor.update(() => {
-              const paragraphNode = $createParagraphNode();
-              $insertNodes([paragraphNode]);
-              paragraphNode.select();
-            });
+            insertParagraph({ forceParagraph: true });
             return true;
           }
         }
 
         if (event?.shiftKey) {
           event.preventDefault();
-          editor.update(() => {
-            const paragraphNode = $createParagraphNode();
-            $insertNodes([paragraphNode]);
-            paragraphNode.select();
-          });
-          return false; // Prevents the default behavior
+          insertParagraph();
+          return true;
         } else {
           // Handle Enter (Submit)
           event?.preventDefault();
