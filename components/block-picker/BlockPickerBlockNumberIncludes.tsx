@@ -14,7 +14,7 @@ export default function BlockPickerBlockNumberIncludes({
       <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
         Block number includes
       </label>
-      <div className="tw-mt-1 5">
+      <div className="tw-relative tw-mt-1.5">
         <input
           disabled={disabled}
           type="text"
