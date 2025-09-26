@@ -6,9 +6,19 @@ import BlockPickerDateSelect from "@/components/block-picker/BlockPickerDateSele
 import BlockPickerTimeWindowSelect from "@/components/block-picker/BlockPickerTimeWindowSelect";
 import BlockPickerResult from "@/components/block-picker/result/BlockPickerResult";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { publicEnv } from "@/config/env";
 import { useTitle } from "@/contexts/TitleContext";
-import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 import { useEffect, useState } from "react";
+
+interface PredictBlockNumberRequestApiModel {
+  timestamp: number;
+}
+
+interface PredictBlockNumbersRequestApiModel {
+  minTimestamp: number;
+  maxTimestamp: number;
+  blockNumberIncludes?: number[];
+}
 
 export interface PredictBlockNumbersResponseApiModel {
   readonly blockNumberIncludes: number;
@@ -57,61 +67,103 @@ export default function BlockFinderClient() {
   );
   const [blockNumberIncludes, setBlockNumberIncludes] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [predictedBlock, setPredictedBlock] = useState<{
-    blockNumber: number;
-    timestamp: number;
+  const [predictedBlocks, setPredictedBlocks] = useState<{
+    timestamp?: number;
+    blocknumber?: number;
+    blocks?: PredictBlockNumbersResponseApiModel[];
   } | null>(null);
-  const [predictedBlocks, setPredictedBlocks] =
-    useState<PredictBlockNumbersResponseApiModel | null>(null);
 
   useEffect(() => {
     setTitle("Block Finder | Tools");
   }, [setTitle]);
 
   const onSubmit = async () => {
-    if (blockNumberIncludes && !/^\d+$/.test(blockNumberIncludes)) {
+    setPredictedBlocks(null);
+    if (timeWindow !== BlockPickerTimeWindow.NONE && !blockNumberIncludes) {
       setToast({
-        message: "Block numbers must be numeric!",
+        message:
+          "You must provide some block number inclusions when using a time window!",
         type: "error",
       });
       return;
     }
 
-    if (!date || !time) return;
+    if (
+      blockNumberIncludes &&
+      !/^\d+(,\s*\d+)*$/.test(blockNumberIncludes.trim())
+    ) {
+      setToast({
+        message: "Block numbers must be numeric and comma-separated!",
+        type: "error",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
       const dateObj = new Date(date);
       const [hours, minutes] = time.split(":");
-      const timestamp = new Date(dateObj);
-      timestamp.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const startDate = new Date(dateObj);
+      startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      const endTimestamp = new Date(
-        timestamp.getTime() + BlockPickerTimeWindowToMilliseconds[timeWindow]
+      const minTimestamp = startDate.getTime();
+
+      let path;
+      let body:
+        | PredictBlockNumbersRequestApiModel
+        | PredictBlockNumberRequestApiModel;
+      if (blockNumberIncludes) {
+        path = "/other/predict-block-numbers";
+        const numbers = blockNumberIncludes
+          .split(",")
+          .map((number) => parseInt(number.trim()));
+        const maxTimestamp =
+          minTimestamp + BlockPickerTimeWindowToMilliseconds[timeWindow];
+
+        body = {
+          minTimestamp,
+          maxTimestamp,
+          blockNumberIncludes: numbers,
+        };
+      } else {
+        path = "/other/predict-block-number";
+        body = {
+          timestamp: minTimestamp,
+        };
+      }
+
+      const response = await fetch(
+        `${publicEnv.ALLOWLIST_API_ENDPOINT}${path}`,
+        {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      const response =
-        await distributionPlanApiPost<PredictBlockNumbersResponseApiModel>({
-          endpoint: "block-numbers/predict",
-          body: {
-            timestamp: timestamp.toISOString(),
-            endTimestamp: endTimestamp.toISOString(),
-            blockNumberIncludes: blockNumberIncludes
-              ? parseInt(blockNumberIncludes)
-              : undefined,
-          },
-        });
+      if (!response.ok) {
+        let message = "Failed to predict block numbers";
+        const errorResponse = await response.json().catch(() => null);
+        if (errorResponse && errorResponse.message) {
+          message = `${message}: ${errorResponse.message}`;
+        }
+        throw new Error(message);
+      }
 
-      if (
-        response.success &&
-        response.data &&
-        response.data.blockNumbers.length > 0
-      ) {
-        setPredictedBlock({
-          blockNumber: response.data.blockNumbers[0],
-          timestamp: timestamp.getTime(),
+      if (blockNumberIncludes) {
+        const data =
+          (await response.json()) as PredictBlockNumbersResponseApiModel[];
+        setPredictedBlocks({
+          blocks: data,
         });
-        setPredictedBlocks(response.data);
+      } else {
+        const data = await response.text();
+        setPredictedBlocks({
+          timestamp: minTimestamp,
+          blocknumber: Number(data),
+        });
       }
     } catch (error) {
       console.error("Error predicting block numbers:", error);
@@ -126,7 +178,7 @@ export default function BlockFinderClient() {
         <h1 className="tw-text-white pb-4">
           <span className="font-lightest">Block</span> Finder
         </h1>
-        <div className="tw-w-full tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-5">
+        <div className="tw-w-full tw-mt-3 tw-mb-5 tw-flex tw-gap-x-4 tw-gap-y-5">
           <div className="tw-w-1/2">
             <BlockPickerDateSelect
               date={date}
@@ -142,6 +194,7 @@ export default function BlockFinderClient() {
                 setTimeWindow={setTimeWindow}
               />
               <BlockPickerBlockNumberIncludes
+                disabled={timeWindow === BlockPickerTimeWindow.NONE}
                 blockNumberIncludes={blockNumberIncludes}
                 setBlockNumberIncludes={setBlockNumberIncludes}
               />
@@ -151,7 +204,7 @@ export default function BlockFinderClient() {
             <div className="tw-w-[5.25rem]">
               <PrimaryButton
                 onClicked={onSubmit}
-                disabled={false}
+                disabled={!date || !time}
                 loading={loading}
                 padding="tw-px-4 tw-py-3">
                 Submit
@@ -159,11 +212,11 @@ export default function BlockFinderClient() {
             </div>
           </div>
         </div>
-        {!loading && !!predictedBlock && (
+        {!loading && !!predictedBlocks && (
           <BlockPickerResult
-            blocknumber={predictedBlock.blockNumber}
-            timestamp={predictedBlock.timestamp}
-            predictedBlocks={predictedBlocks ? [predictedBlocks] : []}
+            blocknumber={predictedBlocks.blocknumber ?? undefined}
+            timestamp={predictedBlocks.timestamp ?? 0}
+            predictedBlocks={predictedBlocks.blocks ?? []}
           />
         )}
       </div>
