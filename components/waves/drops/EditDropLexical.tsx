@@ -50,6 +50,8 @@ import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import EmojiPlugin from "../../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../../drops/create/lexical/nodes/EmojiNode";
+import { IOS_PLAINTEXT_CONTENT_EDITABLE_STYLE } from "../../drops/create/lexical/constants";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 interface EditDropLexicalProps {
   initialContent: string;
@@ -280,6 +282,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
   const { isApp } = useDeviceInfo();
+  const { isIos } = useCapacitor();
 
   const initialConfig: InitialConfigType = {
     namespace: "EditDropLexical",
@@ -361,6 +364,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
                   style={{
                     fontFamily: "inherit",
                     lineHeight: "1.4",
+                    ...(isIos ? IOS_PLAINTEXT_CONTENT_EDITABLE_STYLE : {}),
                   }}
                 />
                 <CreateDropEmojiPicker top="tw-top-1" />

@@ -68,6 +68,8 @@ import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
 import { EmojiNode } from "../lexical/nodes/EmojiNode";
 import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
+import { IOS_PLAINTEXT_CONTENT_EDITABLE_STYLE } from "../lexical/constants";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -119,6 +121,7 @@ const CreateDropContent = forwardRef<
     },
     ref
   ) => {
+    const { isIos } = useCapacitor();
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -249,6 +252,11 @@ const CreateDropContent = forwardRef<
                     <ContentEditable
                       spellCheck={true}
                       autoCorrect="on"
+                      style={
+                        isIos
+                          ? IOS_PLAINTEXT_CONTENT_EDITABLE_STYLE
+                          : undefined
+                      }
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"

@@ -59,6 +59,7 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "../../hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
+import { IOS_PLAINTEXT_CONTENT_EDITABLE_STYLE } from "../drops/create/lexical/constants";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -122,7 +123,7 @@ const CreateDropInput = forwardRef<
     },
     ref
   ) => {
-    const { isCapacitor } = useCapacitor();
+    const { isCapacitor, isIos } = useCapacitor();
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -237,6 +238,11 @@ const CreateDropInput = forwardRef<
                     <ContentEditable
                       spellCheck={true}
                       autoCorrect="on"
+                      style={
+                        isIos
+                          ? IOS_PLAINTEXT_CONTENT_EDITABLE_STYLE
+                          : undefined
+                      }
                       onClick={(e) => {
                         // Ensure the contenteditable is properly focused and ready for paste
                         const target = e.currentTarget;
