@@ -55,19 +55,22 @@ export default function UserPageIdentityAddStatementsContactInput({
   );
 }
 
+const REPEATED_PROTOCOL_REGEX = /^(https?:\/\/)+/i;
+
 const collapseProtocolPrefix = (value: string): string => {
-  const repeatedProtocolMatch = value.match(/^(https?:\/\/)+/i);
+  const repeatedProtocolMatch = REPEATED_PROTOCOL_REGEX.exec(value);
   if (!repeatedProtocolMatch) {
     return value;
   }
 
-  const protocols = repeatedProtocolMatch[0]?.match(/https?:\/\//gi);
+  const [matchedProtocols] = repeatedProtocolMatch;
+  const protocols = matchedProtocols.match(/https?:\/\//gi);
 
   if (!protocols || protocols.length <= 1) {
     return value;
   }
 
-  const protocolToKeep = protocols[protocols.length - 1]?.toLowerCase() ?? "https://";
-  const remainder = value.slice(repeatedProtocolMatch[0].length);
+  const protocolToKeep = protocols.at(-1)?.toLowerCase() ?? "https://";
+  const remainder = value.slice(matchedProtocols.length);
   return `${protocolToKeep}${remainder}`;
 };
