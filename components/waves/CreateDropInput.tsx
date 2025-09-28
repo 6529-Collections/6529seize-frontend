@@ -60,6 +60,7 @@ import useCapacitor from "../../hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import { IOS_PLAINTEXT_CONTENT_EDITABLE_STYLE } from "../drops/create/lexical/constants";
+import NormalizeTextNodesPlugin from "../drops/create/lexical/plugins/NormalizeTextNodesPlugin";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -304,6 +305,7 @@ const CreateDropInput = forwardRef<
                 disabled={submitting}
               />
               <EmojiPlugin />
+              <NormalizeTextNodesPlugin />
             </div>
           </div>
         </LexicalComposer>
