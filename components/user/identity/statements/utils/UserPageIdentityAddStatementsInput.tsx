@@ -57,16 +57,10 @@ export default function UserPageIdentityAddStatementsContactInput({
   );
 }
 
-const REPEATED_PROTOCOL_REGEX = /^(https?:\/\/)+/i;
+const COLLAPSE_PROTOCOL_PREFIX = /^(?:(https?):\/\/)+/i;
 
-const collapseProtocolPrefix = (value: string): string => {
-  const repeatedProtocolMatch = REPEATED_PROTOCOL_REGEX.exec(value);
-  if (!repeatedProtocolMatch) {
-    return value;
-  }
-
-  const [matchedProtocols] = repeatedProtocolMatch;
-  const protocolToKeep = repeatedProtocolMatch[1]?.toLowerCase() ?? "https://";
-  const remainder = value.slice(matchedProtocols.length);
-  return `${protocolToKeep}${remainder}`;
-};
+const collapseProtocolPrefix = (value: string): string =>
+  value.replace(
+    COLLAPSE_PROTOCOL_PREFIX,
+    (_match, scheme: string) => `${scheme.toLowerCase()}://`
+  );
