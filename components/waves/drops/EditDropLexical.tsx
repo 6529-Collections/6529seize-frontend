@@ -22,6 +22,7 @@ import {
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
+  TextNode,
 } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
@@ -59,6 +60,8 @@ interface EditDropLexicalProps {
   onSave: (content: string, mentions: ApiDropMentionedUser[]) => void;
   onCancel: () => void;
 }
+
+const MAX_MENTION_RECONSTRUCTION_PASSES = 20;
 
 // Plugin to set initial content from markdown
 function reconstructSplitMention(
@@ -105,7 +108,7 @@ function reconstructSplitMention(
   return true;
 }
 
-function processSplitMentions(textNodes: any[]) {
+function processSplitMentions(textNodes: Array<TextNode>): boolean {
   for (let i = 0; i < textNodes.length - 1; i++) {
     const currentNode = textNodes[i];
     const nextNode = textNodes[i + 1];
@@ -118,13 +121,19 @@ function processSplitMentions(textNodes: any[]) {
     const mentionEnd = nextText.match(/^\w*\]/);
 
     if (mentionStart && mentionEnd) {
-      if (
-        reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
-      ) {
-        break; // Refresh needed after tree modification
+      try {
+        if (
+          reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
+        ) {
+          return true; // Tree changed; caller should re-run with fresh text nodes
+        }
+      } catch (error) {
+        console.warn("Failed to reconstruct split mention", error);
       }
     }
   }
+
+  return false;
 }
 
 function InitialContentPlugin({ initialContent }: { initialContent: string }) {
@@ -140,17 +149,36 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 
       // Post-process: reconstruct mentions split across text nodes
       const root = $getRoot();
-      const textNodes = root.getAllTextNodes();
 
-      // Check if any text nodes still contain @[...] patterns (missed by transformer due to splitting)
-      const hasUnprocessedMentions = textNodes.some((node) =>
-        /@\[\w+\]/.test(node.getTextContent())
-      );
+      let needsAnotherPass = true;
+      let passCount = 0;
+      while (
+        needsAnotherPass &&
+        passCount < MAX_MENTION_RECONSTRUCTION_PASSES
+      ) {
+        const textNodes = root.getAllTextNodes();
 
-      if (!hasUnprocessedMentions) {
-        // Look for mention patterns split across adjacent nodes
-        processSplitMentions(textNodes);
+        // If any text node still has the full @[handle] pattern, defer to the
+        // mention transformer rather than trying to stitch pieces together.
+        const hasUnprocessedMentions = textNodes.some((node) =>
+          /@\[\w+\]/.test(node.getTextContent())
+        );
+
+        if (hasUnprocessedMentions) {
+          break;
+        }
+
+        needsAnotherPass = processSplitMentions(textNodes);
+        passCount += 1;
       }
+
+      if (needsAnotherPass && passCount >= MAX_MENTION_RECONSTRUCTION_PASSES) {
+        console.warn(
+          "Mention reconstruction reached max passes without converging"
+        );
+      }
+
+      root.selectEnd();
     });
   }, [editor, initialContent]);
 
