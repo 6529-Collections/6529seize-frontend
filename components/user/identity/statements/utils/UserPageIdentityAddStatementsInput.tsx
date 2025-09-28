@@ -22,8 +22,10 @@ export default function UserPageIdentityAddStatementsContactInput({
   }, [activeType]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.value;
-    onChange(newValue);
+    const { value: raw } = event.target;
+    const nativeEvent = event.nativeEvent as { isComposing?: boolean };
+    const isComposing = Boolean(nativeEvent?.isComposing);
+    onChange(isComposing ? raw : collapseProtocolPrefix(raw));
   };
   const inputId = `statement-${activeType}`;
   return (
@@ -54,3 +56,11 @@ export default function UserPageIdentityAddStatementsContactInput({
     </>
   );
 }
+
+const COLLAPSE_PROTOCOL_PREFIX = /^(?:(https?):\/\/)+/i;
+
+const collapseProtocolPrefix = (value: string): string =>
+  value.replace(
+    COLLAPSE_PROTOCOL_PREFIX,
+    (_match, scheme: string) => `${scheme.toLowerCase()}://`
+  );
