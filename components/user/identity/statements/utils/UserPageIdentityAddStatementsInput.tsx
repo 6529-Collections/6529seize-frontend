@@ -22,8 +22,10 @@ export default function UserPageIdentityAddStatementsContactInput({
   }, [activeType]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = collapseProtocolPrefix(event.target.value);
-    onChange(newValue);
+    const { value: raw } = event.target;
+    const nativeEvent = event.nativeEvent as { isComposing?: boolean };
+    const isComposing = Boolean(nativeEvent?.isComposing);
+    onChange(isComposing ? raw : collapseProtocolPrefix(raw));
   };
   const inputId = `statement-${activeType}`;
   return (
@@ -64,13 +66,7 @@ const collapseProtocolPrefix = (value: string): string => {
   }
 
   const [matchedProtocols] = repeatedProtocolMatch;
-  const protocols = matchedProtocols.match(/https?:\/\//gi);
-
-  if (!protocols || protocols.length <= 1) {
-    return value;
-  }
-
-  const protocolToKeep = protocols.at(-1)?.toLowerCase() ?? "https://";
+  const protocolToKeep = repeatedProtocolMatch[1]?.toLowerCase() ?? "https://";
   const remainder = value.slice(matchedProtocols.length);
   return `${protocolToKeep}${remainder}`;
 };
