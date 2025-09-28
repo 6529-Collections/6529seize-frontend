@@ -35,10 +35,10 @@ function transformEmojiTextToNode(
     const root = $getRoot();
     const textNodes = root.getAllTextNodes();
 
-    textNodes.forEach((node) => {
+    for (const node of textNodes) {
       const textContent = node.getTextContent();
       if (!EMOJI_TEST_REGEX.test(textContent)) {
-        return;
+        continue;
       }
 
       const matches = Array.from(textContent.matchAll(EMOJI_MATCH_REGEX)).map(
@@ -66,7 +66,7 @@ function transformEmojiTextToNode(
       const newNodes: (TextNode | EmojiNode)[] = [];
       let cursorNode: TextNode | null = null;
 
-      matches.forEach(({ matchText, emojiId, startIndex, endIndex }) => {
+      for (const { matchText, emojiId, startIndex, endIndex } of matches) {
         if (startIndex > lastIndex) {
           const beforeStr = textContent.slice(lastIndex, startIndex);
           if (beforeStr.length > 0) {
@@ -95,11 +95,11 @@ function transformEmojiTextToNode(
         }
 
         lastIndex = endIndex;
-      });
+      }
 
       if (lastIndex < textContent.length) {
         const afterStr = textContent.slice(lastIndex);
-        let lastCreated = newNodes[newNodes.length - 1];
+        const lastCreated = newNodes.at(-1);
         if (lastCreated instanceof TextNode) {
           lastCreated.setTextContent(lastCreated.getTextContent() + afterStr);
         } else {
@@ -108,10 +108,10 @@ function transformEmojiTextToNode(
       }
 
       let prev: TextNode | EmojiNode = node;
-      newNodes.forEach((n) => {
-        prev.insertAfter(n);
-        prev = n;
-      });
+      for (const newNode of newNodes) {
+        prev.insertAfter(newNode);
+        prev = newNode;
+      }
 
       node.remove();
 
@@ -122,7 +122,7 @@ function transformEmojiTextToNode(
         newSelection.focus.set(cursorTextNodeKey, 0, "text");
         $setSelection(newSelection);
       }
-    });
+    }
   });
 }
 
