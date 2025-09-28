@@ -160,6 +160,8 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 
         needsAnotherPass = processSplitMentions(textNodes);
       }
+
+      root.selectEnd();
     });
   }, [editor, initialContent]);
 
