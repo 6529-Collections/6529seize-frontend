@@ -22,7 +22,7 @@ export default function UserPageIdentityAddStatementsContactInput({
   }, [activeType]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.value;
+    const newValue = collapseProtocolPrefix(event.target.value);
     onChange(newValue);
   };
   const inputId = `statement-${activeType}`;
@@ -54,3 +54,20 @@ export default function UserPageIdentityAddStatementsContactInput({
     </>
   );
 }
+
+const collapseProtocolPrefix = (value: string): string => {
+  const repeatedProtocolMatch = value.match(/^(https?:\/\/)+/i);
+  if (!repeatedProtocolMatch) {
+    return value;
+  }
+
+  const protocols = repeatedProtocolMatch[0]?.match(/https?:\/\//gi);
+
+  if (!protocols || protocols.length <= 1) {
+    return value;
+  }
+
+  const protocolToKeep = protocols[protocols.length - 1]?.toLowerCase() ?? "https://";
+  const remainder = value.slice(repeatedProtocolMatch[0].length);
+  return `${protocolToKeep}${remainder}`;
+};
