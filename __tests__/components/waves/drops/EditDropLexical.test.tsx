@@ -128,10 +128,12 @@ jest.mock('@lexical/markdown', () => ({
 jest.mock('lexical', () => ({
   $getRoot: jest.fn(() => ({
     getAllTextNodes: jest.fn(() => []),
+    selectEnd: jest.fn(),
   })),
   COMMAND_PRIORITY_HIGH: 4,
   KEY_ENTER_COMMAND: 'KEY_ENTER_COMMAND',
   KEY_ESCAPE_COMMAND: 'KEY_ESCAPE_COMMAND',
+  TextNode: class MockTextNode {},
 }));
 
 // Mock the custom plugins and nodes
