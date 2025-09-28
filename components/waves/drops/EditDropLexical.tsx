@@ -61,6 +61,8 @@ interface EditDropLexicalProps {
   onCancel: () => void;
 }
 
+const MAX_MENTION_RECONSTRUCTION_PASSES = 20;
+
 // Plugin to set initial content from markdown
 function reconstructSplitMention(
   currentNode: any,
@@ -119,10 +121,14 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
     const mentionEnd = nextText.match(/^\w*\]/);
 
     if (mentionStart && mentionEnd) {
-      if (
-        reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
-      ) {
-        return true; // Tree changed; caller should re-run with fresh text nodes
+      try {
+        if (
+          reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
+        ) {
+          return true; // Tree changed; caller should re-run with fresh text nodes
+        }
+      } catch (error) {
+        console.warn("Failed to reconstruct split mention", error);
       }
     }
   }
@@ -145,7 +151,11 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
       const root = $getRoot();
 
       let needsAnotherPass = true;
-      while (needsAnotherPass) {
+      let passCount = 0;
+      while (
+        needsAnotherPass &&
+        passCount < MAX_MENTION_RECONSTRUCTION_PASSES
+      ) {
         const textNodes = root.getAllTextNodes();
 
         // If any text node still has the full @[handle] pattern, defer to the
@@ -159,6 +169,13 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
         }
 
         needsAnotherPass = processSplitMentions(textNodes);
+        passCount += 1;
+      }
+
+      if (needsAnotherPass && passCount >= MAX_MENTION_RECONSTRUCTION_PASSES) {
+        console.warn(
+          "Mention reconstruction reached max passes without converging"
+        );
       }
 
       root.selectEnd();
