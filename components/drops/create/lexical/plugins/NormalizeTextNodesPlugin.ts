@@ -4,22 +4,29 @@ import { useEffect } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $isTextNode, TextNode } from "lexical";
 
-const NBSP = "\u00A0";
+const IN_WORD_INVISIBLE_CHARS = new Set([
+  "\u00A0", // non-breaking space
+  "\u2007", // figure space
+  "\u202F", // narrow non-breaking space
+  "\u2060", // word joiner
+  "\u2063", // invisible separator
+  "\u200B", // zero width space
+  "\u200C", // zero width non-joiner
+  "\u200D", // zero width joiner
+  "\uFEFF", // zero width no-break space
+]);
 
 const isNonWhitespace = (char: string | undefined) =>
   !!char && !/\s/.test(char);
 
-const removeInWordNbsp = (text: string): string => {
-  if (!text.includes(NBSP)) {
-    return text;
-  }
-
+const removeInWordArtifacts = (text: string): string => {
   let result = "";
   let didModify = false;
 
   for (let index = 0; index < text.length; index += 1) {
     const char = text[index];
-    if (char === NBSP) {
+
+    if (IN_WORD_INVISIBLE_CHARS.has(char)) {
       const prev = text[index - 1];
       const next = text[index + 1];
 
@@ -56,44 +63,38 @@ const canMerge = (a: TextNode, b: TextNode): boolean => {
 };
 
 const mergeAdjacentIfPossible = (node: TextNode) => {
-  const previousSibling = node.getPreviousSibling();
-  if ($isTextNode(previousSibling) && canMerge(previousSibling, node)) {
-    previousSibling.mergeWithSibling(node);
-    return;
+  let current: TextNode = node;
+
+  let previousSibling = current.getPreviousSibling();
+  while ($isTextNode(previousSibling) && canMerge(previousSibling, current)) {
+    current = previousSibling.mergeWithSibling(current);
+    previousSibling = current.getPreviousSibling();
   }
 
-  const nextSibling = node.getNextSibling();
-  if ($isTextNode(nextSibling) && canMerge(node, nextSibling)) {
-    node.mergeWithSibling(nextSibling);
+  let nextSibling = current.getNextSibling();
+  while ($isTextNode(nextSibling) && canMerge(current, nextSibling)) {
+    current = current.mergeWithSibling(nextSibling);
+    nextSibling = current.getNextSibling();
   }
 };
 
-const isIosUserAgent = () =>
-  typeof navigator !== "undefined" &&
-  /iP(ad|hone|od)/i.test(navigator.userAgent);
-
 const NormalizeTextNodesPlugin = () => {
   const [editor] = useLexicalComposerContext();
-  const shouldNormalize = isIosUserAgent();
 
   useEffect(() => {
-    if (!shouldNormalize) {
-      return;
-    }
-
     return editor.registerNodeTransform(TextNode, (node) => {
-      if (!node.isSimpleText()) {
+      if (node.getType() !== "text") {
         return;
       }
 
-      const normalized = removeInWordNbsp(node.getTextContent());
+      const normalized = removeInWordArtifacts(node.getTextContent());
       if (normalized !== node.getTextContent()) {
         node.setTextContent(normalized);
       }
 
       mergeAdjacentIfPossible(node);
     });
-  }, [editor, shouldNormalize]);
+  }, [editor]);
 
   return null;
 };
