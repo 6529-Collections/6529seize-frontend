@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getRoot,
@@ -12,11 +12,15 @@ import {
   LexicalEditor,
 } from "lexical";
 import { EmojiNode } from "../../nodes/EmojiNode";
+import { useEmoji } from "../../../../../../contexts/EmojiContext";
 
 const EMOJI_TEST_REGEX = /:(\w+)/;
 export const EMOJI_MATCH_REGEX = /:(\w+):/g;
 
-function transformEmojiTextToNode(editor: LexicalEditor) {
+function transformEmojiTextToNode(
+  editor: LexicalEditor,
+  isEmojiIdValid: (emojiId: string) => boolean
+) {
   editor.update(() => {
     const selectionBefore = $getSelection();
     let anchorNodeKey: string | null = null;
@@ -31,14 +35,30 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
     const root = $getRoot();
     const textNodes = root.getAllTextNodes();
 
-    textNodes.forEach((node) => {
+    for (const node of textNodes) {
       const textContent = node.getTextContent();
       if (!EMOJI_TEST_REGEX.test(textContent)) {
+        continue;
+      }
+
+      const matches = Array.from(textContent.matchAll(EMOJI_MATCH_REGEX)).map(
+        (match) => ({
+          matchText: match[0],
+          emojiId: match[1],
+          startIndex: match.index!,
+          endIndex: match.index! + match[0].length,
+        })
+      );
+
+      if (matches.length === 0) {
         return;
       }
 
-      const matches = Array.from(textContent.matchAll(EMOJI_MATCH_REGEX));
-      if (matches.length === 0) {
+      const hasValidEmoji = matches.some(({ emojiId }) =>
+        isEmojiIdValid(emojiId)
+      );
+
+      if (!hasValidEmoji) {
         return;
       }
 
@@ -46,17 +66,18 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
       const newNodes: (TextNode | EmojiNode)[] = [];
       let cursorNode: TextNode | null = null;
 
-      matches.forEach((match) => {
-        const emojiText = match[0];
-        const emojiId = match[1];
-        const startIndex = match.index!;
-        const endIndex = startIndex + emojiText.length;
-
+      for (const { matchText, emojiId, startIndex, endIndex } of matches) {
         if (startIndex > lastIndex) {
           const beforeStr = textContent.slice(lastIndex, startIndex);
           if (beforeStr.length > 0) {
             newNodes.push(new TextNode(beforeStr));
           }
+        }
+
+        if (!isEmojiIdValid(emojiId)) {
+          newNodes.push(new TextNode(matchText));
+          lastIndex = endIndex;
+          return;
         }
 
         const emojiNode = new EmojiNode(emojiId);
@@ -74,11 +95,11 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
         }
 
         lastIndex = endIndex;
-      });
+      }
 
       if (lastIndex < textContent.length) {
         const afterStr = textContent.slice(lastIndex);
-        let lastCreated = newNodes[newNodes.length - 1];
+        const lastCreated = newNodes.at(-1);
         if (lastCreated instanceof TextNode) {
           lastCreated.setTextContent(lastCreated.getTextContent() + afterStr);
         } else {
@@ -87,10 +108,10 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
       }
 
       let prev: TextNode | EmojiNode = node;
-      newNodes.forEach((n) => {
-        prev.insertAfter(n);
-        prev = n;
-      });
+      for (const newNode of newNodes) {
+        prev.insertAfter(newNode);
+        prev = newNode;
+      }
 
       node.remove();
 
@@ -101,22 +122,44 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
         newSelection.focus.set(cursorTextNodeKey, 0, "text");
         $setSelection(newSelection);
       }
-    });
+    }
   });
 }
 
 const EmojiPlugin = () => {
   const [editor] = useLexicalComposerContext();
+  const { emojiMap, findNativeEmoji } = useEmoji();
+
+  const customEmojiIds = useMemo(() => {
+    const ids = new Set<string>();
+    emojiMap.forEach((category) => {
+      category.emojis.forEach((emoji) => {
+        ids.add(emoji.id);
+      });
+    });
+    return ids;
+  }, [emojiMap]);
+
+  const isEmojiIdValid = useCallback(
+    (emojiId: string) => {
+      if (customEmojiIds.has(emojiId)) {
+        return true;
+      }
+
+      return Boolean(findNativeEmoji(emojiId));
+    },
+    [customEmojiIds, findNativeEmoji]
+  );
 
   useEffect(() => {
-    transformEmojiTextToNode(editor);
+    transformEmojiTextToNode(editor, isEmojiIdValid);
 
     return editor.registerTextContentListener((textContent) => {
       if (EMOJI_TEST_REGEX.test(textContent)) {
-        transformEmojiTextToNode(editor);
+        transformEmojiTextToNode(editor, isEmojiIdValid);
       }
     });
-  }, [editor]);
+  }, [editor, isEmojiIdValid]);
 
   return null;
 };
