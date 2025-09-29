@@ -1,10 +1,10 @@
 "use client";
 
-import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
-import styles from "./DatePickerModal.module.scss";
+import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
+import styles from "./DatePickerModal.module.scss";
 
 interface Props {
   mode: "date" | "block";
@@ -81,14 +81,14 @@ export default function DatePickerModal(props: Readonly<Props>) {
 
   return (
     <Modal show={props.show} onHide={() => props.onHide()}>
-      <Modal.Header className={styles.header}>
+      <div className={styles.header}>
         <Modal.Title>Select {props.mode}s</Modal.Title>
         <FontAwesomeIcon
           className={styles.modalClose}
           icon={faTimesCircle}
           onClick={() => props.onHide()}
         />
-      </Modal.Header>
+      </div>
       <Modal.Body
         className={`${styles.body} d-flex align-items-center justify-content-between font-larger`}>
         <Container>
