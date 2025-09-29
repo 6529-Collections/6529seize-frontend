@@ -1,59 +1,402 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiWave } from "../../generated/models/ApiWave";
 import { DecisionPoint } from "../../helpers/waves/time.types";
-import { calculateLastDecisionTime } from "../../helpers/waves/time.utils";
+import {
+  calculateLastDecisionTime,
+  FALLBACK_END_TIME,
+} from "../../helpers/waves/time.utils";
+import { Time } from "../../helpers/time";
 
-export const useDecisionPoints = (wave: ApiWave) => {
-  // Function that calculates decision points for a wave
-  const getDecisionPoints = (wave: ApiWave): DecisionPoint[] => {
-    // Create an empty array for decision points
-    const decisions: DecisionPoint[] = [];
+const DEFAULT_PAST_WINDOW = 6;
+const DEFAULT_FUTURE_WINDOW = 10;
+const DEFAULT_WINDOW_STEP = 6;
 
-    if (!wave.wave.decisions_strategy?.first_decision_time) {
-      return decisions;
-    }
-    const firstDecisionTime = wave.wave.decisions_strategy?.first_decision_time;
-    const lastDecisionTime = calculateLastDecisionTime(wave);
+interface UseDecisionPointsOptions {
+  readonly initialPastWindow?: number;
+  readonly initialFutureWindow?: number;
+  readonly windowStep?: number;
+}
 
-    if (firstDecisionTime > lastDecisionTime) {
-      return decisions;
-    }
+interface DecisionWindowResult {
+  readonly decisions: DecisionPoint[];
+  readonly hasMorePast: boolean;
+  readonly hasMoreFuture: boolean;
+  readonly nextDecisionTimestamp: number | null;
+  readonly remainingPastCount: number | null;
+  readonly remainingFutureCount: number | null;
+}
 
-    decisions.push({
-      id: 0,
-      name: "First Decision",
-      timestamp: firstDecisionTime,
-    });
+export const useDecisionPoints = (
+  wave: ApiWave,
+  options?: UseDecisionPointsOptions
+) => {
+  const {
+    initialPastWindow = DEFAULT_PAST_WINDOW,
+    initialFutureWindow = DEFAULT_FUTURE_WINDOW,
+    windowStep = DEFAULT_WINDOW_STEP,
+  } = options ?? {};
 
-    let currentTime = firstDecisionTime;
-    let decisionIndex = 0;
+  const step = Math.max(1, windowStep);
+  const [pastWindow, setPastWindow] = useState(initialPastWindow);
+  const [futureWindow, setFutureWindow] = useState(initialFutureWindow);
 
-    const maxDecisionIndex =
-      wave.wave.decisions_strategy.subsequent_decisions.length - 1;
-    do {
-      if (decisionIndex > maxDecisionIndex) {
-        decisionIndex = 0;
-      }
-      const nextDecisionTime =
-        currentTime +
-        wave.wave.decisions_strategy.subsequent_decisions[decisionIndex];
-      if (nextDecisionTime > lastDecisionTime) {
-        break;
-      }
-      decisions.push({
-        id: decisions.length,
-        name: `Decision ${decisions.length}`,
-        timestamp: nextDecisionTime,
-      });
-      currentTime = nextDecisionTime;
-      decisionIndex++;
-    } while (currentTime < lastDecisionTime);
-    return decisions;
-  };
+  useEffect(() => {
+    setPastWindow(initialPastWindow);
+    setFutureWindow(initialFutureWindow);
+  }, [wave?.wave?.id, initialPastWindow, initialFutureWindow]);
 
-  // Call the function and get all decision points
-  const allDecisions = getDecisionPoints(wave);
+  const decisionWindow = useMemo<DecisionWindowResult>(() => {
+    return computeDecisionWindow({ wave, pastWindow, futureWindow });
+  }, [wave, pastWindow, futureWindow]);
+
+  const loadMorePast = useCallback(() => {
+    setPastWindow((prev) => prev + step);
+  }, [step]);
+
+  const loadMoreFuture = useCallback(() => {
+    setFutureWindow((prev) => prev + step);
+  }, [step]);
 
   return {
-    allDecisions: allDecisions,
+    allDecisions: decisionWindow.decisions,
+    hasMorePast: decisionWindow.hasMorePast,
+    hasMoreFuture: decisionWindow.hasMoreFuture,
+    loadMorePast,
+    loadMoreFuture,
+    nextDecisionTimestamp: decisionWindow.nextDecisionTimestamp,
+    remainingPastCount: decisionWindow.remainingPastCount,
+    remainingFutureCount: decisionWindow.remainingFutureCount,
+  };
+};
+
+interface ComputeDecisionWindowParams {
+  readonly wave: ApiWave;
+  readonly pastWindow: number;
+  readonly futureWindow: number;
+}
+
+const computeDecisionWindow = ({
+  wave,
+  pastWindow,
+  futureWindow,
+}: ComputeDecisionWindowParams): DecisionWindowResult => {
+  const firstDecisionTime =
+    wave.wave.decisions_strategy?.first_decision_time ?? null;
+
+  if (!firstDecisionTime) {
+    return {
+      decisions: [],
+      hasMoreFuture: false,
+      hasMorePast: false,
+      nextDecisionTimestamp: null,
+      remainingPastCount: 0,
+      remainingFutureCount: 0,
+    };
+  }
+
+  const subsequentDecisions =
+    wave.wave.decisions_strategy?.subsequent_decisions ?? [];
+  const isRolling = wave.wave.decisions_strategy?.is_rolling ?? false;
+  const now = Time.currentMillis();
+
+  if (subsequentDecisions.length === 0 || !isRolling) {
+    return computeFiniteWindow({
+      firstDecisionTime,
+      subsequentDecisions,
+      now,
+      pastWindow,
+      futureWindow,
+      lastDecisionTime: calculateLastDecisionTime(wave),
+    });
+  }
+
+  const lastDecisionTime = calculateLastDecisionTime(wave);
+  const hasExplicitEnd = wave.voting.period?.max != null;
+  const isInfiniteRolling =
+    isRolling && (!hasExplicitEnd || lastDecisionTime === FALLBACK_END_TIME);
+
+  if (isInfiniteRolling) {
+    return computeRollingWindow({
+      firstDecisionTime,
+      subsequentDecisions,
+      now,
+      pastWindow,
+      futureWindow,
+      lastDecisionTime: null,
+    });
+  }
+
+  return computeRollingWindow({
+    firstDecisionTime,
+    subsequentDecisions,
+    now,
+    pastWindow,
+    futureWindow,
+    lastDecisionTime,
+  });
+};
+
+interface ComputeFiniteWindowParams {
+  readonly firstDecisionTime: number;
+  readonly subsequentDecisions: number[];
+  readonly now: number;
+  readonly pastWindow: number;
+  readonly futureWindow: number;
+  readonly lastDecisionTime: number;
+}
+
+const computeFiniteWindow = ({
+  firstDecisionTime,
+  subsequentDecisions,
+  now,
+  pastWindow,
+  futureWindow,
+  lastDecisionTime,
+}: ComputeFiniteWindowParams): DecisionWindowResult => {
+  if (firstDecisionTime > lastDecisionTime) {
+    return {
+      decisions: [],
+      hasMoreFuture: false,
+      hasMorePast: false,
+      nextDecisionTimestamp: null,
+      remainingPastCount: 0,
+      remainingFutureCount: 0,
+    };
+  }
+
+  const timestamps: number[] = [firstDecisionTime];
+  let currentTime = firstDecisionTime;
+
+  for (const interval of subsequentDecisions) {
+    const nextTime = currentTime + interval;
+    if (nextTime > lastDecisionTime) {
+      break;
+    }
+    timestamps.push(nextTime);
+    currentTime = nextTime;
+  }
+
+  return sliceTimestamps({
+    timestamps,
+    now,
+    pastWindow,
+    futureWindow,
+  });
+};
+
+interface ComputeRollingWindowParams {
+  readonly firstDecisionTime: number;
+  readonly subsequentDecisions: number[];
+  readonly now: number;
+  readonly pastWindow: number;
+  readonly futureWindow: number;
+  readonly lastDecisionTime: number | null;
+}
+
+const computeRollingWindow = ({
+  firstDecisionTime,
+  subsequentDecisions,
+  now,
+  pastWindow,
+  futureWindow,
+  lastDecisionTime,
+}: ComputeRollingWindowParams): DecisionWindowResult => {
+  if (subsequentDecisions.length === 0) {
+    return sliceTimestamps({
+      timestamps: [firstDecisionTime],
+      now,
+      pastWindow,
+      futureWindow,
+    });
+  }
+
+  const prefixSums: number[] = [];
+  subsequentDecisions.reduce((acc, interval) => {
+    const next = acc + interval;
+    prefixSums.push(next);
+    return next;
+  }, 0);
+
+  const cycleLength = prefixSums[prefixSums.length - 1];
+  if (cycleLength <= 0) {
+    return sliceTimestamps({
+      timestamps: [firstDecisionTime],
+      now,
+      pastWindow,
+      futureWindow,
+    });
+  }
+
+  const countDecisionsUpTo = (time: number): number => {
+    if (time < firstDecisionTime) {
+      return 0;
+    }
+
+    const elapsed = time - firstDecisionTime;
+    const completeCycles = Math.floor(elapsed / cycleLength);
+    let count = 1 + completeCycles * subsequentDecisions.length;
+    const timeIntoCycle = elapsed % cycleLength;
+
+    for (const offset of prefixSums) {
+      if (timeIntoCycle >= offset) {
+        count++;
+      } else {
+        break;
+      }
+    }
+
+    return count;
+  };
+
+  const totalDecisions =
+    lastDecisionTime == null
+      ? null
+      : countDecisionsUpTo(lastDecisionTime);
+
+  const nextIndexRaw = countDecisionsUpTo(now);
+  const nextIndex =
+    totalDecisions == null
+      ? nextIndexRaw
+      : Math.min(nextIndexRaw, Math.max(totalDecisions, 0));
+
+  const availablePast = nextIndex;
+  const pastCount = Math.min(pastWindow, availablePast);
+  let startIndex = nextIndex - pastCount;
+
+  let futureEndExclusive: number;
+  if (totalDecisions == null) {
+    futureEndExclusive = nextIndex + futureWindow;
+  } else {
+    const availableFuture = Math.max(totalDecisions - nextIndex, 0);
+    const futureCount = Math.min(futureWindow, availableFuture);
+    futureEndExclusive = nextIndex + futureCount;
+    futureEndExclusive = Math.min(futureEndExclusive, totalDecisions);
+
+    if (futureCount === 0 && totalDecisions > 0 && startIndex === nextIndex) {
+      startIndex = Math.max(0, totalDecisions - pastWindow);
+    }
+  }
+
+  const entries: Array<{ index: number; timestamp: number }> = [];
+  const getTimestampForIndex = (index: number): number => {
+    if (index === 0) {
+      return firstDecisionTime;
+    }
+
+    const offset = index - 1;
+    const cycleIndex = offset % subsequentDecisions.length;
+    const completedCycles = Math.floor(offset / subsequentDecisions.length);
+    return (
+      firstDecisionTime +
+      completedCycles * cycleLength +
+      prefixSums[cycleIndex]
+    );
+  };
+
+  const endIndexExclusive = futureEndExclusive;
+
+  for (let index = startIndex; index < endIndexExclusive; index++) {
+    if (totalDecisions != null && index >= totalDecisions) {
+      break;
+    }
+    entries.push({ index, timestamp: getTimestampForIndex(index) });
+  }
+
+  const hasMorePast = startIndex > 0;
+  const hasMoreFuture =
+    totalDecisions == null ? true : endIndexExclusive < totalDecisions;
+
+  const nextDecisionTimestamp =
+    totalDecisions == null
+      ? getTimestampForIndex(nextIndex)
+      : nextIndex < totalDecisions
+      ? getTimestampForIndex(nextIndex)
+      : null;
+
+  const decisions: DecisionPoint[] = entries.map(({ index, timestamp }) => ({
+    id: index,
+    name: index === 0 ? "First Decision" : `Decision ${index}`,
+    timestamp,
+  }));
+
+  const remainingPastCount = startIndex;
+  const remainingFutureCount =
+    totalDecisions == null
+      ? null
+      : Math.max(totalDecisions - endIndexExclusive, 0);
+
+  return {
+    decisions,
+    hasMorePast,
+    hasMoreFuture,
+    nextDecisionTimestamp,
+    remainingPastCount,
+    remainingFutureCount,
+  };
+};
+
+interface SliceTimestampsParams {
+  readonly timestamps: number[];
+  readonly now: number;
+  readonly pastWindow: number;
+  readonly futureWindow: number;
+}
+
+const sliceTimestamps = ({
+  timestamps,
+  now,
+  pastWindow,
+  futureWindow,
+}: SliceTimestampsParams): DecisionWindowResult => {
+  if (timestamps.length === 0) {
+    return {
+      decisions: [],
+      hasMoreFuture: false,
+      hasMorePast: false,
+      nextDecisionTimestamp: null,
+      remainingPastCount: 0,
+      remainingFutureCount: 0,
+    };
+  }
+
+  const sorted = [...timestamps].sort((a, b) => a - b);
+  const total = sorted.length;
+
+  const nextIndex = sorted.findIndex((timestamp) => timestamp > now);
+  const effectiveNextIndex = nextIndex === -1 ? sorted.length : nextIndex;
+
+  const pastCount = Math.min(pastWindow, effectiveNextIndex);
+  const futureCount = Math.min(
+    futureWindow,
+    Math.max(sorted.length - effectiveNextIndex, 0)
+  );
+
+  const startIndex = effectiveNextIndex - pastCount;
+  const endIndexExclusive = effectiveNextIndex + futureCount;
+
+  const decisions = sorted
+    .slice(startIndex, endIndexExclusive)
+    .map((timestamp, index) => ({
+      id: startIndex + index,
+      name: startIndex + index === 0 ? "First Decision" : `Decision ${startIndex + index}`,
+      timestamp,
+    }));
+
+  const remainingPastCount = startIndex;
+  const remainingFutureCount = Math.max(total - endIndexExclusive, 0);
+
+  const hasMorePast = remainingPastCount > 0;
+  const hasMoreFuture = remainingFutureCount > 0;
+
+  const nextDecisionTimestamp =
+    effectiveNextIndex < sorted.length ? sorted[effectiveNextIndex] : null;
+
+  return {
+    decisions,
+    hasMorePast,
+    hasMoreFuture,
+    nextDecisionTimestamp,
+    remainingPastCount,
+    remainingFutureCount,
   };
 };

@@ -8,6 +8,8 @@ interface HorizontalTimelineProps {
   readonly decisions: DecisionPoint[];
   readonly nextDecisionTime: number | null;
   readonly animationComplete?: boolean;
+  readonly focus?: "start" | "end" | null;
+  readonly onFocusHandled?: () => void;
 }
 
 /**
@@ -17,6 +19,8 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
   decisions,
   nextDecisionTime,
   animationComplete = false,
+  focus = null,
+  onFocusHandled,
 }) => {
   // Calculate whether we should use flex-grow or fixed width
   // If we have few items (less than would cause scrolling), we want them to spread out
@@ -26,25 +30,68 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Create refs for each timeline item
-  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   // Effect to scroll to the next decision or the end
   useEffect(() => {
     // Only attempt to scroll if animation is complete
     if (!scrollContainerRef.current || !animationComplete) return;
 
+    if (focus && decisions.length === 0) {
+      onFocusHandled?.();
+      return;
+    }
+
+    if (focus && decisions.length > 0) {
+      const targetDecision =
+        focus === "start" ? decisions[0] : decisions[decisions.length - 1];
+      const targetElement =
+        targetDecision && itemRefs.current[targetDecision.id];
+
+      if (targetDecision && targetElement) {
+        targetElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: focus === "start" ? "start" : "end",
+        });
+        onFocusHandled?.();
+        return;
+      }
+      // Wait for refs to populate before clearing focus
+      return;
+    }
+
     // Find the next decision
-    const nextDecision = decisions.find(
+    const nextDecisionIndex = decisions.findIndex(
       (decision) => decision.timestamp === nextDecisionTime
     );
 
-    if (nextDecision && itemRefs.current[nextDecision.id]) {
-      // Scroll to the next decision
-      itemRefs.current[nextDecision.id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
+    if (nextDecisionIndex !== -1) {
+      const anchorIndex = Math.max(nextDecisionIndex - 3, 0);
+      const anchorDecision = decisions[anchorIndex];
+      const anchorRef = anchorDecision ? itemRefs.current[anchorDecision.id] : null;
+
+      if (anchorRef) {
+        // Bias the scroll so earlier decisions remain immediately visible
+        anchorRef.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: anchorIndex === nextDecisionIndex ? "center" : "start",
+        });
+        return;
+      }
+
+      const nextDecision = decisions[nextDecisionIndex];
+      const nextRef = itemRefs.current[nextDecision.id];
+
+      if (nextRef) {
+        nextRef.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+        return;
+      }
     } else if (decisions.length > 0 && !shouldSpread) {
       // If no next decision, scroll to the last item
       const lastDecision = decisions[decisions.length - 1];
@@ -54,7 +101,14 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
         inline: "end",
       });
     }
-  }, [decisions, nextDecisionTime, shouldSpread, animationComplete]);
+  }, [
+    decisions,
+    nextDecisionTime,
+    shouldSpread,
+    animationComplete,
+    focus,
+    onFocusHandled,
+  ]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg">

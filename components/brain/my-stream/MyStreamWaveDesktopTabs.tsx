@@ -28,6 +28,8 @@ interface TabOption {
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
+const AUTO_EXPAND_LIMIT = 5;
+
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
@@ -49,7 +51,13 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   } = useWaveTimers(wave);
 
   // For next decision countdown
-  const { allDecisions } = useDecisionPoints(wave);
+  const { allDecisions, hasMoreFuture, loadMoreFuture } = useDecisionPoints(
+    wave,
+    {
+      initialPastWindow: 3,
+      initialFutureWindow: 10,
+    }
+  );
 
   // Filter out decisions that occur during pause periods using the helper from useWave
   const filteredDecisions = React.useMemo(() => {
@@ -75,6 +83,38 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     filteredDecisions.find(
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
+
+  const [autoExpandFutureAttempts, setAutoExpandFutureAttempts] =
+    useState(0);
+
+  useEffect(() => {
+    const now = Time.currentMillis();
+    const hasUpcoming = filteredDecisions.some(
+      (decision) => decision.timestamp > now
+    );
+
+    if (hasUpcoming) {
+      if (autoExpandFutureAttempts !== 0) {
+        setAutoExpandFutureAttempts(0);
+      }
+      return;
+    }
+
+    if (hasMoreFuture && autoExpandFutureAttempts < AUTO_EXPAND_LIMIT) {
+      setAutoExpandFutureAttempts((prev) => prev + 1);
+      loadMoreFuture();
+      return;
+    }
+
+    if (!hasMoreFuture && autoExpandFutureAttempts !== 0) {
+      setAutoExpandFutureAttempts(0);
+    }
+  }, [
+    filteredDecisions,
+    hasMoreFuture,
+    loadMoreFuture,
+    autoExpandFutureAttempts,
+  ]);
 
   // Calculate time left for next decision
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({

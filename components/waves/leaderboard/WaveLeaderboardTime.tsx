@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
@@ -19,11 +19,24 @@ interface WaveLeaderboardTimeProps {
  * Component for displaying wave time information focusing on next winner announcement
  * in a compact format with expandable timeline
  */
+const AUTO_EXPAND_LIMIT = 5;
+
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
   // Using decision points hooks
-  const { allDecisions } = useDecisionPoints(wave);
+  const {
+    allDecisions,
+    hasMorePast,
+    hasMoreFuture,
+    loadMorePast,
+    loadMoreFuture,
+    remainingPastCount,
+    remainingFutureCount,
+  } = useDecisionPoints(wave, {
+    initialPastWindow: 4,
+    initialFutureWindow: 20,
+  });
   const {
     decisions: { multiDecision },
     pauses: { showPause, filterDecisionsDuringPauses },
@@ -32,6 +45,17 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   // Track expanded/collapsed state for decjusision details
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
+  const [autoExpandFutureAttempts, setAutoExpandFutureAttempts] =
+    useState<number>(0);
+  const [timelineFocus, setTimelineFocus] = useState<"start" | "end" | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!isDecisionDetailsOpen && timelineFocus !== null) {
+      setTimelineFocus(null);
+    }
+  }, [isDecisionDetailsOpen, timelineFocus]);
 
   // Filter out decisions that occur during pause periods using the helper from useWave
   const filteredDecisions = useMemo(() => {
@@ -59,6 +83,50 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
 
+  // Ensure we have at least one upcoming decision available for countdowns
+  useEffect(() => {
+    const now = Time.currentMillis();
+    const hasUpcoming = filteredDecisions.some(
+      (decision) => decision.timestamp > now
+    );
+
+    if (hasUpcoming) {
+      if (autoExpandFutureAttempts !== 0) {
+        setAutoExpandFutureAttempts(0);
+      }
+      return;
+    }
+
+    if (hasMoreFuture && autoExpandFutureAttempts < AUTO_EXPAND_LIMIT) {
+      setAutoExpandFutureAttempts((prev) => prev + 1);
+      loadMoreFuture();
+      return;
+    }
+
+    if (!hasMoreFuture && autoExpandFutureAttempts !== 0) {
+      setAutoExpandFutureAttempts(0);
+    }
+  }, [
+    filteredDecisions,
+    hasMoreFuture,
+    loadMoreFuture,
+    autoExpandFutureAttempts,
+  ]);
+
+  const handleLoadMorePast = () => {
+    if (hasMorePast) {
+      setTimelineFocus("start");
+      loadMorePast();
+    }
+  };
+
+  const handleLoadMoreFuture = () => {
+    if (hasMoreFuture) {
+      setTimelineFocus("end");
+      loadMoreFuture();
+    }
+  };
+
   return (
     <div className="tw-mb-2 lg:tw-mb-4">
       {multiDecision ? (
@@ -80,6 +148,14 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
               <ExpandedTimelineContent
                 decisions={filteredDecisions}
                 nextDecisionTime={nextDecisionTime}
+                onLoadMorePast={hasMorePast ? handleLoadMorePast : undefined}
+                onLoadMoreFuture={hasMoreFuture ? handleLoadMoreFuture : undefined}
+                hasMorePast={hasMorePast}
+                hasMoreFuture={hasMoreFuture}
+                remainingPastCount={remainingPastCount}
+                remainingFutureCount={remainingFutureCount}
+                focus={timelineFocus}
+                onFocusHandled={() => setTimelineFocus(null)}
               />
             )}
           </AnimatePresence>
