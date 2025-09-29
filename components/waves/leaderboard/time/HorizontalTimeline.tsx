@@ -31,6 +31,9 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
 
   // Create refs for each timeline item
   const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  // Track whether we just handled a focus-driven scroll to avoid immediately
+  // overriding the user's intent with automated scrolling logic
+  const handledFocusRef = useRef<"start" | "end" | null>(null);
 
   // Effect to scroll to the next decision or the end
   useEffect(() => {
@@ -38,6 +41,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
     if (!scrollContainerRef.current || !animationComplete) return;
 
     if (focus && decisions.length === 0) {
+      handledFocusRef.current = focus;
       onFocusHandled?.();
       return;
     }
@@ -49,6 +53,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
         targetDecision && itemRefs.current[targetDecision.id];
 
       if (targetDecision && targetElement) {
+        handledFocusRef.current = focus;
         targetElement.scrollIntoView({
           behavior: "smooth",
           block: "nearest",
@@ -58,6 +63,11 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
         return;
       }
       // Wait for refs to populate before clearing focus
+      return;
+    }
+
+    if (handledFocusRef.current) {
+      handledFocusRef.current = null;
       return;
     }
 
