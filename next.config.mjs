@@ -34,9 +34,9 @@ function createSecurityHeaders(apiEndpoint = "") {
   ];
 }
 
-// ─────────────────────────────────────────────────────────────
-// Helpers to remove duplication
-// ─────────────────────────────────────────────────────────────
+// ───────
+// Helpers
+// ───────
 const schemaMod = require("./config/env.schema.runtime.cjs");
 const { publicEnvSchema } = schemaMod;
 
