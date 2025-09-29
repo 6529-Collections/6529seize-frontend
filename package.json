@@ -29,7 +29,7 @@
     "knip": "knip --fix --allow-remove-files",
     "type-check": "tsc --noEmit -p tsconfig.json",
     "lint:quiet": "next lint --quiet",
-    "lint:all": "next lint",
+    "lint": "next lint",
     "lint:fix": "npx eslint . --ext .ts,.tsx,.js,.jsx --fix"
   },
   "dependencies": {
