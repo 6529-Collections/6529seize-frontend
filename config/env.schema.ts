@@ -80,6 +80,14 @@ export const publicEnvSchema = z.object({
 
   /**
    * ────────────────
+   * FARCASTER CONFIG
+   * ────────────────
+   */
+  FARCASTER_WARPCAST_API_BASE: z.string().optional(),
+  FARCASTER_WARPCAST_API_KEY: z.string().optional(),
+
+  /**
+   * ────────────────
    * FEATURES / FLAGS (all optional)
    * ────────────────
    */

@@ -215,6 +215,8 @@ const nextConfigFactory = (phase) => {
         FEATURE_AB_CARD: publicEnv.FEATURE_AB_CARD,
         PEPE_CACHE_TTL_MINUTES: publicEnv.PEPE_CACHE_TTL_MINUTES,
         PEPE_CACHE_MAX_ITEMS: publicEnv.PEPE_CACHE_MAX_ITEMS,
+        FARCASTER_WARPCAST_API_BASE: publicEnv.FARCASTER_WARPCAST_API_BASE,
+        FARCASTER_WARPCAST_API_KEY: publicEnv.FARCASTER_WARPCAST_API_KEY,
       },
       async generateBuildId() {
         return VERSION;
