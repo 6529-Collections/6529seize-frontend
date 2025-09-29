@@ -43,7 +43,7 @@ export const useDecisionPoints = (
   useEffect(() => {
     setPastWindow(initialPastWindow);
     setFutureWindow(initialFutureWindow);
-  }, [wave?.wave?.id, initialPastWindow, initialFutureWindow]);
+  }, [wave?.id, initialPastWindow, initialFutureWindow]);
 
   const decisionWindow = useMemo<DecisionWindowResult>(() => {
     return computeDecisionWindow({ wave, pastWindow, futureWindow });
