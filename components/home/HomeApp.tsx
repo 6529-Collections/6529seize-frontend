@@ -3,12 +3,10 @@
 import React from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import Home from "./Home";
 import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
-import HomeApp from "./HomeApp";
-import HomeWeb from "./HomeWeb";
 
-interface HomePageProps {
+interface HomeAppProps {
   readonly featuredNft: NFTWithMemesExtendedData;
   readonly featuredNextgen: NextGenCollection;
   readonly initialActivityData: InitialActivityData;
@@ -16,30 +14,21 @@ interface HomePageProps {
   readonly isMemeMintingActive: boolean;
 }
 
-export default function HomePage({
+export default function HomeApp({
   featuredNft,
   featuredNextgen,
   initialActivityData,
   initialTokens,
   isMemeMintingActive,
-}: HomePageProps) {
-  const { isApp } = useDeviceInfo();
-
-  return isApp ? (
-    <HomeApp
+}: HomeAppProps) {
+  // App version shows the Home component directly (latest drop content)
+  return (
+    <Home
       featuredNft={featuredNft}
+      isMemeMintingActive={isMemeMintingActive}
       featuredNextgen={featuredNextgen}
       initialActivityData={initialActivityData}
       initialTokens={initialTokens}
-      isMemeMintingActive={isMemeMintingActive}
-    />
-  ) : (
-    <HomeWeb
-      featuredNft={featuredNft}
-      featuredNextgen={featuredNextgen}
-      initialActivityData={initialActivityData}
-      initialTokens={initialTokens}
-      isMemeMintingActive={isMemeMintingActive}
     />
   );
 }

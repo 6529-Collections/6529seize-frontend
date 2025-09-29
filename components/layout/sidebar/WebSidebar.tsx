@@ -82,7 +82,7 @@ function WebSidebar({
     <>
       {isDialog && (
         <div
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none"
           onClick={onCloseOffcanvas}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -96,14 +96,14 @@ function WebSidebar({
         />
       )}
       <div
-        className={`tw-fixed tw-inset-y-0 tw-left-0 ${
+        className={`tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none ${
           isDialog ? "tw-z-[80]" : "tw-z-40"
         }`}
         role={isDialog ? "dialog" : undefined}
         aria-modal={isDialog ? "true" : undefined}
       >
         <div
-          className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-[width] tw-duration-300 tw-ease-in-out"
+          className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
           ref={scrollContainerRef}
@@ -112,7 +112,6 @@ function WebSidebar({
             <WebSidebarHeader
               collapsed={shouldShowCollapsed}
               onToggle={handleToggle}
-              tooltipId="sidebar-tooltip"
             />
 
             <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">

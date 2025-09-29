@@ -114,7 +114,7 @@ function WebSidebarUser({
       <button
         ref={buttonRef}
         onClick={() => setShowUserMenu(!showUserMenu)}
-        className={`tw-group/user tw-py-2 tw-px-2 tw-border-none tw-bg-transparent tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 ${
+        className={`tw-mt-1 tw-group/user tw-py-2 tw-px-2 tw-border-none tw-bg-transparent tw-w-full tw-rounded-xl tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 ${
           isCollapsed ? "" : "desktop-hover:hover:tw-bg-iron-900"
         }`}
         aria-label="Open user menu"
