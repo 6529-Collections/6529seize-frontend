@@ -97,7 +97,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
           <Link
             href={getTransactionLink(NEXTGEN_CHAIN_ID, props.hash)}
             target="_blank"
-            rel="noreferrer">
+            rel="noopener noreferrer">
             view
           </Link>
           {waitContractWrite.isLoading && (
@@ -117,7 +117,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
                 <Link
                   href={`/nextgen/token/${t}`}
                   target="_blank"
-                  rel="noreferrer">
+                  rel="noopener noreferrer">
                   #{t}
                 </Link>
               </li>

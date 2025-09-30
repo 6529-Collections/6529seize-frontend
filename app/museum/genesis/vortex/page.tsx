@@ -1156,7 +1156,7 @@ The phenomena of the spiral is located throughout the natural world, found in ev
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

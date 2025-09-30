@@ -372,7 +372,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://nftnow.com/nft100-list-2022/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   NFT100 LIST 2022
                                 </a>
                               </h1>
@@ -404,7 +404,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://nftnow.com/nft100-list-2022/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   nft now
                                 </a>{" "}
                                 |{" "}
@@ -512,7 +512,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://www.gqindia.com/get-smart/content/how-to-mint-an-nft-and-sell-it-according-to-someone-who-has-done-it/amp"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   HOW TO MINT AN NFT AND SELL IT (ACCORDING TO
                                   SOMEONE WHO HAS DONE IT)
                                 </a>
@@ -540,7 +540,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://www.gqindia.com/get-smart/content/how-to-mint-an-nft-and-sell-it-according-to-someone-who-has-done-it/amp"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   GQ India
                                 </a>{" "}
                                 |{" "}
@@ -648,7 +648,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://www.ft.com/content/de268ae5-8ee2-472e-a49b-243e63e7ef5c"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   VENTURE CAPITALISTS SEEK BIG RETURNS WITH NFTs
                                 </a>
                               </h1>
@@ -678,7 +678,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://www.ft.com/content/de268ae5-8ee2-472e-a49b-243e63e7ef5c"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   Financial Times
                                 </a>{" "}
                                 |{" "}
@@ -786,7 +786,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://coinpaper.com/174/punk6529-launches-the-first-district-of-open-metaverse"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   PUNK6529 LAUNCHES THE FIRST DISTRICT OF OPEN
                                   METAVERSE
                                 </a>
@@ -825,7 +825,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://coinpaper.com/174/punk6529-launches-the-first-district-of-open-metaverse"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   coinpaper.com
                                 </a>{" "}
                                 |{" "}
@@ -933,7 +933,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://coinmarketcap.com/alexandria/article/weekly-wrap-what-s-happening-in-the-metaverse-this-week-april-18-2022"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   WEEKLY WRAP: WHAT'S HAPPENING IN THE METAVERSE
                                   THIS WEEK?
                                 </a>
@@ -964,7 +964,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://coinmarketcap.com/alexandria/article/weekly-wrap-what-s-happening-in-the-metaverse-this-week-april-18-2022"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   CoinMarketCap.com
                                 </a>{" "}
                                 |{" "}
@@ -1072,7 +1072,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://cointelegraph.com/news/punk6529-unveils-metaverse-museum-district-most-high-end-art-nfts-ever"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   PUNK 6529 UNVEILS METAVERSE MUSEUM DISTRICT:
                                   “MOST HIGH-END ART NFTS EVER”
                                 </a>
@@ -1105,7 +1105,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://cointelegraph.com/news/punk6529-unveils-metaverse-museum-district-most-high-end-art-nfts-ever"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   CoinTelegraph.com
                                 </a>{" "}
                                 |{" "}
@@ -1213,7 +1213,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://newrepublic.com/article/165559/bitcoin-ukraine-war-cryptocurrency-markets"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   BITCOIN GOES TO WAR
                                 </a>
                               </h1>
@@ -1246,7 +1246,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://newrepublic.com/article/165559/bitcoin-ukraine-war-cryptocurrency-markets"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   NewRepublic.com
                                 </a>{" "}
                                 |{" "}
@@ -1354,7 +1354,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://decrypt.co/89158/15-biggest-nft-influencers-of-2021"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   15 BIGGEST NFT INFLUENCERS OF 2021
                                 </a>
                               </h1>
@@ -1387,7 +1387,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://decrypt.co/89158/15-biggest-nft-influencers-of-2021"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   Decrypt.co
                                 </a>{" "}
                                 |{" "}
@@ -1495,7 +1495,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://nymag.com/intelligencer/article/crypto-nft-twitter-discord-guide.html"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   A NORMIE'S GUIDE TO BECOMING A CRYPTO PERSON
                                 </a>
                               </h1>
@@ -1526,7 +1526,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://nymag.com/intelligencer/article/crypto-nft-twitter-discord-guide.html"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   NYMag.com
                                 </a>{" "}
                                 |{" "}
@@ -1634,7 +1634,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://decrypt.co/83727/why-cryptopunks-owner-turned-down-9-5m-ethereum-nft"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   WHY A CRYPTOPUNKS OWNER TURNED DOWN $9.5M IN
                                   ETHEREUM FOR HIS NFT
                                 </a>
@@ -1662,7 +1662,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://decrypt.co/83727/why-cryptopunks-owner-turned-down-9-5m-ethereum-nft"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   Decrypt.co
                                 </a>{" "}
                                 |{" "}
@@ -1770,7 +1770,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://dappradar.com/blog/cryptopunk-whale-bought-1-67m-chromie-squiggle-top-10-nft-sales"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   CRYPTOPUNK WHALE BOUGHT $1.67M CHROMIE
                                   SQUIGGLE
                                 </a>
@@ -1798,7 +1798,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://dappradar.com/blog/cryptopunk-whale-bought-1-67m-chromie-squiggle-top-10-nft-sales"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   DappRadar.com
                                 </a>{" "}
                                 |{" "}
@@ -1906,7 +1906,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://www.coindesk.com/business/2021/09/02/a-dictionary-for-degens/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   A DICTIONARY FOR DEGENS
                                 </a>
                               </h1>
@@ -1939,7 +1939,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                                 <a
                                   href="https://www.coindesk.com/business/2021/09/02/a-dictionary-for-degens/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   Coindesk.com
                                 </a>{" "}
                                 |{" "}
@@ -1979,7 +1979,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

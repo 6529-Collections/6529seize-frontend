@@ -190,7 +190,7 @@ export default function Leaderboard(
                 TDH Block&nbsp;
                 <a
                   href={`https://etherscan.io/block/${lastTDH.block}`}
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   target="_blank">
                   {lastTDH.block}
                 </a>

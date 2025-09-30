@@ -425,7 +425,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/punk6529"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@punk6529</strong>
                                 </a>
                               </p>
@@ -472,7 +472,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/krybharat"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@krybharat</strong>
                                 </a>
                               </p>
@@ -519,7 +519,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/batsoupyum"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@batsoupyum</strong>
                                 </a>
                               </p>
@@ -566,7 +566,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/ACthecollector"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@ACthecollector</strong>
                                 </a>
                               </p>
@@ -613,7 +613,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/phon_ro"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@phon_ro</strong>
                                 </a>
                               </p>
@@ -660,7 +660,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/bonafidehan"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@bonafidehan</strong>
                                 </a>
                               </p>
@@ -730,7 +730,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/6529Guardian"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@6529Guardian</strong>
                                 </a>
                               </p>
@@ -777,7 +777,7 @@ NFT investing is difficult specifically"
                                 <a
                                   href="https://twitter.com/itsjpower"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   <strong>@itsjpower</strong>
                                 </a>
                               </p>
@@ -835,7 +835,7 @@ NFT investing is difficult specifically"
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

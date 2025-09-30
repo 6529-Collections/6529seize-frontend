@@ -174,7 +174,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 <Link
                   href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
                   data-tooltip-id={`opensea-${props.token.id}`}
                 >
@@ -242,7 +242,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 <Link
                   href={getBlurLink(props.token.id)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
                   data-tooltip-id={`blur-${props.token.id}`}
                 >
@@ -292,7 +292,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 <Link
                   href={getMagicEdenLink(props.token.id)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
                   data-tooltip-id={`magic-eden-${props.token.id}`}
                 >
