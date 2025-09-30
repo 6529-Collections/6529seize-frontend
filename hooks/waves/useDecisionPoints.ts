@@ -229,13 +229,12 @@ const computeRollingWindow = ({
   }
 
   const prefixSums: number[] = [];
-  subsequentDecisions.reduce((acc, interval) => {
+  const cycleLength = subsequentDecisions.reduce((acc, interval) => {
     const next = acc + interval;
     prefixSums.push(next);
     return next;
   }, 0);
 
-  const cycleLength = prefixSums[prefixSums.length - 1];
   if (cycleLength <= 0) {
     return sliceTimestamps({
       timestamps: [firstDecisionTime],
@@ -245,110 +244,254 @@ const computeRollingWindow = ({
     });
   }
 
-  const countDecisionsUpTo = (time: number): number => {
-    if (time < firstDecisionTime) {
-      return 0;
-    }
-
-    const elapsed = time - firstDecisionTime;
-    const completeCycles = Math.floor(elapsed / cycleLength);
-    let count = 1 + completeCycles * subsequentDecisions.length;
-    const timeIntoCycle = elapsed % cycleLength;
-
-    for (const offset of prefixSums) {
-      if (timeIntoCycle >= offset) {
-        count++;
-      } else {
-        break;
-      }
-    }
-
-    return count;
-  };
-
   const totalDecisions =
     lastDecisionTime == null
       ? null
-      : countDecisionsUpTo(lastDecisionTime);
+      : countRollingDecisionsUpTo({
+          time: lastDecisionTime,
+          firstDecisionTime,
+          cycleLength,
+          prefixSums,
+          subsequentCount: subsequentDecisions.length,
+        });
 
-  const nextIndexRaw = countDecisionsUpTo(now);
+  const nextIndexRaw = countRollingDecisionsUpTo({
+    time: now,
+    firstDecisionTime,
+    cycleLength,
+    prefixSums,
+    subsequentCount: subsequentDecisions.length,
+  });
   const nextIndex =
     totalDecisions == null
       ? nextIndexRaw
       : Math.min(nextIndexRaw, Math.max(totalDecisions, 0));
 
-  const availablePast = nextIndex;
-  const pastCount = Math.min(pastWindow, availablePast);
-  let startIndex = nextIndex - pastCount;
+  const pastCount = Math.min(pastWindow, nextIndex);
+  const bounds = resolveRollingBounds({
+    nextIndex,
+    pastWindow,
+    futureWindow,
+    totalDecisions,
+    pastCount,
+  });
 
-  let futureEndExclusive: number;
-  if (totalDecisions == null) {
-    futureEndExclusive = nextIndex + futureWindow;
-  } else {
-    const availableFuture = Math.max(totalDecisions - nextIndex, 0);
-    const futureCount = Math.min(futureWindow, availableFuture);
-    futureEndExclusive = nextIndex + futureCount;
-    futureEndExclusive = Math.min(futureEndExclusive, totalDecisions);
+  const entries = buildRollingEntries({
+    startIndex: bounds.startIndex,
+    endIndexExclusive: bounds.endIndexExclusive,
+    totalDecisions,
+    firstDecisionTime,
+    cycleLength,
+    prefixSums,
+    subsequentCount: subsequentDecisions.length,
+  });
 
-    if (futureCount === 0 && totalDecisions > 0 && startIndex === nextIndex) {
-      startIndex = Math.max(0, totalDecisions - pastWindow);
-    }
-  }
-
-  const entries: Array<{ index: number; timestamp: number }> = [];
-  const getTimestampForIndex = (index: number): number => {
-    if (index === 0) {
-      return firstDecisionTime;
-    }
-
-    const offset = index - 1;
-    const cycleIndex = offset % subsequentDecisions.length;
-    const completedCycles = Math.floor(offset / subsequentDecisions.length);
-    return (
-      firstDecisionTime +
-      completedCycles * cycleLength +
-      prefixSums[cycleIndex]
-    );
-  };
-
-  const endIndexExclusive = futureEndExclusive;
-
-  for (let index = startIndex; index < endIndexExclusive; index++) {
-    if (totalDecisions != null && index >= totalDecisions) {
-      break;
-    }
-    entries.push({ index, timestamp: getTimestampForIndex(index) });
-  }
-
-  const hasMorePast = startIndex > 0;
-  const hasMoreFuture =
-    totalDecisions == null ? true : endIndexExclusive < totalDecisions;
-
-  const nextDecisionTimestamp =
-    totalDecisions == null
-      ? getTimestampForIndex(nextIndex)
-      : nextIndex < totalDecisions
-      ? getTimestampForIndex(nextIndex)
-      : null;
+  const nextDecisionTimestamp = determineNextRollingTimestamp({
+    nextIndex,
+    totalDecisions,
+    firstDecisionTime,
+    cycleLength,
+    prefixSums,
+    subsequentCount: subsequentDecisions.length,
+  });
 
   const decisions: DecisionPoint[] = entries.map(({ index, timestamp }) =>
     createDecisionPoint(index, timestamp)
   );
 
-  const remainingPastCount = startIndex;
-  const remainingFutureCount =
-    totalDecisions == null
-      ? null
-      : Math.max(totalDecisions - endIndexExclusive, 0);
-
   return {
     decisions,
-    hasMorePast,
-    hasMoreFuture,
+    hasMorePast: bounds.startIndex > 0,
+    hasMoreFuture: bounds.hasMoreFuture,
     nextDecisionTimestamp,
-    remainingPastCount,
+    remainingPastCount: bounds.startIndex,
+    remainingFutureCount: bounds.remainingFutureCount,
+  };
+};
+
+interface ResolveRollingBoundsParams {
+  readonly nextIndex: number;
+  readonly pastWindow: number;
+  readonly futureWindow: number;
+  readonly totalDecisions: number | null;
+  readonly pastCount: number;
+}
+
+interface ResolveRollingBoundsResult {
+  readonly startIndex: number;
+  readonly endIndexExclusive: number;
+  readonly hasMoreFuture: boolean;
+  readonly remainingFutureCount: number | null;
+}
+
+const resolveRollingBounds = ({
+  nextIndex,
+  pastWindow,
+  futureWindow,
+  totalDecisions,
+  pastCount,
+}: ResolveRollingBoundsParams): ResolveRollingBoundsResult => {
+  let startIndex = nextIndex - pastCount;
+
+  if (totalDecisions == null) {
+    return {
+      startIndex,
+      endIndexExclusive: nextIndex + futureWindow,
+      hasMoreFuture: true,
+      remainingFutureCount: null,
+    };
+  }
+
+  const availableFuture = Math.max(totalDecisions - nextIndex, 0);
+  const futureCount = Math.min(futureWindow, availableFuture);
+  const endIndexExclusive = Math.min(nextIndex + futureCount, totalDecisions);
+
+  if (futureCount === 0 && totalDecisions > 0 && startIndex === nextIndex) {
+    startIndex = Math.max(0, totalDecisions - pastWindow);
+  }
+
+  const remainingFutureCount = Math.max(totalDecisions - endIndexExclusive, 0);
+
+  return {
+    startIndex,
+    endIndexExclusive,
+    hasMoreFuture: endIndexExclusive < totalDecisions,
     remainingFutureCount,
   };
+};
+
+interface BuildRollingEntriesParams {
+  readonly startIndex: number;
+  readonly endIndexExclusive: number;
+  readonly totalDecisions: number | null;
+  readonly firstDecisionTime: number;
+  readonly cycleLength: number;
+  readonly prefixSums: readonly number[];
+  readonly subsequentCount: number;
+}
+
+const buildRollingEntries = ({
+  startIndex,
+  endIndexExclusive,
+  totalDecisions,
+  firstDecisionTime,
+  cycleLength,
+  prefixSums,
+  subsequentCount,
+}: BuildRollingEntriesParams): Array<{ index: number; timestamp: number }> => {
+  const entries: Array<{ index: number; timestamp: number }> = [];
+
+  for (let index = startIndex; index < endIndexExclusive; index++) {
+    if (totalDecisions != null && index >= totalDecisions) {
+      break;
+    }
+
+    entries.push({
+      index,
+      timestamp: getRollingTimestampForIndex({
+        index,
+        firstDecisionTime,
+        cycleLength,
+        prefixSums,
+        subsequentCount,
+      }),
+    });
+  }
+
+  return entries;
+};
+
+interface DetermineNextRollingTimestampParams {
+  readonly nextIndex: number;
+  readonly totalDecisions: number | null;
+  readonly firstDecisionTime: number;
+  readonly cycleLength: number;
+  readonly prefixSums: readonly number[];
+  readonly subsequentCount: number;
+}
+
+const determineNextRollingTimestamp = ({
+  nextIndex,
+  totalDecisions,
+  firstDecisionTime,
+  cycleLength,
+  prefixSums,
+  subsequentCount,
+}: DetermineNextRollingTimestampParams): number | null => {
+  if (totalDecisions != null && nextIndex >= totalDecisions) {
+    return null;
+  }
+
+  return getRollingTimestampForIndex({
+    index: nextIndex,
+    firstDecisionTime,
+    cycleLength,
+    prefixSums,
+    subsequentCount,
+  });
+};
+
+interface GetRollingTimestampForIndexParams {
+  readonly index: number;
+  readonly firstDecisionTime: number;
+  readonly cycleLength: number;
+  readonly prefixSums: readonly number[];
+  readonly subsequentCount: number;
+}
+
+const getRollingTimestampForIndex = ({
+  index,
+  firstDecisionTime,
+  cycleLength,
+  prefixSums,
+  subsequentCount,
+}: GetRollingTimestampForIndexParams): number => {
+  if (index === 0) {
+    return firstDecisionTime;
+  }
+
+  const offset = index - 1;
+  const cycleIndex = offset % subsequentCount;
+  const completedCycles = Math.floor(offset / subsequentCount);
+
+  return (
+    firstDecisionTime + completedCycles * cycleLength + prefixSums[cycleIndex]
+  );
+};
+
+interface CountRollingDecisionsUpToParams {
+  readonly time: number;
+  readonly firstDecisionTime: number;
+  readonly cycleLength: number;
+  readonly prefixSums: readonly number[];
+  readonly subsequentCount: number;
+}
+
+const countRollingDecisionsUpTo = ({
+  time,
+  firstDecisionTime,
+  cycleLength,
+  prefixSums,
+  subsequentCount,
+}: CountRollingDecisionsUpToParams): number => {
+  if (time < firstDecisionTime) {
+    return 0;
+  }
+
+  const elapsed = time - firstDecisionTime;
+  const completeCycles = Math.floor(elapsed / cycleLength);
+  let count = 1 + completeCycles * subsequentCount;
+  const timeIntoCycle = elapsed % cycleLength;
+
+  for (const offset of prefixSums) {
+    if (timeIntoCycle >= offset) {
+      count++;
+    } else {
+      break;
+    }
+  }
+
+  return count;
 };
 
 interface SliceTimestampsParams {
