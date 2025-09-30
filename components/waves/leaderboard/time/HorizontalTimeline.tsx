@@ -60,8 +60,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
         return true;
       }
 
-      const targetDecision =
-        focus === "start" ? decisions[0] : decisions[decisions.length - 1];
+      const targetDecision = decisions.at(focus === "start" ? 0 : -1);
 
       const attemptScroll = () => {
         const targetElement =
