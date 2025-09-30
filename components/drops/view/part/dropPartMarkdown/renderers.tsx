@@ -1,7 +1,6 @@
 import type { ReactElement } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import type { TweetProps } from "react-tweet";
-import { type TwitterComponents } from "react-tweet";
+import type { TweetProps, TwitterComponents } from "react-tweet";
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import type { SeizeQuoteLinkInfo } from "@/helpers/SeizeLinkParser";

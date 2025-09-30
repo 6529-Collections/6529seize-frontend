@@ -31,9 +31,12 @@ export default function TimePicker({
   const minutesInputId = `${baseId}-minutes`;
   const minTimeDescriptionId = minTime ? `${baseId}-min-time` : undefined;
   const minTimeDescription =
-    minTime !== null
-      ? `Earliest selectable time is ${formatTime(minTime.hours, minTime.minutes)}.`
-      : undefined;
+    minTime === null
+      ? undefined
+      : `Earliest selectable time is ${formatTime(
+          minTime.hours,
+          minTime.minutes
+        )}.`;
 
   const timeOptions: TimeOption[] = [
     { label: "12 AM", hours: 0, minutes: 0 },
@@ -85,7 +88,7 @@ export default function TimePicker({
     if (!isTimeDisabled(hours, val)) {
       onTimeChange(hours, val);
     }
-  }
+  };
 
   return (
     <div className="tw-py-4 tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-shadow-md tw-ring-1 tw-ring-iron-700/50">
@@ -128,8 +131,7 @@ export default function TimePicker({
             <button
               onClick={toggleAmPm}
               aria-label="Toggle AM/PM"
-              className="tw-bg-[#2A2A33] hover:tw-bg-[#32323C] tw-text-white tw-rounded-lg tw-px-3 tw-py-2 tw-transition-all tw-duration-200 tw-border-0 tw-shadow-md hover:tw-shadow-lg hover:tw-translate-y-[-1px] tw-ml-1"
-            >
+              className="tw-bg-[#2A2A33] hover:tw-bg-[#32323C] tw-text-white tw-rounded-lg tw-px-3 tw-py-2 tw-transition-all tw-duration-200 tw-border-0 tw-shadow-md hover:tw-shadow-lg hover:tw-translate-y-[-1px] tw-ml-1">
               {isPm ? "PM" : "AM"}
             </button>
           </div>
@@ -157,8 +159,7 @@ export default function TimePicker({
                     : disabled
                     ? "tw-bg-[#2A2A33] tw-text-iron-600 tw-opacity-50 tw-cursor-not-allowed"
                     : "tw-bg-[#2A2A33] tw-text-iron-50 hover:tw-bg-[#32323C]"
-                }`}
-              >
+                }`}>
                 {option.label}
               </button>
             );
