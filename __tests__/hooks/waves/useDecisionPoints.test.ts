@@ -46,8 +46,8 @@ describe('useDecisionPoints', () => {
 
     expect(mockUtils.calculateLastDecisionTime).toHaveBeenCalledWith(wave);
     expect(result.current.allDecisions).toEqual([
-      { id: 0, name: 'First Decision', timestamp: 10 },
-      { id: 1, name: 'Decision 1', timestamp: 15 },
+      { id: '10-0', name: 'First Decision', timestamp: 10, seriesIndex: 0 },
+      { id: '15-1', name: 'Decision 1', timestamp: 15, seriesIndex: 1 },
     ]);
     expect(result.current.remainingPastCount).toBe(0);
     expect(result.current.remainingFutureCount).toBe(0);
