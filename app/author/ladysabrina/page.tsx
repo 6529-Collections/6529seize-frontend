@@ -1,14 +1,11 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
 
-
-
 export default function AuthorLadysabrinaPage() {
   return (
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -330,7 +327,8 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-rollover-link"
                                 href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank" rel="noopener noreferrer">
+                                target="_blank"
+                                rel="noopener noreferrer">
                                 Disney and DeeKay: Their Secret to Animation
                               </a>
                               <div className="fusion-rollover-sep" />
@@ -347,7 +345,8 @@ export default function AuthorLadysabrinaPage() {
                                 <a
                                   className="fusion-rollover-title-link"
                                   href="/blog/disney-deekay-their-secret-to-animation/"
-                                  target="_blank" rel="noopener noreferrer">
+                                  target="_blank"
+                                  rel="noopener noreferrer">
                                   Disney and DeeKay: Their Secret to Animation{" "}
                                 </a>
                               </h4>
@@ -359,7 +358,8 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-link-wrapper"
                                 href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank" rel="noopener noreferrer"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 aria-label="Disney and DeeKay: Their Secret to Animation"
                               />
                             </div>
@@ -444,7 +444,8 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-rollover-link"
                                 href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank" rel="noopener noreferrer">
+                                target="_blank"
+                                rel="noopener noreferrer">
                                 FROM FIBONACCI TO FIDENZA
                               </a>
                               <div className="fusion-rollover-sep" />
@@ -461,7 +462,8 @@ export default function AuthorLadysabrinaPage() {
                                 <a
                                   className="fusion-rollover-title-link"
                                   href="/blog/from-fibonacci-to-fidenza/"
-                                  target="_blank" rel="noopener noreferrer">
+                                  target="_blank"
+                                  rel="noopener noreferrer">
                                   FROM FIBONACCI TO FIDENZA{" "}
                                 </a>
                               </h4>
@@ -473,7 +475,8 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-link-wrapper"
                                 href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank" rel="noopener noreferrer"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 aria-label="FROM FIBONACCI TO FIDENZA"
                               />
                             </div>
@@ -559,7 +562,8 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-rollover-link"
                                 href="/blog/a-tale-of-two-artists/"
-                                target="_blank" rel="noopener noreferrer">
+                                target="_blank"
+                                rel="noopener noreferrer">
                                 A Tale of Two Artists – Van Gogh and XCOPY
                               </a>
                               <div className="fusion-rollover-sep" />
@@ -576,7 +580,8 @@ export default function AuthorLadysabrinaPage() {
                                 <a
                                   className="fusion-rollover-title-link"
                                   href="/blog/a-tale-of-two-artists/"
-                                  target="_blank" rel="noopener noreferrer">
+                                  target="_blank"
+                                  rel="noopener noreferrer">
                                   A Tale of Two Artists – Van Gogh and XCOPY{" "}
                                 </a>
                               </h4>
@@ -588,7 +593,8 @@ export default function AuthorLadysabrinaPage() {
                               <a
                                 className="fusion-link-wrapper"
                                 href="/blog/a-tale-of-two-artists/"
-                                target="_blank" rel="noopener noreferrer"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 aria-label="A Tale of Two Artists – Van Gogh and XCOPY"
                               />
                             </div>
@@ -657,9 +663,13 @@ export default function AuthorLadysabrinaPage() {
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-        <button type="button" className="fusion-one-page-text-link fusion-page-load-link" tabIndex={-1} aria-hidden="true">
-          Page load link
-        </button>
+      <button
+        type="button"
+        className="fusion-one-page-text-link fusion-page-load-link"
+        tabIndex={-1}
+        aria-hidden="true">
+        Page load link
+      </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
@@ -668,7 +678,8 @@ export default function AuthorLadysabrinaPage() {
             <li className="fab-fa-twitter">
               <a
                 href="https://twitter.com/punk6529"
-                target="_blank" rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>
@@ -679,16 +690,15 @@ export default function AuthorLadysabrinaPage() {
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-          <button type="button" id="toTop" className="fusion-top-top-link">
-            <span id="awb-to-top-label" className="screen-reader-text">
-              Go to Top
-            </span>
-          </button>
+        <button type="button" id="toTop" className="fusion-top-top-link">
+          <span id="awb-to-top-label" className="screen-reader-text">
+            Go to Top
+          </span>
+        </button>
       </section>
     </div>
-);
+  );
 }
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({ title: "Sabrina Khan, Author at 6529.io" });
