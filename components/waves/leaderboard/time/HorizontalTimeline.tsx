@@ -35,7 +35,6 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
 
   // Effect to scroll to the next decision or the end
   useEffect(() => {
-    // Only attempt to scroll if animation is complete
     if (!scrollContainerRef.current || !animationComplete) return;
 
     let frameId: number | null = null;
@@ -46,28 +45,36 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
       }
     };
 
-    if (focus && decisions.length === 0) {
-      handledFocusRef.current = focus;
+    const markFocusHandled = (value: "start" | "end") => {
+      handledFocusRef.current = value;
       onFocusHandled?.();
-      return cleanup;
-    }
+    };
 
-    if (focus && decisions.length > 0) {
+    const handleFocusScroll = () => {
+      if (!focus) {
+        return false;
+      }
+
+      if (decisions.length === 0) {
+        markFocusHandled(focus);
+        return true;
+      }
+
       const targetDecision =
         focus === "start" ? decisions[0] : decisions[decisions.length - 1];
+
       const attemptScroll = () => {
         const targetElement =
           targetDecision && itemRefs.current[targetDecision.id];
 
         if (targetDecision && targetElement) {
-          handledFocusRef.current = focus;
+          markFocusHandled(focus);
           frameId = null;
           targetElement.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
             inline: focus === "start" ? "start" : "end",
           });
-          onFocusHandled?.();
           return;
         }
 
@@ -75,52 +82,78 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
       };
 
       attemptScroll();
-      return cleanup;
-    }
+      return true;
+    };
 
-    if (handledFocusRef.current) {
+    const resetHandledFocus = () => {
+      if (!handledFocusRef.current) {
+        return false;
+      }
+
       handledFocusRef.current = null;
-      return cleanup;
-    }
+      return true;
+    };
 
-    // Find the next decision
-    const nextDecisionIndex = decisions.findIndex(
-      (decision) => decision.timestamp === nextDecisionTime
-    );
-
-    if (nextDecisionIndex !== -1) {
-      const anchorIndex = Math.max(nextDecisionIndex - 3, 0);
-      const anchorDecision = decisions[anchorIndex];
-      const anchorRef = anchorDecision ? itemRefs.current[anchorDecision.id] : null;
-
-      if (anchorRef) {
-        anchorRef.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: anchorIndex === nextDecisionIndex ? "center" : "start",
-        });
-        return cleanup;
+    const scrollToDecision = (decision: DecisionPoint | undefined, inline: ScrollLogicalPosition) => {
+      if (!decision) {
+        return false;
       }
 
-      const nextDecision = decisions[nextDecisionIndex];
-      const nextRef = itemRefs.current[nextDecision.id];
+      const element = itemRefs.current[decision.id];
 
-      if (nextRef) {
-        nextRef.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "center",
-        });
-        return cleanup;
+      if (!element) {
+        return false;
       }
-    } else if (decisions.length > 0 && !shouldSpread) {
-      // If no next decision, scroll to the last item
-      const lastDecision = decisions[decisions.length - 1];
-      itemRefs.current[lastDecision.id]?.scrollIntoView({
+
+      element.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
-        inline: "end",
+        inline,
       });
+
+      return true;
+    };
+
+    const scrollToNextDecision = () => {
+      const index = decisions.findIndex(
+        (decision) => decision.timestamp === nextDecisionTime
+      );
+
+      if (index === -1) {
+        return false;
+      }
+
+      const anchorIndex = Math.max(index - 3, 0);
+      const anchorDecision = decisions[anchorIndex];
+
+      if (
+        scrollToDecision(
+          anchorDecision,
+          anchorIndex === index ? "center" : "start"
+        )
+      ) {
+        return true;
+      }
+
+      return scrollToDecision(decisions[index], "center");
+    };
+
+    const scrollToLastDecision = () => {
+      if (decisions.length === 0 || shouldSpread) {
+        return false;
+      }
+
+      const lastDecision = decisions[decisions.length - 1];
+      return scrollToDecision(lastDecision, "end");
+    };
+
+    if (
+      handleFocusScroll() ||
+      resetHandledFocus() ||
+      scrollToNextDecision() ||
+      scrollToLastDecision()
+    ) {
+      return cleanup;
     }
 
     return cleanup;
