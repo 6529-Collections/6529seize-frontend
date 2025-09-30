@@ -68,6 +68,7 @@ export function calculateLastDecisionTime(
   const firstDecisionTime = wave.wave.decisions_strategy?.first_decision_time;
   const subsequentDecisions =
     wave.wave.decisions_strategy?.subsequent_decisions || [];
+  const intervals = subsequentDecisions.filter((interval) => interval > 0);
   const isRolling = wave.wave.decisions_strategy?.is_rolling || false;
   // Use stable fallback value for missing end time
   const votingEndTime = wave.voting.period?.max ?? FALLBACK_END_TIME;
@@ -78,7 +79,7 @@ export function calculateLastDecisionTime(
   }
 
   // Case 1: Single decision wave (no subsequent decisions)
-  if (subsequentDecisions.length === 0) {
+  if (intervals.length === 0) {
     // For single decision waves, the end time is the first decision time
     // But make sure it's not after the voting end time
     const result = Math.min(firstDecisionTime, votingEndTime);
@@ -90,7 +91,7 @@ export function calculateLastDecisionTime(
     // Calculate the last decision time by adding all intervals
     let lastDecisionTime = firstDecisionTime;
 
-    for (const interval of subsequentDecisions) {
+    for (const interval of intervals) {
       lastDecisionTime += interval;
     }
 
@@ -102,10 +103,11 @@ export function calculateLastDecisionTime(
   // Case 3: Rolling waves (decisions repeat until end time)
 
   // Calculate the total length of one decision cycle
-  const cycleLength = subsequentDecisions.reduce(
-    (sum, interval) => sum + interval,
-    0
-  );
+  const cycleLength = intervals.reduce((sum, interval) => sum + interval, 0);
+
+  if (cycleLength <= 0) {
+    return Math.min(firstDecisionTime, votingEndTime);
+  }
 
   // If the first decision is after the end time, there are no decisions
   if (firstDecisionTime > votingEndTime) {
@@ -131,7 +133,7 @@ export function calculateLastDecisionTime(
 
   // Process partial cycle - find the last decision that fits
   let accumulatedTime = 0;
-  for (const interval of subsequentDecisions) {
+  for (const interval of intervals) {
     accumulatedTime += interval;
 
     if (accumulatedTime <= remainingTime) {
