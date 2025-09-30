@@ -968,6 +968,7 @@ These are the legendary words of DeeKay Kwon, a South Korean artist"
                                     rel="noopener noreferrer">
                                     Yin Yang
                                   </a>
+                                  {""}
                                   .” These pieces have the same power to endure
                                   in a way that is timeless and moving.&nbsp;
                                 </span>

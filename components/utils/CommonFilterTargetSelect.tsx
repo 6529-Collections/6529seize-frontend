@@ -21,7 +21,7 @@ export default function CommonFilterTargetSelect({
   readonly selected: FilterTargetType;
   readonly onChange: (filter: FilterTargetType) => void;
 }) {
-  const baseId = useId().replaceAll(/:/g, "");
+  const baseId = useId().replaceAll(":", "");
   const groupName = `filter-target-${baseId}`;
 
   return (
