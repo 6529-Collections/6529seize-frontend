@@ -231,12 +231,12 @@ const computeRollingWindow = ({
   }
 
   const prefixSums: number[] = [];
-  intervals.reduce((acc, interval) => {
-    const next = acc + interval;
-    prefixSums.push(next);
-    return next;
-  }, 0);
-  const cycleLength = prefixSums.at(-1) ?? 0;
+  let runningTotal = 0;
+  for (const interval of intervals) {
+    runningTotal += interval;
+    prefixSums.push(runningTotal);
+  }
+  const cycleLength = runningTotal;
 
   if (cycleLength <= 0) {
     return sliceTimestamps({
