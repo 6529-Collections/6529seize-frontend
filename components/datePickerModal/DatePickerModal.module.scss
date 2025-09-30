@@ -1,9 +1,14 @@
 @use "../../styles/variables.scss";
 
 .header {
-  background-color: rgb(40, 40, 40);
-  color: white;
-  padding: 10px;
+  padding: 1rem;
+  background-color: rgb(40, 40, 40) !important;
+  color: variables.$font-color !important;
+  border: 1px solid variables.$lighter-grey !important;
+  border-radius: 0 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .modalClose {
@@ -13,17 +18,19 @@
 }
 
 .body {
-  background-color: black;
-  color: white;
-  border-left: 2px solid rgb(40, 40, 40);
-  border-right: 2px solid rgb(40, 40, 40);
-  padding: 20px;
+  padding: 1rem;
+  background-color: rgb(40, 40, 40) !important;
+  color: variables.$font-color !important;
+  border-top: 0 !important;
+  border-left: 1px solid variables.$lighter-grey !important;
+  border-right: 1px solid variables.$lighter-grey !important;
+  border-radius: 0 !important;
 }
 
 .footer {
-  border: 2px solid rgb(40, 40, 40);
-  background-color: black;
-  color: white;
+  padding: 1rem;
+  border: 1px solid variables.$lighter-grey !important;
+  background-color: rgb(40, 40, 40) !important;
+  color: white !important;
   border-radius: 0 !important;
-  padding: 20px 5px;
 }
