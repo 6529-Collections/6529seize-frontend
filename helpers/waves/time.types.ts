@@ -23,7 +23,8 @@ enum WaveLeaderboardTimeState {
  * Represents a decision point in a Wave timeline
  */
 export interface DecisionPoint {
-  id: number;
+  id: string;
   name: string;
   timestamp: number;
+  seriesIndex: number;
 }

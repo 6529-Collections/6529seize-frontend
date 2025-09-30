@@ -8,6 +8,8 @@ interface HorizontalTimelineProps {
   readonly decisions: DecisionPoint[];
   readonly nextDecisionTime: number | null;
   readonly animationComplete?: boolean;
+  readonly focus?: "start" | "end" | null;
+  readonly onFocusHandled?: () => void;
 }
 
 /**
@@ -17,6 +19,8 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
   decisions,
   nextDecisionTime,
   animationComplete = false,
+  focus = null,
+  onFocusHandled,
 }) => {
   // Calculate whether we should use flex-grow or fixed width
   // If we have few items (less than would cause scrolling), we want them to spread out
@@ -27,34 +31,139 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
 
   // Create refs for each timeline item
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const handledFocusRef = useRef<"start" | "end" | null>(null);
 
   // Effect to scroll to the next decision or the end
   useEffect(() => {
-    // Only attempt to scroll if animation is complete
     if (!scrollContainerRef.current || !animationComplete) return;
 
-    // Find the next decision
-    const nextDecision = decisions.find(
-      (decision) => decision.timestamp === nextDecisionTime
-    );
+    let frameId: number | null = null;
 
-    if (nextDecision && itemRefs.current[nextDecision.id]) {
-      // Scroll to the next decision
-      itemRefs.current[nextDecision.id]?.scrollIntoView({
+    const cleanup = () => {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+
+    const markFocusHandled = (value: "start" | "end") => {
+      handledFocusRef.current = value;
+      onFocusHandled?.();
+    };
+
+    const handleFocusScroll = () => {
+      if (!focus) {
+        return false;
+      }
+
+      if (decisions.length === 0) {
+        markFocusHandled(focus);
+        return true;
+      }
+
+      const targetDecision = decisions.at(focus === "start" ? 0 : -1);
+
+      const attemptScroll = () => {
+        const targetElement =
+          targetDecision && itemRefs.current[targetDecision.id];
+
+        if (targetDecision && targetElement) {
+          markFocusHandled(focus);
+          frameId = null;
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: focus === "start" ? "start" : "end",
+          });
+          return;
+        }
+
+        frameId = requestAnimationFrame(attemptScroll);
+      };
+
+      attemptScroll();
+      return true;
+    };
+
+    const resetHandledFocus = () => {
+      if (!handledFocusRef.current) {
+        return false;
+      }
+
+      handledFocusRef.current = null;
+      return true;
+    };
+
+    const scrollToDecision = (decision: DecisionPoint | undefined, inline: ScrollLogicalPosition) => {
+      if (!decision) {
+        return false;
+      }
+
+      const element = itemRefs.current[decision.id];
+
+      if (!element) {
+        return false;
+      }
+
+      element.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
-        inline: "center",
+        inline,
       });
-    } else if (decisions.length > 0 && !shouldSpread) {
-      // If no next decision, scroll to the last item
+
+      return true;
+    };
+
+    const scrollToNextDecision = () => {
+      const index = decisions.findIndex(
+        (decision) => decision.timestamp === nextDecisionTime
+      );
+
+      if (index === -1) {
+        return false;
+      }
+
+      const anchorIndex = Math.max(index - 3, 0);
+      const anchorDecision = decisions[anchorIndex];
+
+      if (
+        scrollToDecision(
+          anchorDecision,
+          anchorIndex === index ? "center" : "start"
+        )
+      ) {
+        return true;
+      }
+
+      return scrollToDecision(decisions[index], "center");
+    };
+
+    const scrollToLastDecision = () => {
+      if (decisions.length === 0 || shouldSpread) {
+        return false;
+      }
+
       const lastDecision = decisions[decisions.length - 1];
-      itemRefs.current[lastDecision.id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "end",
-      });
+      return scrollToDecision(lastDecision, "end");
+    };
+
+    if (
+      handleFocusScroll() ||
+      resetHandledFocus() ||
+      scrollToNextDecision() ||
+      scrollToLastDecision()
+    ) {
+      return cleanup;
     }
-  }, [decisions, nextDecisionTime, shouldSpread, animationComplete]);
+
+    return cleanup;
+  }, [
+    decisions,
+    nextDecisionTime,
+    shouldSpread,
+    animationComplete,
+    focus,
+    onFocusHandled,
+  ]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg">

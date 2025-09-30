@@ -27,7 +27,15 @@ describe('WaveLeaderboardTime', () => {
         getNextValidDecision: jest.fn(() => null),
       }
     });
-    useDecisionPoints.mockReturnValue({ allDecisions: [{ timestamp: 10 }] });
+    useDecisionPoints.mockReturnValue({
+      allDecisions: [{ timestamp: 10 }],
+      hasMorePast: false,
+      hasMoreFuture: false,
+      loadMorePast: jest.fn(),
+      loadMoreFuture: jest.fn(),
+      remainingPastCount: 0,
+      remainingFutureCount: 0,
+    });
     render(<WaveLeaderboardTime wave={{} as any} />);
     expect(screen.getByTestId('header')).toBeInTheDocument();
     expect(screen.queryByTestId('drop')).toBeNull();
@@ -46,7 +54,15 @@ describe('WaveLeaderboardTime', () => {
         getNextValidDecision: jest.fn(() => null),
       }
     });
-    useDecisionPoints.mockReturnValue({ allDecisions: [] });
+    useDecisionPoints.mockReturnValue({
+      allDecisions: [],
+      hasMorePast: false,
+      hasMoreFuture: false,
+      loadMorePast: jest.fn(),
+      loadMoreFuture: jest.fn(),
+      remainingPastCount: 0,
+      remainingFutureCount: 0,
+    });
     render(<WaveLeaderboardTime wave={{} as any} />);
     expect(screen.getByTestId('drop')).toBeInTheDocument();
     expect(screen.getByTestId('vote')).toBeInTheDocument();
