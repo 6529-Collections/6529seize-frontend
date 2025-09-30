@@ -101,8 +101,6 @@ export default function TheMemesComponent() {
   const searchParams = useSearchParams();
 
   const { connectedProfile } = useContext(AuthContext);
-  const [connectedConsolidationKey, setConnectedConsolidationKey] =
-    useState("");
 
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [seasons, setSeasons] = useState<MemeSeason[]>([]);
@@ -230,7 +228,7 @@ export default function TheMemesComponent() {
       { meme: Meme; items: NFTWithMemesExtendedData[] }
     >();
 
-    nfts.forEach((nft) => {
+    for (const nft of nfts) {
       const existing = memesMap.get(nft.meme);
       if (existing) {
         existing.items.push(nft);
@@ -240,7 +238,7 @@ export default function TheMemesComponent() {
           items: [nft],
         });
       }
-    });
+    }
 
     const sortedMemes = Array.from(memesMap.values()).map(
       (value) => value.meme
@@ -252,14 +250,18 @@ export default function TheMemesComponent() {
       sortedMemes.sort((a, b) => a.meme - b.meme);
     }
 
-    memesMap.forEach((value) => value.items.sort((a, b) => a.id - b.id));
-
     setNftMemes(sortedMemes);
-    setNftsByMeme(
-      new Map(
-        Array.from(memesMap.entries()).map(([key, value]) => [key, value.items])
-      )
-    );
+
+    const nftsByMeme = new Map<number, NFTWithMemesExtendedData[]>();
+
+    for (const [key, { items }] of Array.from(memesMap.entries())) {
+      nftsByMeme.set(
+        key,
+        items.toSorted((a, b) => a.id - b.id)
+      );
+    }
+
+    setNftsByMeme(nftsByMeme);
   }, [nfts, sortDir]);
 
   function fetchNfts() {
@@ -313,7 +315,7 @@ export default function TheMemesComponent() {
           window.scrollY;
 
         if (distanceFromBottom <= 400 && routerLoaded) {
-          setFetching((prevFetching) => (prevFetching ? prevFetching : true));
+          setFetching(true);
         }
       }, 200);
     };
@@ -327,14 +329,6 @@ export default function TheMemesComponent() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [routerLoaded, nftsNextPage]);
-
-  useEffect(() => {
-    setConnectedConsolidationKey(
-      connectedProfile?.consolidation_key ??
-        connectedProfile?.wallets?.[0]?.wallet ??
-        ""
-    );
-  }, [connectedProfile]);
 
   function getVolume(nft: NFTWithMemesExtendedData) {
     let vol = 0;
