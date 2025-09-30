@@ -88,10 +88,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     useState(0);
 
   useEffect(() => {
-    const now = Time.currentMillis();
-    const hasUpcoming = filteredDecisions.some(
-      (decision) => decision.timestamp > now
-    );
+    const hasUpcoming = !!nextDecisionTime;
 
     if (hasUpcoming) {
       if (autoExpandFutureAttempts !== 0) {
@@ -100,17 +97,27 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       return;
     }
 
-    if (hasMoreFuture && autoExpandFutureAttempts < AUTO_EXPAND_LIMIT) {
-      setAutoExpandFutureAttempts((prev) => prev + 1);
-      loadMoreFuture();
+    if (!hasMoreFuture) {
+      if (autoExpandFutureAttempts !== 0) {
+        setAutoExpandFutureAttempts(0);
+      }
       return;
     }
 
-    if (!hasMoreFuture && autoExpandFutureAttempts !== 0) {
-      setAutoExpandFutureAttempts(0);
+    if (autoExpandFutureAttempts >= AUTO_EXPAND_LIMIT) {
+      return;
     }
+
+    const timeoutId = window.setTimeout(() => {
+      setAutoExpandFutureAttempts((prev) => prev + 1);
+      loadMoreFuture();
+    }, 50);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [
-    filteredDecisions,
+    nextDecisionTime,
     hasMoreFuture,
     loadMoreFuture,
     autoExpandFutureAttempts,

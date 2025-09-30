@@ -48,7 +48,6 @@ describe('useDecisionPoints', () => {
     expect(result.current.allDecisions).toEqual([
       { id: 0, name: 'First Decision', timestamp: 10 },
       { id: 1, name: 'Decision 1', timestamp: 15 },
-      { id: 2, name: 'Decision 2', timestamp: 20 },
     ]);
     expect(result.current.remainingPastCount).toBe(0);
     expect(result.current.remainingFutureCount).toBe(0);

@@ -31,8 +31,6 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
 
   // Create refs for each timeline item
   const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
-  // Track whether we just handled a focus-driven scroll to avoid immediately
-  // overriding the user's intent with automated scrolling logic
   const handledFocusRef = useRef<"start" | "end" | null>(null);
 
   // Effect to scroll to the next decision or the end
@@ -40,35 +38,49 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
     // Only attempt to scroll if animation is complete
     if (!scrollContainerRef.current || !animationComplete) return;
 
+    let frameId: number | null = null;
+
+    const cleanup = () => {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+
     if (focus && decisions.length === 0) {
       handledFocusRef.current = focus;
       onFocusHandled?.();
-      return;
+      return cleanup;
     }
 
     if (focus && decisions.length > 0) {
       const targetDecision =
         focus === "start" ? decisions[0] : decisions[decisions.length - 1];
-      const targetElement =
-        targetDecision && itemRefs.current[targetDecision.id];
+      const attemptScroll = () => {
+        const targetElement =
+          targetDecision && itemRefs.current[targetDecision.id];
 
-      if (targetDecision && targetElement) {
-        handledFocusRef.current = focus;
-        targetElement.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: focus === "start" ? "start" : "end",
-        });
-        onFocusHandled?.();
-        return;
-      }
-      // Wait for refs to populate before clearing focus
-      return;
+        if (targetDecision && targetElement) {
+          handledFocusRef.current = focus;
+          frameId = null;
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: focus === "start" ? "start" : "end",
+          });
+          onFocusHandled?.();
+          return;
+        }
+
+        frameId = requestAnimationFrame(attemptScroll);
+      };
+
+      attemptScroll();
+      return cleanup;
     }
 
     if (handledFocusRef.current) {
       handledFocusRef.current = null;
-      return;
+      return cleanup;
     }
 
     // Find the next decision
@@ -82,13 +94,12 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
       const anchorRef = anchorDecision ? itemRefs.current[anchorDecision.id] : null;
 
       if (anchorRef) {
-        // Bias the scroll so earlier decisions remain immediately visible
         anchorRef.scrollIntoView({
           behavior: "smooth",
           block: "nearest",
           inline: anchorIndex === nextDecisionIndex ? "center" : "start",
         });
-        return;
+        return cleanup;
       }
 
       const nextDecision = decisions[nextDecisionIndex];
@@ -100,7 +111,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
           block: "nearest",
           inline: "center",
         });
-        return;
+        return cleanup;
       }
     } else if (decisions.length > 0 && !shouldSpread) {
       // If no next decision, scroll to the last item
@@ -111,6 +122,8 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
         inline: "end",
       });
     }
+
+    return cleanup;
   }, [
     decisions,
     nextDecisionTime,

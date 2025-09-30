@@ -37,13 +37,15 @@ export const useDecisionPoints = (
   } = options ?? {};
 
   const step = Math.max(1, windowStep);
-  const [pastWindow, setPastWindow] = useState(initialPastWindow);
-  const [futureWindow, setFutureWindow] = useState(initialFutureWindow);
+  const sanitizedPast = Math.max(0, initialPastWindow);
+  const sanitizedFuture = Math.max(0, initialFutureWindow);
+  const [pastWindow, setPastWindow] = useState(sanitizedPast);
+  const [futureWindow, setFutureWindow] = useState(sanitizedFuture);
 
   useEffect(() => {
-    setPastWindow(initialPastWindow);
-    setFutureWindow(initialFutureWindow);
-  }, [wave?.id, initialPastWindow, initialFutureWindow]);
+    setPastWindow(sanitizedPast);
+    setFutureWindow(sanitizedFuture);
+  }, [wave?.id, sanitizedPast, sanitizedFuture]);
 
   const decisionWindow = useMemo<DecisionWindowResult>(() => {
     return computeDecisionWindow({ wave, pastWindow, futureWindow });
@@ -83,7 +85,7 @@ const computeDecisionWindow = ({
   const firstDecisionTime =
     wave.wave.decisions_strategy?.first_decision_time ?? null;
 
-  if (!firstDecisionTime) {
+  if (firstDecisionTime == null) {
     return {
       decisions: [],
       hasMoreFuture: false,
@@ -168,6 +170,9 @@ const computeFiniteWindow = ({
   let currentTime = firstDecisionTime;
 
   for (const interval of subsequentDecisions) {
+    if (interval <= 0) {
+      continue;
+    }
     const nextTime = currentTime + interval;
     if (nextTime > lastDecisionTime) {
       break;

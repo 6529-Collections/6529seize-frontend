@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 import { DecisionPoint } from "../../../../helpers/waves/time.types";
 import { HorizontalTimeline } from "./HorizontalTimeline";
 
@@ -22,9 +23,6 @@ interface ExpandedTimelineContentProps {
   readonly onFocusHandled?: () => void;
 }
 
-/**
- * Renders the expanded content of the timeline
- */
 export const ExpandedTimelineContent: React.FC<
   ExpandedTimelineContentProps
 > = ({
@@ -73,7 +71,6 @@ export const ExpandedTimelineContent: React.FC<
       transition={{ duration: 0.3 }}
       onAnimationComplete={() => setAnimationComplete(true)}
       className="tw-bg-iron-950">
-      {/* Horizontal Timeline View */}
       <div className="tw-px-3 tw-py-4">
         {(hasMorePast || hasMoreFuture) && (
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-3 tw-text-xs tw-text-iron-300">
@@ -84,7 +81,10 @@ export const ExpandedTimelineContent: React.FC<
                   onClick={onLoadMorePast}
                   className={loadMoreButtonClasses}
                 >
-                  <ChevronLeftIcon className="tw-size-4 tw-flex-shrink-0" />
+                  <FontAwesomeIcon
+                    icon={faChevronLeft}
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(pastCountToDisplay, "earlier")}
                   </span>
@@ -101,7 +101,10 @@ export const ExpandedTimelineContent: React.FC<
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(remainingFutureCount, "later")}
                   </span>
-                  <ChevronRightIcon className="tw-size-4 tw-flex-shrink-0" />
+                  <FontAwesomeIcon
+                    icon={faChevronRight}
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
                 </button>
               )}
             </div>
