@@ -14,11 +14,13 @@ import { useEffect, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import styles from "./TheMemes.module.scss";
 
-export function MemePageActivity(props: {
-  show: boolean;
-  nft: NFT | undefined;
-  pageSize: number;
-}) {
+export function MemePageActivity(
+  props: Readonly<{
+    show: boolean;
+    nft: NFT | undefined;
+    pageSize: number;
+  }>
+) {
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
   const [activity, setActivity] = useState<Transaction[]>([]);
@@ -27,12 +29,14 @@ export function MemePageActivity(props: {
   );
 
   useEffect(() => {
-    if (!props.show || !props.nft) {
+    if (!props.show || !props.nft?.id) {
+      setActivityTotalResults(0);
+      setActivity([]);
       return;
     }
-    let isMounted = true;
+    let cancelled = false;
 
-    if (props.nft) {
+    if (props.nft?.id) {
       let url = `${publicEnv.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&id=${props.nft.id}&page_size=${props.pageSize}&page=${activityPage}`;
       switch (activityTypeFilter) {
         case TypeFilter.SALES:
@@ -51,15 +55,28 @@ export function MemePageActivity(props: {
           url += `&filter=burns`;
           break;
       }
-      fetchUrl(url).then((response: DBResponse) => {
-        setActivityTotalResults(response.count);
-        setActivity(response.data);
-      });
+      fetchUrl(url)
+        .then((response: DBResponse) => {
+          if (cancelled) return;
+          setActivityTotalResults(response.count ?? 0);
+          setActivity(response.data ?? []);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setActivityTotalResults(0);
+          setActivity([]);
+        });
     }
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
-  }, [props.show, props.nft, props.pageSize, activityPage, activityTypeFilter]);
+  }, [
+    props.show,
+    props.nft?.id,
+    props.pageSize,
+    activityPage,
+    activityTypeFilter,
+  ]);
 
   if (props.show && props.nft) {
     return (

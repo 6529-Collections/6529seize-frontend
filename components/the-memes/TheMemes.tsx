@@ -267,11 +267,15 @@ export default function TheMemesComponent() {
       setFetching(false);
       return;
     }
-    fetchUrl(nftsNextPage).then((responseNfts: DBResponse) => {
-      setNfts([...nfts, ...responseNfts.data]);
-      setNftsNextPage(responseNfts.next);
-      setFetching(false);
-    });
+    fetchUrl(nftsNextPage)
+      .then((responseNfts: DBResponse) => {
+        setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
+        setNftsNextPage(responseNfts.next);
+      })
+      .catch(() => {
+        // optionally surface a toast/log here
+      })
+      .finally(() => setFetching(false));
   }
 
   useEffect(() => {
