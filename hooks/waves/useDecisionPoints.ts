@@ -229,11 +229,12 @@ const computeRollingWindow = ({
   }
 
   const prefixSums: number[] = [];
-  const cycleLength = subsequentDecisions.reduce((acc, interval) => {
+  subsequentDecisions.reduce((acc, interval) => {
     const next = acc + interval;
     prefixSums.push(next);
     return next;
   }, 0);
+  const cycleLength = prefixSums.at(-1) ?? 0;
 
   if (cycleLength <= 0) {
     return sliceTimestamps({
