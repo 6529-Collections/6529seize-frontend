@@ -133,7 +133,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 isOpen={isDecisionDetailsOpen}
                 setIsOpen={setIsDecisionDetailsOpen}
                 nextDecisionTime={nextDecisionTime}
-                isPaused={!currentPause}
+                isPaused={Boolean(currentPause)}
                 currentPause={currentPause}
                 wave={wave}
               />

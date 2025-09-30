@@ -40,7 +40,9 @@ export const ExpandedTimelineContent: React.FC<
   const [animationComplete, setAnimationComplete] = useState(false);
 
   const earliestDecisionIndex =
-    hasMorePast && decisions.length > 0 ? decisions[0]?.id ?? null : null;
+    hasMorePast && decisions.length > 0
+      ? decisions[0]?.seriesIndex ?? null
+      : null;
 
   const pastCountToDisplay =
     remainingPastCount != null && remainingPastCount > 0

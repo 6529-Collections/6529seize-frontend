@@ -138,6 +138,19 @@ const computeDecisionWindow = ({
   });
 };
 
+const createDecisionPointId = (timestamp: number, seriesIndex: number): string =>
+  `${timestamp}-${seriesIndex}`;
+
+const createDecisionPoint = (
+  seriesIndex: number,
+  timestamp: number
+): DecisionPoint => ({
+  id: createDecisionPointId(timestamp, seriesIndex),
+  name: seriesIndex === 0 ? "First Decision" : `Decision ${seriesIndex}`,
+  timestamp,
+  seriesIndex,
+});
+
 interface ComputeFiniteWindowParams {
   readonly firstDecisionTime: number;
   readonly subsequentDecisions: number[];
@@ -318,11 +331,9 @@ const computeRollingWindow = ({
       ? getTimestampForIndex(nextIndex)
       : null;
 
-  const decisions: DecisionPoint[] = entries.map(({ index, timestamp }) => ({
-    id: index,
-    name: index === 0 ? "First Decision" : `Decision ${index}`,
-    timestamp,
-  }));
+  const decisions: DecisionPoint[] = entries.map(({ index, timestamp }) =>
+    createDecisionPoint(index, timestamp)
+  );
 
   const remainingPastCount = startIndex;
   const remainingFutureCount =
@@ -381,11 +392,10 @@ const sliceTimestamps = ({
 
   const decisions = sorted
     .slice(startIndex, endIndexExclusive)
-    .map((timestamp, index) => ({
-      id: startIndex + index,
-      name: startIndex + index === 0 ? "First Decision" : `Decision ${startIndex + index}`,
-      timestamp,
-    }));
+    .map((timestamp, index) => {
+      const seriesIndex = startIndex + index;
+      return createDecisionPoint(seriesIndex, timestamp);
+    });
 
   const remainingPastCount = startIndex;
   const remainingFutureCount = Math.max(total - endIndexExclusive, 0);

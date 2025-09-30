@@ -30,7 +30,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Create refs for each timeline item
-  const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const handledFocusRef = useRef<"start" | "end" | null>(null);
 
   // Effect to scroll to the next decision or the end
