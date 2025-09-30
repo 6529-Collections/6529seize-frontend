@@ -13,13 +13,14 @@ export default function NotFound({ label }: { readonly label?: string }) {
   const { setTitle } = useTitle();
   const router = useRouter();
 
-  const handleGoBack = () => {
-    router.back();
-  };
   useEffect(() => {
     const title = `404 - ${label?.toUpperCase() ?? "PAGE"} NOT FOUND`;
     setTitle(title);
   }, [label, setTitle]);
+
+  const handleGoBack = () => {
+    router.back();
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-start tw-pt-[100px]">
