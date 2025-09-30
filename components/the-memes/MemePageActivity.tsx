@@ -1,17 +1,17 @@
 "use client";
 
+import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import Pagination from "@/components/pagination/Pagination";
 import { publicEnv } from "@/config/env";
+import { MEMES_CONTRACT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NFT } from "@/entities/INFT";
+import { Transaction } from "@/entities/ITransaction";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { TypeFilter } from "@/hooks/useActivityData";
+import { fetchUrl } from "@/services/6529api";
 import { useEffect, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import { MEMES_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { NFT } from "../../entities/INFT";
-import { Transaction } from "../../entities/ITransaction";
-import { numberWithCommas } from "../../helpers/Helpers";
-import { TypeFilter } from "../../hooks/useActivityData";
-import { fetchUrl } from "../../services/6529api";
-import LatestActivityRow from "../latest-activity/LatestActivityRow";
-import Pagination from "../pagination/Pagination";
 import styles from "./TheMemes.module.scss";
 
 export function MemePageActivity(props: {
@@ -27,6 +27,11 @@ export function MemePageActivity(props: {
   );
 
   useEffect(() => {
+    if (!props.show || !props.nft) {
+      return;
+    }
+    let isMounted = true;
+
     if (props.nft) {
       let url = `${publicEnv.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&id=${props.nft.id}&page_size=${props.pageSize}&page=${activityPage}`;
       switch (activityTypeFilter) {
@@ -51,7 +56,10 @@ export function MemePageActivity(props: {
         setActivity(response.data);
       });
     }
-  }, [props.nft, activityPage, activityTypeFilter]);
+    return () => {
+      isMounted = false;
+    };
+  }, [props.show, props.nft, props.pageSize, activityPage, activityTypeFilter]);
 
   if (props.show && props.nft) {
     return (
