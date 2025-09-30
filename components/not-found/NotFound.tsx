@@ -3,10 +3,16 @@
 import { useTitle } from "@/contexts/TitleContext";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function NotFound({ label }: { readonly label?: string }) {
   const { setTitle } = useTitle();
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    router.back();
+  };
   useEffect(() => {
     const title = `404 - ${label?.toUpperCase() ?? "PAGE"} NOT FOUND`;
     setTitle(title);
@@ -33,6 +39,12 @@ export default function NotFound({ label }: { readonly label?: string }) {
       <Link href="/" className="tw-mt-4 tw-text-md tw-font-semibold">
         TAKE ME HOME
       </Link>
+      <button
+        type="button"
+        onClick={handleGoBack}
+        className="tw-mt-2 tw-text-md tw-font-semibold">
+        BACK TO PREVIOUS PAGE
+      </button>
     </div>
   );
 }
