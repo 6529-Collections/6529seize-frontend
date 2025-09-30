@@ -219,7 +219,9 @@ const computeRollingWindow = ({
   futureWindow,
   lastDecisionTime,
 }: ComputeRollingWindowParams): DecisionWindowResult => {
-  if (subsequentDecisions.length === 0) {
+  const intervals = subsequentDecisions.filter((interval) => interval > 0);
+
+  if (intervals.length === 0) {
     return sliceTimestamps({
       timestamps: [firstDecisionTime],
       now,
@@ -229,7 +231,7 @@ const computeRollingWindow = ({
   }
 
   const prefixSums: number[] = [];
-  subsequentDecisions.reduce((acc, interval) => {
+  intervals.reduce((acc, interval) => {
     const next = acc + interval;
     prefixSums.push(next);
     return next;
@@ -253,7 +255,7 @@ const computeRollingWindow = ({
           firstDecisionTime,
           cycleLength,
           prefixSums,
-          subsequentCount: subsequentDecisions.length,
+          subsequentCount: intervals.length,
         });
 
   const nextIndexRaw = countRollingDecisionsUpTo({
@@ -261,7 +263,7 @@ const computeRollingWindow = ({
     firstDecisionTime,
     cycleLength,
     prefixSums,
-    subsequentCount: subsequentDecisions.length,
+    subsequentCount: intervals.length,
   });
   const nextIndex =
     totalDecisions == null
@@ -284,7 +286,7 @@ const computeRollingWindow = ({
     firstDecisionTime,
     cycleLength,
     prefixSums,
-    subsequentCount: subsequentDecisions.length,
+    subsequentCount: intervals.length,
   });
 
   const nextDecisionTimestamp = determineNextRollingTimestamp({
@@ -293,7 +295,7 @@ const computeRollingWindow = ({
     firstDecisionTime,
     cycleLength,
     prefixSums,
-    subsequentCount: subsequentDecisions.length,
+    subsequentCount: intervals.length,
   });
 
   const decisions: DecisionPoint[] = entries.map(({ index, timestamp }) =>

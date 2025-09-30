@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
@@ -15,10 +15,6 @@ interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
 }
 
-/**
- * Component for displaying wave time information focusing on next winner announcement
- * in a compact format with expandable timeline
- */
 const AUTO_EXPAND_LIMIT = 5;
 
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
@@ -56,16 +52,17 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, [isDecisionDetailsOpen, timelineFocus]);
 
   const filteredDecisions = useMemo(() => {
-    const decisionsAsApiFormat = allDecisions.map(
-      (decision) =>
-        ({
-          decision_time: decision.timestamp,
-        } as any)
+    type PauseDecisionLike = { decision_time: number };
+
+    const decisionsAsApiFormat: PauseDecisionLike[] = allDecisions.map(
+      (decision): PauseDecisionLike => ({
+        decision_time: decision.timestamp,
+      })
     );
 
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
     const allowedDecisionTimes = new Set<number>(
-      filtered.map((filteredDecision: any) => filteredDecision.decision_time)
+      filtered.map((filteredDecision) => filteredDecision.decision_time)
     );
 
     return allDecisions.filter((decision) =>
@@ -79,29 +76,34 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     )?.timestamp ?? null;
 
   useEffect(() => {
-    const now = Time.currentMillis();
-    const hasUpcoming = filteredDecisions.some(
-      (decision) => decision.timestamp > now
-    );
-
-    if (hasUpcoming) {
+    if (nextDecisionTime !== null) {
       if (autoExpandFutureAttempts !== 0) {
         setAutoExpandFutureAttempts(0);
       }
       return;
     }
 
-    if (hasMoreFuture && autoExpandFutureAttempts < AUTO_EXPAND_LIMIT) {
-      setAutoExpandFutureAttempts((prev) => prev + 1);
-      loadMoreFuture();
+    if (!hasMoreFuture) {
+      if (autoExpandFutureAttempts !== 0) {
+        setAutoExpandFutureAttempts(0);
+      }
       return;
     }
 
-    if (!hasMoreFuture && autoExpandFutureAttempts !== 0) {
-      setAutoExpandFutureAttempts(0);
+    if (autoExpandFutureAttempts >= AUTO_EXPAND_LIMIT) {
+      return;
     }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      setAutoExpandFutureAttempts((prev) => prev + 1);
+      loadMoreFuture();
+    }, 50);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [
-    filteredDecisions,
+    nextDecisionTime,
     hasMoreFuture,
     loadMoreFuture,
     autoExpandFutureAttempts,
@@ -120,6 +122,10 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
       loadMoreFuture();
     }
   };
+
+  const onTimelineFocusHandled = useCallback(() => {
+    setTimelineFocus(null);
+  }, []);
 
   return (
     <div className="tw-mb-2 lg:tw-mb-4">
@@ -152,7 +158,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 remainingPastCount={remainingPastCount}
                 remainingFutureCount={remainingFutureCount}
                 focus={timelineFocus}
-                onFocusHandled={() => setTimelineFocus(null)}
+                onFocusHandled={onTimelineFocusHandled}
               />
             )}
           </AnimatePresence>

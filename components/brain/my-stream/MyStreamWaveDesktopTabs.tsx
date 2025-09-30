@@ -108,7 +108,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.setTimeout(() => {
       setAutoExpandFutureAttempts((prev) => prev + 1);
       loadMoreFuture();
     }, 50);
