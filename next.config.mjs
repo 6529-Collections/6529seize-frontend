@@ -120,6 +120,8 @@ function sharedConfig(publicEnv, assetPrefix) {
         "localhost",
         "media.generator.seize.io",
         "d3lqz0a4bldqgf.cloudfront.net",
+        "i.seadn.io",
+        "i2.seadn.io",
       ],
       minimumCacheTTL: 86400,
     },
