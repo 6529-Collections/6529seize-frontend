@@ -1,3 +1,5 @@
+"use client";
+
 import {
   memo,
   useMemo,
@@ -11,20 +13,17 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import type { PluggableList } from "unified";
 
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
-import { useEmoji } from "../../../../contexts/EmojiContext";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import { useEmoji } from "@/contexts/EmojiContext";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 
 import {
   DropContentPartType,
   createMarkdownContentRenderers,
 } from "./dropPartMarkdown/content";
-import {
-  createLinkRenderer,
-
-} from "./dropPartMarkdown/linkHandlers";
+import { createLinkRenderer } from "./dropPartMarkdown/linkHandlers";
 
 const BreakComponent = () => <br />;
 
@@ -55,12 +54,10 @@ function DropPartMarkdown({
     }
   }, [isMobile, textSize]);
 
-
-
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
-        onQuoteClick
+        onQuoteClick,
       }),
     [onQuoteClick]
   );
@@ -135,97 +132,92 @@ function DropPartMarkdown({
 
   const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);
 
-  const markdownComponents = useMemo<Components>(
-    () => {
-      const mergeClassNames = (
-        ...classes: Array<string | undefined>
-      ): string => classes.filter(Boolean).join(" ");
+  const markdownComponents = useMemo<Components>(() => {
+    const mergeClassNames = (...classes: Array<string | undefined>): string =>
+      classes.filter(Boolean).join(" ");
 
-      const headingClassName = "tw-text-iron-200 tw-break-words word-break";
+    const headingClassName = "tw-text-iron-200 tw-break-words word-break";
 
-      type MarkdownRendererProps<T extends ElementType> = ComponentPropsWithoutRef<T> &
+    type MarkdownRendererProps<T extends ElementType> =
+      ComponentPropsWithoutRef<T> &
         ExtraProps & { children?: ReactNode; className?: string };
 
-      const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
-        const HeadingRenderer = ({
-          children,
-          className,
-          ...props
-        }: MarkdownRendererProps<T>) => {
-          const TagComponent = Tag;
-          const mergedProps = {
-            ...(props as Record<string, unknown>),
-            className: mergeClassNames(headingClassName, className),
-          };
-
-          return (
-            <TagComponent {...(mergedProps as any)}>
-              {customRenderer(children)}
-            </TagComponent>
-          );
+    const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
+      const HeadingRenderer = ({
+        children,
+        className,
+        ...props
+      }: MarkdownRendererProps<T>) => {
+        const TagComponent = Tag;
+        const mergedProps = {
+          ...(props as Record<string, unknown>),
+          className: mergeClassNames(headingClassName, className),
         };
 
-        HeadingRenderer.displayName = `MarkdownHeading(${typeof Tag === "string" ? Tag : "component"})`;
-
-        return HeadingRenderer;
+        return (
+          <TagComponent {...(mergedProps as any)}>
+            {customRenderer(children)}
+          </TagComponent>
+        );
       };
 
-      return {
-        h1: createHeadingRenderer("h1"),
-        h2: createHeadingRenderer("h2"),
-        h3: createHeadingRenderer("h3"),
-        h4: createHeadingRenderer("h4"),
-        h5: createHeadingRenderer("h5"),
-        p: renderParagraph,
-        li: ({ children, className, ...props }) => (
-          <li
-            {...props}
-            className={mergeClassNames(
-              "tw-text-md tw-text-iron-200 tw-break-words word-break",
-              className
-            )}
-          >
-            {customRenderer(children)}
-          </li>
-        ),
-        code: ({ children, className, style, ...props }) => (
-          <code
-            {...props}
-            style={{ ...style, textOverflow: "unset" }}
-            className={mergeClassNames(
-              "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
-              className
-            )}
-          >
-            {customRenderer(children)}
-          </code>
-        ),
-        a: renderAnchor,
-        img: renderImage,
-        br: BreakComponent,
-        blockquote: ({ children, className, ...props }) => (
-          <blockquote
-            {...props}
-            className={mergeClassNames(
-              "tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0",
-              className
-            )}
-          >
-            {customRenderer(children)}
-          </blockquote>
-        ),
-      } satisfies Components;
-    },
-    [customRenderer, renderAnchor, renderImage, renderParagraph]
-  );
+      HeadingRenderer.displayName = `MarkdownHeading(${
+        typeof Tag === "string" ? Tag : "component"
+      })`;
+
+      return HeadingRenderer;
+    };
+
+    return {
+      h1: createHeadingRenderer("h1"),
+      h2: createHeadingRenderer("h2"),
+      h3: createHeadingRenderer("h3"),
+      h4: createHeadingRenderer("h4"),
+      h5: createHeadingRenderer("h5"),
+      p: renderParagraph,
+      li: ({ children, className, ...props }) => (
+        <li
+          {...props}
+          className={mergeClassNames(
+            "tw-text-md tw-text-iron-200 tw-break-words word-break",
+            className
+          )}>
+          {customRenderer(children)}
+        </li>
+      ),
+      code: ({ children, className, style, ...props }) => (
+        <code
+          {...props}
+          style={{ ...style, textOverflow: "unset" }}
+          className={mergeClassNames(
+            "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
+            className
+          )}>
+          {customRenderer(children)}
+        </code>
+      ),
+      a: renderAnchor,
+      img: renderImage,
+      br: BreakComponent,
+      blockquote: ({ children, className, ...props }) => (
+        <blockquote
+          {...props}
+          className={mergeClassNames(
+            "tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0",
+            className
+          )}>
+          {customRenderer(children)}
+        </blockquote>
+      ),
+    } satisfies Components;
+  }, [customRenderer, renderAnchor, renderImage, renderParagraph]);
 
   return (
     <Markdown
       rehypePlugins={rehypePlugins}
       remarkPlugins={remarkPlugins}
       className="tw-w-full"
-      components={markdownComponents}
-    >
+      components={markdownComponents}>
       {processedContent}
     </Markdown>
   );

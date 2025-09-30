@@ -1,4 +1,48 @@
-import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
+/** @jest-environment jsdom */
+import React from "react";
+
+jest.mock("next/dynamic", () => {
+  let mode: "skeleton" | "eager" = "eager";
+  const calls: any[] = [];
+  const mock = jest.fn((loader: any, options: any) => {
+    calls.push([loader, options]);
+    const Comp = (props: any) => {
+      if (mode === "skeleton") {
+        const L = options?.loading as React.ComponentType | undefined;
+        return L ? <L /> : null;
+      }
+      // Eager mode: immediately render the underlying component.
+      // We know the loader resolves to react-tweet's Tweet, so just render that mock directly.
+      const { Tweet } = require("react-tweet");
+      const T = Tweet as React.ComponentType<any>;
+      return <T {...props} />;
+    };
+    (Comp as any).__loader = loader;
+    (Comp as any).__options = options;
+    return Comp;
+  });
+  const setMode = (m: "skeleton" | "eager") => {
+    mode = m;
+  };
+  return {
+    __esModule: true,
+    default: mock,
+    __calls: calls,
+    __setMode: setMode,
+  };
+});
+
+// Use this in assertions: dynamicSpy.mock.calls[0] => [loader, options]
+const {
+  default: dynamicSpy,
+  __calls: dynamicCalls,
+  __setMode: setDynamicMode,
+} = require("next/dynamic") as {
+  default: jest.Mock;
+  __calls: any[];
+  __setMode: (m: "skeleton" | "eager") => void;
+};
+
 import { publicEnv } from "@/config/env";
 import {
   fetchYoutubePreview,
@@ -6,6 +50,8 @@ import {
 } from "@/services/api/youtube";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 
 const FALLBACK_BASE_ENDPOINT = "https://6529.io";
 const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
@@ -82,8 +128,18 @@ jest.mock("@/components/waves/FarcasterCard", () => ({
 
 jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
   __esModule: true,
-  default: ({ href, relativeHref }: { href: string; relativeHref?: string }) => (
-    <div data-testid="chat-item-buttons" data-href={href} data-relative-href={relativeHref} />
+  default: ({
+    href,
+    relativeHref,
+  }: {
+    href: string;
+    relativeHref?: string;
+  }) => (
+    <div
+      data-testid="chat-item-buttons"
+      data-href={href}
+      data-relative-href={relativeHref}
+    />
   ),
 }));
 
@@ -100,8 +156,7 @@ afterEach(() => {
 describe("DropPartMarkdown", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    publicEnv.BASE_ENDPOINT =
-      originalBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;
+    publicEnv.BASE_ENDPOINT = originalBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;
     publicEnv.VITE_FEATURE_AB_CARD =
       originalArtBlocksFlags.VITE_FEATURE_AB_CARD;
     publicEnv.NEXT_PUBLIC_VITE_FEATURE_AB_CARD =
@@ -201,7 +256,10 @@ describe("DropPartMarkdown", () => {
     expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const link = screen.getByRole("link", { name: "token" });
-    expect(link).toHaveAttribute("href", "https://www.artblocks.io/project/662000");
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.artblocks.io/project/662000"
+    );
   });
 
   it("falls back to regular link when Art Blocks card disabled", () => {
@@ -220,7 +278,10 @@ describe("DropPartMarkdown", () => {
     expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const link = screen.getByRole("link", { name: "token" });
-    expect(link).toHaveAttribute("href", "https://www.artblocks.io/token/662000");
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.artblocks.io/token/662000"
+    );
   });
 
   it("renders a fallback link when tweet data is unavailable", async () => {
@@ -423,5 +484,34 @@ describe("DropPartMarkdown", () => {
 
     const fallbackLink = await screen.findByRole("link", { name: url });
     expect(fallbackLink).toHaveAttribute("href", url);
+  });
+
+  it("lazy loads tweet embeds with a loading skeleton", async () => {
+    setDynamicMode("skeleton");
+    try {
+      const content =
+        "Check this [tweet](https://twitter.com/user/status/1234567890)";
+
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          referencedNfts={[]}
+          partContent={content}
+          onQuoteClick={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId("tweet-embed-loading")).toBeInTheDocument();
+
+      expect(dynamicCalls.length).toBeGreaterThanOrEqual(1);
+      const [loader, options] = dynamicCalls[0];
+      expect(options?.ssr).toBe(false);
+
+      const TweetComponent = await loader();
+      const { getByText } = render(<TweetComponent id="abc123" />);
+      expect(getByText("tweet:abc123")).toBeInTheDocument();
+    } finally {
+      setDynamicMode("eager");
+    }
   });
 });
