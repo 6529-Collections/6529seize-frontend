@@ -11,10 +11,19 @@ Reusable, accessible component to select either:
 **Output (contract-scoped):**
 
 ```ts
-{
-  contractAddress: `0x${string}`;
-  tokenIds: number[]; // empty = all
-}
+export type NftPickerSelection =
+  | {
+      contractAddress: `0x${string}`;
+      outputMode: 'number';
+      tokenIds: number[]; // empty = all
+      tokenIdsRaw: bigint[]; // mirrors tokenIds as bigint for consistency
+    }
+  | {
+      contractAddress: `0x${string}`;
+      outputMode: 'bigint';
+      tokenIds: string[]; // decimal strings, empty = all (JSON/logger friendly)
+      tokenIdsRaw: bigint[]; // exact values, preserves >MAX_SAFE_INTEGER IDs
+    };
 ```
 
 > Internally we use `bigint` for token IDs (IDs can exceed JS safe integers). See **Output modes & bigint**.
@@ -265,20 +274,19 @@ Tabs or segmented control:
 ### 6.6 All Mode
 
 * Shows clear “All tokens in this contract are selected.”
-* Output `tokenIds: []`.
+* Emit empty arrays for both `tokenIds` and `tokenIdsRaw` (numbers in `'number'` mode, decimal strings in `'bigint'`).
 
 ---
 
 ## 7) Output modes & bigint
 
 * **Internal**: `bigint` for IDs.
-* **Prop** `outputMode?: 'number' | 'bigint'` (default `'number'` to match your target shape).
+* **Prop** `outputMode?: 'number' | 'bigint'` (default `'number'` to match downstream contracts).
 
-  * If `'number'`: We **only emit safe integers** (`<= Number.MAX_SAFE_INTEGER`). If an unsafe ID is present, display an inline error **and do not emit changes** until resolved; suggest switching to `'bigint'`.
-  * If `'bigint'`: We still emit `{ contractAddress, tokenIds: number[] }` to the parent **by converting** only safe IDs; if any are unsafe, we emit `[]` there and include a **console.warn** (and we fire `onContractChange` so the parent can react).
+  * If `'number'`: We **only emit safe integers** (`<= Number.MAX_SAFE_INTEGER`). If an unsafe ID is present, display an inline error **and do not emit changes** until resolved; suggest switching to `'bigint'`. `tokenIdsRaw` still mirrors the selection as `bigint[]` for parity/testing.
+  * If `'bigint'`: We emit `{ contractAddress, outputMode: 'bigint', tokenIds: string[], tokenIdsRaw: bigint[] }`. `tokenIds` contains decimal strings (stable for JSON/logging). `tokenIdsRaw` carries the exact `bigint[]` so **no IDs are dropped**—unsafe integers stay intact. When any ID exceeds `Number.MAX_SAFE_INTEGER`, also fire a `console.warn` explaining that the decimal strings are advisory and consumers should rely on `tokenIdsRaw` for precision.
 
-    > If you want, the agent can also add a parallel `onChangeRaw({ contractAddress, tokenIds: bigint[] })`.
-* **“All”** always emits `tokenIds: []`.
+* **“All”** always emits an empty array for both `tokenIds` and `tokenIdsRaw`.
 
 ---
 
