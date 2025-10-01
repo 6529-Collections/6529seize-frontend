@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import clsx from "clsx";
-import { CheckCircleIcon, CheckIcon, XCircleIcon } from "@heroicons/react/20/solid";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
@@ -35,6 +34,7 @@ import {
   primeContractCache,
 } from "./useAlchemyClient";
 import type { SupportedChain, TokenIdBigInt } from "./NftPicker.types";
+import { AllTokensSelectedCard } from "./AllTokensSelectedCard";
 
 const DEFAULT_CHAIN: SupportedChain = "ethereum";
 const DEFAULT_DEBOUNCE = 250;
@@ -153,6 +153,7 @@ export function NftPicker({
   }, [contractQueryAddress, searchResult?.hiddenCount]);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const deselectButtonRef = useRef<HTMLButtonElement>(null);
   const helperMessageId = useId();
 
   useEffect(() => {
@@ -378,50 +379,18 @@ export function NftPicker({
     "tw-text-iron-300": helperState.tone === "muted",
   });
 
-  const tokenInputPlaceholder = allSelected
-    ? "All tokens selected"
-    : hasSelectedTokens
+  const tokenInputPlaceholder = hasSelectedTokens
     ? "Add more tokens or ranges..."
     : "e.g., 1, 5, 30-55, 89, 98-100";
 
   const tokenInputDisabled = allSelected || !selectedContract;
 
-  const selectAllLabel = allSelected
-    ? "Deselect All"
-    : contractTotalSupply
+  const selectAllLabel = contractTotalSupply
     ? `Select All (${formatCount(contractTotalSupply)})`
     : "Select All";
 
-  const selectedCollectionName = selectedContract?.name;
-  const allSelectedTitle = contractTotalSupply
-    ? `All ${formatCount(contractTotalSupply)} tokens selected`
-    : "All tokens selected";
-
-  const allSelectedStatusCard = (
-    <div
-      role="status"
-      aria-live="polite"
-      className="tw-flex tw-items-start tw-gap-3 tw-rounded-md tw-border-2 tw-border-primary-500/70 tw-bg-primary-500/10 tw-px-4 tw-py-3 tw-text-sm tw-text-primary-100"
-    >
-      <div className="tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500">
-        <CheckIcon className="tw-h-6 tw-w-6 tw-text-iron-900" aria-hidden="true" />
-      </div>
-      <div className="tw-flex-1 tw-space-y-1">
-        <div className="tw-text-base tw-font-semibold tw-text-primary-100">{allSelectedTitle}</div>
-        <div className="tw-text-sm tw-text-primary-50">
-          Click <span className="tw-font-semibold tw-text-white">"Deselect All"</span> to add specific tokens
-          {selectedCollectionName ? ` from ${selectedCollectionName}` : ""}.
-        </div>
-      </div>
-    </div>
-  );
-
-  const selectAllButtonClassName = clsx(
-    "tw-inline-flex tw-min-h-[2.75rem] tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-w-auto",
-    allSelected
-      ? "tw-animate-pulse tw-border-primary-500 tw-bg-primary-500 tw-text-black tw-shadow-lg tw-shadow-primary-500/40 hover:tw-border-primary-400 hover:tw-bg-primary-400"
-      : "tw-border-iron-700 tw-bg-transparent tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
-  );
+  const selectAllButtonClassName =
+    "tw-flex tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-2.5 tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-900 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500 sm:tw-w-auto";
 
   const handleTokenInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setTokenInput(event.target.value);
@@ -509,7 +478,11 @@ export function NftPicker({
     previousRangesRef.current = ranges;
     setAllSelected(true);
     setIsEditingText(false);
+    setTokenInput("");
     emitChange(selectedContract, ranges, true);
+    setTimeout(() => {
+      deselectButtonRef.current?.focus();
+    }, 0);
   };
 
   const handleDeselectAll = () => {
@@ -519,6 +492,10 @@ export function NftPicker({
     const previous = previousRangesRef.current;
     setAllSelected(false);
     setIsEditingText(false);
+    setTokenInput("");
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
     if (previous && previous.length) {
       setRanges(previous);
       previousRangesRef.current = null;
@@ -527,8 +504,6 @@ export function NftPicker({
     }
     emitChange(selectedContract, ranges, false);
   };
-
-  const selectAllHandler = allSelected ? handleDeselectAll : handleSelectAll;
 
   const handleClearTokens = () => {
     if (!selectedContract) {
@@ -681,60 +656,65 @@ export function NftPicker({
       {selectedContract && (
         <div className="tw-flex tw-flex-col tw-gap-3">
           <form className="tw-flex tw-flex-col tw-gap-3" onSubmit={handleTokenFormSubmit}>
-            <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-start">
-              <div className="tw-flex-1">
-                {allSelected ? (
-                  allSelectedStatusCard
-                ) : (
-                  <input
-                    value={tokenInput}
-                    onChange={handleTokenInputChange}
-                    onKeyDown={handleTokenInputKeyDown}
-                    placeholder={tokenInputPlaceholder}
-                    disabled={tokenInputDisabled}
-                    className="tw-w-full tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-                    aria-label="Add token IDs or ranges"
-                    aria-describedby={helperMessageId}
-                  />
-                )}
-              </div>
-              <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap">
-                <button
-                  type="submit"
-                  className="tw-inline-flex tw-min-h-[2.75rem] tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-shadow-sm hover:tw-bg-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-w-auto"
-                  disabled={!canAddTokens}
-                >
-                  Add
-                </button>
-                {allowAll && (
+            {allSelected ? (
+              <AllTokensSelectedCard
+                onDeselect={handleDeselectAll}
+                buttonRef={deselectButtonRef}
+              />
+            ) : (
+              <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-start">
+                <input
+                  value={tokenInput}
+                  onChange={handleTokenInputChange}
+                  onKeyDown={handleTokenInputKeyDown}
+                  placeholder={tokenInputPlaceholder}
+                  disabled={tokenInputDisabled}
+                  className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 tw-transition disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900 disabled:tw-text-iron-600 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-500"
+                  aria-label="Add token IDs or ranges"
+                  aria-describedby={helperMessageId}
+                />
+
+                <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center">
                   <button
-                    type="button"
-                    className={selectAllButtonClassName}
-                    onClick={selectAllHandler}
-                    disabled={!selectedContract}
-                    aria-pressed={allSelected}
-                    title={selectAllLabel}
+                    type="submit"
+                    className="tw-inline-flex tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-bg-primary-600 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-primary-700 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500 sm:tw-w-auto"
+                    disabled={!canAddTokens}
                   >
-                    {allSelected ? (
-                      <XCircleIcon className="tw-h-5 tw-w-5" aria-hidden="true" />
-                    ) : (
-                      <CheckCircleIcon className="tw-h-5 tw-w-5" aria-hidden="true" />
-                    )}
-                    <span>{selectAllLabel}</span>
+                    Add
                   </button>
-                )}
+                  {allowAll && (
+                    <button
+                      type="button"
+                      className={selectAllButtonClassName}
+                      onClick={handleSelectAll}
+                      disabled={!selectedContract}
+                      title={selectAllLabel}
+                    >
+                      <svg
+                        className="tw-h-5 tw-w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                      </svg>
+                      <span>{selectAllLabel}</span>
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </form>
 
-          {!allSelected && (
-            <div id={helperMessageId} className={helperClassName} aria-live="polite" role="status">
-              {helperState.text}
-            </div>
-          )}
-
-          {allSelected ? null : (
+          {allSelected ? (
+            <p className="tw-text-sm tw-text-iron-400">All tokens in this contract are selected.</p>
+          ) : (
             <>
+              <div id={helperMessageId} className={helperClassName} aria-live="polite" role="status">
+                {helperState.text}
+              </div>
+
               <NftEditRanges
                 ranges={ranges}
                 isEditing={isEditingText}
