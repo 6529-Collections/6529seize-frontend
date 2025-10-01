@@ -114,6 +114,9 @@ const CodeBlockRenderer = ({
   );
 };
 
+const CodeRenderer = ({ inline, ...props }: MarkdownCodeProps) =>
+  inline ? <InlineCodeRenderer {...props} /> : <CodeBlockRenderer {...props} />;
+
 const createMarkdownComponents = ({
   customRenderer,
   renderParagraph,
@@ -161,9 +164,6 @@ const createMarkdownComponents = ({
       {customRenderer(children)}
     </li>
   );
-
-  const CodeRenderer = ({ inline, ...props }: MarkdownCodeProps) =>
-    inline ? <InlineCodeRenderer {...props} /> : <CodeBlockRenderer {...props} />;
 
   const BlockQuoteRenderer = ({
     children,
