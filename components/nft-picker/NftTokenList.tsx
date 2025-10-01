@@ -27,11 +27,13 @@ interface NftTokenListProps {
 
 const ROW_HEIGHT = 72;
 const DEFAULT_OVERSCAN = 8;
+const BIGINT_ZERO = BigInt(0);
+const BIGINT_ONE = BigInt(1);
 
 function getTotalCount(ranges: TokenRange[]): number {
   let total = 0;
   for (const range of ranges) {
-    const size = Number(range.end - range.start + 1n);
+    const size = Number(range.end - range.start + BIGINT_ONE);
     if (!Number.isFinite(size)) {
       return Number.MAX_SAFE_INTEGER;
     }
@@ -44,10 +46,10 @@ function getTotalCount(ranges: TokenRange[]): number {
 }
 
 function resolveTokenIdAtIndex(ranges: TokenRange[], index: number): bigint | null {
-  let cursor = 0n;
+  let cursor = BIGINT_ZERO;
   const target = BigInt(index);
   for (const range of ranges) {
-    const size = range.end - range.start + 1n;
+    const size = range.end - range.start + BIGINT_ONE;
     const rangeEnd = cursor + size;
     if (target < rangeEnd) {
       const offset = target - cursor;

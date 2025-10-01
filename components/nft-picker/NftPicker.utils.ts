@@ -5,6 +5,8 @@ import type {
 } from "./NftPicker.types";
 
 export const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+const BIGINT_ZERO = BigInt(0);
+const BIGINT_ONE = BigInt(1);
 
 interface Segment {
   value: string;
@@ -148,7 +150,7 @@ export function parseTokenExpressionToBigints(input: string): TokenSelection {
         rangeStart = rangeEnd;
         rangeEnd = temp;
       }
-      for (let cursor = rangeStart; cursor <= rangeEnd; cursor += 1n) {
+      for (let cursor = rangeStart; cursor <= rangeEnd; cursor += BIGINT_ONE) {
         values.push(cursor);
       }
       return;
@@ -188,7 +190,7 @@ export function toCanonicalRanges(ids: TokenSelection): TokenRange[] {
   let current: TokenRange = { start: sorted[0], end: sorted[0] };
   for (let index = 1; index < sorted.length; index += 1) {
     const value = sorted[index];
-    if (value === current.end + 1n) {
+    if (value === current.end + BIGINT_ONE) {
       current = { start: current.start, end: value };
     } else {
       ranges.push(current);
@@ -205,7 +207,7 @@ export function fromCanonicalRanges(ranges: TokenRange[]): TokenSelection {
     let cursor = range.start;
     while (cursor <= range.end) {
       values.push(cursor);
-      cursor += 1n;
+      cursor += BIGINT_ONE;
     }
   });
   return values;
@@ -248,9 +250,9 @@ export function expandRangesWindow(
   const start = BigInt(startIndex);
   const limit = BigInt(count);
   const result: TokenSelection = [];
-  let consumed = 0n;
+  let consumed = BIGINT_ZERO;
   for (const range of ranges) {
-    const rangeLength = range.end - range.start + 1n;
+    const rangeLength = range.end - range.start + BIGINT_ONE;
     const rangeStartIndex = consumed;
     const rangeEndIndex = consumed + rangeLength;
     if (rangeEndIndex <= start) {
@@ -263,9 +265,9 @@ export function expandRangesWindow(
       localStart = range.start + offset;
     }
     const remaining = limit - BigInt(result.length);
-    const available = range.end - localStart + 1n;
+    const available = range.end - localStart + BIGINT_ONE;
     const take = available < remaining ? available : remaining;
-    for (let step = 0n; step < take; step += 1n) {
+    for (let step = BIGINT_ZERO; step < take; step += BIGINT_ONE) {
       result.push(localStart + step);
     }
     if (BigInt(result.length) >= limit) {
