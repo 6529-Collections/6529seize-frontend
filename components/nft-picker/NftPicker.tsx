@@ -15,6 +15,7 @@ import type {
   Suggestion,
   TokenRange,
   TokenSelection,
+  SupportedChain,
 } from "./NftPicker.types";
 import {
   MAX_SAFE,
@@ -37,7 +38,6 @@ import {
   useContractOverviewQuery,
   primeContractCache,
 } from "./useAlchemyClient";
-import type { SupportedChain } from "./NftPicker.types";
 import { AllTokensSelectedCard } from "./AllTokensSelectedCard";
 
 const DEFAULT_CHAIN: SupportedChain = "ethereum";
@@ -67,22 +67,23 @@ function mapSuggestionToOverview(suggestion: Suggestion): ContractOverview {
   };
 }
 
-export function NftPicker({
-  value,
-  defaultValue,
-  onChange,
-  onContractChange,
-  chain: chainProp,
-  outputMode = "number",
-  hideSpam: hideSpamProp = true,
-  allowAll = true,
-  allowRanges = true,
-  debounceMs = DEFAULT_DEBOUNCE,
-  overscan = DEFAULT_OVERSCAN,
-  placeholder = "Search by collection name or paste contract address…",
-  className,
-  renderTokenExtra,
-}: NftPickerProps) {
+export function NftPicker(props: Readonly<NftPickerProps>) {
+  const {
+    value,
+    defaultValue,
+    onChange,
+    onContractChange,
+    chain: chainProp,
+    outputMode = "number",
+    hideSpam: hideSpamProp = true,
+    allowAll = true,
+    allowRanges = true,
+    debounceMs = DEFAULT_DEBOUNCE,
+    overscan = DEFAULT_OVERSCAN,
+    placeholder = "Search by collection name or paste contract address…",
+    className,
+    renderTokenExtra,
+  } = props;
   const valueChain = value?.chain;
   const defaultChain = defaultValue?.chain;
   const chain = useMemo(
@@ -168,6 +169,7 @@ export function NftPicker({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const deselectButtonRef = useRef<HTMLButtonElement>(null);
+  const collectionInputId = useId();
   const helperMessageId = useId();
 
   useEffect(() => {
@@ -530,7 +532,7 @@ export function NftPicker({
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
-    if (previous && previous.length) {
+    if (previous?.length) {
       setRanges(previous);
       previousRangesRef.current = null;
       emitChange(selectedContract, previous, false);
@@ -580,6 +582,38 @@ export function NftPicker({
     }
   };
 
+  const getSelectionFromRanges = (
+    canonicalRanges: TokenRange[],
+    isAll: boolean
+  ): TokenSelection | null => {
+    if (isAll) {
+      return [];
+    }
+    try {
+      return fromCanonicalRanges(canonicalRanges);
+    } catch (error) {
+      if (!isRangeTooLargeError(error)) {
+        throw error;
+      }
+      const canonical = formatCanonical(canonicalRanges);
+      const displayValue = canonical || "selection";
+      setParseErrors([
+        {
+          code: error.code,
+          input: displayValue,
+          index: 0,
+          length: Math.max(displayValue.length, 1),
+          message: error.message,
+        },
+      ]);
+      console.warn(
+        "NftPicker: selection exceeds enumeration limit; change event skipped",
+        error
+      );
+      return null;
+    }
+  };
+
   const emitChange = (
     contract: ContractOverview,
     canonicalRanges: TokenRange[],
@@ -589,33 +623,9 @@ export function NftPicker({
     if (!contract) {
       return;
     }
-    let selectionIds: TokenSelection = [];
-    if (isAll) {
-      selectionIds = [];
-    } else {
-      try {
-        selectionIds = fromCanonicalRanges(canonicalRanges);
-      } catch (error) {
-        if (isRangeTooLargeError(error)) {
-          const canonical = formatCanonical(canonicalRanges);
-          const displayValue = canonical || "selection";
-          setParseErrors([
-            {
-              code: error.code,
-              input: displayValue,
-              index: 0,
-              length: Math.max(displayValue.length, 1),
-              message: error.message,
-            },
-          ]);
-          console.warn(
-            "NftPicker: selection exceeds enumeration limit; change event skipped",
-            error
-          );
-          return;
-        }
-        throw error;
-      }
+    const selectionIds = getSelectionFromRanges(canonicalRanges, isAll);
+    if (selectionIds === null) {
+      return;
     }
     if (!selectionIds.length && !isAll) {
       const payload: NftPickerSelection = {
@@ -678,11 +688,12 @@ export function NftPicker({
   return (
     <div className={clsx("tw-@container tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4", className)}>
       <div className="tw-flex tw-flex-col tw-gap-2">
-        <label className="tw-text-sm tw-font-semibold tw-text-iron-200">
+        <label htmlFor={collectionInputId} className="tw-text-sm tw-font-semibold tw-text-iron-200">
           Select collection
         </label>
         <div className="tw-relative">
           <input
+            id={collectionInputId}
             ref={inputRef}
             value={query}
             onChange={handleInputChange}
@@ -768,11 +779,11 @@ export function NftPicker({
             )}
           </form>
 
-          {!allSelected ? (
+          {allSelected ? null : (
             <>
-              <div id={helperMessageId} className={helperClassName} aria-live="polite" role="status">
+              <output id={helperMessageId} className={helperClassName} aria-live="polite">
                 {helperState.text}
-              </div>
+              </output>
 
               <NftEditRanges
                 ranges={ranges}
@@ -811,7 +822,7 @@ export function NftPicker({
                 </div>
               )}
             </>
-          ) : null}
+          )}
 
           {unsafeCount > 0 && outputMode === "number" && (
             <div className="tw-text-xs tw-text-amber-300">

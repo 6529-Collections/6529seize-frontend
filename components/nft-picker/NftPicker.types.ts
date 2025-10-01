@@ -4,11 +4,9 @@ export type SupportedChain = "ethereum";
 
 export type OutputMode = "number" | "bigint";
 
-export type TokenIdBigInt = bigint;
+export type TokenRange = { start: bigint; end: bigint };
 
-export type TokenRange = { start: TokenIdBigInt; end: TokenIdBigInt };
-
-export type TokenSelection = TokenIdBigInt[];
+export type TokenSelection = bigint[];
 
 export type Suggestion = {
   address: `0x${string}`;
@@ -19,7 +17,7 @@ export type Suggestion = {
   floorPriceEth?: number | null;
   imageUrl?: string | null;
   isSpam?: boolean;
-  safelist?: "verified" | "approved" | "requested" | "not_requested" | undefined;
+  safelist?: "verified" | "approved" | "requested" | "not_requested";
   deployer?: `0x${string}` | null;
 };
 
@@ -29,7 +27,7 @@ export type ContractOverview = Suggestion & {
 };
 
 export type TokenMetadata = {
-  tokenId: TokenIdBigInt;
+  tokenId: bigint;
   tokenIdRaw: string;
   name?: string | null;
   imageUrl?: string | null;
@@ -39,7 +37,7 @@ export type TokenMetadata = {
 type BaseSelection = {
   contractAddress: `0x${string}`;
   allSelected: boolean;
-  tokenIdsRaw: readonly TokenIdBigInt[];
+  tokenIdsRaw: readonly bigint[];
 };
 
 export type NftPickerSelection =
@@ -51,8 +49,6 @@ export type NftPickerSelection =
       outputMode: "bigint";
       tokenIds: readonly string[];
     });
-
-export type NftSelectionOutput = NftPickerSelection;
 
 export type NftPickerValue = {
   chain: SupportedChain;
@@ -75,7 +71,7 @@ export type NftPickerProps = {
   readonly overscan?: number;
   readonly placeholder?: string;
   readonly className?: string;
-  readonly renderTokenExtra?: (tokenId: TokenIdBigInt, metadata?: TokenMetadata) => ReactNode;
+  readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
 };
 
 export type ParseError = {
@@ -92,7 +88,7 @@ export type CanonicalTokenState = {
 };
 
 export type TokenListRow = {
-  tokenId: TokenIdBigInt;
+  tokenId: bigint;
   range?: TokenRange;
 };
 

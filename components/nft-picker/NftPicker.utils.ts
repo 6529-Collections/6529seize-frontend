@@ -15,6 +15,20 @@ export type RangeTooLargeError = Error & {
   size: bigint;
 };
 
+type ParseErrorArray = ParseError[] & Error;
+
+function createParseErrorArray(errors: ParseError[], message?: string): ParseErrorArray {
+  const issues = [...errors];
+  const primaryMessage = message ?? issues[0]?.message ?? "Invalid token expression";
+  const errorArray = Object.assign(issues, new Error(primaryMessage)) as ParseErrorArray;
+  errorArray.name = "ParseErrorArray";
+  return errorArray;
+}
+
+function throwParseErrors(errors: ParseError[], message?: string): never {
+  throw createParseErrorArray(errors, message);
+}
+
 function createRangeTooLargeError(size: bigint): RangeTooLargeError {
   const error = new Error(
     `Range expands to ${size.toString()} tokens, exceeding the limit of ${MAX_ENUMERATION.toString()}.`
@@ -65,7 +79,12 @@ function tokenize(input: string): Segment[] {
     return [];
   }
   const segments: Segment[] = [];
+  let skipNext = false;
   for (let index = 0; index < parts.length; index += 1) {
+    if (skipNext) {
+      skipNext = false;
+      continue;
+    }
     const part = parts[index];
     if (
       part.value === "-" &&
@@ -80,7 +99,7 @@ function tokenize(input: string): Segment[] {
         start: previous.start,
         end: next.end,
       });
-      index += 1;
+      skipNext = true;
       continue;
     }
     segments.push(part);
@@ -124,18 +143,7 @@ function parseTokenValue(
     });
     return null;
   }
-  try {
-    return BigInt(value);
-  } catch (error) {
-    const start = overrideStart ?? segment.start;
-    errors.push({
-      input: value,
-      index: start,
-      length: value.length,
-      message: "Unable to parse token value",
-    });
-    return null;
-  }
+  return BigInt(value);
 }
 
 function canonicalizeRanges(ranges: TokenRange[]): TokenRange[] {
@@ -157,10 +165,18 @@ function canonicalizeRanges(ranges: TokenRange[]): TokenRange[] {
       canonical.push({ start: range.start, end: range.end });
       continue;
     }
-    const last = canonical[canonical.length - 1];
+    const lastIndex = canonical.length - 1;
+    const last = canonical.at(-1);
+    if (!last) {
+      canonical.push({ start: range.start, end: range.end });
+      continue;
+    }
     if (range.start <= last.end + BIGINT_ONE) {
-      const mergedEnd = range.end > last.end ? range.end : last.end;
-      canonical[canonical.length - 1] = { start: last.start, end: mergedEnd };
+      let mergedEnd = last.end;
+      if (range.end > last.end) {
+        mergedEnd = range.end;
+      }
+      canonical[lastIndex] = { start: last.start, end: mergedEnd };
       continue;
     }
     canonical.push({ start: range.start, end: range.end });
@@ -175,9 +191,9 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
   const segments = tokenize(input);
   const errors: ParseError[] = [];
   const ranges: TokenRange[] = [];
-  segments.forEach((segment) => {
+  for (const segment of segments) {
     if (!segment.value) {
-      return;
+      continue;
     }
     const parts = segment.value.split("-");
     if (parts.length === 1) {
@@ -185,7 +201,7 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
       if (value !== null) {
         ranges.push({ start: value, end: value });
       }
-      return;
+      continue;
     }
     if (parts.length === 2) {
       const [startValueRaw, endValueRaw] = parts;
@@ -198,10 +214,11 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
       };
       const endValue = parseTokenValue(endValueRaw, endSegment, errors, endStartIndex);
       if (startValue === null || endValue === null) {
-        return;
+        continue;
       }
-      const rangeStart = startValue < endValue ? startValue : endValue;
-      const rangeEnd = startValue < endValue ? endValue : startValue;
+      const [rangeStart, rangeEnd] = startValue <= endValue
+        ? [startValue, endValue]
+        : [endValue, startValue];
       const rangeSize = rangeEnd - rangeStart + BIGINT_ONE;
       if (rangeSize > MAX_ENUMERATION) {
         const limit = MAX_ENUMERATION.toString();
@@ -213,15 +230,15 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
             "range-too-large"
           )
         );
-        return;
+        continue;
       }
       ranges.push({ start: rangeStart, end: rangeEnd });
-      return;
+      continue;
     }
     errors.push(makeError(segment, "Invalid range expression"));
-  });
+  }
   if (errors.length) {
-    throw errors;
+    throwParseErrors(errors);
   }
   const canonical = canonicalizeRanges(ranges);
   const total = canonical.reduce(
@@ -231,15 +248,14 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
   if (total > MAX_ENUMERATION) {
     const trimmed = input.trim();
     const displayValue = trimmed.length ? trimmed : input;
-    throw [
-      {
-        code: "range-too-large",
-        input: displayValue,
-        index: 0,
-        length: Math.max(displayValue.length, 1),
-        message: `Selection expands to ${total.toString()} tokens, exceeding the limit of ${MAX_ENUMERATION.toString()}.`,
-      },
-    ] satisfies ParseError[];
+    const parseError: ParseError = {
+      code: "range-too-large",
+      input: displayValue,
+      index: 0,
+      length: Math.max(displayValue.length, 1),
+      message: `Selection expands to ${total.toString()} tokens, exceeding the limit of ${MAX_ENUMERATION.toString()}.`,
+    };
+    throwParseErrors([parseError], parseError.message);
   }
   return canonical;
 }
@@ -252,15 +268,14 @@ export function parseTokenExpressionToBigints(input: string): TokenSelection {
     if (isRangeTooLargeError(error)) {
       const trimmed = input.trim();
       const displayValue = trimmed.length ? trimmed : input;
-      throw [
-        {
-          code: error.code,
-          input: displayValue,
-          index: 0,
-          length: Math.max(displayValue.length, 1),
-          message: error.message,
-        },
-      ] satisfies ParseError[];
+      const parseError: ParseError = {
+        code: error.code,
+        input: displayValue,
+        index: 0,
+        length: Math.max(displayValue.length, 1),
+        message: error.message,
+      };
+      throwParseErrors([parseError], error.message);
     }
     throw error;
   }
@@ -303,8 +318,10 @@ export function removeTokenFromRanges(
       result.push({ start: range.start, end: range.end - BIGINT_ONE });
       continue;
     }
-    result.push({ start: range.start, end: tokenId - BIGINT_ONE });
-    result.push({ start: tokenId + BIGINT_ONE, end: range.end });
+    result.push(
+      { start: range.start, end: tokenId - BIGINT_ONE },
+      { start: tokenId + BIGINT_ONE, end: range.end }
+    );
   }
   return canonicalizeRanges(result);
 }
@@ -316,21 +333,22 @@ export function bigintCompare(a: bigint, b: bigint): number {
   return a < b ? -1 : 1;
 }
 
-export function sortAndDedupIds(ids: readonly TokenIdBigInt[]): TokenSelection {
+export function sortAndDedupIds(ids: readonly bigint[]): TokenSelection {
   const sorted = [...ids].sort(bigintCompare);
   const result: TokenSelection = [];
   for (const id of sorted) {
-    if (result.length === 0 || result[result.length - 1] !== id) {
+    const last = result.at(-1);
+    if (last === undefined || last !== id) {
       result.push(id);
     }
   }
   return result;
 }
 
-// TODO: remove once callers migrate to sortAndDedupIds.
+/** @deprecated Use sortAndDedupIds instead. */
 export const mergeAndSort = sortAndDedupIds;
 
-export function toCanonicalRanges(ids: readonly TokenIdBigInt[]): TokenRange[] {
+export function toCanonicalRanges(ids: readonly bigint[]): TokenRange[] {
   const sorted = sortAndDedupIds(ids);
   if (sorted.length === 0) {
     return [];

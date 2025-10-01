@@ -128,26 +128,22 @@ export type SupportedChain =
 
 export type OutputMode = 'number' | 'bigint'; // default 'number' to match your output contract
 
-export type TokenIdBigInt = bigint;
-
-export type TokenRange = { start: TokenIdBigInt; end: TokenIdBigInt }; // inclusive
-export type TokenSelection = TokenIdBigInt[]; // deduped
+export type TokenRange = { start: bigint; end: bigint }; // inclusive
+export type TokenSelection = bigint[]; // deduped
 
 export type NftPickerSelection =
   | {
       contractAddress: `0x${string}`;
       outputMode: 'number';
       tokenIds: number[]; // empty = all
-      tokenIdsRaw: TokenIdBigInt[]; // bigint mirror for parity/testing
+      tokenIdsRaw: bigint[]; // bigint mirror for parity/testing
     }
   | {
       contractAddress: `0x${string}`;
       outputMode: 'bigint';
       tokenIds: string[]; // decimal strings, empty = all
-      tokenIdsRaw: TokenIdBigInt[]; // exact bigints preserve unsafe IDs
+      tokenIdsRaw: bigint[]; // exact bigints preserve unsafe IDs
     };
-
-export type NftSelectionOutput = NftPickerSelection; // alias for clarity in docs
 
 export type NftPickerValue = {
   chain: SupportedChain;
@@ -176,7 +172,7 @@ export type ContractOverview = Suggestion & {
 };
 
 export type TokenMetadata = {
-  tokenId: TokenIdBigInt;
+  tokenId: bigint;
   tokenIdRaw: string;
   name?: string | null;
   imageUrl?: string | null;
@@ -201,7 +197,7 @@ export type NftPickerProps = {
   // customization
   placeholder?: string;
   className?: string;
-  renderTokenExtra?: (tokenId: TokenIdBigInt, metadata?: TokenMetadata) => ReactNode; // optional trailing info per row
+  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode; // optional trailing info per row
 };
 ```
 
@@ -459,10 +455,10 @@ Tabs or segmented control:
 'use client';
 import { useState } from 'react';
 import { NftPicker } from '@/components/nft-picker/NftPicker';
-import type { NftSelectionOutput } from '@/components/nft-picker/NftPicker.types';
+import type { NftPickerSelection } from '@/components/nft-picker/NftPicker.types';
 
 export default function Demo() {
-  const [selection, setSelection] = useState<NftSelectionOutput | null>(null);
+  const [selection, setSelection] = useState<NftPickerSelection | null>(null);
 
   return (
     <div className="tw-@container tw-max-w-3xl tw-mx-auto tw-p-4">

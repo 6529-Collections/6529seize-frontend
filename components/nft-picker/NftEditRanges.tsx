@@ -12,6 +12,23 @@ import { formatCanonical, formatBigIntWithSeparators } from "./NftPicker.utils";
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
 
+type CopyStatus = "idle" | "copied" | "error";
+
+const COPY_FEEDBACK: Record<CopyStatus, { message: string; className: string }> = {
+  idle: {
+    message: "Copy feedback",
+    className: "tw-text-transparent",
+  },
+  copied: {
+    message: "Copied selection to clipboard.",
+    className: "tw-text-emerald-300",
+  },
+  error: {
+    message: "Unable to copy selection.",
+    className: "tw-text-red-300",
+  },
+};
+
 interface NftEditRangesProps {
   readonly ranges: TokenRange[];
   readonly isEditing: boolean;
@@ -53,7 +70,7 @@ export function NftEditRanges({
   const summaryText = hasTokens
     ? canonical
     : "Add tokens using the input above or choose Select All to include every token.";
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
 
   useEffect(() => {
     if (copyStatus === "idle") {
@@ -73,8 +90,9 @@ export function NftEditRanges({
     if (!canonical) {
       return;
     }
+
     try {
-      if (navigator.clipboard?.writeText) {
+      if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(canonical);
         setCopyStatus("copied");
         return;
@@ -97,7 +115,7 @@ export function NftEditRanges({
         /* no-op, best effort for iOS/WebKit */
       }
       const successful = document.execCommand("copy");
-      document.body.removeChild(textarea);
+      textarea.remove();
       if (!successful) {
         throw new Error("execCommand copy failed");
       }
@@ -115,18 +133,7 @@ export function NftEditRanges({
     }
   };
 
-  const copyMessage =
-    copyStatus === "copied"
-      ? "Copied selection to clipboard."
-      : copyStatus === "error"
-      ? "Unable to copy selection."
-      : "Copy feedback";
-  const copyClassName =
-    copyStatus === "copied"
-      ? "tw-text-emerald-300"
-      : copyStatus === "error"
-      ? "tw-text-red-300"
-      : "tw-text-transparent";
+  const { message: copyMessage, className: copyClassName } = COPY_FEEDBACK[copyStatus];
 
   const showCopyButton = hasTokens && Boolean(canonical);
   const showToggleButton = hasTokens || isEditing;
@@ -163,13 +170,12 @@ export function NftEditRanges({
             )}
           </div>
           {copyStatus !== "idle" && (
-            <span
+            <output
               aria-live="polite"
-              role="status"
               className={`tw-min-h-[1.25rem] tw-text-xs tw-font-medium ${copyClassName}`}
             >
               {copyMessage}
-            </span>
+            </output>
           )}
         </div>
         {showActionButtons && (
