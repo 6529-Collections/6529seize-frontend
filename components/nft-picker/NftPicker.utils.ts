@@ -223,6 +223,11 @@ export function formatCanonical(ranges: TokenRange[]): string {
     .join(",");
 }
 
+export function formatBigIntWithSeparators(value: bigint): string {
+  const raw = value.toString();
+  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 export function tryToNumberArray(ids: TokenSelection): {
   numbers: number[];
   unsafeCount: number;

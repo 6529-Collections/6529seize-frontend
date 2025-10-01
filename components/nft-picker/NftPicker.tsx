@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import clsx from "clsx";
 
@@ -22,6 +22,7 @@ import {
   toCanonicalRanges,
   tryToNumberArray,
   formatCanonical,
+  formatBigIntWithSeparators,
 } from "./NftPicker.utils";
 import { NftContractHeader } from "./NftContractHeader";
 import { NftSuggestList } from "./NftSuggestList";
@@ -37,8 +38,9 @@ import type { SupportedChain, TokenIdBigInt } from "./NftPicker.types";
 const DEFAULT_CHAIN: SupportedChain = "ethereum";
 const DEFAULT_DEBOUNCE = 250;
 const DEFAULT_OVERSCAN = 8;
-
-type PickerMode = "single" | "bucket" | "all";
+const BIGINT_ZERO = BigInt(0);
+const BIGINT_ONE = BigInt(1);
+const BIGINT_THOUSAND = BigInt(1000);
 
 const EMPTY_SELECTION: TokenSelection = [];
 
@@ -83,13 +85,15 @@ export function NftPicker({
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hideSpam, setHideSpam] = useState(hideSpamProp);
-  const [mode, setMode] = useState<PickerMode>("single");
   const [ranges, setRanges] = useState<TokenRange[]>([]);
   const [textValue, setTextValue] = useState<string>("");
   const [parseErrors, setParseErrors] = useState<ParseError[]>([]);
   const [unsafeCount, setUnsafeCount] = useState<number>(0);
   const [selectedContract, setSelectedContract] = useState<ContractOverview | null>(null);
   const [allSelected, setAllSelected] = useState<boolean>(false);
+  const [tokenInput, setTokenInput] = useState<string>("");
+  const [isEditingText, setIsEditingText] = useState(false);
+  const previousRangesRef = useRef<TokenRange[] | null>(null);
 
   const presetContractAddress = value?.contractAddress ?? defaultValue?.contractAddress;
   const presetContractQuery = useContractOverviewQuery({
@@ -150,26 +154,26 @@ export function NftPicker({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (value) {
-      if (value.contractAddress) {
-        if (!selectedContract || selectedContract.address !== value.contractAddress) {
-          setSelectedContract((prev) =>
-            prev && prev.address === value.contractAddress ? prev : null
-          );
-        }
-      } else {
-        setSelectedContract(null);
+    if (!value) {
+      return;
+    }
+    if (value.contractAddress) {
+      if (!selectedContract || selectedContract.address !== value.contractAddress) {
+        setSelectedContract((prev) =>
+          prev && prev.address === value.contractAddress ? prev : null
+        );
       }
-      if (value.allSelected) {
-        setAllSelected(true);
-        setRanges([]);
-        setMode("all");
-      } else {
-        setAllSelected(false);
-        const canonical = toRangesFromSelection(value.selectedIds ?? EMPTY_SELECTION);
-        setRanges(canonical);
-        setMode(canonical.length > 1 ? "bucket" : "single");
-      }
+    } else {
+      setSelectedContract(null);
+    }
+    const canonical = toRangesFromSelection(value.selectedIds ?? EMPTY_SELECTION);
+    setRanges(canonical);
+    if (value.allSelected) {
+      setAllSelected(true);
+      previousRangesRef.current = canonical;
+    } else {
+      setAllSelected(false);
+      previousRangesRef.current = null;
     }
   }, [value, selectedContract]);
 
@@ -188,8 +192,10 @@ export function NftPicker({
     setActiveIndex(0);
     setRanges([]);
     setAllSelected(false);
-    setMode("single");
+    previousRangesRef.current = null;
     setUnsafeCount(0);
+    setTokenInput("");
+    setIsEditingText(false);
     emitChange(overview, [], false);
   };
 
@@ -225,6 +231,169 @@ export function NftPicker({
     setActiveIndex(0);
   };
 
+  const trimmedTokenInput = tokenInput.trim();
+
+  const tokenPreview = useMemo(
+    () => {
+      if (!trimmedTokenInput) {
+        return {
+          tokens: [] as TokenSelection,
+          ranges: [] as TokenRange[],
+          canonical: "",
+          errors: null as ParseError[] | null,
+        };
+      }
+
+      if (!allowRanges && trimmedTokenInput.includes("-")) {
+        return {
+          tokens: [] as TokenSelection,
+          ranges: [] as TokenRange[],
+          canonical: "",
+          errors: [
+            {
+              input: trimmedTokenInput,
+              index: 0,
+              length: Math.max(trimmedTokenInput.length, 1),
+              message: "Ranges are disabled for this picker",
+            },
+          ],
+        };
+      }
+
+      try {
+        const parsed = parseTokenExpressionToBigints(trimmedTokenInput);
+        const merged = mergeAndSort(parsed);
+        const canonicalRanges = toCanonicalRanges(merged);
+        return {
+          tokens: merged,
+          ranges: canonicalRanges,
+          canonical: formatCanonical(canonicalRanges),
+          errors: null as ParseError[] | null,
+        };
+      } catch (error) {
+        if (Array.isArray(error)) {
+          return {
+            tokens: [] as TokenSelection,
+            ranges: [] as TokenRange[],
+            canonical: "",
+            errors: error as ParseError[],
+          };
+        }
+        return {
+          tokens: [] as TokenSelection,
+          ranges: [] as TokenRange[],
+          canonical: "",
+          errors: [
+            {
+              input: trimmedTokenInput,
+              index: 0,
+              length: Math.max(trimmedTokenInput.length, 1),
+              message: "Unable to parse token input",
+            },
+          ],
+        };
+      }
+    },
+    [allowRanges, trimmedTokenInput]
+  );
+
+  const canAddTokens =
+    !allSelected &&
+    Boolean(trimmedTokenInput) &&
+    !tokenPreview.errors &&
+    tokenPreview.tokens.length > 0;
+
+  const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
+
+  const formatCount = useCallback(
+    (value: bigint | number): string =>
+      typeof value === "number"
+        ? numberFormatter.format(value)
+        : formatBigIntWithSeparators(value),
+    [numberFormatter]
+  );
+
+  const contractTotalSupply = useMemo(() => {
+    if (!selectedContract?.totalSupply) {
+      return null;
+    }
+    try {
+      return BigInt(selectedContract.totalSupply);
+    } catch (error) {
+      console.warn("NftPicker: unable to parse totalSupply", error);
+      return null;
+    }
+  }, [selectedContract?.totalSupply]);
+
+  const selectedTokenCount = useMemo(() => {
+    return ranges.reduce(
+      (total, range) => total + (range.end - range.start + BIGINT_ONE),
+      BIGINT_ZERO
+    );
+  }, [ranges]);
+
+  const hasSelectedTokens = selectedTokenCount > BIGINT_ZERO;
+
+  const helperState = useMemo(() => {
+    if (allSelected) {
+      if (contractTotalSupply) {
+        return {
+          tone: "success" as const,
+          text: `All ${formatCount(contractTotalSupply)} tokens selected. Deselect to add specific tokens.`,
+        };
+      }
+      return {
+        tone: "success" as const,
+        text: "All tokens selected. Deselect to add specific tokens.",
+      };
+    }
+    if (!trimmedTokenInput) {
+      return {
+        tone: "muted" as const,
+        text: "Tip: Enter single tokens or ranges separated by commas.",
+      };
+    }
+    if (tokenPreview.errors) {
+      const [firstError] = tokenPreview.errors;
+      const detail = firstError?.input ? ` (${firstError.input})` : "";
+      return {
+        tone: "error" as const,
+        text: `${firstError?.message ?? "Invalid token input"}${detail}`,
+      };
+    }
+    const countLabel = formatCount(tokenPreview.tokens.length);
+    const canonical = tokenPreview.canonical || trimmedTokenInput;
+    const plural = tokenPreview.tokens.length === 1 ? "token" : "tokens";
+    return {
+      tone: "success" as const,
+      text: `Looks good: ${canonical} • Will add ${countLabel} ${plural}.`,
+    };
+  }, [allSelected, contractTotalSupply, formatCount, tokenPreview, trimmedTokenInput]);
+
+  const helperClassName = clsx("tw-text-xs", {
+    "tw-text-emerald-300": helperState.tone === "success",
+    "tw-text-red-300": helperState.tone === "error",
+    "tw-text-iron-300": helperState.tone === "muted",
+  });
+
+  const tokenInputPlaceholder = allSelected
+    ? "All tokens selected"
+    : hasSelectedTokens
+    ? "Add more tokens or ranges..."
+    : "e.g., 1, 5, 30-55, 89, 98-100";
+
+  const tokenInputDisabled = allSelected || !selectedContract;
+
+  const selectAllLabel = allSelected
+    ? "Deselect All"
+    : contractTotalSupply
+    ? `Select All (${formatCount(contractTotalSupply)})`
+    : "Select All";
+
+  const handleTokenInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setTokenInput(event.target.value);
+  };
+
   const addTokenIds = (ids: TokenIdBigInt[]) => {
     if (!ids.length) {
       return;
@@ -233,53 +402,48 @@ export function NftPicker({
     const merged = mergeAndSort([...combined, ...ids]);
     const canonical = toCanonicalRanges(merged);
     setRanges(canonical);
-    setMode(canonical.length > 1 ? "bucket" : "single");
     setAllSelected(false);
     setParseErrors([]);
     setUnsafeCount(0);
+    previousRangesRef.current = null;
     if (selectedContract) {
       emitChange(selectedContract, canonical, false);
     }
   };
 
-  const handleAddSingle = (inputValue: string) => {
-    if (!inputValue.trim()) {
+  const handleAddTokens = (ids: TokenIdBigInt[]) => {
+    if (!ids.length) {
       return;
     }
-    try {
-      const parsed = parseTokenExpressionToBigints(inputValue.trim());
-      if (parsed.length > 0) {
-        addTokenIds([parsed[0]]);
-      }
-    } catch (error) {
-      if (Array.isArray(error)) {
-        setParseErrors(error);
-      }
+    addTokenIds(ids);
+    setTokenInput("");
+    setParseErrors([]);
+  };
+
+  const handleSubmitTokens = () => {
+    if (!canAddTokens) {
+      return;
+    }
+    handleAddTokens(tokenPreview.tokens);
+  };
+
+  const handleTokenInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmitTokens();
     }
   };
 
-  const handleAddBucket = (inputValue: string) => {
-    if (!inputValue.trim()) {
-      return;
-    }
-    try {
-      const parsed = parseTokenExpressionToBigints(inputValue.trim());
-      addTokenIds(parsed);
-    } catch (error) {
-      if (Array.isArray(error)) {
-        setParseErrors(error);
-      }
-    }
+  const handleTokenFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleSubmitTokens();
   };
 
-  const handleRemoveToken = (tokenId: bigint) => {
-    const filtered = fromCanonicalRanges(ranges).filter((id) => id !== tokenId);
-    const canonical = toCanonicalRanges(filtered);
-    setRanges(canonical);
-    setAllSelected(false);
-    if (selectedContract) {
-      emitChange(selectedContract, canonical, false);
+  const handleEditTextChange = (value: string) => {
+    if (parseErrors.length) {
+      setParseErrors([]);
     }
+    setTextValue(value);
   };
 
   const handleClearContract = () => {
@@ -289,24 +453,72 @@ export function NftPicker({
     onContractChange?.(null);
     onChange(null);
     setQuery("");
-    setMode("single");
     setUnsafeCount(0);
+    setTokenInput("");
+    setParseErrors([]);
+    previousRangesRef.current = null;
+    setIsEditingText(false);
     inputRef.current?.focus();
   };
 
-  const handleModeChange = (nextMode: PickerMode) => {
-    setMode(nextMode);
-    if (nextMode === "all") {
-      setAllSelected(true);
-      setRanges([]);
-      if (selectedContract) {
-        emitChange(selectedContract, [], true);
-      }
-    } else {
-      setAllSelected(false);
-      if (selectedContract) {
-        emitChange(selectedContract, ranges, false);
-      }
+  const handleSelectAll = () => {
+    if (!selectedContract || allSelected) {
+      return;
+    }
+    let confirmed = true;
+    if (contractTotalSupply && contractTotalSupply > BIGINT_THOUSAND) {
+      const formatted = formatCount(contractTotalSupply);
+      confirmed = window.confirm(`Select all ${formatted} tokens?`);
+    }
+    if (!confirmed) {
+      return;
+    }
+    previousRangesRef.current = ranges;
+    setAllSelected(true);
+    setIsEditingText(false);
+    emitChange(selectedContract, ranges, true);
+  };
+
+  const handleDeselectAll = () => {
+    if (!selectedContract) {
+      return;
+    }
+    const previous = previousRangesRef.current;
+    setAllSelected(false);
+    setIsEditingText(false);
+    if (previous && previous.length) {
+      setRanges(previous);
+      previousRangesRef.current = null;
+      emitChange(selectedContract, previous, false);
+      return;
+    }
+    emitChange(selectedContract, ranges, false);
+  };
+
+  const selectAllHandler = allSelected ? handleDeselectAll : handleSelectAll;
+
+  const handleClearTokens = () => {
+    if (!selectedContract) {
+      return;
+    }
+    setRanges([]);
+    setAllSelected(false);
+    setTokenInput("");
+    setParseErrors([]);
+    setUnsafeCount(0);
+    setIsEditingText(false);
+    previousRangesRef.current = null;
+    emitChange(selectedContract, [], false);
+  };
+
+  const handleRemoveToken = (tokenId: bigint) => {
+    const filtered = fromCanonicalRanges(ranges).filter((id) => id !== tokenId);
+    const canonical = toCanonicalRanges(filtered);
+    setRanges(canonical);
+    setAllSelected(false);
+    previousRangesRef.current = null;
+    if (selectedContract) {
+      emitChange(selectedContract, canonical, false);
     }
   };
 
@@ -317,6 +529,7 @@ export function NftPicker({
       setRanges(canonical);
       setParseErrors([]);
       setAllSelected(false);
+      previousRangesRef.current = null;
       if (selectedContract) {
         emitChange(selectedContract, canonical, false);
       }
@@ -379,10 +592,11 @@ export function NftPicker({
   };
 
   useEffect(() => {
-    if (selectedContract && mode !== "all") {
-      emitChange(selectedContract, ranges, false);
+    if (!selectedContract) {
+      return;
     }
-  }, [selectedContract, ranges, mode]);
+    emitChange(selectedContract, ranges, allSelected);
+  }, [selectedContract, ranges, allSelected]);
 
   const activeSuggestionId = isOpen && suggestionList[activeIndex]
     ? `nft-suggestion-${activeIndex}`
@@ -433,85 +647,79 @@ export function NftPicker({
 
       {selectedContract && (
         <div className="tw-flex tw-flex-col tw-gap-3">
-          <div className="tw-flex tw-gap-2" role="tablist" aria-label="Selection mode">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === "single"}
-              className={clsx(
-                "tw-flex-1 tw-rounded-md tw-py-2 tw-text-sm",
-                mode === "single"
-                  ? "tw-bg-primary-500 tw-font-semibold tw-text-black"
-                  : "tw-bg-iron-800 tw-text-iron-200"
-              )}
-              onClick={() => handleModeChange("single")}
-            >
-              Single
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === "bucket"}
-              className={clsx(
-                "tw-flex-1 tw-rounded-md tw-py-2 tw-text-sm",
-                mode === "bucket"
-                  ? "tw-bg-primary-500 tw-font-semibold tw-text-black"
-                  : "tw-bg-iron-800 tw-text-iron-200"
-              )}
-              onClick={() => handleModeChange("bucket")}
-              disabled={!allowRanges}
-            >
-              Bucket
-            </button>
-            {allowAll && (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mode === "all"}
-                className={clsx(
-                  "tw-flex-1 tw-rounded-md tw-py-2 tw-text-sm",
-                  mode === "all"
-                    ? "tw-bg-primary-500 tw-font-semibold tw-text-black"
-                    : "tw-bg-iron-800 tw-text-iron-200"
+          <form className="tw-flex tw-flex-col tw-gap-2" onSubmit={handleTokenFormSubmit}>
+            <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-items-center">
+              <input
+                value={tokenInput}
+                onChange={handleTokenInputChange}
+                onKeyDown={handleTokenInputKeyDown}
+                placeholder={tokenInputPlaceholder}
+                disabled={tokenInputDisabled}
+                className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                aria-label="Add token IDs or ranges"
+              />
+              <div className="tw-flex tw-flex-wrap tw-gap-2">
+                <button
+                  type="submit"
+                  className="tw-rounded-md tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+                  disabled={!canAddTokens}
+                >
+                  Add
+                </button>
+                {allowAll && (
+                  <button
+                    type="button"
+                    className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+                    onClick={selectAllHandler}
+                    disabled={!selectedContract}
+                  >
+                    {selectAllLabel}
+                  </button>
                 )}
-                onClick={() => handleModeChange("all")}
-              >
-                All
-              </button>
-            )}
-          </div>
-
-          {mode === "single" && (
-            <SingleModeForm onAdd={handleAddSingle} />
-          )}
-
-          {mode === "bucket" && (
-            <BucketModeForm
-              onAdd={handleAddBucket}
-              ranges={ranges}
-              textValue={textValue}
-              parseErrors={parseErrors}
-              onTextChange={setTextValue}
-              onApply={handleApplyText}
-              onCancel={() => setTextValue(formatCanonical(ranges))}
-            />
-          )}
-
-          {mode === "all" && (
-            <div className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900 tw-p-3 tw-text-sm tw-text-iron-200">
-              All tokens in this contract are selected.
+              </div>
             </div>
-          )}
+          </form>
 
-          {mode !== "all" && (
-            <NftTokenList
-              contractAddress={selectedContract.address}
-              chain={chain}
-              ranges={ranges}
-              overscan={overscan}
-              renderTokenExtra={renderTokenExtra}
-              onRemove={handleRemoveToken}
-            />
+          <div className={helperClassName}>{helperState.text}</div>
+
+          {allSelected ? (
+            <div className="tw-rounded-md tw-border tw-border-primary-500/40 tw-bg-primary-500/10 tw-p-3 tw-text-sm tw-text-primary-200">
+              {contractTotalSupply
+                ? `All ${formatCount(contractTotalSupply)} tokens selected. Deselect to add specific tokens.`
+                : "All tokens in this contract are selected. Deselect to add specific tokens."}
+            </div>
+          ) : (
+            <>
+              <NftEditRanges
+                ranges={ranges}
+                isEditing={isEditingText}
+                textValue={textValue}
+                parseErrors={parseErrors}
+                onToggle={() => setIsEditingText((prev) => !prev)}
+                onTextChange={handleEditTextChange}
+                onApply={() => {
+                  handleApplyText();
+                  setIsEditingText(false);
+                }}
+                onCancel={() => {
+                  setTextValue(formatCanonical(ranges));
+                  setParseErrors([]);
+                  setIsEditingText(false);
+                }}
+                onClear={handleClearTokens}
+              />
+
+              {hasSelectedTokens && (
+                <NftTokenList
+                  contractAddress={selectedContract.address}
+                  chain={chain}
+                  ranges={ranges}
+                  overscan={overscan}
+                  renderTokenExtra={renderTokenExtra}
+                  onRemove={handleRemoveToken}
+                />
+              )}
+            </>
           )}
 
           {unsafeCount > 0 && outputMode === "number" && (
@@ -521,99 +729,6 @@ export function NftPicker({
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-type SingleModeFormProps = {
-  readonly onAdd: (value: string) => void;
-};
-
-function SingleModeForm({ onAdd }: SingleModeFormProps) {
-  const [value, setValue] = useState("");
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    onAdd(value);
-    setValue("");
-  };
-  return (
-    <form className="tw-flex tw-gap-2" onSubmit={handleSubmit}>
-      <input
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-        placeholder="Token ID"
-      />
-      <button
-        type="submit"
-        className="tw-rounded-md tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-primary-400"
-      >
-        Add
-      </button>
-    </form>
-  );
-}
-
-type BucketModeFormProps = {
-  readonly onAdd: (value: string) => void;
-  readonly ranges: TokenRange[];
-  readonly textValue: string;
-  readonly parseErrors: ParseError[];
-  readonly onTextChange: (value: string) => void;
-  readonly onApply: () => void;
-  readonly onCancel: () => void;
-};
-
-function BucketModeForm({
-  onAdd,
-  ranges,
-  textValue,
-  parseErrors,
-  onTextChange,
-  onApply,
-  onCancel,
-}: BucketModeFormProps) {
-  const [inputValue, setInputValue] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    onAdd(inputValue);
-    setInputValue("");
-  };
-
-  return (
-    <div className="tw-flex tw-flex-col tw-gap-3">
-      <form className="tw-flex tw-gap-2" onSubmit={handleSubmit}>
-        <input
-          value={inputValue}
-          onChange={(event) => setInputValue(event.target.value)}
-          className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-          placeholder="Add IDs or ranges (e.g. 1,2,5-12)"
-        />
-        <button
-          type="submit"
-          className="tw-rounded-md tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-primary-400"
-        >
-          Add
-        </button>
-      </form>
-      <NftEditRanges
-        ranges={ranges}
-        isEditing={isEditing}
-        textValue={textValue}
-        parseErrors={parseErrors}
-        onToggle={() => setIsEditing((prev) => !prev)}
-        onTextChange={onTextChange}
-        onApply={() => {
-          onApply();
-          setIsEditing(false);
-        }}
-        onCancel={() => {
-          onCancel();
-          setIsEditing(false);
-        }}
-      />
     </div>
   );
 }

@@ -77,8 +77,8 @@ export function NftTokenList({
   const totalCount = getTotalCount(ranges);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { getPosition, setPosition } = useScrollPositionContext();
-  const initialOffsetRef = useRef<number>();
-  if (initialOffsetRef.current === undefined) {
+  const initialOffsetRef = useRef<number | null>(null);
+  if (initialOffsetRef.current === null) {
     initialOffsetRef.current = getPosition(VIRTUAL_SCROLL_KEY);
   }
 
