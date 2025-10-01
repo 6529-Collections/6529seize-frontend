@@ -92,19 +92,31 @@ type AlchemyContractMetadataResponse = {
   isSpam?: boolean;
 };
 
+type AlchemyTokenMetadataEntry = {
+  tokenId?: string;
+  tokenType?: string | null;
+  title?: string | null;
+  name?: string | null;
+  description?: string | null;
+  image?: {
+    cachedUrl?: string | null;
+    thumbnailUrl?: string | null;
+    originalUrl?: string | null;
+  } | null;
+  media?: {
+    gateway?: string | null;
+    thumbnailUrl?: string | null;
+    raw?: string | null;
+  }[] | null;
+  metadata?: { image?: string | null; name?: string | null } | null;
+  raw?: { metadata?: { image?: string | null; name?: string | null } } | null;
+  isSpam?: boolean;
+  spamInfo?: { isSpam?: boolean } | null;
+};
+
 type AlchemyTokenMetadataResponse = {
-  tokens?: {
-    tokenId?: string;
-    tokenType?: string | null;
-    title?: string | null;
-    name?: string | null;
-    description?: string | null;
-    image?: { cachedUrl?: string | null; thumbnailUrl?: string | null } | null;
-    media?: { gateway?: string | null; thumbnailUrl?: string | null }[] | null;
-    raw?: { metadata?: { image?: string | null; name?: string | null } } | null;
-    isSpam?: boolean;
-    spamInfo?: { isSpam?: boolean } | null;
-  }[];
+  tokens?: AlchemyTokenMetadataEntry[];
+  nfts?: AlchemyTokenMetadataEntry[];
 };
 
 const NETWORK_MAP: Record<SupportedChain, string> = {
@@ -353,22 +365,37 @@ function parseTokenIdToBigint(tokenId: string): bigint {
 }
 
 function normaliseTokenMetadata(
-  token: NonNullable<AlchemyTokenMetadataResponse["tokens"]>[number]
+  token: AlchemyTokenMetadataEntry
 ): TokenMetadata | null {
   const tokenIdRaw = token.tokenId ?? "";
   try {
     const tokenId = parseTokenIdToBigint(tokenIdRaw);
     const imageUrl = pickImage({
-      imageUrl: token.image?.cachedUrl ?? undefined,
+      imageUrl:
+        token.metadata?.image ??
+        token.raw?.metadata?.image ??
+        token.image?.cachedUrl ??
+        token.image?.thumbnailUrl ??
+        token.image?.originalUrl ??
+        undefined,
       image: token.image ?? undefined,
       media: token.media ?? undefined,
     });
     const fallbackImage =
-      token.raw?.metadata?.image ?? token.media?.[0]?.gateway ?? null;
+      token.metadata?.image ??
+      token.raw?.metadata?.image ??
+      token.media?.find((item) => item?.thumbnailUrl)?.thumbnailUrl ??
+      token.media?.find((item) => item?.gateway)?.gateway ??
+      null;
     return {
       tokenId,
       tokenIdRaw,
-      name: token.title ?? token.name ?? token.raw?.metadata?.name ?? null,
+      name:
+        token.title ??
+        token.name ??
+        token.metadata?.name ??
+        token.raw?.metadata?.name ??
+        null,
       imageUrl: imageUrl ?? fallbackImage ?? null,
       isSpam: token.isSpam ?? token.spamInfo?.isSpam ?? false,
     };
@@ -407,7 +434,8 @@ export async function getTokensMetadata(
     if (status >= 400) {
       throw new Error("Failed to fetch token metadata");
     }
-    const tokens = (response as AlchemyTokenMetadataResponse).tokens ?? [];
+    const payload = response as AlchemyTokenMetadataResponse;
+    const tokens = payload.tokens ?? payload.nfts ?? [];
     for (const token of tokens) {
       const normalised = normaliseTokenMetadata(token);
       if (normalised) {
