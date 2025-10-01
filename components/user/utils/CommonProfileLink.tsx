@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { UserPageTabType } from "../layout/UserPageTabs";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
 import { usePathname } from "next/navigation";
+import { type UserPageTabType } from "../layout/userTabs.config";
 
 export default function CommonProfileLink({
   handleOrWallet,

@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import HeaderSearchModalItemHighlight from "./HeaderSearchModalItemHighlight";
 import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
 import { usePathname, useSearchParams } from "next/navigation";
-import { UserPageTabType } from "../../user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "../../user/layout/userTabs.config";
 import Link from "next/link";
 import {
   GRADIENT_CONTRACT,
@@ -122,7 +122,7 @@ export default function HeaderSearchModalItem({
       return getProfileTargetRoute({
         handleOrWallet: profile.handle ?? profile.wallet.toLowerCase(),
         pathname: pathname ?? "",
-        defaultPath: UserPageTabType.IDENTITY,
+        defaultPath: USER_PAGE_TAB_IDS.IDENTITY,
       });
     } else if (isNft()) {
       const nft = getNft();

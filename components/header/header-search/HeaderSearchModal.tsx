@@ -13,7 +13,7 @@ import HeaderSearchModalItem, {
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
-import { UserPageTabType } from "../../user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "../../user/layout/userTabs.config";
 import { createPortal } from "react-dom";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "../../../generated/models/ApiWave";
@@ -128,7 +128,7 @@ export default function HeaderSearchModal({
     const path = getProfileTargetRoute({
       handleOrWallet,
       pathname: pathname ?? "",
-      defaultPath: UserPageTabType.IDENTITY,
+      defaultPath: USER_PAGE_TAB_IDS.IDENTITY,
     });
     router.push(path);
     onClose();

@@ -1,29 +1,34 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { USER_PAGE_TAB_META, UserPageTabType } from "./UserPageTabs";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import type {
+  UserPageTabConfig,
+  UserPageTabKey,
+} from "./userTabs.config";
+
+interface UserPageTabProps {
+  readonly tab: UserPageTabConfig;
+  readonly parentRef: React.RefObject<HTMLDivElement | null>;
+  readonly activeTabId: UserPageTabKey;
+}
 
 export default function UserPageTab({
   tab,
   parentRef,
-  activeTab,
-}: {
-  readonly tab: UserPageTabType;
-  readonly parentRef: React.RefObject<HTMLDivElement | null>;
-  readonly activeTab: UserPageTabType;
-}) {
+  activeTabId,
+}: UserPageTabProps) {
   const params = useParams();
   const searchParams = useSearchParams();
   const handleOrWallet = params?.user?.toString();
 
-  const path = `/${handleOrWallet}/${USER_PAGE_TAB_META[tab].route}`;
+  const path = `/${handleOrWallet}/${tab.route}`;
 
-  const [isActive, setIsActive] = useState<boolean>(tab === activeTab);
+  const [isActive, setIsActive] = useState<boolean>(tab.id === activeTabId);
   useEffect(() => {
-    setIsActive(tab === activeTab);
-  }, [activeTab]);
+    setIsActive(tab.id === activeTabId);
+  }, [activeTabId, tab.id]);
 
   const activeClasses =
     "tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-font-semibold tw-py-4 tw-px-1";
@@ -72,7 +77,7 @@ export default function UserPageTab({
       className={`${
         isActive ? "tw-pointer-events-none" : ""
       }  tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold`}>
-      <div className={classes}>{USER_PAGE_TAB_META[tab].title}</div>
+      <div className={classes}>{tab.title}</div>
     </Link>
   );
 }

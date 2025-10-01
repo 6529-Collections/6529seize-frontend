@@ -4,116 +4,75 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import { usePathname } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
+import {
+  DEFAULT_USER_PAGE_TAB,
+  USER_PAGE_TABS,
+  type UserPageTabConfig,
+  type UserPageTabKey,
+  type UserPageVisibilityContext,
+  getUserPageTabByRoute,
+} from "./userTabs.config";
 
-export enum UserPageTabType {
-  BRAIN = "BRAIN",
-  REP = "REP",
-  IDENTITY = "IDENTITY",
-  COLLECTED = "COLLECTED",
-  STATS = "STATS",
-  SUBSCRIPTIONS = "SUBSCRIPTIONS",
-  PROXY = "PROXY",
-  GROUPS = "GROUPS",
-  WAVES = "WAVES",
-  FOLLOWERS = "FOLLOWERS",
-}
+const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 
-export const USER_PAGE_TAB_META: Record<
-  UserPageTabType,
-  { tab: UserPageTabType; title: string; route: string }
-> = {
-  [UserPageTabType.BRAIN]: {
-    tab: UserPageTabType.BRAIN,
-    title: "Brain",
-    route: "",
-  },
-  [UserPageTabType.REP]: {
-    tab: UserPageTabType.REP,
-    title: "Rep",
-    route: "rep",
-  },
+const getVisibilityContext = ({
+  showWaves,
+  capacitorIsIos,
+  country,
+}: {
+  readonly showWaves: boolean;
+  readonly capacitorIsIos: boolean;
+  readonly country: string | null;
+}): UserPageVisibilityContext => ({
+  showWaves,
+  hideSubscriptions: capacitorIsIos && country !== "US",
+});
 
-  [UserPageTabType.IDENTITY]: {
-    tab: UserPageTabType.IDENTITY,
-    title: "Identity",
-    route: "identity",
-  },
-  [UserPageTabType.COLLECTED]: {
-    tab: UserPageTabType.COLLECTED,
-    title: "Collected",
-    route: "collected",
-  },
-  [UserPageTabType.STATS]: {
-    tab: UserPageTabType.STATS,
-    title: "Stats",
-    route: "stats",
-  },
-  [UserPageTabType.SUBSCRIPTIONS]: {
-    tab: UserPageTabType.SUBSCRIPTIONS,
-    title: "Subscriptions",
-    route: "subscriptions",
-  },
-  [UserPageTabType.PROXY]: {
-    tab: UserPageTabType.PROXY,
-    title: "Proxy",
-    route: "proxy",
-  },
-  [UserPageTabType.GROUPS]: {
-    tab: UserPageTabType.GROUPS,
-    title: "Groups",
-    route: "groups",
-  },
-  [UserPageTabType.WAVES]: {
-    tab: UserPageTabType.WAVES,
-    title: "Waves",
-    route: "waves",
-  },
-  [UserPageTabType.FOLLOWERS]: {
-    tab: UserPageTabType.FOLLOWERS,
-    title: "Followers",
-    route: "followers",
-  },
+const resolveTabFromPath = (pathname: string): UserPageTabKey => {
+  const segments = pathname.split("/").filter(Boolean);
+  const routeSegment = segments[1] ?? "";
+  const match = getUserPageTabByRoute(routeSegment);
+  return (match?.id ?? DEFAULT_TAB) as UserPageTabKey;
 };
+
+const filterVisibleTabs = (
+  tabs: readonly UserPageTabConfig[],
+  context: UserPageVisibilityContext
+) =>
+  tabs.filter((tab) => (tab.isVisible ? tab.isVisible(context) : true));
 
 export default function UserPageTabs() {
   const pathname = usePathname() ?? "";
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { showWaves } = useContext(AuthContext);
-  const pathnameToTab = (pathname: string): UserPageTabType => {
-    const segments = pathname.split("/").filter(Boolean);
-    const name = segments[1] ?? "";
-    const tab = Object.values(UserPageTabType).find(
-      (tab) =>
-        USER_PAGE_TAB_META[tab].route.toLowerCase() === name?.toLowerCase()
-    );
-    return tab ?? UserPageTabType.COLLECTED;
-  };
 
-  const [tab, setTab] = useState<UserPageTabType>(pathnameToTab(pathname));
+  const visibilityContext = useMemo(
+    () =>
+      getVisibilityContext({
+        showWaves,
+        capacitorIsIos: capacitor.isIos,
+        country: country ?? null,
+      }),
+    [capacitor.isIos, country, showWaves]
+  );
+
+  const [activeTab, setActiveTab] = useState<UserPageTabKey>(
+    resolveTabFromPath(pathname)
+  );
 
   useEffect(() => {
-    setTab(pathnameToTab(pathname));
+    setActiveTab(resolveTabFromPath(pathname));
   }, [pathname]);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const getTabsToShow = () => {
-    let allTabs = Object.values(UserPageTabType);
-    if (capacitor.isIos && country !== "US") {
-      allTabs = allTabs.filter((tab) => tab !== UserPageTabType.SUBSCRIPTIONS);
-    }
-    if (showWaves) return allTabs;
-    return allTabs.filter(
-      (tab) => ![UserPageTabType.BRAIN, UserPageTabType.WAVES].includes(tab)
-    );
-  };
-  const [tabsToShow, setTabsToShow] = useState<UserPageTabType[]>(
-    getTabsToShow()
+  const visibleTabs = useMemo(
+    () => filterVisibleTabs(USER_PAGE_TABS, visibilityContext),
+    [visibilityContext]
   );
-  useEffect(() => setTabsToShow(getTabsToShow()), [showWaves]);
 
   return (
     <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
@@ -121,13 +80,14 @@ export default function UserPageTabs() {
         className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
         aria-label="Tabs">
         <div
+          ref={wrapperRef}
           className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
           aria-label="Tabs">
-          {tabsToShow.map((tabType) => (
+          {visibleTabs.map((tabConfig) => (
             <UserPageTab
-              key={tabType}
-              tab={tabType}
-              activeTab={tab}
+              key={tabConfig.id}
+              tab={tabConfig}
+              activeTabId={activeTab}
               parentRef={wrapperRef}
             />
           ))}
