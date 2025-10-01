@@ -21,16 +21,21 @@ const BASE_SAFE_TRANSFORMERS = TRANSFORMERS.filter((transformer) => {
 });
 
 const isCodeTransformer = (transformer: Transformer): boolean => {
-  if (!Array.isArray(transformer.dependencies)) {
+  const dependencies = (transformer as { dependencies?: unknown }).dependencies;
+  if (!Array.isArray(dependencies)) {
     return false;
   }
 
-  return transformer.dependencies.some((dependency) => {
-    if (!dependency || typeof dependency.getType !== "function") {
+  return dependencies.some((dependency) => {
+    if (
+      !dependency ||
+      typeof dependency !== "object" ||
+      typeof (dependency as { getType?: unknown }).getType !== "function"
+    ) {
       return false;
     }
 
-    return dependency.getType() === "code";
+    return (dependency as { getType: () => string }).getType() === "code";
   });
 };
 

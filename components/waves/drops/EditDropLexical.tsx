@@ -56,12 +56,12 @@ import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/crea
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 
 interface EditDropLexicalProps {
-  initialContent: string;
-  initialMentions: ApiDropMentionedUser[];
-  waveId: string | null;
-  isSaving: boolean;
-  onSave: (content: string, mentions: ApiDropMentionedUser[]) => void;
-  onCancel: () => void;
+  readonly initialContent: string;
+  readonly initialMentions: ApiDropMentionedUser[];
+  readonly waveId: string | null;
+  readonly isSaving: boolean;
+  readonly onSave: (content: string, mentions: ApiDropMentionedUser[]) => void;
+  readonly onCancel: () => void;
 }
 
 const MAX_MENTION_RECONSTRUCTION_PASSES = 20;
@@ -195,8 +195,6 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
       ) {
         const textNodes = root.getAllTextNodes();
 
-        // If any text node still has the full @[handle] pattern, defer to the
-        // mention transformer rather than trying to stitch pieces together.
         const hasUnprocessedMentions = textNodes.some((node) =>
           /@\[\w+\]/.test(node.getTextContent())
         );
@@ -222,39 +220,32 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   return null;
 }
 
-// Plugin to handle keyboard shortcuts
-// Plugin to handle focus on mount
 function FocusPlugin({ isApp }: { isApp: boolean }) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
     const focusEditor = () => {
-      // Try Lexical's focus first
       editor.focus();
-
-      // Also try DOM focus as fallback
       requestAnimationFrame(() => {
         const contentEditable = document.querySelector(
           '[contenteditable="true"]'
         ) as HTMLElement;
         if (contentEditable && document.activeElement !== contentEditable) {
           contentEditable.focus();
-          contentEditable.click(); // For mobile keyboard
+          contentEditable.click();
         }
       });
     };
 
     if (isApp) {
-      // Multiple timing strategies for mobile reliability
       const timeouts = [
-        setTimeout(focusEditor, 100), // Quick attempt
-        setTimeout(focusEditor, 350), // After menu close
-        setTimeout(focusEditor, 600), // Final attempt
+        setTimeout(focusEditor, 100),
+        setTimeout(focusEditor, 350),
+        setTimeout(focusEditor, 600),
       ];
 
       return () => timeouts.forEach(clearTimeout);
     } else {
-      // Desktop: immediate focus
       focusEditor();
     }
   }, [editor, isApp]);
@@ -290,23 +281,18 @@ function KeyboardPlugin({
     const removeEnterListener = editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
-        // Check if mentions dropdown is open
         if (mentionsRef.current?.isMentionsOpen()) {
-          // Let the mentions plugin handle the Enter key
           return false;
         }
 
         if (event?.shiftKey) {
-          // Allow Shift+Enter for new lines
           return false;
         }
 
         if (!isSaving) {
-          // Check if content has changed (similar to original logic)
           editor.getEditorState().read(() => {
             const currentMarkdown =
               $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
-            // If no changes, just cancel (silent exit)
             if (currentMarkdown.trim() === initialContent.trim()) {
               onCancel();
             } else {
