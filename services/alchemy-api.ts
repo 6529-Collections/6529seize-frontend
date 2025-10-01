@@ -10,7 +10,6 @@ import { getAddress } from "viem";
 import { goerli, sepolia } from "wagmi/chains";
 
 import { fetchUrl, postData } from "./6529api";
-import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 
 type SearchContractsParams = {
   query: string;
@@ -311,7 +310,7 @@ export async function searchNftCollections(
   const contracts = response?.contracts ?? [];
   const suggestions = contracts
     .map((contract) => extractContract(contract))
-    .filter((suggestion): suggestion is Suggestion => Boolean(suggestion));
+    .filter((suggestion): suggestion is Suggestion => suggestion !== null);
   const hiddenCount = hideSpam
     ? suggestions.filter((suggestion) => suggestion.isSpam).length
     : 0;
@@ -345,7 +344,7 @@ export async function getContractOverview(
     return null;
   }
   const contract: AlchemyContractResult = {
-    ...(response.contractMetadata ?? {}),
+    ...response.contractMetadata,
     contractMetadata: response.contractMetadata,
     address: checksum,
     contractAddress: checksum,

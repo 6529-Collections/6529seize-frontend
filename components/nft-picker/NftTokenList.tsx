@@ -93,9 +93,7 @@ export function NftTokenList({
 
   const virtualItems = virtualizer.getVirtualItems();
   const firstVisibleIndex = virtualItems.length > 0 ? virtualItems[0].index : 0;
-  const lastVisibleIndex = virtualItems.length > 0
-    ? virtualItems[virtualItems.length - 1].index
-    : -1;
+  const lastVisibleIndex = virtualItems.at(-1)?.index ?? -1;
 
   const windowTokenIds = useMemo(() => {
     if (lastVisibleIndex < firstVisibleIndex) {
@@ -117,10 +115,10 @@ export function NftTokenList({
 
   const metadataMap = useMemo(() => {
     const map = new Map<string, TokenMetadata>();
-    (metadataQuery.data ?? []).forEach((entry) => {
+    for (const entry of metadataQuery.data ?? []) {
       map.set(entry.tokenIdRaw, entry);
       map.set(entry.tokenId.toString(10), entry);
-    });
+    }
     return map;
   }, [metadataQuery.data]);
 
@@ -132,15 +130,11 @@ export function NftTokenList({
 
   return (
     <div className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900">
-      <div
-        ref={scrollContainerRef}
-        className="tw-max-h-80 tw-overflow-y-auto"
-        role="list"
-        aria-label="Selected tokens"
-      >
-        <div
+      <div ref={scrollContainerRef} className="tw-max-h-80 tw-overflow-y-auto">
+        <ul
+          aria-label="Selected tokens"
+          className="tw-relative tw-m-0 tw-list-none tw-p-0"
           style={{ height: virtualizer.getTotalSize(), position: "relative" }}
-          role="presentation"
         >
           {virtualItems.map((virtualItem) => {
             const windowIndex = virtualItem.index - firstVisibleIndex;
@@ -151,8 +145,36 @@ export function NftTokenList({
             const decimalId = toDecimalString(tokenId);
             const metadata = metadataMap.get(decimalId);
             const isLoadingMetadata = metadataQuery.isFetching && !metadata;
+            let thumbnailContent: ReactNode;
+            if (metadata?.imageUrl) {
+              thumbnailContent = (
+                <Image
+                  src={metadata.imageUrl}
+                  alt={metadata.name ?? decimalId}
+                  fill
+                  sizes="40px"
+                  className="tw-h-full tw-w-full tw-object-cover"
+                />
+              );
+            } else if (isLoadingMetadata) {
+              thumbnailContent = (
+                <div
+                  aria-label="Loading thumbnail"
+                  aria-live="polite"
+                  className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
+                >
+                  <Spinner />
+                </div>
+              );
+            } else {
+              thumbnailContent = (
+                <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
+                  #{decimalId}
+                </div>
+              );
+            }
             return (
-              <div
+              <li
                 key={decimalId}
                 className="tw-absolute tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-3 tw-py-2"
                 style={{
@@ -160,26 +182,9 @@ export function NftTokenList({
                   height: virtualItem.size,
                   width: "100%",
                 }}
-                role="listitem"
               >
                 <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800" aria-hidden="true">
-                  {metadata?.imageUrl ? (
-                    <Image
-                      src={metadata.imageUrl}
-                      alt={metadata.name ?? decimalId}
-                      fill
-                      sizes="40px"
-                      className="tw-h-full tw-w-full tw-object-cover"
-                    />
-                  ) : isLoadingMetadata ? (
-                    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center" role="status" aria-label="Loading thumbnail">
-                      <Spinner />
-                    </div>
-                  ) : (
-                    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
-                      #{decimalId}
-                    </div>
-                  )}
+                  {thumbnailContent}
                 </div>
                 <div className="tw-flex tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
                   <div className="tw-flex tw-flex-col tw-gap-0.5">
@@ -198,10 +203,10 @@ export function NftTokenList({
                     Remove
                   </button>
                 </div>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </div>
       <div className="tw-border-t tw-border-iron-700 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-400">
         {formatCanonical(ranges)}

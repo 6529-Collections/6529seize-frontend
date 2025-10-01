@@ -62,15 +62,23 @@ function getContractCacheKey(
 }
 
 function getTokenCacheKey(params: TokenMetadataParams): string {
-  const ids = [...params.tokenIds].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const ids = [...params.tokenIds].sort((a, b) => {
+    if (a < b) {
+      return -1;
+    }
+    if (a > b) {
+      return 1;
+    }
+    return 0;
+  });
   return `${params.chain ?? "ethereum"}:${params.address.toLowerCase()}:${ids.join("|")}`;
 }
 
 function useDebouncedValue<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
-    const handle = window.setTimeout(() => setDebounced(value), delay);
-    return () => window.clearTimeout(handle);
+    const handle = globalThis.setTimeout(() => setDebounced(value), delay);
+    return () => globalThis.clearTimeout(handle);
   }, [value, delay]);
   return debounced;
 }
@@ -201,12 +209,12 @@ export function useTokenMetadataQuery({
   const uniqueIds = useMemo(() => {
     const seen = new Set<string>();
     const deduped: string[] = [];
-    tokenIds.forEach((id) => {
+    for (const id of tokenIds) {
       if (!seen.has(id)) {
         seen.add(id);
         deduped.push(id);
       }
-    });
+    }
     return deduped;
   }, [tokenIds]);
 

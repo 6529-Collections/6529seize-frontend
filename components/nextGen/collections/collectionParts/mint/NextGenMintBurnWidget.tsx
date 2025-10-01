@@ -138,7 +138,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (tokenId) {
       setFetchingProofs(true);
       const url = `${publicEnv.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
-      fetchUrl(url).then((response: ProofResponse) => {
+      fetchUrl<ProofResponse>(url).then((response: ProofResponse) => {
         setBurnProofResponse(response);
         setFetchingProofs(false);
       });

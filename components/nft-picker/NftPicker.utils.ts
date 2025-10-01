@@ -371,7 +371,7 @@ export function toCanonicalRanges(ids: readonly bigint[]): TokenRange[] {
 export function fromCanonicalRanges(ranges: TokenRange[]): TokenSelection {
   const values: TokenSelection = [];
   let total = BIGINT_ZERO;
-  ranges.forEach((range) => {
+  for (const range of ranges) {
     let cursor = range.start;
     const rangeSize = range.end - range.start + BIGINT_ONE;
     if (rangeSize > MAX_ENUMERATION) {
@@ -385,7 +385,7 @@ export function fromCanonicalRanges(ranges: TokenRange[]): TokenSelection {
       values.push(cursor);
       cursor += BIGINT_ONE;
     }
-  });
+  }
   return values;
 }
 
@@ -426,13 +426,13 @@ export function tryToNumberArray(ids: TokenSelection): {
 } {
   const numbers: number[] = [];
   let unsafeCount = 0;
-  ids.forEach((id) => {
+  for (const id of ids) {
     if (id > MAX_SAFE) {
       unsafeCount += 1;
     } else {
       numbers.push(Number(id));
     }
-  });
+  }
   return { numbers, unsafeCount };
 }
 
@@ -463,7 +463,10 @@ export function expandRangesWindow(
     }
     const remaining = limit - BigInt(result.length);
     const available = range.end - localStart + BIGINT_ONE;
-    const take = available < remaining ? available : remaining;
+    let take = available;
+    if (remaining < available) {
+      take = remaining;
+    }
     for (let step = BIGINT_ZERO; step < take; step += BIGINT_ONE) {
       result.push(localStart + step);
     }

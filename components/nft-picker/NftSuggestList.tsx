@@ -65,98 +65,114 @@ export function NftSuggestList({
   return (
     <div
       ref={scrollContainerRef}
-      id="nft-picker-suggest-list"
-      role="listbox"
-      aria-label="NFT collections suggestions"
       className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900"
     >
       <div
         ref={listContainerRef}
         style={{ height: virtualization.totalHeight, position: "relative" }}
       >
-        {virtualization.virtualItems.map((virtual) => {
-          if (virtual.index >= items.length) {
+        <ul
+          id="nft-picker-suggest-list"
+          role="listbox"
+          aria-label="NFT collections suggestions"
+          className="tw-relative tw-m-0 tw-list-none tw-p-0"
+          style={{ height: "100%" }}
+          tabIndex={-1}
+        >
+          {virtualization.virtualItems.map((virtual) => {
+            if (virtual.index >= items.length) {
+              return (
+                <li
+                  key="suggestions-sentinel"
+                  className="tw-absolute tw-w-full"
+                  style={{ top: virtual.start, height: virtual.size }}
+                  aria-hidden="true"
+                  role="presentation"
+                >
+                  <div
+                    ref={virtualization.sentinelRef}
+                    style={{ height: "100%", width: "100%" }}
+                  />
+                </li>
+              );
+            }
+            const suggestion = items[virtual.index];
+            const isActive = virtual.index === activeIndex;
             return (
-              <div
-                key="suggestions-sentinel"
-                ref={virtualization.sentinelRef}
-                style={{
-                  position: "absolute",
-                  top: virtual.start,
-                  height: virtual.size,
-                  width: "100%",
+              <li
+                key={suggestion.address}
+                role="option"
+                aria-selected={isActive}
+                id={`nft-suggestion-${virtual.index}`}
+                tabIndex={isActive ? 0 : -1}
+                onMouseEnter={() => onHover(virtual.index)}
+                onClick={() => onSelect(suggestion)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+                    event.preventDefault();
+                    onSelect(suggestion);
+                  }
                 }}
-              />
-            );
-          }
-          const suggestion = items[virtual.index];
-          const isActive = virtual.index === activeIndex;
-          return (
-            <div
-              key={suggestion.address}
-              role="option"
-              aria-selected={isActive}
-              id={`nft-suggestion-${virtual.index}`}
-              onMouseEnter={() => onHover(virtual.index)}
-              onClick={() => onSelect(suggestion)}
-              className={clsx(
-                "tw-absolute tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-px-3 tw-py-2",
-                isActive
-                  ? "tw-bg-primary-500/20 tw-text-white"
-                  : "tw-text-iron-200 hover:tw-bg-iron-800"
-              )}
-              style={{ top: virtual.start, height: virtual.size }}
-            >
-              <div className="tw-relative tw-h-10 tw-w-10">
-                <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
-                  {suggestion.imageUrl ? (
-                    <Image
-                      src={suggestion.imageUrl}
-                      alt={suggestion.name ?? suggestion.address}
-                      fill
-                      sizes="40px"
-                      className="tw-h-full tw-w-full tw-object-cover"
-                    />
-                  ) : (
-                    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
-                      NFT
+                className={clsx(
+                  "tw-absolute tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-px-3 tw-py-2",
+                  isActive
+                    ? "tw-bg-primary-500/20 tw-text-white"
+                    : "tw-text-iron-200 hover:tw-bg-iron-800"
+                )}
+                style={{ top: virtual.start, height: virtual.size }}
+                onFocus={() => onHover(virtual.index)}
+              >
+                <div className="tw-relative tw-h-10 tw-w-10">
+                  <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+                    {suggestion.imageUrl ? (
+                      <Image
+                        src={suggestion.imageUrl}
+                        alt={suggestion.name ?? suggestion.address}
+                        fill
+                        sizes="40px"
+                        className="tw-h-full tw-w-full tw-object-cover"
+                      />
+                    ) : (
+                      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
+                        NFT
+                      </div>
+                    )}
+                  </div>
+                  {suggestion.safelist === "verified" && (
+                    <div className="tw-absolute tw-right-[-6px] tw-top-[-6px]">
+                      <DistributionPlanVerifiedIcon />
                     </div>
                   )}
                 </div>
-                {suggestion.safelist === "verified" && (
-                  <div className="tw-absolute tw-right-[-6px] tw-top-[-6px]">
-                    <DistributionPlanVerifiedIcon />
+                <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-1">
+                  <span className="tw-text-sm tw-font-medium tw-text-white">
+                    {suggestion.name ?? shortenAddress(suggestion.address)}
+                  </span>
+                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
+                    <span>{shortenAddress(suggestion.address)}</span>
+                    {suggestion.tokenType && (
+                      <span className="tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5">
+                        {suggestion.tokenType}
+                      </span>
+                    )}
+                    <span>Ξ{formatFloor(suggestion.floorPriceEth)}</span>
+                    {suggestion.totalSupply && <span>Supply {suggestion.totalSupply}</span>}
+                    {suggestion.safelist === "verified" && (
+                      <span className="tw-rounded tw-bg-green-500/20 tw-px-2 tw-py-0.5 tw-text-green-300">
+                        Verified
+                      </span>
+                    )}
+                    {suggestion.isSpam && (
+                      <span className="tw-rounded tw-bg-amber-500/20 tw-px-2 tw-py-0.5 tw-text-amber-300">
+                        Suspected spam
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-1">
-                <span className="tw-text-sm tw-font-medium tw-text-white">
-                  {suggestion.name ?? shortenAddress(suggestion.address)}
-                </span>
-                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
-                  <span>{shortenAddress(suggestion.address)}</span>
-                  {suggestion.tokenType && (
-                    <span className="tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5">
-                      {suggestion.tokenType}
-                    </span>
-                  )}
-                  <span>Ξ{formatFloor(suggestion.floorPriceEth)}</span>
-                  {suggestion.totalSupply && <span>Supply {suggestion.totalSupply}</span>}
-                  {suggestion.safelist === "verified" && (
-                    <span className="tw-rounded tw-bg-green-500/20 tw-px-2 tw-py-0.5 tw-text-green-300">
-                      Verified
-                    </span>
-                  )}
-                  {suggestion.isSpam && (
-                    <span className="tw-rounded tw-bg-amber-500/20 tw-px-2 tw-py-0.5 tw-text-amber-300">
-                      Suspected spam
-                    </span>
-                  )}
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              </li>
+            );
+          })}
+        </ul>
       </div>
       {hideSpam && hiddenCount > 0 && (
         <div className="tw-border-t tw-border-iron-700 tw-px-3 tw-py-2 tw-text-xs tw-text-amber-300">
