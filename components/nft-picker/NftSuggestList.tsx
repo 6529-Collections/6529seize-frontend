@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useRef } from "react";
 
+import DistributionPlanVerifiedIcon from "../distribution-plan-tool/common/DistributionPlanVerifiedIcon";
 import type { Suggestion } from "./NftPicker.types";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 
@@ -106,18 +107,25 @@ export function NftSuggestList({
               )}
               style={{ top: virtual.start, height: virtual.size }}
             >
-              <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
-                {suggestion.imageUrl ? (
-                  <Image
-                    src={suggestion.imageUrl}
-                    alt={suggestion.name ?? suggestion.address}
-                    fill
-                    sizes="40px"
-                    className="tw-h-full tw-w-full tw-object-cover"
-                  />
-                ) : (
-                  <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
-                    NFT
+              <div className="tw-relative tw-h-10 tw-w-10">
+                <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+                  {suggestion.imageUrl ? (
+                    <Image
+                      src={suggestion.imageUrl}
+                      alt={suggestion.name ?? suggestion.address}
+                      fill
+                      sizes="40px"
+                      className="tw-h-full tw-w-full tw-object-cover"
+                    />
+                  ) : (
+                    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
+                      NFT
+                    </div>
+                  )}
+                </div>
+                {suggestion.safelist === "verified" && (
+                  <div className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-rounded-full tw-bg-iron-900 tw-p-0.5 tw-shadow-lg">
+                    <DistributionPlanVerifiedIcon />
                   </div>
                 )}
               </div>
