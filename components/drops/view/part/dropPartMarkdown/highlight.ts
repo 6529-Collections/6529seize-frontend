@@ -81,7 +81,7 @@ export const highlightCodeElement = async (
 
   const { value, language: detectedLanguage } = hljs.highlightAuto(text);
   element.innerHTML = value;
-  element.setAttribute("data-highlighted", "yes");
+  element.dataset.highlighted = "yes";
 
   if (detectedLanguage) {
     element.classList.add(`language-${detectedLanguage}`);
