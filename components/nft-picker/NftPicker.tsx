@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import clsx from "clsx";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon, CheckIcon, XCircleIcon } from "@heroicons/react/20/solid";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
@@ -392,6 +392,37 @@ export function NftPicker({
     ? `Select All (${formatCount(contractTotalSupply)})`
     : "Select All";
 
+  const selectedCollectionName = selectedContract?.name;
+  const allSelectedTitle = contractTotalSupply
+    ? `All ${formatCount(contractTotalSupply)} tokens selected`
+    : "All tokens selected";
+
+  const allSelectedStatusCard = (
+    <div
+      role="status"
+      aria-live="polite"
+      className="tw-flex tw-items-start tw-gap-3 tw-rounded-md tw-border-2 tw-border-primary-500/70 tw-bg-primary-500/10 tw-px-4 tw-py-3 tw-text-sm tw-text-primary-100"
+    >
+      <div className="tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500">
+        <CheckIcon className="tw-h-6 tw-w-6 tw-text-iron-900" aria-hidden="true" />
+      </div>
+      <div className="tw-flex-1 tw-space-y-1">
+        <div className="tw-text-base tw-font-semibold tw-text-primary-100">{allSelectedTitle}</div>
+        <div className="tw-text-sm tw-text-primary-50">
+          Click <span className="tw-font-semibold tw-text-white">"Deselect All"</span> to add specific tokens
+          {selectedCollectionName ? ` from ${selectedCollectionName}` : ""}.
+        </div>
+      </div>
+    </div>
+  );
+
+  const selectAllButtonClassName = clsx(
+    "tw-inline-flex tw-min-h-[2.75rem] tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-w-auto",
+    allSelected
+      ? "tw-animate-pulse tw-border-primary-500 tw-bg-primary-500 tw-text-black tw-shadow-lg tw-shadow-primary-500/40 hover:tw-border-primary-400 hover:tw-bg-primary-400"
+      : "tw-border-iron-700 tw-bg-transparent tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
+  );
+
   const handleTokenInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setTokenInput(event.target.value);
   };
@@ -651,16 +682,22 @@ export function NftPicker({
         <div className="tw-flex tw-flex-col tw-gap-3">
           <form className="tw-flex tw-flex-col tw-gap-3" onSubmit={handleTokenFormSubmit}>
             <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-start">
-              <input
-                value={tokenInput}
-                onChange={handleTokenInputChange}
-                onKeyDown={handleTokenInputKeyDown}
-                placeholder={tokenInputPlaceholder}
-                disabled={tokenInputDisabled}
-                className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-                aria-label="Add token IDs or ranges"
-                aria-describedby={helperMessageId}
-              />
+              <div className="tw-flex-1">
+                {allSelected ? (
+                  allSelectedStatusCard
+                ) : (
+                  <input
+                    value={tokenInput}
+                    onChange={handleTokenInputChange}
+                    onKeyDown={handleTokenInputKeyDown}
+                    placeholder={tokenInputPlaceholder}
+                    disabled={tokenInputDisabled}
+                    className="tw-w-full tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                    aria-label="Add token IDs or ranges"
+                    aria-describedby={helperMessageId}
+                  />
+                )}
+              </div>
               <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap">
                 <button
                   type="submit"
@@ -672,7 +709,7 @@ export function NftPicker({
                 {allowAll && (
                   <button
                     type="button"
-                    className="tw-inline-flex tw-min-h-[2.75rem] tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition hover:tw-border-primary-500 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 sm:tw-w-auto"
+                    className={selectAllButtonClassName}
                     onClick={selectAllHandler}
                     disabled={!selectedContract}
                     aria-pressed={allSelected}
@@ -690,17 +727,13 @@ export function NftPicker({
             </div>
           </form>
 
-          <div id={helperMessageId} className={helperClassName} aria-live="polite" role="status">
-            {helperState.text}
-          </div>
-
-          {allSelected ? (
-            <div className="tw-rounded-md tw-border tw-border-primary-500/40 tw-bg-primary-500/10 tw-p-3 tw-text-sm tw-text-primary-200">
-              {contractTotalSupply
-                ? `All ${formatCount(contractTotalSupply)} tokens selected. Deselect to add specific tokens.`
-                : "All tokens in this contract are selected. Deselect to add specific tokens."}
+          {!allSelected && (
+            <div id={helperMessageId} className={helperClassName} aria-live="polite" role="status">
+              {helperState.text}
             </div>
-          ) : (
+          )}
+
+          {allSelected ? null : (
             <>
               <NftEditRanges
                 ranges={ranges}
