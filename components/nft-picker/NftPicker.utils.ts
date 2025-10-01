@@ -111,13 +111,43 @@ function parseTokenValue(
   }
 }
 
-export function parseTokenExpressionToBigints(input: string): TokenSelection {
+function canonicalizeRanges(ranges: TokenRange[]): TokenRange[] {
+  if (!ranges.length) {
+    return [];
+  }
+  const sorted = [...ranges].sort((a, b) => {
+    if (a.start === b.start) {
+      if (a.end === b.end) {
+        return 0;
+      }
+      return a.end < b.end ? -1 : 1;
+    }
+    return a.start < b.start ? -1 : 1;
+  });
+  const canonical: TokenRange[] = [];
+  for (const range of sorted) {
+    if (!canonical.length) {
+      canonical.push({ start: range.start, end: range.end });
+      continue;
+    }
+    const last = canonical[canonical.length - 1];
+    if (range.start <= last.end + BIGINT_ONE) {
+      const mergedEnd = range.end > last.end ? range.end : last.end;
+      canonical[canonical.length - 1] = { start: last.start, end: mergedEnd };
+      continue;
+    }
+    canonical.push({ start: range.start, end: range.end });
+  }
+  return canonical;
+}
+
+export function parseTokenExpressionToRanges(input: string): TokenRange[] {
   if (!input.trim()) {
     return [];
   }
   const segments = tokenize(input);
   const errors: ParseError[] = [];
-  const values: bigint[] = [];
+  const ranges: TokenRange[] = [];
   segments.forEach((segment) => {
     if (!segment.value) {
       return;
@@ -126,7 +156,7 @@ export function parseTokenExpressionToBigints(input: string): TokenSelection {
     if (parts.length === 1) {
       const value = parseTokenValue(parts[0], segment, errors);
       if (value !== null) {
-        values.push(value);
+        ranges.push({ start: value, end: value });
       }
       return;
     }
@@ -143,16 +173,9 @@ export function parseTokenExpressionToBigints(input: string): TokenSelection {
       if (startValue === null || endValue === null) {
         return;
       }
-      let rangeStart = startValue;
-      let rangeEnd = endValue;
-      if (rangeStart > rangeEnd) {
-        const temp = rangeStart;
-        rangeStart = rangeEnd;
-        rangeEnd = temp;
-      }
-      for (let cursor = rangeStart; cursor <= rangeEnd; cursor += BIGINT_ONE) {
-        values.push(cursor);
-      }
+      const rangeStart = startValue < endValue ? startValue : endValue;
+      const rangeEnd = startValue < endValue ? endValue : startValue;
+      ranges.push({ start: rangeStart, end: rangeEnd });
       return;
     }
     errors.push(makeError(segment, "Invalid range expression"));
@@ -160,7 +183,55 @@ export function parseTokenExpressionToBigints(input: string): TokenSelection {
   if (errors.length) {
     throw errors;
   }
-  return values;
+  return canonicalizeRanges(ranges);
+}
+
+export function parseTokenExpressionToBigints(input: string): TokenSelection {
+  const ranges = parseTokenExpressionToRanges(input);
+  return fromCanonicalRanges(ranges);
+}
+
+export function mergeCanonicalRanges(
+  current: TokenRange[],
+  additions: TokenRange[]
+): TokenRange[] {
+  if (!additions.length) {
+    return current;
+  }
+  if (!current.length) {
+    return canonicalizeRanges(additions);
+  }
+  return canonicalizeRanges([...current, ...additions]);
+}
+
+export function removeTokenFromRanges(
+  ranges: TokenRange[],
+  tokenId: bigint
+): TokenRange[] {
+  if (!ranges.length) {
+    return ranges;
+  }
+  const result: TokenRange[] = [];
+  for (const range of ranges) {
+    if (tokenId < range.start || tokenId > range.end) {
+      result.push(range);
+      continue;
+    }
+    if (range.start === range.end && range.start === tokenId) {
+      continue;
+    }
+    if (tokenId === range.start) {
+      result.push({ start: range.start + BIGINT_ONE, end: range.end });
+      continue;
+    }
+    if (tokenId === range.end) {
+      result.push({ start: range.start, end: range.end - BIGINT_ONE });
+      continue;
+    }
+    result.push({ start: range.start, end: tokenId - BIGINT_ONE });
+    result.push({ start: tokenId + BIGINT_ONE, end: range.end });
+  }
+  return canonicalizeRanges(result);
 }
 
 export function bigintCompare(a: bigint, b: bigint): number {

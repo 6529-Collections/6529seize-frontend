@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
@@ -17,12 +19,13 @@ import type {
 import {
   MAX_SAFE,
   fromCanonicalRanges,
-  sortAndDedupIds,
-  parseTokenExpressionToBigints,
   toCanonicalRanges,
   tryToNumberArray,
   formatCanonical,
   formatBigIntWithSeparators,
+  parseTokenExpressionToRanges,
+  mergeCanonicalRanges,
+  removeTokenFromRanges,
 } from "./NftPicker.utils";
 import { NftContractHeader } from "./NftContractHeader";
 import { NftSuggestList } from "./NftSuggestList";
@@ -33,7 +36,7 @@ import {
   useContractOverviewQuery,
   primeContractCache,
 } from "./useAlchemyClient";
-import type { SupportedChain, TokenIdBigInt } from "./NftPicker.types";
+import type { SupportedChain } from "./NftPicker.types";
 import { AllTokensSelectedCard } from "./AllTokensSelectedCard";
 
 const DEFAULT_CHAIN: SupportedChain = "ethereum";
@@ -79,8 +82,12 @@ export function NftPicker({
   className,
   renderTokenExtra,
 }: NftPickerProps) {
-  const initialChain = ensureChain(value?.chain ?? defaultValue?.chain ?? chainProp);
-  const [chain] = useState<SupportedChain>(initialChain);
+  const valueChain = value?.chain;
+  const defaultChain = defaultValue?.chain;
+  const chain = useMemo(
+    () => ensureChain(valueChain ?? defaultChain ?? chainProp),
+    [valueChain, defaultChain, chainProp]
+  );
   const [query, setQuery] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -239,18 +246,18 @@ export function NftPicker({
     () => {
       if (!trimmedTokenInput) {
         return {
-          tokens: [] as TokenSelection,
           ranges: [] as TokenRange[],
           canonical: "",
+          count: BIGINT_ZERO,
           errors: null as ParseError[] | null,
         };
       }
 
       if (!allowRanges && trimmedTokenInput.includes("-")) {
         return {
-          tokens: [] as TokenSelection,
           ranges: [] as TokenRange[],
           canonical: "",
+          count: BIGINT_ZERO,
           errors: [
             {
               input: trimmedTokenInput,
@@ -263,28 +270,30 @@ export function NftPicker({
       }
 
       try {
-        const parsed = parseTokenExpressionToBigints(trimmedTokenInput);
-        const merged = sortAndDedupIds(parsed);
-        const canonicalRanges = toCanonicalRanges(merged);
+        const canonicalRanges = parseTokenExpressionToRanges(trimmedTokenInput);
+        const count = canonicalRanges.reduce(
+          (total, range) => total + (range.end - range.start + BIGINT_ONE),
+          BIGINT_ZERO
+        );
         return {
-          tokens: merged,
           ranges: canonicalRanges,
           canonical: formatCanonical(canonicalRanges),
+          count,
           errors: null as ParseError[] | null,
         };
       } catch (error) {
         if (Array.isArray(error)) {
           return {
-            tokens: [] as TokenSelection,
             ranges: [] as TokenRange[],
             canonical: "",
+            count: BIGINT_ZERO,
             errors: error as ParseError[],
           };
         }
         return {
-          tokens: [] as TokenSelection,
           ranges: [] as TokenRange[],
           canonical: "",
+          count: BIGINT_ZERO,
           errors: [
             {
               input: trimmedTokenInput,
@@ -303,7 +312,7 @@ export function NftPicker({
     !allSelected &&
     Boolean(trimmedTokenInput) &&
     !tokenPreview.errors &&
-    tokenPreview.tokens.length > 0;
+    tokenPreview.count > BIGINT_ZERO;
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
@@ -363,9 +372,9 @@ export function NftPicker({
         text: `${firstError?.message ?? "Invalid token input"}${detail}`,
       };
     }
-    const countLabel = formatCount(tokenPreview.tokens.length);
+    const countLabel = formatCount(tokenPreview.count);
     const canonical = tokenPreview.canonical || trimmedTokenInput;
-    const plural = tokenPreview.tokens.length === 1 ? "token" : "tokens";
+    const plural = tokenPreview.count === BIGINT_ONE ? "token" : "tokens";
     return {
       tone: "success" as const,
       text: `Looks good: ${canonical} • Will add ${countLabel} ${plural}.`,
@@ -395,13 +404,11 @@ export function NftPicker({
     setTokenInput(event.target.value);
   };
 
-  const addTokenIds = (ids: TokenIdBigInt[]) => {
-    if (!ids.length) {
+  const addTokenRanges = (newRanges: TokenRange[]) => {
+    if (!newRanges.length) {
       return;
     }
-    const combined = fromCanonicalRanges(ranges);
-    const merged = sortAndDedupIds([...combined, ...ids]);
-    const canonical = toCanonicalRanges(merged);
+    const canonical = mergeCanonicalRanges(ranges, newRanges);
     setRanges(canonical);
     setAllSelected(false);
     setParseErrors([]);
@@ -412,11 +419,11 @@ export function NftPicker({
     }
   };
 
-  const handleAddTokens = (ids: TokenIdBigInt[]) => {
-    if (!ids.length) {
+  const handleAddRanges = (newRanges: TokenRange[]) => {
+    if (!newRanges.length) {
       return;
     }
-    addTokenIds(ids);
+    addTokenRanges(newRanges);
     setTokenInput("");
     setParseErrors([]);
   };
@@ -425,7 +432,7 @@ export function NftPicker({
     if (!canAddTokens) {
       return;
     }
-    handleAddTokens(tokenPreview.tokens);
+    handleAddRanges(tokenPreview.ranges);
   };
 
   const handleTokenInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -511,8 +518,7 @@ export function NftPicker({
   };
 
   const handleRemoveToken = (tokenId: bigint) => {
-    const filtered = fromCanonicalRanges(ranges).filter((id) => id !== tokenId);
-    const canonical = toCanonicalRanges(filtered);
+    const canonical = removeTokenFromRanges(ranges, tokenId);
     setRanges(canonical);
     setAllSelected(false);
     previousRangesRef.current = null;
@@ -523,8 +529,7 @@ export function NftPicker({
 
   const handleApplyText = () => {
     try {
-      const parsed = parseTokenExpressionToBigints(textValue);
-      const canonical = toCanonicalRanges(sortAndDedupIds(parsed));
+      const canonical = parseTokenExpressionToRanges(textValue);
       setRanges(canonical);
       setParseErrors([]);
       setAllSelected(false);
@@ -681,15 +686,11 @@ export function NftPicker({
                       disabled={!selectedContract}
                       title={selectAllLabel}
                     >
-                      <svg
+                      <FontAwesomeIcon
                         className="tw-h-5 tw-w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                        icon={faCircle}
                         aria-hidden="true"
-                      >
-                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                      </svg>
+                      />
                       <span>{selectAllLabel}</span>
                     </button>
                   )}
