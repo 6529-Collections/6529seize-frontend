@@ -39,17 +39,17 @@ export type TokenMetadata = {
 type BaseSelection = {
   contractAddress: `0x${string}`;
   allSelected: boolean;
-  tokenIdsRaw: TokenIdBigInt[];
+  tokenIdsRaw: readonly TokenIdBigInt[];
 };
 
 export type NftPickerSelection =
   | (BaseSelection & {
       outputMode: "number";
-      tokenIds: number[];
+      tokenIds: readonly number[];
     })
   | (BaseSelection & {
       outputMode: "bigint";
-      tokenIds: string[];
+      tokenIds: readonly string[];
     });
 
 export type NftSelectionOutput = NftPickerSelection;
@@ -57,7 +57,7 @@ export type NftSelectionOutput = NftPickerSelection;
 export type NftPickerValue = {
   chain: SupportedChain;
   contractAddress?: `0x${string}`;
-  selectedIds: TokenSelection;
+  selectedIds: Readonly<TokenSelection>;
   allSelected: boolean;
 };
 

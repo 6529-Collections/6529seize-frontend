@@ -623,14 +623,6 @@ export function NftPicker({
       onChange(payload);
     }
   };
-
-  useEffect(() => {
-    if (!selectedContract) {
-      return;
-    }
-    emitChange(selectedContract, ranges, allSelected);
-  }, [selectedContract, ranges, allSelected]);
-
   const activeSuggestionId = isOpen && suggestionList[activeIndex]
     ? `nft-suggestion-${activeIndex}`
     : undefined;

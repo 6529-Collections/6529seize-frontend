@@ -456,8 +456,50 @@ export async function getTokensMetadata(
 
 const legacyOptions = { method: "GET", headers: { accept: "application/json" } };
 
-async function fetchLegacyUrl(url: string) {
-  const response = await fetch(url, legacyOptions);
+function createAbortError(signal: AbortSignal): Error {
+  if (signal.reason instanceof Error) {
+    return signal.reason;
+  }
+  if (typeof DOMException === "function") {
+    return new DOMException("The operation was aborted.", "AbortError");
+  }
+  const error = new Error("The operation was aborted.");
+  (error as Error & { name: string }).name = "AbortError";
+  return error;
+}
+
+function delayWithAbort(ms: number, signal?: AbortSignal): Promise<void> {
+  if (ms <= 0) {
+    return Promise.resolve();
+  }
+  if (!signal) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+  if (signal.aborted) {
+    return Promise.reject(createAbortError(signal));
+  }
+
+  return new Promise((resolve, reject) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const onAbort = () => {
+      clearTimeout(timeoutId);
+      signal.removeEventListener("abort", onAbort);
+      reject(createAbortError(signal));
+    };
+
+    timeoutId = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+async function fetchLegacyUrl(url: string, signal?: AbortSignal) {
+  const response = await fetch(url, { ...legacyOptions, signal });
   return await response.json();
 }
 
@@ -467,7 +509,8 @@ export async function getNftsForContractAndOwner(
   owner: string,
   nfts?: any[],
   pageKey?: string,
-  retries = 0
+  retries = 0,
+  signal?: AbortSignal
 ) {
   if (!nfts) {
     nfts = [];
@@ -483,18 +526,20 @@ export async function getNftsForContractAndOwner(
   if (pageKey) {
     url += `&pageKey=${pageKey}`;
   }
-  const response = await fetchLegacyUrl(url);
+  const response = await fetchLegacyUrl(url, signal);
   if (response.error) {
     if (retries >= MAX_GET_NFTS_RETRIES) {
       throw new Error("Failed to fetch NFTs for owner after retries");
     }
+    await delayWithAbort(250 * (retries + 1), signal);
     return getNftsForContractAndOwner(
       chainId,
       contract,
       owner,
       nfts,
       pageKey,
-      retries + 1
+      retries + 1,
+      signal
     );
   }
   nfts = [...nfts].concat(response.ownedNfts);
@@ -504,7 +549,9 @@ export async function getNftsForContractAndOwner(
       contract,
       owner,
       nfts,
-      response.pageKey
+      response.pageKey,
+      retries,
+      signal
     );
   }
 

@@ -62,9 +62,8 @@ function getContractCacheKey(
 }
 
 function getTokenCacheKey(params: TokenMetadataParams): string {
-  return `${params.chain ?? "ethereum"}:$${params.address.toLowerCase()}:$${
-    params.tokenIds.join("|")
-  }`;
+  const ids = [...params.tokenIds].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return `${params.chain ?? "ethereum"}:${params.address.toLowerCase()}:${ids.join("|")}`;
 }
 
 function useDebouncedValue<T>(value: T, delay: number): T {
@@ -77,24 +76,24 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 }
 
 type UseCollectionSearchParams = {
-  query: string;
-  chain?: SupportedChain;
-  hideSpam?: boolean;
-  debounceMs?: number;
-  enabled?: boolean;
+  readonly query: string;
+  readonly chain?: SupportedChain;
+  readonly hideSpam?: boolean;
+  readonly debounceMs?: number;
+  readonly enabled?: boolean;
 };
 
 type UseContractOverviewParams = {
-  address?: `0x${string}`;
-  chain?: SupportedChain;
-  enabled?: boolean;
+  readonly address?: `0x${string}`;
+  readonly chain?: SupportedChain;
+  readonly enabled?: boolean;
 };
 
 type UseTokenMetadataParams = {
-  address?: `0x${string}`;
-  tokenIds: readonly string[];
-  chain?: SupportedChain;
-  enabled?: boolean;
+  readonly address?: `0x${string}`;
+  readonly tokenIds: readonly string[];
+  readonly chain?: SupportedChain;
+  readonly enabled?: boolean;
 };
 
 export function useCollectionSearch({

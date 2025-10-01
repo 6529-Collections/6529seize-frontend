@@ -90,6 +90,11 @@ export function NftEditRanges({
       textarea.style.left = "-9999px";
       document.body.appendChild(textarea);
       textarea.select();
+      try {
+        textarea.setSelectionRange(0, textarea.value.length);
+      } catch (error) {
+        /* no-op, best effort for iOS/WebKit */
+      }
       const successful = document.execCommand("copy");
       document.body.removeChild(textarea);
       if (!successful) {
