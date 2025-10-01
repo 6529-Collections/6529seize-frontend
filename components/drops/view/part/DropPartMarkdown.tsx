@@ -197,7 +197,7 @@ function DropPartMarkdown({
               className
             )}
           >
-            {customRenderer(children)}
+            {children}
           </code>
         ),
         a: renderAnchor,
