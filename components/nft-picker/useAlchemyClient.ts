@@ -38,6 +38,14 @@ const suggestionCache = new Map<string, CacheEntry<SearchContractsResult>>();
 const contractCache = new Map<string, CacheEntry<ContractOverview | null>>();
 const tokenCache = new Map<string, CacheEntry<TokenMetadata[]>>();
 
+function gcExpired<T>(map: Map<string, CacheEntry<T>>, now = Date.now()): void {
+  for (const [key, entry] of map) {
+    if (entry.expires <= now) {
+      map.delete(key);
+    }
+  }
+}
+
 function getSuggestionCacheKey(
   query: string,
   chain: SupportedChain,
@@ -110,6 +118,7 @@ export function useCollectionSearch({
         hideSpam
       );
       const now = Date.now();
+      gcExpired(suggestionCache, now);
       const cached = suggestionCache.get(cacheKey);
       if (cached && cached.expires > now) {
         return cached.data;
@@ -168,6 +177,7 @@ export function useContractOverviewQuery({
       }
       const cacheKey = getContractCacheKey(normalizedAddress, chain);
       const now = Date.now();
+      gcExpired(contractCache, now);
       const cached = contractCache.get(cacheKey);
       if (cached && cached.expires > now) {
         return cached.data;
@@ -229,6 +239,7 @@ export function useTokenMetadataQuery({
       }
       const cacheKey = getTokenCacheKey(params);
       const now = Date.now();
+      gcExpired(tokenCache, now);
       const cached = tokenCache.get(cacheKey);
       if (cached && cached.expires > now) {
         return cached.data;
