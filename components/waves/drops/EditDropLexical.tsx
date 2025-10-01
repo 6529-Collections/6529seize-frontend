@@ -81,13 +81,13 @@ const convertCodeNodesToFences = (root: RootNode) => {
 
     if ($isCodeNode(node)) {
       const language = node.getLanguage?.() ?? "";
-      const trimmedLanguage = language.trim();
+      const safeLanguage = language.trim().replace(/[`\n\r]/g, "");
       const codeText = node.getTextContent();
       const normalizedCode = codeText.endsWith("\n")
         ? codeText
         : `${codeText}\n`;
       const fence = "```";
-      const openFence = trimmedLanguage ? `${fence}${trimmedLanguage}` : fence;
+      const openFence = safeLanguage ? `${fence}${safeLanguage}` : fence;
       const fencedMarkdown = `${openFence}\n${normalizedCode}${fence}`;
 
       const paragraph = $createParagraphNode();
