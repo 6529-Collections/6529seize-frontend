@@ -55,6 +55,8 @@ export default function HomeWeb({
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(HOME_TAB_STORAGE_KEY, tab);
+        // Notify other components about tab change
+        window.dispatchEvent(new CustomEvent("homeTabChange", { detail: { tab } }));
       } catch (error) {
         console.warn("Failed to persist home tab to storage", error);
       }

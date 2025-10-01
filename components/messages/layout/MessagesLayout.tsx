@@ -1,86 +1,80 @@
 "use client";
 
-import { ReactNode, useContext, useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import Head from "next/head";
-import { AuthContext } from "../../auth/Auth";
-import { useLayout } from "../../brain/my-stream/layout/LayoutContext";
-import HeaderUserConnect from "../../header/user/HeaderUserConnect";
-import Image from "next/image";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import ClientOnly from "../../client-only/ClientOnly";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
-import MessagesBrain from "../MessagesBrain";
+import MessagesDesktop from "../MessagesDesktop";
+import MessagesMobile from "../MessagesMobile";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import ConnectWallet from "../../common/ConnectWallet";
+import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 
 // Main layout content that uses the Layout context
 function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { showWaves, connectedProfile, fetchingProfile } =
-    useContext(AuthContext);
-  const { spaces } = useLayout();
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { contentState } = useAuthenticatedContent();
+  const { isApp } = useDeviceInfo();
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
 
-  const shouldShowContent = useMemo(
-    () => showWaves && spaces.measurementsComplete,
-    [showWaves, spaces.measurementsComplete]
-  );
-
   const connectPrompt = useMemo(() => {
-    if (!isAuthenticated) {
-      return (
-        <>
+    switch (contentState) {
+      case "needs-profile":
+        return (
+          <>
+            <h1 className="tw-text-xl tw-font-bold">
+              You need to set up a profile to continue.
+            </h1>
+            <UserSetUpProfileCta />
+          </>
+        );
+      case "not-available":
+        return (
           <h1 className="tw-text-xl tw-font-bold">
-            This content is only available to connected wallets.
+            This content is not available.
           </h1>
-          <p className="tw-text-base tw-text-gray-400">
-            Connect your wallet to continue.
-          </p>
-          <HeaderUserConnect />
-        </>
+        );
+      case "loading":
+      case "measuring":
+        // Don't show any text for loading states - let the messages content handle its own loading UI
+        return null;
+      default:
+        return null;
+    }
+  }, [contentState]);
+
+  const content = useMemo(() => {
+    if (contentState === "ready") {
+      // Include device routing here instead of separate Brain component
+      const Component = isApp ? MessagesMobile : MessagesDesktop;
+      return (
+        <div className="tw-flex-1" id="messages-content">
+          <Component>
+            <div className={containerClassName}>{children}</div>
+          </Component>
+        </div>
       );
     }
 
-    if (!connectedProfile?.handle && !fetchingProfile) {
+    if (contentState === "not-authenticated") {
+      return <ConnectWallet />;
+    }
+
+    // For other states (needs-profile, not-available)
+    if (connectPrompt) {
       return (
-        <>
-          <h1 className="tw-text-xl tw-font-bold">
-            You need to set up a profile to continue.
-          </h1>
-          <UserSetUpProfileCta />
-        </>
+        <div className="tw-flex tw-items-center tw-justify-center tw-min-h-screen tw-px-6">
+          <div className="tw-flex tw-flex-col tw-items-center tw-text-center tw-gap-4">
+            {connectPrompt}
+          </div>
+        </div>
       );
     }
 
-    return (
-      <h1 className="tw-text-xl tw-font-bold tw-animate-pulse">Loading...</h1>
-    );
-  }, [isAuthenticated, connectedProfile, fetchingProfile]);
-
-  const content = shouldShowContent ? (
-    <div className="tw-flex-1" id="messages-content">
-      <MessagesBrain>
-        <div className={containerClassName}>{children}</div>
-      </MessagesBrain>
-    </div>
-  ) : (
-    <div
-      id="messages-connect"
-      className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-screen">
-      <Image
-        priority
-        loading="eager"
-        src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
-        alt="Messages"
-        width={304}
-        height={450}
-        className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
-      />
-      <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-        {connectPrompt}
-      </div>
-    </div>
-  );
+    // Loading/measuring states
+    return null;
+  }, [contentState, connectPrompt, containerClassName, children, isApp]);
 
   return (
     <>

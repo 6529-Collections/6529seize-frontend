@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useEffect, useState, useCallback } from "react";
+import React, { ReactNode, useEffect, useState, useCallback, useMemo } from "react";
 import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
@@ -19,13 +19,13 @@ import { createBreakpoint } from "react-use";
 // Breakpoint for mobile responsiveness (lg = 1024px)
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-interface WavesMessagesLayoutProps {
+interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
   readonly defaultPath?: string; // "/waves" or "/messages"
   readonly showLeftSidebar?: boolean;
 }
 
-const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
+const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   children,
   defaultPath = "/waves",
   showLeftSidebar = true,
@@ -43,8 +43,11 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
-  const dropId = searchParams?.get("drop") ?? undefined;
+  const rawDropId = searchParams?.get("drop") ?? undefined;
   const waveId = searchParams?.get("wave") ?? undefined;
+
+  // Validate drop ID format (assuming alphanumeric + hyphens)
+  const dropId = rawDropId && /^[a-zA-Z0-9-_]+$/.test(rawDropId) ? rawDropId : undefined;
 
   // Check if we're on mobile (below LG breakpoint)
   const isMobile = breakpoint === "S";
@@ -56,7 +59,7 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
     }
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
-  const { data: drop } = useQuery<ApiDrop>({
+  const { data: drop, error: dropError, isLoading: dropLoading } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
       await commonApiFetch<ApiDrop>({
@@ -84,10 +87,25 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
     [searchParams, pathname, router]
   );
 
-  const isDropOpen = Boolean(dropId && drop?.id?.toLowerCase() === dropId?.toLowerCase());
+  const isDropOpen = useMemo(
+    () => Boolean(dropId && drop?.id?.toLowerCase() === dropId?.toLowerCase()),
+    [dropId, drop?.id]
+  );
 
   const contentClasses =
     "tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto";
+
+  // Clear logic for when to show each part
+  const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
+  const shouldShowMainContent = !isMobile || waveId;
+  const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
+  const shouldShowRightSidebar = isRightSidebarOpen && !isDropOpen && waveId;
+
+  // Handle error state for drop loading
+  if (dropError && dropId) {
+    console.error("Failed to load drop:", dropError);
+    // Could show an error toast here
+  }
 
   return (
     <>
@@ -100,13 +118,13 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
               className="tw-flex tw-flex-row tw-justify-between tw-w-full tw-overflow-hidden"
               style={contentContainerStyle}
             >
-              {showLeftSidebar && (!isMobile || !waveId) && (
+              {shouldShowLeftSidebar && (
                 <WebBrainLeftSidebar />
               )}
-              {(!isMobile || waveId) && (
+              {shouldShowMainContent && (
                 <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0">
                   {children}
-                  {isDropOpen && drop && (
+                  {shouldShowDropOverlay && (
                     <div className="tw-absolute tw-inset-0 tw-z-[49]">
                       <BrainDesktopDrop
                         drop={{
@@ -127,7 +145,7 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
       </div>
 
       {/* Overlay backdrop when right sidebar is open - moved outside motion container */}
-      {isRightSidebarOpen && !isDropOpen && waveId && (
+      {shouldShowRightSidebar && (
         <>
           <div
             className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[49]"
@@ -155,4 +173,4 @@ const WavesMessagesLayout: React.FC<WavesMessagesLayoutProps> = ({
   );
 };
 
-export default WavesMessagesLayout;
+export default WavesMessagesWrapper;

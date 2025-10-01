@@ -8,11 +8,11 @@ import MyStreamWaveChat from "./MyStreamWaveChat";
 import { useWaveData } from "../../../hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
-import { createBreakpoint } from "react-use";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
+import SpinnerLoader from "../../common/SpinnerLoader";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "../../../contexts/wave/MyStreamContext";
@@ -21,13 +21,10 @@ interface MyStreamWaveProps {
   readonly waveId: string;
 }
 
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
-
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
-  const breakpoint = useBreakpoint();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -71,7 +68,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
-    return null;
+    return (
+      <div className="tw-flex tw-items-center tw-justify-center tw-h-full">
+        <SpinnerLoader text="Loading..." />
+      </div>
+    );
   }
 
   // Create component instances with wave-specific props and stable measurements

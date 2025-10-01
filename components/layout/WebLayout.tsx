@@ -25,7 +25,7 @@ const WebLayout = ({ children }: WebLayoutProps) => {
   const rootStyle = useMemo<LayoutCssVars>(
     () => ({
       "--left-rail": sidebarWidth,
-      height: "100dvh",
+      minHeight: "100dvh",
     }),
     [sidebarWidth]
   );

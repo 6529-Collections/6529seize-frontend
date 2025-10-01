@@ -90,11 +90,10 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
 
 export async function middleware(req: NextRequest) {
   try {
-    // Temporarily disable static redirect mappings while testing.
-    // const redirectResponse = handleRedirects(req);
-    // if (redirectResponse) {
-    //   return redirectResponse;
-    // }
+    const redirectResponse = handleRedirects(req);
+    if (redirectResponse) {
+      return redirectResponse;
+    }
 
     const { pathname } = req.nextUrl;
     const normalizedPathname =
@@ -102,62 +101,59 @@ export async function middleware(req: NextRequest) {
         ? pathname.slice(0, -1)
         : pathname;
 
-    // Handle all my-stream redirects for desktop users (including Electron)
-    // Redirect logic disabled for now so that all clients stay on the legacy routes.
-    // if (normalizedPathname.startsWith("/my-stream")) {
-    //   const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
-    //   const isAndroid = userAgent.includes("android");
-    //   const isIOS =
-    //     userAgent.includes("iphone") ||
-    //     userAgent.includes("ipad") ||
-    //     userAgent.includes("ipod");
-    //   const isMacDesktop =
-    //     userAgent.includes("macintosh") ||
-    //     (userAgent.includes("mac os x") && !userAgent.includes("mobile"));
-    //   const isLinuxDesktop =
-    //     userAgent.includes("linux") &&
-    //     !isAndroid &&
-    //     !userAgent.includes("mobile");
+    if (normalizedPathname.startsWith("/my-stream")) {
+      const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
+      const isAndroid = userAgent.includes("android");
+      const isIOS =
+        userAgent.includes("iphone") ||
+        userAgent.includes("ipad") ||
+        userAgent.includes("ipod");
+      const isMacDesktop =
+        userAgent.includes("macintosh") ||
+        (userAgent.includes("mac os x") && !userAgent.includes("mobile"));
+      const isLinuxDesktop =
+        userAgent.includes("linux") &&
+        !isAndroid &&
+        !userAgent.includes("mobile");
 
-    //   const isDesktopOS =
-    //     !isAndroid &&
-    //     !isIOS &&
-    //     (userAgent.includes("windows") ||
-    //       userAgent.includes("x11") ||
-    //       userAgent.includes("cros") ||
-    //       isMacDesktop ||
-    //       isLinuxDesktop);
+      const isDesktopOS =
+        !isAndroid &&
+        !isIOS &&
+        (userAgent.includes("windows") ||
+          userAgent.includes("x11") ||
+          userAgent.includes("cros") ||
+          isMacDesktop ||
+          isLinuxDesktop);
 
-    //   if (isDesktopOS) {
-    //     const url = req.nextUrl.clone();
+      if (isDesktopOS) {
+        const url = req.nextUrl.clone();
 
-    //     if (normalizedPathname === "/my-stream/notifications") {
-    //       url.pathname = "/notifications";
-    //       url.search = ""; // notifications doesn't need params from my-stream
-    //       return NextResponse.redirect(url, 301);
-    //     }
+        if (normalizedPathname === "/my-stream/notifications") {
+          url.pathname = "/notifications";
+          url.search = "";
+          return NextResponse.redirect(url, 301);
+        }
 
-    //     if (normalizedPathname === "/my-stream") {
-    //       const view = req.nextUrl.searchParams.get("view");
+        if (normalizedPathname === "/my-stream") {
+          const view = req.nextUrl.searchParams.get("view");
 
-    //       if (view === "messages") {
-    //         const wave = req.nextUrl.searchParams.get("wave");
-    //         url.pathname = "/messages";
-    //         url.search = wave ? `?wave=${wave}` : "";
-    //         return NextResponse.redirect(url, 301);
-    //       }
+          if (view === "messages") {
+            const wave = req.nextUrl.searchParams.get("wave");
+            url.pathname = "/messages";
+            url.search = wave ? `?wave=${wave}` : "";
+            return NextResponse.redirect(url, 301);
+          }
 
-    //       // Default: redirect to /waves with all params preserved (except view)
-    //       url.pathname = "/waves";
-    //       const params = new URLSearchParams(req.nextUrl.searchParams);
-    //       if (params.has("view")) {
-    //         params.delete("view");
-    //       }
-    //       url.search = params.toString() ? `?${params.toString()}` : "";
-    //       return NextResponse.redirect(url, 301);
-    //     }
-    //   }
-    // }
+          url.pathname = "/waves";
+          const params = new URLSearchParams(req.nextUrl.searchParams);
+          if (params.has("view")) {
+            params.delete("view");
+          }
+          url.search = params.toString() ? `?${params.toString()}` : "";
+          return NextResponse.redirect(url, 301);
+        }
+      }
+    }
 
     if (
       normalizedPathname.startsWith("/api") ||

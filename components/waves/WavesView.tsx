@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
@@ -14,13 +14,9 @@ const WavesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
-  const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  useEffect(() => {
-    const waveId = searchParams?.get('wave') || null;
-    setSerialisedWaveId(waveId);
-  }, [searchParams]);
+  const serialisedWaveId = searchParams?.get('wave') || null;
 
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
@@ -47,6 +43,9 @@ const WavesView: React.FC = () => {
     </div>
   );
 
+  // Note: Wave views (MyStreamWave) manage their own activeDrop state
+  // internally via MyStreamWaveChat. We pass null to BrainContent because
+  // the wave's internal state controls the reply/quote input box.
   return (
     <>
       <BrainContent
@@ -67,4 +66,4 @@ const WavesView: React.FC = () => {
   );
 };
 
-export default WavesView;
+export default React.memo(WavesView);

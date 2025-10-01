@@ -14,7 +14,7 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
     <div className="tw-relative tw-shrink-0 tw-h-12 tw-flex tw-items-center tw-justify-between tw-px-2">
       <Link
         href="/"
-        className={`tw-flex tw-items-center tw-ml-1.5 tw-transition-all tw-duration-300 tw-ease-in-out ${
+        className={`tw-relative tw-z-10 tw-flex tw-items-center tw-ml-1.5 tw-transition-all tw-duration-100 tw-ease-in-out ${
           collapsed
             ? "tw-opacity-0 tw-scale-75 tw-pointer-events-none"
             : "tw-opacity-100 tw-scale-100"
