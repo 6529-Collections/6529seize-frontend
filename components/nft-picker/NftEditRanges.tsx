@@ -121,7 +121,7 @@ export function NftEditRanges({
       ? "tw-text-red-300"
       : "tw-text-transparent";
 
-  const copyDisabled = !canonical;
+  const showCopyButton = hasTokens && Boolean(canonical);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-border tw-border-primary-500/30 tw-bg-primary-500/5 tw-p-4">
@@ -132,27 +132,35 @@ export function NftEditRanges({
             <span className="tw-flex-1 tw-break-words tw-font-mono tw-text-xs tw-text-iron-200">
               {summaryText}
             </span>
-            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-              <button
-                type="button"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-primary-500/50 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-primary-200 hover:tw-border-primary-500 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-                onClick={handleCopy}
-                disabled={copyDisabled}
-                aria-label="Copy token selection"
-              >
-                <CopyIcon />
-                Copy
-              </button>
-            </div>
+            {showCopyButton && (
+              <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+                <button
+                  type="button"
+                  className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-primary-500/50 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-primary-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                  onClick={handleCopy}
+                  aria-label="Copy token selection"
+                >
+                  {copyStatus === "copied" ? (
+                    <span className="tw-font-semibold tw-text-emerald-300">✓ Copied!</span>
+                  ) : (
+                    <>
+                      <CopyIcon />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
-          <span
-            aria-live="polite"
-            role="status"
-            aria-hidden={copyStatus === "idle"}
-            className={`tw-min-h-[1.25rem] tw-text-xs tw-font-medium ${copyClassName}`}
-          >
-            {copyMessage}
-          </span>
+          {copyStatus !== "idle" && (
+            <span
+              aria-live="polite"
+              role="status"
+              className={`tw-min-h-[1.25rem] tw-text-xs tw-font-medium ${copyClassName}`}
+            >
+              {copyMessage}
+            </span>
+          )}
         </div>
         <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row">
           <button

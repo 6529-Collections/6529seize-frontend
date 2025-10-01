@@ -16,6 +16,7 @@ import {
 import { useTokenMetadataQuery } from "./useAlchemyClient";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
+import Spinner from "@/components/utils/Spinner";
 
 interface NftTokenListProps {
   readonly contractAddress?: `0x${string}`;
@@ -162,6 +163,7 @@ export function NftTokenList({
           }
           const decimalId = toDecimalString(tokenId);
           const metadata = metadataMap.get(decimalId);
+          const isLoadingMetadata = metadataQuery.isFetching && !metadata;
           return (
             <div
               key={decimalId}
@@ -182,6 +184,10 @@ export function NftTokenList({
                     sizes="40px"
                     className="tw-h-full tw-w-full tw-object-cover"
                   />
+                ) : isLoadingMetadata ? (
+                  <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center" role="status" aria-label="Loading thumbnail">
+                    <Spinner />
+                  </div>
                 ) : (
                   <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
                     #{decimalId}
