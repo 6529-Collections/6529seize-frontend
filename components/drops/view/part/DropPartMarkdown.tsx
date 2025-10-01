@@ -31,6 +31,82 @@ import { highlightCodeElement } from "./dropPartMarkdown/highlight";
 
 const BreakComponent = () => <br />;
 
+const mergeClassNames = (
+  ...classes: Array<string | undefined>
+): string => classes.filter(Boolean).join(" ");
+
+const headingClassName = "tw-text-iron-200 tw-break-words word-break";
+
+type MarkdownRendererProps<T extends ElementType> = ComponentPropsWithoutRef<T> &
+  ExtraProps & { children?: ReactNode; className?: string };
+
+type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
+  inline?: boolean;
+};
+
+const InlineCodeRenderer = ({
+  children,
+  className,
+  style,
+  ...props
+}: MarkdownCodeProps) => (
+  <code
+    {...props}
+    style={{ ...style, textOverflow: "unset" }}
+    className={mergeClassNames(
+      "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
+      className
+    )}
+  >
+    {children}
+  </code>
+);
+
+const CodeBlockRenderer = ({
+  children,
+  className,
+  style,
+  ...props
+}: MarkdownCodeProps) => {
+  const codeRef = useRef<HTMLElement>(null);
+
+  const language = useMemo(() => {
+    const match =
+      typeof className === "string"
+        ? /language-([\w+-]+)/.exec(className)
+        : null;
+
+    return match?.[1] ?? null;
+  }, [className]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const element = codeRef.current;
+    if (!element) {
+      return;
+    }
+
+    void highlightCodeElement(element, language);
+  }, [language, children]);
+
+  return (
+    <code
+      {...props}
+      ref={codeRef}
+      style={{ ...style, textOverflow: "unset" }}
+      className={mergeClassNames(
+        "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
+        className
+      )}
+    >
+      {children}
+    </code>
+  );
+};
+
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
@@ -142,15 +218,6 @@ function DropPartMarkdown({
 
   const markdownComponents = useMemo<Components>(
     () => {
-      const mergeClassNames = (
-        ...classes: Array<string | undefined>
-      ): string => classes.filter(Boolean).join(" ");
-
-      const headingClassName = "tw-text-iron-200 tw-break-words word-break";
-
-      type MarkdownRendererProps<T extends ElementType> = ComponentPropsWithoutRef<T> &
-        ExtraProps & { children?: ReactNode; className?: string };
-
       const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
         const HeadingRenderer = ({
           children,
@@ -173,71 +240,6 @@ function DropPartMarkdown({
         HeadingRenderer.displayName = `MarkdownHeading(${typeof Tag === "string" ? Tag : "component"})`;
 
         return HeadingRenderer;
-      };
-
-      type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
-        inline?: boolean;
-      };
-
-      const InlineCodeRenderer = ({
-        children,
-        className,
-        style,
-        ...props
-      }: MarkdownCodeProps) => (
-        <code
-          {...props}
-          style={{ ...style, textOverflow: "unset" }}
-          className={mergeClassNames(
-            "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
-            className
-          )}
-        >
-          {children}
-        </code>
-      );
-
-      const CodeBlockRenderer = ({
-        children,
-        className,
-        style,
-        ...props
-      }: MarkdownCodeProps) => {
-        const codeRef = useRef<HTMLElement>(null);
-
-        const language = useMemo(() => {
-          const match = typeof className === "string"
-            ? /language-([\w+-]+)/.exec(className)
-            : null;
-          return match?.[1] ?? null;
-        }, [className]);
-
-        useEffect(() => {
-          if (typeof window === "undefined") {
-            return;
-          }
-
-          const element = codeRef.current;
-          if (!element) {
-            return;
-          }
-
-          void highlightCodeElement(element, language);
-        }, [language, children]);
-
-        return (
-          <code
-            {...props}
-            ref={codeRef}
-            style={{ ...style, textOverflow: "unset" }}
-            className={mergeClassNames(
-              "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
-              className
-            )}
-          >
-            {children}
-          </code>
-        );
       };
 
       return {
