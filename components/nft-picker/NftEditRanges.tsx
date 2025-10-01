@@ -122,6 +122,9 @@ export function NftEditRanges({
       : "tw-text-transparent";
 
   const showCopyButton = hasTokens && Boolean(canonical);
+  const showToggleButton = hasTokens || isEditing;
+  const showClearButton = hasTokens;
+  const showActionButtons = showToggleButton || showClearButton;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-border tw-border-primary-500/30 tw-bg-primary-500/5 tw-p-4">
@@ -162,23 +165,28 @@ export function NftEditRanges({
             </span>
           )}
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row">
-          <button
-            type="button"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-            onClick={onToggle}
-          >
-            {isEditing ? "Hide text editor" : "Edit as text"}
-          </button>
-          <button
-            type="button"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 disabled:tw-opacity-40"
-            onClick={onClear}
-            disabled={!hasTokens}
-          >
-            Clear All
-          </button>
-        </div>
+        {showActionButtons && (
+          <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row">
+            {showToggleButton && (
+              <button
+                type="button"
+                className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                onClick={onToggle}
+              >
+                {isEditing ? "Hide text editor" : "Edit as text"}
+              </button>
+            )}
+            {showClearButton && (
+              <button
+                type="button"
+                className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                onClick={onClear}
+              >
+                Clear All
+              </button>
+            )}
+          </div>
+        )}
       </div>
       {isEditing && (
         <div className="tw-flex tw-flex-col tw-gap-2">
