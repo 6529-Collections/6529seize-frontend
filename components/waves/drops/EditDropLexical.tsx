@@ -103,7 +103,6 @@ const convertCodeNodesToFences = (root: RootNode) => {
   }
 };
 
-// Plugin to set initial content from markdown
 function reconstructSplitMention(
   currentNode: any,
   nextNode: any,
@@ -122,14 +121,12 @@ function reconstructSplitMention(
   const currentText = currentNode.getTextContent();
   const nextText = nextNode.getTextContent();
 
-  // Calculate text before and after mention
   const beforeMention = currentText.substring(
     0,
     currentText.length - mentionStart[0].length
   );
   const afterMention = nextText.substring(mentionEnd[0].length);
 
-  // Update or remove current node
   if (beforeMention) {
     currentNode.setTextContent(beforeMention);
     currentNode.insertAfter(mentionNode);
@@ -138,7 +135,6 @@ function reconstructSplitMention(
     nextNode.insertBefore(mentionNode);
   }
 
-  // Update or remove next node
   if (afterMention) {
     nextNode.setTextContent(afterMention);
   } else {
@@ -156,7 +152,6 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
     const currentText = currentNode.getTextContent();
     const nextText = nextNode.getTextContent();
 
-    // Check for @[ at end of current node and word] at start of next
     const mentionStart = currentText.match(/@\[\w*$/);
     const mentionEnd = nextText.match(/^\w*\]/);
 
@@ -165,7 +160,7 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
         if (
           reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
         ) {
-          return true; // Tree changed; caller should re-run with fresh text nodes
+          return true;
         }
       } catch (error) {
         console.warn("Failed to reconstruct split mention", error);
@@ -183,7 +178,6 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
     editor.update(() => {
       $convertFromMarkdownString(initialContent, EDIT_MARKDOWN_TRANSFORMERS);
 
-      // Post-process: reconstruct mentions split across text nodes
       const root = $getRoot();
       convertCodeNodesToFences(root);
 
@@ -363,7 +357,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       };
 
       setMentionedUsers((prev) => {
-        // Avoid duplicates
         if (
           prev.some(
             (m) => m.mentioned_profile_id === newMention.mentioned_profile_id
@@ -383,7 +376,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     editorState.read(() => {
       const markdown = $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
 
-      // If no changes, silently exit edit mode without API call
       if (markdown.trim() === initialContent.trim()) {
         onCancel();
         return;

@@ -41,7 +41,6 @@ const isCodeTransformer = (transformer: Transformer): boolean => {
 
 export const SAFE_MARKDOWN_TRANSFORMERS = BASE_SAFE_TRANSFORMERS;
 
-// Variant that keeps fenced code fences as raw markdown (useful for edit mode).
 export const SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE =
   BASE_SAFE_TRANSFORMERS.filter(
     (transformer) =>
