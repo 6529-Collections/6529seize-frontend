@@ -22,6 +22,7 @@ jest.mock('../../../../../components/drops/create/lexical/plugins/DragDropPasteP
 jest.mock('../../../../../components/drops/create/lexical/plugins/enter/EnterKeyPlugin', () => () => null);
 jest.mock('../../../../../components/drops/create/lexical/plugins/AutoFocusPlugin', () => () => null);
 jest.mock('../../../../../components/drops/create/lexical/plugins/emoji/EmojiPlugin', () => () => null);
+jest.mock('../../../../../components/drops/create/lexical/plugins/PlainTextPastePlugin', () => () => null);
 jest.mock('../../../../../components/waves/CreateDropEmojiPicker', () => () => <div />);
 jest.mock('../../../../../components/drops/create/utils/storm/CreateDropParts', () => () => <div data-testid="parts" />);
 jest.mock('../../../../../components/drops/create/utils/CreateDropActionsRow', () => () => <div data-testid="actions" />);

@@ -1,56 +1,56 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import EditDropLexical from '../../../../components/waves/drops/EditDropLexical';
-import { ApiDropMentionedUser } from '../../../../generated/models/ApiDropMentionedUser';
+import type { ApiDropMentionedUser } from '../../../../generated/models/ApiDropMentionedUser';
 
-// Mock all Lexical dependencies
+type MentionSelectHandler = (user: {
+  mentioned_profile_id: string;
+  handle_in_content: string;
+}) => void;
+
+const rootMock = {
+  getChildren: jest.fn(() => [] as unknown[]),
+  getAllTextNodes: jest.fn(() => [] as unknown[]),
+  selectEnd: jest.fn(),
+};
+const getRootMock = jest.fn(() => rootMock);
+const editorMock = {
+  update: jest.fn(),
+  getEditorState: jest.fn(() => ({
+    read: (fn: () => void) => fn(),
+  })),
+  registerCommand: jest.fn(() => jest.fn()),
+  focus: jest.fn(),
+};
+
+let mentionSelectHandler: MentionSelectHandler | null = null;
+
 jest.mock('@lexical/list', () => ({
-  ListNode: class MockListNode {
-    static getType() { return 'list'; }
-  },
-  ListItemNode: class MockListItemNode {
-    static getType() { return 'listitem'; }
-  },
+  ListNode: class MockListNode {},
+  ListItemNode: class MockListItemNode {},
 }));
-
 jest.mock('@lexical/rich-text', () => ({
-  HeadingNode: class MockHeadingNode {
-    static getType() { return 'heading'; }
-  },
-  QuoteNode: class MockQuoteNode {
-    static getType() { return 'quote'; }
-  },
+  HeadingNode: class MockHeadingNode {},
+  QuoteNode: class MockQuoteNode {},
 }));
-
 jest.mock('@lexical/react/LexicalHorizontalRuleNode', () => ({
-  HorizontalRuleNode: class MockHorizontalRuleNode {
-    static getType() { return 'horizontalrule'; }
-  },
+  HorizontalRuleNode: class MockHorizontalRuleNode {},
 }));
-
 jest.mock('@lexical/code', () => ({
-  CodeHighlightNode: class MockCodeHighlightNode {
-    static getType() { return 'code-highlight'; }
-  },
-  CodeNode: class MockCodeNode {
-    static getType() { return 'code'; }
-  },
+  CodeHighlightNode: class MockCodeHighlightNode {},
+  CodeNode: class MockCodeNode {},
+  $isCodeNode: () => false,
 }));
-
 jest.mock('@lexical/link', () => ({
-  AutoLinkNode: class MockAutoLinkNode {
-    static getType() { return 'autolink'; }
-  },
-  LinkNode: class MockLinkNode {
-    static getType() { return 'link'; }
-  },
+  AutoLinkNode: class MockAutoLinkNode {},
+  LinkNode: class MockLinkNode {},
 }));
-
 jest.mock('@lexical/react/LexicalComposer', () => ({
-  LexicalComposer: ({ children }: any) => <div data-testid="lexical-composer">{children}</div>,
+  LexicalComposer: ({ children }: any) => (
+    <div data-testid="lexical-composer">{children}</div>
+  ),
 }));
-
 jest.mock('@lexical/react/LexicalRichTextPlugin', () => ({
   RichTextPlugin: ({ contentEditable, placeholder }: any) => (
     <div data-testid="rich-text-plugin">
@@ -59,126 +59,66 @@ jest.mock('@lexical/react/LexicalRichTextPlugin', () => ({
     </div>
   ),
 }));
-
 jest.mock('@lexical/react/LexicalContentEditable', () => ({
   ContentEditable: ({ className, style }: any) => (
-    <div 
+    <div
       data-testid="content-editable"
       className={className}
       style={style}
       contentEditable="true"
-      suppressContentEditableWarning={true}
+      suppressContentEditableWarning
     />
   ),
 }));
-
 jest.mock('@lexical/react/LexicalErrorBoundary', () => ({
   __esModule: true,
-  default: ({ children }: any) => <div data-testid="error-boundary">{children}</div>,
+  default: () => null,
 }));
-
 jest.mock('@lexical/react/LexicalHistoryPlugin', () => ({
-  HistoryPlugin: () => <div data-testid="history-plugin" />,
+  HistoryPlugin: () => null,
 }));
-
 jest.mock('@lexical/react/LexicalOnChangePlugin', () => ({
   OnChangePlugin: ({ onChange }: any) => {
-    // Simulate editor state change
     React.useEffect(() => {
       const mockEditorState = {
         read: (fn: () => void) => fn(),
       };
       onChange(mockEditorState);
     }, [onChange]);
-    return <div data-testid="onchange-plugin" />;
+    return null;
   },
 }));
-
 jest.mock('@lexical/react/LexicalMarkdownShortcutPlugin', () => ({
-  MarkdownShortcutPlugin: () => <div data-testid="markdown-plugin" />,
+  MarkdownShortcutPlugin: () => null,
 }));
-
 jest.mock('@lexical/react/LexicalListPlugin', () => ({
-  ListPlugin: () => <div data-testid="list-plugin" />,
+  ListPlugin: () => null,
 }));
-
 jest.mock('@lexical/react/LexicalLinkPlugin', () => ({
-  LinkPlugin: () => <div data-testid="link-plugin" />,
+  LinkPlugin: () => null,
 }));
-
-jest.mock('@lexical/react/LexicalComposerContext', () => ({
-  useLexicalComposerContext: () => [
-    {
-      update: jest.fn((fn) => fn()),
-      getEditorState: () => ({
-        read: (fn: () => void) => fn(),
-      }),
-      registerCommand: jest.fn(() => jest.fn()),
-      focus: jest.fn(),
-    },
-  ],
+jest.mock('../../../../components/drops/create/lexical/plugins/PlainTextPastePlugin', () => ({
+  __esModule: true,
+  default: () => null,
 }));
-
-jest.mock('@lexical/markdown', () => ({
-  TRANSFORMERS: [],
-  $convertFromMarkdownString: jest.fn(),
-  $convertToMarkdownString: jest.fn(() => 'mock markdown'),
-}));
-
-jest.mock('lexical', () => ({
-  $getRoot: jest.fn(() => ({
-    getAllTextNodes: jest.fn(() => []),
-    selectEnd: jest.fn(),
-  })),
-  COMMAND_PRIORITY_HIGH: 4,
-  KEY_ENTER_COMMAND: 'KEY_ENTER_COMMAND',
-  KEY_ESCAPE_COMMAND: 'KEY_ESCAPE_COMMAND',
-  TextNode: class MockTextNode {},
-}));
-
-// Mock the custom plugins and nodes
-jest.mock('../../../../components/drops/create/lexical/nodes/MentionNode', () => ({
-  MentionNode: class MockMentionNode {
-    static getType() { return 'mention'; }
-  },
-  $createMentionNode: jest.fn(() => ({ type: 'mention' })),
-}));
-
-jest.mock('../../../../components/drops/create/lexical/nodes/HashtagNode', () => ({
-  HashtagNode: class MockHashtagNode {
-    static getType() { return 'hashtag'; }
-  },
-}));
-
-jest.mock('../../../../components/drops/create/lexical/transformers/MentionTransformer', () => ({
-  MENTION_TRANSFORMER: { type: 'mention-transformer' },
-}));
-
-jest.mock('../../../../components/drops/create/lexical/transformers/HastagTransformer', () => ({
-  HASHTAG_TRANSFORMER: { type: 'hashtag-transformer' },
-}));
-
-jest.mock('../../../../components/drops/create/lexical/nodes/EmojiNode', () => ({
-  EmojiNode: class MockEmojiNode {
-    static getType() { return 'emoji'; }
-  },
-}));
-
 jest.mock('../../../../components/drops/create/lexical/plugins/emoji/EmojiPlugin', () => ({
   __esModule: true,
-  default: () => <div data-testid="emoji-plugin" />,
+  default: () => null,
 }));
-
-jest.mock('../../../../components/drops/create/lexical/ExampleTheme', () => ({
+jest.mock('../../../../components/waves/CreateDropEmojiPicker', () => ({
   __esModule: true,
-  default: {},
+  default: () => <div data-testid="emoji-picker" />,
 }));
-
+jest.mock('../../../../hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: () => ({ isApp: false }),
+}));
 jest.mock('../../../../components/drops/create/lexical/plugins/mentions/MentionsPlugin', () => {
   const React = require('react');
   return {
     __esModule: true,
     default: React.forwardRef(({ onSelect }: any, ref: any) => {
+      mentionSelectHandler = onSelect;
       React.useImperativeHandle(ref, () => ({
         isMentionsOpen: jest.fn(() => false),
       }));
@@ -186,15 +126,63 @@ jest.mock('../../../../components/drops/create/lexical/plugins/mentions/Mentions
     }),
   };
 });
-
-jest.mock('../../../../components/waves/CreateDropEmojiPicker', () => ({
-  __esModule: true,
-  default: () => <div data-testid="emoji-picker" />,
+jest.mock('../../../../components/drops/create/lexical/nodes/MentionNode', () => ({
+  MentionNode: class MockMentionNode {},
+  $createMentionNode: jest.fn(() => ({ type: 'mention' })),
 }));
-
-jest.mock('../../../../hooks/useDeviceInfo', () => ({
+jest.mock('../../../../components/drops/create/lexical/nodes/HashtagNode', () => ({
+  HashtagNode: class MockHashtagNode {},
+}));
+jest.mock('../../../../components/drops/create/lexical/nodes/EmojiNode', () => ({
+  EmojiNode: class MockEmojiNode {},
+}));
+jest.mock('../../../../components/drops/create/lexical/ExampleTheme', () => ({
   __esModule: true,
-  default: () => ({ isApp: false }),
+  default: {},
+}));
+jest.mock('../../../../components/drops/create/lexical/transformers/MentionTransformer', () => ({
+  MENTION_TRANSFORMER: {},
+}));
+jest.mock('../../../../components/drops/create/lexical/transformers/HastagTransformer', () => ({
+  HASHTAG_TRANSFORMER: {},
+}));
+jest.mock('@/components/drops/create/lexical/transformers/markdownTransformers', () => ({
+  SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE: [],
+}));
+jest.mock('@lexical/react/LexicalComposerContext', () => ({
+  useLexicalComposerContext: () => [editorMock],
+}));
+jest.mock('@lexical/markdown', () => ({
+  __esModule: true,
+  $convertFromMarkdownString: jest.fn(),
+  $convertToMarkdownString: jest.fn(() => 'mock markdown'),
+}));
+const {
+  $convertFromMarkdownString: convertFromMarkdownStringMock,
+  $convertToMarkdownString: convertToMarkdownStringMock,
+} = jest.requireMock('@lexical/markdown') as {
+  $convertFromMarkdownString: jest.Mock;
+  $convertToMarkdownString: jest.Mock;
+};
+jest.mock('lexical', () => ({
+  $getRoot: getRootMock,
+  COMMAND_PRIORITY_HIGH: 4,
+  KEY_ENTER_COMMAND: 'KEY_ENTER_COMMAND',
+  KEY_ESCAPE_COMMAND: 'KEY_ESCAPE_COMMAND',
+  TextNode: class MockTextNode {},
+  $createParagraphNode: jest.fn(() => ({
+    append: jest.fn(),
+    replace: jest.fn(),
+  })),
+  $createTextNode: jest.fn(() => ({
+    setTextContent: jest.fn(),
+    insertAfter: jest.fn(),
+    insertBefore: jest.fn(),
+    remove: jest.fn(),
+    getTextContent: jest.fn(() => ''),
+  })),
+  $isElementNode: jest.fn(() => false),
+  $isCodeNode: jest.fn(() => false),
 }));
 
 describe('EditDropLexical', () => {
@@ -209,175 +197,92 @@ describe('EditDropLexical', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    convertToMarkdownStringMock.mockReturnValue('mock markdown');
+    convertFromMarkdownStringMock.mockReset();
+    rootMock.getChildren.mockReturnValue([]);
+    rootMock.getAllTextNodes.mockReturnValue([]);
+    mentionSelectHandler = null;
   });
 
-  describe('Component Rendering', () => {
-    it('renders without crashing', () => {
-      render(<EditDropLexical {...defaultProps} />);
-      expect(screen.getByTestId('lexical-composer')).toBeInTheDocument();
-    });
-
-    it('renders all required plugins', () => {
-      render(<EditDropLexical {...defaultProps} />);
-      
-      expect(screen.getByTestId('rich-text-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('content-editable')).toBeInTheDocument();
-      expect(screen.getByTestId('onchange-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('history-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('markdown-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('list-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('link-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('mentions-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('emoji-plugin')).toBeInTheDocument();
-      expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
-    });
-
-    it('renders save and cancel buttons', () => {
-      render(<EditDropLexical {...defaultProps} />);
-      
-      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
-    });
-
-    it('displays help text for keyboard shortcuts', () => {
-      render(<EditDropLexical {...defaultProps} />);
-      
-      expect(screen.getByText(/escape to/i)).toBeInTheDocument();
-      expect(screen.getByText(/enter to/i)).toBeInTheDocument();
-    });
-
-    it('renders placeholder text', () => {
-      render(<EditDropLexical {...defaultProps} />);
-      
-      expect(screen.getByText('Edit message...')).toBeInTheDocument();
-    });
+  it('renders placeholder text and emoji picker', () => {
+    render(<EditDropLexical {...defaultProps} />);
+    expect(screen.getByText('Edit message...')).toBeInTheDocument();
+    expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
   });
 
-  describe('Button Interactions', () => {
-    it('calls onCancel when cancel button is clicked', async () => {
-      const user = userEvent.setup();
-      const onCancel = jest.fn();
-      
-      render(<EditDropLexical {...defaultProps} onCancel={onCancel} />);
-      
-      const cancelButton = screen.getByRole('button', { name: /cancel/i });
-      await user.click(cancelButton);
-      
-      expect(onCancel).toHaveBeenCalledTimes(1);
+  it('saves updated markdown together with unique mentions', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    convertToMarkdownStringMock.mockReturnValue('updated markdown');
+
+    render(<EditDropLexical {...defaultProps} onSave={onSave} onCancel={onCancel} />);
+
+    expect(mentionSelectHandler).toBeTruthy();
+    const mention = { mentioned_profile_id: 'profile-1', handle_in_content: 'user1' };
+
+    await act(async () => {
+      mentionSelectHandler?.(mention);
+      mentionSelectHandler?.(mention);
     });
 
-    it('calls handleSave when save button is clicked', async () => {
-      const user = userEvent.setup();
-      const onSave = jest.fn();
-      
-      render(<EditDropLexical {...defaultProps} onSave={onSave} />);
-      
-      const saveButton = screen.getByRole('button', { name: /save/i });
-      await user.click(saveButton);
-      
-      // Note: handleSave will call onCancel if no changes detected (mock markdown returns 'mock markdown' vs 'Initial content here')
-      // In a real test environment, we'd mock the markdown conversion to simulate content changes
-      expect(onSave).toHaveBeenCalledWith('mock markdown', []);
-    });
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    await user.click(saveButton);
+
+    expect(onSave).toHaveBeenCalledWith('updated markdown', [
+      { mentioned_profile_id: 'profile-1', handle_in_content: 'user1' },
+    ]);
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
-  describe('Content Handling', () => {
-    it('initializes with provided content', () => {
-      const initialContent = 'Test initial content';
-      render(<EditDropLexical {...defaultProps} initialContent={initialContent} />);
-      
-      // The initial content is processed through the InitialContentPlugin
-      expect(screen.getByTestId('lexical-composer')).toBeInTheDocument();
-    });
+  it('calls onCancel when markdown has not changed', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    convertToMarkdownStringMock.mockReturnValue('Initial content here');
 
-    it('initializes with provided mentions', () => {
-      const initialMentions: ApiDropMentionedUser[] = [
-        {
-          mentioned_profile_id: 'profile-1',
-          handle_in_content: 'user1',
-        },
-      ];
-      
-      render(<EditDropLexical {...defaultProps} initialMentions={initialMentions} />);
-      
-      expect(screen.getByTestId('lexical-composer')).toBeInTheDocument();
-    });
+    render(<EditDropLexical {...defaultProps} onSave={onSave} onCancel={onCancel} />);
+
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    await user.click(saveButton);
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onSave).not.toHaveBeenCalled();
   });
 
-  describe('Keyboard Shortcuts', () => {
-    it('handles escape key to cancel', () => {
-      const onCancel = jest.fn();
-      render(<EditDropLexical {...defaultProps} onCancel={onCancel} />);
-      
-      // Simulate escape key press
-      const contentEditable = screen.getByTestId('content-editable');
-      fireEvent.keyDown(contentEditable, { key: 'Escape', code: 'Escape' });
-      
-      // Note: In the actual implementation, this is handled by Lexical's command system
-      // This test verifies the component structure is in place
-      expect(screen.getByTestId('lexical-composer')).toBeInTheDocument();
-    });
+  it('invokes keyboard command handlers', async () => {
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    convertToMarkdownStringMock.mockReturnValue('changed content');
 
-    it('handles enter key to save', () => {
-      const onSave = jest.fn();
-      render(<EditDropLexical {...defaultProps} onSave={onSave} />);
-      
-      // Simulate enter key press
-      const contentEditable = screen.getByTestId('content-editable');
-      fireEvent.keyDown(contentEditable, { key: 'Enter', code: 'Enter' });
-      
-      expect(screen.getByTestId('lexical-composer')).toBeInTheDocument();
-    });
-  });
+    render(<EditDropLexical {...defaultProps} onSave={onSave} onCancel={onCancel} />);
 
-  describe('Saving State', () => {
-    it('disables interactions when saving', () => {
-      render(<EditDropLexical {...defaultProps} isSaving={true} />);
-      
-      // Component should still render but be in saving state
-      expect(screen.getByTestId('lexical-composer')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-    });
-  });
+    await act(async () => {});
 
-  describe('Wave Context', () => {
-    it('handles null waveId', () => {
-      render(<EditDropLexical {...defaultProps} waveId={null} />);
-      
-      expect(screen.getByTestId('mentions-plugin')).toBeInTheDocument();
-    });
+    const escapeCall = editorMock.registerCommand.mock.calls.find(
+      ([command]) => command === 'KEY_ESCAPE_COMMAND'
+    );
+    const enterCall = editorMock.registerCommand.mock.calls.find(
+      ([command]) => command === 'KEY_ENTER_COMMAND'
+    );
 
-    it('passes waveId to mentions plugin', () => {
-      const waveId = 'test-wave-id';
-      render(<EditDropLexical {...defaultProps} waveId={waveId} />);
-      
-      expect(screen.getByTestId('mentions-plugin')).toBeInTheDocument();
-    });
-  });
+    expect(escapeCall).toBeDefined();
+    expect(enterCall).toBeDefined();
 
-  describe('Error Handling', () => {
-    it('handles editor errors gracefully', () => {
-      // Mock console.error to avoid noise in test output
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
-      render(<EditDropLexical {...defaultProps} />);
-      
-      // The component should render successfully without throwing
-      expect(screen.getByTestId('lexical-composer')).toBeInTheDocument();
-      
-      consoleSpy.mockRestore();
-    });
-  });
+    const escapeHandler = escapeCall?.[1] as () => boolean;
+    const enterHandler = enterCall?.[1] as (event?: { shiftKey?: boolean }) => boolean;
 
-  describe('Focus Management', () => {
-    it('attempts to focus the editor on mount', async () => {
-      render(<EditDropLexical {...defaultProps} />);
-      
-      // The component should render and attempt focus
-      await waitFor(() => {
-        expect(screen.getByTestId('content-editable')).toBeInTheDocument();
-      });
+    await act(async () => {
+      escapeHandler?.();
     });
+    expect(onCancel).toHaveBeenCalledTimes(1);
+
+    let handled = false;
+    await act(async () => {
+      handled = enterHandler?.({ shiftKey: false }) ?? false;
+    });
+    expect(handled).toBe(true);
+    expect(convertToMarkdownStringMock).toHaveBeenCalled();
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });

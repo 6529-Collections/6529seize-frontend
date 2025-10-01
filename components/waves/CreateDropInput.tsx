@@ -24,7 +24,6 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { TRANSFORMERS } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
@@ -59,6 +58,8 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "../../hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
+import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -287,7 +288,8 @@ const CreateDropInput = forwardRef<
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
               <ListPlugin />
-              <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+              <PlainTextPastePlugin />
+              <MarkdownShortcutPlugin transformers={SAFE_MARKDOWN_TRANSFORMERS} />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />

@@ -40,6 +40,16 @@
   height: 200px;
 }
 
+.editor-code,
+.editor-text-code {
+  color: #e5e7eb;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.editor-code {
+  background-color: transparent;
+}
+
 .editor-nested-listitem {
   list-style-type: none;
 }
