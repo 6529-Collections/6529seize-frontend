@@ -41,7 +41,6 @@ const DEFAULT_DEBOUNCE = 250;
 const DEFAULT_OVERSCAN = 8;
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
-const BIGINT_THOUSAND = BigInt(1000);
 
 const EMPTY_SELECTION: TokenSelection = [];
 
@@ -465,14 +464,6 @@ export function NftPicker({
 
   const handleSelectAll = () => {
     if (!selectedContract || allSelected) {
-      return;
-    }
-    let confirmed = true;
-    if (contractTotalSupply && contractTotalSupply > BIGINT_THOUSAND) {
-      const formatted = formatCount(contractTotalSupply);
-      confirmed = window.confirm(`Select all ${formatted} tokens?`);
-    }
-    if (!confirmed) {
       return;
     }
     previousRangesRef.current = ranges;
