@@ -46,8 +46,9 @@ export function NftEditRanges({
   );
   const hasTokens = total > BIGINT_ZERO;
   const countLabel = formatBigIntWithSeparators(total);
+  const tokenLabel = total === BIGINT_ONE ? "token" : "tokens";
   const selectionLabel = hasTokens
-    ? `${countLabel} ${total === BIGINT_ONE ? "token" : "tokens"} selected`
+    ? `${countLabel} ${tokenLabel} selected`
     : "No tokens selected";
   const summaryText = hasTokens
     ? canonical
@@ -58,10 +59,10 @@ export function NftEditRanges({
     if (copyStatus === "idle") {
       return undefined;
     }
-    const timeout = window.setTimeout(() => {
+    const timeout = globalThis.setTimeout(() => {
       setCopyStatus("idle");
     }, 2000);
-    return () => window.clearTimeout(timeout);
+    return () => globalThis.clearTimeout(timeout);
   }, [copyStatus]);
 
   useEffect(() => {
