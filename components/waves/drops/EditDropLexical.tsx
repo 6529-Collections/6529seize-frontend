@@ -416,10 +416,10 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           />
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
+          <PlainTextPastePlugin />
           <MarkdownShortcutPlugin
             transformers={SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE}
           />
-          <PlainTextPastePlugin />
           <ListPlugin />
           <LinkPlugin />
           <NewMentionsPlugin
