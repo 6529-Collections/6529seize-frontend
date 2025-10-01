@@ -19,6 +19,11 @@ import {
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
   TextNode,
+  $createParagraphNode,
+  $createTextNode,
+  $isElementNode,
+  type LexicalNode,
+  type RootNode,
 } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
@@ -26,7 +31,7 @@ import { ListNode, ListItemNode } from "@lexical/list";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { CodeHighlightNode, CodeNode, $isCodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 
@@ -47,7 +52,7 @@ import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import EmojiPlugin from "../../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../../drops/create/lexical/nodes/EmojiNode";
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 
 interface EditDropLexicalProps {
@@ -60,6 +65,43 @@ interface EditDropLexicalProps {
 }
 
 const MAX_MENTION_RECONSTRUCTION_PASSES = 20;
+
+const EDIT_MARKDOWN_TRANSFORMERS = [
+  ...SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE,
+  MENTION_TRANSFORMER,
+  HASHTAG_TRANSFORMER,
+];
+
+const convertCodeNodesToFences = (root: RootNode) => {
+  const stack: LexicalNode[] = [...root.getChildren()];
+
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!node) continue;
+
+    if ($isCodeNode(node)) {
+      const language = node.getLanguage?.() ?? "";
+      const trimmedLanguage = language.trim();
+      const codeText = node.getTextContent();
+      const normalizedCode = codeText.endsWith("\n")
+        ? codeText
+        : `${codeText}\n`;
+      const fence = "```";
+      const openFence = trimmedLanguage ? `${fence}${trimmedLanguage}` : fence;
+      const fencedMarkdown = `${openFence}\n${normalizedCode}${fence}`;
+
+      const paragraph = $createParagraphNode();
+      paragraph.append($createTextNode(fencedMarkdown));
+      node.replace(paragraph);
+
+      continue;
+    }
+
+    if ($isElementNode(node)) {
+      stack.push(...node.getChildren());
+    }
+  }
+};
 
 // Plugin to set initial content from markdown
 function reconstructSplitMention(
@@ -139,14 +181,11 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 
   useEffect(() => {
     editor.update(() => {
-      $convertFromMarkdownString(initialContent, [
-        ...SAFE_MARKDOWN_TRANSFORMERS,
-        MENTION_TRANSFORMER,
-        HASHTAG_TRANSFORMER,
-      ]);
+      $convertFromMarkdownString(initialContent, EDIT_MARKDOWN_TRANSFORMERS);
 
       // Post-process: reconstruct mentions split across text nodes
       const root = $getRoot();
+      convertCodeNodesToFences(root);
 
       let needsAnotherPass = true;
       let passCount = 0;
@@ -265,11 +304,8 @@ function KeyboardPlugin({
         if (!isSaving) {
           // Check if content has changed (similar to original logic)
           editor.getEditorState().read(() => {
-            const currentMarkdown = $convertToMarkdownString([
-              ...SAFE_MARKDOWN_TRANSFORMERS,
-              MENTION_TRANSFORMER,
-              HASHTAG_TRANSFORMER,
-            ]);
+            const currentMarkdown =
+              $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
             // If no changes, just cancel (silent exit)
             if (currentMarkdown.trim() === initialContent.trim()) {
               onCancel();
@@ -359,11 +395,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     if (!editorState) return;
 
     editorState.read(() => {
-      const markdown = $convertToMarkdownString([
-        ...SAFE_MARKDOWN_TRANSFORMERS,
-        MENTION_TRANSFORMER,
-        HASHTAG_TRANSFORMER,
-      ]);
+      const markdown = $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
 
       // If no changes, silently exit edit mode without API call
       if (markdown.trim() === initialContent.trim()) {
@@ -401,7 +433,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           />
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
-          <MarkdownShortcutPlugin transformers={SAFE_MARKDOWN_TRANSFORMERS} />
+          <MarkdownShortcutPlugin
+            transformers={SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE}
+          />
           <PlainTextPastePlugin />
           <ListPlugin />
           <LinkPlugin />
