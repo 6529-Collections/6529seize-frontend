@@ -28,7 +28,7 @@ export type NftPickerSelection =
 
 > Internally we use `bigint` for token IDs (IDs can exceed JS safe integers). See **Output modes & bigint**.
 
-**Tech**: Next.js 15 (App Router), TypeScript, Tailwind CSS 3.4 with `tw-` prefix, existing Alchemy REST wrapper in `services/alchemy-api.ts` (uses `config/env.schema.ts:28` `ALCHEMY_API_KEY`), virtualization patterns built on `hooks/useVirtualizedWaves.ts` / `hooks/useVirtualizedWaveMessages.ts`, responsive via **container queries** (Tailwind plugin). Multi‑chain design, but **initial chain = Ethereum**.
+**Tech**: Next.js 15 (App Router), TypeScript, Tailwind CSS 3.4 with `tw-` prefix, existing Alchemy REST wrapper in `services/alchemy-api.ts` (uses `config/env.schema.ts:28` `ALCHEMY_API_KEY`), virtualization built with `@tanstack/react-virtual` for token rows (legacy `hooks/useVirtualizedWaves.ts` still power suggestion lists elsewhere), responsive via **container queries** (Tailwind plugin). Multi‑chain design, but **initial chain = Ethereum**.
 
 ---
 
@@ -310,9 +310,10 @@ Tabs or segmented control:
 
 ## 10) Virtualization
 
-* Reuse the primitives from `hooks/useVirtualizedWaves.ts` / `hooks/useVirtualizedWaveMessages.ts` (extract a shared helper if it keeps the picker self-contained).
-* Apply the same fixed-row math (overscan default 8) already used in those hooks so scroll restoration and sentinel behaviour stay consistent across the app.
-* For token thumbnails, trigger metadata fetches when items enter the overscan window and cancel via the existing abort-handling patterns in our hooks.
+* Selected-token rows are virtualized with `useVirtualizer` from `@tanstack/react-virtual`; set `count`, `estimateSize: () => 72`, and wire `getScrollElement` to the scroll container ref.
+* Default overscan remains `8` (configurable via prop) so behaviour matches the rest of the app.
+* Persist scroll restoration through `ScrollPositionContext` by supplying `initialOffset` on `useVirtualizer` and updating the context on scroll events.
+* Use the virtual window to decide when to request metadata and cancel outstanding work when items leave the window (the same abort-handling patterns still apply).
 
 ---
 
@@ -360,10 +361,10 @@ Tabs or segmented control:
 ### 12.3 Selected list (NftTokenList.tsx)
 
 * Input area for Single/Bucket + canonical summary + “Edit as text” toggle.
-* Virtualized rows using the same primitives as `useVirtualizedWaveMessages`. Each row:
+* Virtualized rows come from `useVirtualizer` (`@tanstack/react-virtual`). Render `virtualizer.getVirtualItems()` inside a container sized via `virtualizer.getTotalSize()` and position rows with `transform: translateY(virtualItem.start)`.
 
   * 40px image (lazy), tokenId badge, optional name (ellipsize), remove button.
-* On viewport change, call a memoized helper in `services/alchemy-api.ts` that batches token metadata (up to 100) and cache results with `@tanstack/react-query`.
+* Use `expandRangesWindow` to convert the visible indices into token IDs and feed that window into the batched metadata query (cached via `@tanstack/react-query`).
 
 ---
 
