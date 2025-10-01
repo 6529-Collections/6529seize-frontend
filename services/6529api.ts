@@ -45,9 +45,9 @@ export async function postData(url: string, body: any, init?: RequestInit) {
     headers.set("x-6529-auth", apiAuth);
   }
   const res = await fetch(url, {
+    ...init,
     method: "POST",
     body: JSON.stringify(body),
-    ...init,
     headers,
   });
   const json = await res.json();

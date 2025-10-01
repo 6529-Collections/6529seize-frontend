@@ -29,7 +29,6 @@ interface NftTokenListProps {
 
 const ROW_HEIGHT = 72;
 const DEFAULT_OVERSCAN = 8;
-const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
 const VIRTUAL_SCROLL_KEY = "nft-picker-token-list";
 
@@ -46,21 +45,6 @@ function getTotalCount(ranges: TokenRange[]): number {
     }
   }
   return total;
-}
-
-function resolveTokenIdAtIndex(ranges: TokenRange[], index: number): bigint | null {
-  let cursor = BIGINT_ZERO;
-  const target = BigInt(index);
-  for (const range of ranges) {
-    const size = range.end - range.start + BIGINT_ONE;
-    const rangeEnd = cursor + size;
-    if (target < rangeEnd) {
-      const offset = target - cursor;
-      return range.start + offset;
-    }
-    cursor = rangeEnd;
-  }
-  return null;
 }
 
 function toDecimalString(value: bigint): string {
@@ -96,7 +80,6 @@ export function NftTokenList({
     if (!container) {
       return;
     }
-    container.scrollTop = getPosition(VIRTUAL_SCROLL_KEY);
     const handleScroll = () => {
       setPosition(VIRTUAL_SCROLL_KEY, container.scrollTop);
     };
@@ -105,7 +88,7 @@ export function NftTokenList({
       setPosition(VIRTUAL_SCROLL_KEY, container.scrollTop);
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [getPosition, setPosition]);
+  }, [setPosition]);
 
   const virtualItems = virtualizer.getVirtualItems();
   const firstVisibleIndex = virtualItems.length > 0 ? virtualItems[0].index : 0;
@@ -147,73 +130,77 @@ export function NftTokenList({
   }
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="tw-max-h-80 tw-overflow-y-auto tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900"
-      role="grid"
-      aria-label="Selected tokens"
-    >
+    <div className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900">
       <div
-        style={{ height: virtualizer.getTotalSize(), position: "relative" }}
+        ref={scrollContainerRef}
+        className="tw-max-h-80 tw-overflow-y-auto"
+        role="list"
+        aria-label="Selected tokens"
       >
-        {virtualItems.map((virtualItem) => {
-          const tokenId = resolveTokenIdAtIndex(ranges, virtualItem.index);
-          if (tokenId === null) {
-            return null;
-          }
-          const decimalId = toDecimalString(tokenId);
-          const metadata = metadataMap.get(decimalId);
-          const isLoadingMetadata = metadataQuery.isFetching && !metadata;
-          return (
-            <div
-              key={decimalId}
-              className="tw-absolute tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-3 tw-py-2"
-              style={{
-                transform: `translateY(${virtualItem.start}px)`,
-                height: virtualItem.size,
-                width: "100%",
-              }}
-              role="row"
-            >
-              <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800" aria-hidden="true">
-                {metadata?.imageUrl ? (
-                  <Image
-                    src={metadata.imageUrl}
-                    alt={metadata.name ?? decimalId}
-                    fill
-                    sizes="40px"
-                    className="tw-h-full tw-w-full tw-object-cover"
-                  />
-                ) : isLoadingMetadata ? (
-                  <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center" role="status" aria-label="Loading thumbnail">
-                    <Spinner />
-                  </div>
-                ) : (
-                  <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
-                    #{decimalId}
-                  </div>
-                )}
-              </div>
-              <div className="tw-flex tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
-                <div className="tw-flex tw-flex-col tw-gap-0.5">
-                  <span className="tw-text-sm tw-font-medium tw-text-white">#{decimalId}</span>
-                  {metadata?.name && (
-                    <span className="tw-text-xs tw-text-iron-400">{metadata.name}</span>
+        <div
+          style={{ height: virtualizer.getTotalSize(), position: "relative" }}
+          role="presentation"
+        >
+          {virtualItems.map((virtualItem) => {
+            const windowIndex = virtualItem.index - firstVisibleIndex;
+            const tokenId = windowTokenIds[windowIndex] ?? null;
+            if (tokenId === null) {
+              return null;
+            }
+            const decimalId = toDecimalString(tokenId);
+            const metadata = metadataMap.get(decimalId);
+            const isLoadingMetadata = metadataQuery.isFetching && !metadata;
+            return (
+              <div
+                key={decimalId}
+                className="tw-absolute tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-3 tw-py-2"
+                style={{
+                  transform: `translateY(${virtualItem.start}px)`,
+                  height: virtualItem.size,
+                  width: "100%",
+                }}
+                role="listitem"
+              >
+                <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800" aria-hidden="true">
+                  {metadata?.imageUrl ? (
+                    <Image
+                      src={metadata.imageUrl}
+                      alt={metadata.name ?? decimalId}
+                      fill
+                      sizes="40px"
+                      className="tw-h-full tw-w-full tw-object-cover"
+                    />
+                  ) : isLoadingMetadata ? (
+                    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center" role="status" aria-label="Loading thumbnail">
+                      <Spinner />
+                    </div>
+                  ) : (
+                    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
+                      #{decimalId}
+                    </div>
                   )}
                 </div>
-                {renderTokenExtra?.(tokenId, metadata)}
-                <button
-                  type="button"
-                  className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
-                  onClick={() => onRemove(tokenId)}
-                  aria-label={`Remove token ${decimalId}`}
-                >
-                  Remove
-                </button>
+                <div className="tw-flex tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
+                  <div className="tw-flex tw-flex-col tw-gap-0.5">
+                    <span className="tw-text-sm tw-font-medium tw-text-white">#{decimalId}</span>
+                    {metadata?.name && (
+                      <span className="tw-text-xs tw-text-iron-400">{metadata.name}</span>
+                    )}
+                  </div>
+                  {renderTokenExtra?.(tokenId, metadata)}
+                  <button
+                    type="button"
+                    className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
+                    onClick={() => onRemove(tokenId)}
+                    aria-label={`Remove token ${decimalId}`}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
       <div className="tw-border-t tw-border-iron-700 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-400">
         {formatCanonical(ranges)}
