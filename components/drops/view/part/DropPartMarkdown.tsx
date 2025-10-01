@@ -109,8 +109,12 @@ const CodeBlockRenderer = ({
       return;
     }
 
+    if (!codeText || codeText.trim() === "") {
+      return;
+    }
+
     void highlightCodeElement(element, language);
-  }, [language, codeText]);
+  });
 
   return (
     <code
