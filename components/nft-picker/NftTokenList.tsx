@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 
 import type {
@@ -14,7 +14,8 @@ import {
   formatCanonical,
 } from "./NftPicker.utils";
 import { useTokenMetadataQuery } from "./useAlchemyClient";
-import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
 
 interface NftTokenListProps {
   readonly contractAddress?: `0x${string}`;
@@ -29,6 +30,7 @@ const ROW_HEIGHT = 72;
 const DEFAULT_OVERSCAN = 8;
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
+const VIRTUAL_SCROLL_KEY = "nft-picker-token-list";
 
 function getTotalCount(ranges: TokenRange[]): number {
   let total = 0;
@@ -74,45 +76,52 @@ export function NftTokenList({
 }: NftTokenListProps) {
   const totalCount = getTotalCount(ranges);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const listContainerRef = useRef<HTMLDivElement>(null);
+  const { getPosition, setPosition } = useScrollPositionContext();
+  const initialOffsetRef = useRef<number>();
+  if (initialOffsetRef.current === undefined) {
+    initialOffsetRef.current = getPosition(VIRTUAL_SCROLL_KEY);
+  }
 
-  const indexes = useMemo(() => {
-    return Array.from({ length: totalCount }, (_, index) => index);
-  }, [totalCount]);
+  const virtualizer = useVirtualizer({
+    count: totalCount,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan,
+    initialOffset: initialOffsetRef.current ?? 0,
+  });
 
-  const virtualization = useVirtualizedWaves<number>(
-    indexes,
-    "nft-picker-token-list",
-    scrollContainerRef,
-    listContainerRef,
-    ROW_HEIGHT,
-    overscan
-  );
-
-  const visibleRange = useMemo(() => {
-    const visibleItems = virtualization.virtualItems.filter(
-      (item) => item.index < totalCount
-    );
-    if (visibleItems.length === 0) {
-      return { start: 0, count: 0 };
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
     }
-    const start = Math.max(
-      visibleItems.reduce((min, item) => Math.min(min, item.index), totalCount),
-      0
-    );
-    const end = visibleItems.reduce(
-      (max, item) => Math.max(max, item.index),
-      start
-    );
-    return { start, count: end - start + 1 };
-  }, [virtualization.virtualItems, totalCount]);
+    container.scrollTop = getPosition(VIRTUAL_SCROLL_KEY);
+    const handleScroll = () => {
+      setPosition(VIRTUAL_SCROLL_KEY, container.scrollTop);
+    };
+    container.addEventListener("scroll", handleScroll);
+    return () => {
+      setPosition(VIRTUAL_SCROLL_KEY, container.scrollTop);
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, [getPosition, setPosition]);
+
+  const virtualItems = virtualizer.getVirtualItems();
+  const firstVisibleIndex = virtualItems.length > 0 ? virtualItems[0].index : 0;
+  const lastVisibleIndex = virtualItems.length > 0
+    ? virtualItems[virtualItems.length - 1].index
+    : -1;
 
   const windowTokenIds = useMemo(() => {
-    if (visibleRange.count <= 0) {
+    if (lastVisibleIndex < firstVisibleIndex) {
       return [] as bigint[];
     }
-    return expandRangesWindow(ranges, visibleRange.start, visibleRange.count);
-  }, [ranges, visibleRange]);
+    return expandRangesWindow(
+      ranges,
+      firstVisibleIndex,
+      lastVisibleIndex - firstVisibleIndex + 1
+    );
+  }, [ranges, firstVisibleIndex, lastVisibleIndex]);
 
   const metadataQuery = useTokenMetadataQuery({
     address: contractAddress,
@@ -144,24 +153,9 @@ export function NftTokenList({
       aria-label="Selected tokens"
     >
       <div
-        ref={listContainerRef}
-        style={{ height: virtualization.totalHeight, position: "relative" }}
+        style={{ height: virtualizer.getTotalSize(), position: "relative" }}
       >
-        {virtualization.virtualItems.map((virtualItem) => {
-          if (virtualItem.index >= totalCount) {
-            return (
-              <div
-                key="token-sentinel"
-                ref={virtualization.sentinelRef}
-                style={{
-                  position: "absolute",
-                  top: virtualItem.start,
-                  height: virtualItem.size,
-                  width: "100%",
-                }}
-              />
-            );
-          }
+        {virtualItems.map((virtualItem) => {
           const tokenId = resolveTokenIdAtIndex(ranges, virtualItem.index);
           if (tokenId === null) {
             return null;
@@ -172,7 +166,11 @@ export function NftTokenList({
             <div
               key={decimalId}
               className="tw-absolute tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-3 tw-py-2"
-              style={{ top: virtualItem.start, height: virtualItem.size }}
+              style={{
+                transform: `translateY(${virtualItem.start}px)`,
+                height: virtualItem.size,
+                width: "100%",
+              }}
               role="row"
             >
               <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800" aria-hidden="true">
