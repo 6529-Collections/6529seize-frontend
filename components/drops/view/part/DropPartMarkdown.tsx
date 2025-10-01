@@ -1,6 +1,8 @@
 import {
   memo,
+  useEffect,
   useMemo,
+  useRef,
   type ComponentPropsWithoutRef,
   type ElementType,
   type ReactNode,
@@ -25,6 +27,7 @@ import {
   createLinkRenderer,
 
 } from "./dropPartMarkdown/linkHandlers";
+import { highlightCodeElement } from "./dropPartMarkdown/highlight";
 
 const BreakComponent = () => <br />;
 
@@ -126,6 +129,8 @@ function DropPartMarkdown({
           allowedAttributes: {
             a: ["href", "title"],
             img: ["src", "alt", "title"],
+            code: ["className"],
+            pre: ["className"],
           },
         },
       ],
@@ -170,6 +175,71 @@ function DropPartMarkdown({
         return HeadingRenderer;
       };
 
+      type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
+        inline?: boolean;
+      };
+
+      const InlineCodeRenderer = ({
+        children,
+        className,
+        style,
+        ...props
+      }: MarkdownCodeProps) => (
+        <code
+          {...props}
+          style={{ ...style, textOverflow: "unset" }}
+          className={mergeClassNames(
+            "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
+            className
+          )}
+        >
+          {children}
+        </code>
+      );
+
+      const CodeBlockRenderer = ({
+        children,
+        className,
+        style,
+        ...props
+      }: MarkdownCodeProps) => {
+        const codeRef = useRef<HTMLElement>(null);
+
+        const language = useMemo(() => {
+          const match = typeof className === "string"
+            ? /language-([\w+-]+)/.exec(className)
+            : null;
+          return match?.[1] ?? null;
+        }, [className]);
+
+        useEffect(() => {
+          if (typeof window === "undefined") {
+            return;
+          }
+
+          const element = codeRef.current;
+          if (!element) {
+            return;
+          }
+
+          void highlightCodeElement(element, language);
+        }, [language, children]);
+
+        return (
+          <code
+            {...props}
+            ref={codeRef}
+            style={{ ...style, textOverflow: "unset" }}
+            className={mergeClassNames(
+              "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
+              className
+            )}
+          >
+            {children}
+          </code>
+        );
+      };
+
       return {
         h1: createHeadingRenderer("h1"),
         h2: createHeadingRenderer("h2"),
@@ -188,18 +258,12 @@ function DropPartMarkdown({
             {customRenderer(children)}
           </li>
         ),
-        code: ({ children, className, style, ...props }) => (
-          <code
-            {...props}
-            style={{ ...style, textOverflow: "unset" }}
-            className={mergeClassNames(
-              "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
-              className
-            )}
-          >
-            {children}
-          </code>
-        ),
+        code: ({ inline, ...props }: MarkdownCodeProps) =>
+          inline ? (
+            <InlineCodeRenderer {...props} />
+          ) : (
+            <CodeBlockRenderer {...props} />
+          ),
         a: renderAnchor,
         img: renderImage,
         br: BreakComponent,
