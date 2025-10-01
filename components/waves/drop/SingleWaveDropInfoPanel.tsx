@@ -37,7 +37,7 @@ export const SingleWaveDropInfoPanel: React.FC<
       <div className="tw-px-6 tw-mt-4">
         <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
       </div>
-      <SingleWaveDropInfoActions drop={drop} wave={wave} />
+      <SingleWaveDropInfoActions drop={drop} />
 
       <div className="tw-mt-2">
         <SingleWaveDropInfoDetails drop={drop} />

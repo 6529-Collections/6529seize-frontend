@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
@@ -15,77 +15,155 @@ interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
 }
 
-/**
- * Component for displaying wave time information focusing on next winner announcement
- * in a compact format with expandable timeline
- */
+const AUTO_EXPAND_LIMIT = 5;
+
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
-  // Using decision points hooks
-  const { allDecisions } = useDecisionPoints(wave);
+  const {
+    allDecisions,
+    hasMorePast,
+    hasMoreFuture,
+    loadMorePast,
+    loadMoreFuture,
+    remainingPastCount,
+    remainingFutureCount,
+  } = useDecisionPoints(wave, {
+    initialPastWindow: 4,
+    initialFutureWindow: 20,
+  });
   const {
     decisions: { multiDecision },
     pauses: { showPause, filterDecisionsDuringPauses },
   } = useWave(wave);
 
-  // Track expanded/collapsed state for decjusision details
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
+  const [autoExpandFutureAttempts, setAutoExpandFutureAttempts] =
+    useState<number>(0);
+  const [timelineFocus, setTimelineFocus] = useState<"start" | "end" | null>(
+    null
+  );
 
-  // Filter out decisions that occur during pause periods using the helper from useWave
+  useEffect(() => {
+    if (!isDecisionDetailsOpen && timelineFocus !== null) {
+      setTimelineFocus(null);
+    }
+  }, [isDecisionDetailsOpen, timelineFocus]);
+
   const filteredDecisions = useMemo(() => {
-    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
-    const decisionsAsApiFormat = allDecisions.map(
-      (decision) =>
-        ({
-          decision_time: decision.timestamp,
-          // Add other required fields if needed
-        } as any)
+    type PauseDecisionLike = { decision_time: number };
+
+    const decisionsAsApiFormat: PauseDecisionLike[] = allDecisions.map(
+      (decision): PauseDecisionLike => ({
+        decision_time: decision.timestamp,
+      })
     );
 
-    // Apply the filter
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
+    const allowedDecisionTimes = new Set<number>(
+      filtered.map((filteredDecision) => filteredDecision.decision_time)
+    );
 
-    // Convert back to DecisionPoint[] format
     return allDecisions.filter((decision) =>
-      filtered.some((f) => f.decision_time === decision.timestamp)
+      allowedDecisionTimes.has(decision.timestamp)
     );
   }, [allDecisions, filterDecisionsDuringPauses]);
 
-  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
     filteredDecisions.find(
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
 
+  useEffect(() => {
+    if (nextDecisionTime !== null) {
+      if (autoExpandFutureAttempts !== 0) {
+        setAutoExpandFutureAttempts(0);
+      }
+      return;
+    }
+
+    if (!hasMoreFuture) {
+      if (autoExpandFutureAttempts !== 0) {
+        setAutoExpandFutureAttempts(0);
+      }
+      return;
+    }
+
+    if (autoExpandFutureAttempts >= AUTO_EXPAND_LIMIT) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      setAutoExpandFutureAttempts((prev) => prev + 1);
+      loadMoreFuture();
+    }, 50);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [
+    nextDecisionTime,
+    hasMoreFuture,
+    loadMoreFuture,
+    autoExpandFutureAttempts,
+  ]);
+
+  const handleLoadMorePast = () => {
+    if (hasMorePast) {
+      setTimelineFocus("start");
+      loadMorePast();
+    }
+  };
+
+  const handleLoadMoreFuture = () => {
+    if (hasMoreFuture) {
+      setTimelineFocus("end");
+      loadMoreFuture();
+    }
+  };
+
+  const onTimelineFocusHandled = useCallback(() => {
+    setTimelineFocus(null);
+  }, []);
+
   return (
     <div className="tw-mb-2 lg:tw-mb-4">
       {multiDecision ? (
-        // For multi-decision and memes waves: Show expandable timeline
         <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">
-          {/* Timeline header with title and countdown */}
-          <TimelineToggleHeader
-            isOpen={isDecisionDetailsOpen}
-            setIsOpen={setIsDecisionDetailsOpen}
-            nextDecisionTime={nextDecisionTime}
-            isPaused={!!showPause(nextDecisionTime)}
-            currentPause={showPause(nextDecisionTime)}
-            wave={wave}
-          />
+          {(() => {
+            const currentPause = showPause(nextDecisionTime);
 
-          {/* Expandable timeline section */}
+            return (
+              <TimelineToggleHeader
+                isOpen={isDecisionDetailsOpen}
+                setIsOpen={setIsDecisionDetailsOpen}
+                nextDecisionTime={nextDecisionTime}
+                isPaused={Boolean(currentPause)}
+                currentPause={currentPause}
+                wave={wave}
+              />
+            );
+          })()}
+
           <AnimatePresence>
             {isDecisionDetailsOpen && (
               <ExpandedTimelineContent
                 decisions={filteredDecisions}
                 nextDecisionTime={nextDecisionTime}
+                onLoadMorePast={hasMorePast ? handleLoadMorePast : undefined}
+                onLoadMoreFuture={hasMoreFuture ? handleLoadMoreFuture : undefined}
+                hasMorePast={hasMorePast}
+                hasMoreFuture={hasMoreFuture}
+                remainingPastCount={remainingPastCount}
+                remainingFutureCount={remainingFutureCount}
+                focus={timelineFocus}
+                onFocusHandled={onTimelineFocusHandled}
               />
             )}
           </AnimatePresence>
         </div>
       ) : (
-        // For regular waves: Show phase cards directly in the header
         <div className="tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-2 tw-overflow-hidden">
           <div className="tw-flex tw-items-center tw-gap-2">
             <CompactDroppingPhaseCard wave={wave} />
