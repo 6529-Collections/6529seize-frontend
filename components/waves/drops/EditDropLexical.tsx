@@ -11,11 +11,7 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import {
-  TRANSFORMERS,
-  $convertFromMarkdownString,
-  $convertToMarkdownString,
-} from "@lexical/markdown";
+import { $convertFromMarkdownString, $convertToMarkdownString } from "@lexical/markdown";
 import {
   $getRoot,
   EditorState,
@@ -23,6 +19,11 @@ import {
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
   TextNode,
+  $createParagraphNode,
+  $createTextNode,
+  $isElementNode,
+  type LexicalNode,
+  type RootNode,
 } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
@@ -30,7 +31,7 @@ import { ListNode, ListItemNode } from "@lexical/list";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { CodeHighlightNode, CodeNode, $isCodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 
@@ -51,19 +52,62 @@ import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import EmojiPlugin from "../../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../../drops/create/lexical/nodes/EmojiNode";
+import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 
 interface EditDropLexicalProps {
-  initialContent: string;
-  initialMentions: ApiDropMentionedUser[];
-  waveId: string | null;
-  isSaving: boolean;
-  onSave: (content: string, mentions: ApiDropMentionedUser[]) => void;
-  onCancel: () => void;
+  readonly initialContent: string;
+  readonly initialMentions: ApiDropMentionedUser[];
+  readonly waveId: string | null;
+  readonly isSaving: boolean;
+  readonly onSave: (content: string, mentions: ApiDropMentionedUser[]) => void;
+  readonly onCancel: () => void;
 }
 
 const MAX_MENTION_RECONSTRUCTION_PASSES = 20;
 
-// Plugin to set initial content from markdown
+const EDIT_MARKDOWN_TRANSFORMERS = [
+  ...SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE,
+  MENTION_TRANSFORMER,
+  HASHTAG_TRANSFORMER,
+];
+
+const convertCodeNodesToFences = (root: RootNode) => {
+  const stack: LexicalNode[] = [...root.getChildren()];
+
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!node) continue;
+
+    if ($isCodeNode(node)) {
+      const language = node.getLanguage?.() ?? "";
+      const safeLanguage = language.trim().replaceAll(/[`\n\r]/g, "");
+      const codeText = node.getTextContent();
+      const normalizedCode = codeText.endsWith("\n")
+        ? codeText
+        : `${codeText}\n`;
+      const maxExistingFence = (codeText.match(/`+/g) ?? []).reduce(
+        (max, match) => Math.max(max, match.length),
+        0
+      );
+      const fenceLength = Math.max(3, maxExistingFence + 1);
+      const fence = "`".repeat(fenceLength);
+      const openFence = safeLanguage ? `${fence}${safeLanguage}` : fence;
+      const fencedMarkdown = `${openFence}\n${normalizedCode}${fence}`;
+
+      const paragraph = $createParagraphNode();
+      paragraph.append($createTextNode(fencedMarkdown));
+      node.replace(paragraph);
+
+      continue;
+    }
+
+    if ($isElementNode(node)) {
+      stack.push(...node.getChildren());
+    }
+  }
+};
+
 function reconstructSplitMention(
   currentNode: any,
   nextNode: any,
@@ -82,14 +126,12 @@ function reconstructSplitMention(
   const currentText = currentNode.getTextContent();
   const nextText = nextNode.getTextContent();
 
-  // Calculate text before and after mention
   const beforeMention = currentText.substring(
     0,
     currentText.length - mentionStart[0].length
   );
   const afterMention = nextText.substring(mentionEnd[0].length);
 
-  // Update or remove current node
   if (beforeMention) {
     currentNode.setTextContent(beforeMention);
     currentNode.insertAfter(mentionNode);
@@ -98,7 +140,6 @@ function reconstructSplitMention(
     nextNode.insertBefore(mentionNode);
   }
 
-  // Update or remove next node
   if (afterMention) {
     nextNode.setTextContent(afterMention);
   } else {
@@ -116,7 +157,6 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
     const currentText = currentNode.getTextContent();
     const nextText = nextNode.getTextContent();
 
-    // Check for @[ at end of current node and word] at start of next
     const mentionStart = currentText.match(/@\[\w*$/);
     const mentionEnd = nextText.match(/^\w*\]/);
 
@@ -125,7 +165,7 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
         if (
           reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
         ) {
-          return true; // Tree changed; caller should re-run with fresh text nodes
+          return true;
         }
       } catch (error) {
         console.warn("Failed to reconstruct split mention", error);
@@ -141,14 +181,10 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 
   useEffect(() => {
     editor.update(() => {
-      $convertFromMarkdownString(initialContent, [
-        ...TRANSFORMERS,
-        MENTION_TRANSFORMER,
-        HASHTAG_TRANSFORMER,
-      ]);
+      $convertFromMarkdownString(initialContent, EDIT_MARKDOWN_TRANSFORMERS);
 
-      // Post-process: reconstruct mentions split across text nodes
       const root = $getRoot();
+      convertCodeNodesToFences(root);
 
       let needsAnotherPass = true;
       let passCount = 0;
@@ -158,8 +194,6 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
       ) {
         const textNodes = root.getAllTextNodes();
 
-        // If any text node still has the full @[handle] pattern, defer to the
-        // mention transformer rather than trying to stitch pieces together.
         const hasUnprocessedMentions = textNodes.some((node) =>
           /@\[\w+\]/.test(node.getTextContent())
         );
@@ -185,39 +219,32 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   return null;
 }
 
-// Plugin to handle keyboard shortcuts
-// Plugin to handle focus on mount
 function FocusPlugin({ isApp }: { isApp: boolean }) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
     const focusEditor = () => {
-      // Try Lexical's focus first
       editor.focus();
-
-      // Also try DOM focus as fallback
       requestAnimationFrame(() => {
         const contentEditable = document.querySelector(
           '[contenteditable="true"]'
         ) as HTMLElement;
         if (contentEditable && document.activeElement !== contentEditable) {
           contentEditable.focus();
-          contentEditable.click(); // For mobile keyboard
+          contentEditable.click();
         }
       });
     };
 
     if (isApp) {
-      // Multiple timing strategies for mobile reliability
       const timeouts = [
-        setTimeout(focusEditor, 100), // Quick attempt
-        setTimeout(focusEditor, 350), // After menu close
-        setTimeout(focusEditor, 600), // Final attempt
+        setTimeout(focusEditor, 100),
+        setTimeout(focusEditor, 350),
+        setTimeout(focusEditor, 600),
       ];
 
       return () => timeouts.forEach(clearTimeout);
     } else {
-      // Desktop: immediate focus
       focusEditor();
     }
   }, [editor, isApp]);
@@ -253,26 +280,18 @@ function KeyboardPlugin({
     const removeEnterListener = editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
-        // Check if mentions dropdown is open
         if (mentionsRef.current?.isMentionsOpen()) {
-          // Let the mentions plugin handle the Enter key
           return false;
         }
 
         if (event?.shiftKey) {
-          // Allow Shift+Enter for new lines
           return false;
         }
 
         if (!isSaving) {
-          // Check if content has changed (similar to original logic)
           editor.getEditorState().read(() => {
-            const currentMarkdown = $convertToMarkdownString([
-              ...TRANSFORMERS,
-              MENTION_TRANSFORMER,
-              HASHTAG_TRANSFORMER,
-            ]);
-            // If no changes, just cancel (silent exit)
+            const currentMarkdown =
+              $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
             if (currentMarkdown.trim() === initialContent.trim()) {
               onCancel();
             } else {
@@ -343,7 +362,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       };
 
       setMentionedUsers((prev) => {
-        // Avoid duplicates
         if (
           prev.some(
             (m) => m.mentioned_profile_id === newMention.mentioned_profile_id
@@ -361,13 +379,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     if (!editorState) return;
 
     editorState.read(() => {
-      const markdown = $convertToMarkdownString([
-        ...TRANSFORMERS,
-        MENTION_TRANSFORMER,
-        HASHTAG_TRANSFORMER,
-      ]);
+      const markdown = $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
 
-      // If no changes, silently exit edit mode without API call
       if (markdown.trim() === initialContent.trim()) {
         onCancel();
         return;
@@ -403,7 +416,10 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           />
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          <PlainTextPastePlugin />
+          <MarkdownShortcutPlugin
+            transformers={SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE}
+          />
           <ListPlugin />
           <LinkPlugin />
           <NewMentionsPlugin
