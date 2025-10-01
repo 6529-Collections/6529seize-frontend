@@ -44,6 +44,13 @@ type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
   inline?: boolean;
 };
 
+type MarkdownComponentsOptions = {
+  customRenderer: (content: ReactNode | undefined) => ReactNode;
+  renderParagraph: Components["p"];
+  renderAnchor: Components["a"];
+  renderImage: Components["img"];
+};
+
 const InlineCodeRenderer = ({
   children,
   className,
@@ -105,6 +112,89 @@ const CodeBlockRenderer = ({
       {children}
     </code>
   );
+};
+
+const createMarkdownComponents = ({
+  customRenderer,
+  renderParagraph,
+  renderAnchor,
+  renderImage,
+}: MarkdownComponentsOptions): Components => {
+  const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
+    const HeadingRenderer = ({
+      children,
+      className,
+      ...props
+    }: MarkdownRendererProps<T>) => {
+      const TagComponent = Tag;
+      const mergedProps = {
+        ...(props as Record<string, unknown>),
+        className: mergeClassNames(headingClassName, className),
+      };
+
+      return (
+        <TagComponent {...(mergedProps as any)}>
+          {customRenderer(children)}
+        </TagComponent>
+      );
+    };
+
+    HeadingRenderer.displayName = `MarkdownHeading(${
+      typeof Tag === "string" ? Tag : "component"
+    })`;
+
+    return HeadingRenderer;
+  };
+
+  const ListItemRenderer = ({
+    children,
+    className,
+    ...props
+  }: MarkdownRendererProps<"li">) => (
+    <li
+      {...props}
+      className={mergeClassNames(
+        "tw-text-md tw-text-iron-200 tw-break-words word-break",
+        className
+      )}
+    >
+      {customRenderer(children)}
+    </li>
+  );
+
+  const CodeRenderer = ({ inline, ...props }: MarkdownCodeProps) =>
+    inline ? <InlineCodeRenderer {...props} /> : <CodeBlockRenderer {...props} />;
+
+  const BlockQuoteRenderer = ({
+    children,
+    className,
+    ...props
+  }: MarkdownRendererProps<"blockquote">) => (
+    <blockquote
+      {...props}
+      className={mergeClassNames(
+        "tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0",
+        className
+      )}
+    >
+      {customRenderer(children)}
+    </blockquote>
+  );
+
+  return {
+    h1: createHeadingRenderer("h1"),
+    h2: createHeadingRenderer("h2"),
+    h3: createHeadingRenderer("h3"),
+    h4: createHeadingRenderer("h4"),
+    h5: createHeadingRenderer("h5"),
+    p: renderParagraph,
+    li: ListItemRenderer,
+    code: CodeRenderer,
+    a: renderAnchor,
+    img: renderImage,
+    br: BreakComponent,
+    blockquote: BlockQuoteRenderer,
+  } satisfies Components;
 };
 
 export interface DropPartMarkdownProps {
@@ -217,71 +307,13 @@ function DropPartMarkdown({
   const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);
 
   const markdownComponents = useMemo<Components>(
-    () => {
-      const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
-        const HeadingRenderer = ({
-          children,
-          className,
-          ...props
-        }: MarkdownRendererProps<T>) => {
-          const TagComponent = Tag;
-          const mergedProps = {
-            ...(props as Record<string, unknown>),
-            className: mergeClassNames(headingClassName, className),
-          };
-
-          return (
-            <TagComponent {...(mergedProps as any)}>
-              {customRenderer(children)}
-            </TagComponent>
-          );
-        };
-
-        HeadingRenderer.displayName = `MarkdownHeading(${typeof Tag === "string" ? Tag : "component"})`;
-
-        return HeadingRenderer;
-      };
-
-      return {
-        h1: createHeadingRenderer("h1"),
-        h2: createHeadingRenderer("h2"),
-        h3: createHeadingRenderer("h3"),
-        h4: createHeadingRenderer("h4"),
-        h5: createHeadingRenderer("h5"),
-        p: renderParagraph,
-        li: ({ children, className, ...props }) => (
-          <li
-            {...props}
-            className={mergeClassNames(
-              "tw-text-md tw-text-iron-200 tw-break-words word-break",
-              className
-            )}
-          >
-            {customRenderer(children)}
-          </li>
-        ),
-        code: ({ inline, ...props }: MarkdownCodeProps) =>
-          inline ? (
-            <InlineCodeRenderer {...props} />
-          ) : (
-            <CodeBlockRenderer {...props} />
-          ),
-        a: renderAnchor,
-        img: renderImage,
-        br: BreakComponent,
-        blockquote: ({ children, className, ...props }) => (
-          <blockquote
-            {...props}
-            className={mergeClassNames(
-              "tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0",
-              className
-            )}
-          >
-            {customRenderer(children)}
-          </blockquote>
-        ),
-      } satisfies Components;
-    },
+    () =>
+      createMarkdownComponents({
+        customRenderer,
+        renderParagraph,
+        renderAnchor,
+        renderImage,
+      }),
     [customRenderer, renderAnchor, renderImage, renderParagraph]
   );
 
