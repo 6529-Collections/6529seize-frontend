@@ -23,7 +23,6 @@ export default function PlainTextPastePlugin(): null {
           return false;
         }
 
-        // Let other handlers process file pastes (e.g. images)
         if (clipboardData.files.length > 0) {
           return false;
         }

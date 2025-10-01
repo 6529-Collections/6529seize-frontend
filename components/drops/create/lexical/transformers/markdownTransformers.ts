@@ -39,7 +39,6 @@ const isCodeTransformer = (transformer: Transformer): boolean => {
   });
 };
 
-// Strip underscore-triggered shortcuts so pasting code keeps underscores intact.
 export const SAFE_MARKDOWN_TRANSFORMERS = BASE_SAFE_TRANSFORMERS;
 
 // Variant that keeps fenced code fences as raw markdown (useful for edit mode).
