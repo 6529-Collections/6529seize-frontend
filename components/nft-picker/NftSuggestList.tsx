@@ -124,7 +124,7 @@ export function NftSuggestList({
                   )}
                 </div>
                 {suggestion.safelist === "verified" && (
-                  <div className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-rounded-full tw-bg-primary-500 tw-p-[3px] tw-shadow-lg">
+                  <div className="tw-absolute tw-right-[-6px] tw-top-[-6px]">
                     <DistributionPlanVerifiedIcon />
                   </div>
                 )}
