@@ -81,7 +81,7 @@ const convertCodeNodesToFences = (root: RootNode) => {
 
     if ($isCodeNode(node)) {
       const language = node.getLanguage?.() ?? "";
-      const safeLanguage = language.trim().replace(/[`\n\r]/g, "");
+      const safeLanguage = language.trim().replaceAll(/[`\n\r]/g, "");
       const codeText = node.getTextContent();
       const normalizedCode = codeText.endsWith("\n")
         ? codeText
