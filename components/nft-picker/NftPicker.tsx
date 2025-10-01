@@ -18,6 +18,7 @@ import type {
 } from "./NftPicker.types";
 import {
   MAX_SAFE,
+  isRangeTooLargeError,
   fromCanonicalRanges,
   toCanonicalRanges,
   tryToNumberArray,
@@ -552,12 +553,38 @@ export function NftPicker({
     if (!contract) {
       return;
     }
-    const selectionIds = isAll
-      ? []
-      : fromCanonicalRanges(canonicalRanges);
+    let selectionIds: TokenSelection = [];
+    if (isAll) {
+      selectionIds = [];
+    } else {
+      try {
+        selectionIds = fromCanonicalRanges(canonicalRanges);
+      } catch (error) {
+        if (isRangeTooLargeError(error)) {
+          const canonical = formatCanonical(canonicalRanges);
+          const displayValue = canonical || "selection";
+          setParseErrors([
+            {
+              code: error.code,
+              input: displayValue,
+              index: 0,
+              length: Math.max(displayValue.length, 1),
+              message: error.message,
+            },
+          ]);
+          console.warn(
+            "NftPicker: selection exceeds enumeration limit; change event skipped",
+            error
+          );
+          return;
+        }
+        throw error;
+      }
+    }
     if (!selectionIds.length && !isAll) {
       const payload: NftPickerSelection = {
         contractAddress: contract.address,
+        allSelected: isAll,
         outputMode,
         tokenIds: [],
         tokenIdsRaw: [],
@@ -573,6 +600,7 @@ export function NftPicker({
       }
       const payload: NftPickerSelection = {
         contractAddress: contract.address,
+        allSelected: isAll,
         outputMode: "number",
         tokenIds: numbers,
         tokenIdsRaw: selectionIds,
@@ -582,6 +610,7 @@ export function NftPicker({
       const decimalIds = selectionIds.map((id) => id.toString(10));
       const payload: NftPickerSelection = {
         contractAddress: contract.address,
+        allSelected: isAll,
         outputMode: "bigint",
         tokenIds: decimalIds,
         tokenIdsRaw: selectionIds,

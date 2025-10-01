@@ -1,11 +1,14 @@
 import {
+  MAX_ENUMERATION,
   MAX_SAFE,
   bigintCompare,
   expandRangesWindow,
   formatCanonical,
   fromCanonicalRanges,
+  isRangeTooLargeError,
   mergeAndSort,
   parseTokenExpressionToBigints,
+  parseTokenExpressionToRanges,
   toCanonicalRanges,
   tryToNumberArray,
 } from "@/components/nft-picker/NftPicker.utils";
@@ -66,6 +69,32 @@ describe("NftPicker.utils", () => {
         expect(errors[0].message).toBe("Invalid token format");
       }
     });
+
+    it("throws a parse error when a single range exceeds the enumeration ceiling", () => {
+      expect(() => parseTokenExpressionToRanges("0-10000"))
+        .toThrow();
+      try {
+        parseTokenExpressionToRanges("0-10000");
+      } catch (error) {
+        expect(Array.isArray(error)).toBe(true);
+        const errors = error as { code?: string; message: string }[];
+        expect(errors[0]?.code).toBe("range-too-large");
+        expect(errors[0]?.message).toContain("exceeding the limit");
+      }
+    });
+
+    it("throws a parse error when combined ranges exceed the enumeration ceiling", () => {
+      const input = "0-5000,6000-11000";
+      expect(() => parseTokenExpressionToBigints(input)).toThrow();
+      try {
+        parseTokenExpressionToBigints(input);
+      } catch (error) {
+        expect(Array.isArray(error)).toBe(true);
+        const errors = error as { code?: string; message: string }[];
+        expect(errors[0]?.code).toBe("range-too-large");
+        expect(errors[0]?.message).toContain(MAX_ENUMERATION.toString());
+      }
+    });
   });
 
   it("merges and sorts token ids", () => {
@@ -87,6 +116,20 @@ describe("NftPicker.utils", () => {
     ]);
     const expanded = fromCanonicalRanges(ranges);
     expect(expanded).toEqual([1n, 2n, 3n, 5n, 6n]);
+  });
+
+  it("throws a structured error when expanding canonical ranges beyond the ceiling", () => {
+    const oversized = [{ start: 0n, end: 10_000n }];
+    expect(() => fromCanonicalRanges(oversized)).toThrow();
+    try {
+      fromCanonicalRanges(oversized);
+    } catch (error) {
+      expect(isRangeTooLargeError(error)).toBe(true);
+      if (isRangeTooLargeError(error)) {
+        expect(error.limit).toBe(MAX_ENUMERATION);
+        expect(error.size).toBe(10_001n);
+      }
+    }
   });
 
   it("formats canonical ranges", () => {

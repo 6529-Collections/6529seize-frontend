@@ -36,19 +36,21 @@ export type TokenMetadata = {
   isSpam?: boolean;
 };
 
+type BaseSelection = {
+  contractAddress: `0x${string}`;
+  allSelected: boolean;
+  tokenIdsRaw: TokenIdBigInt[];
+};
+
 export type NftPickerSelection =
-  | {
-      contractAddress: `0x${string}`;
+  | (BaseSelection & {
       outputMode: "number";
       tokenIds: number[];
-      tokenIdsRaw: TokenIdBigInt[];
-    }
-  | {
-      contractAddress: `0x${string}`;
+    })
+  | (BaseSelection & {
       outputMode: "bigint";
       tokenIds: string[];
-      tokenIdsRaw: TokenIdBigInt[];
-    };
+    });
 
 export type NftSelectionOutput = NftPickerSelection;
 
@@ -60,23 +62,24 @@ export type NftPickerValue = {
 };
 
 export type NftPickerProps = {
-  value?: NftPickerValue;
-  defaultValue?: Partial<NftPickerValue>;
-  onChange: (output: NftPickerSelection | null) => void;
-  onContractChange?: (meta: ContractOverview | null) => void;
-  chain?: SupportedChain;
-  outputMode?: OutputMode;
-  hideSpam?: boolean;
-  allowAll?: boolean;
-  allowRanges?: boolean;
-  debounceMs?: number;
-  overscan?: number;
-  placeholder?: string;
-  className?: string;
-  renderTokenExtra?: (tokenId: TokenIdBigInt, metadata?: TokenMetadata) => ReactNode;
+  readonly value?: NftPickerValue;
+  readonly defaultValue?: Partial<NftPickerValue>;
+  readonly onChange: (output: NftPickerSelection | null) => void;
+  readonly onContractChange?: (meta: ContractOverview | null) => void;
+  readonly chain?: SupportedChain;
+  readonly outputMode?: OutputMode;
+  readonly hideSpam?: boolean;
+  readonly allowAll?: boolean;
+  readonly allowRanges?: boolean;
+  readonly debounceMs?: number;
+  readonly overscan?: number;
+  readonly placeholder?: string;
+  readonly className?: string;
+  readonly renderTokenExtra?: (tokenId: TokenIdBigInt, metadata?: TokenMetadata) => ReactNode;
 };
 
 export type ParseError = {
+  code?: string;
   input: string;
   index: number;
   length: number;

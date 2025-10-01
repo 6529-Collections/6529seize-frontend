@@ -75,7 +75,7 @@ export type NftPickerSelection =
 
 ## 2) Project Structure (suggested)
 
-```
+```text
 /components/nft-picker/
   NftPicker.tsx                // client component (combobox + modes + selected list)
   NftPicker.types.ts           // exported types
@@ -259,7 +259,7 @@ export const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
 * **Keyboard**: ↑/↓ to move, Enter to select, Esc to close, Tab moves focus.
 * **Mouse**: hover highlights, click selects.
 
-**API specifics**
+#### API specifics
 
 * Search uses **`searchContractMetadata`** (v3). Pull: `address`, `name`, `tokenType`, `totalSupply`, `openseaMetadata.floorPrice`, `openseaMetadata.safelistRequestStatus`, `openseaMetadata.imageUrl`. ([Alchemy][1])
 * For **floor**, optionally call `getFloorPrice` (SDK) for more marketplaces and fallback to OpenSea’s value. Cache per address (stale 5 min). ([Alchemy][5])

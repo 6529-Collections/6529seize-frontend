@@ -27,7 +27,7 @@
 | `allowRanges` | `boolean` | `true` | Enables bucket mode with range parsing. |
 | `debounceMs` | `number` | `250` | Debounce duration for search queries. |
 | `overscan` | `number` | `8` | Overscan applied to virtualized lists. |
-| `placeholder` | `string` | Search placeholder text. |
+| `placeholder` | `string` | – | Search placeholder text. |
 | `className` | `string` | – | Optional root className. |
 | `renderTokenExtra` | `(tokenId: bigint, metadata?: TokenMetadata) => ReactNode` | – | Custom renderer appended to each token row. |
 

@@ -5,8 +5,34 @@ import type {
 } from "./NftPicker.types";
 
 export const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+export const MAX_ENUMERATION = BigInt(10_000);
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
+
+export type RangeTooLargeError = Error & {
+  code: "range-too-large";
+  limit: bigint;
+  size: bigint;
+};
+
+function createRangeTooLargeError(size: bigint): RangeTooLargeError {
+  const error = new Error(
+    `Range expands to ${size.toString()} tokens, exceeding the limit of ${MAX_ENUMERATION.toString()}.`
+  ) as RangeTooLargeError;
+  error.name = "RangeTooLargeError";
+  error.code = "range-too-large";
+  error.limit = MAX_ENUMERATION;
+  error.size = size;
+  return error;
+}
+
+export function isRangeTooLargeError(value: unknown): value is RangeTooLargeError {
+  if (!(value instanceof Error)) {
+    return false;
+  }
+  const candidate = value as Partial<RangeTooLargeError>;
+  return candidate.code === "range-too-large" && typeof candidate.size === "bigint";
+}
 
 interface Segment {
   value: string;
@@ -62,8 +88,9 @@ function tokenize(input: string): Segment[] {
   return segments;
 }
 
-function makeError(segment: Segment, message: string): ParseError {
+function makeError(segment: Segment, message: string, code?: string): ParseError {
   return {
+    code,
     input: segment.value,
     index: segment.start,
     length: Math.max(segment.end - segment.start, segment.value.length || 1),
@@ -175,6 +202,19 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
       }
       const rangeStart = startValue < endValue ? startValue : endValue;
       const rangeEnd = startValue < endValue ? endValue : startValue;
+      const rangeSize = rangeEnd - rangeStart + BIGINT_ONE;
+      if (rangeSize > MAX_ENUMERATION) {
+        const limit = MAX_ENUMERATION.toString();
+        const size = rangeSize.toString();
+        errors.push(
+          makeError(
+            segment,
+            `Range expands to ${size} tokens, exceeding the limit of ${limit}.`,
+            "range-too-large"
+          )
+        );
+        return;
+      }
       ranges.push({ start: rangeStart, end: rangeEnd });
       return;
     }
@@ -183,12 +223,47 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
   if (errors.length) {
     throw errors;
   }
-  return canonicalizeRanges(ranges);
+  const canonical = canonicalizeRanges(ranges);
+  const total = canonical.reduce(
+    (sum, range) => sum + (range.end - range.start + BIGINT_ONE),
+    BIGINT_ZERO
+  );
+  if (total > MAX_ENUMERATION) {
+    const trimmed = input.trim();
+    const displayValue = trimmed.length ? trimmed : input;
+    throw [
+      {
+        code: "range-too-large",
+        input: displayValue,
+        index: 0,
+        length: Math.max(displayValue.length, 1),
+        message: `Selection expands to ${total.toString()} tokens, exceeding the limit of ${MAX_ENUMERATION.toString()}.`,
+      },
+    ] satisfies ParseError[];
+  }
+  return canonical;
 }
 
 export function parseTokenExpressionToBigints(input: string): TokenSelection {
   const ranges = parseTokenExpressionToRanges(input);
-  return fromCanonicalRanges(ranges);
+  try {
+    return fromCanonicalRanges(ranges);
+  } catch (error) {
+    if (isRangeTooLargeError(error)) {
+      const trimmed = input.trim();
+      const displayValue = trimmed.length ? trimmed : input;
+      throw [
+        {
+          code: error.code,
+          input: displayValue,
+          index: 0,
+          length: Math.max(displayValue.length, 1),
+          message: error.message,
+        },
+      ] satisfies ParseError[];
+    }
+    throw error;
+  }
 }
 
 export function mergeCanonicalRanges(
@@ -277,8 +352,17 @@ export function toCanonicalRanges(ids: TokenSelection): TokenRange[] {
 
 export function fromCanonicalRanges(ranges: TokenRange[]): TokenSelection {
   const values: TokenSelection = [];
+  let total = BIGINT_ZERO;
   ranges.forEach((range) => {
     let cursor = range.start;
+    const rangeSize = range.end - range.start + BIGINT_ONE;
+    if (rangeSize > MAX_ENUMERATION) {
+      throw createRangeTooLargeError(rangeSize);
+    }
+    total += rangeSize;
+    if (total > MAX_ENUMERATION) {
+      throw createRangeTooLargeError(total);
+    }
     while (cursor <= range.end) {
       values.push(cursor);
       cursor += BIGINT_ONE;

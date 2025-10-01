@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent } from "react";
 
-import CopyIcon from "@/components/utils/icons/CopyIcon";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
 import type { ParseError, TokenRange } from "./NftPicker.types";
 import { formatCanonical, formatBigIntWithSeparators } from "./NftPicker.utils";
@@ -147,7 +148,7 @@ export function NftEditRanges({
                     <span className="tw-font-semibold tw-text-emerald-300">✓ Copied!</span>
                   ) : (
                     <>
-                      <CopyIcon />
+                      <FontAwesomeIcon icon={faCopy} />
                       <span>Copy</span>
                     </>
                   )}

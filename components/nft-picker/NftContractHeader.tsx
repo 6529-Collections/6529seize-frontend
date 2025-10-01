@@ -20,10 +20,6 @@ export function NftContractHeader({
   onChange,
   onClear,
 }: NftContractHeaderProps) {
-  if (!contract) {
-    return null;
-  }
-
   const handleChangeClick = useCallback(() => {
     onChange();
   }, [onChange]);
@@ -31,6 +27,10 @@ export function NftContractHeader({
   const handleClearClick = useCallback(() => {
     onClear();
   }, [onClear]);
+
+  if (!contract) {
+    return null;
+  }
 
   return (
     <section

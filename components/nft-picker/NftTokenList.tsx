@@ -29,22 +29,23 @@ interface NftTokenListProps {
 
 const ROW_HEIGHT = 72;
 const DEFAULT_OVERSCAN = 8;
+const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
+const MAX_VIRTUAL_ITEM_COUNT = 100_000;
+// Cap prevents virtualization container heights from becoming extreme.
+const MAX_VIRTUAL_ITEM_COUNT_BIGINT = BigInt(MAX_VIRTUAL_ITEM_COUNT);
 const VIRTUAL_SCROLL_KEY = "nft-picker-token-list";
 
 function getTotalCount(ranges: TokenRange[]): number {
-  let total = 0;
+  let total = BIGINT_ZERO;
   for (const range of ranges) {
-    const size = Number(range.end - range.start + BIGINT_ONE);
-    if (!Number.isFinite(size)) {
-      return Number.MAX_SAFE_INTEGER;
-    }
+    const size = range.end - range.start + BIGINT_ONE;
     total += size;
-    if (total >= Number.MAX_SAFE_INTEGER) {
-      return Number.MAX_SAFE_INTEGER;
+    if (total >= MAX_VIRTUAL_ITEM_COUNT_BIGINT) {
+      return MAX_VIRTUAL_ITEM_COUNT;
     }
   }
-  return total;
+  return Number(total);
 }
 
 function toDecimalString(value: bigint): string {
