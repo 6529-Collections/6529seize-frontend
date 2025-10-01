@@ -23,7 +23,7 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../entities/IDrop";
-import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import { $convertToMarkdownString } from "@lexical/markdown";
 import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
@@ -51,6 +51,7 @@ import { ApiReplyToDropResponse } from "../../generated/models/ApiReplyToDropRes
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 import { DropPrivileges } from "../../hooks/useDropPriviledges";
+import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 
 import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
 import { useDropMetadata, generateMetadataId } from "./hooks/useDropMetadata";
@@ -489,7 +490,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     () =>
       editorState?.read(() =>
         $convertToMarkdownString([
-          ...TRANSFORMERS,
+          ...SAFE_MARKDOWN_TRANSFORMERS,
           MENTION_TRANSFORMER,
           HASHTAG_TRANSFORMER,
           IMAGE_TRANSFORMER,

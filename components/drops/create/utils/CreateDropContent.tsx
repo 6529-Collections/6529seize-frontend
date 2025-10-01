@@ -27,7 +27,7 @@ import {
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import { $convertToMarkdownString } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
@@ -63,11 +63,13 @@ import { ImageNode } from "../lexical/nodes/ImageNode";
 import CreateDropParts from "./storm/CreateDropParts";
 import CreateDropActionsRow from "./CreateDropActionsRow";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
+import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
 import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
 import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
 import { EmojiNode } from "../lexical/nodes/EmojiNode";
 import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
+import PlainTextPastePlugin from "../lexical/plugins/PlainTextPastePlugin";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -194,7 +196,7 @@ const CreateDropContent = forwardRef<
       editorState?.read(() =>
         setCharsCount(
           $convertToMarkdownString([
-            ...TRANSFORMERS,
+            ...SAFE_MARKDOWN_TRANSFORMERS,
             MENTION_TRANSFORMER,
             HASHTAG_TRANSFORMER,
             IMAGE_TRANSFORMER,
@@ -283,7 +285,8 @@ const CreateDropContent = forwardRef<
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
               <ListPlugin />
-              <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+              <PlainTextPastePlugin />
+              <MarkdownShortcutPlugin transformers={SAFE_MARKDOWN_TRANSFORMERS} />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />

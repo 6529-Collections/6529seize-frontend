@@ -11,11 +11,7 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import {
-  TRANSFORMERS,
-  $convertFromMarkdownString,
-  $convertToMarkdownString,
-} from "@lexical/markdown";
+import { $convertFromMarkdownString, $convertToMarkdownString } from "@lexical/markdown";
 import {
   $getRoot,
   EditorState,
@@ -51,6 +47,8 @@ import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import EmojiPlugin from "../../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../../drops/create/lexical/nodes/EmojiNode";
+import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 
 interface EditDropLexicalProps {
   initialContent: string;
@@ -142,7 +140,7 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   useEffect(() => {
     editor.update(() => {
       $convertFromMarkdownString(initialContent, [
-        ...TRANSFORMERS,
+        ...SAFE_MARKDOWN_TRANSFORMERS,
         MENTION_TRANSFORMER,
         HASHTAG_TRANSFORMER,
       ]);
@@ -268,7 +266,7 @@ function KeyboardPlugin({
           // Check if content has changed (similar to original logic)
           editor.getEditorState().read(() => {
             const currentMarkdown = $convertToMarkdownString([
-              ...TRANSFORMERS,
+              ...SAFE_MARKDOWN_TRANSFORMERS,
               MENTION_TRANSFORMER,
               HASHTAG_TRANSFORMER,
             ]);
@@ -362,7 +360,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
     editorState.read(() => {
       const markdown = $convertToMarkdownString([
-        ...TRANSFORMERS,
+        ...SAFE_MARKDOWN_TRANSFORMERS,
         MENTION_TRANSFORMER,
         HASHTAG_TRANSFORMER,
       ]);
@@ -403,7 +401,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           />
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          <MarkdownShortcutPlugin transformers={SAFE_MARKDOWN_TRANSFORMERS} />
+          <PlainTextPastePlugin />
           <ListPlugin />
           <LinkPlugin />
           <NewMentionsPlugin
