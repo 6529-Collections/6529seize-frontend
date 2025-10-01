@@ -48,7 +48,7 @@ const BIGINT_ONE = BigInt(1);
 
 const EMPTY_SELECTION: TokenSelection = [];
 
-function toRangesFromSelection(selection: TokenSelection): TokenRange[] {
+function toRangesFromSelection(selection: Readonly<TokenSelection>): TokenRange[] {
   if (!selection.length) {
     return [];
   }
@@ -102,6 +102,13 @@ export function NftPicker({
   const [tokenInput, setTokenInput] = useState<string>("");
   const [isEditingText, setIsEditingText] = useState(false);
   const previousRangesRef = useRef<TokenRange[] | null>(null);
+  const hasHydratedInitialValueRef = useRef(false);
+  const pendingPropEmitRef = useRef<string | null>(null);
+  const isControlled = value !== undefined;
+
+  useEffect(() => {
+    setHideSpam(hideSpamProp);
+  }, [hideSpamProp]);
 
   const presetContractAddress = value?.contractAddress ?? defaultValue?.contractAddress;
   const presetContractQuery = useContractOverviewQuery({
@@ -164,9 +171,11 @@ export function NftPicker({
   const helperMessageId = useId();
 
   useEffect(() => {
+    pendingPropEmitRef.current = null;
     if (!value) {
       return;
     }
+    hasHydratedInitialValueRef.current = true;
     if (value.contractAddress) {
       if (!selectedContract || selectedContract.address !== value.contractAddress) {
         setSelectedContract((prev) =>
@@ -186,6 +195,32 @@ export function NftPicker({
       previousRangesRef.current = null;
     }
   }, [value, selectedContract]);
+
+  useEffect(() => {
+    if (isControlled) {
+      return;
+    }
+    if (hasHydratedInitialValueRef.current) {
+      return;
+    }
+    if (!defaultValue) {
+      return;
+    }
+    const defaultSelection = defaultValue.selectedIds
+      ? (Array.from(defaultValue.selectedIds) as TokenSelection)
+      : EMPTY_SELECTION;
+    const canonical = toRangesFromSelection(defaultSelection);
+    setRanges(canonical);
+    if (defaultValue.allSelected) {
+      setAllSelected(true);
+      previousRangesRef.current = canonical;
+    } else {
+      setAllSelected(false);
+      previousRangesRef.current = null;
+    }
+    pendingPropEmitRef.current = defaultValue.contractAddress ?? null;
+    hasHydratedInitialValueRef.current = true;
+  }, [isControlled, defaultValue]);
 
   useEffect(() => {
     const formatted = formatCanonical(ranges);
@@ -550,6 +585,7 @@ export function NftPicker({
     canonicalRanges: TokenRange[],
     isAll: boolean
   ) => {
+    pendingPropEmitRef.current = null;
     if (!contract) {
       return;
     }
@@ -623,6 +659,18 @@ export function NftPicker({
       onChange(payload);
     }
   };
+
+  useEffect(() => {
+    const pendingContractAddress = pendingPropEmitRef.current;
+    if (!pendingContractAddress) {
+      return;
+    }
+    if (!selectedContract || selectedContract.address !== pendingContractAddress) {
+      return;
+    }
+    pendingPropEmitRef.current = null;
+    emitChange(selectedContract, ranges, allSelected);
+  }, [selectedContract, ranges, allSelected]);
   const activeSuggestionId = isOpen && suggestionList[activeIndex]
     ? `nft-suggestion-${activeIndex}`
     : undefined;
