@@ -3,19 +3,24 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
 import { getStagingAuth } from "./auth/auth.utils";
 
-export async function fetchUrl(url: string): Promise<DBResponse | any> {
-  let headers = {};
+export async function fetchUrl<T = DBResponse>(
+  url: string,
+  init?: RequestInit
+): Promise<T> {
+  const baseHeaders = new Headers(init?.headers);
   const apiAuth = getStagingAuth();
   if (apiAuth) {
-    headers = { "x-6529-auth": apiAuth };
+    baseHeaders.set("x-6529-auth", apiAuth);
   }
+  const headers = Object.fromEntries(baseHeaders.entries());
   const res = await fetch(url, {
-    headers: headers,
+    ...init,
+    headers,
   });
   if (res.status === 401) {
     Cookies.remove(API_AUTH_COOKIE);
   }
-  return await res.json();
+  return (await res.json()) as T;
 }
 
 export async function fetchAllPages(url: string, data?: any[]): Promise<any[]> {
@@ -23,7 +28,7 @@ export async function fetchAllPages(url: string, data?: any[]): Promise<any[]> {
   if (data) {
     allData = data;
   }
-  const response = await fetchUrl(url);
+  const response = await fetchUrl<DBResponse>(url);
   allData = [...allData].concat(response.data);
   if (response.next) {
     return fetchAllPages(response.next, allData);
@@ -31,18 +36,21 @@ export async function fetchAllPages(url: string, data?: any[]): Promise<any[]> {
   return allData;
 }
 
-export async function postData(url: string, body: any) {
-  let headers: any = {
-    "Content-Type": "application/json",
-  };
+export async function postData(url: string, body: any, init?: RequestInit) {
+  const baseHeaders = new Headers(init?.headers);
+  if (!baseHeaders.has("Content-Type")) {
+    baseHeaders.set("Content-Type", "application/json");
+  }
   const apiAuth = getStagingAuth();
   if (apiAuth) {
-    headers = { "x-6529-auth": apiAuth, "Content-Type": "application/json" };
+    baseHeaders.set("x-6529-auth", apiAuth);
   }
+  const headers = Object.fromEntries(baseHeaders.entries());
   const res = await fetch(url, {
+    ...init,
     method: "POST",
     body: JSON.stringify(body),
-    headers: headers,
+    headers,
   });
   const json = await res.json();
   return {
