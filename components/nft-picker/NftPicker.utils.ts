@@ -170,7 +170,7 @@ export function bigintCompare(a: bigint, b: bigint): number {
   return a < b ? -1 : 1;
 }
 
-export function mergeAndSort(ids: TokenSelection): TokenSelection {
+export function sortAndDedupIds(ids: TokenSelection): TokenSelection {
   const sorted = [...ids].sort(bigintCompare);
   const result: TokenSelection = [];
   for (const id of sorted) {
@@ -181,8 +181,11 @@ export function mergeAndSort(ids: TokenSelection): TokenSelection {
   return result;
 }
 
+// TODO: remove once callers migrate to sortAndDedupIds.
+export const mergeAndSort = sortAndDedupIds;
+
 export function toCanonicalRanges(ids: TokenSelection): TokenRange[] {
-  const sorted = mergeAndSort(ids);
+  const sorted = sortAndDedupIds(ids);
   if (sorted.length === 0) {
     return [];
   }

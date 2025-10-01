@@ -17,7 +17,7 @@ import type {
 import {
   MAX_SAFE,
   fromCanonicalRanges,
-  mergeAndSort,
+  sortAndDedupIds,
   parseTokenExpressionToBigints,
   toCanonicalRanges,
   tryToNumberArray,
@@ -264,7 +264,7 @@ export function NftPicker({
 
       try {
         const parsed = parseTokenExpressionToBigints(trimmedTokenInput);
-        const merged = mergeAndSort(parsed);
+        const merged = sortAndDedupIds(parsed);
         const canonicalRanges = toCanonicalRanges(merged);
         return {
           tokens: merged,
@@ -400,7 +400,7 @@ export function NftPicker({
       return;
     }
     const combined = fromCanonicalRanges(ranges);
-    const merged = mergeAndSort([...combined, ...ids]);
+    const merged = sortAndDedupIds([...combined, ...ids]);
     const canonical = toCanonicalRanges(merged);
     setRanges(canonical);
     setAllSelected(false);
@@ -524,7 +524,7 @@ export function NftPicker({
   const handleApplyText = () => {
     try {
       const parsed = parseTokenExpressionToBigints(textValue);
-      const canonical = toCanonicalRanges(mergeAndSort(parsed));
+      const canonical = toCanonicalRanges(sortAndDedupIds(parsed));
       setRanges(canonical);
       setParseErrors([]);
       setAllSelected(false);

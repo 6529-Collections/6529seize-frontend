@@ -230,7 +230,7 @@ export type NftPickerProps = {
 
 ```ts
 export function parseTokenExpressionToBigints(input: string): bigint[]; // throws ParseError[]
-export function mergeAndSort(ids: bigint[]): bigint[]; // merge contiguous as ranges but returns expanded ids
+export function sortAndDedupIds(ids: bigint[]): bigint[]; // returns sorted unique ids
 export function toCanonicalRanges(ids: bigint[]): TokenRange[]; // merged range model
 export function fromCanonicalRanges(ranges: TokenRange[]): bigint[]; // expand
 export function formatCanonical(ranges: TokenRange[]): string; // e.g., "1,2,4-6,8-14"
