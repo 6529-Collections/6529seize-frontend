@@ -707,9 +707,7 @@ export function NftPicker({
             )}
           </form>
 
-          {allSelected ? (
-            <p className="tw-text-sm tw-text-iron-400">All tokens in this contract are selected.</p>
-          ) : (
+          {!allSelected ? (
             <>
               <div id={helperMessageId} className={helperClassName} aria-live="polite" role="status">
                 {helperState.text}
@@ -752,7 +750,7 @@ export function NftPicker({
                 </div>
               )}
             </>
-          )}
+          ) : null}
 
           {unsafeCount > 0 && outputMode === "number" && (
             <div className="tw-text-xs tw-text-amber-300">
