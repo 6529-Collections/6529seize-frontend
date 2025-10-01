@@ -2,9 +2,7 @@
 
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";

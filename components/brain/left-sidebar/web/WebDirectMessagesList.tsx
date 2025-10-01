@@ -10,7 +10,6 @@ import PrimaryButton from "../../../utils/button/PrimaryButton";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
-import { CREATE_DIRECT_MESSAGE_SEARCH_PATH } from "../../../waves/Waves";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import { AuthContext } from "../../../auth/Auth";
