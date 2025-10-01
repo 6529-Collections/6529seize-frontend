@@ -133,10 +133,21 @@ export type TokenIdBigInt = bigint;
 export type TokenRange = { start: TokenIdBigInt; end: TokenIdBigInt }; // inclusive
 export type TokenSelection = TokenIdBigInt[]; // deduped
 
-export type NftSelectionOutput = {
-  contractAddress: `0x${string}`;
-  tokenIds: number[]; // empty = all
-};
+export type NftPickerSelection =
+  | {
+      contractAddress: `0x${string}`;
+      outputMode: 'number';
+      tokenIds: number[]; // empty = all
+      tokenIdsRaw: TokenIdBigInt[]; // bigint mirror for parity/testing
+    }
+  | {
+      contractAddress: `0x${string}`;
+      outputMode: 'bigint';
+      tokenIds: string[]; // decimal strings, empty = all
+      tokenIdsRaw: TokenIdBigInt[]; // exact bigints preserve unsafe IDs
+    };
+
+export type NftSelectionOutput = NftPickerSelection; // alias for clarity in docs
 
 export type NftPickerValue = {
   chain: SupportedChain;
@@ -156,13 +167,27 @@ export type Suggestion = {
   imageUrl?: string | null;
   isSpam?: boolean;
   safelist?: 'verified' | 'approved' | 'requested' | 'not_requested' | undefined;
+  deployer?: `0x${string}` | null;
+};
+
+export type ContractOverview = Suggestion & {
+  description?: string | null;
+  bannerImageUrl?: string | null;
+};
+
+export type TokenMetadata = {
+  tokenId: TokenIdBigInt;
+  tokenIdRaw: string;
+  name?: string | null;
+  imageUrl?: string | null;
+  isSpam?: boolean;
 };
 
 export type NftPickerProps = {
   value?: NftPickerValue; // controlled
   defaultValue?: Partial<NftPickerValue>;
-  onChange: (output: NftSelectionOutput) => void;
-  onContractChange?: (meta: Suggestion | null) => void;
+  onChange: (output: NftPickerSelection | null) => void;
+  onContractChange?: (meta: ContractOverview | null) => void;
 
   // data / behavior
   chain?: SupportedChain;                // default 'ethereum'
@@ -176,7 +201,7 @@ export type NftPickerProps = {
   // customization
   placeholder?: string;
   className?: string;
-  renderTokenExtra?: (tokenId: bigint) => ReactNode; // optional trailing info per row
+  renderTokenExtra?: (tokenId: TokenIdBigInt, metadata?: TokenMetadata) => ReactNode; // optional trailing info per row
 };
 ```
 

@@ -124,6 +124,7 @@ const NETWORK_MAP: Record<SupportedChain, string> = {
 };
 
 const MAX_BATCH_SIZE = 100;
+const MAX_GET_NFTS_RETRIES = 3;
 
 function resolveNetwork(chain: SupportedChain = "ethereum"): string {
   return NETWORK_MAP[chain] ?? NETWORK_MAP.ethereum;
@@ -465,7 +466,8 @@ export async function getNftsForContractAndOwner(
   contract: string,
   owner: string,
   nfts?: any[],
-  pageKey?: string
+  pageKey?: string,
+  retries = 0
 ) {
   if (!nfts) {
     nfts = [];
@@ -483,12 +485,22 @@ export async function getNftsForContractAndOwner(
   }
   const response = await fetchLegacyUrl(url);
   if (response.error) {
-    return getNftsForContractAndOwner(chainId, contract, owner, nfts, pageKey);
+    if (retries >= MAX_GET_NFTS_RETRIES) {
+      throw new Error("Failed to fetch NFTs for owner after retries");
+    }
+    return getNftsForContractAndOwner(
+      chainId,
+      contract,
+      owner,
+      nfts,
+      pageKey,
+      retries + 1
+    );
   }
   nfts = [...nfts].concat(response.ownedNfts);
   if (response.pageKey) {
     return getNftsForContractAndOwner(
-      NEXTGEN_CHAIN_ID,
+      chainId,
       contract,
       owner,
       nfts,

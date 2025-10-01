@@ -50,6 +50,8 @@ export type NftPickerSelection =
       tokenIdsRaw: TokenIdBigInt[];
     };
 
+export type NftSelectionOutput = NftPickerSelection;
+
 export type NftPickerValue = {
   chain: SupportedChain;
   contractAddress?: `0x${string}`;
