@@ -67,7 +67,7 @@ export function NftSuggestList({
       id="nft-picker-suggest-list"
       role="listbox"
       aria-label="NFT collections suggestions"
-      className="tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900"
+      className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900"
     >
       <div
         ref={listContainerRef}
