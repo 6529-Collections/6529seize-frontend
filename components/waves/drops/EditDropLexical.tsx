@@ -86,7 +86,12 @@ const convertCodeNodesToFences = (root: RootNode) => {
       const normalizedCode = codeText.endsWith("\n")
         ? codeText
         : `${codeText}\n`;
-      const fence = "```";
+      const maxExistingFence = (codeText.match(/`+/g) ?? []).reduce(
+        (max, match) => Math.max(max, match.length),
+        0
+      );
+      const fenceLength = Math.max(3, maxExistingFence + 1);
+      const fence = "`".repeat(fenceLength);
       const openFence = safeLanguage ? `${fence}${safeLanguage}` : fence;
       const fencedMarkdown = `${openFence}\n${normalizedCode}${fence}`;
 
