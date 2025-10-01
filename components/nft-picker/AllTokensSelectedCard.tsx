@@ -14,22 +14,20 @@ export function AllTokensSelectedCard({
   buttonRef,
 }: AllTokensSelectedCardProps) {
   return (
-    <div
-      role="status"
-      aria-live="polite"
+    <output
       aria-label="All tokens selected status"
       className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-rounded-lg tw-border-2 tw-border-green-500/60 tw-bg-green-950/30 tw-p-4 tw-transition-all tw-duration-200 tw-ease-in-out @md:tw-flex-row @md:tw-items-center"
     >
-      <div className="tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-green-600">
+      <span className="tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-green-600">
         <FontAwesomeIcon icon={faCheckCircle} className="tw-h-6 tw-w-6 tw-text-white" aria-hidden="true" />
-      </div>
+      </span>
 
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-text-base tw-font-semibold tw-text-green-400">All tokens selected</div>
-        <div className="tw-text-sm tw-text-iron-400">
+      <span className="tw-flex-1 tw-min-w-0">
+        <span className="tw-block tw-text-base tw-font-semibold tw-text-green-400">All tokens selected</span>
+        <span className="tw-block tw-text-sm tw-text-iron-400">
           Click "Deselect All" to add specific tokens
-        </div>
-      </div>
+        </span>
+      </span>
 
       <button
         ref={buttonRef}
@@ -41,6 +39,6 @@ export function AllTokensSelectedCard({
         <FontAwesomeIcon icon={faCheckCircle} className="tw-h-5 tw-w-5 tw-text-white" aria-hidden="true" />
         Deselect All
       </button>
-    </div>
+    </output>
   );
 }

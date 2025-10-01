@@ -383,7 +383,23 @@ export function formatCanonical(ranges: TokenRange[]): string {
 
 export function formatBigIntWithSeparators(value: bigint): string {
   const raw = value.toString();
-  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const isNegative = raw.startsWith("-");
+  const digits = isNegative ? raw.slice(1) : raw;
+
+  if (digits.length <= 3) {
+    return isNegative ? `-${digits}` : digits;
+  }
+
+  let formatted = "";
+  for (let index = 0; index < digits.length; index += 1) {
+    const char = digits[digits.length - 1 - index];
+    if (index > 0 && index % 3 === 0) {
+      formatted = `,${formatted}`;
+    }
+    formatted = `${char}${formatted}`;
+  }
+
+  return isNegative ? `-${formatted}` : formatted;
 }
 
 export function tryToNumberArray(ids: TokenSelection): {
