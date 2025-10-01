@@ -205,6 +205,26 @@ function pickImage(source?: {
   return null;
 }
 
+function pickThumbnail(source?: {
+  image?: { thumbnailUrl?: string | null } | null;
+  media?: { thumbnailUrl?: string | null }[] | null;
+}): string | null {
+  if (!source) {
+    return null;
+  }
+  if (source.image?.thumbnailUrl) {
+    return source.image.thumbnailUrl;
+  }
+  if (source.media && source.media.length > 0) {
+    const mediaItem = source.media.find((item) => item?.thumbnailUrl) ??
+      source.media[0];
+    if (mediaItem?.thumbnailUrl) {
+      return mediaItem.thumbnailUrl;
+    }
+  }
+  return null;
+}
+
 function normaliseAddress(address?: string | null): `0x${string}` | null {
   if (!address) {
     return null;
@@ -370,23 +390,10 @@ function normaliseTokenMetadata(
   const tokenIdRaw = token.tokenId ?? "";
   try {
     const tokenId = parseTokenIdToBigint(tokenIdRaw);
-    const imageUrl = pickImage({
-      imageUrl:
-        token.metadata?.image ??
-        token.raw?.metadata?.image ??
-        token.image?.cachedUrl ??
-        token.image?.thumbnailUrl ??
-        token.image?.originalUrl ??
-        undefined,
+    const imageUrl = pickThumbnail({
       image: token.image ?? undefined,
       media: token.media ?? undefined,
     });
-    const fallbackImage =
-      token.metadata?.image ??
-      token.raw?.metadata?.image ??
-      token.media?.find((item) => item?.thumbnailUrl)?.thumbnailUrl ??
-      token.media?.find((item) => item?.gateway)?.gateway ??
-      null;
     return {
       tokenId,
       tokenIdRaw,
@@ -396,7 +403,7 @@ function normaliseTokenMetadata(
         token.metadata?.name ??
         token.raw?.metadata?.name ??
         null,
-      imageUrl: imageUrl ?? fallbackImage ?? null,
+      imageUrl,
       isSpam: token.isSpam ?? token.spamInfo?.isSpam ?? false,
     };
   } catch (error) {
