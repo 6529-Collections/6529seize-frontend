@@ -53,15 +53,23 @@ const shouldUseOpenGraphPreview = (
     return false;
   }
 
-  if (YOUTUBE_DOMAINS.some((domain) => matchesDomainOrSubdomain(hostname, domain))) {
+  if (
+    YOUTUBE_DOMAINS.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+  ) {
     return false;
   }
 
-  if (TWITTER_DOMAINS.some((domain) => matchesDomainOrSubdomain(hostname, domain))) {
+  if (
+    TWITTER_DOMAINS.some((domain) => matchesDomainOrSubdomain(hostname, domain))
+  ) {
     return false;
   }
 
-  if (ART_BLOCKS_DOMAINS.some((domain) => matchesDomainOrSubdomain(hostname, domain))) {
+  if (
+    ART_BLOCKS_DOMAINS.some((domain) =>
+      matchesDomainOrSubdomain(hostname, domain)
+    )
+  ) {
     return false;
   }
 
@@ -72,7 +80,7 @@ const renderExternalOrInternalLink = (
   href: string,
   props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
 ) => {
-  const baseEndpoint = publicEnv.BASE_ENDPOINT || process.env.BASE_ENDPOINT || "";
+  const baseEndpoint = publicEnv.BASE_ENDPOINT || "";
   const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
   const { onClick, ...restProps } = props;
   const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {
@@ -104,4 +112,9 @@ const isValidLink = (href: string): boolean => {
   return parseUrl(href) !== null || isLikelyEnsTarget(href);
 };
 
-export { parseUrl, shouldUseOpenGraphPreview, renderExternalOrInternalLink, isValidLink };
+export {
+  isValidLink,
+  parseUrl,
+  renderExternalOrInternalLink,
+  shouldUseOpenGraphPreview,
+};

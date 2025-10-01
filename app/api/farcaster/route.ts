@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { publicEnv } from "@/config/env";
 import {
   UrlGuardError,
   assertPublicUrl,
@@ -8,6 +9,10 @@ import {
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
 import { escapeRegExp } from "@/lib/text/regex";
+import {
+  parseFarcasterResource,
+  type FarcasterResourceIdentifier,
+} from "@/src/services/farcaster/url";
 import type {
   FarcasterCastPreview,
   FarcasterChannelPreview,
@@ -16,14 +21,10 @@ import type {
   FarcasterProfilePreview,
   FarcasterUnavailablePreview,
 } from "@/types/farcaster.types";
-import {
-  parseFarcasterResource,
-  type FarcasterResourceIdentifier,
-} from "@/src/services/farcaster/url";
 
 const WARPCAST_API_BASE =
-  process.env.FARCASTER_WARPCAST_API_BASE ?? "https://api.warpcast.com";
-const WARPCAST_API_KEY = process.env.FARCASTER_WARPCAST_API_KEY ?? undefined;
+  publicEnv.FARCASTER_WARPCAST_API_BASE ?? "https://api.warpcast.com";
+const WARPCAST_API_KEY = publicEnv.FARCASTER_WARPCAST_API_KEY ?? undefined;
 
 const CAST_CACHE_TTL_MS = 20 * 60 * 1000;
 const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -40,7 +41,15 @@ const HTML_ACCEPT_HEADER =
 
 const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
   blockedHosts: ["localhost", "127.0.0.1", "::1"],
-  blockedHostSuffixes: [".local", ".internal", ".lan", ".intra", ".corp", ".home", ".test"],
+  blockedHostSuffixes: [
+    ".local",
+    ".internal",
+    ".lan",
+    ".intra",
+    ".corp",
+    ".home",
+    ".test",
+  ],
 };
 
 const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
@@ -53,11 +62,20 @@ type CacheEntry<T> = {
 };
 
 const castCache = new Map<string, CacheEntry<FarcasterCastPreview | null>>();
-const profileCache = new Map<string, CacheEntry<FarcasterProfilePreview | null>>();
-const channelCache = new Map<string, CacheEntry<FarcasterChannelPreview | null>>();
+const profileCache = new Map<
+  string,
+  CacheEntry<FarcasterProfilePreview | null>
+>();
+const channelCache = new Map<
+  string,
+  CacheEntry<FarcasterChannelPreview | null>
+>();
 const frameCache = new Map<string, CacheEntry<FarcasterFramePreview | null>>();
 
-const getCacheValue = <T>(cache: Map<string, CacheEntry<T>>, key: string): T | undefined => {
+const getCacheValue = <T>(
+  cache: Map<string, CacheEntry<T>>,
+  key: string
+): T | undefined => {
   const entry = cache.get(key);
   if (!entry) {
     return undefined;
@@ -83,7 +101,9 @@ const setCacheValue = <T>(
   });
 };
 
-const createAbortController = (timeoutMs: number): {
+const createAbortController = (
+  timeoutMs: number
+): {
   controller: AbortController;
   cancel: () => void;
 } => {
@@ -146,15 +166,13 @@ const fetchWarpcastJson = async <T>(
       throw new Error("Warpcast request aborted");
     }
 
-    throw error instanceof Error
-      ? error
-      : new Error("Warpcast request failed");
+    throw error instanceof Error ? error : new Error("Warpcast request failed");
   } finally {
     cancel();
   }
 };
 
- type WarpcastUserResponse = {
+type WarpcastUserResponse = {
   readonly result?: {
     readonly user?: {
       readonly fid?: number;
@@ -168,21 +186,21 @@ const fetchWarpcastJson = async <T>(
   };
 };
 
- type WarpcastCastEmbed = {
+type WarpcastCastEmbed = {
   readonly url?: string;
   readonly castId?: { readonly fid?: number; readonly hash?: string };
   readonly metadata?: { readonly image?: string };
   readonly type?: string;
 };
 
- type WarpcastCastAuthor = {
+type WarpcastCastAuthor = {
   readonly fid?: number;
   readonly username?: string;
   readonly displayName?: string;
   readonly pfp?: { readonly url?: string };
 };
 
- type WarpcastCastResponse = {
+type WarpcastCastResponse = {
   readonly result?: {
     readonly cast?: {
       readonly hash?: string;
@@ -206,7 +224,7 @@ const fetchWarpcastJson = async <T>(
   };
 };
 
- type WarpcastChannelResponse = {
+type WarpcastChannelResponse = {
   readonly result?: {
     readonly channel?: {
       readonly id?: string;
@@ -223,7 +241,7 @@ const fetchWarpcastJson = async <T>(
   };
 };
 
- type WarpcastFrameResponse = {
+type WarpcastFrameResponse = {
   readonly result?: {
     readonly frame?: {
       readonly url?: string;
@@ -500,7 +518,10 @@ const extractTitle = (html: string): string | undefined => {
   return rawTitle.trim();
 };
 
-const resolveUrl = (base: string, value: string | undefined): string | undefined => {
+const resolveUrl = (
+  base: string,
+  value: string | undefined
+): string | undefined => {
   if (!value) {
     return undefined;
   }
@@ -543,9 +564,7 @@ const fetchHtml = async (
         return null;
       }
 
-      throw new Error(
-        `Frame fetch failed with status ${response.status}`
-      );
+      throw new Error(`Frame fetch failed with status ${response.status}`);
     }
 
     const html = await response.text();
@@ -639,7 +658,9 @@ const handleResource = async (
 ): Promise<FarcasterPreviewResponse> => {
   if (resource.type === "cast") {
     const preview = await fetchCastPreview(resource);
-    return preview ?? toUnavailable(resource.canonicalUrl, "Cast not available");
+    return (
+      preview ?? toUnavailable(resource.canonicalUrl, "Cast not available")
+    );
   }
 
   if (resource.type === "profile") {
@@ -661,14 +682,20 @@ const handleResource = async (
 
 const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   error instanceof UrlGuardError ||
-  (typeof error === "object" && error !== null && (error as { name?: string }).name === "UrlGuardError");
+  (typeof error === "object" &&
+    error !== null &&
+    (error as { name?: string }).name === "UrlGuardError");
 
 const handleGuardError = (error: unknown, fallbackStatus = 400) => {
   if (isUrlGuardError(error)) {
-    return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.statusCode }
+    );
   }
 
-  const message = error instanceof Error ? error.message : "Invalid or forbidden URL";
+  const message =
+    error instanceof Error ? error.message : "Invalid or forbidden URL";
   return NextResponse.json({ error: message }, { status: fallbackStatus });
 };
 
@@ -709,7 +736,9 @@ export async function GET(request: NextRequest) {
     }
 
     const message =
-      error instanceof Error ? error.message : "Unable to resolve Farcaster data";
+      error instanceof Error
+        ? error.message
+        : "Unable to resolve Farcaster data";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }
