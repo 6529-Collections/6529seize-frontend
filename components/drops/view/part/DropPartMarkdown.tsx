@@ -1,4 +1,5 @@
 import {
+  Children,
   memo,
   useEffect,
   useMemo,
@@ -77,6 +78,18 @@ const CodeBlockRenderer = ({
 }: MarkdownCodeProps) => {
   const codeRef = useRef<HTMLElement>(null);
 
+  const codeText = useMemo(() => {
+    return Children.toArray(children)
+      .map((child) => {
+        if (typeof child === "string" || typeof child === "number") {
+          return child;
+        }
+
+        return "";
+      })
+      .join("");
+  }, [children]);
+
   const language = useMemo(() => {
     const match =
       typeof className === "string"
@@ -97,7 +110,7 @@ const CodeBlockRenderer = ({
     }
 
     void highlightCodeElement(element, language);
-  }, [language, children]);
+  }, [language, codeText]);
 
   return (
     <code
