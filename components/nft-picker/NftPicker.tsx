@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import clsx from "clsx";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/20/solid";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
@@ -152,6 +153,7 @@ export function NftPicker({
   }, [contractQueryAddress, searchResult?.hiddenCount]);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const helperMessageId = useId();
 
   useEffect(() => {
     if (!value) {
@@ -370,7 +372,7 @@ export function NftPicker({
     };
   }, [allSelected, contractTotalSupply, formatCount, tokenPreview, trimmedTokenInput]);
 
-  const helperClassName = clsx("tw-text-xs", {
+  const helperClassName = clsx("tw-min-h-[1.25rem] tw-text-xs tw-font-medium", {
     "tw-text-emerald-300": helperState.tone === "success",
     "tw-text-red-300": helperState.tone === "error",
     "tw-text-iron-300": helperState.tone === "muted",
@@ -647,21 +649,22 @@ export function NftPicker({
 
       {selectedContract && (
         <div className="tw-flex tw-flex-col tw-gap-3">
-          <form className="tw-flex tw-flex-col tw-gap-2" onSubmit={handleTokenFormSubmit}>
-            <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-items-center">
+          <form className="tw-flex tw-flex-col tw-gap-3" onSubmit={handleTokenFormSubmit}>
+            <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-start">
               <input
                 value={tokenInput}
                 onChange={handleTokenInputChange}
                 onKeyDown={handleTokenInputKeyDown}
                 placeholder={tokenInputPlaceholder}
                 disabled={tokenInputDisabled}
-                className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
                 aria-label="Add token IDs or ranges"
+                aria-describedby={helperMessageId}
               />
-              <div className="tw-flex tw-flex-wrap tw-gap-2">
+              <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap">
                 <button
                   type="submit"
-                  className="tw-rounded-md tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+                  className="tw-inline-flex tw-min-h-[2.75rem] tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-shadow-sm hover:tw-bg-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-w-auto"
                   disabled={!canAddTokens}
                 >
                   Add
@@ -669,18 +672,27 @@ export function NftPicker({
                 {allowAll && (
                   <button
                     type="button"
-                    className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+                    className="tw-inline-flex tw-min-h-[2.75rem] tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition hover:tw-border-primary-500 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 sm:tw-w-auto"
                     onClick={selectAllHandler}
                     disabled={!selectedContract}
+                    aria-pressed={allSelected}
+                    title={selectAllLabel}
                   >
-                    {selectAllLabel}
+                    {allSelected ? (
+                      <XCircleIcon className="tw-h-5 tw-w-5" aria-hidden="true" />
+                    ) : (
+                      <CheckCircleIcon className="tw-h-5 tw-w-5" aria-hidden="true" />
+                    )}
+                    <span>{selectAllLabel}</span>
                   </button>
                 )}
               </div>
             </div>
           </form>
 
-          <div className={helperClassName}>{helperState.text}</div>
+          <div id={helperMessageId} className={helperClassName} aria-live="polite" role="status">
+            {helperState.text}
+          </div>
 
           {allSelected ? (
             <div className="tw-rounded-md tw-border tw-border-primary-500/40 tw-bg-primary-500/10 tw-p-3 tw-text-sm tw-text-primary-200">
@@ -709,7 +721,7 @@ export function NftPicker({
                 onClear={handleClearTokens}
               />
 
-              {hasSelectedTokens && (
+              {hasSelectedTokens ? (
                 <NftTokenList
                   contractAddress={selectedContract.address}
                   chain={chain}
@@ -718,6 +730,13 @@ export function NftPicker({
                   renderTokenExtra={renderTokenExtra}
                   onRemove={handleRemoveToken}
                 />
+              ) : (
+                <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-950 tw-p-6 tw-text-center">
+                  <span className="tw-text-sm tw-font-semibold tw-text-iron-100">No tokens selected</span>
+                  <span className="tw-max-w-xs tw-text-xs tw-text-iron-300">
+                    Add tokens using the input above or choose Select All to include the entire collection.
+                  </span>
+                </div>
               )}
             </>
           )}
