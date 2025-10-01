@@ -7,9 +7,7 @@ import {
   MenuTextMatch,
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
-import { TextNode, $getSelection, $isRangeSelection } from "lexical";
-import type { LexicalNode } from "lexical";
-import { $isCodeNode } from "@lexical/code";
+import { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
@@ -25,6 +23,7 @@ import { $createMentionNode } from "../../nodes/MentionNode";
 import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
 import { MentionedUser } from "../../../../../../entities/IDrop";
 import { useIdentitiesSearch } from "../../../../../../hooks/useIdentitiesSearch";
+import { isInCodeContext } from "../../utils/codeContextDetection";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -212,36 +211,7 @@ const NewMentionsPlugin = forwardRef<
 
   const checkForMentionMatch = useCallback(
     (text: string) => {
-      const shouldSkip = editor.getEditorState().read(() => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) {
-          return false;
-        }
-
-        if (selection.hasFormat("code")) {
-          return true;
-        }
-
-        const anchorNode = selection.anchor.getNode();
-        const focusNode = selection.focus.getNode();
-
-        const isNodeWithinCode = (node: LexicalNode | null) => {
-          if (!node) {
-            return false;
-          }
-
-          if ($isCodeNode(node)) {
-            return true;
-          }
-
-          const topLevel = node.getTopLevelElement();
-          return $isCodeNode(topLevel);
-        };
-
-        return isNodeWithinCode(anchorNode) || isNodeWithinCode(focusNode);
-      });
-
-      if (shouldSkip) {
+      if (isInCodeContext(editor)) {
         return null;
       }
 

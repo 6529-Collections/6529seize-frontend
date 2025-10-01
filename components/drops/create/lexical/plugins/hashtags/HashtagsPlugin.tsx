@@ -7,9 +7,7 @@ import {
   MenuTextMatch,
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
-import { TextNode, $getSelection, $isRangeSelection } from "lexical";
-import type { LexicalNode } from "lexical";
-import { $isCodeNode } from "@lexical/code";
+import { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
@@ -26,6 +24,7 @@ import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
 import { isEthereumAddress } from "../../../../../../helpers/AllowlistToolHelpers";
 import { ReferencedNft } from "../../../../../../entities/IDrop";
 import { ReservoirTokensResponseTokenElement } from "../../../../../../entities/IReservoir";
+import { isInCodeContext } from "../../utils/codeContextDetection";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -240,36 +239,7 @@ const NewHashtagsPlugin = forwardRef<
 
   const checkForHashtagMatch = useCallback(
     (text: string) => {
-      const shouldSkip = editor.getEditorState().read(() => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) {
-          return false;
-        }
-
-        if (selection.hasFormat("code")) {
-          return true;
-        }
-
-        const anchorNode = selection.anchor.getNode();
-        const focusNode = selection.focus.getNode();
-
-        const isNodeWithinCode = (node: LexicalNode | null) => {
-          if (!node) {
-            return false;
-          }
-
-          if ($isCodeNode(node)) {
-            return true;
-          }
-
-          const topLevel = node.getTopLevelElement();
-          return $isCodeNode(topLevel);
-        };
-
-        return isNodeWithinCode(anchorNode) || isNodeWithinCode(focusNode);
-      });
-
-      if (shouldSkip) {
+      if (isInCodeContext(editor)) {
         return null;
       }
 
