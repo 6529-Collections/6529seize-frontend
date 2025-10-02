@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { publicEnv } from "@/config/env";
 import { LeaderboardFocus } from "@/enums";
 import { useEffect, useState } from "react";
@@ -173,9 +174,9 @@ export default function Leaderboard(
           <h1>
             Network{" "}
             {showViewAll && (
-              <a href="/network/nerd">
+              <Link href="/network/nerd">
                 <span className={styles.viewAllLink}>View All</span>
-              </a>
+              </Link>
             )}
           </h1>
         </Col>

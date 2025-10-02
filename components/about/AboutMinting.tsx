@@ -538,9 +538,9 @@ export default function AboutMinting() {
             <br />
             <li>
               For our full analysis of our Network Metrics, go here:{" "}
-              <a href="/network/metrics" target="_blank" rel="noopener noreferrer">
+              <Link href="/network/metrics" target="_blank" rel="noopener noreferrer">
                 6529.io/network/metrics
-              </a>
+              </Link>
             </li>
           </ul>
           <br />
@@ -569,9 +569,9 @@ export default function AboutMinting() {
             <li>
               On a daily basis, we publish to Arweave the statistics we use to
               create our own allowlists. You can find them here:{" "}
-              <a href="/open-data" target="_blank" rel="noopener noreferrer">
+              <Link href="/open-data" target="_blank" rel="noopener noreferrer">
                 6529.io/open-data
-              </a>
+              </Link>
             </li>
             <br />
             <li>

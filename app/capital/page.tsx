@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import { Metadata } from "next";
 
 export default function CapitalPage() {
@@ -300,12 +301,12 @@ NFT investing is difficult specifically"
                   </span>
                   <span className="vcard rich-snippet-hidden">
                     <span className="fn">
-                      <a
+                      <Link
                         href="/author/6529er6529-io/"
                         title="Posts by 6529er"
                         rel="author">
                         6529er
-                      </a>
+                      </Link>
                     </span>
                   </span>
                   <span className="updated rich-snippet-hidden">
@@ -373,11 +374,11 @@ NFT investing is difficult specifically"
                               <p>
                                 A full list of companies in our portfolio can be
                                 found{" "}
-                                <a
+                                <Link
                                   href="/capital/company-portfolio/"
                                   className="decoration-underline">
                                   here
-                                </a>
+                                </Link>
                                 {"."}
                               </p>
                             </div>
@@ -797,9 +798,9 @@ NFT investing is difficult specifically"
                             <div className="fusion-text fusion-text-11">
                               <p>
                                 6529 Capital is currently investing through the{" "}
-                                <a href="/capital/fund/">
+                                <Link href="/capital/fund/">
                                   <u>6529 NFT Fund</u>
-                                </a>
+                                </Link>
                                 {"."}
                               </p>
                             </div>

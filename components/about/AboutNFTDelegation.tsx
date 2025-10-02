@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutNFTDelegation() {
@@ -13,8 +14,8 @@ export default function AboutNFTDelegation() {
       <Row className="pt-5">
         <Col>
           Visit our{" "}
-          <a href="/delegation/delegation-center">Delegation Center</a> to get
-          started
+          <Link href="/delegation/delegation-center">Delegation Center</Link> to
+          get started
         </Col>
       </Row>
     </Container>

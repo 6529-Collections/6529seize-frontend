@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 const IndexPage = () => (
   <div>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -347,12 +348,12 @@ Matt Kane"
                 </span>
                 <span className="vcard rich-snippet-hidden">
                   <span className="fn">
-                    <a
+                    <Link
                       href="/author/ladysabrina/"
                       title="Posts by Sabrina Khan"
                       rel="author">
                       Sabrina Khan
-                    </a>
+                    </Link>
                   </span>
                 </span>
                 <span className="updated rich-snippet-hidden">
@@ -500,24 +501,24 @@ Matt Kane"
                             className="fusion-text fusion-text-2"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/6529-fund-szn1/fidenza/">
+                              <Link href="/museum/6529-fund-szn1/fidenza/">
                                 <strong>Fidenza</strong>
-                              </a>
+                              </Link>
                               <br />
                               Tyler Hobbs
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/xcopy/">
+                              <Link href="/museum/6529-fund-szn1/xcopy/">
                                 <strong>XCOPY</strong>
-                              </a>
+                              </Link>
                               <br />
                               XCOPYART
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/meridian/">
+                                <Link href="/museum/6529-fund-szn1/meridian/">
                                   Meridian
-                                </a>
+                                </Link>
                                 <br />
                                 <span style={{ fontWeight: 400 }}>
                                   Matt DesLauriers
@@ -526,74 +527,74 @@ Matt Kane"
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/ringers/">
+                                <Link href="/museum/6529-fund-szn1/ringers/">
                                   Ringers
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Dmitri Cherniak
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/bored-ape-yacht-club/">
+                              <Link href="/museum/6529-fund-szn1/bored-ape-yacht-club/">
                                 <strong>Bored Ape Yacht Club</strong>
-                              </a>
+                              </Link>
                               <br />
                               Yuga Labs
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/cryptopunks/">
+                                <Link href="/museum/6529-fund-szn1/cryptopunks/">
                                   CryptoPunks
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Yuga Labs
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/nouns/">
+                                <Link href="/museum/6529-fund-szn1/nouns/">
                                   Nouns
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               NounsDAO
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/gazers/">
+                                <Link href="/museum/6529-fund-szn1/gazers/">
                                   Gazers
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Matt Kane
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/intensify-modeling/">
+                                <Link href="/museum/6529-fund-szn1/intensify-modeling/">
                                   Intensify Modeling
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Botto
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/dead-ringers/">
+                              <Link href="/museum/6529-fund-szn1/dead-ringers/">
                                 <strong>Dead Ringers</strong>
-                              </a>
+                              </Link>
                               <br />
                               Dmitri Cherniak
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/azuki/">
+                              <Link href="/museum/6529-fund-szn1/azuki/">
                                 <strong>Azuki</strong>
-                              </a>
+                              </Link>
                               <br />
                               Chiru Labs
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/mfers/">
+                              <Link href="/museum/6529-fund-szn1/mfers/">
                                 <strong>mfers</strong>
-                              </a>
+                              </Link>
                               <br />
                               Sartoshi
                             </p>
