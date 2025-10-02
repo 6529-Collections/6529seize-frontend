@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../components/drops/view/part/DropPartMarkdown', () => () => (
+jest.mock('@/components/drops/view/part/DropPartMarkdown', () => () => (
   <div data-testid="markdown" />
 ));
 
-import CreateDropStormPart from '../../../components/waves/CreateDropStormPart';
+import CreateDropStormPart from '@/components/waves/CreateDropStormPart';
 
 const part = { content: 'hello', media: [] } as any;
 

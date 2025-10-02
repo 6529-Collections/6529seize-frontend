@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DistributionPlanToolPlansTableItem from '../../../../components/distribution-plan-tool/plans/DistributionPlanToolPlansTableItem';
-import { distributionPlanApiDelete } from '../../../../services/distribution-plan-api';
+import DistributionPlanToolPlansTableItem from '@/components/distribution-plan-tool/plans/DistributionPlanToolPlansTableItem';
+import { distributionPlanApiDelete } from '@/services/distribution-plan-api';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
-jest.mock('../../../../services/distribution-plan-api');
-jest.mock('../../../../components/allowlist-tool/common/AllowlistToolLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/services/distribution-plan-api');
+jest.mock('@/components/allowlist-tool/common/AllowlistToolLoader', () => () => <div data-testid="loader" />);
 
 const routerPush = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push: routerPush });

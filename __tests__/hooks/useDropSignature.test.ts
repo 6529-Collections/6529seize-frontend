@@ -1,12 +1,12 @@
 import { renderHook, act } from "@testing-library/react";
 import React from "react";
-import { useDropSignature } from "../../hooks/drops/useDropSignature";
+import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { useSignMessage } from "wagmi";
 
 jest.mock("wagmi", () => ({ useSignMessage: jest.fn() }));
 
 const mockHash = "hash";
-jest.mock("../../utils/drop-hasher", () => ({
+jest.mock("@/utils/drop-hasher", () => ({
   DropHasher: class { hash() { return mockHash; } },
 }));
 

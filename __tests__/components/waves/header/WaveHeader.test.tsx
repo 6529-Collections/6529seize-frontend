@@ -1,16 +1,16 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import WaveHeader, { WaveHeaderPinnedSide } from '../../../../components/waves/header/WaveHeader';
-import { ApiWaveType } from '../../../../generated/models/ApiWaveType';
-import { AuthContext } from '../../../../components/auth/Auth';
+import WaveHeader, { WaveHeaderPinnedSide } from '@/components/waves/header/WaveHeader';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../components/waves/header/WaveHeaderFollow', () => () => <div />);
-jest.mock('../../../../components/waves/header/options/WaveHeaderOptions', () => () => <div />);
-jest.mock('../../../../components/waves/header/name/WaveHeaderName', () => () => <div data-testid="name" />);
-jest.mock('../../../../components/waves/header/WaveHeaderFollowers', () => () => <div />);
-jest.mock('../../../../components/waves/header/WaveHeaderDescription', () => () => <div data-testid="description" />);
-jest.mock('../../../../components/waves/WavePicture', () => () => <div />);
-jest.mock('../../../../components/waves/specs/WaveNotificationSettings', () => () => <div />);
+jest.mock('@/components/waves/header/WaveHeaderFollow', () => () => <div />);
+jest.mock('@/components/waves/header/options/WaveHeaderOptions', () => () => <div />);
+jest.mock('@/components/waves/header/name/WaveHeaderName', () => () => <div data-testid="name" />);
+jest.mock('@/components/waves/header/WaveHeaderFollowers', () => () => <div />);
+jest.mock('@/components/waves/header/WaveHeaderDescription', () => () => <div data-testid="description" />);
+jest.mock('@/components/waves/WavePicture', () => () => <div />);
+jest.mock('@/components/waves/specs/WaveNotificationSettings', () => () => <div />);
 
 const baseWave: any = {
   id: 'w',

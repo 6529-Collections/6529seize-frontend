@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveApprovalThreshold from '../../../../../components/waves/create-wave/approval/CreateWaveApprovalThreshold';
+import CreateWaveApprovalThreshold from '@/components/waves/create-wave/approval/CreateWaveApprovalThreshold';
 
 describe('CreateWaveApprovalThreshold', () => {
   const defaultProps = {

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
-import UserPageDrops from '../../../../components/user/brain/UserPageDrops';
+import UserPageDrops from '@/components/user/brain/UserPageDrops';
 
-jest.mock('../../../../components/drops/view/Drops', () => ({
+jest.mock('@/components/drops/view/Drops', () => ({
   __esModule: true,
   default: () => <div data-testid="drops" />,
 }));

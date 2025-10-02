@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import WaveDropFollowAuthor from "../../components/waves/drops/WaveDropFollowAuthor";
-import { AuthContext } from "../../components/auth/Auth";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import WaveDropFollowAuthor from "@/components/waves/drops/WaveDropFollowAuthor";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import React from "react";
 
 // Mock ResizeObserver
@@ -17,7 +17,7 @@ jest.mock("@tanstack/react-query", () => ({
   useMutation: jest.fn(),
 }));
 
-jest.mock("../../components/distribution-plan-tool/common/CircleLoader", () => ({ __esModule: true,
+jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({ __esModule: true,
   CircleLoaderSize: { SMALL: "SMALL" },
   default: () => <div data-testid="loader" />,
 }));

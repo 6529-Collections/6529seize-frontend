@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 
 import WavesListSearch from "./WavesListSearch";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 

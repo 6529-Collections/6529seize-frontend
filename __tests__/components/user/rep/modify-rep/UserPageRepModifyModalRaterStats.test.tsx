@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import UserPageRepModifyModalRaterStats from '../../../../../components/user/rep/modify-rep/UserPageRepModifyModalRaterStats';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import UserPageRepModifyModalRaterStats from '@/components/user/rep/modify-rep/UserPageRepModifyModalRaterStats';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommas: (n: number) => `#${n}`,
 }));
 

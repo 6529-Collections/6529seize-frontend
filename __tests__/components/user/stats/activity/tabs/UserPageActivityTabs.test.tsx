@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageActivityTabs from '../../../../../../components/user/stats/activity/tabs/UserPageActivityTabs';
-import { USER_PAGE_ACTIVITY_TAB } from '../../../../../../components/user/stats/activity/UserPageActivityWrapper';
+import UserPageActivityTabs from '@/components/user/stats/activity/tabs/UserPageActivityTabs';
+import { USER_PAGE_ACTIVITY_TAB } from '@/components/user/stats/activity/UserPageActivityWrapper';
 
-jest.mock('../../../../../../components/user/stats/activity/tabs/UserPageActivityTab', () => ({ __esModule: true, default: (props: any) => (
+jest.mock('@/components/user/stats/activity/tabs/UserPageActivityTab', () => ({ __esModule: true, default: (props: any) => (
   <button data-testid={props.tab} onClick={() => props.setActiveTab(props.tab)}>{props.tab}</button>
 ) }));
 

@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesRows from '../../../../../../../components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRows';
-import { ApiWaveType } from '../../../../../../../generated/models/ApiWaveType';
-import { CREATE_WAVE_VALIDATION_ERROR } from '../../../../../../../helpers/waves/create-wave.validation';
-import { CreateWaveOutcomeConfig, CreateWaveOutcomeType } from '../../../../../../../types/waves.types';
+import CreateWaveOutcomesRows from '@/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRows';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.validation';
+import { CreateWaveOutcomeConfig, CreateWaveOutcomeType } from '@/types/waves.types';
 
-jest.mock('../../../../../../../components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRow', () => {
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRow', () => {
   return function MockRow(props: any) {
     return (
       <div data-testid="row">

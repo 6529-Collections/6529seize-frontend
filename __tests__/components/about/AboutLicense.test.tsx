@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutLicense from '../../../components/about/AboutLicense';
+import AboutLicense from '@/components/about/AboutLicense';
 
 describe('AboutLicense', () => {
   it('renders heading and date', () => {

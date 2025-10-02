@@ -1,4 +1,4 @@
-import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
+import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateConfigHeader from "../GroupCreateConfigHeader";
 import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";

@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PERIOD_LABELS } from "../../../../../helpers/Helpers";
-import { Period } from "../../../../../helpers/Types";
+import { PERIOD_LABELS } from "@/helpers/Helpers";
+import { Period } from "@/helpers/Types";
 import CreateWaveDatesEndDateSelectPeriodItem from "./CreateWaveDatesEndDateSelectPeriodItem";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.validation";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 export default function CreateWaveDatesEndDateSelectPeriod({
   activePeriod,

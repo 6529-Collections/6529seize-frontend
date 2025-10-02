@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GroupDescriptionType } from "../../../../../entities/IGroup";
-import { ApiGroupDescription } from "../../../../../generated/models/ApiGroupDescription";
-import { ApiGroupFilterDirection } from "../../../../../generated/models/ApiGroupFilterDirection";
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
+import { GroupDescriptionType } from "@/entities/IGroup";
+import { ApiGroupDescription } from "@/generated/models/ApiGroupDescription";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {

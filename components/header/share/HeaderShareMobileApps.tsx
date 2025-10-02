@@ -1,4 +1,4 @@
-import { MOBILE_APP_IOS, MOBILE_APP_ANDROID } from "../../../constants";
+import { MOBILE_APP_IOS, MOBILE_APP_ANDROID } from "@/constants";
 import Image from "next/image";
 import Link from "next/link";
 

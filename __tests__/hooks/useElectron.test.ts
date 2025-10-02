@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useElectron } from '../../hooks/useElectron';
+import { useElectron } from '@/hooks/useElectron';
 
 describe('useElectron', () => {
   const originalUA = navigator.userAgent;

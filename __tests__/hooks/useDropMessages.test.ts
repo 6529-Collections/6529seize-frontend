@@ -9,20 +9,20 @@ jest.mock('@tanstack/react-query', () => {
   return { ...actual, useInfiniteQuery: (...args: any[]) => useInfiniteQueryMock(...args) };
 });
 
-const { useDropMessages } = require('../../hooks/useDropMessages');
+const { useDropMessages } = require('@/hooks/useDropMessages');
 import React from 'react';
 
 // Mock all dependencies
-jest.mock('../../hooks/useCapacitor', () => ({
+jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
 }));
 
-jest.mock('../../services/websocket/useWebSocketMessage', () => ({
+jest.mock('@/services/websocket/useWebSocketMessage', () => ({
   useWebSocketMessage: jest.fn(),
 }));
 
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn().mockResolvedValue({ drops: [], wave: null }),
 }));
 
@@ -87,7 +87,7 @@ describe('useDropMessages', () => {
       refetch: jest.fn(),
     } as Partial<UseInfiniteQueryResult>);
 
-    const { useWebSocketMessage } = require('../../services/websocket/useWebSocketMessage');
+    const { useWebSocketMessage } = require('@/services/websocket/useWebSocketMessage');
     (useWebSocketMessage as jest.Mock).mockReturnValue({ isConnected: true });
 
     const { result } = renderHook(() => useDropMessages('wave-1', 'drop-1'), {
@@ -111,7 +111,7 @@ describe('useDropMessages', () => {
     } as Partial<UseInfiniteQueryResult>);
 
     let wsCallback: any;
-    const { useWebSocketMessage } = require('../../services/websocket/useWebSocketMessage');
+    const { useWebSocketMessage } = require('@/services/websocket/useWebSocketMessage');
     (useWebSocketMessage as jest.Mock).mockImplementation((type, cb) => {
       wsCallback = cb;
       return { isConnected: true };
@@ -140,7 +140,7 @@ it('ignores websocket messages when dropId is null', () => {
   } as Partial<UseInfiniteQueryResult>);
 
   let wsCallback: any;
-  const { useWebSocketMessage } = require('../../services/websocket/useWebSocketMessage');
+  const { useWebSocketMessage } = require('@/services/websocket/useWebSocketMessage');
   (useWebSocketMessage as jest.Mock).mockImplementation((type, cb) => {
     wsCallback = cb;
     return { isConnected: true };

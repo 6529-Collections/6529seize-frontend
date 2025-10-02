@@ -1,6 +1,6 @@
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import CommonDropdownItemsDefaultWrapper from '../../../../../components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper';
+import CommonDropdownItemsDefaultWrapper from '@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper';
 
 jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => <div>{children}</div>,

@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import WaveWinnersDropHeaderVoters from "../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderVoters";
+import WaveWinnersDropHeaderVoters from "@/components/waves/winners/drops/header/WaveWinnersDropHeaderVoters";
 
-jest.mock("../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderVoter", () => {
+jest.mock("@/components/waves/winners/drops/header/WaveWinnersDropHeaderVoter", () => {
   return function Mock(props: any) {
     return <div data-testid="voter">{props.voter.profile.handle}</div>;
   };

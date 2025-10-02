@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { printVolumeTypeDropdown, SortButton } from '../../../components/the-memes/TheMemes';
-import { VolumeType } from '../../../entities/INFT';
-import { MemesSort } from '../../../enums';
+import { printVolumeTypeDropdown, SortButton } from '@/components/the-memes/TheMemes';
+import { VolumeType } from '@/entities/INFT';
+import { MemesSort } from '@/enums';
 
 describe('TheMemes helpers', () => {
   it('printVolumeTypeDropdown triggers callbacks', async () => {

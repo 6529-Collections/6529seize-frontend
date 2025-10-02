@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UpdateDelegationComponent from "../../../components/delegation/UpdateDelegation";
+import UpdateDelegationComponent from "@/components/delegation/UpdateDelegation";
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }), useEnsAddress: () => ({ data: null }) }));
 
-jest.mock("../../../components/delegation/DelegationFormParts", () => ({
+jest.mock("@/components/delegation/DelegationFormParts", () => ({
   DelegationCloseButton: () => <div />,
   DelegationFormLabel: (p: any) => <label>{p.title}</label>,
   DelegationAddressDisabledInput: () => <div />,

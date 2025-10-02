@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import MemeDropActions from '../../../../../components/memes/drops/meme-participation-drop/MemeDropActions';
+import MemeDropActions from '@/components/memes/drops/meme-participation-drop/MemeDropActions';
 
-jest.mock('../../../../../components/waves/drops/WaveDropActions', () => (props: any) => (
+jest.mock('@/components/waves/drops/WaveDropActions', () => (props: any) => (
   <div data-testid="wave-actions">{JSON.stringify(props)}</div>
 ));
 

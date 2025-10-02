@@ -1,9 +1,9 @@
 import React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import HeaderSearchButton from "../../../../components/header/header-search/HeaderSearchButton";
-import { QueryKey } from "../../../../components/react-query-wrapper/ReactQueryWrapper";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useClickAway, useKey, useKeyPressEvent } from "react-use";
 
 jest.mock("focus-trap-react", () => jest.requireActual("focus-trap-react"));
@@ -32,28 +32,28 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => useSearchParamsMock(),
 }));
 
-jest.mock("../../../../hooks/useWaves", () => ({
+jest.mock("@/hooks/useWaves", () => ({
   useWaves: (...args: any[]) => useWavesMock(...args),
 }));
 
-jest.mock("../../../../hooks/useLocalPreference", () => ({
+jest.mock("@/hooks/useLocalPreference", () => ({
   __esModule: true,
   default: (...args: any[]) => useLocalPreferenceMock(...args),
 }));
 
-jest.mock("../../../../components/utils/animation/CommonAnimationWrapper", () => ({
+jest.mock("@/components/utils/animation/CommonAnimationWrapper", () => ({
   __esModule: true,
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
-jest.mock("../../../../components/utils/animation/CommonAnimationOpacity", () => ({
+jest.mock("@/components/utils/animation/CommonAnimationOpacity", () => ({
   __esModule: true,
   default: ({ children, elementRole }: any) => (
     <div role={elementRole}>{children}</div>
   ),
 }));
 
-jest.mock("../../../../hooks/useDeviceInfo");
+jest.mock("@/hooks/useDeviceInfo");
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo

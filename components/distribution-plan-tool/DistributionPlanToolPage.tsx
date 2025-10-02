@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import AllowlistToolAnimationOpacity from "../allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
 import AllowlistToolAnimationWrapper from "../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import BuildPhases from "./build-phases/BuildPhases";

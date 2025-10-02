@@ -3,7 +3,7 @@
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useParams } from "next/navigation";
-import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
+import { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
 import UserPageRep from "./UserPageRep";

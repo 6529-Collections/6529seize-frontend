@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { SingleWaveDropVoteStats } from '../../../../components/waves/drop/SingleWaveDropVoteStats';
-import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
+import { SingleWaveDropVoteStats } from '@/components/waves/drop/SingleWaveDropVoteStats';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 describe('SingleWaveDropVoteStats', () => {
   it('displays current and max rating with credit type', () => {

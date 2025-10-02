@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDropsMetadata from '../../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadata';
-import { ApiWaveMetadataType } from '../../../../../../generated/models/ApiWaveMetadataType';
+import CreateWaveDropsMetadata from '@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadata';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
 
-jest.mock('../../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRow', () => ({ item, index, isNotUnique, onItemChange, onItemRemove }: any) => (
+jest.mock('@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRow', () => ({ item, index, isNotUnique, onItemChange, onItemRemove }: any) => (
   <div data-testid={`row-${index}`}>{item.key}-{isNotUnique ? 'bad' : 'ok'}<button onClick={()=>onItemRemove(index)}>rem</button></div>
 ));
 
-jest.mock('../../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataAddRowButton', () => ({ onAddNewRow }: any) => (
+jest.mock('@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataAddRowButton', () => ({ onAddNewRow }: any) => (
   <button data-testid="add" onClick={onAddNewRow}>add</button>
 ));
 

@@ -1,6 +1,6 @@
-import { HASHTAG_TRANSFORMER } from '../../../../../../components/drops/create/lexical/transformers/HastagTransformer';
+import { HASHTAG_TRANSFORMER } from '@/components/drops/create/lexical/transformers/HastagTransformer';
 
-jest.mock('../../../../../../components/drops/create/lexical/nodes/HashtagNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/HashtagNode', () => ({
   $createHashtagNode: jest.fn((text) => ({ type: 'hashtag', getTextContent: () => text })),
   $isHashtagNode: jest.fn((n) => n && n.type === 'hashtag'),
   HashtagNode: class {},

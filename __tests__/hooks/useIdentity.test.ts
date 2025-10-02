@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react';
-import { useIdentity } from '../../hooks/useIdentity';
-import { QueryKey } from '../../components/react-query-wrapper/ReactQueryWrapper';
-import { ApiIdentity } from '../../generated/models/ApiIdentity';
-import { commonApiFetch } from '../../services/api/common-api';
+import { useIdentity } from '@/hooks/useIdentity';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import { commonApiFetch } from '@/services/api/common-api';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
-jest.mock('../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
 
 const { useQuery } = require('@tanstack/react-query');
 const mockCommonApiFetch = commonApiFetch as jest.Mock;

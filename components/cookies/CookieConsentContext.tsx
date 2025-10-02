@@ -12,12 +12,12 @@ import {
   commonApiDelete,
   commonApiFetch,
   commonApiPost,
-} from "../../services/api/common-api";
+} from "@/services/api/common-api";
 import Cookies from "js-cookie";
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
-} from "../../constants";
+} from "@/constants";
 import { AuthContext } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import DistributionPlanStepCurrent from '../../../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepCurrent';
+import DistributionPlanStepCurrent from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepCurrent';
 
 describe('DistributionPlanStepCurrent', () => {
   const baseStep = {

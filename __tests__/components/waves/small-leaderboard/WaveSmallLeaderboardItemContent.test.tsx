@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WaveSmallLeaderboardItemContent } from '../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemContent';
+import { WaveSmallLeaderboardItemContent } from '@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent';
 
-jest.mock('../../../../components/waves/drops/WaveDropPartContentMedias', () => () => <div data-testid="medias" />);
-jest.mock('../../../../components/waves/drops/WaveDropPartContentMarkdown', () => () => <div data-testid="markdown" />);
+jest.mock('@/components/waves/drops/WaveDropPartContentMedias', () => () => <div data-testid="medias" />);
+jest.mock('@/components/waves/drops/WaveDropPartContentMarkdown', () => () => <div data-testid="markdown" />);
 
 describe('WaveSmallLeaderboardItemContent', () => {
   const baseDrop = { parts: [{ media: [], id: 1 }], metadata: [], mentioned_users: [], referenced_nfts: [], wave: {}, rank: 1 } as any;

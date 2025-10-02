@@ -1,14 +1,14 @@
 // @ts-nocheck
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { AuthContext } from '../../../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../components/utils/button/PrimaryButtonLink', () => ({
+jest.mock('@/components/utils/button/PrimaryButtonLink', () => ({
   __esModule: true,
   default: ({ children }: any) => <a data-testid="btn">{children}</a>
 }));
 
-const GroupHeaderSelect = require('../../../../components/groups/header/GroupHeaderSelect').default;
+const GroupHeaderSelect = require('@/components/groups/header/GroupHeaderSelect').default;
 
 describe('GroupHeaderSelect', () => {
   const renderWithProfile = (profile: any) =>

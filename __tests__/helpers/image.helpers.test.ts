@@ -1,4 +1,4 @@
-import { getScaledImageUri, ImageScale } from '../../helpers/image.helpers';
+import { getScaledImageUri, ImageScale } from '@/helpers/image.helpers';
 
 describe('getScaledImageUri', () => {
   it('returns original url for non scalable prefix', () => {

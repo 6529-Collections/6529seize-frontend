@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { cicToType } from "../../../../helpers/Helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../../user/utils/UserCICAndLevel";
+} from "@/components/user/utils/UserCICAndLevel";
 import WinnerDropBadge from "../winner/WinnerDropBadge";
 import WaveDropTime from "../time/WaveDropTime";
 

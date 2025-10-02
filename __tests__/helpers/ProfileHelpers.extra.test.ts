@@ -1,5 +1,5 @@
-import { getProfileConnectedStatus, profileAndConsolidationsToProfileMin } from '../../helpers/ProfileHelpers';
-import { ProfileConnectedStatus } from '../../entities/IProfile';
+import { getProfileConnectedStatus, profileAndConsolidationsToProfileMin } from '@/helpers/ProfileHelpers';
+import { ProfileConnectedStatus } from '@/entities/IProfile';
 
 describe('getProfileConnectedStatus', () => {
   it('returns NOT_CONNECTED when profile missing', () => {

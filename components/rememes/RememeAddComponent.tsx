@@ -12,14 +12,14 @@ import { useEffect, useState } from "react";
 import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
-import { NFT } from "../../entities/INFT";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { NFT } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
   isValidEthAddress,
-} from "../../helpers/Helpers";
-import { postData } from "../../services/6529api";
+} from "@/helpers/Helpers";
+import { postData } from "@/services/6529api";
 import { Nft, NftContract } from "./alchemy-sdk-types";
 import styles from "./Rememes.module.scss";
 

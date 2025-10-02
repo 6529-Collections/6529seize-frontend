@@ -1,6 +1,6 @@
-import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
-import { WAVE_LABELS } from "../../../../../helpers/waves/waves.constants";
-import CommonBorderedRadioButton from "../../../../utils/radio/CommonBorderedRadioButton";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WAVE_LABELS } from "@/helpers/waves/waves.constants";
+import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 
 export default function CreateWaveTypeInputs({
   selected,

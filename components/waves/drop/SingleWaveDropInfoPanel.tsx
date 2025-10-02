@@ -1,17 +1,17 @@
 import React from "react";
 import { SingleWaveDropClose } from "./SingleWaveDropClose";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
 import { SingleWaveDropInfoActions } from "./SingleWaveDropInfoActions";
 import { SingleWaveDropInfoContent } from "./SingleWaveDropInfoContent";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
-import WaveDropDeleteButton from "../../utils/button/WaveDropDeleteButton";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;

@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
 
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";

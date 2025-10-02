@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AppWallets from '../../../components/app-wallets/AppWallets';
-import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
+import AppWallets from '@/components/app-wallets/AppWallets';
+import { useAppWallets } from '@/components/app-wallets/AppWalletsContext';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
-jest.mock('../../../components/app-wallets/AppWalletsContext');
-jest.mock('../../../components/app-wallets/AppWalletCard', () => (props: any) => <div data-testid="card">{props.wallet.address}</div>);
-jest.mock('../../../components/app-wallets/AppWalletsUnsupported', () => () => <div data-testid="unsupported" />);
-jest.mock('../../../components/app-wallets/AppWalletModal', () => ({ CreateAppWalletModal: (props: any) => <div data-testid="modal">{props.show ? 'open' : 'closed'}</div> }));
+jest.mock('@/components/app-wallets/AppWalletsContext');
+jest.mock('@/components/app-wallets/AppWalletCard', () => (props: any) => <div data-testid="card">{props.wallet.address}</div>);
+jest.mock('@/components/app-wallets/AppWalletsUnsupported', () => () => <div data-testid="unsupported" />);
+jest.mock('@/components/app-wallets/AppWalletModal', () => ({ CreateAppWalletModal: (props: any) => <div data-testid="modal">{props.show ? 'open' : 'closed'}</div> }));
 
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });

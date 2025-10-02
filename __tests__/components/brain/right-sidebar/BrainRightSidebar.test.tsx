@@ -5,12 +5,12 @@ import React from 'react';
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn(), keepPreviousData: {} }));
 
 const WaveContentMock = jest.fn((props: any) => <div data-testid="content" />);
-jest.mock('../../../../components/brain/right-sidebar/WaveContent', () => ({
+jest.mock('@/components/brain/right-sidebar/WaveContent', () => ({
   __esModule: true,
   WaveContent: (props: any) => WaveContentMock(props),
 }));
 
-import BrainRightSidebar, { Mode, SidebarTab } from '../../../../components/brain/right-sidebar/BrainRightSidebar';
+import BrainRightSidebar, { Mode, SidebarTab } from '@/components/brain/right-sidebar/BrainRightSidebar';
 import { useQuery } from '@tanstack/react-query';
 
 const mockUseQuery = useQuery as jest.Mock;

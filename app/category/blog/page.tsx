@@ -1,6 +1,6 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import Link from "next/link";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export default function CategoryBlogPage() {
   return (
@@ -298,9 +298,7 @@ export default function CategoryBlogPage() {
                             <div className="fusion-rollover-content">
                               <Link
                                 className="fusion-rollover-link"
-                                href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                                href="/blog/disney-deekay-their-secret-to-animation/">
                                 Disney and DeeKay: Their Secret to Animation
                               </Link>
                               <div className="fusion-rollover-sep" />
@@ -316,9 +314,7 @@ export default function CategoryBlogPage() {
                               <h4 className="fusion-rollover-title">
                                 <Link
                                   className="fusion-rollover-title-link"
-                                  href="/blog/disney-deekay-their-secret-to-animation/"
-                                  target="_blank"
-                                  rel="noopener noreferrer">
+                                  href="/blog/disney-deekay-their-secret-to-animation/">
                                   Disney and DeeKay: Their Secret to Animation{" "}
                                 </Link>
                               </h4>
@@ -330,8 +326,6 @@ export default function CategoryBlogPage() {
                               <Link
                                 className="fusion-link-wrapper"
                                 href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
-                                rel="noopener noreferrer"
                                 aria-label="Disney and DeeKay: Their Secret to Animation"
                               />
                             </div>
@@ -340,10 +334,7 @@ export default function CategoryBlogPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <Link
-                                href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                              <Link href="/blog/disney-deekay-their-secret-to-animation/">
                                 Disney and DeeKay: Their Secret to Animation
                               </Link>
                             </h2>
@@ -415,9 +406,7 @@ export default function CategoryBlogPage() {
                             <div className="fusion-rollover-content">
                               <Link
                                 className="fusion-rollover-link"
-                                href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                                href="/blog/from-fibonacci-to-fidenza/">
                                 FROM FIBONACCI TO FIDENZA
                               </Link>
                               <div className="fusion-rollover-sep" />
@@ -433,9 +422,7 @@ export default function CategoryBlogPage() {
                               <h4 className="fusion-rollover-title">
                                 <Link
                                   className="fusion-rollover-title-link"
-                                  href="/blog/from-fibonacci-to-fidenza/"
-                                  target="_blank"
-                                  rel="noopener noreferrer">
+                                  href="/blog/from-fibonacci-to-fidenza/">
                                   FROM FIBONACCI TO FIDENZA{" "}
                                 </Link>
                               </h4>
@@ -447,8 +434,6 @@ export default function CategoryBlogPage() {
                               <Link
                                 className="fusion-link-wrapper"
                                 href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank"
-                                rel="noopener noreferrer"
                                 aria-label="FROM FIBONACCI TO FIDENZA"
                               />
                             </div>
@@ -457,10 +442,7 @@ export default function CategoryBlogPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <Link
-                                href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                              <Link href="/blog/from-fibonacci-to-fidenza/">
                                 FROM FIBONACCI TO FIDENZA
                               </Link>
                             </h2>
@@ -533,9 +515,7 @@ export default function CategoryBlogPage() {
                             <div className="fusion-rollover-content">
                               <Link
                                 className="fusion-rollover-link"
-                                href="/blog/a-tale-of-two-artists/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                                href="/blog/a-tale-of-two-artists/">
                                 A Tale of Two Artists – Van Gogh and XCOPY
                               </Link>
                               <div className="fusion-rollover-sep" />
@@ -551,9 +531,7 @@ export default function CategoryBlogPage() {
                               <h4 className="fusion-rollover-title">
                                 <Link
                                   className="fusion-rollover-title-link"
-                                  href="/blog/a-tale-of-two-artists/"
-                                  target="_blank"
-                                  rel="noopener noreferrer">
+                                  href="/blog/a-tale-of-two-artists/">
                                   A Tale of Two Artists – Van Gogh and XCOPY{" "}
                                 </Link>
                               </h4>
@@ -565,8 +543,6 @@ export default function CategoryBlogPage() {
                               <Link
                                 className="fusion-link-wrapper"
                                 href="/blog/a-tale-of-two-artists/"
-                                target="_blank"
-                                rel="noopener noreferrer"
                                 aria-label="A Tale of Two Artists – Van Gogh and XCOPY"
                               />
                             </div>
@@ -575,10 +551,7 @@ export default function CategoryBlogPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <Link
-                                href="/blog/a-tale-of-two-artists/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                              <Link href="/blog/a-tale-of-two-artists/">
                                 A Tale of Two Artists – Van Gogh and XCOPY
                               </Link>
                             </h2>

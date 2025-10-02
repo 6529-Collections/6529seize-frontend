@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import AllowlistToolJsonIcon from '../../../../components/allowlist-tool/icons/AllowlistToolJsonIcon';
+import AllowlistToolJsonIcon from '@/components/allowlist-tool/icons/AllowlistToolJsonIcon';
 
 describe('AllowlistToolJsonIcon', () => {
   it('renders svg with expected attributes', () => {

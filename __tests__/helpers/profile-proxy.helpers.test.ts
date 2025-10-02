@@ -1,5 +1,5 @@
-import { getProfileProxyActionStatus, groupProfileProxies, haveSeenProfileProxyActionAcceptanceModal, setSeenProfileProxyActionAcceptanceModal } from '../../helpers/profile-proxy.helpers';
-import { ProfileProxyActionStatus, ProfileProxySide } from '../../entities/IProxy';
+import { getProfileProxyActionStatus, groupProfileProxies, haveSeenProfileProxyActionAcceptanceModal, setSeenProfileProxyActionAcceptanceModal } from '@/helpers/profile-proxy.helpers';
+import { ProfileProxyActionStatus, ProfileProxySide } from '@/entities/IProxy';
 import Cookies from 'js-cookie';
 
 jest.mock('js-cookie', () => ({ get: jest.fn(), set: jest.fn() }));

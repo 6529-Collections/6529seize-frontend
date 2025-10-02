@@ -1,5 +1,5 @@
 import React from "react";
-import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 interface InfoButtonProps {
   readonly loading?: boolean;

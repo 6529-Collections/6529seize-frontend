@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import VoteBreakdownTooltip from '../../../../../../../components/waves/drops/participation/ratings/tooltips/VoteBreakdownTooltip';
-import { getScaledImageUri } from '../../../../../../../helpers/image.helpers';
+import VoteBreakdownTooltip from '@/components/waves/drops/participation/ratings/tooltips/VoteBreakdownTooltip';
+import { getScaledImageUri } from '@/helpers/image.helpers';
 
-jest.mock('../../../../../../../helpers/image.helpers', () => ({
+jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: jest.fn(() => 'scaled'),
   ImageScale: { W_AUTO_H_50: 'W_AUTO_H_50' },
 }));

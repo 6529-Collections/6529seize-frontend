@@ -1,8 +1,8 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { BaseNFT, NFTHistory } from "../../entities/INFT";
+import { BaseNFT, NFTHistory } from "@/entities/INFT";
 import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { numberWithCommasFromString } from "../../helpers/Helpers";
+import { numberWithCommasFromString } from "@/helpers/Helpers";
 import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 

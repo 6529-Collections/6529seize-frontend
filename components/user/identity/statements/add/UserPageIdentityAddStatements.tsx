@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export enum STATEMENT_ADD_VIEW {
   SELECT = "SELECT",

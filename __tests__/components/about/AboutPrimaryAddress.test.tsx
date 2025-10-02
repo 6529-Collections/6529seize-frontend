@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import AboutPrimaryAddress from '../../../components/about/AboutPrimaryAddress';
+import AboutPrimaryAddress from '@/components/about/AboutPrimaryAddress';
 
 jest.mock('csv-parser', () => {
   return () => {

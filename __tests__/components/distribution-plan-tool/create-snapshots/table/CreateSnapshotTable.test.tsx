@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreateSnapshotTable from '../../../../../components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTable';
-import { CreateSnapshotSnapshot } from '../../../../../components/distribution-plan-tool/create-snapshots/CreateSnapshots';
+import CreateSnapshotTable from '@/components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTable';
+import { CreateSnapshotSnapshot } from '@/components/distribution-plan-tool/create-snapshots/CreateSnapshots';
 
 const mockCopy = jest.fn();
 

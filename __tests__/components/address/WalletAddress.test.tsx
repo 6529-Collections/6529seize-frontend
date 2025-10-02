@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { WalletAddress } from '../../../components/address/WalletAddress';
+import { WalletAddress } from '@/components/address/WalletAddress';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
@@ -9,7 +9,7 @@ jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: 
 const parseEmojis = jest.fn((s: string) => 'parsed');
 const formatAddress = jest.fn((v: string) => `fmt-${v}`);
 
-jest.mock('../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   containsEmojis: jest.fn((s: string) => s.includes('U+')),
   parseEmojis: (s: string) => parseEmojis(s),
   formatAddress: (v: string) => formatAddress(v)

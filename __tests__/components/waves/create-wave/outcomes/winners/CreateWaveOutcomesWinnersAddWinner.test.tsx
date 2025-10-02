@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesWinnersAddWinner from '../../../../../../components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersAddWinner';
+import CreateWaveOutcomesWinnersAddWinner from '@/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersAddWinner';
 
 describe('CreateWaveOutcomesWinnersAddWinner', () => {
   const mockAddWinner = jest.fn();

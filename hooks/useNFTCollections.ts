@@ -1,10 +1,10 @@
 import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
-import { DBResponse } from "../entities/IDBResponse";
-import { NFT } from "../entities/INFT";
-import { NextGenCollection } from "../entities/INextgen";
-import { fetchAllPages, fetchUrl } from "../services/6529api";
-import { commonApiFetch } from "../services/api/common-api";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NFT } from "@/entities/INFT";
+import { NextGenCollection } from "@/entities/INextgen";
+import { fetchAllPages, fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseNFTCollectionsReturn {
   // Data

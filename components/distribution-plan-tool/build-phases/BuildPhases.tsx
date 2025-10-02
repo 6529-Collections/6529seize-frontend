@@ -5,10 +5,10 @@ import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
-import { AllowlistOperationCode } from "../../allowlist-tool/allowlist-tool.types";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 import BuildPhase from "./build-phase/BuildPhase";
-import AllowlistToolAnimationWrapper from "../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import AllowlistToolAnimationOpacity from "../../allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
+import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationOpacity from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationOpacity";
 
 export interface BuildPhasesPhase {
   readonly id: string;

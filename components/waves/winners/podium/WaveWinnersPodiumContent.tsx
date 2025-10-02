@@ -1,6 +1,6 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { WavePodiumItem } from "./WavePodiumItem";
 
 interface WaveWinnersPodiumContentProps {

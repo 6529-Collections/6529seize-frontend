@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import WaveWinnersDropOutcome from '../../../../../../components/waves/winners/drops/header/WaveWinnersDropOutcome';
-import { ApiWaveOutcomeCredit } from '../../../../../../generated/models/ApiWaveOutcomeCredit';
-import { ApiWaveOutcomeType } from '../../../../../../generated/models/ApiWaveOutcomeType';
+import WaveWinnersDropOutcome from '@/components/waves/winners/drops/header/WaveWinnersDropOutcome';
+import { ApiWaveOutcomeCredit } from '@/generated/models/ApiWaveOutcomeCredit';
+import { ApiWaveOutcomeType } from '@/generated/models/ApiWaveOutcomeType';
 
 describe('WaveWinnersDropOutcome', () => {
   it('returns null when there are no awards', () => {

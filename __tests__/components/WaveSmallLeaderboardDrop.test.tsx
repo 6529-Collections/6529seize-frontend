@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-jest.mock('../../components/waves/small-leaderboard/MemesWaveSmallLeaderboardDrop', () => ({
+jest.mock('@/components/waves/small-leaderboard/MemesWaveSmallLeaderboardDrop', () => ({
   MemesWaveSmallLeaderboardDrop: () => <div>memes</div>,
 }));
-jest.mock('../../components/waves/small-leaderboard/DefaultWaveSmallLeaderboardDrop', () => ({
+jest.mock('@/components/waves/small-leaderboard/DefaultWaveSmallLeaderboardDrop', () => ({
   DefaultWaveSmallLeaderboardDrop: () => <div>default</div>,
 }));
-jest.mock('../../hooks/useWave', () => ({ useWave: jest.fn() }));
+jest.mock('@/hooks/useWave', () => ({ useWave: jest.fn() }));
 
-const { useWave } = require('../../hooks/useWave');
+const { useWave } = require('@/hooks/useWave');
 
-const { WaveSmallLeaderboardDrop } = require('../../components/waves/small-leaderboard/WaveSmallLeaderboardDrop');
+const { WaveSmallLeaderboardDrop } = require('@/components/waves/small-leaderboard/WaveSmallLeaderboardDrop');
 
 describe('WaveSmallLeaderboardDrop', () => {
   const drop = {} as any;

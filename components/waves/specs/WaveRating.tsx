@@ -1,6 +1,6 @@
 import React from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import WaveRatingRep from "./WaveRatingRep";
 
 const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {

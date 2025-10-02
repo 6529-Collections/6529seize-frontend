@@ -1,5 +1,5 @@
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
-import { WAVE_LABELS } from "../../../helpers/waves/waves.constants";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WAVE_LABELS } from "@/helpers/waves/waves.constants";
 
 export default function WaveTypeIcon({
   waveType,

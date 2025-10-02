@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesRepRank from '../../../../../../components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepRank';
-import { CreateWaveOutcomeType } from '../../../../../../types/waves.types';
+import CreateWaveOutcomesRepRank from '@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepRank';
+import { CreateWaveOutcomeType } from '@/types/waves.types';
 
 // Mock dependencies
-jest.mock('../../../../../../components/utils/input/rep-category/RepCategorySearch', () => {
+jest.mock('@/components/utils/input/rep-category/RepCategorySearch', () => {
   return function RepCategorySearch({ error, category, setCategory }: any) {
     return (
       <div data-testid="rep-category-search">
@@ -22,7 +22,7 @@ jest.mock('../../../../../../components/utils/input/rep-category/RepCategorySear
   };
 });
 
-jest.mock('../../../../../../components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinners', () => {
+jest.mock('@/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinners', () => {
   return function CreateWaveOutcomesWinners({ 
     winnersConfig, 
     totalValueError, 
@@ -61,7 +61,7 @@ jest.mock('../../../../../../components/waves/create-wave/outcomes/winners/Creat
   };
 });
 
-jest.mock('../../../../../../components/utils/button/PrimaryButton', () => {
+jest.mock('@/components/utils/button/PrimaryButton', () => {
   return function PrimaryButton({ onClicked, disabled, loading, children }: any) {
     return (
       <button

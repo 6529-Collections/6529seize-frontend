@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWavesMainStep from '../../../../../components/waves/create-wave/main-steps/CreateWavesMainStep';
-import { CreateWaveStep, CreateWaveStepStatus } from '../../../../../types/waves.types';
+import CreateWavesMainStep from '@/components/waves/create-wave/main-steps/CreateWavesMainStep';
+import { CreateWaveStep, CreateWaveStepStatus } from '@/types/waves.types';
 
-jest.mock('../../../../../components/waves/create-wave/main-steps/CreateWavesMainStepIcon', () => () => <div data-testid="icon" />);
-jest.mock('../../../../../components/waves/create-wave/main-steps/CreateWavesMainStepConnectionLine', () => () => <div data-testid="line" />);
+jest.mock('@/components/waves/create-wave/main-steps/CreateWavesMainStepIcon', () => () => <div data-testid="icon" />);
+jest.mock('@/components/waves/create-wave/main-steps/CreateWavesMainStepConnectionLine', () => () => <div data-testid="line" />);
 
-jest.mock('../../../../../helpers/waves/waves.helpers', () => ({
+jest.mock('@/helpers/waves/waves.helpers', () => ({
   getCreateWaveStepStatus: jest.fn(() => CreateWaveStepStatus.DONE),
 }));
 
@@ -29,7 +29,7 @@ describe('CreateWavesMainStep', () => {
   });
 
   it('disables button when not done', () => {
-    const helpers = require('../../../../../helpers/waves/waves.helpers');
+    const helpers = require('@/helpers/waves/waves.helpers');
     helpers.getCreateWaveStepStatus.mockReturnValue(CreateWaveStepStatus.ACTIVE);
     render(
       <CreateWavesMainStep

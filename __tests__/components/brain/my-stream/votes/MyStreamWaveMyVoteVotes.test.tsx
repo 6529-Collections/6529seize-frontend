@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveMyVoteVotes from '../../../../../components/brain/my-stream/votes/MyStreamWaveMyVoteVotes';
-import DropVoteProgressing from '../../../../../components/drops/view/utils/DropVoteProgressing';
+import MyStreamWaveMyVoteVotes from '@/components/brain/my-stream/votes/MyStreamWaveMyVoteVotes';
+import DropVoteProgressing from '@/components/drops/view/utils/DropVoteProgressing';
 
-jest.mock('../../../../../components/drops/view/utils/DropVoteProgressing');
+jest.mock('@/components/drops/view/utils/DropVoteProgressing');
 
 const ProgressMock = DropVoteProgressing as jest.Mock;
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupItems from '../../../../components/groups/select/GroupItems';
+import GroupItems from '@/components/groups/select/GroupItems';
 import { useDispatch, useSelector } from 'react-redux';
 
 jest.mock('react-redux');
@@ -11,7 +11,7 @@ const mockUseSelector = useSelector as unknown as jest.Mock;
 
 let captured: any[] = [];
 
-jest.mock('../../../../components/groups/select/item/GroupItem', () => ({
+jest.mock('@/components/groups/select/item/GroupItem', () => ({
   __esModule: true,
   default: (props: any) => {
     captured.push(props);

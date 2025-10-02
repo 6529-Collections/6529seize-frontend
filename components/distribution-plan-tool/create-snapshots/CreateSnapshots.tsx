@@ -9,7 +9,7 @@ import {
   AllowlistOperationCode,
   DistributionPlanTokenPoolDownload,
   DistributionPlanTokenPoolDownloadStatus,
-} from "../../allowlist-tool/allowlist-tool.types";
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateSnapshotTable from "./table/CreateSnapshotTable";
 import CreateSnapshotForm from "./form/CreateSnapshotForm";
 import StepHeader from "../common/StepHeader";
@@ -17,7 +17,7 @@ import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 import { useInterval } from "react-use";
-import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 
 export interface CreateSnapshotSnapshot {
   id: string;

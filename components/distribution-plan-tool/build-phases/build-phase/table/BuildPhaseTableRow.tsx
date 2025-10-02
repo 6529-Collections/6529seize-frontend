@@ -1,6 +1,6 @@
-import DistributionPlanTableRowWrapper from "../../../common/DistributionPlanTableRowWrapper";
-import { BuildPhasesPhaseComponent } from "../../BuildPhases";
-import DistributionPlanDeleteOperationButton from "../../../common/DistributionPlanDeleteOperationButton";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
+import { BuildPhasesPhaseComponent } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import DistributionPlanDeleteOperationButton from "@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton";
 
 export default function BuildPhaseTableRow({
   component,

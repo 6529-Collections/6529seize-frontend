@@ -3,20 +3,20 @@ import { createPortal } from "react-dom";
 import {
   ExtendedDrop,
   convertApiDropToExtendedDrop,
-} from "../../../../helpers/waves/drop.helpers";
+} from "@/helpers/waves/drop.helpers";
 import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
-import useLongPressInteraction from "../../../../hooks/useLongPressInteraction";
-import WaveDropActionsOpen from "../../../waves/drops/WaveDropActionsOpen";
-import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import WaveDropMobileMenuOpen from "../../../waves/drops/WaveDropMobileMenuOpen";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;

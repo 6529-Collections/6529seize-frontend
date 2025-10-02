@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { formatNumberWithCommas } from "../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useQuery } from "@tanstack/react-query";
-import { ApiIncomingIdentitySubscriptionsPage } from "../../generated/models/ApiIncomingIdentitySubscriptionsPage";
-import { commonApiFetch } from "../../services/api/common-api";
+import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
 export default function AppSidebarUserStats({

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import AppWalletAvatar from "../../../components/app-wallets/AppWalletAvatar";
+import AppWalletAvatar from "@/components/app-wallets/AppWalletAvatar";
 
 // Mock next/image to render a regular img element
 jest.mock("next/image", () => ({

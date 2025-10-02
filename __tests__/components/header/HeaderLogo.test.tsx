@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import HeaderLogo from '../../../components/header/HeaderLogo';
+import HeaderLogo from '@/components/header/HeaderLogo';
 
 // Mock Next.js components
 jest.mock('next/link', () => {
@@ -12,7 +12,7 @@ jest.mock('next/image', () => {
 });
 
 // Mock styles
-jest.mock('../../../components/header/Header.module.scss', () => ({
+jest.mock('@/components/header/Header.module.scss', () => ({
   logoIcon: 'logoIcon',
   logoIconSmall: 'logoIconSmall'
 }));

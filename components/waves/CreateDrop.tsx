@@ -8,23 +8,23 @@ import {
   useContext,
   useMemo,
 } from "react";
-import { CreateDropConfig } from "../../entities/IDrop";
+import { CreateDropConfig } from "@/entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import { useMutation } from "@tanstack/react-query";
-import { ApiWave } from "../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPost } from "../../services/api/common-api";
-import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
-import { ApiDrop } from "../../generated/models/ApiDrop";
+import { commonApiPost } from "@/services/api/common-api";
+import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "../auth/Auth";
-import { useProgressiveDebounce } from "../../hooks/useProgressiveDebounce";
+import { useProgressiveDebounce } from "@/hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
-import { ActiveDropState } from "../../types/dropInteractionTypes";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropMode } from "./PrivilegedDropCreator";
-import { DropPrivileges } from "../../hooks/useDropPriviledges";
-import { useMyStream } from "../../contexts/wave/MyStreamContext";
+import { DropPrivileges } from "@/hooks/useDropPriviledges";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;

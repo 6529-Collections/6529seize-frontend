@@ -8,10 +8,10 @@ import {
 } from "react";
 import { ExtraProps } from "react-markdown";
 
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
-import type { DropListItemContentPartProps } from "../../item/content/DropListItemContentPart";
-import { ApiDropMentionedUser } from "../../../../../generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "../../../../../generated/models/ApiDropReferencedNFT";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import type { DropListItemContentPartProps } from "@/components/drops/view/item/content/DropListItemContentPart";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -52,7 +52,7 @@ export interface MarkdownContentRenderers {
 type DropListItemContentPartComponent = typeof import("../../item/content/DropListItemContentPart").default;
 
 const getDropListItemContentPart = (): DropListItemContentPartComponent => {
-  const dropListItemContentPartModule = require("../../item/content/DropListItemContentPart");
+  const dropListItemContentPartModule = require("@/components/drops/view/item/content/DropListItemContentPart");
   return dropListItemContentPartModule.default as DropListItemContentPartComponent;
 };
 

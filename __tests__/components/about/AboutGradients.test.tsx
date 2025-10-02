@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutGradients from '../../../components/about/AboutGradients';
+import AboutGradients from '@/components/about/AboutGradients';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
 

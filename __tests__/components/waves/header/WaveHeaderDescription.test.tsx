@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderDescription from '../../../../components/waves/header/WaveHeaderDescription';
-import { WaveHeaderPinnedSide } from '../../../../components/waves/header/WaveHeader';
-import { ApiWave } from '../../../../generated/models/ApiWave';
+import WaveHeaderDescription from '@/components/waves/header/WaveHeaderDescription';
+import { WaveHeaderPinnedSide } from '@/components/waves/header/WaveHeader';
+import { ApiWave } from '@/generated/models/ApiWave';
 
 jest.mock('react-use', () => ({
   useClickAway: jest.fn(),
@@ -21,7 +21,7 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('../../../../components/waves/drops/Drop', () => {
+jest.mock('@/components/waves/drops/Drop', () => {
   const MockDrop = function MockDrop() {
     return <div data-testid="mock-drop">Drop Component</div>;
   };
@@ -36,7 +36,7 @@ jest.mock('../../../../components/waves/drops/Drop', () => {
   };
 });
 
-jest.mock('../../../../helpers/waves/drop.helpers', () => ({
+jest.mock('@/helpers/waves/drop.helpers', () => ({
   DropSize: {
     FULL: 'FULL',
   },

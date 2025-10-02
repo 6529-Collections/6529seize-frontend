@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CommunityMembersTableHeader from '../../../../components/community/members-table/CommunityMembersTableHeader';
-import { CommunityMembersSortOption } from '../../../../enums';
-import { SortDirection } from '../../../../entities/ISort';
+import CommunityMembersTableHeader from '@/components/community/members-table/CommunityMembersTableHeader';
+import { CommunityMembersSortOption } from '@/enums';
+import { SortDirection } from '@/entities/ISort';
 
 const mockSortable = jest.fn();
-jest.mock('../../../../components/community/members-table/CommunityMembersTableHeaderSortableContent', () => ({
+jest.mock('@/components/community/members-table/CommunityMembersTableHeaderSortableContent', () => ({
   __esModule: true,
   default: (props: any) => {
     mockSortable(props);

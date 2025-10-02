@@ -4,11 +4,11 @@ import React from "react";
 import {
   calculateTimeLeft,
   TimeLeft,
-} from "../../../../helpers/waves/time.utils";
+} from "@/helpers/waves/time.utils";
 import { TimeCountdown } from "./TimeCountdown";
-import { ApiWaveDecisionPause } from "../../../../generated/models/ApiWaveDecisionPause";
-import { useWave } from "../../../../hooks/useWave";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
+import { useWave } from "@/hooks/useWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;

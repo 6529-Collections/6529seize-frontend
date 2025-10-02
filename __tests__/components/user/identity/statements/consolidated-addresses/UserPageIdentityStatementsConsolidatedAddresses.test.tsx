@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import UserPageIdentityStatementsConsolidatedAddresses from '../../../../../../components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { ApiIdentity } from '../../../../../../generated/models/ApiIdentity';
+import UserPageIdentityStatementsConsolidatedAddresses from '@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses';
+import { AuthContext } from '@/components/auth/Auth';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
-jest.mock('../../../../../../components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItem', () => (props: any) => <li data-testid="item">{props.address.wallet}</li>);
-jest.mock('../../../../../../components/user/utils/icons/EthereumIcon', () => () => <div />);
+jest.mock('@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItem', () => (props: any) => <li data-testid="item">{props.address.wallet}</li>);
+jest.mock('@/components/user/utils/icons/EthereumIcon', () => () => <div />);
 jest.mock('next/link', () => ({ __esModule: true, default: (props: any) => <a {...props}>{props.children}</a> }));
 jest.mock('@tanstack/react-query', () => ({ useQueries: () => [] }));
-jest.mock('../../../../../../helpers/Helpers', () => ({ amIUser: () => true, formatNumberWithCommasOrDash: (x: number) => String(x) }));
-jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x2' }) }));
+jest.mock('@/helpers/Helpers', () => ({ amIUser: () => true, formatNumberWithCommasOrDash: (x: number) => String(x) }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x2' }) }));
 
 describe('UserPageIdentityStatementsConsolidatedAddresses', () => {
   const profile: ApiIdentity = {

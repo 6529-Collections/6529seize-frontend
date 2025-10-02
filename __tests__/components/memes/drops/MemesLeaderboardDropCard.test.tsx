@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import MemesLeaderboardDropCard from '../../../../components/memes/drops/MemesLeaderboardDropCard';
+import MemesLeaderboardDropCard from '@/components/memes/drops/MemesLeaderboardDropCard';
 
 test.each([
   [1, 'desktop-hover:hover:tw-border-[#fbbf24]/40'],

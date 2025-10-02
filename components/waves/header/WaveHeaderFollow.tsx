@@ -1,19 +1,19 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
-import { ApiWaveSubscriptionActions } from "../../../generated/models/ApiWaveSubscriptionActions";
+import { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
-} from "../../../services/api/common-api";
-import { AuthContext } from "../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+} from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
-import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "../../react-query-wrapper/utils/query-utils";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 
 export enum WaveFollowBtnSize {
   SMALL = "SMALL",

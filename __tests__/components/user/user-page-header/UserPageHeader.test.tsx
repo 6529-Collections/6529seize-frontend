@@ -1,22 +1,22 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageHeader from '../../../../components/user/user-page-header/UserPageHeader';
-import { AuthContext } from '../../../../components/auth/Auth';
+import UserPageHeader from '@/components/user/user-page-header/UserPageHeader';
+import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
-import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
+import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 
 jest.mock('next/dynamic', () => () => () => <div />);
-jest.mock('../../../../components/user/user-page-header/banner/UserPageHeaderBanner', () => () => <div data-testid="banner" />);
-jest.mock('../../../../components/user/user-page-header/pfp/UserPageHeaderPfp', () => () => <div data-testid="pfp" />);
-jest.mock('../../../../components/user/user-page-header/pfp/UserPageHeaderPfpWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
-jest.mock('../../../../components/user/user-page-header/about/UserPageHeaderAbout', () => () => <div data-testid="about" />);
-jest.mock('../../../../components/user/user-page-header/name/UserPageHeaderName', () => () => <div data-testid="name" />);
-jest.mock('../../../../components/user/user-page-header/stats/UserPageHeaderStats', () => () => <div data-testid="stats" />);
-jest.mock('../../../../components/user/user-page-header/UserPageHeaderProfileEnabledAt', () => () => <div data-testid="enabled" />);
-jest.mock('../../../../components/user/utils/UserFollowBtn', () => ({ __esModule: true, default: () => <div data-testid="follow" /> }));
-jest.mock('../../../../components/user/utils/level/UserLevel', () => () => <div data-testid="level" />);
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/components/user/user-page-header/banner/UserPageHeaderBanner', () => () => <div data-testid="banner" />);
+jest.mock('@/components/user/user-page-header/pfp/UserPageHeaderPfp', () => () => <div data-testid="pfp" />);
+jest.mock('@/components/user/user-page-header/pfp/UserPageHeaderPfpWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
+jest.mock('@/components/user/user-page-header/about/UserPageHeaderAbout', () => () => <div data-testid="about" />);
+jest.mock('@/components/user/user-page-header/name/UserPageHeaderName', () => () => <div data-testid="name" />);
+jest.mock('@/components/user/user-page-header/stats/UserPageHeaderStats', () => () => <div data-testid="stats" />);
+jest.mock('@/components/user/user-page-header/UserPageHeaderProfileEnabledAt', () => () => <div data-testid="enabled" />);
+jest.mock('@/components/user/utils/UserFollowBtn', () => ({ __esModule: true, default: () => <div data-testid="follow" /> }));
+jest.mock('@/components/user/utils/level/UserLevel', () => () => <div data-testid="level" />);
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(),

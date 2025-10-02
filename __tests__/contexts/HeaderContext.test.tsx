@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { HeaderProvider, useHeaderContext } from '../../contexts/HeaderContext';
+import { HeaderProvider, useHeaderContext } from '@/contexts/HeaderContext';
 
 describe('HeaderContext', () => {
   it('provides ref setter and state', () => {

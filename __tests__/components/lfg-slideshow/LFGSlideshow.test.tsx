@@ -1,15 +1,15 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { LFGButton } from '../../../components/lfg-slideshow/LFGSlideshow';
-import { commonApiFetch } from '../../../services/api/common-api';
+import { LFGButton } from '@/components/lfg-slideshow/LFGSlideshow';
+import { commonApiFetch } from '@/services/api/common-api';
 
-jest.mock('../../../services/api/common-api');
-jest.mock('../../../helpers/Helpers', () => ({
+jest.mock('@/services/api/common-api');
+jest.mock('@/helpers/Helpers', () => ({
   enterArtFullScreen: jest.fn(),
   fullScreenSupported: () => true,
 }));
 jest.mock('react-bootstrap', () => ({ Button: (p: any) => <button onClick={p.onClick}>{p.children}</button> }));
-jest.mock('../../../components/lfg-slideshow/LFGSlideshow.module.scss', () => ({}));
+jest.mock('@/components/lfg-slideshow/LFGSlideshow.module.scss', () => ({}));
 
 const mockFetch = commonApiFetch as jest.Mock;
 

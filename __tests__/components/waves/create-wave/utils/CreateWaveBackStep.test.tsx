@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveBackStep from '../../../../../components/waves/create-wave/utils/CreateWaveBackStep';
+import CreateWaveBackStep from '@/components/waves/create-wave/utils/CreateWaveBackStep';
 
 describe('CreateWaveBackStep', () => {
   it('calls onPreviousStep when clicked', async () => {

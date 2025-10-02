@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import NextGenCollectionPreview from '../../../../components/nextGen/collections/NextGenCollectionPreview';
-import { formatNameForUrl } from '../../../../components/nextGen/nextgen_helpers';
+import NextGenCollectionPreview from '@/components/nextGen/collections/NextGenCollectionPreview';
+import { formatNameForUrl } from '@/components/nextGen/nextgen_helpers';
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');
@@ -16,7 +16,7 @@ jest.mock('next/image', () => ({
   default: (props: any) => <img data-testid="img" {...props} />,
 }));
 
-jest.mock('../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => ({
+jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => ({
   NextGenMintCounts: () => <span data-testid="mint-counts" />,
 }));
 

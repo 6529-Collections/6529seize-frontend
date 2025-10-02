@@ -1,4 +1,4 @@
-import { wrapper } from '../../store/store';
+import { wrapper } from '@/store/store';
 
 describe('Redux store', () => {
   it('has wrapper defined', () => {

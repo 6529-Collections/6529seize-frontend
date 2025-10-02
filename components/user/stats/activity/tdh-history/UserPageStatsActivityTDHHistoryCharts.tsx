@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TDHHistory } from "../../../../../entities/ITDH";
+import { TDHHistory } from "@/entities/ITDH";
 import UserPageStatsActivityTDHHistoryChart from "./UserPageStatsActivityTDHHistoryChart";
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 interface ChartData {
   readonly label: string;

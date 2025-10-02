@@ -1,24 +1,24 @@
 import { render, screen } from '@testing-library/react';
-import CommunityMembersTableRow from '../../../../components/community/members-table/CommunityMembersTableRow';
-import { CommunityMemberOverview } from '../../../../entities/IProfile';
+import CommunityMembersTableRow from '@/components/community/members-table/CommunityMembersTableRow';
+import { CommunityMemberOverview } from '@/entities/IProfile';
 
-jest.mock('../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommasOrDash: (n: number) => `#${n}`,
   cicToType: (n: number) => n,
 }));
 
-jest.mock('../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   isEthereumAddress: (val: string) => val.startsWith('0x'),
 }));
 
-jest.mock('../../../../helpers/image.helpers', () => ({
+jest.mock('@/helpers/image.helpers', () => ({
   ImageScale: { W_AUTO_H_50: 'AUTOx50' },
   getScaledImageUri: (url: string) => `scaled-${url}`,
 }));
 
-jest.mock('../../../../components/user/utils/level/UserLevel', () => () => <div data-testid="level" />);
-jest.mock('../../../../components/user/utils/user-cic-type/UserCICTypeIcon', () => () => <div data-testid="icon" />);
-jest.mock('../../../../components/utils/CommonTimeAgo', () => () => <span data-testid="time" />);
+jest.mock('@/components/user/utils/level/UserLevel', () => () => <div data-testid="level" />);
+jest.mock('@/components/user/utils/user-cic-type/UserCICTypeIcon', () => () => <div data-testid="icon" />);
+jest.mock('@/components/utils/CommonTimeAgo', () => () => <span data-testid="time" />);
 jest.mock('next/link', () => ({ __esModule: true, default: ({ children, href }: any) => <a href={href}>{children}</a> }));
 
 const baseMember: CommunityMemberOverview = {

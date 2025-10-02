@@ -1,18 +1,18 @@
 "use client"
 
 import React, { memo, useCallback } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
 import {
   formatNumberWithCommas,
-} from "../../../helpers/Helpers";
-import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
+} from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import WaveDropTime from "../drops/time/WaveDropTime";
-import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;

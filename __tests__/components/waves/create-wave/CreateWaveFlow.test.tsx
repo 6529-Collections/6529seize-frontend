@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import CreateWaveFlow from "../../../../components/waves/create-wave/CreateWaveFlow";
+import CreateWaveFlow from "@/components/waves/create-wave/CreateWaveFlow";
 
-jest.mock("../../../../hooks/isMobileScreen", () => ({
+jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 const mockedUseIsMobileScreen = useIsMobileScreen as jest.Mock;
 
 describe("CreateWaveFlow", () => {

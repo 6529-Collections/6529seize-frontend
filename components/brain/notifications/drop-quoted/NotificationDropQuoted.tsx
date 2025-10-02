@@ -1,14 +1,14 @@
 "use client";
 
-import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { INotificationDropQuoted } from "../../../../types/feed.types";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { INotificationDropQuoted } from "@/types/feed.types";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import Drop, {
   DropInteractionParams,
   DropLocation,
-} from "../../../waves/drops/Drop";
+} from "@/components/waves/drops/Drop";
 import { useRouter } from "next/navigation";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 
 export default function NotificationDropQuoted({
   notification,

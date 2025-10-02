@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SortDirection } from "../../../../../entities/ISort";
+import { SortDirection } from "@/entities/ISort";
 import { RepsTableSort } from "./UserPageRepRepsTable";
-import CommonTableSortIcon from "../../../utils/icons/CommonTableSortIcon";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 
 export default function UserPageRepRepsTableHeaderSortableCell({
   type,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import ProfileActivityLogHandle from '../../../../../components/profile-activity/list/items/ProfileActivityLogHandle';
+import ProfileActivityLogHandle from '@/components/profile-activity/list/items/ProfileActivityLogHandle';
 
 const baseLog = {
   contents: { new_value: 'new', old_value: 'old' }

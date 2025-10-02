@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import WavePicture from '../../../components/waves/WavePicture';
+import WavePicture from '@/components/waves/WavePicture';
 
 describe('WavePicture', () => {
   it('renders picture image when provided', () => {

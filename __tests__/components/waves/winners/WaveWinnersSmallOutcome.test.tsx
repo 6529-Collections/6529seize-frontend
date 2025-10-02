@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { WaveWinnersSmallOutcome } from '../../../../components/waves/winners/WaveWinnersSmallOutcome';
-import { ApiWave } from '../../../../generated/models/ApiWave';
-import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
+import { WaveWinnersSmallOutcome } from '@/components/waves/winners/WaveWinnersSmallOutcome';
+import { ApiWave } from '@/generated/models/ApiWave';
+import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
 
 // Mock external dependencies
 jest.mock('react-tooltip', () => ({
@@ -13,15 +13,15 @@ jest.mock('react-tooltip', () => ({
   ),
 }));
 
-jest.mock('../../../../hooks/drops/useDropOutcomes', () => ({
+jest.mock('@/hooks/drops/useDropOutcomes', () => ({
   useDropOutcomes: jest.fn(),
 }));
 
-jest.mock('../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommas: jest.fn((num) => num.toLocaleString('en-US')),
 }));
 
-import { useDropOutcomes } from '../../../../hooks/drops/useDropOutcomes';
+import { useDropOutcomes } from '@/hooks/drops/useDropOutcomes';
 
 const mockedUseDropOutcomes = useDropOutcomes as jest.Mock;
 
@@ -304,7 +304,7 @@ describe('WaveWinnersSmallOutcome', () => {
   });
 
   it('formats numbers correctly in tooltip', () => {
-    const formatNumberWithCommas = require('../../../../helpers/Helpers').formatNumberWithCommas;
+    const formatNumberWithCommas = require('@/helpers/Helpers').formatNumberWithCommas;
     formatNumberWithCommas.mockImplementation((num: number) => num.toLocaleString('en-US'));
 
     mockedUseDropOutcomes.mockReturnValue({

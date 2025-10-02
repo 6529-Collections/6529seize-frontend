@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import BuildPhaseTableBody from '../../../../../../components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableBody';
-import { BuildPhasesPhase } from '../../../../../../components/distribution-plan-tool/build-phases/BuildPhases';
+import BuildPhaseTableBody from '@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableBody';
+import { BuildPhasesPhase } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 
-jest.mock('../../../../../../components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableRow', () => ({ component }: any) => (
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableRow', () => ({ component }: any) => (
   <tr data-testid="mock-row">
     <td>{component.name}</td>
   </tr>
 ));
 
-jest.mock('../../../../../../components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper', () => ({ children }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper', () => ({ children }: any) => (
   <tbody data-testid="wrapper">{children}</tbody>
 ));
 

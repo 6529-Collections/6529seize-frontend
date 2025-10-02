@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import MapDelegationsDone from '../../components/distribution-plan-tool/map-delegations/MapDelegationsDone';
+import MapDelegationsDone from '@/components/distribution-plan-tool/map-delegations/MapDelegationsDone';
 
 describe('MapDelegationsDone', () => {
   it('renders the contract address', () => {

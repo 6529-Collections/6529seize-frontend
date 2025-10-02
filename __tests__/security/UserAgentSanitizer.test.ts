@@ -12,7 +12,7 @@ import {
   sanitizeUserAgent,
   sanitizeUserAgentAsync,
   UserAgentSecurityError,
-} from "../../hooks/security/UserAgentSanitizer";
+} from "@/hooks/security/UserAgentSanitizer";
 
 // Mock globalThis for environments that don't have it defined
 if (typeof globalThis === "undefined") {

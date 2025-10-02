@@ -1,6 +1,6 @@
 import Image from "next/image";
 import styles from "./LatestActivity.module.scss";
-import { Transaction } from "../../entities/ITransaction";
+import { Transaction } from "@/entities/ITransaction";
 import {
   areEqualAddresses,
   areEqualURLS,
@@ -13,13 +13,13 @@ import {
   isNullAddress,
   numberWithCommas,
   getRoyaltyImage,
-} from "../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MANIFOLD } from "../../constants";
-import { NFTLite } from "../../entities/INFT";
+import { MANIFOLD } from "@/constants";
+import { NFTLite } from "@/entities/INFT";
 import Address from "../address/Address";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
-import { NextGenCollection } from "../../entities/INextgen";
+import { NextGenCollection } from "@/entities/INextgen";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
 import {
   getNextGenIconUrl,

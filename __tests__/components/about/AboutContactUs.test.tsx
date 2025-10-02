@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutContactUs from '../../../components/about/AboutContactUs';
+import AboutContactUs from '@/components/about/AboutContactUs';
 
 describe('AboutContactUs', () => {
   it('shows contact header', () => {

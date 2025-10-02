@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenCollectionProvenance from '../../../components/nextGen/collections/collectionParts/NextGenCollectionProvenance';
-import { NextGenCollection, NextGenLog } from '../../../entities/INextgen';
+import NextGenCollectionProvenance from '@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance';
+import { NextGenCollection, NextGenLog } from '@/entities/INextgen';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any) => <img {...p} /> }));
-jest.mock('../../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
-jest.mock('../../../components/pagination/Pagination', () => (props: any) => (
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
+jest.mock('@/components/pagination/Pagination', () => (props: any) => (
   <button data-testid="page" onClick={() => props.setPage(props.page + 1)}>next</button>
 ));
 jest.mock('react-bootstrap', () => {
@@ -23,7 +23,7 @@ jest.mock('react-bootstrap', () => {
   };
 });
 
-const { commonApiFetch } = require('../../../services/api/common-api');
+const { commonApiFetch } = require('@/services/api/common-api');
 const collection: NextGenCollection = { id: 1, name: 'Coll' } as any;
 const log: NextGenLog = { id:1, block_timestamp:1, log:'test', heading:'H', transaction:'0x', collection_id:1, from_address:'0x', to_address:'0x', from_display:'', to_display:'', value:0, royalties:0, gas:0, gas_price:0, gas_gwei:0 } as any;
 

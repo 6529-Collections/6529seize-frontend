@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveItem from '../../../../components/waves/list/WaveItem';
+import WaveItem from '@/components/waves/list/WaveItem';
 
-jest.mock('../../../../components/waves/list/WaveItemDropped', () => () => <div data-testid="dropped" />);
-jest.mock('../../../../components/waves/list/WaveItemFollow', () => () => <div data-testid="follow" />);
+jest.mock('@/components/waves/list/WaveItemDropped', () => () => <div data-testid="dropped" />);
+jest.mock('@/components/waves/list/WaveItemFollow', () => () => <div data-testid="follow" />);
 
 const wave = {
   id: 'w1',

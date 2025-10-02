@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getSliderTheme } from "./types/slider.types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 interface WaveDropVoteSliderProps {

@@ -12,7 +12,7 @@ import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
-} from "../../constants";
+} from "@/constants";
 
 export default function AboutCookiePolicy() {
   const { showCookieConsent, consent, reject } = useCookieConsent();

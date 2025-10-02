@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CommunityMembersMobileFilterBar from '../../../../components/community/members-table/CommunityMembersMobileFilterBar';
-import { CommunityMembersSortOption } from '../../../../enums';
-import { SortDirection } from '../../../../entities/ISort';
+import CommunityMembersMobileFilterBar from '@/components/community/members-table/CommunityMembersMobileFilterBar';
+import { CommunityMembersSortOption } from '@/enums';
+import { SortDirection } from '@/entities/ISort';
 
-jest.mock('../../../../components/user/utils/icons/CommonTableSortIcon', () => ({
+jest.mock('@/components/user/utils/icons/CommonTableSortIcon', () => ({
   __esModule: true,
   default: () => <div data-testid="icon" />,
 }));
 
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
   CircleLoaderSize: { SMALL: 'SMALL' },

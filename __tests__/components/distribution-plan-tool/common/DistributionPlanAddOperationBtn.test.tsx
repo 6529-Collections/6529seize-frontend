@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DistributionPlanAddOperationBtn from '../../../../components/distribution-plan-tool/common/DistributionPlanAddOperationBtn';
+import DistributionPlanAddOperationBtn from '@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn';
 
 // helper to render component
 function renderBtn(loading: boolean) {

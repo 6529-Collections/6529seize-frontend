@@ -1,23 +1,23 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import NextGenZoomableImage, { MIN_ZOOM_SCALE } from '../../../../../components/nextGen/collections/nextgenToken/NextGenZoomableImage';
-import useIsMobileDevice from '../../../../../hooks/isMobileDevice';
-import useIsMobileScreen from '../../../../../hooks/isMobileScreen';
+import NextGenZoomableImage, { MIN_ZOOM_SCALE } from '@/components/nextGen/collections/nextgenToken/NextGenZoomableImage';
+import useIsMobileDevice from '@/hooks/isMobileDevice';
+import useIsMobileScreen from '@/hooks/isMobileScreen';
 
 jest.mock('next/image', () => ({
   __esModule: true,
   default: React.forwardRef((props: any, ref) => <img ref={ref} data-testid="img" {...props} />),
 }));
 
-jest.mock('../../../../../hooks/isMobileDevice');
-jest.mock('../../../../../hooks/isMobileScreen');
+jest.mock('@/hooks/isMobileDevice');
+jest.mock('@/hooks/isMobileScreen');
 
-jest.mock('../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage', () => ({
+jest.mock('@/components/nextGen/collections/nextgenToken/NextGenTokenImage', () => ({
   get8KUrl: jest.fn(() => '8k'),
   get16KUrl: jest.fn(() => '16k'),
 }));
 
-jest.mock('../../../../../components/dotLoader/DotLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/components/dotLoader/DotLoader', () => () => <div data-testid="loader" />);
 
 describe('NextGenZoomableImage', () => {
   const token = { id: 1, name: 'Token' } as any;

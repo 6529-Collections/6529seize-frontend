@@ -1,9 +1,9 @@
-import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../helpers/image.helpers";
-import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
+} from "@/helpers/image.helpers";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { RatingsData } from "../types";
 
 interface VoteBreakdownTooltipProps {

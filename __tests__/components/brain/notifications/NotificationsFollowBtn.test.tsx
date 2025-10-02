@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NotificationsFollowBtn from '../../../../components/brain/notifications/NotificationsFollowBtn';
+import NotificationsFollowBtn from '@/components/brain/notifications/NotificationsFollowBtn';
 import { useMutation } from '@tanstack/react-query';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('@tanstack/react-query');
 

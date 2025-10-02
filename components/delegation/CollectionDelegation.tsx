@@ -34,14 +34,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import { DELEGATION_ABI } from "../../abis";
+import { DELEGATION_ABI } from "@/abis";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
   NULL_ADDRESS,
-} from "../../constants";
-import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
+} from "@/constants";
+import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { Spinner } from "../dotLoader/DotLoader";
 import {

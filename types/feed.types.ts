@@ -1,10 +1,10 @@
-import { ApiDrop } from "../generated/models/ApiDrop";
-import { ApiDropVote } from "../generated/models/ApiDropVote";
-import { ApiFeedItemType } from "../generated/models/ApiFeedItemType";
-import { ApiNotificationCause } from "../generated/models/ApiNotificationCause";
-import { ApiNotificationsResponse } from "../generated/models/ApiNotificationsResponse";
-import { ApiProfileMin } from "../generated/models/ApiProfileMin";
-import { ApiWave } from "../generated/models/ApiWave";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropVote } from "@/generated/models/ApiDropVote";
+import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ApiWave } from "@/generated/models/ApiWave";
 
 export type IFeedItemWaveCreated = {
   readonly serial_no: number;

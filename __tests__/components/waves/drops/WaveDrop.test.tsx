@@ -2,20 +2,20 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import WaveDrop from '../../../../components/waves/drops/WaveDrop';
-import useIsMobileDevice from '../../../../hooks/isMobileDevice';
-import { editSlice } from '../../../../store/editSlice';
+import WaveDrop from '@/components/waves/drops/WaveDrop';
+import useIsMobileDevice from '@/hooks/isMobileDevice';
+import { editSlice } from '@/store/editSlice';
 
-jest.mock('../../../../components/waves/drops/WaveDropActions', () => (props: any) => <div data-testid="actions" />);
-jest.mock('../../../../components/waves/drops/WaveDropReply', () => () => <div data-testid="reply" />);
-jest.mock('../../../../components/waves/drops/WaveDropContent', () => () => <div data-testid="content" />);
-jest.mock('../../../../components/waves/drops/WaveDropHeader', () => () => <div data-testid="header" />);
-jest.mock('../../../../components/waves/drops/WaveDropAuthorPfp', () => () => <div data-testid="pfp" />);
-jest.mock('../../../../components/waves/drops/WaveDropMetadata', () => () => <div data-testid="meta" />);
-jest.mock('../../../../components/waves/drops/WaveDropRatings', () => () => <div data-testid="ratings" />);
-jest.mock('../../../../components/waves/drops/WaveDropMobileMenu', () => () => <div data-testid="mobile" />);
+jest.mock('@/components/waves/drops/WaveDropActions', () => (props: any) => <div data-testid="actions" />);
+jest.mock('@/components/waves/drops/WaveDropReply', () => () => <div data-testid="reply" />);
+jest.mock('@/components/waves/drops/WaveDropContent', () => () => <div data-testid="content" />);
+jest.mock('@/components/waves/drops/WaveDropHeader', () => () => <div data-testid="header" />);
+jest.mock('@/components/waves/drops/WaveDropAuthorPfp', () => () => <div data-testid="pfp" />);
+jest.mock('@/components/waves/drops/WaveDropMetadata', () => () => <div data-testid="meta" />);
+jest.mock('@/components/waves/drops/WaveDropRatings', () => () => <div data-testid="ratings" />);
+jest.mock('@/components/waves/drops/WaveDropMobileMenu', () => () => <div data-testid="mobile" />);
 
-jest.mock('../../../../hooks/isMobileDevice');
+jest.mock('@/hooks/isMobileDevice');
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({ push: jest.fn() })),
@@ -23,7 +23,7 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => ({ get: () => null, toString: () => '' }),
 }));
 
-jest.mock('../../../../hooks/drops/useDropUpdateMutation', () => ({
+jest.mock('@/hooks/drops/useDropUpdateMutation', () => ({
   useDropUpdateMutation: jest.fn(() => ({
     mutate: jest.fn(),
     isLoading: false,

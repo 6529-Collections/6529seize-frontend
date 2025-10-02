@@ -9,7 +9,7 @@ jest.mock('next/image', () => ({
   },
 }));
 
-jest.mock('../../../../components/brain/left-sidebar/waves/UnifiedWavesListWaves', () => ({
+jest.mock('@/components/brain/left-sidebar/waves/UnifiedWavesListWaves', () => ({
   __esModule: true,
   default: React.forwardRef((props: any, ref) => {
     const handle = {
@@ -22,40 +22,40 @@ jest.mock('../../../../components/brain/left-sidebar/waves/UnifiedWavesListWaves
   }),
 }));
 
-jest.mock('../../../../components/brain/left-sidebar/waves/UnifiedWavesListLoader', () => ({
+jest.mock('@/components/brain/left-sidebar/waves/UnifiedWavesListLoader', () => ({
   __esModule: true,
   UnifiedWavesListLoader: (props: any) => <div data-testid="loader">{String(props.isFetchingNextPage)}</div>,
 }));
 
-jest.mock('../../../../components/brain/left-sidebar/waves/UnifiedWavesListEmpty', () => ({
+jest.mock('@/components/brain/left-sidebar/waves/UnifiedWavesListEmpty', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="empty">{props.emptyMessage}</div>,
 }));
 
-jest.mock('../../../../components/brain/left-sidebar/BrainLeftSidebarCreateADirectMessageButton', () => ({
+jest.mock('@/components/brain/left-sidebar/BrainLeftSidebarCreateADirectMessageButton', () => ({
   __esModule: true,
   default: () => <div data-testid="create-dm-btn" />,
 }));
 
-jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({
     directMessages: mockDMs,
     registerWave: jest.fn(),
   }),
 }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: () => ({ isAuthenticated: mockAuth }),
 }));
 
-jest.mock('../../../../hooks/useDeviceInfo', () => jest.fn(() => ({ isApp: mockIsApp })));
+jest.mock('@/hooks/useDeviceInfo', () => jest.fn(() => ({ isApp: mockIsApp })));
 
-jest.mock('../../../../components/header/user/HeaderUserConnect', () => ({ __esModule: true, default: () => <div data-testid="connect" /> }));
-jest.mock('../../../../components/user/utils/set-up-profile/UserSetUpProfileCta', () => ({ __esModule: true, default: () => <div data-testid="setup-profile" /> }));
+jest.mock('@/components/header/user/HeaderUserConnect', () => ({ __esModule: true, default: () => <div data-testid="connect" /> }));
+jest.mock('@/components/user/utils/set-up-profile/UserSetUpProfileCta', () => ({ __esModule: true, default: () => <div data-testid="setup-profile" /> }));
 
-import DirectMessagesList from '../../../../components/brain/direct-messages/DirectMessagesList';
-import { AuthContext } from '../../../../components/auth/Auth';
-import useDeviceInfo from '../../../../hooks/useDeviceInfo';
+import DirectMessagesList from '@/components/brain/direct-messages/DirectMessagesList';
+import { AuthContext } from '@/components/auth/Auth';
+import useDeviceInfo from '@/hooks/useDeviceInfo';
 
 let mockAuth = false;
 let mockIsApp = false;

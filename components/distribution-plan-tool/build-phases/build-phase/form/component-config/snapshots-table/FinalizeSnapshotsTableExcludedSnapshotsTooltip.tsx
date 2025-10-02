@@ -5,13 +5,13 @@ import {
   AllowlistOperation,
   AllowlistOperationCode,
   Pool,
-} from "../../../../../../allowlist-tool/allowlist-tool.types";
-import { DistributionPlanToolContext } from "../../../../../DistributionPlanToolContext";
-import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import DistributionPlanTableWrapper from "../../../../../common/DistributionPlanTableWrapper";
-import DistributionPlanTableHeaderWrapper from "../../../../../common/DistributionPlanTableHeaderWrapper";
-import DistributionPlanTableBodyWrapper from "../../../../../common/DistributionPlanTableBodyWrapper";
-import DistributionPlanTableRowWrapper from "../../../../../common/DistributionPlanTableRowWrapper";
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
+import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
+import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 
 interface ExcludedSnapshot {
   readonly id: string;

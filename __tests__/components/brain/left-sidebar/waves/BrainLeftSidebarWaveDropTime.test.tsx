@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import BrainLeftSidebarWaveDropTime from '../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime';
-import { getTimeAgoShort } from '../../../../../helpers/Helpers';
+import BrainLeftSidebarWaveDropTime from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime';
+import { getTimeAgoShort } from '@/helpers/Helpers';
 
-jest.mock('../../../../../helpers/Helpers');
+jest.mock('@/helpers/Helpers');
 
 describe('BrainLeftSidebarWaveDropTime', () => {
   it('renders time using helper and sets interval', () => {

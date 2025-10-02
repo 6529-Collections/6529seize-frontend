@@ -1,14 +1,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import WaveDropActionsRate from '../../../../components/waves/drops/WaveDropActionsRate';
+import WaveDropActionsRate from '@/components/waves/drops/WaveDropActionsRate';
 
 const useDropInteractionRules = jest.fn();
-jest.mock('../../../../hooks/drops/useDropInteractionRules', () => ({
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({
   useDropInteractionRules: (...args: any[]) => useDropInteractionRules(...args),
 }));
 
-jest.mock('../../../../components/drops/view/item/rate/give/DropListItemRateGive', () => (props: any) => <div data-testid="rate" data-mobile={props.isMobile} />);
-jest.mock('../../../../contexts/SeizeSettingsContext', () => ({ 
+jest.mock('@/components/drops/view/item/rate/give/DropListItemRateGive', () => (props: any) => <div data-testid="rate" data-mobile={props.isMobile} />);
+jest.mock('@/contexts/SeizeSettingsContext', () => ({ 
   useSeizeSettings: () => ({ isMemesWave: jest.fn().mockReturnValue(false) })
 }));
 

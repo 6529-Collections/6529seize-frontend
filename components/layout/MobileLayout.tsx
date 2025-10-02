@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
-import useDeviceInfo from "../../hooks/useDeviceInfo";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import AppLayout from "./AppLayout";
 import SmallScreenLayout from "./SmallScreenLayout";
 

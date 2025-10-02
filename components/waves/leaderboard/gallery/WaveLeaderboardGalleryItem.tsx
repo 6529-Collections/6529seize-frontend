@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, memo } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import MediaDisplay from "../../../drops/view/item/content/media/MediaDisplay";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
-import WinnerDropBadge from "../../drops/winner/WinnerDropBadge";
-import { VotingModal, MobileVotingModal } from "../../../../components/voting";
-import VotingModalButton from "../../../../components/voting/VotingModalButton";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
-import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
-import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import { VotingModal, MobileVotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;

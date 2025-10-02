@@ -4,17 +4,17 @@ import Link from "next/link";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
-import { INotificationAllDrops } from "../../../../types/feed.types";
-import { getTimeAgoShort, numberWithCommas } from "../../../../helpers/Helpers";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+} from "@/helpers/image.helpers";
+import { INotificationAllDrops } from "@/types/feed.types";
+import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import Drop, {
   DropInteractionParams,
   DropLocation,
-} from "../../../waves/drops/Drop";
-import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+} from "@/components/waves/drops/Drop";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRouter } from "next/navigation";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
 
 export default function NotificationAllDrops({

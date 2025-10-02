@@ -4,12 +4,12 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import WaveDrop from "../../components/waves/drops/WaveDrop";
-import { AuthContext } from "../../components/auth/Auth";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
-import { editSlice } from "../../store/editSlice";
-import { ApiDropType } from "../../generated/models/ApiDropType";
-import { commonApiPost } from "../../services/api/common-api";
+import WaveDrop from "@/components/waves/drops/WaveDrop";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { editSlice } from "@/store/editSlice";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { commonApiPost } from "@/services/api/common-api";
 
 // Add ResizeObserver polyfill for tests
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -19,12 +19,12 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
 }));
 
 // Mock the API
-jest.mock("../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
 // Mock the MyStreamContext
-jest.mock("../../contexts/wave/MyStreamContext", () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   MyStreamProvider: ({ children }: any) => children,
   useMyStream: () => ({
     processIncomingDrop: jest.fn(),
@@ -41,7 +41,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock mobile device hook
-jest.mock("../../hooks/isMobileDevice", () => ({
+jest.mock("@/hooks/isMobileDevice", () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }));
@@ -49,7 +49,7 @@ jest.mock("../../hooks/isMobileDevice", () => ({
 // The actual drop update mutation hook will be used with mocked API
 
 // Mock the EmojiContext
-jest.mock("../../contexts/EmojiContext", () => ({
+jest.mock("@/contexts/EmojiContext", () => ({
   EmojiProvider: ({ children }: any) => children,
   useEmoji: () => ({
     emojiMap: [],
@@ -61,14 +61,14 @@ jest.mock("../../contexts/EmojiContext", () => ({
 }));
 
 // Mock SeizeSettingsContext
-jest.mock("../../contexts/SeizeSettingsContext", () => ({
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
     settings: {},
   }),
 }));
 
 // Mock WaveDropActions to focus on edit functionality
-jest.mock("../../components/waves/drops/WaveDropActions", () => {
+jest.mock("@/components/waves/drops/WaveDropActions", () => {
   return function MockWaveDropActions({ onEdit }: any) {
     return (
       <div data-testid="wave-drop-actions">
@@ -94,7 +94,7 @@ const TestEditContext = React.createContext<{
 }>({});
 
 // Mock WaveDropPartContentMarkdown to check for edit state
-jest.mock("../../components/waves/drops/WaveDropPartContentMarkdown", () => {
+jest.mock("@/components/waves/drops/WaveDropPartContentMarkdown", () => {
   const { useSelector } = require("react-redux");
 
   return function MockWaveDropPartContentMarkdown({ part }: any) {

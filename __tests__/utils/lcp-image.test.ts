@@ -1,9 +1,9 @@
-import { getLCPImageUrl } from '../../utils/lcp-image';
-import { getMediaType } from '../../components/nft-image/utils/media-type';
-import { NFTWithMemesExtendedData } from '../../entities/INFT';
+import { getLCPImageUrl } from '@/utils/lcp-image';
+import { getMediaType } from '@/components/nft-image/utils/media-type';
+import { NFTWithMemesExtendedData } from '@/entities/INFT';
 
 // Mock the getMediaType utility
-jest.mock('../../components/nft-image/utils/media-type');
+jest.mock('@/components/nft-image/utils/media-type');
 const mockGetMediaType = getMediaType as jest.MockedFunction<typeof getMediaType>;
 
 describe('lcp-image utils', () => {

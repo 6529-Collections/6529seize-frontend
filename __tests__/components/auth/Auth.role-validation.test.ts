@@ -2,7 +2,7 @@ import {
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError 
-} from '../../../errors/authentication';
+} from '@/errors/authentication';
 
 describe('AuthenticationRoleError hierarchy', () => {
   test('AuthenticationRoleError should extend Error', () => {

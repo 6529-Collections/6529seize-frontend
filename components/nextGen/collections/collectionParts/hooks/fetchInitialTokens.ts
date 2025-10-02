@@ -1,5 +1,5 @@
-import { NextGenToken } from "../../../../../entities/INextgen";
-import { commonApiFetch } from "../../../../../services/api/common-api";
+import { NextGenToken } from "@/entities/INextgen";
+import { commonApiFetch } from "@/services/api/common-api";
 
 const FETCH_SIZE = 50;
 

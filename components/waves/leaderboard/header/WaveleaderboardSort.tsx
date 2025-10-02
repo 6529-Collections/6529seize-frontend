@@ -2,12 +2,12 @@
 
 import React, { useCallback, useMemo } from "react";
 import { debounce } from "lodash";
-import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useQueryClient } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { ApiDropsLeaderboardPage } from "../../../../generated/models/ApiDropsLeaderboardPage";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { WAVE_DROPS_PARAMS, getDefaultQueryRetry } from "../../../react-query-wrapper/utils/query-utils";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { WAVE_DROPS_PARAMS, getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 
 interface WaveleaderboardSortProps {
   readonly sort: WaveDropsLeaderboardSort;

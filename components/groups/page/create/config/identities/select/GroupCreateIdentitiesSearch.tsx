@@ -3,8 +3,8 @@
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import GroupCreateIdentitiesSearchItems from "./GroupCreateIdentitiesSearchItems";
-import { CommunityMemberMinimal } from "../../../../../../../entities/IProfile";
-import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export default function GroupCreateIdentitiesSearch({
   selectedWallets,

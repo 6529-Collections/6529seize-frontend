@@ -5,10 +5,10 @@ import {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
-} from "../../../../../types/waves.types";
-import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
+} from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
-import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesCICApprove({
   waveType,

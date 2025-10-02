@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { MaxLengthPlugin } from '../../../../../../components/drops/create/lexical/plugins/MaxLengthPlugin';
+import { MaxLengthPlugin } from '@/components/drops/create/lexical/plugins/MaxLengthPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getSelection } from 'lexical';
 

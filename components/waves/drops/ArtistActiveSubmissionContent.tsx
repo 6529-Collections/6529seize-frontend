@@ -6,20 +6,20 @@ import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import {
   useUserArtSubmissions,
   useSubmissionDrops,
-} from "../../../hooks/useUserArtSubmissions";
+} from "@/hooks/useUserArtSubmissions";
 import {
   SingleWaveDropVote,
   SingleWaveDropVoteSize,
 } from "../drop/SingleWaveDropVote";
 import { SubmissionPosition } from "./SubmissionPosition";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;

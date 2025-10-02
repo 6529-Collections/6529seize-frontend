@@ -1,8 +1,8 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import NextGenAdminArtistSignCollection from "../../../../components/nextGen/admin/NextGenAdminArtistSignCollection";
+import NextGenAdminArtistSignCollection from "@/components/nextGen/admin/NextGenAdminArtistSignCollection";
 
-jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   useCollectionIndex: jest.fn(() => ({ data: 1 })),
   useCollectionArtist: jest.fn(() => ({ data: [{ result: "0xabc" }] })),
   useParsedCollectionIndex: jest.fn(() => 1),
@@ -10,7 +10,7 @@ jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
   useCoreContractWrite: jest.fn(),
 }));
 
-jest.mock("../../../../components/nextGen/admin/NextGenAdminShared", () => ({
+jest.mock("@/components/nextGen/admin/NextGenAdminShared", () => ({
   NextGenCollectionIdFormGroup: ({ onChange }: any) => (
     <input
       data-testid="collectionId"
@@ -21,21 +21,21 @@ jest.mock("../../../../components/nextGen/admin/NextGenAdminShared", () => ({
 }));
 
 jest.mock(
-  "../../../../components/nextGen/NextGenContractWriteStatus",
+  "@/components/nextGen/NextGenContractWriteStatus",
   () => () => <div data-testid="status" />,
 );
 
-jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
 const {
   useSeizeConnectContext,
-} = require("../../../../components/auth/SeizeConnectContext");
+} = require("@/components/auth/SeizeConnectContext");
 const {
   isCollectionArtist,
   useCoreContractWrite,
-} = require("../../../../components/nextGen/nextgen_helpers");
+} = require("@/components/nextGen/nextgen_helpers");
 
 function setup(isArtist: boolean) {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: "0xabc" });

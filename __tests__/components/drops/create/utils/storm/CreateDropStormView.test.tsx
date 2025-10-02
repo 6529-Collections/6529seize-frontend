@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import CreateDropStormView from '../../../../../../components/drops/create/utils/storm/CreateDropStormView';
-import { CreateDropConfig } from '../../../../../../entities/IDrop';
+import CreateDropStormView from '@/components/drops/create/utils/storm/CreateDropStormView';
+import { CreateDropConfig } from '@/entities/IDrop';
 
-jest.mock('../../../../../../components/drops/create/utils/storm/CreateDropStormViewPart', () => {
+jest.mock('@/components/drops/create/utils/storm/CreateDropStormViewPart', () => {
   return jest.fn(() => <div data-testid="part" />);
 });
 
-const MockPart = require('../../../../../../components/drops/create/utils/storm/CreateDropStormViewPart');
+const MockPart = require('@/components/drops/create/utils/storm/CreateDropStormViewPart');
 
 describe('CreateDropStormView', () => {
   const profile = { id: '1', handle: 'alice', pfp: null } as any;

@@ -1,11 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
-import { useDrop } from '../../hooks/useDrop';
+import { useDrop } from '@/hooks/useDrop';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { commonApiFetch } from '../../services/api/common-api';
-import { QueryKey } from '../../components/react-query-wrapper/ReactQueryWrapper';
+import { commonApiFetch } from '@/services/api/common-api';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 const useQueryMock = useQuery as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;

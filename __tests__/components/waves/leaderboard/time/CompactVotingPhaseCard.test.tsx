@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { CompactVotingPhaseCard } from '../../../../../components/waves/leaderboard/time/CompactVotingPhaseCard';
+import { CompactVotingPhaseCard } from '@/components/waves/leaderboard/time/CompactVotingPhaseCard';
 
 const useWaveTimers = jest.fn();
-jest.mock('../../../../../hooks/useWaveTimers', () => ({
+jest.mock('@/hooks/useWaveTimers', () => ({
   useWaveTimers: (...args: any[]) => useWaveTimers(...args),
 }));
 const useWave = jest.fn();
-jest.mock('../../../../../hooks/useWave', () => ({
+jest.mock('@/hooks/useWave', () => ({
   useWave: (...args: any[]) => useWave(...args),
 }));
 

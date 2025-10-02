@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
-import BottomNavigation, { items } from '../../../components/navigation/BottomNavigation';
-import NavItem from '../../../components/navigation/NavItem';
-import { useLayout } from '../../../components/brain/my-stream/layout/LayoutContext';
+import BottomNavigation, { items } from '@/components/navigation/BottomNavigation';
+import NavItem from '@/components/navigation/NavItem';
+import { useLayout } from '@/components/brain/my-stream/layout/LayoutContext';
 
-jest.mock('../../../components/navigation/NavItem', () => ({ __esModule: true, default: jest.fn(() => <div data-testid="nav-item" />) }));
-jest.mock('../../../components/brain/my-stream/layout/LayoutContext', () => ({ useLayout: jest.fn() }));
+jest.mock('@/components/navigation/NavItem', () => ({ __esModule: true, default: jest.fn(() => <div data-testid="nav-item" />) }));
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({ useLayout: jest.fn() }));
 
 const registerRef = jest.fn();
 (useLayout as jest.Mock).mockReturnValue({ registerRef });

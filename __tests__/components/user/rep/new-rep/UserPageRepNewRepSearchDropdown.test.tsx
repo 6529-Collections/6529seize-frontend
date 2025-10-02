@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import UserPageRepNewRepSearchDropdown from "../../../../../components/user/rep/new-rep/UserPageRepNewRepSearchDropdown";
-import { RepSearchState } from "../../../../../components/user/rep/new-rep/UserPageRepNewRepSearch";
+import UserPageRepNewRepSearchDropdown from "@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown";
+import { RepSearchState } from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
 
 describe("UserPageRepNewRepSearchDropdown", () => {
   it("renders categories and handles selection", async () => {

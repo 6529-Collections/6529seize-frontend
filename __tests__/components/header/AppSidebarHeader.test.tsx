@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import AppSidebarHeader from '../../../components/header/AppSidebarHeader';
+import AppSidebarHeader from '@/components/header/AppSidebarHeader';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
-jest.mock('../../../components/header/AppSidebarUserInfo', () => (props: any) => <div data-testid="userinfo" {...props} />);
-jest.mock('../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/components/header/AppSidebarUserInfo', () => (props: any) => <div data-testid="userinfo" {...props} />);
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 
-const { useSeizeConnectContext } = require('../../../components/auth/SeizeConnectContext');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
 
 function setup(address: string | undefined) {
   const onClose = jest.fn();

@@ -1,6 +1,6 @@
 import React from "react";
 import { render, renderHook, screen, waitFor } from "@testing-library/react";
-import { EmojiProvider, useEmoji } from "../../contexts/EmojiContext";
+import { EmojiProvider, useEmoji } from "@/contexts/EmojiContext";
 
 // Mock fetch
 global.fetch = jest.fn();

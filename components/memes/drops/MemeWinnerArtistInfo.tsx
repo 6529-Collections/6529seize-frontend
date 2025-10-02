@@ -2,12 +2,12 @@ import React from "react";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../user/utils/UserCICAndLevel";
-import WaveDropAuthorPfp from "../../waves/drops/WaveDropAuthorPfp";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { cicToType, getTimeAgoShort } from "../../../helpers/Helpers";
-import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
-import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
+} from "@/components/user/utils/UserCICAndLevel";
+import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { cicToType, getTimeAgoShort } from "@/helpers/Helpers";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface MemeWinnerArtistInfoProps {
   readonly drop: ExtendedDrop;

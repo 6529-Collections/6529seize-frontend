@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import { DelegationAddressDisabledInput } from '../../../components/delegation/DelegationFormParts';
+import { DelegationAddressDisabledInput } from '@/components/delegation/DelegationFormParts';
 
 jest.mock('wagmi', () => ({
   useEnsName: () => ({ data: 'alice.eth' }),

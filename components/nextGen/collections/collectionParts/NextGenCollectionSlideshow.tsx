@@ -1,6 +1,6 @@
 import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import styles from "../NextGen.module.scss";
 import SlideshowHeader from "./hooks/SlideshowHeader";
 import TokenSlideshow from "./hooks/TokenSlideshow";

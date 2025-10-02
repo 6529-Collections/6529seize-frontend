@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useRef, useState } from "react";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 
 const ACCEPTED_FORMATS = [
   "image/jpeg",

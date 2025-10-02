@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import ChatItemHrefButtons from "../../components/waves/ChatItemHrefButtons";
+import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 
 const writeText = jest.fn().mockResolvedValue(undefined);
 Object.assign(navigator, {

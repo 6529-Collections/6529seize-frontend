@@ -1,4 +1,4 @@
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 
 export default function WaveHeaderNameEditInput({
   wave,

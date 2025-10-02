@@ -1,10 +1,10 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
-import ProxyActionAcceptanceButton from '../../components/user/proxy/proxy/action/ProxyActionAcceptanceButton';
-import { AuthContext } from '../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../components/react-query-wrapper/ReactQueryWrapper';
-import { AcceptActionRequestActionEnum } from '../../generated/models/AcceptActionRequest';
+import ProxyActionAcceptanceButton from '@/components/user/proxy/proxy/action/ProxyActionAcceptanceButton';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { AcceptActionRequestActionEnum } from '@/generated/models/AcceptActionRequest';
 
 const mutateAsync = jest.fn();
 let onSuccessCb: any;
@@ -15,12 +15,12 @@ jest.mock('@tanstack/react-query', () => ({
   },
 }));
 
-jest.mock('../../helpers/profile-proxy.helpers', () => ({
+jest.mock('@/helpers/profile-proxy.helpers', () => ({
   haveSeenProfileProxyActionAcceptanceModal: jest.fn(() => false),
   setSeenProfileProxyActionAcceptanceModal: jest.fn(),
 }));
 
-jest.mock('../../components/distribution-plan-tool/common/CircleLoader', () => {
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => {
   const MockedCircleLoader = () => <span data-testid="loader" />;
   MockedCircleLoader.displayName = 'CircleLoader';
   return MockedCircleLoader;

@@ -25,12 +25,12 @@ import {
   areEqualAddresses,
   fromGWEI,
   getAddressEtherscanLink,
-} from "../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import { UnlockAppWalletModal } from "./AppWalletModal";
 import { decryptData } from "./app-wallet-helpers";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 import { Share } from "@capacitor/share";

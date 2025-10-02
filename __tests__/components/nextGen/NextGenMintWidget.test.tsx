@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { getJsonData } from "../../../components/nextGen/collections/collectionParts/mint/NextGenMintWidget";
+import { getJsonData } from "@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget";
 
 it("renders json data list", () => {
   const data = JSON.stringify({ artist: "bob", year: "2023" });

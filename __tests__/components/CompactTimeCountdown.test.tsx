@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { CompactTimeCountdown } from '../../components/waves/leaderboard/time/CompactTimeCountdown';
+import { CompactTimeCountdown } from '@/components/waves/leaderboard/time/CompactTimeCountdown';
 
 const baseTime = { days: 0, hours: 1, minutes: 2, seconds: 3 };
 

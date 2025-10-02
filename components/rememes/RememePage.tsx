@@ -11,9 +11,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEnsName } from "wagmi";
-import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { NFT, Rememe } from "../../entities/INFT";
+import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NFT, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
@@ -22,9 +22,9 @@ import {
   numberWithCommas,
   parseIpfsUrl,
   parseNftDescriptionToHtml,
-} from "../../helpers/Helpers";
-import useCapacitor from "../../hooks/useCapacitor";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+} from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import Address from "../address/Address";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 import DotLoader from "../dotLoader/DotLoader";

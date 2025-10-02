@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import MakersPlaceIcon from '../../../../../components/user/utils/icons/MakersPlaceIcon';
+import MakersPlaceIcon from '@/components/user/utils/icons/MakersPlaceIcon';
 
 describe('MakersPlaceIcon', () => {
   it('renders img with correct attributes', () => {

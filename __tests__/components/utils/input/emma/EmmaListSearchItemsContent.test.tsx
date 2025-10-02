@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import EmmaListSearchItemsContent from '../../../../../components/utils/input/emma/EmmaListSearchItemsContent';
+import EmmaListSearchItemsContent from '@/components/utils/input/emma/EmmaListSearchItemsContent';
 
-jest.mock('../../../../../components/utils/input/emma/EmmaListSearchItem', () => (props: any) => (
+jest.mock('@/components/utils/input/emma/EmmaListSearchItem', () => (props: any) => (
   <div data-testid="item" data-selected={props.selectedId === props.item.id} onClick={() => props.onSelect(props.item)} />
 ));
 

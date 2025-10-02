@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import SlideshowHeader from "../../../../../../components/nextGen/collections/collectionParts/hooks/SlideshowHeader";
+import SlideshowHeader from "@/components/nextGen/collections/collectionParts/hooks/SlideshowHeader";
 
 // Mock Next.js Link component
 jest.mock("next/link", () => {
@@ -21,11 +21,11 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 }));
 
 // Mock the formatNameForUrl helper
-jest.mock("../../../../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   formatNameForUrl: jest.fn((name: string) => name.replace(/ /g, "-").toLowerCase()),
 }));
 
-import { formatNameForUrl } from "../../../../../../components/nextGen/nextgen_helpers";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 
 describe("SlideshowHeader", () => {
   const mockFormatNameForUrl = formatNameForUrl as jest.MockedFunction<typeof formatNameForUrl>;

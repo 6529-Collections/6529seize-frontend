@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import DropPartContent from '../../../../../components/drops/view/part/DropPartContent';
+import DropPartContent from '@/components/drops/view/part/DropPartContent';
 
-jest.mock('../../../../../components/drops/view/part/DropPartMarkdown', () => ({ __esModule: true, default: () => <div data-testid="markdown" /> }));
-jest.mock('../../../../../components/drops/view/item/content/media/DropListItemContentMedia', () => ({ __esModule: true, default: (props:any) => <div data-testid="media" data-src={props.media_url} /> }));
+jest.mock('@/components/drops/view/part/DropPartMarkdown', () => ({ __esModule: true, default: () => <div data-testid="markdown" /> }));
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia', () => ({ __esModule: true, default: (props:any) => <div data-testid="media" data-src={props.media_url} /> }));
 
 const baseProps = {
   mentionedUsers: [],

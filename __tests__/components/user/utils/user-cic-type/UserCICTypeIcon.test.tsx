@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import UserCICTypeIcon from '../../../../../components/user/utils/user-cic-type/UserCICTypeIcon';
+import UserCICTypeIcon from '@/components/user/utils/user-cic-type/UserCICTypeIcon';
 
-jest.mock('../../../../../components/user/utils/user-cic-type/icons/UserCICInaccurateIcon', () => () => <div data-testid="inaccurate" />);
-jest.mock('../../../../../components/user/utils/user-cic-type/icons/UserCICUnknownIcon', () => () => <div data-testid="unknown" />);
-jest.mock('../../../../../components/user/utils/user-cic-type/icons/UserCICProbablyAccurateIcon', () => () => <div data-testid="probably" />);
-jest.mock('../../../../../components/user/utils/user-cic-type/icons/UserCICAccurateIcon', () => () => <div data-testid="accurate" />);
-jest.mock('../../../../../components/user/utils/user-cic-type/icons/UserCICHighlyAccurateIcon', () => () => <div data-testid="highly" />);
+jest.mock('@/components/user/utils/user-cic-type/icons/UserCICInaccurateIcon', () => () => <div data-testid="inaccurate" />);
+jest.mock('@/components/user/utils/user-cic-type/icons/UserCICUnknownIcon', () => () => <div data-testid="unknown" />);
+jest.mock('@/components/user/utils/user-cic-type/icons/UserCICProbablyAccurateIcon', () => () => <div data-testid="probably" />);
+jest.mock('@/components/user/utils/user-cic-type/icons/UserCICAccurateIcon', () => () => <div data-testid="accurate" />);
+jest.mock('@/components/user/utils/user-cic-type/icons/UserCICHighlyAccurateIcon', () => () => <div data-testid="highly" />);
 
 describe('UserCICTypeIcon', () => {
   it('renders inaccurate icon for negative CIC', () => {

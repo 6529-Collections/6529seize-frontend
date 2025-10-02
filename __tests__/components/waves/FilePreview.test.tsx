@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import FilePreview from '../../../components/waves/FilePreview';
+import FilePreview from '@/components/waves/FilePreview';
 
-jest.mock('../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
   CircleLoaderSize: { XXLARGE: 'XX' },

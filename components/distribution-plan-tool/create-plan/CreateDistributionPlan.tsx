@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import DistributionPlanPrimaryBtn from "../common/DistributionPlanPrimaryBtn";
-import { distributionPlanApiPost } from "../../../services/distribution-plan-api";
-import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
+import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 
 export default function CreateDistributionPlan({
   onSuccess,

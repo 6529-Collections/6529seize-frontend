@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateActions from '../../../../../../components/groups/page/create/actions/GroupCreateActions';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import GroupCreateActions from '@/components/groups/page/create/actions/GroupCreateActions';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
-jest.mock('../../../../../../components/groups/page/create/actions/GroupCreateTest', () => () => <div data-testid="test" />);
-jest.mock('../../../../../../components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/components/groups/page/create/actions/GroupCreateTest', () => () => <div data-testid="test" />);
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
 
 const commonApiPost = jest.fn();
-jest.mock('../../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: (...args: any[]) => commonApiPost(...args),
 }));
 

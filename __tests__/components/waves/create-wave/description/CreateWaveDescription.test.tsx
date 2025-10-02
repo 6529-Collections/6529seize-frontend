@@ -2,20 +2,20 @@ import React from 'react';
 
 // Mock helper functions
 const mockProfileAndConsolidationsToProfileMin = jest.fn();
-jest.mock('../../../../../helpers/ProfileHelpers', () => ({
+jest.mock('@/helpers/ProfileHelpers', () => ({
   ...jest.requireActual('../../../../../helpers/ProfileHelpers'),
   profileAndConsolidationsToProfileMin: mockProfileAndConsolidationsToProfileMin,
 }));
 
 // Mock CreateDropType
-jest.mock('../../../../../components/drops/create/types', () => ({
+jest.mock('@/components/drops/create/types', () => ({
   CreateDropType: {
     DROP: 'DROP',
   },
 }));
 
 // Mock DropEditor component
-jest.mock('../../../../../components/drops/create/DropEditor', () => 
+jest.mock('@/components/drops/create/DropEditor', () => 
   React.forwardRef((props: any, ref: any) => {
     React.useImperativeHandle(ref, () => ({
       requestDrop: () => ({ content: 'test drop' }),
@@ -37,7 +37,7 @@ jest.mock('../../../../../components/drops/create/DropEditor', () =>
 );
 
 import { render, screen } from '@testing-library/react';
-import CreateWaveDescription, { CreateWaveDescriptionHandles } from '../../../../../components/waves/create-wave/description/CreateWaveDescription';
+import CreateWaveDescription, { CreateWaveDescriptionHandles } from '@/components/waves/create-wave/description/CreateWaveDescription';
 
 describe('CreateWaveDescription', () => {
   const mockProfile = {

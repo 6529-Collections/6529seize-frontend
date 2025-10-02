@@ -1,18 +1,18 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from '../../../../../components/brain/left-sidebar/waves/UnifiedWavesListWaves';
-import { useShowFollowingWaves } from '../../../../../hooks/useShowFollowingWaves';
-import { useAuth } from '../../../../../components/auth/Auth';
-import { useVirtualizedWaves } from '../../../../../hooks/useVirtualizedWaves';
-import { createMockMinimalWave } from '../../../../utils/mockFactories';
+import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from '@/components/brain/left-sidebar/waves/UnifiedWavesListWaves';
+import { useShowFollowingWaves } from '@/hooks/useShowFollowingWaves';
+import { useAuth } from '@/components/auth/Auth';
+import { useVirtualizedWaves } from '@/hooks/useVirtualizedWaves';
+import { createMockMinimalWave } from '@/__tests__/utils/mockFactories';
 
-jest.mock('../../../../../components/utils/switch/CommonSwitch', () => (props: any) => <div data-testid="switch">{props.label}-{String(props.isOn)}</div>);
-jest.mock('../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWave', () => (props: any) => <div data-testid={`wave-${props.wave.id}`} data-pin={String(props.showPin)} />);
-jest.mock('../../../../../components/brain/left-sidebar/waves/SectionHeader', () => (props: any) => <div data-testid={`header-${props.label}`}>{props.label}{props.rightContent}</div>);
+jest.mock('@/components/utils/switch/CommonSwitch', () => (props: any) => <div data-testid="switch">{props.label}-{String(props.isOn)}</div>);
+jest.mock('@/components/brain/left-sidebar/waves/BrainLeftSidebarWave', () => (props: any) => <div data-testid={`wave-${props.wave.id}`} data-pin={String(props.showPin)} />);
+jest.mock('@/components/brain/left-sidebar/waves/SectionHeader', () => (props: any) => <div data-testid={`header-${props.label}`}>{props.label}{props.rightContent}</div>);
 
-jest.mock('../../../../../hooks/useShowFollowingWaves');
-jest.mock('../../../../../components/auth/Auth');
-jest.mock('../../../../../hooks/useVirtualizedWaves');
+jest.mock('@/hooks/useShowFollowingWaves');
+jest.mock('@/components/auth/Auth');
+jest.mock('@/hooks/useVirtualizedWaves');
 
 const mockUseShowFollowingWaves = useShowFollowingWaves as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;

@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { ApiIncomingIdentitySubscriptionsPage } from "../../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import { commonApiFetch } from "@/services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import Link from "next/link";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageFollowers({
   profile,

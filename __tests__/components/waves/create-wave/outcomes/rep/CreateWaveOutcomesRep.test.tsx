@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveOutcomesRep from '../../../../../../components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRep';
-import { ApiWaveType } from '../../../../../../generated/models/ApiWaveType';
+import CreateWaveOutcomesRep from '@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRep';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../../components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepApprove', () => () => <div data-testid="approve" />);
-jest.mock('../../../../../../components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepRank', () => () => <div data-testid="rank" />);
+jest.mock('@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepApprove', () => () => <div data-testid="approve" />);
+jest.mock('@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepRank', () => () => <div data-testid="rank" />);
 
 describe('CreateWaveOutcomesRep', () => {
   it('renders approve component when waveType is Approve', () => {

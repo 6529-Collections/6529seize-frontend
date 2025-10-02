@@ -1,8 +1,8 @@
-import { MentionedUser, ReferencedNft } from "../../../../../entities/IDrop";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import { MentionedUser, ReferencedNft } from "@/entities/IDrop";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentNft from "./nft-tag/DropListItemContentNft";
 import DropListItemContentMention from "./DropListItemContentMention";
-import { DropContentPartType } from "../../part/DropPartMarkdown";
+import { DropContentPartType } from "@/components/drops/view/part/DropPartMarkdown";
 
 interface DropListItemContentMentionProps {
   readonly type: DropContentPartType.MENTION;

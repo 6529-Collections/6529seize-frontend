@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import KnownOriginIcon from '../../../../../components/user/utils/icons/KnownOriginIcon';
+import KnownOriginIcon from '@/components/user/utils/icons/KnownOriginIcon';
 
 describe('KnownOriginIcon', () => {
   it('renders img with correct attributes', () => {

@@ -1,7 +1,7 @@
 import React from "react";
-import { ApiDropPart } from "../../../generated/models/ApiDropPart";
-import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
-import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
+import { ApiDropPart } from "@/generated/models/ApiDropPart";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;

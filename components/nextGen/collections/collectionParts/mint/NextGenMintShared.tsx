@@ -1,9 +1,9 @@
-import styles from "../../NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { Form, Row, Col } from "react-bootstrap";
 import { useEnsName } from "wagmi";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 function NextGenMintAddressOption(props: Readonly<{ address: string }>) {

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import LinkIcon from '../../../../../components/user/utils/icons/LinkIcon';
+import LinkIcon from '@/components/user/utils/icons/LinkIcon';
 
 describe('LinkIcon', () => {
   it('renders svg with correct attributes', () => {

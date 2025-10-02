@@ -1,21 +1,21 @@
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import UnifiedWavesList from '../../../../../components/brain/left-sidebar/waves/UnifiedWavesList';
-import useDeviceInfo from '../../../../../hooks/useDeviceInfo';
-import { createMockMinimalWave } from '../../../../utils/mockFactories';
+import UnifiedWavesList from '@/components/brain/left-sidebar/waves/UnifiedWavesList';
+import useDeviceInfo from '@/hooks/useDeviceInfo';
+import { createMockMinimalWave } from '@/__tests__/utils/mockFactories';
 
-jest.mock('../../../../../hooks/useDeviceInfo');
-jest.mock('../../../../../components/brain/left-sidebar/waves/UnifiedWavesListLoader', () => ({
+jest.mock('@/hooks/useDeviceInfo');
+jest.mock('@/components/brain/left-sidebar/waves/UnifiedWavesListLoader', () => ({
   UnifiedWavesListLoader: ({ isFetchingNextPage }: any) => <div data-testid="loader">{String(isFetchingNextPage)}</div>
 }));
-jest.mock('../../../../../components/brain/left-sidebar/waves/UnifiedWavesListEmpty', () => ({
+jest.mock('@/components/brain/left-sidebar/waves/UnifiedWavesListEmpty', () => ({
   __esModule: true,
   default: ({ sortedWaves }: any) => <div data-testid="empty">{sortedWaves.length}</div>
 }));
 
 let sentinel: HTMLElement | null = null;
 
-jest.mock('../../../../../components/brain/left-sidebar/waves/UnifiedWavesListWaves', () => {
+jest.mock('@/components/brain/left-sidebar/waves/UnifiedWavesListWaves', () => {
   return {
     __esModule: true,
     default: React.forwardRef((props: any, ref: any) => {

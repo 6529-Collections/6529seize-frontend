@@ -1,4 +1,4 @@
-import { generateCalendar } from '../../../helpers/calendar/calendar.helpers';
+import { generateCalendar } from '@/helpers/calendar/calendar.helpers';
 
 describe('calendar.helpers', () => {
   it('generates a month grid with previous and next month days', () => {

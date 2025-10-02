@@ -4,15 +4,15 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import { BrainLeftSidebarViewChange } from "./BrainLeftSidebarViewChange";
 import BrainLeftSidebarSearchWave from "./search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "./waves/BrainLeftSidebarWaves";
-import { TabToggle } from "../../common/TabToggle";
+import { TabToggle } from "@/components/common/TabToggle";
 import { useContentTab } from "../ContentTabContext";
-import { MyStreamWaveTab } from "../../../types/waves.types";
+import { MyStreamWaveTab } from "@/types/waves.types";
 import DirectMessagesList from "../direct-messages/DirectMessagesList";
 import { useSearchParams } from "next/navigation";
-import { useUnreadIndicator } from "../../../hooks/useUnreadIndicator";
-import { useAuth } from "../../auth/Auth";
-import { useWaveData } from "../../../hooks/useWaveData";
-import { useWave } from "../../../hooks/useWave";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { useAuth } from "@/components/auth/Auth";
+import { useWaveData } from "@/hooks/useWaveData";
+import { useWave } from "@/hooks/useWave";
 
 interface BrainLeftSidebarProps {
   readonly activeWaveId: string | null | undefined;

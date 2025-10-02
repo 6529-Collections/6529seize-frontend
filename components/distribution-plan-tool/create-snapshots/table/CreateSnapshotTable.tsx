@@ -1,6 +1,6 @@
 import CreateSnapshotTableHeader from "./CreateSnapshotTableHeader";
 import CreateSnapshotTableBody from "./CreateSnapshotTableBody";
-import DistributionPlanTableWrapper from "../../common/DistributionPlanTableWrapper";
+import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
 import { CreateSnapshotSnapshot } from "../CreateSnapshots";
 
 export default function CreateSnapshotTable({

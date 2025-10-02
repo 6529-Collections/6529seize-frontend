@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RevokeDelegationWithSub from "../../components/delegation/RevokeDelegationWithSub";
+import RevokeDelegationWithSub from "@/components/delegation/RevokeDelegationWithSub";
 import React from "react";
 
-jest.mock("../../components/delegation/DelegationFormParts", () => ({
+jest.mock("@/components/delegation/DelegationFormParts", () => ({
   DelegationCloseButton: (props: any) => <button onClick={props.onHide}>close</button>,
   DelegationFormLabel: ({ title }: any) => <div>{title}</div>,
   DelegationAddressDisabledInput: ({ address, ens }: any) => <div data-testid="disabled-address">{ens ? `${ens} - ${address}` : address}</div>,
@@ -31,7 +31,7 @@ jest.mock("../../components/delegation/DelegationFormParts", () => ({
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }) }));
 
-jest.mock("../../components/delegation/delegation-constants", () => ({
+jest.mock("@/components/delegation/delegation-constants", () => ({
   __esModule: true,
   ALL_USE_CASES: [{ use_case: 1, display: "One" }],
   DelegationCollection: {} as any,

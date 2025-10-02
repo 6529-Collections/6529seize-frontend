@@ -1,10 +1,10 @@
-import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
-import { ApiWaveMetadataType } from "../../generated/models/ApiWaveMetadataType";
-import { ApiWaveType } from "../../generated/models/ApiWaveType";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   CreateWaveGroupConfigType,
   CreateWaveStep,
-} from "../../types/waves.types";
+} from "@/types/waves.types";
 
 export const WAVE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Chat]: "Chat",

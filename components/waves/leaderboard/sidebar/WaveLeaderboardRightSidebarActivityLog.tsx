@@ -1,15 +1,15 @@
-import { ApiWaveLog } from "../../../../generated/models/ApiWaveLog";
+import { ApiWaveLog } from "@/generated/models/ApiWaveLog";
 import {
   formatNumberWithCommas,
   getTimeAgoShort,
-} from "../../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import Link from "next/link";
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
 
-import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { SystemAdjustmentPill } from "../../../common/SystemAdjustmentPill";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;

@@ -1,10 +1,10 @@
 import React from "react";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
-import { ApiDropRater } from "../../../generated/models/ApiDropRater";
-import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
-import { ApiDropContextProfileContext } from "../../../generated/models/ApiDropContextProfileContext";
+import { ApiDropRater } from "@/generated/models/ApiDropRater";
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 
 interface MemesLeaderboardDropVoteSummaryProps {
   readonly current: number;

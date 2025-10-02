@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import EmmaListSearchItem from '../../../../../components/utils/input/emma/EmmaListSearchItem';
-import { AllowlistDescription } from '../../../../../components/allowlist-tool/allowlist-tool.types';
+import EmmaListSearchItem from '@/components/utils/input/emma/EmmaListSearchItem';
+import { AllowlistDescription } from '@/components/allowlist-tool/allowlist-tool.types';
 
 describe('EmmaListSearchItem', () => {
   const mockOnSelect = jest.fn();

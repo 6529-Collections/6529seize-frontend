@@ -6,7 +6,7 @@ import {
   formatDate,
   countTotalDecisions,
   calculateEndDateForCycles,
-} from '../../../../../components/waves/create-wave/services/waveDecisionService';
+} from '@/components/waves/create-wave/services/waveDecisionService';
 
 describe('waveDecisionService', () => {
   it('calculates decision times list', () => {

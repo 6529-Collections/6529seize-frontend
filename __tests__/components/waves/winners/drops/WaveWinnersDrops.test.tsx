@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { WaveWinnersDrops } from '../../../../../components/waves/winners/drops/WaveWinnersDrops';
+import { WaveWinnersDrops } from '@/components/waves/winners/drops/WaveWinnersDrops';
 
-jest.mock('../../../../../components/waves/winners/drops/WaveWinnersDrop', () => ({
+jest.mock('@/components/waves/winners/drops/WaveWinnersDrop', () => ({
   WaveWinnersDrop: (props: any) => <div data-testid={`drop-${props.winner.drop.id}`} />,
 }));
 

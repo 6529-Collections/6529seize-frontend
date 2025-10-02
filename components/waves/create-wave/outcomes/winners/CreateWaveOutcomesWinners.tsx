@@ -6,7 +6,7 @@ import {
   CreateWaveOutcomeConfigWinnersConfig,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
-} from "../../../../../types/waves.types";
+} from "@/types/waves.types";
 import CreateWaveOutcomesWinnersAddWinner from "./CreateWaveOutcomesWinnersAddWinner";
 import CreateWaveOutcomesWinnersRows from "./CreateWaveOutcomesWinnersRows";
 

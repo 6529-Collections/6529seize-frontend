@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
-import { NftPageStats } from '../../components/nftAttributes/NftStats';
+import { NftPageStats } from '@/components/nftAttributes/NftStats';
 
 describe('NftPageStats', () => {
   const nft = {

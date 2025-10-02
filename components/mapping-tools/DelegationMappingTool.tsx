@@ -9,10 +9,10 @@ import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "../../constants";
-import { Delegation } from "../../entities/IDelegation";
-import { areEqualAddresses } from "../../helpers/Helpers";
-import { fetchAllPages } from "../../services/6529api";
+import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants";
+import { Delegation } from "@/entities/IDelegation";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { fetchAllPages } from "@/services/6529api";
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");

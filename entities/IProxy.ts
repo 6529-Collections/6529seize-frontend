@@ -1,4 +1,4 @@
-import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 interface CreateProxyActionBase<T extends ApiProfileProxyActionType> {
   readonly action_type: T;

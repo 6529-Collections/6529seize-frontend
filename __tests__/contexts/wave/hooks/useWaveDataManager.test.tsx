@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useWaveDataManager } from '../../../../contexts/wave/hooks/useWaveDataManager';
+import { useWaveDataManager } from '@/contexts/wave/hooks/useWaveDataManager';
 
 const fetchFns = {
   registerWave: jest.fn(),
@@ -12,11 +12,11 @@ const paginationFns = {
   fetchAroundSerialNo: jest.fn(),
 };
 
-jest.mock('../../../../contexts/wave/hooks/useWaveDataFetching', () => ({
+jest.mock('@/contexts/wave/hooks/useWaveDataFetching', () => ({
   useWaveDataFetching: jest.fn(() => fetchFns),
 }));
 
-jest.mock('../../../../contexts/wave/hooks/useWavePagination', () => ({
+jest.mock('@/contexts/wave/hooks/useWavePagination', () => ({
   useWavePagination: jest.fn(() => paginationFns),
 }));
 

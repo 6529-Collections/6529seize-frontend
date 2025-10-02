@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveLoadingState } from '../../../../contexts/wave/hooks/useWaveLoadingState';
+import { useWaveLoadingState } from '@/contexts/wave/hooks/useWaveLoadingState';
 
 describe('useWaveLoadingState', () => {
   it('initializes state and determines continuation', () => {

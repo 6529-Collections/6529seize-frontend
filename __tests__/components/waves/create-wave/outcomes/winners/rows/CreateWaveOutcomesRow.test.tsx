@@ -1,22 +1,22 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveOutcomesRow from '../../../../../../../components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRow';
-import { CreateWaveOutcomeType } from '../../../../../../../types/waves.types';
-import { ApiWaveType } from '../../../../../../../generated/models/ApiWaveType';
+import CreateWaveOutcomesRow from '@/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRow';
+import { CreateWaveOutcomeType } from '@/types/waves.types';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 // Mock the specific row components
-jest.mock('../../../../../../../components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManual', () => {
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManual', () => {
   return function MockCreateWaveOutcomesRowManual() {
     return <div data-testid="manual-row">Manual Row Component</div>;
   };
 });
 
-jest.mock('../../../../../../../components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRep', () => {
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRep', () => {
   return function MockCreateWaveOutcomesRowRep() {
     return <div data-testid="rep-row">Rep Row Component</div>;
   };
 });
 
-jest.mock('../../../../../../../components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCIC', () => {
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCIC', () => {
   return function MockCreateWaveOutcomesRowCIC() {
     return <div data-testid="cic-row">CIC Row Component</div>;
   };

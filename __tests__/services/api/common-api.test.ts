@@ -1,4 +1,4 @@
-import * as api from '../../../services/api/common-api';
+import * as api from '@/services/api/common-api';
 
 describe('commonApiFetchWithRetry', () => {
   afterEach(() => {

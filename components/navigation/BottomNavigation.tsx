@@ -11,7 +11,7 @@ import BellIcon from "../common/icons/BellIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import LogoIcon from "../common/icons/LogoIcon";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 
 export const items: NavItemData[] = [
   {

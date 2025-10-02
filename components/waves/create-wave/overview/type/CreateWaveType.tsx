@@ -1,6 +1,6 @@
 
 
-import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import CreateWaveTypeInputs from "./CreateWaveTypeInputs";
 
 export default function CreateWaveType({

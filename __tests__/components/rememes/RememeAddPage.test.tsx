@@ -1,6 +1,6 @@
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import RememeAddPage from "../../../components/rememes/RememeAddPage";
+import RememeAddPage from "@/components/rememes/RememeAddPage";
 
 // Mock react-bootstrap
 jest.mock("react-bootstrap", () => ({
@@ -25,7 +25,7 @@ jest.mock("wagmi", () => ({
 
 // Mock components
 jest.mock(
-  "../../../components/rememes/RememeAddComponent",
+  "@/components/rememes/RememeAddComponent",
   () => (props: any) =>
     (
       <div data-testid="rememe-add-component">
@@ -53,45 +53,45 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 }));
 
 // Mock hooks and contexts
-jest.mock("../../../components/auth/Auth", () => ({
+jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
 
-jest.mock("../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-jest.mock("../../../contexts/SeizeSettingsContext", () => ({
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
 }));
 
 // Mock API services
-jest.mock("../../../services/6529api", () => ({
+jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(),
   postData: jest.fn(),
 }));
 
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   areEqualAddresses: jest.fn((a, b) => a?.toLowerCase() === b?.toLowerCase()),
   numberWithCommas: jest.fn((n) => n.toLocaleString("en-US")),
 }));
 
 // Get mocked functions
 const mockUseSignMessage = require("wagmi").useSignMessage as jest.Mock;
-const mockUseAuth = require("../../../components/auth/Auth")
+const mockUseAuth = require("@/components/auth/Auth")
   .useAuth as jest.Mock;
 const mockUseSeizeConnectContext =
-  require("../../../components/auth/SeizeConnectContext")
+  require("@/components/auth/SeizeConnectContext")
     .useSeizeConnectContext as jest.Mock;
-const mockUseSeizeSettings = require("../../../contexts/SeizeSettingsContext")
+const mockUseSeizeSettings = require("@/contexts/SeizeSettingsContext")
   .useSeizeSettings as jest.Mock;
-const mockFetchUrl = require("../../../services/6529api").fetchUrl as jest.Mock;
-const mockPostData = require("../../../services/6529api").postData as jest.Mock;
-const mockCommonApiFetch = require("../../../services/api/common-api")
+const mockFetchUrl = require("@/services/6529api").fetchUrl as jest.Mock;
+const mockPostData = require("@/services/6529api").postData as jest.Mock;
+const mockCommonApiFetch = require("@/services/api/common-api")
   .commonApiFetch as jest.Mock;
 
 // Mock location.reload

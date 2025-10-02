@@ -1,27 +1,27 @@
 import { render, screen } from '@testing-library/react';
-import { WaveLeaderboardRightSidebarActivityLogs } from '../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs';
-import { ApiWave } from '../../../../../generated/models/ApiWave';
-import { useAuth } from '../../../../../components/auth/Auth';
+import { WaveLeaderboardRightSidebarActivityLogs } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs';
+import { ApiWave } from '@/generated/models/ApiWave';
+import { useAuth } from '@/components/auth/Auth';
 
 const hook = jest.fn();
 let intersectionCb: any;
 
-jest.mock('../../../../../hooks/useWaveActivityLogs', () => ({
+jest.mock('@/hooks/useWaveActivityLogs', () => ({
   useWaveActivityLogs: (...args: any[]) => hook(...args),
 }));
 
-jest.mock('../../../../../hooks/useIntersectionObserver', () => ({
+jest.mock('@/hooks/useIntersectionObserver', () => ({
   useIntersectionObserver: (cb: any) => {
     intersectionCb = cb;
     return { current: null };
   },
 }));
 
-jest.mock('../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLog', () => ({
+jest.mock('@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLog', () => ({
   WaveLeaderboardRightSidebarActivityLog: (props: any) => <div data-testid="log" >{props.log.id}</div>,
 }));
 
-jest.mock('../../../../../components/auth/Auth', () => ({
+jest.mock('@/components/auth/Auth', () => ({
   useAuth: jest.fn(),
 }));
 

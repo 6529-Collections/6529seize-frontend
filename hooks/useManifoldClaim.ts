@@ -1,10 +1,10 @@
 "use client";
 
 import { useReadContract } from "wagmi";
-import { MEMES_CONTRACT, NULL_MERKLE } from "../constants";
+import { MEMES_CONTRACT, NULL_MERKLE } from "@/constants";
 import { useCallback, useEffect, useState } from "react";
-import { areEqualAddresses } from "../helpers/Helpers";
-import { Time } from "../helpers/time";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
 import { DateTime } from "luxon";
 import { MANIFOLD_NETWORK } from "@/constants";
 

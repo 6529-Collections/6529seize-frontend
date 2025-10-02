@@ -1,9 +1,9 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import UserPageStatsActivityOverview, { printEthValue } from '../../../../components/user/stats/UserPageStatsActivityOverview';
-import { commonApiFetch } from '../../../../services/api/common-api';
+import UserPageStatsActivityOverview, { printEthValue } from '@/components/user/stats/UserPageStatsActivityOverview';
+import { commonApiFetch } from '@/services/api/common-api';
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(() => Promise.resolve({}))
 }));
 

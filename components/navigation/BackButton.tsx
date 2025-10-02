@@ -1,12 +1,12 @@
 "use client";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Spinner from "../utils/Spinner";
-import { useWaveData } from "../../hooks/useWaveData";
-import { useWave } from "../../hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
+import { useWave } from "@/hooks/useWave";
 import { useViewContext } from "./ViewContext";
 
 export default function BackButton() {

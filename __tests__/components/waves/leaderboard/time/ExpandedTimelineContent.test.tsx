@@ -14,14 +14,14 @@ jest.mock("framer-motion", () => ({
   },
 }));
 
-jest.mock("../../../../../components/waves/leaderboard/time/HorizontalTimeline", () => ({
+jest.mock("@/components/waves/leaderboard/time/HorizontalTimeline", () => ({
   HorizontalTimeline: (props: any) => {
     timelineProps = props;
     return <div data-testid="timeline" />;
   }
 }));
 
-import { ExpandedTimelineContent } from "../../../../../components/waves/leaderboard/time/ExpandedTimelineContent";
+import { ExpandedTimelineContent } from "@/components/waves/leaderboard/time/ExpandedTimelineContent";
 
 describe("ExpandedTimelineContent", () => {
   beforeEach(() => {

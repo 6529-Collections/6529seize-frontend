@@ -1,18 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { ApiGroupOwnsNftNameEnum } from "../../../../../../generated/models/ApiGroupOwnsNft";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "../../../../../../constants";
-import { commonApiFetch } from "../../../../../../services/api/common-api";
-import { ApiNftsPage } from "../../../../../../generated/models/ApiNftsPage";
+} from "@/constants";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiNftsPage } from "@/generated/models/ApiNftsPage";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../helpers/image.helpers";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+} from "@/helpers/image.helpers";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreateNftsSelectedItem({
   nft,

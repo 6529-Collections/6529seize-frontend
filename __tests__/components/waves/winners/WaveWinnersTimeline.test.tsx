@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { WaveWinnersTimeline } from '../../../../components/waves/winners/WaveWinnersTimeline';
+import { WaveWinnersTimeline } from '@/components/waves/winners/WaveWinnersTimeline';
 import { format } from 'date-fns';
 
-jest.mock('../../../../components/waves/winners/WaveWinnersTimelineLoading', () => ({ WaveWinnersTimelineLoading: () => <div data-testid="loading" /> }));
-jest.mock('../../../../components/waves/winners/WaveWinnersEmpty', () => ({ WaveWinnersEmpty: () => <div data-testid="empty" /> }));
+jest.mock('@/components/waves/winners/WaveWinnersTimelineLoading', () => ({ WaveWinnersTimelineLoading: () => <div data-testid="loading" /> }));
+jest.mock('@/components/waves/winners/WaveWinnersEmpty', () => ({ WaveWinnersEmpty: () => <div data-testid="empty" /> }));
 const dropsOrder: string[] = [];
-jest.mock('../../../../components/waves/winners/drops/WaveWinnersDrops', () => ({
+jest.mock('@/components/waves/winners/drops/WaveWinnersDrops', () => ({
   WaveWinnersDrops: (props: any) => {
     dropsOrder.push(props.winners[0].drop.id);
     return <div data-testid={`drops-${props.winners[0].drop.id}`} />;

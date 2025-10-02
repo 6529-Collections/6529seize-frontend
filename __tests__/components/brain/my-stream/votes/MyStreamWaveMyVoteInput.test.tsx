@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveMyVoteInput from '../../../../../components/brain/my-stream/votes/MyStreamWaveMyVoteInput';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import MyStreamWaveMyVoteInput from '@/components/brain/my-stream/votes/MyStreamWaveMyVoteInput';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));

@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import ProfileProxyCreditEdit from "../../../../../../../components/user/proxy/proxy/action/utils/credit/ProfileProxyCreditEdit";
-import { AuthContext } from "../../../../../../../components/auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../../../../components/react-query-wrapper/ReactQueryWrapper";
+import ProfileProxyCreditEdit from "@/components/user/proxy/proxy/action/utils/credit/ProfileProxyCreditEdit";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query", () => ({

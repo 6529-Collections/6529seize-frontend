@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomeTypesItem from '../../../../../components/waves/create-wave/outcomes/CreateWaveOutcomeTypesItem';
-import { CreateWaveOutcomeType } from '../../../../../types/waves.types';
+import CreateWaveOutcomeTypesItem from '@/components/waves/create-wave/outcomes/CreateWaveOutcomeTypesItem';
+import { CreateWaveOutcomeType } from '@/types/waves.types';
 
 describe('CreateWaveOutcomeTypesItem', () => {
   it('applies active classes when selected', () => {

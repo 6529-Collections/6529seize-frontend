@@ -1,6 +1,6 @@
 import React from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ApiDropPart } from "../../../generated/models/ApiDropPart";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropPart } from "@/generated/models/ApiDropPart";
 import WaveDropPartTitle from "./WaveDropPartTitle";
 import WaveDropPartContent from "./WaveDropPartContent";
 

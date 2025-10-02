@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityWalletTable from '../../../../../../../components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTable';
-import { ApiIdentity } from '../../../../../../../generated/models/ApiIdentity';
-import { Transaction } from '../../../../../../../entities/ITransaction';
+import UserPageStatsActivityWalletTable from '@/components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTable';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import { Transaction } from '@/entities/ITransaction';
 
-jest.mock('../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow', () => ({
+jest.mock('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow', () => ({
   __esModule: true,
   default: jest.fn(() => <tr data-testid="row" />)
 }));
 
-const RowMock = require('../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow').default as jest.Mock;
+const RowMock = require('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow').default as jest.Mock;
 
 describe('UserPageStatsActivityWalletTable', () => {
   it('renders a row for each transaction', () => {

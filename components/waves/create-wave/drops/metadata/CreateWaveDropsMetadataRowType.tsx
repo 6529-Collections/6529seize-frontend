@@ -1,4 +1,4 @@
-import { ApiWaveMetadataType } from "../../../../../generated/models/ApiWaveMetadataType";
+import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 
 export default function CreateWaveDropsMetadataRowType({
   activeType,

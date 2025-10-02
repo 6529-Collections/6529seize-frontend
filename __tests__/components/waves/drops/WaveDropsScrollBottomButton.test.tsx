@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WaveDropsScrollBottomButton } from '../../../../components/waves/drops/WaveDropsScrollBottomButton';
+import { WaveDropsScrollBottomButton } from '@/components/waves/drops/WaveDropsScrollBottomButton';
 
 describe('WaveDropsScrollBottomButton', () => {
   it('does not render when at bottom', () => {

@@ -1,8 +1,8 @@
 import { publicEnv } from "@/config/env";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import { API_AUTH_COOKIE } from "../../constants";
-import { safeLocalStorage } from "../../helpers/safeLocalStorage";
+import { API_AUTH_COOKIE } from "@/constants";
+import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 

@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import MyStreamWaveTabsLeaderboard from '../../../../components/brain/my-stream/MyStreamWaveTabsLeaderboard';
-import { BrainView } from '../../../../components/brain/BrainMobile';
+import MyStreamWaveTabsLeaderboard from '@/components/brain/my-stream/MyStreamWaveTabsLeaderboard';
+import { BrainView } from '@/components/brain/BrainMobile';
 
-jest.mock('../../../../components/brain/BrainMobile', () => ({
+jest.mock('@/components/brain/BrainMobile', () => ({
   BrainView: { DEFAULT: 'DEFAULT', LEADERBOARD: 'LEADERBOARD', WINNERS: 'WINNERS' }
 }));
 
-jest.mock('../../../../hooks/useWaveTimers', () => ({
+jest.mock('@/hooks/useWaveTimers', () => ({
   useWaveTimers: () => ({
     voting: { isCompleted: mockCompleted },
     decisions: { firstDecisionDone: mockFirstDecision },

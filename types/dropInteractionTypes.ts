@@ -1,4 +1,4 @@
-import { ApiDrop } from "../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",

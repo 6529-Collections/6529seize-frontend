@@ -3,25 +3,25 @@
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
-import { getTimeAgoShort, numberWithCommas } from "../../../../helpers/Helpers";
+} from "@/helpers/image.helpers";
+import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import Drop, {
   DropInteractionParams,
   DropLocation,
-} from "../../../waves/drops/Drop";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+} from "@/components/waves/drops/Drop";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
-import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
-import { useEmoji } from "../../../../contexts/EmojiContext";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
+import { useEmoji } from "@/contexts/EmojiContext";
 import type {
   INotificationDropVoted,
   INotificationDropReacted,
-} from "../../../../types/feed.types";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+} from "@/types/feed.types";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 export const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";

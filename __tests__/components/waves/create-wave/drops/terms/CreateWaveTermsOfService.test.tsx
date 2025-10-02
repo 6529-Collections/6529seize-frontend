@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateWaveTermsOfService from '../../../../../../components/waves/create-wave/drops/terms/CreateWaveTermsOfService';
-import { ApiWaveType } from '../../../../../../generated/models/ApiWaveType';
+import CreateWaveTermsOfService from '@/components/waves/create-wave/drops/terms/CreateWaveTermsOfService';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 describe('CreateWaveTermsOfService', () => {
   it('renders toggle and textarea when enabled', () => {

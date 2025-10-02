@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreateSnapshotFormSearchCollectionDropdown from '../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdown';
+import CreateSnapshotFormSearchCollectionDropdown from '@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdown';
 
 const tableMock = jest.fn(({ collections }: any) => (
   <table data-testid="table">{collections.map((c: any) => c.name).join(',')}</table>
 ));
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownTable',
+  '@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownTable',
   () => (props: any) => tableMock(props)
 );
 

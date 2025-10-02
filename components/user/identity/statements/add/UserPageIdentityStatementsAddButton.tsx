@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
-import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,

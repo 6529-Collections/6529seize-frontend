@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Transaction } from "../../../../../../../entities/ITransaction";
-import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
+import { Transaction } from "@/entities/ITransaction";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import {
   formatAddress,
   getProfileTargetRoute,
-} from "../../../../../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
 import { usePathname } from "next/navigation";
-import { UserPageTabType } from "../../../../../layout/UserPageTabs";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 
 export default function UserPageStatsActivityWalletTableRowSecondAddress({
   transaction,

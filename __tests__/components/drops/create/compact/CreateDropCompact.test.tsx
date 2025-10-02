@@ -1,14 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import CreateDropCompact from "../../../../../components/drops/create/compact/CreateDropCompact";
-import { CreateDropType } from "../../../../../components/drops/create/types";
+import CreateDropCompact from "@/components/drops/create/compact/CreateDropCompact";
+import { CreateDropType } from "@/components/drops/create/types";
 
-jest.mock("../../../../../components/drops/create/utils/CreateDropContent", () => ({
+jest.mock("@/components/drops/create/utils/CreateDropContent", () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="content">{children}</div>,
 }));
 
-jest.mock("../../../../../components/utils/button/PrimaryButton", () => (props: any) => (
+jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
   <button onClick={props.onClicked}>{props.children}</button>
 ));
 

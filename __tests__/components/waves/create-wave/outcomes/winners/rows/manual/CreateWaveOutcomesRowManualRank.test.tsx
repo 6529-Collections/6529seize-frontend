@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesRowManualRank from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualRank';
+import CreateWaveOutcomesRowManualRank from '@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualRank';
 
 const outcome = { title: 'Winner' } as any;
 

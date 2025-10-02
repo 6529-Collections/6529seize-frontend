@@ -18,15 +18,15 @@ import {
   RoleValidationError,
   MissingActiveProfileError,
   InvalidRoleStateError 
-} from '../../errors/authentication';
+} from '@/errors/authentication';
 
 // Mock the API functions
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 
-import { commonApiPost } from '../../services/api/common-api';
-import { redeemRefreshTokenWithRetries } from '../../services/auth/token-refresh.utils';
+import { commonApiPost } from '@/services/api/common-api';
+import { redeemRefreshTokenWithRetries } from '@/services/auth/token-refresh.utils';
 
 describe('Token Refresh Error Classes', () => {
   test('TokenRefreshError base class', () => {

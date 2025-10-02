@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateCustomSnapshotFormTable from '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable';
-import { CustomTokenPoolParamsToken } from '../../../../../components/allowlist-tool/allowlist-tool.types';
+import CreateCustomSnapshotFormTable from '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable';
+import { CustomTokenPoolParamsToken } from '@/components/allowlist-tool/allowlist-tool.types';
 
 const tokens: CustomTokenPoolParamsToken[] = [
   { owner: '0x1' },

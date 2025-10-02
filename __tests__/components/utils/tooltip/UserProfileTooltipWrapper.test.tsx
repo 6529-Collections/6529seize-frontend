@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import UserProfileTooltipWrapper from '../../../../components/utils/tooltip/UserProfileTooltipWrapper';
+import UserProfileTooltipWrapper from '@/components/utils/tooltip/UserProfileTooltipWrapper';
 
 // Mock the CustomTooltip component
-jest.mock('../../../../components/utils/tooltip/CustomTooltip', () => {
+jest.mock('@/components/utils/tooltip/CustomTooltip', () => {
   return function MockCustomTooltip({ 
     children, 
     content, 
@@ -28,14 +28,14 @@ jest.mock('../../../../components/utils/tooltip/CustomTooltip', () => {
 });
 
 // Mock UserProfileTooltip component
-jest.mock('../../../../components/user/utils/profile/UserProfileTooltip', () => {
+jest.mock('@/components/user/utils/profile/UserProfileTooltip', () => {
   return function MockUserProfileTooltip({ user }: { user: string }) {
     return <div data-testid="user-profile-tooltip">Profile for {user}</div>;
   };
 });
 
 // Mock useDeviceInfo hook
-jest.mock('../../../../hooks/useDeviceInfo', () => ({
+jest.mock('@/hooks/useDeviceInfo', () => ({
   __esModule: true,
   default: () => ({
     hasTouchScreen: false,
@@ -81,7 +81,7 @@ describe('UserProfileTooltipWrapper', () => {
 
     // Clear cache and re-import
     jest.resetModules();
-    const { default: UserProfileTooltipWrapperWithTouch } = require('../../../../components/utils/tooltip/UserProfileTooltipWrapper');
+    const { default: UserProfileTooltipWrapperWithTouch } = require('@/components/utils/tooltip/UserProfileTooltipWrapper');
 
     render(
       <UserProfileTooltipWrapperWithTouch user="testuser">

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import UsersIcon from '../../../../components/common/icons/UsersIcon';
+import UsersIcon from '@/components/common/icons/UsersIcon';
 
 describe('UsersIcon', () => {
   it('renders svg with class and attributes', () => {

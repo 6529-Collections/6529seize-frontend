@@ -1,15 +1,15 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../../user/utils/UserCICAndLevel";
-import { SingleWaveDropPosition } from "../../../waves/drop/SingleWaveDropPosition";
-import { cicToType } from "../../../../helpers/Helpers";
+} from "@/components/user/utils/UserCICAndLevel";
+import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPosition";
+import { cicToType } from "@/helpers/Helpers";
 import Link from "next/link";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;

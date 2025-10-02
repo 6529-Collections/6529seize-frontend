@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ArtworkDetails from '../../../../../../components/waves/memes/submission/details/ArtworkDetails';
+import ArtworkDetails from '@/components/waves/memes/submission/details/ArtworkDetails';
 
 describe('ArtworkDetails', () => {
   it('calls blur handlers when values change', async () => {

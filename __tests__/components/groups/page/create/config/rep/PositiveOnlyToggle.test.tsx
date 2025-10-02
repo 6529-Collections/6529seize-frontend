@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import PositiveOnlyToggle from '../../../../../../../components/groups/page/create/config/rep/PositiveOnlyToggle';
+import PositiveOnlyToggle from '@/components/groups/page/create/config/rep/PositiveOnlyToggle';
 
 describe('PositiveOnlyToggle', () => {
   it('reflects unchecked state and toggles on click', async () => {

@@ -14,9 +14,9 @@ import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 import {
   AllowlistCustomTokenPool,
   AllowlistOperationCode,
-} from "../../allowlist-tool/allowlist-tool.types";
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
-import AllowlistToolCsvIcon from "../../allowlist-tool/icons/AllowlistToolCsvIcon";
+import AllowlistToolCsvIcon from "@/components/allowlist-tool/icons/AllowlistToolCsvIcon";
 
 export default function CreateCustomSnapshots() {
   const { distributionPlan, setStep, operations } = useContext(

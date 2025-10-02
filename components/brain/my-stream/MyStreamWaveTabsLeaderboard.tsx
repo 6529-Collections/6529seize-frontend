@@ -1,7 +1,7 @@
 import React from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { BrainView } from "../BrainMobile";
-import { useWaveTimers } from "../../../hooks/useWaveTimers";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
 
 type RegisterTabRef = (view: BrainView, el: HTMLButtonElement | null) => void;
 

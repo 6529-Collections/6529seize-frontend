@@ -1,16 +1,16 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MediaDisplayVideo from '../../../../../../../components/drops/view/item/content/media/MediaDisplayVideo';
+import MediaDisplayVideo from '@/components/drops/view/item/content/media/MediaDisplayVideo';
 
 // mock hooks used inside component
-jest.mock('../../../../../../../hooks/useInView', () => ({
+jest.mock('@/hooks/useInView', () => ({
   useInView: () => [jest.fn(), true],
 }));
 
 const playMock = jest.fn().mockResolvedValue(undefined);
 const pauseMock = jest.fn();
 
-jest.mock('../../../../../../../hooks/useOptimizedVideo', () => ({
+jest.mock('@/hooks/useOptimizedVideo', () => ({
   useOptimizedVideo: () => ({ playableUrl: 'video.mp4', isHls: false }),
 }));
 

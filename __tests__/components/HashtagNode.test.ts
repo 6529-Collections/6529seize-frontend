@@ -1,4 +1,4 @@
-import * as mod from "../../components/drops/create/lexical/nodes/HashtagNode";
+import * as mod from "@/components/drops/create/lexical/nodes/HashtagNode";
 
 describe("HashtagNode exports", () => {
   it("exposes helpers", () => {

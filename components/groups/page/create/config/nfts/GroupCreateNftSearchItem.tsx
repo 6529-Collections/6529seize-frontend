@@ -3,16 +3,16 @@ import {
   MEMES_CONTRACT,
   MEMELAB_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "../../../../../../constants";
+} from "@/constants";
 import {
   ApiGroupOwnsNft,
   ApiGroupOwnsNftNameEnum,
-} from "../../../../../../generated/models/ApiGroupOwnsNft";
+} from "@/generated/models/ApiGroupOwnsNft";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../helpers/image.helpers";
-import { NFTSearchResult } from "../../../../../header/header-search/HeaderSearchModalItem";
+} from "@/helpers/image.helpers";
+import { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 
 export default function GroupCreateNftSearchItem({
   item,

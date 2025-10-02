@@ -1,7 +1,7 @@
 "use client";
 
 import CreateSnapshotTableRow from "./CreateSnapshotTableRow";
-import DistributionPlanTableBodyWrapper from "../../common/DistributionPlanTableBodyWrapper";
+import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
 import { CreateSnapshotSnapshot } from "../CreateSnapshots";
 
 export default function CreateSnapshotTableBody({

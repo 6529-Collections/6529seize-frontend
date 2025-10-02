@@ -2,10 +2,10 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import NextGenCollectionHeader, {
   NextGenBackToCollectionPageLink,
-} from '../../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader';
+} from '@/components/nextGen/collections/collectionParts/NextGenCollectionHeader';
 
-jest.mock('../../../../../services/6529api', () => ({ fetchUrl: jest.fn(() => Promise.resolve({})) }));
-jest.mock('../../../../../components/cookies/CookieConsentContext', () => ({ 
+jest.mock('@/services/6529api', () => ({ fetchUrl: jest.fn(() => Promise.resolve({})) }));
+jest.mock('@/components/cookies/CookieConsentContext', () => ({ 
   useCookieConsent: jest.fn(() => ({
     showCookieConsent: false,
     country: 'US',

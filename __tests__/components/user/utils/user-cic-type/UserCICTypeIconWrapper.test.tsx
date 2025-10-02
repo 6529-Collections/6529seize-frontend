@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import UserCICTypeIconWrapper from '../../../../../components/user/utils/user-cic-type/UserCICTypeIconWrapper';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
+import UserCICTypeIconWrapper from '@/components/user/utils/user-cic-type/UserCICTypeIconWrapper';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
-jest.mock('../../../../../components/user/utils/user-cic-type/UserCICTypeIcon', () => ({
+jest.mock('@/components/user/utils/user-cic-type/UserCICTypeIcon', () => ({
   __esModule: true,
   default: () => <div data-testid="icon" />,
 }));
 
-jest.mock('../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltip', () => ({
+jest.mock('@/components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltip', () => ({
   __esModule: true,
   default: () => <div data-testid="tooltip" />,
 }));

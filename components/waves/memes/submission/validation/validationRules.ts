@@ -6,7 +6,7 @@ import {
   FieldType,
   NumberFieldDefinition,
   DropdownFieldDefinition,
-} from "../../traits/schema";
+} from "@/components/waves/memes/traits/schema";
 
 /**
  * Validates a text field

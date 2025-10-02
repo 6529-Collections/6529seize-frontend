@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserSettingsClassificationItem from '../../../../components/user/settings/UserSettingsClassificationItem';
-import { ApiProfileClassification } from '../../../../generated/models/ApiProfileClassification';
+import UserSettingsClassificationItem from '@/components/user/settings/UserSettingsClassificationItem';
+import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
 
 const classification = ApiProfileClassification.Bot;
 

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import GroupCreateIdentitiesSearchItemsContent from '../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItemsContent';
+import GroupCreateIdentitiesSearchItemsContent from '@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItemsContent';
 
-jest.mock('../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItem', () => ({ __esModule: true, default: (props: any) => <div data-testid="item" data-selected={props.selected}>{props.item.display}</div> }));
+jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItem', () => ({ __esModule: true, default: (props: any) => <div data-testid="item" data-selected={props.selected}>{props.item.display}</div> }));
 
 const items = [
   { wallet: '1', display: 'one' },

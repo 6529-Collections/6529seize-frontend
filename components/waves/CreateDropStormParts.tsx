@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { CreateDropPart, ReferencedNft } from "../../entities/IDrop";
-import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
+import { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { AuthContext } from "../auth/Auth";
-import { cicToType } from "../../helpers/Helpers";
+import { cicToType } from "@/helpers/Helpers";
 import Link from "next/link";
 import CreateDropStormPart from "./CreateDropStormPart";
 import { AnimatePresence, motion } from "framer-motion";

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import ChatBubbleIcon from '../../../../components/common/icons/ChatBubbleIcon';
+import ChatBubbleIcon from '@/components/common/icons/ChatBubbleIcon';
 
 describe('ChatBubbleIcon', () => {
   it('renders svg with class and stroke width', () => {
