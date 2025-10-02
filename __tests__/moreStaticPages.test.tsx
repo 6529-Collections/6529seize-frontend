@@ -6,6 +6,8 @@ import { AuthContext } from "@/components/auth/Auth";
 import MemeLabCollection from "@/components/memelab/MemeLabCollection";
 import NotFoundPage from "@/app/not-found";
 import { render, screen, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
@@ -30,6 +32,9 @@ jest.mock(
   "@/components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan",
   () => () => <div data-testid="create" />
 );
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+}));
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -61,11 +66,21 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("additional static pages", () => {
+  beforeEach(() => {
+    (useRouter as jest.Mock).mockReturnValue({
+      back: jest.fn(),
+      push: jest.fn(),
+    });
+  });
   afterEach(() => {
     cleanup();
     jest.clearAllMocks();
   });
-  it("renders 404 not-found page with proper content and navigation", () => {
+  it("renders 404 not-found page with proper content and navigation", async () => {
+    const routerMock = { back: jest.fn(), push: jest.fn() };
+    (useRouter as jest.Mock).mockReturnValue(routerMock);
+    const user = userEvent.setup();
+
     render(
       <TestProvider>
         <NotFoundPage />
@@ -79,7 +94,13 @@ describe("additional static pages", () => {
     const homeLink = screen.getByRole('link', { name: /take me home/i });
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveAttribute('href', '/');
-    
+
+    const backButton = screen.getByRole('button', { name: /back to previous page/i });
+    expect(backButton).toBeInTheDocument();
+
+    await user.click(backButton);
+    expect(routerMock.back).toHaveBeenCalledTimes(1);
+
     // Check for visual elements
     expect(screen.getByAltText('SummerGlasses')).toBeInTheDocument();
     expect(screen.getByAltText('sgt_flushed')).toBeInTheDocument();

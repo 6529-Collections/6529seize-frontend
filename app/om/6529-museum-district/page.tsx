@@ -1,4 +1,3 @@
-import React from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 
@@ -6,7 +5,6 @@ const IndexPage = () => (
   <div>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="robots"
       content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -544,7 +542,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=115.81x2.8x-47.23x-1.50"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>IMAGINED WORLDS</u>
                                       </a>
                                     </li>
@@ -552,7 +550,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=117.37x2.8x-35.82x-1.67"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>EARLY NFT ART</u>
                                       </a>
                                     </li>
@@ -560,7 +558,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=116.94x2.8x-21.20x-1.59"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         Y<u>ONGOH KIM</u>
                                       </a>
                                     </li>
@@ -568,7 +566,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=116.56x2.8x-5.36x-1.59"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>SOZET LOUNGE</u>
                                       </a>
                                     </li>
@@ -657,7 +655,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=116.87x2.8x190.55x-1.56"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>GENESIS</u>
                                       </a>
                                     </li>
@@ -748,7 +746,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=108.57x2.8x348.03x-1.62"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>6529 PHOTO A</u>
                                       </a>
                                     </li>
@@ -756,7 +754,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=107.85x2.8x393.99x-1.59"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>6529 PHOTO B</u>
                                       </a>
                                     </li>
@@ -847,7 +845,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-117.88x2.8x76.13x1.53"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>GENERAL ASSEMBLY</u>
                                       </a>
                                     </li>
@@ -938,7 +936,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=69.65x2.8x-96.75x0.02"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>6529 FAM 2021</u>
                                       </a>
                                     </li>
@@ -946,7 +944,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=80.16x2.8x-97.23x0.05"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>6529 GRADIENT COLLECTOR CURATED</u>
                                       </a>
                                     </li>
@@ -954,7 +952,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=90.32x2.8x-97.37x0.01"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>6529 PUBLIC DOMAIN</u>
                                       </a>
                                     </li>
@@ -1045,7 +1043,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-99.64x2.8x-30.16x1.61"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>6529 FUND SZN1</u>
                                       </a>
                                     </li>
@@ -1128,7 +1126,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                     <a
                                       href="https://oncyber.io/6529om?coords=-0.99x2.8x-181.98x-0.13"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       <u>SUNSHINE SQUARE</u>
                                     </a>
                                   </h3>
@@ -1208,7 +1206,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                     <a
                                       href="https://oncyber.io/6529om?coords=-74.35x2.8x-107.85x-0.17"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       <u>TEMPLE OF GM</u>
                                     </a>
                                   </h3>
@@ -1290,7 +1288,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                     <a
                                       href="https://oncyber.io/6529om?coords=106.87x2.8x447.93x-2.55"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       <u>ACK BAR</u>
                                     </a>
                                   </h3>
@@ -1404,7 +1402,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-144.52x2.8x218.64x1.37"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>BHARAT KRYMO MUSEE D'ART 1</u>
                                       </a>
                                     </li>
@@ -1412,7 +1410,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-125.23x2.8x195.75x1.32"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>BHARAT KRYMO MUSEE D'ART 2</u>
                                       </a>
                                     </li>
@@ -1420,7 +1418,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-141.26x2.8x158.47x1.68"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>BHARAT KRYMO MUSEE D'ART 3</u>
                                       </a>
                                     </li>
@@ -1511,7 +1509,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-122.69x2.8x330.00x1.33"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>BATSOUPCAVE</u>
                                       </a>
                                     </li>
@@ -1519,7 +1517,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-120.46x2.8x320.42x1.39"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>BATSOUPLOUNGE</u>
                                       </a>
                                     </li>
@@ -1610,7 +1608,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-139.01x14.52x402.20x1.49"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>AC COLLECTION</u>
                                       </a>
                                     </li>
@@ -1701,7 +1699,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
                                       <a
                                         href="https://oncyber.io/6529om?coords=-119.63x2.8x472.51x1.51"
                                         target="_blank"
-                                        rel="noopener">
+                                        rel="noopener noreferrer">
                                         <u>BONAFIDEHAN GALLERY</u>
                                       </a>
                                     </li>
@@ -1805,6 +1803,7 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
             <a
               href="https://twitter.com/punk6529"
               target="_blank"
+              rel="noopener noreferrer"
               className="fab-fa-twitter">
               <i className="fab fa-twitter" />
             </a>

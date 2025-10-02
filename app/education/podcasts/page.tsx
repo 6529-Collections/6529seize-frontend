@@ -1,4 +1,3 @@
-import React from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 
@@ -7,7 +6,6 @@ export default function PodcastsPage() {
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -391,7 +389,7 @@ This is without question the Real Vision"
                                 <a
                                   href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   THE PSEUDONYMOUS PHILOSOPHER: PUNK 6529'S
                                   VISION FOR OUR DECENTRALIZED FUTURE
                                 </a>
@@ -415,7 +413,7 @@ This is without question the Real Vision"
                                 <a
                                   href="https://www.coindesk.com/tv/special-coverage/pseudonymous-philosopher-livestream/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   Coindesk
                                 </a>
                               </p>
@@ -518,7 +516,7 @@ This is without question the Real Vision"
                                 <a
                                   href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   THE WORLD ACCORDING TO PUNK 6529
                                 </a>
                               </h1>
@@ -549,7 +547,7 @@ This is without question the Real Vision"
                                 <a
                                   href="https://www.realvision.com/shows/raoul-pal-adventures-in-crypto/videos/the-world-according-to-punk-6529-mXg5?utm_campaign=Standard&utm_medium=email&_hsmi=209440565&_hsenc=p2ANqtz--g9VR4uR4r_gYXUHzs_nQ_HtjcBwauwvn9JpB0mcMcjnP7pTKcphSHpClkDikSztXMi6N7_1n11iVTODrpvFNuVz26qg&utm_source=202248_alert_weekly_members_crypto_1_Standard"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   RealVision.com
                                 </a>
                               </p>
@@ -651,7 +649,7 @@ This is without question the Real Vision"
                                 <a
                                   href="https://unchainedpodcast.com/punk6529-on-the-significance-of-bored-ape-yacht-club-and-cryptopunks/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   PUNK6529 ON THE SIGNIFICANCE OF BORED APE
                                   YACHT CLUB AND CRYPTOPUNKS
                                 </a>
@@ -693,7 +691,7 @@ This is without question the Real Vision"
                                 <a
                                   href="https://unchainedpodcast.com/punk6529-on-the-significance-of-bored-ape-yacht-club-and-cryptopunks/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   UnchainedPodcast.com
                                 </a>{" "}
                                 |{" "}
@@ -764,6 +762,7 @@ This is without question the Real Vision"
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

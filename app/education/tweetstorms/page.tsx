@@ -1,4 +1,3 @@
-import React from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 
@@ -7,7 +6,6 @@ export default function TweetstormsPage() {
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -356,7 +354,7 @@ Current Pinned Tweet:"
                                 <a
                                   href="https://twitter.com/punk6529"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   https://twitter.com/punk6529
                                 </a>
                                 <br />
@@ -368,7 +366,7 @@ Current Pinned Tweet:"
                                   role="button"
                                   href="https://twitter.com/punk6529/status/1448399827054833668"
                                   target="_blank"
-                                  rel="noreferrer noopener">
+                                  rel="noopener noreferrer">
                                   https://twitter.com/punk6529/status/1448399827054833668
                                 </a>
                               </p>
@@ -394,7 +392,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1423370458494341129?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       Don't let the institutions steal your JPGs
                                     </a>
                                   </li>
@@ -402,7 +400,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1424127515476598796?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On JPGs
                                     </a>
                                   </li>
@@ -410,7 +408,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1428455358398443527?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Decentralization and NFTs
                                     </a>
                                   </li>
@@ -418,7 +416,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1428638532684423173?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Regulation and NFTs
                                     </a>
                                   </li>
@@ -426,7 +424,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1428656886543495169?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Sunshine
                                     </a>
                                   </li>
@@ -434,7 +432,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1429514317108502536?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Metaverse
                                     </a>
                                   </li>
@@ -442,7 +440,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1429863145607159809?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       Consider The Tulip
                                     </a>
                                   </li>
@@ -450,7 +448,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1431931687034830850?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On buying your first NFT
                                     </a>
                                   </li>
@@ -458,7 +456,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1432088984180695045?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Sliding into 6529's DMs
                                     </a>
                                   </li>
@@ -466,7 +464,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1433002033242595338?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On NFT Twitter
                                     </a>
                                   </li>
@@ -474,7 +472,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1433708919591948309?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On institutional traps
                                     </a>
                                   </li>
@@ -482,7 +480,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1434145979528323072?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On 6529 Fam
                                     </a>
                                   </li>
@@ -490,7 +488,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1434554792035160077?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       The 100 Million (100,000,000) Project
                                     </a>
                                   </li>
@@ -498,7 +496,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1435229502708322313?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Making It
                                     </a>
                                   </li>
@@ -506,7 +504,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1435581987553751041?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On the 1st Amendment &amp; SEC
                                     </a>
                                   </li>
@@ -514,7 +512,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1438042185207799812?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Emerging NFT Photographers{" "}
                                     </a>
                                   </li>
@@ -522,7 +520,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1439332605263032327?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On the 6529 Squiggles Collection
                                     </a>
                                   </li>
@@ -530,7 +528,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1440303850842300431?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On NFA (Not Financial Advice)
                                     </a>
                                   </li>
@@ -538,7 +536,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1442587130941906946?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On NFT Rights Experiments
                                     </a>
                                   </li>
@@ -546,7 +544,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1442498117258170368?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On The WIP 6529 Museum Photography
                                       Collection
                                     </a>
@@ -555,7 +553,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1440654746331664393?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Billionaire TradArt Collectors
                                     </a>
                                   </li>
@@ -563,7 +561,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1443921334837338114?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On NFTs 2030
                                     </a>
                                   </li>
@@ -571,7 +569,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1444782122007420928?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On ETH Gas Prices
                                     </a>
                                   </li>
@@ -579,7 +577,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1445468399656595456?s=20&t=B9fyPhu_MyYeohbAYMj93Q"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON A PATHWAY TO AN OPEN METAVERSE
                                     </a>
                                   </li>
@@ -587,7 +585,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1446182782594699270?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On the 6529 Gradient Collection
                                     </a>
                                   </li>
@@ -595,7 +593,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1448395546150977537?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Eyes On Earth and Citizen Science
                                     </a>
                                   </li>
@@ -603,7 +601,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1449316622573920262?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On The City Experiment
                                     </a>
                                   </li>
@@ -611,7 +609,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1451896453065023493?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On What is an NFT?
                                     </a>
                                   </li>
@@ -619,7 +617,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1452797543478448129?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Real Estate
                                     </a>
                                   </li>
@@ -627,7 +625,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1457278102405623811?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On the United States and crypto
                                     </a>
                                   </li>
@@ -635,7 +633,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1457370810679808006?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On the EU and crypto
                                     </a>
                                   </li>
@@ -643,7 +641,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1457393362466709506?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Not Failing Decentralization A Second
                                       Time
                                     </a>
@@ -652,7 +650,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1457750434546864129?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On a Pathway to Decentralization
                                     </a>
                                   </li>
@@ -660,7 +658,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1455622499861925898?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On gm NYC
                                     </a>
                                   </li>
@@ -668,7 +666,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1461742366696652809?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Securing Your NFTs (only 102 tweets 😉)
                                     </a>
                                   </li>
@@ -676,7 +674,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1467098483656122371?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On NFT Photography 1/1s
                                     </a>
                                   </li>
@@ -684,7 +682,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/artnet/status/1472671289450151939?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Web 1, Web 2, Web 3 and choices (Artnet
                                       guest thread)
                                     </a>
@@ -693,7 +691,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1477259809493819393?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On How To Make It In Crypto As a Normal
                                       Person
                                     </a>
@@ -702,7 +700,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1480871574823710723?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Preserving A Digital Image For 100
                                       Years
                                     </a>
@@ -711,7 +709,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1471832930066604039?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On NFT Rights Delegation
                                     </a>
                                   </li>
@@ -719,7 +717,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1485743978364477445?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Corporations and Institutions in NFTs
                                     </a>
                                   </li>
@@ -727,7 +725,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1489387642018050050?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Fixing The Transfer Function On
                                       Exchanges.
                                     </a>
@@ -736,7 +734,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1493973723547934726?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On why NFTs are socially optimal
                                     </a>
                                   </li>
@@ -744,7 +742,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1481228619863187461?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Why NFTs Are The Worst Way To Sell
                                       Digital Art
                                     </a>
@@ -753,7 +751,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1494444624630403083?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On why freedom to transact underpins all
                                       other constitutional rights.
                                     </a>
@@ -762,7 +760,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1497550173597093894?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On SWIFT
                                     </a>
                                   </li>
@@ -770,7 +768,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1502595586960367617?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Punks
                                     </a>
                                   </li>
@@ -778,7 +776,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1506732150120456205?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Safely Dropping NFTs to Your Collectors
                                     </a>
                                   </li>
@@ -786,7 +784,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1507787390114488322?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On Life Is Short
                                     </a>
                                   </li>
@@ -794,7 +792,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1509832349986562048?s=20&t=uZptXwsqBbMm1Nqr1qhpKg"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       On the EU Giving Up
                                     </a>
                                   </li>
@@ -802,7 +800,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1514718020849000461?s=20&t=FcY1DpnPXyPPRE36USkjmQ"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       INTRODUCING OM
                                     </a>
                                   </li>
@@ -810,7 +808,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1518332020929314816?s=20&t=EvevdLIa0RbCdA5lQl50WQ"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON THE 6529 COF (CULTURAL OBJECT
                                       FRAMEWORK)
                                     </a>
@@ -819,7 +817,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1525565876711444484?s=20&t=4VsFPvxqcm75qXnMqsa24g"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON BEAR MARKETS
                                     </a>
                                   </li>
@@ -827,7 +825,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1530586594184511489?s=20&t=594dDo2_9xBDHuCVUVUL0g"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON VCS IN WEB3
                                     </a>
                                   </li>
@@ -835,7 +833,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1533375485023031297?s=21&t=GDpVuuOPfQIslTOSI7IaIQ"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON THE RIGHT WAY TO WORRY
                                     </a>
                                   </li>
@@ -843,7 +841,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1533195045196775425?s=21&t=GDpVuuOPfQIslTOSI7IaIQ"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON 6529 RAW
                                     </a>
                                   </li>
@@ -851,7 +849,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1534965126901682181?s=20&t=xuoU32hLMp3qA1r0Ju-DWw"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON THE MEMES
                                     </a>
                                   </li>
@@ -859,7 +857,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1540622605497077761?s=20&t=xuoU32hLMp3qA1r0Ju-DWw"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON FIXING NFT RIGHTS DELEGATION
                                     </a>
                                   </li>
@@ -867,7 +865,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1550562880185143296"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       SOME THINGS I AM LEARNING MINTING NFTS (AN
                                       ONGOING THREAD)
                                     </a>
@@ -876,7 +874,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1550772437914099712"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON ONE YEAR OF 6529
                                     </a>
                                   </li>
@@ -884,7 +882,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1558920163386327042"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON ROYALTIES
                                     </a>
                                   </li>
@@ -892,7 +890,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1560717728268402688"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON SOLVING PROBLEMS ON-CHAIN
                                     </a>
                                   </li>
@@ -900,7 +898,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1562510420644343810"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON BEING EFFICIENT WITH BUSY PEOPLE
                                     </a>
                                   </li>
@@ -908,7 +906,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1579188245426229248"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON IS MONEY JUST A GAME?
                                     </a>
                                   </li>
@@ -916,7 +914,7 @@ Current Pinned Tweet:"
                                     <a
                                       href="https://twitter.com/punk6529/status/1587203759108661251"
                                       target="_blank"
-                                      rel="noopener">
+                                      rel="noopener noreferrer">
                                       ON HOW TO EFFECTIVELY END CRYPTO (FOR
                                       DECADES)
                                     </a>
@@ -956,6 +954,7 @@ Current Pinned Tweet:"
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

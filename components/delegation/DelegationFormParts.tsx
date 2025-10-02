@@ -336,7 +336,7 @@ export function DelegationSubmitGroups(
   function getTransactionAnchor(hash: any) {
     return `<a href=${getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
     target="_blank"
-    rel="noreferrer"
+    rel="noopener noreferrer"
     className=${styles.etherscanLink}>
       view
     </a>`;

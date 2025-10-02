@@ -336,7 +336,7 @@ export default function MemeLabPageComponent({
                               <Link
                                 href={addProtocol(w)}
                                 target="_blank"
-                                rel="noreferrer">
+                                rel="noopener noreferrer">
                                 {w}
                               </Link>
                               &nbsp;&nbsp;
@@ -783,7 +783,7 @@ export default function MemeLabPageComponent({
                             className={styles.arweaveLink}
                             href={nft.metadata.image}
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noopener noreferrer">
                             {nft.metadata.image}
                           </Link>
                           <Download
@@ -806,7 +806,7 @@ export default function MemeLabPageComponent({
                                   : nft.metadata.animation_url
                               }
                               target="_blank"
-                              rel="noreferrer">
+                              rel="noopener noreferrer">
                               {nft.metadata.animation
                                 ? nft.metadata.animation
                                 : nft.metadata.animation_url}

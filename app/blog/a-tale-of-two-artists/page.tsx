@@ -5,7 +5,6 @@ export default function BlogATaleOfTwoArtistsPage() {
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -427,7 +426,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/sabrinaxdoll"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Sabrina Khan
                                   </a>
                                 </b>
@@ -468,7 +467,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/XCOPYART"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     XCOPY
                                   </a>
                                   , who, like Van Gogh, is highly prolific,
@@ -634,7 +633,7 @@ So, it is startling to imagine that"
                                 <a
                                   href="https://vangoghletters.org/vg/letters/let712/letter.html"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   letter to his brother
                                 </a>{" "}
                                 Van Gogh wrote almost prophetically:
@@ -933,7 +932,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/172139699716/today-i-sold-my-first-gif-for-1-nothing-can-stop"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     “Today I sold my first gif for £1. Nothing
                                     can stop us tumblr.”
                                   </a>
@@ -996,7 +995,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/182777190451/day-3-trying-to-give-away-crypto-art-on-tumblr"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     “Day 3 trying to give away crypto art on
                                     tumblr.”&nbsp;
                                   </a>
@@ -1013,7 +1012,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://www.reddit.com/r/OpenBazaar/comments/86nudn/shameless_self_promotion_thread_friday_323/dw7ry0u/"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     30% off coupon codes
                                   </a>{" "}
                                   to try to sell his pieces and gather as many
@@ -1041,7 +1040,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://xcopy.tumblr.com/post/182764132406/2019-mission-convert-some-tumblr-followers-to"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     gave away
                                   </a>{" "}
                                   so many of his pieces that may have been
@@ -1249,7 +1248,7 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/XCOPYART"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     XCOPY
                                   </a>{" "}
                                   for answering my questions about his work and
@@ -1257,14 +1256,14 @@ So, it is startling to imagine that"
                                   <a
                                     href="https://twitter.com/fredwilson"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Fred Wilson
                                   </a>{" "}
                                   and{" "}
                                   <a
                                     href="https://twitter.com/punk6529"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     punk6529
                                   </a>{" "}
                                   for their helpful comments and
@@ -1301,9 +1300,13 @@ So, it is startling to imagine that"
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-        <button type="button" className="fusion-one-page-text-link fusion-page-load-link" tabIndex={-1} aria-hidden="true">
-          Page load link
-        </button>
+      <button
+        type="button"
+        className="fusion-one-page-text-link fusion-page-load-link"
+        tabIndex={-1}
+        aria-hidden="true">
+        Page load link
+      </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
@@ -1313,6 +1316,7 @@ So, it is startling to imagine that"
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>
@@ -1323,18 +1327,18 @@ So, it is startling to imagine that"
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-          <button type="button" id="toTop" className="fusion-top-top-link">
-            <span id="awb-to-top-label" className="screen-reader-text">
-              Go to Top
-            </span>
-          </button>
+        <button type="button" id="toTop" className="fusion-top-top-link">
+          <span id="awb-to-top-label" className="screen-reader-text">
+            Go to Top
+          </span>
+        </button>
       </section>
     </div>
-);
+  );
 }
-
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "A Tale of Two Artists - Van Gogh and XCOPY - 6529.io" });
+  return getAppMetadata({
+    title: "A Tale of Two Artists - Van Gogh and XCOPY - 6529.io",
+  });
 }
-
