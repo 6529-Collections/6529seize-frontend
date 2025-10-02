@@ -1,19 +1,13 @@
 import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getAppMetadata } from "@/components/providers/metadata";
 import MessagesPageClient from "./page.client";
 
 export default async function MessagesPage({
-  searchParams,
+  searchParams: _searchParams,
 }: {
   readonly searchParams: Promise<{ wave?: string; drop?: string }>;
 }) {
   const queryClient = new QueryClient();
-  const headers = await getAppCommonHeaders();
-  const resolvedParams = await searchParams;
-  
-  // No need to prefetch feed items for messages view - it only shows direct messages
-  
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <MessagesPageClient />

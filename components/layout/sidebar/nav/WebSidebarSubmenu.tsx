@@ -21,6 +21,11 @@ function WebSidebarSubmenu({
 }: WebSidebarSubmenuProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  const browserWindow =
+    typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+  const browserDocument =
+    typeof globalThis.document === "undefined" ? undefined : globalThis.document;
+
   // Position submenu at fixed position - right after collapsed sidebar
   const submenuPosition = {
     top: 0,
@@ -54,16 +59,20 @@ function WebSidebarSubmenu({
   );
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
+    if (!browserWindow || !browserDocument) {
+      return;
+    }
+
+    browserWindow.addEventListener("keydown", handleKeyDown);
+    browserDocument.addEventListener("mousedown", handleClickOutside);
+    browserDocument.addEventListener("touchstart", handleClickOutside);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
+      browserWindow.removeEventListener("keydown", handleKeyDown);
+      browserDocument.removeEventListener("mousedown", handleClickOutside);
+      browserDocument.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [handleKeyDown, handleClickOutside]);
+  }, [browserWindow, browserDocument, handleKeyDown, handleClickOutside]);
 
   const isActive = (href: string) => pathname === href;
 
@@ -76,7 +85,7 @@ function WebSidebarSubmenu({
   }, [section.items, section.subsections]);
 
   // SSR check - early return for server-side rendering
-  if (typeof document === "undefined") {
+  if (!browserDocument) {
     return null;
   }
 
@@ -85,7 +94,6 @@ function WebSidebarSubmenu({
       ref={popoverRef}
       className="tw-fixed tw-z-[95] tw-bg-iron-950"
       style={{ top: submenuPosition.top, left: submenuPosition.left }}
-      role="presentation"
     >
       <div
         className="tailwind-scope tw-w-56 tw-bg-iron-950 tw-backdrop-blur-xl tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-800/50 tw-shadow-2xl tw-shadow-black/80 tw-overflow-hidden tw-h-screen"
@@ -128,7 +136,7 @@ function WebSidebarSubmenu({
         </div>
       </div>
     </div>,
-    document.body
+    browserDocument.body
   );
 }
 

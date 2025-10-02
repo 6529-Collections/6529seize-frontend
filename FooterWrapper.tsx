@@ -12,26 +12,32 @@ export default function FooterWrapper() {
   const [homeActiveTab, setHomeActiveTab] = useState<string>("latest");
   const { sidebarWidth, isMobile, isOffcanvasOpen } = useSidebarController();
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const win = typeof globalThis !== "undefined" ? globalThis.window : undefined;
+    if (!win) return;
 
-    // Load initial tab from localStorage
-    try {
-      const savedTab = window.localStorage.getItem("home.activeTab");
-      if (savedTab) {
-        setHomeActiveTab(savedTab);
+    const loadStoredTab = () => {
+      try {
+        const savedTab = win.localStorage.getItem("home.activeTab");
+        if (savedTab) {
+          setHomeActiveTab(savedTab);
+        }
+      } catch (error) {
+        console.warn("Failed to read home.activeTab from storage", error);
       }
-    } catch (error) {
-      // Ignore localStorage errors
-    }
-
-    // Listen for tab changes
-    const handleTabChange = (event: CustomEvent) => {
-      setHomeActiveTab(event.detail.tab);
     };
 
-    window.addEventListener("homeTabChange", handleTabChange as EventListener);
+    loadStoredTab();
+
+    const handleTabChange = (event: CustomEvent<{ tab?: string }>) => {
+      if (event.detail?.tab) {
+        setHomeActiveTab(event.detail.tab);
+      }
+    };
+
+    win.addEventListener("homeTabChange", handleTabChange as EventListener);
+
     return () => {
-      window.removeEventListener("homeTabChange", handleTabChange as EventListener);
+      win.removeEventListener("homeTabChange", handleTabChange as EventListener);
     };
   }, []);
 

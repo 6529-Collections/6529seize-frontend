@@ -82,11 +82,18 @@ const WebUnifiedWavesListWaves = forwardRef<
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Check if device is touch-enabled for tooltip display
-    const isTouchDevice = typeof window !== "undefined" && (
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      window.matchMedia?.("(pointer: coarse)").matches
-    );
+    const browserWindow =
+      typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+    const browserNavigator =
+      typeof globalThis.navigator === "undefined"
+        ? undefined
+        : globalThis.navigator;
+
+    const isTouchDevice =
+      !!browserWindow &&
+      ("ontouchstart" in browserWindow ||
+        (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
+        browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
 
     useImperativeHandle(ref, () => ({
       sentinelRef,
@@ -97,13 +104,13 @@ const WebUnifiedWavesListWaves = forwardRef<
       const pinned: MinimalWave[] = [];
       const regular: MinimalWave[] = [];
 
-      waves.forEach((wave) => {
+      for (const wave of waves) {
         if (wave.isPinned) {
           pinned.push(wave);
         } else {
           regular.push(wave);
         }
-      });
+      }
 
       return { pinnedWaves: pinned, regularWaves: regular };
     }, [waves]);
@@ -158,31 +165,29 @@ const WebUnifiedWavesListWaves = forwardRef<
           <div>
             {/* Conditionally show pinned section */}
             {!hideHeaders && pinnedWaves.length > 0 && (
-              <>
-                <section
-                  className="tw-flex tw-flex-col"
-                  aria-label="Pinned waves"
-                >
-                  {pinnedWaves
-                    .filter((wave): wave is MinimalWave => {
-                      if (!isValidWave(wave)) {
-                        console.warn("Invalid pinned wave object", wave);
-                        return false;
-                      }
-                      return true;
-                    })
-                    .map((wave) => (
-                      <div key={wave.id}>
-                        <WebBrainLeftSidebarWave
-                          wave={wave}
-                          onHover={onHover}
-                          showPin={!hidePin}
-                          basePath={basePath}
-                        />
-                      </div>
-                    ))}
-                </section>
-              </>
+              <section
+                className="tw-flex tw-flex-col"
+                aria-label="Pinned waves"
+              >
+                {pinnedWaves
+                  .filter((wave): wave is MinimalWave => {
+                    if (!isValidWave(wave)) {
+                      console.warn("Invalid pinned wave object", wave);
+                      return false;
+                    }
+                    return true;
+                  })
+                  .map((wave) => (
+                    <div key={wave.id}>
+                      <WebBrainLeftSidebarWave
+                        wave={wave}
+                        onHover={onHover}
+                        showPin={!hidePin}
+                        basePath={basePath}
+                      />
+                    </div>
+                  ))}
+              </section>
             )}
             {/* Add divider between pinned and regular waves */}
             {!hideHeaders &&

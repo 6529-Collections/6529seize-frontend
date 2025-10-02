@@ -7,13 +7,17 @@ type HomeTab = "feed" | "latest";
 const HOME_TAB_STORAGE_KEY = "home.activeTab";
 export const HOME_TAB_EVENT = "homeTabChange";
 
+const getBrowserWindow = () =>
+  typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+
 export const getStoredHomeTab = (): HomeTab => {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow();
+  if (!browserWindow) {
     return "latest";
   }
 
   try {
-    const saved = window.localStorage.getItem(HOME_TAB_STORAGE_KEY);
+    const saved = browserWindow.localStorage.getItem(HOME_TAB_STORAGE_KEY);
     return saved === "feed" || saved === "latest" ? saved : "latest";
   } catch (error) {
     console.warn("Failed to read home tab from storage", error);
@@ -22,14 +26,15 @@ export const getStoredHomeTab = (): HomeTab => {
 };
 
 export const setStoredHomeTab = (tab: HomeTab) => {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow();
+  if (!browserWindow) {
     return;
   }
 
   try {
-    const current = window.localStorage.getItem(HOME_TAB_STORAGE_KEY);
+    const current = browserWindow.localStorage.getItem(HOME_TAB_STORAGE_KEY);
     if (current === tab) {
-      window.dispatchEvent(
+      browserWindow.dispatchEvent(
         new CustomEvent(HOME_TAB_EVENT, {
           detail: { tab },
         })
@@ -37,8 +42,8 @@ export const setStoredHomeTab = (tab: HomeTab) => {
       return;
     }
 
-    window.localStorage.setItem(HOME_TAB_STORAGE_KEY, tab);
-    window.dispatchEvent(
+    browserWindow.localStorage.setItem(HOME_TAB_STORAGE_KEY, tab);
+    browserWindow.dispatchEvent(
       new CustomEvent(HOME_TAB_EVENT, {
         detail: { tab },
       })
@@ -52,19 +57,23 @@ export function useHomeTabs() {
   const [activeTab, setActiveTab] = useState<HomeTab>(() => getStoredHomeTab());
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
+    const browserWindow = getBrowserWindow();
+    if (!browserWindow) return;
+
+    const params = new URLSearchParams(browserWindow.location.search);
     if (!params.has("tab")) return;
 
     params.delete("tab");
     const search = params.toString();
-    const hash = window.location.hash ?? "";
-    const nextUrl = `${window.location.pathname}${search ? `?${search}` : ""}${hash}`;
-    window.history.replaceState(null, "", nextUrl);
+    const queryPrefix = search ? `?${search}` : "";
+    const hash = browserWindow.location.hash ?? "";
+    const nextUrl = `${browserWindow.location.pathname}${queryPrefix}${hash}`;
+    browserWindow.history.replaceState(null, "", nextUrl);
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    const browserWindow = getBrowserWindow();
+    if (!browserWindow) {
       return;
     }
 
@@ -75,10 +84,10 @@ export function useHomeTabs() {
       setActiveTab(detail.tab);
     };
 
-    window.addEventListener(HOME_TAB_EVENT, handleTabEvent as EventListener);
+    browserWindow.addEventListener(HOME_TAB_EVENT, handleTabEvent as EventListener);
 
     return () => {
-      window.removeEventListener(
+      browserWindow.removeEventListener(
         HOME_TAB_EVENT,
         handleTabEvent as EventListener
       );

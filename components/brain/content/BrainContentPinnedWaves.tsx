@@ -6,12 +6,14 @@ import { usePinnedWaves } from "../../../hooks/usePinnedWaves";
 import { useRouter, useSearchParams } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 const BrainContentPinnedWaves: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const { isApp } = useDeviceInfo();
+  const { directMessages } = useMyStream();
   const [onHoverWaveId, setOnHoverWaveId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const leftArrowRef = useRef<HTMLButtonElement>(null);
@@ -103,8 +105,9 @@ const BrainContentPinnedWaves: React.FC = () => {
   const onRemove = async (waveId: string) => {
     const currentWaveId = searchParams?.get('wave') ?? undefined;
     if (currentWaveId === waveId) {
+      const isDirectMessage = directMessages.list.some((w) => w.id === waveId);
       router.replace(
-        getWaveHomeRoute({ isDirectMessage: false, isApp })
+        getWaveHomeRoute({ isDirectMessage, isApp })
       );
     }
     removeId(waveId);

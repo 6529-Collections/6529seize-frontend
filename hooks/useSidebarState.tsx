@@ -34,7 +34,11 @@ export type UseSidebarStateReturn = SidebarState & SidebarActions;
 const SidebarContext = createContext<UseSidebarStateReturn | null>(null);
 
 // Provider component
-export function SidebarProvider({ children }: { children: ReactNode }) {
+export function SidebarProvider({
+  children,
+}: {
+  readonly children: ReactNode;
+}) {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   // Right sidebar actions

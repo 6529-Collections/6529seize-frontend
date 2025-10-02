@@ -14,6 +14,7 @@ import { ApiDrop } from "../../generated/models/ApiDrop";
 import { commonApiFetch } from "../../services/api/common-api";
 import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useLayout } from "./my-stream/layout/LayoutContext";
+import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import Cookies from "js-cookie";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
@@ -28,7 +29,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   
-  const [isCollapsed, setIsCollapsed] = useState(() => {
+  const [isCollapsed] = useState(() => {
     const cookie = Cookies.get(SIDEBAR_COLLAPSED_COOKIE);
     return cookie ? JSON.parse(cookie) : false;
   });
@@ -59,16 +60,11 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
     }
   }, [waveId]);
 
-  useEffect(() => {
-    Cookies.set(SIDEBAR_COLLAPSED_COOKIE, isCollapsed, {
-      expires: 365,
-    });
-  }, [isCollapsed]);
-
   const onDropClose = () => {
     const params = new URLSearchParams(searchParams?.toString() || '');
     params.delete('drop');
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+    const basePath = pathname ?? getWaveHomeRoute({ isDirectMessage: false, isApp: false });
+    const newUrl = params.toString() ? `${basePath}?${params.toString()}` : basePath;
     router.push(newUrl, { scroll: false });
   };
 

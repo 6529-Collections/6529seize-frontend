@@ -52,27 +52,31 @@ export default function HomeApp({
     };
   }, [activeTab, isApp]);
 
+  let content: React.ReactNode;
+
+  if (activeTab === "feed") {
+    content = isAuthenticated ? (
+      <div className=" tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 sm:tw-px-4">
+        <HomeFeed />
+      </div>
+    ) : (
+      <ConnectWallet />
+    );
+  } else {
+    content = (
+      <Home
+        featuredNft={featuredNft}
+        isMemeMintingActive={isMemeMintingActive}
+        featuredNextgen={featuredNextgen}
+        initialActivityData={initialActivityData}
+        initialTokens={initialTokens}
+      />
+    );
+  }
+
   return (
     <div>
-      <div>
-        {activeTab === "feed" ? (
-          isAuthenticated ? (
-            <div className=" tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 sm:tw-px-4">
-              <HomeFeed />
-            </div>
-          ) : (
-            <ConnectWallet />
-          )
-        ) : (
-          <Home
-            featuredNft={featuredNft}
-            isMemeMintingActive={isMemeMintingActive}
-            featuredNextgen={featuredNextgen}
-            initialActivityData={initialActivityData}
-            initialTokens={initialTokens}
-          />
-        )}
-      </div>
+      <div>{content}</div>
     </div>
   );
 }

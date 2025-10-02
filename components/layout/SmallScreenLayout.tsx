@@ -17,7 +17,7 @@ export default function SmallScreenLayout({ children }: Props) {
   const { registerRef } = useLayout();
   const headerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const sidebarRef = useRef<HTMLDivElement | null>(null);
+  const sidebarRef = useRef<HTMLElement | null>(null);
   const searchParams = useSearchParams();
 
   // Get tab from URL
@@ -100,48 +100,39 @@ export default function SmallScreenLayout({ children }: Props) {
       </div>
 
       {/* Animated overlay and sidebar */}
-      <>
-        {/* Overlay - fades in/out */}
-        <div
-          role="button"
-          tabIndex={isMenuOpen ? 0 : -1}
-          aria-label="Close navigation menu"
-          className={`tw-fixed tw-inset-0 tw-bg-gray-500 tw-z-40 tw-transition-opacity tw-duration-300 ${
-            isMenuOpen
-              ? "tw-bg-opacity-50"
-              : "tw-bg-opacity-0 tw-pointer-events-none"
-          }`}
-          onClick={() => setIsMenuOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setIsMenuOpen(false);
-            }
-          }}
-        />
+      {/* Overlay - fades in/out */}
+      <button
+        type="button"
+        tabIndex={isMenuOpen ? 0 : -1}
+        aria-label="Close navigation menu"
+        className={`tw-fixed tw-inset-0 tw-bg-gray-500 tw-z-40 tw-transition-opacity tw-duration-300 ${
+          isMenuOpen
+            ? "tw-bg-opacity-50"
+            : "tw-bg-opacity-0 tw-pointer-events-none"
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+      />
 
-        {/* Sidebar - slides in/out */}
-        <div
-          ref={sidebarRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigation menu"
-          tabIndex={-1}
-          className={`tailwind-scope tw-fixed tw-inset-y-0 tw-left-0 tw-z-50 tw-transition-transform tw-duration-300 tw-ease-in-out ${
-            isMenuOpen ? "tw-translate-x-0" : "-tw-translate-x-full"
-          }`}
-          style={{ width: SIDEBAR_WIDTHS.EXPANDED }}
-        >
-          <WebSidebar
-            isCollapsed={false}
-            onToggle={() => setIsMenuOpen(!isMenuOpen)}
-            isMobile={true}
-            isOffcanvasOpen={isMenuOpen}
-            onCloseOffcanvas={() => setIsMenuOpen(false)}
-            sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
-          />
-        </div>
-      </>
+      {/* Sidebar - slides in/out */}
+      <nav
+        ref={sidebarRef}
+        aria-label="Navigation menu"
+        tabIndex={-1}
+        aria-hidden={!isMenuOpen}
+        className={`tailwind-scope tw-fixed tw-inset-y-0 tw-left-0 tw-z-50 tw-transition-transform tw-duration-300 tw-ease-in-out ${
+          isMenuOpen ? "tw-translate-x-0" : "-tw-translate-x-full"
+        }`}
+        style={{ width: SIDEBAR_WIDTHS.EXPANDED }}
+      >
+        <WebSidebar
+          isCollapsed={false}
+          onToggle={() => setIsMenuOpen(!isMenuOpen)}
+          isMobile={true}
+          isOffcanvasOpen={isMenuOpen}
+          onCloseOffcanvas={() => setIsMenuOpen(false)}
+          sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
+        />
+      </nav>
 
       {/* Main content area */}
       <main

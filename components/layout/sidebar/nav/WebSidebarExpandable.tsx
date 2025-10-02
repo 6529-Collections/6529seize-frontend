@@ -90,7 +90,10 @@ function WebSidebarExpandable({
           }`}
         >
           <div className="tw-overflow-hidden">
-            <div id={`section-${section.key}`} role="group" className="tw-relative">
+            <fieldset
+              id={`section-${section.key}`}
+              className="tw-relative tw-p-0 tw-m-0 tw-border-0"
+            >
               {/* Vertical connector line */}
               <div
                 className={`tw-absolute tw-left-6 tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-800 tw-transition-opacity tw-duration-300 ${
@@ -126,7 +129,7 @@ function WebSidebarExpandable({
                   onToggle={(isExpanded) => handleSubsectionToggle(subsection.name, isExpanded)}
                 />
               ))}
-            </div>
+            </fieldset>
           </div>
         </div>
       )}

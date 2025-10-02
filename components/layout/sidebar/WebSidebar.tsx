@@ -11,12 +11,12 @@ import HeaderShare from "../../header/share/HeaderShare";
 import WebSidebarHeader from "./WebSidebarHeader";
 
 interface WebSidebarProps {
-  isCollapsed: boolean;
-  onToggle: () => void;
-  isMobile: boolean;
-  isOffcanvasOpen: boolean;
-  onCloseOffcanvas: () => void;
-  sidebarWidth: string;
+  readonly isCollapsed: boolean;
+  readonly onToggle: () => void;
+  readonly isMobile: boolean;
+  readonly isOffcanvasOpen: boolean;
+  readonly onCloseOffcanvas: () => void;
+  readonly sidebarWidth: string;
 }
 
 function WebSidebar({
@@ -37,9 +37,13 @@ function WebSidebar({
 
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+    const browserWindow =
+      typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+    if (!browserWindow) {
+      return;
     }
+
+    setIsTouchScreen(browserWindow.matchMedia("(pointer: coarse)").matches);
   }, []);
 
   // Close sidebar on route change when on mobile
@@ -57,14 +61,20 @@ function WebSidebar({
   useEffect(() => {
     if (!isMobile || !isOffcanvasOpen) return;
 
+    const browserWindow =
+      typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+    if (!browserWindow) {
+      return;
+    }
+
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onCloseOffcanvas();
       }
     };
 
-    window.addEventListener("keydown", handleEscapeKey);
-    return () => window.removeEventListener("keydown", handleEscapeKey);
+    browserWindow.addEventListener("keydown", handleEscapeKey);
+    return () => browserWindow.removeEventListener("keydown", handleEscapeKey);
   }, [isMobile, isOffcanvasOpen, onCloseOffcanvas]);
 
   // Sidebar is expanded on mobile when offcanvas is open
@@ -78,57 +88,54 @@ function WebSidebar({
     onToggle();
   };
 
+  const sidebarContent = (
+    <div
+      className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+      style={{ width: sidebarWidth }}
+      aria-label="Primary sidebar"
+      ref={scrollContainerRef}
+    >
+      <div className="tw-flex tw-flex-col tw-h-full tw-pt-3">
+        <WebSidebarHeader
+          collapsed={shouldShowCollapsed}
+          onToggle={handleToggle}
+        />
+
+        <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+          <div className="tw-flex-1">
+            <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
+          </div>
+
+          <HeaderShare isCollapsed={shouldShowCollapsed} />
+
+          <WebSidebarUser isCollapsed={shouldShowCollapsed} profile={profile} />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       {isDialog && (
-        <div
+        <button
+          type="button"
           className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none"
           onClick={onCloseOffcanvas}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onCloseOffcanvas();
-            }
-          }}
-          role="button"
-          tabIndex={0}
           aria-label="Close menu overlay"
         />
       )}
-      <div
-        className={`tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none ${
-          isDialog ? "tw-z-[80]" : "tw-z-40"
-        }`}
-        role={isDialog ? "dialog" : undefined}
-        aria-modal={isDialog ? "true" : undefined}
-      >
-        <div
-          className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
-          style={{ width: sidebarWidth }}
-          aria-label="Primary sidebar"
-          ref={scrollContainerRef}
+      {isDialog ? (
+        <dialog
+          open
+          className="tw-fixed tw-inset-y-0 tw-left-0 tw-bg-transparent tw-border-none tw-p-0 tw-m-0 focus:tw-outline-none tw-z-[80]"
         >
-          <div className="tw-flex tw-flex-col tw-h-full tw-pt-3">
-            <WebSidebarHeader
-              collapsed={shouldShowCollapsed}
-              onToggle={handleToggle}
-            />
-
-            <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-              <div className="tw-flex-1">
-                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
-              </div>
-
-              <HeaderShare isCollapsed={shouldShowCollapsed} />
-
-              <WebSidebarUser
-                isCollapsed={shouldShowCollapsed}
-                profile={profile}
-              />
-            </div>
-          </div>
+          {sidebarContent}
+        </dialog>
+      ) : (
+        <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
+          {sidebarContent}
         </div>
-      </div>
+      )}
       {!isTouchScreen && (
         <ReactTooltip
           id="sidebar-tooltip"

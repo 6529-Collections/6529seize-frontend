@@ -135,7 +135,7 @@ export default function Drops() {
     };
   }, [drops]);
 
-  const onQuoteClick = (drop: ApiDrop) => {
+  const navigateToDropWave = (drop: Pick<ApiDrop, "wave" | "serial_no">) => {
     const waveInfo = drop.wave as any;
     const isDirectMessage =
       waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
@@ -149,18 +149,12 @@ export default function Drops() {
     );
   };
 
+  const onQuoteClick = (drop: ApiDrop) => {
+    navigateToDropWave(drop);
+  };
+
   const onDropContentClick = (drop: ExtendedDrop) => {
-    const waveInfo = drop.wave as any;
-    const isDirectMessage =
-      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
-    router.push(
-      getWaveRoute({
-        waveId: drop.wave.id,
-        serialNo: drop.serial_no,
-        isDirectMessage,
-        isApp,
-      })
-    );
+    navigateToDropWave(drop);
   };
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);

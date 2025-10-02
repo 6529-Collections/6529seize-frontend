@@ -19,8 +19,8 @@ import {
 } from "@/helpers/AllowlistToolHelpers";
 
 interface WebSidebarUserProps {
-  isCollapsed: boolean;
-  profile: any;
+  readonly isCollapsed: boolean;
+  readonly profile: any;
 }
 
 function WebSidebarUser({

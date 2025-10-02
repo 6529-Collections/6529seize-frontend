@@ -29,7 +29,7 @@ import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimation
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 
 interface WebSidebarNavProps {
-  isCollapsed: boolean;
+  readonly isCollapsed: boolean;
 }
 
 const WebSidebarNav = React.forwardRef<
@@ -65,11 +65,12 @@ const WebSidebarNav = React.forwardRef<
   );
 
   // Profile path computation
-  const profilePath = connectedProfile?.handle
-    ? `/${connectedProfile.handle}`
-    : address
-    ? `/${address}`
-    : null;
+  let profilePath: string | null = null;
+  if (connectedProfile?.handle) {
+    profilePath = `/${connectedProfile.handle}`;
+  } else if (address) {
+    profilePath = `/${address}`;
+  }
 
   // Use custom hook for sections
   const sections = useSidebarSections(
@@ -336,18 +337,17 @@ const WebSidebarNav = React.forwardRef<
       {activeSubmenu && activeSection && submenuAnchor && (
         <>
           {/* Overlay for main content */}
-          <div
-            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70]"
+          <button
+            type="button"
+            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none"
             style={{ left: "18rem" }} // 4rem sidebar + 14rem submenu
             onClick={closeSubmenu}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+              if (e.key === 'Escape') {
                 e.preventDefault();
                 closeSubmenu();
               }
             }}
-            role="button"
-            tabIndex={0}
             aria-label="Close submenu"
           />
           <WebSidebarSubmenu

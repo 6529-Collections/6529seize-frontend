@@ -6,8 +6,8 @@ import Image from "next/image";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 
 interface SmallScreenHeaderProps {
-  onMenuToggle: () => void;
-  isMenuOpen: boolean;
+  readonly onMenuToggle: () => void;
+  readonly isMenuOpen: boolean;
 }
 
 export default function SmallScreenHeader({

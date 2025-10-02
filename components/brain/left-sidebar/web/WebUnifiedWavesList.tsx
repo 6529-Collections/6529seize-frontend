@@ -1,7 +1,6 @@
 "use client";
 
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import React, { useRef } from "react";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
@@ -31,7 +30,6 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   onHover,
   scrollContainerRef,
 }) => {
-  const { isApp } = useDeviceInfo();
   // Refs to the scroll container and sentinel
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
 

@@ -35,11 +35,18 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Check if device is touch-enabled for tooltip display
-  const isTouchDevice = typeof window !== "undefined" && (
-    "ontouchstart" in window ||
-    navigator.maxTouchPoints > 0 ||
-    window.matchMedia?.("(pointer: coarse)").matches
-  );
+  const browserWindow =
+    typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+  const browserNavigator =
+    typeof globalThis.navigator === "undefined"
+      ? undefined
+      : globalThis.navigator;
+
+  const isTouchDevice =
+    !!browserWindow &&
+    ("ontouchstart" in browserWindow ||
+      (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
+      browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
 
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
@@ -115,6 +122,39 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     );
   }
 
+  let listContent: React.ReactNode;
+
+  if (isInitialLoad) {
+    listContent = (
+      <UnifiedWavesListLoader
+        isFetching={true}
+        isFetchingNextPage={false}
+      />
+    );
+  } else if (isEmpty) {
+    listContent = (
+      <UnifiedWavesListEmpty
+        sortedWaves={directMessages.list}
+        isFetching={directMessages.isFetching}
+        isFetchingNextPage={directMessages.isFetchingNextPage}
+        emptyMessage="No direct messages yet"
+      />
+    );
+  } else {
+    listContent = (
+      <WebUnifiedWavesListWaves
+        ref={listRef}
+        waves={directMessages.list}
+        onHover={registerWave}
+        scrollContainerRef={scrollContainerRef}
+        hideToggle={true}
+        hideHeaders={true}
+        hidePin={true}
+        basePath="/messages"
+      />
+    );
+  }
+
   return (
     <div className="tw-h-full tw-flex tw-flex-col">
       <div className="tw-flex-1 tw-bg-black tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4 tw-flex tw-flex-col">
@@ -145,30 +185,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         </div>
 
         <div className="tw-flex-1 tw-w-full tw-flex tw-flex-col">
-          {isInitialLoad ? (
-            <UnifiedWavesListLoader
-              isFetching={true}
-              isFetchingNextPage={false}
-            />
-          ) : isEmpty ? (
-            <UnifiedWavesListEmpty
-              sortedWaves={directMessages.list}
-              isFetching={directMessages.isFetching}
-              isFetchingNextPage={directMessages.isFetchingNextPage}
-              emptyMessage="No direct messages yet"
-            />
-          ) : (
-            <WebUnifiedWavesListWaves
-              ref={listRef}
-              waves={directMessages.list}
-              onHover={registerWave}
-              scrollContainerRef={scrollContainerRef}
-              hideToggle={true}
-              hideHeaders={true}
-              hidePin={true}
-              basePath="/messages"
-            />
-          )}
+          {listContent}
 
           <UnifiedWavesListLoader
             isFetching={false}
