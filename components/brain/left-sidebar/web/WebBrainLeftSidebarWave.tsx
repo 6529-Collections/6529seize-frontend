@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WavePicture from "../../../waves/WavePicture";
@@ -24,7 +24,6 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   showPin = true,
   basePath = "/waves",
 }) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const isDropWave = wave.type !== ApiWaveType.Chat;

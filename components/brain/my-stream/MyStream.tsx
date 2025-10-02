@@ -18,9 +18,9 @@ interface MyStreamProps {
   readonly isFetching: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly haveNewItems: boolean;
-  readonly status: string;
-  readonly isInitialQueryDone: boolean;
+  readonly haveNewItems?: boolean;
+  readonly status?: string;
+  readonly isInitialQueryDone?: boolean;
 }
 
 export default function MyStream({
@@ -31,9 +31,9 @@ export default function MyStream({
   isFetching,
   onBottomIntersection,
   onDropContentClick,
-  haveNewItems,
-  status,
-  isInitialQueryDone,
+  haveNewItems = false,
+  status = "success",
+  isInitialQueryDone = true,
 }: MyStreamProps) {
   const { myStreamFeedStyle } = useLayout();
   // Compute whether stream has new items
@@ -44,7 +44,7 @@ export default function MyStream({
   
   // Update stream new items status in title context
   useSetStreamHasNewItems(hasNewItems);
-  const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
+  const showLoader = !isInitialQueryDone && items.length === 0;
 
   return (
     <div className="tw-h-full">

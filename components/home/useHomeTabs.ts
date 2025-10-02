@@ -7,12 +7,16 @@ type HomeTab = "feed" | "latest";
 const HOME_TAB_STORAGE_KEY = "home.activeTab";
 export const HOME_TAB_EVENT = "homeTabChange";
 
-const getBrowserWindow = () =>
-  typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+const getBrowserWindow = () => {
+  const { window: browserWindow } = globalThis as typeof globalThis & {
+    window?: Window;
+  };
+  return browserWindow;
+};
 
 export const getStoredHomeTab = (): HomeTab => {
   const browserWindow = getBrowserWindow();
-  if (!browserWindow) {
+  if (browserWindow === undefined) {
     return "latest";
   }
 
@@ -27,7 +31,7 @@ export const getStoredHomeTab = (): HomeTab => {
 
 export const setStoredHomeTab = (tab: HomeTab) => {
   const browserWindow = getBrowserWindow();
-  if (!browserWindow) {
+  if (browserWindow === undefined) {
     return;
   }
 
@@ -58,7 +62,9 @@ export function useHomeTabs() {
 
   useEffect(() => {
     const browserWindow = getBrowserWindow();
-    if (!browserWindow) return;
+    if (browserWindow === undefined) {
+      return;
+    }
 
     const params = new URLSearchParams(browserWindow.location.search);
     if (!params.has("tab")) return;
@@ -73,7 +79,7 @@ export function useHomeTabs() {
 
   useEffect(() => {
     const browserWindow = getBrowserWindow();
-    if (!browserWindow) {
+    if (browserWindow === undefined) {
       return;
     }
 

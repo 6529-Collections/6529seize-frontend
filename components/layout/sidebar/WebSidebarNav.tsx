@@ -93,8 +93,6 @@ const WebSidebarNav = React.forwardRef<
   // Handle click on collapsed sidebar section
   const handleCollapsedClick = useCallback(
     (sectionKey: string, event: React.MouseEvent) => {
-      if (!isCollapsed) return;
-
       const target = event.currentTarget as HTMLElement;
 
       // Toggle submenu
@@ -106,7 +104,7 @@ const WebSidebarNav = React.forwardRef<
         setSubmenuAnchor(target);
       }
     },
-    [isCollapsed, activeSubmenu]
+    [activeSubmenu]
   );
 
   const closeSubmenu = useCallback(() => {
@@ -131,6 +129,23 @@ const WebSidebarNav = React.forwardRef<
         : [...prev, key]
     );
   }, []);
+
+  const collapsedSectionToggle = useCallback(
+    (sectionKey: string) =>
+      (event?: React.MouseEvent) => {
+        if (event) {
+          handleCollapsedClick(sectionKey, event);
+        }
+      },
+    [handleCollapsedClick]
+  );
+
+  const expandedSectionToggle = useCallback(
+    (sectionKey: string) => () => {
+      toggleSection(sectionKey);
+    },
+    [toggleSection]
+  );
 
   // Auto-manage expanded sections based on current route
   useEffect(() => {
@@ -220,13 +235,11 @@ const WebSidebarNav = React.forwardRef<
               <WebSidebarExpandable
                 section={networkSection}
                 expanded={expandedSections.includes("network")}
-                onToggle={(e?: React.MouseEvent) => {
-                  if (isCollapsed && e) {
-                    handleCollapsedClick("network", e);
-                  } else if (!isCollapsed) {
-                    toggleSection("network");
-                  }
-                }}
+                onToggle={
+                  isCollapsed
+                    ? collapsedSectionToggle("network")
+                    : expandedSectionToggle("network")
+                }
                 collapsed={isCollapsed}
                 pathname={pathname}
                 data-section="network"
@@ -240,13 +253,11 @@ const WebSidebarNav = React.forwardRef<
               <WebSidebarExpandable
                 section={collectionsSection}
                 expanded={expandedSections.includes("collections")}
-                onToggle={(e?: React.MouseEvent) => {
-                  if (isCollapsed && e) {
-                    handleCollapsedClick("collections", e);
-                  } else if (!isCollapsed) {
-                    toggleSection("collections");
-                  }
-                }}
+                onToggle={
+                  isCollapsed
+                    ? collapsedSectionToggle("collections")
+                    : expandedSectionToggle("collections")
+                }
                 collapsed={isCollapsed}
                 pathname={pathname}
                 data-section="collections"
@@ -305,13 +316,11 @@ const WebSidebarNav = React.forwardRef<
                 <WebSidebarExpandable
                   section={section}
                   expanded={expandedSections.includes(section.key)}
-                  onToggle={(e?: React.MouseEvent) => {
-                    if (isCollapsed && e) {
-                      handleCollapsedClick(section.key, e);
-                    } else if (!isCollapsed) {
-                      toggleSection(section.key);
-                    }
-                  }}
+                  onToggle={
+                    isCollapsed
+                      ? collapsedSectionToggle(section.key)
+                      : expandedSectionToggle(section.key)
+                  }
                   collapsed={isCollapsed}
                   pathname={pathname}
                   data-section={section.key}

@@ -21,10 +21,12 @@ function WebSidebarSubmenu({
 }: WebSidebarSubmenuProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const browserWindow =
-    typeof globalThis.window === "undefined" ? undefined : globalThis.window;
-  const browserDocument =
-    typeof globalThis.document === "undefined" ? undefined : globalThis.document;
+  const globalScope = globalThis as typeof globalThis & {
+    window?: Window;
+    document?: Document;
+  };
+  const browserWindow = globalScope.window;
+  const browserDocument = globalScope.document;
 
   // Position submenu at fixed position - right after collapsed sidebar
   const submenuPosition = {
@@ -59,7 +61,7 @@ function WebSidebarSubmenu({
   );
 
   useEffect(() => {
-    if (!browserWindow || !browserDocument) {
+    if (browserWindow === undefined || browserDocument === undefined) {
       return;
     }
 
@@ -85,7 +87,7 @@ function WebSidebarSubmenu({
   }, [section.items, section.subsections]);
 
   // SSR check - early return for server-side rendering
-  if (!browserDocument) {
+  if (browserDocument === undefined) {
     return null;
   }
 

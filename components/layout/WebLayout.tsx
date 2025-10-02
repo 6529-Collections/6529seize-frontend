@@ -10,6 +10,7 @@ type LayoutCssVars = CSSProperties & {
 
 interface WebLayoutProps {
   readonly children: ReactNode;
+  readonly isSmall?: boolean;
 }
 
 const WebLayout = ({ children }: WebLayoutProps) => {

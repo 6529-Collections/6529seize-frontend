@@ -51,7 +51,12 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   );
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const { window: browserWindow } = globalThis as typeof globalThis & {
+      window?: Window;
+    };
+    if (browserWindow === undefined) {
+      return;
+    }
 
     const handleTabEvent = (event: Event) => {
       const detail = (event as CustomEvent<{ tab?: HomeTab }>).detail;
@@ -60,10 +65,13 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
       setHomeActiveTab(tab);
     };
 
-    window.addEventListener(HOME_TAB_EVENT, handleTabEvent as EventListener);
+    browserWindow.addEventListener(
+      HOME_TAB_EVENT,
+      handleTabEvent as EventListener
+    );
 
     return () => {
-      window.removeEventListener(
+      browserWindow.removeEventListener(
         HOME_TAB_EVENT,
         handleTabEvent as EventListener
       );

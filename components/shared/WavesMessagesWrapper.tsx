@@ -59,7 +59,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     }
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
-  const { data: drop, error: dropError, isLoading: dropLoading } = useQuery<ApiDrop>({
+  const { data: drop, error: dropError } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
       await commonApiFetch<ApiDrop>({
@@ -147,17 +147,16 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       {/* Overlay backdrop when right sidebar is open - moved outside motion container */}
       {shouldShowRightSidebar && (
         <>
-          <div
+          <button
+            type="button"
             className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[49]"
             onClick={closeRightSidebar}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
-                e.preventDefault();
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
                 closeRightSidebar();
               }
             }}
-            role="button"
-            tabIndex={0}
             aria-label="Close sidebar overlay"
           />
           <BrainRightSidebar

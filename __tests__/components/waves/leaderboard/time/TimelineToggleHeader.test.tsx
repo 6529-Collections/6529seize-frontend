@@ -22,7 +22,11 @@ describe("TimelineToggleHeader", () => {
       </SeizeSettingsProvider>
     );
     expect(screen.getByText("Decision Timeline")).toBeInTheDocument();
-    fireEvent.click(screen.getByText(/Decision Timeline/).closest("div")!);
+    const toggle = screen.getByText(/Decision Timeline/).closest("div");
+    if (!toggle) {
+      throw new Error("Toggle container not found");
+    }
+    fireEvent.click(toggle);
     expect(setIsOpen).toHaveBeenCalledWith(true);
   });
 });

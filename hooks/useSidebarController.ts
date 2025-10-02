@@ -4,6 +4,13 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { SIDEBAR_WIDTHS, SIDEBAR_BREAKPOINT } from "../constants/sidebar";
 import { safeSessionStorage } from "../helpers/safeSessionStorage";
 
+const getBrowserWindow = () => {
+  const { window: browserWindow } = globalThis as typeof globalThis & {
+    window?: Window;
+  };
+  return browserWindow;
+};
+
 /**
  * useSidebarController
  *
@@ -23,17 +30,20 @@ import { safeSessionStorage } from "../helpers/safeSessionStorage";
 export function useSidebarController() {
   // Media query for desktop vs mobile breakpoint
   const mql = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    return window.matchMedia(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`);
+    const browserWindow = getBrowserWindow();
+    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
+      return null;
+    }
+    return browserWindow.matchMedia(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`);
   }, []);
 
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < SIDEBAR_BREAKPOINT : false
-  );
+  const [isMobile, setIsMobile] = useState(() => {
+    const browserWindow = getBrowserWindow();
+    return browserWindow ? browserWindow.innerWidth < SIDEBAR_BREAKPOINT : false;
+  });
 
   // Desktop state - default to expanded (false) on big screens with session persistence
   const [isDesktopCollapsed, setIsDesktopCollapsedState] = useState(() => {
-    if (typeof window === "undefined") return false;
     try {
       const stored = safeSessionStorage.getItem("sidebarCollapsed");
       return stored !== null ? JSON.parse(stored) : false;
@@ -67,7 +77,9 @@ export function useSidebarController() {
 
   // React to breakpoint changes
   useEffect(() => {
-    if (!mql) return;
+    if (mql === null) {
+      return;
+    }
     const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     setIsMobile(mql.matches);
     mql.addEventListener("change", onChange);

@@ -1,14 +1,18 @@
-const isAvailable = typeof window !== "undefined";
+const globalScope = globalThis as typeof globalThis & {
+  sessionStorage?: Storage;
+};
+
+const storage = globalScope.sessionStorage;
 
 export const safeSessionStorage = {
-  getItem: (key: string) => (isAvailable ? sessionStorage.getItem(key) : null),
+  getItem: (key: string) => (storage ? storage.getItem(key) : null),
   setItem: (key: string, value: string) => {
-    if (isAvailable) sessionStorage.setItem(key, value);
+    storage?.setItem(key, value);
   },
   removeItem: (key: string) => {
-    if (isAvailable) sessionStorage.removeItem(key);
+    storage?.removeItem(key);
   },
   clear: () => {
-    if (isAvailable) sessionStorage.clear();
+    storage?.clear();
   },
 };

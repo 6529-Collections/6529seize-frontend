@@ -12,8 +12,10 @@ export default function FooterWrapper() {
   const [homeActiveTab, setHomeActiveTab] = useState<string>("latest");
   const { sidebarWidth, isMobile, isOffcanvasOpen } = useSidebarController();
   useEffect(() => {
-    const win = typeof globalThis !== "undefined" ? globalThis.window : undefined;
-    if (!win) return;
+    const win = (globalThis as typeof globalThis & { window?: Window }).window;
+    if (win === undefined) {
+      return;
+    }
 
     const loadStoredTab = () => {
       try {

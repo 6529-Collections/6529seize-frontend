@@ -20,29 +20,35 @@ const WavesView: React.FC = () => {
 
   const showPlaceholder = !serialisedWaveId && !isApp;
 
-  const component = serialisedWaveId ? (
-    <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
-  ) : showPlaceholder ? (
-    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-center tw-p-8">
-      <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
-        Select a Wave
-      </h2>
-      <p className="tw-text-iron-400 tw-max-w-md tw-mb-6 tw-text-sm sm:tw-text-base">
-        Choose a wave to view its content and participate in the discussion.
-      </p>
+  let content: React.ReactNode = null;
 
-      {connectedProfile && (
-        <PrimaryButton
-          onClicked={() => setIsCreateModalOpen(true)}
-          disabled={false}
-          loading={false}
-        >
-          <PlusIcon className="tw-w-5 tw-h-5 -tw-ml-1" />
-          Create Wave
-        </PrimaryButton>
-      )}
-    </div>
-  ) : null;
+  if (serialisedWaveId) {
+    content = (
+      <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
+    );
+  } else if (showPlaceholder) {
+    content = (
+      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-center tw-p-8">
+        <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
+          Select a Wave
+        </h2>
+        <p className="tw-text-iron-400 tw-max-w-md tw-mb-6 tw-text-sm sm:tw-text-base">
+          Choose a wave to view its content and participate in the discussion.
+        </p>
+
+        {connectedProfile && (
+          <PrimaryButton
+            onClicked={() => setIsCreateModalOpen(true)}
+            disabled={false}
+            loading={false}
+          >
+            <PlusIcon className="tw-w-5 tw-h-5 -tw-ml-1" />
+            Create Wave
+          </PrimaryButton>
+        )}
+      </div>
+    );
+  }
 
   // Note: Wave views (MyStreamWave) manage their own activeDrop state
   // internally via MyStreamWaveChat. We pass null to BrainContent because
@@ -52,7 +58,7 @@ const WavesView: React.FC = () => {
       <BrainContent
         activeDrop={null}
         onCancelReplyQuote={() => {}}>
-        {component}
+        {content}
       </BrainContent>
 
       {/* Create Wave Modal */}

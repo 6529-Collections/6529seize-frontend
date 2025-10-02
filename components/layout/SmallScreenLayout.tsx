@@ -18,7 +18,13 @@ export default function SmallScreenLayout({ children }: Props) {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
-  const searchParams = useSearchParams();
+
+  let searchParams: ReturnType<typeof useSearchParams> | null = null;
+  try {
+    searchParams = useSearchParams();
+  } catch (error) {
+    searchParams = null;
+  }
 
   // Get tab from URL
   const activeTab = searchParams?.get("tab") || "latest";
@@ -51,6 +57,23 @@ export default function SmallScreenLayout({ children }: Props) {
       });
     }
   }, [activeTab]);
+
+  const renderSidebar = () => {
+    try {
+      return (
+        <WebSidebar
+          isCollapsed={false}
+          onToggle={() => setIsMenuOpen(!isMenuOpen)}
+          isMobile={true}
+          isOffcanvasOpen={isMenuOpen}
+          onCloseOffcanvas={() => setIsMenuOpen(false)}
+          sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
+        />
+      );
+    } catch (error) {
+      return null;
+    }
+  };
 
   // Focus management when menu opens/closes
   useEffect(() => {
@@ -124,14 +147,7 @@ export default function SmallScreenLayout({ children }: Props) {
         }`}
         style={{ width: SIDEBAR_WIDTHS.EXPANDED }}
       >
-        <WebSidebar
-          isCollapsed={false}
-          onToggle={() => setIsMenuOpen(!isMenuOpen)}
-          isMobile={true}
-          isOffcanvasOpen={isMenuOpen}
-          onCloseOffcanvas={() => setIsMenuOpen(false)}
-          sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
-        />
+        {renderSidebar()}
       </nav>
 
       {/* Main content area */}

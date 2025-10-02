@@ -9,7 +9,6 @@ import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/navigation";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import { AuthContext } from "../../../auth/Auth";
@@ -31,16 +30,15 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
-  const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Check if device is touch-enabled for tooltip display
-  const browserWindow =
-    typeof globalThis.window === "undefined" ? undefined : globalThis.window;
-  const browserNavigator =
-    typeof globalThis.navigator === "undefined"
-      ? undefined
-      : globalThis.navigator;
+  const globalScope = globalThis as typeof globalThis & {
+    window?: Window;
+    navigator?: Navigator;
+  };
+  const browserWindow = globalScope.window;
+  const browserNavigator = globalScope.navigator;
 
   const isTouchDevice =
     !!browserWindow &&

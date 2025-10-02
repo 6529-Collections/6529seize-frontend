@@ -12,10 +12,10 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
-import SpinnerLoader from "../../common/SpinnerLoader";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { createBreakpoint } from "react-use";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -23,6 +23,8 @@ interface MyStreamWaveProps {
 
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
+
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const searchParams = useSearchParams();
@@ -59,6 +61,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   // Get the active tab and utilities from global context
   const { activeContentTab } = useContentTab();
 
+  const breakpoint = useBreakpoint();
+  const isSmallScreen = breakpoint === "S";
+
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
     const params = new URLSearchParams(searchParams?.toString() || '');
@@ -68,11 +73,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
-    return (
-      <div className="tw-flex tw-items-center tw-justify-center tw-h-full">
-        <SpinnerLoader text="Loading..." />
-      </div>
-    );
+    return null;
   }
 
   // Create component instances with wave-specific props and stable measurements
@@ -96,7 +97,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
       key={stableWaveKey}>
       {/* Always render tab container - shows title area on all screen sizes */}
-      <MyStreamWaveTabs wave={wave} />
+      {!isSmallScreen && <MyStreamWaveTabs wave={wave} />}
 
       <div
         className="tw-flex-grow tw-overflow-hidden tw-relative"

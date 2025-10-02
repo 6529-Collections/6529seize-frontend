@@ -37,9 +37,10 @@ function WebSidebar({
 
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
-    const browserWindow =
-      typeof globalThis.window === "undefined" ? undefined : globalThis.window;
-    if (!browserWindow) {
+    const { window: browserWindow } = globalThis as typeof globalThis & {
+      window?: Window;
+    };
+    if (browserWindow === undefined) {
       return;
     }
 
@@ -61,9 +62,10 @@ function WebSidebar({
   useEffect(() => {
     if (!isMobile || !isOffcanvasOpen) return;
 
-    const browserWindow =
-      typeof globalThis.window === "undefined" ? undefined : globalThis.window;
-    if (!browserWindow) {
+    const { window: browserWindow } = globalThis as typeof globalThis & {
+      window?: Window;
+    };
+    if (browserWindow === undefined) {
       return;
     }
 

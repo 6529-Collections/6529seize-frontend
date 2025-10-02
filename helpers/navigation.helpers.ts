@@ -34,20 +34,22 @@ export const getWaveRoute = ({
   isDirectMessage: boolean;
   isApp: boolean;
 }): string => {
-  const params = new URLSearchParams();
+  const queryEntries: Array<[string, string]> = [];
 
   if (extraParams) {
-    Object.entries(extraParams).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(extraParams)) {
       if (value !== undefined && value !== null) {
-        params.set(key, value);
+        queryEntries.push([key, value]);
       }
-    });
+    }
   }
 
-  params.set("wave", waveId);
+  queryEntries.push(["wave", waveId]);
 
   if (serialNo !== undefined) {
-    params.set("serialNo", `${serialNo}/`);
+    const serialString = `${serialNo}`;
+    const normalizedSerial = serialString === "0" ? serialString : `${serialString}/`;
+    queryEntries.push(["serialNo", normalizedSerial]);
   }
 
   const base = (() => {
@@ -57,8 +59,21 @@ export const getWaveRoute = ({
     return "/my-stream";
   })();
 
-  const query = params.toString();
-  return query ? `${base}?${query}` : base;
+  if (queryEntries.length === 0) {
+    return base;
+  }
+
+  const query = queryEntries
+    .map(([key, value]) => {
+      const encodedKey = encodeURIComponent(key);
+      const encodedValue = key === "serialNo"
+        ? encodeURIComponent(value).replace(/%2F/g, "/")
+        : encodeURIComponent(value);
+      return `${encodedKey}=${encodedValue}`;
+    })
+    .join("&");
+
+  return `${base}?${query}`;
 };
 
 export const getWaveHomeRoute = ({

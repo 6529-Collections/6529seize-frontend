@@ -82,12 +82,12 @@ const WebUnifiedWavesListWaves = forwardRef<
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Check if device is touch-enabled for tooltip display
-    const browserWindow =
-      typeof globalThis.window === "undefined" ? undefined : globalThis.window;
-    const browserNavigator =
-      typeof globalThis.navigator === "undefined"
-        ? undefined
-        : globalThis.navigator;
+    const globalScope = globalThis as typeof globalThis & {
+      window?: Window;
+      navigator?: Navigator;
+    };
+    const browserWindow = globalScope.window;
+    const browserNavigator = globalScope.navigator;
 
     const isTouchDevice =
       !!browserWindow &&

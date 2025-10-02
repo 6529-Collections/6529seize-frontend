@@ -21,39 +21,45 @@ const MessagesView: React.FC = () => {
 
   const showPlaceholder = !serialisedWaveId && !isApp;
 
-  const component = serialisedWaveId ? (
-    <MyStreamWave
-      key={`dm-wave-${serialisedWaveId}`}
-      waveId={serialisedWaveId}
-    />
-  ) : showPlaceholder ? (
-    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-center tw-p-8">
-      <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
-        Select a Conversation
-      </h2>
-      <p className="tw-text-iron-400 tw-max-w-md tw-mb-6">
-        Choose a direct message conversation from the sidebar to view messages
-        and continue the discussion.
-      </p>
-      <PrimaryButton
-        onClicked={() => setIsCreateModalOpen(true)}
-        loading={false}
-        disabled={false}
-        padding="tw-px-4 tw-py-2"
-      >
-        <FontAwesomeIcon
-          icon={faPaperPlane}
-          className="tw-size-4 tw-flex-shrink-0 tw-mr-2"
-        />
-        <span>New Direct Message</span>
-      </PrimaryButton>
-    </div>
-  ) : null;
+  let content: React.ReactNode = null;
+
+  if (serialisedWaveId) {
+    content = (
+      <MyStreamWave
+        key={`dm-wave-${serialisedWaveId}`}
+        waveId={serialisedWaveId}
+      />
+    );
+  } else if (showPlaceholder) {
+    content = (
+      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-center tw-p-8">
+        <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
+          Select a Conversation
+        </h2>
+        <p className="tw-text-iron-400 tw-max-w-md tw-mb-6">
+          Choose a direct message conversation from the sidebar to view
+          messages and continue the discussion.
+        </p>
+        <PrimaryButton
+          onClicked={() => setIsCreateModalOpen(true)}
+          loading={false}
+          disabled={false}
+          padding="tw-px-4 tw-py-2"
+        >
+          <FontAwesomeIcon
+            icon={faPaperPlane}
+            className="tw-size-4 tw-flex-shrink-0 tw-mr-2"
+          />
+          <span>New Direct Message</span>
+        </PrimaryButton>
+      </div>
+    );
+  }
 
   return (
     <>
       <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
-        {component}
+        {content}
       </BrainContent>
 
       {/* Create Direct Message Modal */}

@@ -13,7 +13,13 @@ const BrainContentPinnedWaves: React.FC = () => {
   const searchParams = useSearchParams();
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const { isApp } = useDeviceInfo();
-  const { directMessages } = useMyStream();
+  let directMessagesList: ReadonlyArray<{ id: string }> = [];
+  try {
+    const stream = useMyStream();
+    directMessagesList = stream.directMessages.list;
+  } catch (error) {
+    directMessagesList = [];
+  }
   const [onHoverWaveId, setOnHoverWaveId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const leftArrowRef = useRef<HTMLButtonElement>(null);
@@ -105,7 +111,7 @@ const BrainContentPinnedWaves: React.FC = () => {
   const onRemove = async (waveId: string) => {
     const currentWaveId = searchParams?.get('wave') ?? undefined;
     if (currentWaveId === waveId) {
-      const isDirectMessage = directMessages.list.some((w) => w.id === waveId);
+      const isDirectMessage = directMessagesList.some((w) => w.id === waveId);
       router.replace(
         getWaveHomeRoute({ isDirectMessage, isApp })
       );
