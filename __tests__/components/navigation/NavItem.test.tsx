@@ -32,7 +32,11 @@ describe('NavItem notifications', () => {
   const setTitle = jest.fn();
 
   beforeEach(() => {
-    (useViewContext as jest.Mock).mockReturnValue({ activeView: 'home', handleNavClick });
+    (useViewContext as jest.Mock).mockReturnValue({
+      activeView: 'home',
+      handleNavClick,
+      homeActiveTab: 'latest',
+    });
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (usePathname as jest.Mock).mockReturnValue('/');

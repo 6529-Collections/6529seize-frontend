@@ -96,24 +96,82 @@ export async function middleware(req: NextRequest) {
     }
 
     const { pathname } = req.nextUrl;
+    const normalizedPathname =
+      pathname.length > 1 && pathname.endsWith("/")
+        ? pathname.slice(0, -1)
+        : pathname;
+
+    if (normalizedPathname.startsWith("/my-stream")) {
+      const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
+      const isAndroid = userAgent.includes("android");
+      const isIOS =
+        userAgent.includes("iphone") ||
+        userAgent.includes("ipad") ||
+        userAgent.includes("ipod");
+      const isMacDesktop =
+        userAgent.includes("macintosh") ||
+        (userAgent.includes("mac os x") && !userAgent.includes("mobile"));
+      const isLinuxDesktop =
+        userAgent.includes("linux") &&
+        !isAndroid &&
+        !userAgent.includes("mobile");
+
+      const isDesktopOS =
+        !isAndroid &&
+        !isIOS &&
+        (userAgent.includes("windows") ||
+          userAgent.includes("x11") ||
+          userAgent.includes("cros") ||
+          isMacDesktop ||
+          isLinuxDesktop);
+
+      if (isDesktopOS) {
+        const url = req.nextUrl.clone();
+
+        if (normalizedPathname === "/my-stream/notifications") {
+          url.pathname = "/notifications";
+          url.search = "";
+          return NextResponse.redirect(url, 301);
+        }
+
+        if (normalizedPathname === "/my-stream") {
+          const view = req.nextUrl.searchParams.get("view");
+
+          if (view === "messages") {
+            const wave = req.nextUrl.searchParams.get("wave");
+            url.pathname = "/messages";
+            url.search = wave ? `?wave=${wave}` : "";
+            return NextResponse.redirect(url, 301);
+          }
+
+          url.pathname = "/waves";
+          const params = new URLSearchParams(req.nextUrl.searchParams);
+          if (params.has("view")) {
+            params.delete("view");
+          }
+          url.search = params.toString() ? `?${params.toString()}` : "";
+          return NextResponse.redirect(url, 301);
+        }
+      }
+    }
 
     if (
-      pathname.startsWith("/api") ||
-      pathname.startsWith("/_next") ||
-      pathname.endsWith("favicon.ico") ||
-      pathname.endsWith(".jpeg") ||
-      pathname.endsWith(".png") ||
-      pathname.endsWith(".gif") ||
-      pathname.endsWith(".svg") ||
-      pathname.endsWith(".webp") ||
-      pathname.startsWith("/sitemap") ||
-      pathname.startsWith("/robots.txt") ||
-      pathname.startsWith("/error")
+      normalizedPathname.startsWith("/api") ||
+      normalizedPathname.startsWith("/_next") ||
+      normalizedPathname.endsWith("favicon.ico") ||
+      normalizedPathname.endsWith(".jpeg") ||
+      normalizedPathname.endsWith(".png") ||
+      normalizedPathname.endsWith(".gif") ||
+      normalizedPathname.endsWith(".svg") ||
+      normalizedPathname.endsWith(".webp") ||
+      normalizedPathname.startsWith("/sitemap") ||
+      normalizedPathname.startsWith("/robots.txt") ||
+      normalizedPathname.startsWith("/error")
     ) {
       return NextResponse.next();
     }
 
-    if (pathname != "/access" && pathname != "/restricted") {
+    if (normalizedPathname !== "/access" && normalizedPathname !== "/restricted") {
       const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
         value: publicEnv.STAGING_API_KEY ?? "",
       };

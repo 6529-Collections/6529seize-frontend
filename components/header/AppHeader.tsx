@@ -30,7 +30,7 @@ export default function AppHeader(props: Readonly<Props>) {
     handleOrWallet: address ?? null,
     initialProfile: null,
   });
-  const { activeView } = useViewContext();
+  const { activeView, homeActiveTab } = useViewContext();
   const { canGoBack } = useNavigationHistoryContext();
 
   const pfp = (() => {
@@ -59,6 +59,7 @@ export default function AppHeader(props: Readonly<Props>) {
   const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";
     if (activeView === "messages") return "Messages";
+    if (pathname === "/" && homeActiveTab === "feed") return "My Feed";
     if (waveId) {
       if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
       return wave?.name ?? "Wave";

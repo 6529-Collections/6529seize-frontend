@@ -24,6 +24,15 @@ jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: jest.fn(),
 }));
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  })),
+}));
+
 const { usePathname } = require("next/navigation");
 const { useAuth } = require("@/components/auth/Auth");
 const { useTitle } = require("@/contexts/TitleContext");

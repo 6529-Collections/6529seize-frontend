@@ -1,5 +1,5 @@
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import { Col, Container, Row } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import FeaturedNFTDetailsColumn from "./FeaturedNFTDetailsColumn";
 import FeaturedNFTImageColumn from "./FeaturedNFTImageColumn";
 
@@ -13,14 +13,7 @@ export default function LatestDropSection({
   isMemeMintingActive,
 }: Props) {
   return (
-    <Container className="pt-4">
-      <Row>
-        <Col>
-          <h1>
-            <span className="font-lightest">Latest</span> Drop
-          </h1>
-        </Col>
-      </Row>
+    <Container className="tw-pt-2.5">
       <Row>
         <FeaturedNFTImageColumn featuredNft={featuredNft} />
         <FeaturedNFTDetailsColumn

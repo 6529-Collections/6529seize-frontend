@@ -1,31 +1,33 @@
 "use client";
 
+import type { ComponentType, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import DesktopLayout from "@/components/layout/DesktopLayout";
+import WebLayout from "@/components/layout/WebLayout";
 import MobileLayout from "@/components/layout/MobileLayout";
-import { useMemo } from "react";
+import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import FooterWrapper from "@/FooterWrapper";
 
 export default function LayoutWrapper({
   children,
 }: {
-  readonly children: React.ReactNode;
+  readonly children: ReactNode;
 }) {
-  const { isApp } = useDeviceInfo();
+  const { isApp, hasTouchScreen } = useDeviceInfo();
+  const isSmallScreen = useIsMobileScreen();
   const pathname = usePathname();
 
-  const isSmall = pathname?.startsWith("/my-stream");
   const isAccessOrRestricted =
     pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
 
-  const content = useMemo(() => {
-    return isApp ? (
-      <MobileLayout>{children}</MobileLayout>
-    ) : (
-      <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
-    );
-  }, [isApp, isSmall, children]);
+  let LayoutComponent: ComponentType<{ readonly children: ReactNode }> = WebLayout;
+
+  if (isApp) {
+    LayoutComponent = MobileLayout;
+  } else if (isSmallScreen && hasTouchScreen) {
+    LayoutComponent = SmallScreenLayout;
+  }
 
   if (isAccessOrRestricted) {
     return <>{children}</>;
@@ -33,7 +35,7 @@ export default function LayoutWrapper({
 
   return (
     <>
-      {content}
+      <LayoutComponent>{children}</LayoutComponent>
       <FooterWrapper />
     </>
   );

@@ -58,7 +58,7 @@ export default function DistributionPlanTool() {
             </div>
           </div>
 
-          <div className="lg:tw-w-1/2 xl:tw-w-[60%] 2xl:tw-w-1/2 tw-pt-8 lg:tw-pt-12 tw-pb-12 lg:tw-pb-0 tw-border-l-0 lg:tw-border-l tw-border-solid tw-border-r-0 tw-border-t-1 lg:tw-border-t-0 tw-border-b-0 tw-border-neutral-700">
+          <div className="lg:tw-w-1/2 xl:tw-w-[60%] 2xl:tw-w-1/2 tw-pt-8 tw-px-8 lg:tw-pt-12 tw-pb-12 lg:tw-pb-0 tw-border-l-0 lg:tw-border-l tw-border-solid tw-border-r-0 tw-border-t-1 lg:tw-border-t-0 tw-border-b-0 tw-border-neutral-700">
             <DistributionPlanToolConnect />
           </div>
         </div>

@@ -28,11 +28,12 @@ export default function AppLayout({ children }: Props) {
   useDeepLinkNavigation();
   const { registerRef } = useLayout();
   const { setHeaderRef } = useHeaderContext();
-  const { activeView } = useViewContext();
+  const { activeView, homeActiveTab } = useViewContext();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSingleDropOpen = searchParams?.get("drop") !== null;
   const isStreamRoute = pathname?.startsWith("/my-stream");
+  const isHomeFeedView = pathname === "/" && homeActiveTab === "feed";
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const isEditingOnMobile = isApp && editingDropId !== null;
@@ -55,9 +56,14 @@ export default function AppLayout({ children }: Props) {
       ) : activeView === "waves" ? (
         <BrainMobileWaves />
       ) : (
-        <main>{children}</main>
+        <main
+          className={
+            isHomeFeedView ? "tw-h-full tw-overflow-hidden" : undefined
+          }>
+          {children}
+        </main>
       )}
-      {!isSingleDropOpen && !isStreamRoute && (
+      {!isSingleDropOpen && !isStreamRoute && !isHomeFeedView && (
         <div className="tw-h-16 tw-w-full" />
       )}
       {!isSingleDropOpen && !isEditingOnMobile && <BottomNavigation />}

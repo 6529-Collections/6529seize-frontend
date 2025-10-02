@@ -10,6 +10,8 @@ import {
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface NotificationsWrapperProps {
   readonly items: TypedNotification[];
@@ -25,10 +27,20 @@ export default function NotificationsWrapper({
   setActiveDrop,
 }: NotificationsWrapperProps) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
 
   const onDropContentClick = (drop: ExtendedDrop) => {
+    const waveInfo = drop.wave as any;
+    const isDirectMessage =
+      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+
     router.push(
-      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`
+      getWaveRoute({
+        waveId: drop.wave.id,
+        serialNo: drop.serial_no,
+        isDirectMessage,
+        isApp,
+      })
     );
   };
 

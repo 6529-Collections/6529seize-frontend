@@ -4,11 +4,22 @@ import React, { useEffect, useRef, useState } from "react";
 import BrainContentPinnedWave from "./BrainContentPinnedWave";
 import { usePinnedWaves } from "../../../hooks/usePinnedWaves";
 import { useRouter, useSearchParams } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 const BrainContentPinnedWaves: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { pinnedIds, addId, removeId } = usePinnedWaves();
+  const { isApp } = useDeviceInfo();
+  let directMessagesList: ReadonlyArray<{ id: string }> = [];
+  try {
+    const stream = useMyStream();
+    directMessagesList = stream.directMessages.list;
+  } catch (error) {
+    directMessagesList = [];
+  }
   const [onHoverWaveId, setOnHoverWaveId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const leftArrowRef = useRef<HTMLButtonElement>(null);
@@ -100,7 +111,10 @@ const BrainContentPinnedWaves: React.FC = () => {
   const onRemove = async (waveId: string) => {
     const currentWaveId = searchParams?.get('wave') ?? undefined;
     if (currentWaveId === waveId) {
-      router.replace('/my-stream');
+      const isDirectMessage = directMessagesList.some((w) => w.id === waveId);
+      router.replace(
+        getWaveHomeRoute({ isDirectMessage, isApp })
+      );
     }
     removeId(waveId);
   };

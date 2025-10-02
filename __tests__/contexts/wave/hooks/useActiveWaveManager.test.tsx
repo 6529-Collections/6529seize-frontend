@@ -2,6 +2,15 @@ import { renderHook, act } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
 import { useRouter, useSearchParams } from "next/navigation";
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
