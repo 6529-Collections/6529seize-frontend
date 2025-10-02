@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import PencilIcon, { PencilIconSize } from "../../../utils/icons/PencilIcon";
-import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
+import { ApiWave } from "@/generated/models/ApiWave";
+import PencilIcon, { PencilIconSize } from "@/components/utils/icons/PencilIcon";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import WaveHeaderNameEditModal from "./WaveHeaderNameEditModal";
 
 export default function WaveHeaderNameEdit({

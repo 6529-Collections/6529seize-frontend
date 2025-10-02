@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import UserSettingsClassification from '../../../../components/user/settings/UserSettingsClassification';
-import { ApiProfileClassification } from '../../../../generated/models/ApiProfileClassification';
-import { CLASSIFICATIONS } from '../../../../entities/IProfile';
+import UserSettingsClassification from '@/components/user/settings/UserSettingsClassification';
+import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
+import { CLASSIFICATIONS } from '@/entities/IProfile';
 
 describe('UserSettingsClassification', () => {
   it('opens menu and selects new classification', async () => {

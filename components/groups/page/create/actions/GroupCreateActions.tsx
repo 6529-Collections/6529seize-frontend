@@ -1,15 +1,15 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiCreateGroup } from "../../../../../generated/models/ApiCreateGroup";
-import { AuthContext } from "../../../../auth/Auth";
+import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import { AuthContext } from "@/components/auth/Auth";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../../services/api/common-api";
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
-import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
+import { commonApiPost } from "@/services/api/common-api";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import GroupCreateTest from "./GroupCreateTest";
-import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import SecondaryButton from "../../../../utils/button/SecondaryButton";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
 
 export default function GroupCreateActions({
   originalGroup,

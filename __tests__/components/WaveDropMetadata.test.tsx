@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import WaveDropMetadata from "../../components/waves/drops/WaveDropMetadata";
+import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 
-jest.mock("../../hooks/isMobileDevice", () => () => false);
+jest.mock("@/hooks/isMobileDevice", () => () => false);
 
 describe("WaveDropMetadata", () => {
   const metadata = [

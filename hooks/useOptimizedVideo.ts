@@ -5,7 +5,7 @@ import {
   isVideoUrl,
   getVideoConversions,
   checkVideoAvailability,
-} from "../helpers/video.helpers";
+} from "@/helpers/video.helpers";
 
 export interface UseOptimizedVideoOptions {
   /** ms between checks */

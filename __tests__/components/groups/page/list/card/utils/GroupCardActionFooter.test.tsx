@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GroupCardActionFooter from "../../../../../../../components/groups/page/list/card/utils/GroupCardActionFooter";
+import GroupCardActionFooter from "@/components/groups/page/list/card/utils/GroupCardActionFooter";
 
-jest.mock("../../../../../../../components/utils/button/PrimaryButton", () => (props: any) => (
+jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
   <button data-testid="save" disabled={props.disabled} onClick={props.onClicked}>Save</button>
 ));
 

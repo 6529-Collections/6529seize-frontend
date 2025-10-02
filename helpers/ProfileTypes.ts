@@ -1,4 +1,4 @@
-import { ApiProfileMin } from "../generated/models/ApiProfileMin";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 
 export type ProfileMinWithoutSubs = Omit<
   ApiProfileMin,

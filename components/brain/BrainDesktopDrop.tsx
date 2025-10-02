@@ -1,4 +1,4 @@
-import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDrop } from "../waves/drop/SingleWaveDrop";
 
 

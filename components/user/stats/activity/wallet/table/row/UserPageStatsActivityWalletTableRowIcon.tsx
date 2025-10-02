@@ -1,4 +1,4 @@
-import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
 
 export default function UserPageStatsActivityWalletTableRowIcon({

@@ -1,9 +1,9 @@
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
-import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
-import { ApiUpdateWaveRequest } from "../../generated/models/ApiUpdateWaveRequest";
-import { ApiWave } from "../../generated/models/ApiWave";
-import { commonApiPost } from "../../services/api/common-api";
-import { CreateWaveStepStatus } from "../../types/waves.types";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiPost } from "@/services/api/common-api";
+import { CreateWaveStepStatus } from "@/types/waves.types";
 
 export const getCreateWaveStepStatus = ({
   stepIndex,

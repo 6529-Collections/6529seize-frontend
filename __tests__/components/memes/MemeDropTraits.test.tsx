@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import MemeDropTraits from "../../../components/memes/drops/MemeDropTraits";
+import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
 
 jest.mock(
-  "../../../components/memes/drops/MemeDropTrait",
+  "@/components/memes/drops/MemeDropTrait",
   () => (props: any) =>
     (
       <div

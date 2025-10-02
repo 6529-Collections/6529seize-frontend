@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DownloadUrlWidget from '../../../components/downloadUrlWidget/DownloadUrlWidget';
+import DownloadUrlWidget from '@/components/downloadUrlWidget/DownloadUrlWidget';
 
 const mockDownload = jest.fn();
 const mockUseDownloader = jest.fn();
@@ -10,7 +10,7 @@ jest.mock('react-use-downloader', () => ({
   default: (...args: any[]) => mockUseDownloader(...args)
 }));
 
-jest.mock('../../../services/auth/auth.utils', () => ({
+jest.mock('@/services/auth/auth.utils', () => ({
   getStagingAuth: () => 'stag',
   getAuthJwt: () => 'jwtToken'
 }));

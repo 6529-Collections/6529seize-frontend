@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import SelectGroupModalSearchName from '../../components/utils/select-group/SelectGroupModalSearchName';
+import SelectGroupModalSearchName from '@/components/utils/select-group/SelectGroupModalSearchName';
 
 describe('SelectGroupModalSearchName', () => {
   it('calls setFilterName on input', () => {

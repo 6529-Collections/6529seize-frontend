@@ -38,20 +38,20 @@ import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import {
   MentionNode,
   $createMentionNode,
-} from "../../drops/create/lexical/nodes/MentionNode";
-import { HashtagNode } from "../../drops/create/lexical/nodes/HashtagNode";
-import { MENTION_TRANSFORMER } from "../../drops/create/lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/HastagTransformer";
-import ExampleTheme from "../../drops/create/lexical/ExampleTheme";
+} from "@/components/drops/create/lexical/nodes/MentionNode";
+import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
+import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
+import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
+import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
 import NewMentionsPlugin, {
   NewMentionsPluginHandles,
-} from "../../drops/create/lexical/plugins/mentions/MentionsPlugin";
-import { MentionedUser } from "../../../entities/IDrop";
-import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
+} from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import { MentionedUser } from "@/entities/IDrop";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import EmojiPlugin from "../../drops/create/lexical/plugins/emoji/EmojiPlugin";
-import { EmojiNode } from "../../drops/create/lexical/nodes/EmojiNode";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
+import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 

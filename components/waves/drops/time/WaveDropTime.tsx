@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Time } from "../../../../helpers/time";
+import { Time } from "@/helpers/time";
 
 interface WaveDropTimeProps {
   readonly timestamp: number;

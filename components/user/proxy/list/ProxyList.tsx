@@ -3,11 +3,11 @@
 import { ProxyMode } from "../UserPageProxy";
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
-import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import ProxyListItem from "./ProxyListItem";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export enum ProfileProxyListType {
   ALL = "ALL",

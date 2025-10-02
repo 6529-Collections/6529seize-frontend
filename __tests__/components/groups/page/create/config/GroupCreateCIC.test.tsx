@@ -1,25 +1,25 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import GroupCreateCIC from '../../../../../../components/groups/page/create/config/GroupCreateCIC';
-import { ApiGroupFilterDirection } from '../../../../../../generated/models/ApiGroupFilterDirection';
-import { ApiCreateGroupDescription } from '../../../../../../generated/models/ApiCreateGroupDescription';
+import GroupCreateCIC from '@/components/groups/page/create/config/GroupCreateCIC';
+import { ApiGroupFilterDirection } from '@/generated/models/ApiGroupFilterDirection';
+import { ApiCreateGroupDescription } from '@/generated/models/ApiCreateGroupDescription';
 
 let identityProps: any = null;
 let numericProps: any = null;
 let directionProps: any = null;
 
-jest.mock('../../../../../../components/groups/page/create/config/common/GroupCreateDirection', () => ({
+jest.mock('@/components/groups/page/create/config/common/GroupCreateDirection', () => ({
   __esModule: true,
   default: (props: any) => { directionProps = props; return <div data-testid="direction" />; }
 }));
 
-jest.mock('../../../../../../components/utils/input/identity/IdentitySearch', () => ({
+jest.mock('@/components/utils/input/identity/IdentitySearch', () => ({
   __esModule: true,
   IdentitySearchSize: { MD: 'md' },
   default: (props: any) => { identityProps = props; return <div data-testid="identity" />; }
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/common/GroupCreateNumericValue', () => ({
+jest.mock('@/components/groups/page/create/config/common/GroupCreateNumericValue', () => ({
   __esModule: true,
   default: (props: any) => { numericProps = props; return <div data-testid="numeric" />; }
 }));

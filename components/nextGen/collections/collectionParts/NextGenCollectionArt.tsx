@@ -24,17 +24,17 @@ import {
   NextGenCollection,
   TraitValuePair,
   TraitValues,
-} from "../../../../entities/INextgen";
-import { SortDirection } from "../../../../entities/ISort";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { areEqualAddresses } from "../../../../helpers/Helpers";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import DotLoader from "../../../dotLoader/DotLoader";
+} from "@/entities/INextgen";
+import { SortDirection } from "@/entities/ISort";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import DotLoader from "@/components/dotLoader/DotLoader";
 import {
   NextGenListFilters,
   NextGenTokenListedType,
   formatNameForUrl,
-} from "../../nextgen_helpers";
+} from "@/components/nextGen/nextgen_helpers";
 import styles from "../NextGen.module.scss";
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
 import NextGenTokenList from "../NextGenTokenList";

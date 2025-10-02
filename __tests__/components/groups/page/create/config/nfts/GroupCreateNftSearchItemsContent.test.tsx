@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import GroupCreateNftSearchItemsContent from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftSearchItemsContent';
+import GroupCreateNftSearchItemsContent from '@/components/groups/page/create/config/nfts/GroupCreateNftSearchItemsContent';
 
-jest.mock('../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftSearchItem', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNftSearchItem', () => ({
   __esModule: true,
   default: ({ item }: any) => <div data-testid={`item-${item.id}`} />
 }));

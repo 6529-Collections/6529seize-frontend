@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CICType, CIC_TO_TEXT } from "../../../../entities/IProfile";
-import { cicToType } from "../../../../helpers/Helpers";
+import { CICType, CIC_TO_TEXT } from "@/entities/IProfile";
+import { cicToType } from "@/helpers/Helpers";
 
 interface Props {
   readonly cic: number;

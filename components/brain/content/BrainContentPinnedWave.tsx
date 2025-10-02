@@ -4,12 +4,12 @@ import React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Tooltip } from "react-tooltip";
-import { usePrefetchWaveData } from "../../../hooks/usePrefetchWaveData";
-import { useWaveData } from "../../../hooks/useWaveData";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
-import WavePicture from "../../waves/WavePicture";
-import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { useWaveData } from "@/hooks/useWaveData";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+import WavePicture from "@/components/waves/WavePicture";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 interface BrainContentPinnedWaveProps {
   readonly waveId: string;

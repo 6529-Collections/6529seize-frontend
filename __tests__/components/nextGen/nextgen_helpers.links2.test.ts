@@ -1,4 +1,4 @@
-import { getOpenseaLink } from '../../../components/nextGen/nextgen_helpers';
+import { getOpenseaLink } from '@/components/nextGen/nextgen_helpers';
 import { goerli } from 'viem/chains';
 
 describe('nextgen_helpers links extra', () => {

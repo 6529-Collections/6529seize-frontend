@@ -1,10 +1,10 @@
-import { renderWithAuth } from "../../../../../../../utils/testContexts";
+import { renderWithAuth } from "@/__tests__/utils/testContexts";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import ProfileProxyCredit from "../../../../../../../../components/user/proxy/proxy/action/utils/credit/ProfileProxyCredit";
+import ProfileProxyCredit from "@/components/user/proxy/proxy/action/utils/credit/ProfileProxyCredit";
 
-jest.mock("../../../../../../../../components/utils/icons/PencilIcon", () => ({
+jest.mock("@/components/utils/icons/PencilIcon", () => ({
   __esModule: true,
   default: () => <svg data-testid="pencil" />,
   PencilIconSize: { SMALL: 'sm' },

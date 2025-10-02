@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ErrorMessage from '../../../../../../components/waves/memes/file-upload/components/ErrorMessage';
+import ErrorMessage from '@/components/waves/memes/file-upload/components/ErrorMessage';
 
 test('renders message and retry button', async () => {
   const onRetry = jest.fn();

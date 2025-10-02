@@ -1,4 +1,4 @@
-import WaveHeaderNameEditModal from '../../../../../components/waves/header/name/WaveHeaderNameEditModal';
+import WaveHeaderNameEditModal from '@/components/waves/header/name/WaveHeaderNameEditModal';
 
 describe('WaveHeaderNameEditModal', () => {
   it('exports component', () => {

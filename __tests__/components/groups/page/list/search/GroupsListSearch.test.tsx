@@ -1,17 +1,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupsListSearch from '../../../../../../components/groups/page/list/search/GroupsListSearch';
+import GroupsListSearch from '@/components/groups/page/list/search/GroupsListSearch';
 
 let identityProps: any = null;
 
-jest.mock('../../../../../../components/utils/input/identity/IdentitySearch', () => ({
+jest.mock('@/components/utils/input/identity/IdentitySearch', () => ({
   __esModule: true,
   IdentitySearchSize: { SM: 'sm' },
   default: (props: any) => { identityProps = props; return <div data-testid="identity" />; }
 }));
 
-jest.mock('../../../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   __esModule: true,
   getRandomObjectId: () => 'id1'
 }));

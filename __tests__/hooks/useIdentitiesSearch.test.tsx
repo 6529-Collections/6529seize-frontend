@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useIdentitiesSearch } from '../../hooks/useIdentitiesSearch';
-import { commonApiFetch } from '../../services/api/common-api';
-import { useWaveById } from '../../hooks/useWaveById';
+import { useIdentitiesSearch } from '@/hooks/useIdentitiesSearch';
+import { commonApiFetch } from '@/services/api/common-api';
+import { useWaveById } from '@/hooks/useWaveById';
 
-jest.mock('../../hooks/useWaveById');
-jest.mock('../../services/api/common-api');
+jest.mock('@/hooks/useWaveById');
+jest.mock('@/services/api/common-api');
 
 function TestComponent({ handle, waveId }: { handle: string; waveId: string | null }) {
   const { identities } = useIdentitiesSearch({ handle, waveId });

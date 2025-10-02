@@ -1,16 +1,16 @@
 "use client";
 
 import { useContext, useState, useCallback, useRef, useEffect } from "react";
-import { DropRateChangeRequest } from "../../../../../../entities/IDrop";
+import { DropRateChangeRequest } from "@/entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../../../services/api/common-api";
-import { AuthContext } from "../../../../../auth/Auth";
+import { commonApiPost } from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
 import dynamic from "next/dynamic";
-import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
-import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
-import { DropVoteState } from "../../../../../../hooks/drops/types";
-import { DropSize } from "../../../../../../helpers/waves/drop.helpers";
-import { useMyStream } from "../../../../../../contexts/wave/MyStreamContext";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { DropVoteState } from "@/hooks/drops/types";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.NOT_LOGGED_IN]: "Connect your wallet to rate",

@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
-import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
-import { Time } from "../../../../../../helpers/time";
-import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
-import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 export enum RateChangeType {
   INCREASE = "INCREASE",

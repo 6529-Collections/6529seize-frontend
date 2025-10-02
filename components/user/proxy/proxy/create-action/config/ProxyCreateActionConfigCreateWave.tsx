@@ -1,5 +1,5 @@
-import { CreateProxyCreateWaveAction } from "../../../../../../entities/IProxy";
-import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
+import { CreateProxyCreateWaveAction } from "@/entities/IProxy";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigCreateWave({
   endTime,

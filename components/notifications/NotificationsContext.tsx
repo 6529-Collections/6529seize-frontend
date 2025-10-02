@@ -7,11 +7,11 @@ import {
 } from "@capacitor/push-notifications";
 import { Device, DeviceInfo } from "@capacitor/device";
 import { useRouter } from "next/navigation";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
-import { commonApiPost } from "../../services/api/common-api";
+import { commonApiPost } from "@/services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;

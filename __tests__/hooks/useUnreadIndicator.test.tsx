@@ -1,13 +1,13 @@
 import { renderHook } from '@testing-library/react';
-import { useUnreadIndicator } from '../../hooks/useUnreadIndicator';
+import { useUnreadIndicator } from '@/hooks/useUnreadIndicator';
 
 const mockUseUnreadNotifications = jest.fn();
-jest.mock('../../hooks/useUnreadNotifications', () => ({
+jest.mock('@/hooks/useUnreadNotifications', () => ({
   useUnreadNotifications: (handle: string | null) => mockUseUnreadNotifications(handle)
 }));
 
 const mockUseMyStream = jest.fn();
-jest.mock('../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => mockUseMyStream()
 }));
 

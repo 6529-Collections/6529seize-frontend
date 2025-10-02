@@ -1,5 +1,5 @@
-import { MinimalWave } from "../../contexts/wave/hooks/useEnhancedWavesList";
-import { ApiWaveType } from "../../generated/models/ApiWaveType";
+import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 /**
  * Creates a mock MinimalWave object with sensible defaults for testing

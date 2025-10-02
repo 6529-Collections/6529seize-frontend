@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersDropHeaderAuthorPfpProps {
   readonly winner: ApiWaveDecisionWinner;

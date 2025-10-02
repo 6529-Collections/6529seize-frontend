@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DelegationWallet from '../../../components/delegation/DelegationWallet';
+import DelegationWallet from '@/components/delegation/DelegationWallet';
 import { useEnsName } from 'wagmi';
 
 jest.mock('wagmi');

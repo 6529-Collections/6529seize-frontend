@@ -3,17 +3,17 @@
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import CommonCalendar from "../../../utils/calendar/CommonCalendar";
-import { CreateWaveDatesConfig } from "../../../../types/waves.types";
-import DateAccordion from "../../../common/DateAccordion";
-import TimePicker from "../../../common/TimePicker";
-import TooltipIconButton from "../../../common/TooltipIconButton";
+import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
+import { CreateWaveDatesConfig } from "@/types/waves.types";
+import DateAccordion from "@/components/common/DateAccordion";
+import TimePicker from "@/components/common/TimePicker";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
 import {
   calculateDecisionTimes,
   countTotalDecisions,
   formatDate,
 } from "../services/waveDecisionService";
-import { calculateLastDecisionTime } from "../../../../helpers/waves/create-wave.helpers";
+import { calculateLastDecisionTime } from "@/helpers/waves/create-wave.helpers";
 
 interface RollingEndDateProps {
   readonly dates: CreateWaveDatesConfig;

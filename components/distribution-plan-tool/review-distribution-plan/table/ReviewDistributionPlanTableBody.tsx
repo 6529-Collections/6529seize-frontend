@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DistributionPlanTableBodyWrapper from "../../common/DistributionPlanTableBodyWrapper";
+import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
 import ReviewDistributionPlanTableRow from "./ReviewDistributionPlanTableRow";
 import {
   ReviewDistributionPlanTableItem,

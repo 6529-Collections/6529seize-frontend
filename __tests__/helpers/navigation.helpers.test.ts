@@ -1,4 +1,4 @@
-import { mainSegment, sameMainPath } from '../../helpers/navigation.helpers';
+import { mainSegment, sameMainPath } from '@/helpers/navigation.helpers';
 
 describe('navigation.helpers', () => {
   describe('mainSegment', () => {

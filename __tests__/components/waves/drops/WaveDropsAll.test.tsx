@@ -22,18 +22,18 @@ if (typeof window !== 'undefined') {
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveDropsAll from '../../../../components/waves/drops/WaveDropsAll';
-import { useVirtualizedWaveDrops } from '../../../../hooks/useVirtualizedWaveDrops';
-import { ApiDrop } from '../../../../generated/models/ApiDrop';
-import { ActiveDropState } from '../../../../types/dropInteractionTypes';
+import WaveDropsAll from '@/components/waves/drops/WaveDropsAll';
+import { useVirtualizedWaveDrops } from '@/hooks/useVirtualizedWaveDrops';
+import { ApiDrop } from '@/generated/models/ApiDrop';
+import { ActiveDropState } from '@/types/dropInteractionTypes';
 
 // Mock hooks and dependencies
-jest.mock('../../../../hooks/useVirtualizedWaveDrops');
-jest.mock('../../../../hooks/useScrollBehavior');
-jest.mock('../../../../hooks/useWaveIsTyping');
-jest.mock('../../../../components/notifications/NotificationsContext');
-jest.mock('../../../../components/auth/Auth');
-jest.mock('../../../../services/api/common-api');
+jest.mock('@/hooks/useVirtualizedWaveDrops');
+jest.mock('@/hooks/useScrollBehavior');
+jest.mock('@/hooks/useWaveIsTyping');
+jest.mock('@/components/notifications/NotificationsContext');
+jest.mock('@/components/auth/Auth');
+jest.mock('@/services/api/common-api');
 jest.mock('next/navigation');
 
 // Mock components with proper prop capturing
@@ -41,7 +41,7 @@ let containerProps: any;
 let dropsProps: any;
 let scrollButtonProps: any;
 
-jest.mock('../../../../components/waves/drops/WaveDropsReverseContainer', () => ({
+jest.mock('@/components/waves/drops/WaveDropsReverseContainer', () => ({
   __esModule: true,
   WaveDropsReverseContainer: React.forwardRef((props: any, ref: any) => {
     containerProps = props;
@@ -53,7 +53,7 @@ jest.mock('../../../../components/waves/drops/WaveDropsReverseContainer', () => 
   })
 }));
 
-jest.mock('../../../../components/drops/view/DropsList', () => ({
+jest.mock('@/components/drops/view/DropsList', () => ({
   __esModule: true,
   default: (props: any) => {
     dropsProps = props;
@@ -61,7 +61,7 @@ jest.mock('../../../../components/drops/view/DropsList', () => ({
   }
 }));
 
-jest.mock('../../../../components/waves/drops/WaveDropsScrollBottomButton', () => ({
+jest.mock('@/components/waves/drops/WaveDropsScrollBottomButton', () => ({
   __esModule: true,
   WaveDropsScrollBottomButton: (props: any) => {
     scrollButtonProps = props;
@@ -69,19 +69,19 @@ jest.mock('../../../../components/waves/drops/WaveDropsScrollBottomButton', () =
   }
 }));
 
-jest.mock('../../../../components/waves/drops/WaveDropsEmptyPlaceholder', () => ({
+jest.mock('@/components/waves/drops/WaveDropsEmptyPlaceholder', () => ({
   __esModule: true,
   default: () => <div data-testid="empty-placeholder" />
 }));
 
-jest.mock('../../../../components/waves/drops/WaveDropsScrollingOverlay', () => ({
+jest.mock('@/components/waves/drops/WaveDropsScrollingOverlay', () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="scrolling-overlay" style={{ display: props.isVisible ? 'block' : 'none' }} />
   )
 }));
 
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="circle-loader" />,
   CircleLoaderSize: { XXLARGE: 'xxlarge' }
@@ -175,7 +175,7 @@ function setupMocks(options: MockSetupOptions = {}) {
   });
 
   // Setup useScrollBehavior mock
-  require('../../../../hooks/useScrollBehavior').useScrollBehavior.mockReturnValue({
+  require('@/hooks/useScrollBehavior').useScrollBehavior.mockReturnValue({
     scrollContainerRef: mockScrollContainerRef,
     bottomAnchorRef: mockBottomAnchorRef,
     isAtBottom: options.scrollBehavior?.isAtBottom ?? true,
@@ -190,22 +190,22 @@ function setupMocks(options: MockSetupOptions = {}) {
   });
 
   // Setup notifications mock
-  require('../../../../components/notifications/NotificationsContext').useNotificationsContext.mockReturnValue({
+  require('@/components/notifications/NotificationsContext').useNotificationsContext.mockReturnValue({
     removeWaveDeliveredNotifications: mockRemoveNotifications
   });
 
   // Setup auth mock
-  require('../../../../components/auth/Auth').useAuth.mockReturnValue({
+  require('@/components/auth/Auth').useAuth.mockReturnValue({
     connectedProfile: options.auth?.connectedProfile ?? null
   });
 
   // Setup typing mock
-  require('../../../../hooks/useWaveIsTyping').useWaveIsTyping.mockReturnValue(
+  require('@/hooks/useWaveIsTyping').useWaveIsTyping.mockReturnValue(
     options.typingMessage ?? null
   );
 
   // Setup API mock
-  require('../../../../services/api/common-api').commonApiPostWithoutBodyAndResponse.mockImplementation(
+  require('@/services/api/common-api').commonApiPostWithoutBodyAndResponse.mockImplementation(
     mockCommonApiPost.mockResolvedValue(undefined)
   );
 }
@@ -878,7 +878,7 @@ describe('WaveDropsAll', () => {
       });
       
       // The bottomAnchorRef is used by useScrollBehavior for intersection observation
-      expect(require('../../../../hooks/useScrollBehavior').useScrollBehavior).toHaveBeenCalled();
+      expect(require('@/hooks/useScrollBehavior').useScrollBehavior).toHaveBeenCalled();
     });
   });
 });

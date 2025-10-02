@@ -1,11 +1,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useMutation } from '@tanstack/react-query';
-import UserPageIdentityDeleteStatementModal from '../../../../../../components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
-import { CicStatement } from '../../../../../../entities/IProfile';
-import { ApiIdentity } from '../../../../../../generated/models/ApiIdentity';
+import UserPageIdentityDeleteStatementModal from '@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { CicStatement } from '@/entities/IProfile';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 // Mock dependencies
 jest.mock('@tanstack/react-query');

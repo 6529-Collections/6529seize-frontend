@@ -1,19 +1,19 @@
 import { render, screen } from '@testing-library/react';
-import BrainContentInput from '../../../../../components/brain/content/input/BrainContentInput';
+import BrainContentInput from '@/components/brain/content/input/BrainContentInput';
 
 const useWaveDataMock = jest.fn();
 const useCapacitorMock = jest.fn();
 
-jest.mock('../../../../../hooks/useWaveData', () => ({
+jest.mock('@/hooks/useWaveData', () => ({
   useWaveData: (args: any) => useWaveDataMock(args),
 }));
 
-jest.mock('../../../../../hooks/useCapacitor', () => ({
+jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: () => useCapacitorMock(),
 }));
 
-jest.mock('../../../../../components/waves/PrivilegedDropCreator', () => ({
+jest.mock('@/components/waves/PrivilegedDropCreator', () => ({
   __esModule: true,
   default: ({ wave }: any) => <div data-testid="creator">{wave.id}</div>,
   DropMode: { BOTH: 'BOTH' },

@@ -1,7 +1,7 @@
-import { isCollectionAdmin, isCollectionArtist } from '../../../components/nextGen/nextgen_helpers';
-import { areEqualAddresses } from '../../../helpers/Helpers';
+import { isCollectionAdmin, isCollectionArtist } from '@/components/nextGen/nextgen_helpers';
+import { areEqualAddresses } from '@/helpers/Helpers';
 
-jest.mock('../../../helpers/Helpers', () => ({ areEqualAddresses: jest.fn(() => true) }));
+jest.mock('@/helpers/Helpers', () => ({ areEqualAddresses: jest.fn(() => true) }));
 
 describe('nextgen_helpers additional2', () => {
   it('detects collection admin', () => {

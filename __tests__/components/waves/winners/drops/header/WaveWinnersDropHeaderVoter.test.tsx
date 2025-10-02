@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import WaveWinnersDropHeaderVoter from '../../../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderVoter';
+import WaveWinnersDropHeaderVoter from '@/components/waves/winners/drops/header/WaveWinnersDropHeaderVoter';
 
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children, id }: any) => (
@@ -9,7 +9,7 @@ jest.mock('react-tooltip', () => ({
   ),
 }));
 
-jest.mock('../../../../../../helpers/image.helpers', () => ({
+jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: jest.fn(() => 'scaled.jpg'),
   ImageScale: { W_AUTO_H_50: 'scale' },
 }));

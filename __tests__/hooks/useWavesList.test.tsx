@@ -1,28 +1,28 @@
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import useWavesList from '../../hooks/useWavesList';
-import { AuthContext } from '../../components/auth/Auth';
-import { ApiWaveType } from '../../generated/models/ApiWaveType';
+import useWavesList from '@/hooks/useWavesList';
+import { AuthContext } from '@/components/auth/Auth';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../hooks/useWavesOverview', () => ({
+jest.mock('@/hooks/useWavesOverview', () => ({
   useWavesOverview: jest.fn(),
 }));
 
-jest.mock('../../hooks/usePinnedWavesServer', () => ({
+jest.mock('@/hooks/usePinnedWavesServer', () => ({
   usePinnedWavesServer: jest.fn(),
 }));
 
-jest.mock('../../hooks/useWaveData', () => ({
+jest.mock('@/hooks/useWaveData', () => ({
   useWaveData: jest.fn(),
 }));
 
-jest.mock('../../hooks/useShowFollowingWaves', () => ({
+jest.mock('@/hooks/useShowFollowingWaves', () => ({
   useShowFollowingWaves: jest.fn(() => [false]),
 }));
 
-const useWavesOverviewMock = require('../../hooks/useWavesOverview').useWavesOverview as jest.Mock;
-const usePinnedWavesServerMock = require('../../hooks/usePinnedWavesServer').usePinnedWavesServer as jest.Mock;
-const useWaveDataMock = require('../../hooks/useWaveData').useWaveData as jest.Mock;
+const useWavesOverviewMock = require('@/hooks/useWavesOverview').useWavesOverview as jest.Mock;
+const usePinnedWavesServerMock = require('@/hooks/usePinnedWavesServer').usePinnedWavesServer as jest.Mock;
+const useWaveDataMock = require('@/hooks/useWaveData').useWaveData as jest.Mock;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider value={{ connectedProfile: { handle: 'me' }, activeProfileProxy: null } as any}>

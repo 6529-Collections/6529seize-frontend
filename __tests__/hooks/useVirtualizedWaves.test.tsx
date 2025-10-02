@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { useVirtualizedWaves } from '../../hooks/useVirtualizedWaves';
-import { ScrollPositionProvider } from '../../contexts/ScrollPositionContext';
+import { useVirtualizedWaves } from '@/hooks/useVirtualizedWaves';
+import { ScrollPositionProvider } from '@/contexts/ScrollPositionContext';
 
 const wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => (
   <ScrollPositionProvider>{children}</ScrollPositionProvider>

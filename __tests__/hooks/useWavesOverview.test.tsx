@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWavesOverview } from '../../hooks/useWavesOverview';
-import { ApiWavesOverviewType } from '../../generated/models/ApiWavesOverviewType';
+import { useWavesOverview } from '@/hooks/useWavesOverview';
+import { ApiWavesOverviewType } from '@/generated/models/ApiWavesOverviewType';
 
 jest.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: jest.fn(),

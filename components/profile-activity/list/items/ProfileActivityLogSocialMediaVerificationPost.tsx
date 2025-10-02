@@ -1,8 +1,8 @@
 import {
   PROFILE_ACTIVITY_LOG_ACTION_STR,
   ProfileActivityLogSocialVerificationPostEdit,
-} from "../../../../entities/IProfile";
-import SocialStatementIcon from "../../../user/utils/icons/SocialStatementIcon";
+} from "@/entities/IProfile";
+import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import ProfileActivityLogItemValueWithCopy from "./utils/ProfileActivityLogItemValueWithCopy";
 

@@ -1,5 +1,5 @@
-import { AllowlistCustomTokenPool } from "../../../allowlist-tool/allowlist-tool.types";
-import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
+import { AllowlistCustomTokenPool } from "@/components/allowlist-tool/allowlist-tool.types";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 
 export default function CreateCustomSnapshotTableRow({
   snapshot,

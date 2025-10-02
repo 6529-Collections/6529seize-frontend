@@ -1,15 +1,15 @@
 import { render } from "@testing-library/react";
 import React from "react";
 import { act } from "@testing-library/react";
-import UserPageIdentityAddStatementsNFTAccounts from "../../../../../../../components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
-import { STATEMENT_TYPE, STATEMENT_GROUP } from "../../../../../../../helpers/Types";
+import UserPageIdentityAddStatementsNFTAccounts from "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
+import { STATEMENT_TYPE, STATEMENT_GROUP } from "@/helpers/Types";
 
 let headerProps: any;
 let itemsProps: any;
 let formProps: any;
 
 jest.mock(
-  "../../../../../../../components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountHeader",
+  "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountHeader",
   () => (props: any) => {
     headerProps = props;
     return <div data-testid="header" />;
@@ -17,7 +17,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../../../../components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems",
+  "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems",
   () => (props: any) => {
     itemsProps = props;
     return <div data-testid="items" />;
@@ -25,7 +25,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
+  "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
   () => (props: any) => {
     formProps = props;
     return <div data-testid="form" />;

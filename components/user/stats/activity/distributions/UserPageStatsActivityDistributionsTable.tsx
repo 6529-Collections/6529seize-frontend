@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Distribution } from "../../../../../entities/IDistribution";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { Distribution } from "@/entities/IDistribution";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
-} from "../../../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
-} from "../../../../../constants";
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
+} from "@/constants";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import UserPageStatsActivityDistributionsTableItem from "./UserPageStatsActivityDistributionsTableItem";
-import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export enum DistributionCollection {
   MEMES = "MEMES",

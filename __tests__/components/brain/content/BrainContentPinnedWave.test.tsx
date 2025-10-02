@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ApiWaveType } from '../../../../generated/models/ApiWaveType';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -20,16 +20,16 @@ jest.mock('next/navigation', () => ({
 }));
 
 const prefetch = jest.fn();
-jest.mock('../../../../hooks/usePrefetchWaveData', () => ({
+jest.mock('@/hooks/usePrefetchWaveData', () => ({
   usePrefetchWaveData: () => prefetch,
 }));
 
 const registerWave = jest.fn();
-jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({ registerWave }),
 }));
 
-jest.mock('../../../../hooks/isMobileDevice', () => jest.fn(() => false));
+jest.mock('@/hooks/isMobileDevice', () => jest.fn(() => false));
 
 const waveData: any = {
   id: '1',
@@ -41,17 +41,17 @@ const waveData: any = {
 
 let useWaveDataMock: any;
 
-jest.mock('../../../../hooks/useWaveData', () => ({
+jest.mock('@/hooks/useWaveData', () => ({
   useWaveData: (...args: any[]) => useWaveDataMock(...args),
 }));
 
-jest.mock('../../../../components/waves/WavePicture', () => ({
+jest.mock('@/components/waves/WavePicture', () => ({
   __esModule: true,
   default: ({ name }: any) => <div data-testid="picture">{name}</div>,
 }));
 
-import BrainContentPinnedWave from '../../../../components/brain/content/BrainContentPinnedWave';
-import useIsMobileDevice from '../../../../hooks/isMobileDevice';
+import BrainContentPinnedWave from '@/components/brain/content/BrainContentPinnedWave';
+import useIsMobileDevice from '@/hooks/isMobileDevice';
 
 describe('BrainContentPinnedWave', () => {
   const onMouseEnter = jest.fn();

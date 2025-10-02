@@ -6,10 +6,10 @@ import {
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE,
   STATEMENT_GROUP,
   STATEMENT_TYPE,
-} from "../../../../../../helpers/Types";
+} from "@/helpers/Types";
 import UserPageIdentityAddStatementsSocialMediaAccountItems from "./UserPageIdentityAddStatementsSocialMediaAccountItems";
-import UserPageIdentityAddStatementsForm from "../../utils/UserPageIdentityAddStatementsForm";
-import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
+import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageIdentityAddStatementsSocialMediaAccount({
   onClose,

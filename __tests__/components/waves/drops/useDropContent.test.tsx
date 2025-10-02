@@ -1,13 +1,13 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ReactNode } from 'react';
-import { useDropContent } from '../../../../components/waves/drops/useDropContent';
-import { ApiDrop } from '../../../../generated/models/ApiDrop';
-import { commonApiFetch } from '../../../../services/api/common-api';
+import { useDropContent } from '@/components/waves/drops/useDropContent';
+import { ApiDrop } from '@/generated/models/ApiDrop';
+import { commonApiFetch } from '@/services/api/common-api';
 
 // Mock dependencies
-jest.mock('../../../../services/api/common-api');
-jest.mock('../../../../components/waves/drops/media-utils', () => ({
+jest.mock('@/services/api/common-api');
+jest.mock('@/components/waves/drops/media-utils', () => ({
   isVideoMimeType: (mimeType: string) => mimeType?.startsWith('video/'),
   processContent: (content: string, apiMedia: any[]) => ({
     segments: content ? [{ type: 'text', content }] : [],

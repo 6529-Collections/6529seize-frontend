@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageIdentityAddStatementsSocialMediaPosts from '../../../../../../../components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts';
+import UserPageIdentityAddStatementsSocialMediaPosts from '@/components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts';
 
-jest.mock('../../../../../../../components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPostsHeader', () => ({ __esModule: true, default: (p:any) => <div data-testid="header" onClick={p.onClose}/> }));
-jest.mock('../../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => ({ __esModule: true, default: (p:any) => { (global as any).formProps = p; return <div data-testid="form"/>; }}));
+jest.mock('@/components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPostsHeader', () => ({ __esModule: true, default: (p:any) => <div data-testid="header" onClick={p.onClose}/> }));
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => ({ __esModule: true, default: (p:any) => { (global as any).formProps = p; return <div data-testid="form"/>; }}));
 
 test('renders header and passes props to form', () => {
   const profile = { handle: 'a' } as any;

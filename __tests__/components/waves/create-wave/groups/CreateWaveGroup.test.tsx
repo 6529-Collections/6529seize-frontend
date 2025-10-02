@@ -1,16 +1,16 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveGroup from '../../../../../components/waves/create-wave/groups/CreateWaveGroup';
+import CreateWaveGroup from '@/components/waves/create-wave/groups/CreateWaveGroup';
 import {
   CreateWaveGroupConfigType,
   WaveGroupsConfig,
-} from '../../../../../types/waves.types';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { ApiGroupFull } from '../../../../../generated/models/ApiGroupFull';
+} from '@/types/waves.types';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { ApiGroupFull } from '@/generated/models/ApiGroupFull';
 
 // Mock dependencies
-jest.mock('../../../../../components/utils/radio/CommonBorderedRadioButton', () => {
+jest.mock('@/components/utils/radio/CommonBorderedRadioButton', () => {
   return function CommonBorderedRadioButton({ type, selected, disabled, label, onChange }: any) {
     const handleClick = () => {
       if (!disabled && onChange) {
@@ -33,7 +33,7 @@ jest.mock('../../../../../components/utils/radio/CommonBorderedRadioButton', () 
   };
 });
 
-jest.mock('../../../../../components/waves/create-wave/groups/CreateWaveGroupItem', () => {
+jest.mock('@/components/waves/create-wave/groups/CreateWaveGroupItem', () => {
   return function CreateWaveGroupItem({ selectedGroup, disabled, switchSelected, onSelectedClick }: any) {
     return (
       <div data-testid="group-item">
@@ -51,7 +51,7 @@ jest.mock('../../../../../components/waves/create-wave/groups/CreateWaveGroupIte
   };
 });
 
-jest.mock('../../../../../components/utils/select-group/SelectGroupModalWrapper', () => {
+jest.mock('@/components/utils/select-group/SelectGroupModalWrapper', () => {
   return function SelectGroupModalWrapper({ isOpen, onClose, onGroupSelect }: any) {
     if (!isOpen) return null;
     
@@ -70,7 +70,7 @@ jest.mock('../../../../../components/utils/select-group/SelectGroupModalWrapper'
   };
 });
 
-jest.mock('../../../../../components/waves/create-wave/utils/CreateWaveToggle', () => {
+jest.mock('@/components/waves/create-wave/utils/CreateWaveToggle', () => {
   return function CreateWaveToggle({ enabled, onChange, label }: any) {
     return (
       <div data-testid="wave-toggle">
@@ -87,7 +87,7 @@ jest.mock('../../../../../components/waves/create-wave/utils/CreateWaveToggle', 
 });
 
 // Mock constants
-jest.mock('../../../../../helpers/waves/waves.constants', () => {
+jest.mock('@/helpers/waves/waves.constants', () => {
   const { CreateWaveGroupConfigType } = jest.requireActual('../../../../../types/waves.types');
   const { ApiWaveType } = jest.requireActual('../../../../../generated/models/ApiWaveType');
   

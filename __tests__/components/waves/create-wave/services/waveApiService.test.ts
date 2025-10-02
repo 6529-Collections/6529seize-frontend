@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
-import { useAddWaveMutation } from '../../../../../components/waves/create-wave/services/waveApiService';
-import { commonApiPost } from '../../../../../services/api/common-api';
+import { useAddWaveMutation } from '@/components/waves/create-wave/services/waveApiService';
+import { commonApiPost } from '@/services/api/common-api';
 
-jest.mock('../../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 const useMutationMock = jest.fn((options: any) => {
   const mutateAsync = jest.fn(async (body?: any) => {

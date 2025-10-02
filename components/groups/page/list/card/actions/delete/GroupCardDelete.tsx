@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ApiGroupFull } from "../../../../../../../generated/models/ApiGroupFull";
-import CommonAnimationWrapper from "../../../../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../../../../utils/animation/CommonAnimationOpacity";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import GroupCardDeleteModal from "./GroupCardDeleteModal";
 
 export default function GroupCardDelete({

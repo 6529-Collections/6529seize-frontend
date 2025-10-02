@@ -1,14 +1,14 @@
 import { renderHook } from '@testing-library/react';
-import { useDecisionPoints } from '../../../hooks/waves/useDecisionPoints';
+import { useDecisionPoints } from '@/hooks/waves/useDecisionPoints';
 
-const mockUtils = require('../../../helpers/waves/time.utils');
+const mockUtils = require('@/helpers/waves/time.utils');
 
-jest.mock('../../../helpers/waves/time.utils', () => ({
+jest.mock('@/helpers/waves/time.utils', () => ({
   calculateLastDecisionTime: jest.fn(() => 21),
   FALLBACK_END_TIME: Number.MAX_SAFE_INTEGER,
 }));
 
-jest.mock('../../../helpers/time', () => ({
+jest.mock('@/helpers/time', () => ({
   Time: { currentMillis: jest.fn(() => 0) },
 }));
 

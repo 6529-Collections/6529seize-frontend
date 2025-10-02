@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
-import { numberWithCommas } from "../../helpers/Helpers";
-import { SortDirection } from "../../entities/ISort";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { SortDirection } from "@/entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import { MemeSeason } from "../../entities/ISeason";
+import { MemeSeason } from "@/entities/ISeason";
 import { Collector, Content } from "./Leaderboard";
 import LeaderboardSort from "./LeaderboardSort";
 import {

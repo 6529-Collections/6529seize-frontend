@@ -1,10 +1,10 @@
 import Cookies from "js-cookie";
-import { ProfileProxyActionStatus, ProfileProxySide } from "../entities/IProxy";
-import { ApiProfileProxy } from "../generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "../generated/models/ApiProfileProxyAction";
+import { ProfileProxyActionStatus, ProfileProxySide } from "@/entities/IProxy";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import { assertUnreachable } from "./AllowlistToolHelpers";
 import { Time } from "./time";
-import { PROFILE_PROXY_ACCEPTANCE_COOKIE } from "../constants";
+import { PROFILE_PROXY_ACCEPTANCE_COOKIE } from "@/constants";
 
 export const getProfileProxyActionStatus = ({
   action,

@@ -1,7 +1,7 @@
 import React from "react";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 interface WaveDropsScrollingOverlayProps {
   readonly isVisible: boolean;

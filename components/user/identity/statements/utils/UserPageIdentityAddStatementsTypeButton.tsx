@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { STATEMENT_META, STATEMENT_TYPE } from "../../../../../helpers/Types";
-import SocialStatementIcon from "../../../utils/icons/SocialStatementIcon";
+import { STATEMENT_META, STATEMENT_TYPE } from "@/helpers/Types";
+import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 
 export default function UserPageIdentityAddStatementsTypeButton({
   statementType,

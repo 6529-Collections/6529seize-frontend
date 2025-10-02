@@ -1,21 +1,21 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { TimelineToggleHeader } from "../../../../../components/waves/leaderboard/time/TimelineToggleHeader";
-import { SeizeSettingsProvider } from "../../../../../contexts/SeizeSettingsContext";
+import { TimelineToggleHeader } from "@/components/waves/leaderboard/time/TimelineToggleHeader";
+import { SeizeSettingsProvider } from "@/contexts/SeizeSettingsContext";
 
-jest.mock("../../../../../helpers/waves/time.utils", () => ({
+jest.mock("@/helpers/waves/time.utils", () => ({
   calculateTimeLeft: jest.fn(() => ({ days: 0, hours: 1, minutes: 2, seconds: 3 })),
 }));
 
-jest.mock("../../../../../components/waves/leaderboard/time/TimeCountdown", () => ({
+jest.mock("@/components/waves/leaderboard/time/TimeCountdown", () => ({
   TimeCountdown: ({ timeLeft }: any) => <div data-testid="countdown">{timeLeft.seconds}</div>,
 }));
 
-jest.mock("../../../../../hooks/useWave", () => ({
+jest.mock("@/hooks/useWave", () => ({
   useWave: jest.fn(() => null),
 }));
 
-jest.mock("../../../../../services/6529api", () => ({
+jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(() => Promise.resolve({
     memes_wave_id: "test-wave-id"
   })),

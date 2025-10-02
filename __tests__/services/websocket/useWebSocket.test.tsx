@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useWebSocket } from '../../../services/websocket/useWebSocket';
-import { WebSocketContext, WebSocketContextValue } from '../../../services/websocket/WebSocketContext';
-import { WebSocketStatus } from '../../../services/websocket/WebSocketTypes';
+import { useWebSocket } from '@/services/websocket/useWebSocket';
+import { WebSocketContext, WebSocketContextValue } from '@/services/websocket/WebSocketContext';
+import { WebSocketStatus } from '@/services/websocket/WebSocketTypes';
 
 describe('useWebSocket', () => {
   const mockContextValue: WebSocketContextValue = {

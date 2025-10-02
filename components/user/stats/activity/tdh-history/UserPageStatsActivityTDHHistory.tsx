@@ -1,10 +1,10 @@
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { TDHHistory } from "../../../../../entities/ITDH";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { TDHHistory } from "@/entities/ITDH";
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../../../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
-import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageStatsActivityTDHHistory({
   profile,

@@ -17,7 +17,7 @@ jest.mock('react-bootstrap', () => {
   };
 });
 
-jest.mock('../../../components/header/HeaderDesktopLink', () => ({ 
+jest.mock('@/components/header/HeaderDesktopLink', () => ({ 
   __esModule: true, 
   default: ({ link }: any) => (
     <div data-testid={`link-${link.name.toLowerCase().replace(/\s+/g, '-')}`}>
@@ -26,7 +26,7 @@ jest.mock('../../../components/header/HeaderDesktopLink', () => ({
   )
 }));
 
-jest.mock('../../../components/header/Header.module.scss', () => ({ 
+jest.mock('@/components/header/Header.module.scss', () => ({ 
   mainNavLink: 'main-nav-link', 
   mainNavLinkPadding: 'main-nav-link-padding', 
   submenuContainer: 'submenu-container', 
@@ -44,7 +44,7 @@ jest.mock('@fortawesome/free-solid-svg-icons', () => ({
 }));
 
 // Import the component after all mocks are set up
-import HeaderDesktopNav from '../../../components/header/HeaderDesktopNav';
+import HeaderDesktopNav from '@/components/header/HeaderDesktopNav';
 
 describe('HeaderDesktopNav', () => {
   it('renders navigation dropdowns', () => {

@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import WaveDropPartContentMarkdown from '../../../../components/waves/drops/WaveDropPartContentMarkdown';
+import WaveDropPartContentMarkdown from '@/components/waves/drops/WaveDropPartContentMarkdown';
 
-jest.mock('../../../../components/drops/view/part/DropPartMarkdownWithPropLogger', () => (props: any) => <div data-testid='md'>{props.partContent}</div>);
-jest.mock('../../../../components/waves/drops/WaveDropQuoteWithDropId', () => (props: any) => <div data-testid='quote' data-id={props.dropId} data-part={props.partId}/>);
+jest.mock('@/components/drops/view/part/DropPartMarkdownWithPropLogger', () => (props: any) => <div data-testid='md'>{props.partContent}</div>);
+jest.mock('@/components/waves/drops/WaveDropQuoteWithDropId', () => (props: any) => <div data-testid='quote' data-id={props.dropId} data-part={props.partId}/>);
 
 const basePart: any = { content: 'hello', quoted_drop: null };
 const wave: any = { id: 'w' };

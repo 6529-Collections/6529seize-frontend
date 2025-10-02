@@ -1,6 +1,6 @@
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import WaveWinnersDropHeaderAuthorHandle from '../../../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorHandle';
+import WaveWinnersDropHeaderAuthorHandle from '@/components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorHandle';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, onClick }: any) => <a href={href} onClick={onClick}>{children}</a> }));
 

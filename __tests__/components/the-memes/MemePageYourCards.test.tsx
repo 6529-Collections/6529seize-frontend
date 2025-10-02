@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemePageYourCardsRightMenu, MemePageYourCardsSubMenu } from '../../../components/the-memes/MemePageYourCards';
+import { MemePageYourCardsRightMenu, MemePageYourCardsSubMenu } from '@/components/the-memes/MemePageYourCards';
 
 const mockNFT = {
   id: 123,

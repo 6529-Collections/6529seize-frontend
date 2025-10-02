@@ -15,9 +15,9 @@ import {
   useSeizeConnectContext,
   WalletConnectionError,
   WalletDisconnectionError,
-} from "../../../components/auth/SeizeConnectContext";
-import * as authUtils from "../../../services/auth/auth.utils";
-import { WalletInitializationError } from "../../../src/errors/wallet";
+} from "@/components/auth/SeizeConnectContext";
+import * as authUtils from "@/services/auth/auth.utils";
+import { WalletInitializationError } from "@/src/errors/wallet";
 
 // Mock the Reown AppKit hooks
 jest.mock("@reown/appkit/react", () => ({
@@ -47,7 +47,7 @@ jest.mock("viem", () => ({
 }));
 
 // Mock auth utils
-jest.mock("../../../services/auth/auth.utils", () => ({
+jest.mock("@/services/auth/auth.utils", () => ({
   migrateCookiesToLocalStorage: jest.fn(),
   getWalletAddress: jest.fn(() => null),
   removeAuthJwt: jest.fn(),
@@ -854,7 +854,7 @@ describe("SeizeConnectContext Security Logging", () => {
 
     it("initialization with invalid stored address clears auth state", async () => {
       // Mock getWalletAddress to return invalid address
-      const { getWalletAddress } = require("../../../services/auth/auth.utils");
+      const { getWalletAddress } = require("@/services/auth/auth.utils");
       getWalletAddress.mockReturnValue("invalid-stored-address");
 
       render(

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import CsvIcon from '../../components/distribution-plan-tool/common/CsvIcon';
+import CsvIcon from '@/components/distribution-plan-tool/common/CsvIcon';
 
 describe('CsvIcon', () => {
   it('renders svg with expected attributes', () => {

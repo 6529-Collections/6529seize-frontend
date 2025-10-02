@@ -1,13 +1,13 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
-import { AuthContext } from "../../../../../../auth/Auth";
-import { getTimeUntil } from "../../../../../../../helpers/Helpers";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import { AuthContext } from "@/components/auth/Auth";
+import { getTimeUntil } from "@/helpers/Helpers";
 import PencilIcon, {
   PencilIconSize,
-} from "../../../../../../utils/icons/PencilIcon";
+} from "@/components/utils/icons/PencilIcon";
 
 export default function ProfileProxyEndTime({
   profileProxy,

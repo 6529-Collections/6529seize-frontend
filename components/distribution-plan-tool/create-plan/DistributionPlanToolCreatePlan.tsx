@@ -3,7 +3,7 @@
 import { useState } from "react";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
-} from "../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+} from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import CreateDistributionPlan from "./CreateDistributionPlan";
 import { useRouter } from "next/navigation";
 

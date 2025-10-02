@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import DropAuthorHandle from '../../../../../../components/drops/create/utils/author/DropAuthorHandle';
-import { DropPartSize } from '../../../../../../components/drops/view/part/DropPart';
+import DropAuthorHandle from '@/components/drops/create/utils/author/DropAuthorHandle';
+import { DropPartSize } from '@/components/drops/view/part/DropPart';
 import { useSearchParams } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({ useSearchParams: jest.fn() }));

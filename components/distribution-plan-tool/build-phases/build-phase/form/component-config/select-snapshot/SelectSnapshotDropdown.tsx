@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { DistributionPlanSnapshot } from "../../BuildPhaseFormConfigModal";
+import { DistributionPlanSnapshot } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
 import { motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import AllowlistToolAnimationWrapper from "../../../../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import SelectSnapshotDropdownList from "./SelectSnapshotDropdownList";
 
 export default function SelectSnapshotDropdown({

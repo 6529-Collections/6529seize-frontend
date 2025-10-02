@@ -1,28 +1,28 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import BrainMobileAbout from '../../../../components/brain/mobile/BrainMobileAbout';
+import BrainMobileAbout from '@/components/brain/mobile/BrainMobileAbout';
 import { useQuery } from '@tanstack/react-query';
-import { useLayout } from '../../../../components/brain/my-stream/layout/LayoutContext';
+import { useLayout } from '@/components/brain/my-stream/layout/LayoutContext';
 
-jest.mock('../../../../components/waves/header/WaveHeader', () => ({
+jest.mock('@/components/waves/header/WaveHeader', () => ({
   __esModule: true,
   default: (props: any) => <button data-testid="header" onClick={props.onFollowersClick}>header</button>,
   WaveHeaderPinnedSide: { LEFT: 'left' }
 }));
 
-jest.mock('../../../../components/brain/right-sidebar/BrainRightSidebarContent', () => ({
+jest.mock('@/components/brain/right-sidebar/BrainRightSidebarContent', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="content">content-{props.wave.id}</div>
 }));
 
-jest.mock('../../../../components/brain/right-sidebar/BrainRightSidebarFollowers', () => ({
+jest.mock('@/components/brain/right-sidebar/BrainRightSidebarFollowers', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="followers" onClick={props.closeFollowers}>followers-{props.wave.id}</div>
 }));
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext');
+jest.mock('@/components/brain/my-stream/layout/LayoutContext');
 
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseLayout = useLayout as jest.Mock;

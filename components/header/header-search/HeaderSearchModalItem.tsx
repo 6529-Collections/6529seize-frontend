@@ -1,29 +1,29 @@
 "use client";
 
 import { useHoverDirty } from "react-use";
-import { CommunityMemberMinimal } from "../../../entities/IProfile";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
 import {
   cicToType,
   formatNumberWithCommas,
   getProfileTargetRoute,
-} from "../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { useEffect, useRef } from "react";
 import HeaderSearchModalItemHighlight from "./HeaderSearchModalItemHighlight";
-import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
+import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import { usePathname, useSearchParams } from "next/navigation";
-import { UserPageTabType } from "../../user/layout/UserPageTabs";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 import Link from "next/link";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
-} from "../../../constants";
+} from "@/constants";
 import {
   NEXTGEN_CORE,
   NEXTGEN_CHAIN_ID,
-} from "../../nextGen/nextgen_contracts";
+} from "@/components/nextGen/nextgen_contracts";
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
-import type { ApiWave } from "../../../generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 export interface NFTSearchResult {
   id: number;

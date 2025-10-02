@@ -2,17 +2,17 @@
 
 import { useState, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useAuth } from "../../../../auth/Auth";
-import { ApiCreateDropRequest } from "../../../../../generated/models/ApiCreateDropRequest";
-import { ApiDropType } from "../../../../../generated/models/ApiDropType";
-import { ApiDropMedia } from "../../../../../generated/models/ApiDropMedia";
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
-import { ApiDropMetadata } from "../../../../../generated/models/ApiDropMetadata";
-import { commonApiPost } from "../../../../../services/api/common-api";
+import { useAuth } from "@/components/auth/Auth";
+import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import { commonApiPost } from "@/services/api/common-api";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionPhase } from "../ui/SubmissionProgress";
-import { useDropSignature } from "../../../../../hooks/drops/useDropSignature";
-import { multiPartUpload } from "../../../create-wave/services/multiPartUpload";
+import { useDropSignature } from "@/hooks/drops/useDropSignature";
+import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 
 /**
  * Interface for the artwork submission data

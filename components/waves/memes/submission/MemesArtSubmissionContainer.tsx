@@ -10,7 +10,7 @@ import ArtworkStep from "./steps/ArtworkStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { SubmissionPhase } from "./ui/SubmissionProgress";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface MemesArtSubmissionContainerProps {

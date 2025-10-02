@@ -1,7 +1,7 @@
-import { ApiDrop } from "../../generated/models/ApiDrop";
-import { ApiWave } from "../../generated/models/ApiWave";
-import { ApiWaveOutcomeCredit } from "../../generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "../../generated/models/ApiWaveOutcomeType";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 
 export enum OutcomeType {
   NIC = "NIC",

@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ProfileActivityLogsList from '../../../../components/profile-activity/list/ProfileActivityLogsList';
+import ProfileActivityLogsList from '@/components/profile-activity/list/ProfileActivityLogsList';
 
-jest.mock('../../../../components/profile-activity/list/ProfileActivityLogsItem', () => (props: any) => <tr data-testid="item" data-id={props.log.id} />);
-jest.mock('../../../../components/profile-activity/list/items/utils/ProfileActivityLogItemWrapper', () => (props: any) => <>{props.children}</>);
+jest.mock('@/components/profile-activity/list/ProfileActivityLogsItem', () => (props: any) => <tr data-testid="item" data-id={props.log.id} />);
+jest.mock('@/components/profile-activity/list/items/utils/ProfileActivityLogItemWrapper', () => (props: any) => <>{props.children}</>);
 
 describe('ProfileActivityLogsList', () => {
   it('renders one row per log', () => {

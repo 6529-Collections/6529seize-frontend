@@ -1,7 +1,7 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { WaveSmallLeaderboardItemOutcomes } from "../../../small-leaderboard/WaveSmallLeaderboardItemOutcomes";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { WaveSmallLeaderboardItemOutcomes } from "@/components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes";
 
 interface WaveLeaderboardDropFooterProps {
   readonly drop: ExtendedDrop;

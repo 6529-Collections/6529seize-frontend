@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import CommonInfoBox from '../../../components/utils/CommonInfoBox';
+import CommonInfoBox from '@/components/utils/CommonInfoBox';
 
 describe('CommonInfoBox', () => {
   it('renders message', () => {

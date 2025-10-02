@@ -1,5 +1,5 @@
-import { getStatsPath } from '../../components/user/stats/UserPageStats';
-import { ApiIdentity } from '../../generated/models/ApiIdentity';
+import { getStatsPath } from '@/components/user/stats/UserPageStats';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 describe('getStatsPath', () => {
   const baseProfile = {

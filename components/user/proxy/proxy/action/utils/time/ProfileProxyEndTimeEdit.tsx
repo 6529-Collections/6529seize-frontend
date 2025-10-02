@@ -1,20 +1,20 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
-import CommonTimeSelect from "../../../../../../utils/time/CommonTimeSelect";
-import { AuthContext } from "../../../../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import CommonTimeSelect from "@/components/utils/time/CommonTimeSelect";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPut } from "../../../../../../../services/api/common-api";
+import { commonApiPut } from "@/services/api/common-api";
 
-import ProxyCreateActionConfigEndTimeSwitch from "../../../create-action/config/ProxyCreateActionConfigEndTimeSwitch";
-import { Time } from "../../../../../../../helpers/time";
+import ProxyCreateActionConfigEndTimeSwitch from "@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch";
+import { Time } from "@/helpers/time";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../../../../distribution-plan-tool/common/CircleLoader";
-import { ApiUpdateProxyActionRequest } from "../../../../../../../generated/models/ApiUpdateProxyActionRequest";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ApiUpdateProxyActionRequest } from "@/generated/models/ApiUpdateProxyActionRequest";
 
 export default function ProfileProxyEndTimeEdit({
   profileProxy,

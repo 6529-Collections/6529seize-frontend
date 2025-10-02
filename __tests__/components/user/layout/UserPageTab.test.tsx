@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import UserPageTab from '../../../../components/user/layout/UserPageTab';
-import { UserPageTabType } from '../../../../components/user/layout/UserPageTabs';
+import UserPageTab from '@/components/user/layout/UserPageTab';
+import { UserPageTabType } from '@/components/user/layout/UserPageTabs';
 import { useParams, useSearchParams } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({

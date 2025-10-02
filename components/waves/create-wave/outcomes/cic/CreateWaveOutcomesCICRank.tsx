@@ -6,9 +6,9 @@ import {
   CreateWaveOutcomeConfigWinnersConfig,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
-} from "../../../../../types/waves.types";
+} from "@/types/waves.types";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesCICRank({
   onOutcome,

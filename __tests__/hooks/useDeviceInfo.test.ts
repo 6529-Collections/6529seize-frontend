@@ -1,8 +1,8 @@
 import { renderHook } from '@testing-library/react';
-import useDeviceInfo from '../../hooks/useDeviceInfo';
+import useDeviceInfo from '@/hooks/useDeviceInfo';
 
-jest.mock('../../hooks/useCapacitor', () => ({ __esModule: true, default: jest.fn(() => ({ isCapacitor: false })) }));
-const useCapacitorMock = require('../../hooks/useCapacitor').default as jest.Mock;
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: jest.fn(() => ({ isCapacitor: false })) }));
+const useCapacitorMock = require('@/hooks/useCapacitor').default as jest.Mock;
 
 defineMatchMedia();
 

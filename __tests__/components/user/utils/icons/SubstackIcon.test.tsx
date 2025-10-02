@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import SubstackIcon from '../../../../../components/user/utils/icons/SubstackIcon';
+import SubstackIcon from '@/components/user/utils/icons/SubstackIcon';
 
 describe('SubstackIcon', () => {
   it('renders circle with orange fill', () => {

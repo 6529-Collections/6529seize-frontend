@@ -1,5 +1,5 @@
 import { render, fireEvent } from '@testing-library/react';
-import GroupCreateIncludeMeAndPrivate from '../../components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMeAndPrivate';
+import GroupCreateIncludeMeAndPrivate from '@/components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMeAndPrivate';
 
 describe('GroupCreateIncludeMeAndPrivate', () => {
   it('forwards state changes from both toggles', () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { forwardRef, useRef, useEffect, useCallback } from "react";
-import { useIntersectionObserver } from "../../../hooks/scroll/useIntersectionObserver";
+import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
 
 interface WaveDropsReverseContainerProps {

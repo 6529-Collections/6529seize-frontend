@@ -9,16 +9,16 @@ import {
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
-import { fullScreenSupported } from "../../../../../../helpers/Helpers";
+import { fullScreenSupported } from "@/helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
-import useCapacitor from "../../../../../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../helpers/image.helpers";
-import { useInView } from "../../../../../../hooks/useInView";
-import { FallbackImage } from "../../../../../common/FallbackImage";
+} from "@/helpers/image.helpers";
+import { useInView } from "@/hooks/useInView";
+import { FallbackImage } from "@/components/common/FallbackImage";
 import { Tooltip } from "react-tooltip";
 
 const tooltipProps = {

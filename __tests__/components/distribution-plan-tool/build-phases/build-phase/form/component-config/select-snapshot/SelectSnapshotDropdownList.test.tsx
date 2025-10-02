@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import SelectSnapshotDropdownList from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownList';
+import SelectSnapshotDropdownList from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownList';
 
-jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownListItem', () => (props: any) => <li data-testid={`item-${props.snapshot.id}`} />);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownListItem', () => (props: any) => <li data-testid={`item-${props.snapshot.id}`} />);
 
 describe('SelectSnapshotDropdownList', () => {
   it('renders items and empty state', () => {

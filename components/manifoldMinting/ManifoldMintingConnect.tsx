@@ -8,14 +8,14 @@ import {
   areEqualAddresses,
   cicToType,
   isValidEthAddress,
-} from "../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../user/utils/UserCICAndLevel";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
 
 export default function ManifoldMintingConnect(

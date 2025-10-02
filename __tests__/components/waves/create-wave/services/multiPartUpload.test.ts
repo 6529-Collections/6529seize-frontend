@@ -1,14 +1,14 @@
 import axios from 'axios';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { multiPartUpload } from '../../../../../components/waves/create-wave/services/multiPartUpload';
-import { commonApiPost } from '../../../../../services/api/common-api';
+import { multiPartUpload } from '@/components/waves/create-wave/services/multiPartUpload';
+import { commonApiPost } from '@/services/api/common-api';
 
 // Mock dependencies
 jest.mock('axios');
 jest.mock('p-limit');
 jest.mock('p-retry');
-jest.mock('../../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 const mockAxios = axios as jest.Mocked<typeof axios>;
 const mockCommonApiPost = commonApiPost as jest.MockedFunction<typeof commonApiPost>;

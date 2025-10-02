@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { printVolumeTypeDropdown } from '../../../components/the-memes/TheMemes';
-import { VolumeType } from '../../../entities/INFT';
+import { printVolumeTypeDropdown } from '@/components/the-memes/TheMemes';
+import { VolumeType } from '@/entities/INFT';
 
 jest.mock('@headlessui/react', () => ({
   Menu: ({ children }: any) => <div>{children}</div>,
@@ -13,7 +13,7 @@ jest.mock('@headlessui/react', () => ({
   },
 }));
 
-jest.mock('../../../components/the-memes/TheMemes.module.scss', () => ({}));
+jest.mock('@/components/the-memes/TheMemes.module.scss', () => ({}));
 
 describe('printVolumeTypeDropdown', () => {
   it('renders all volume type items', () => {

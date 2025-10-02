@@ -1,11 +1,11 @@
 import { screen } from "@testing-library/react";
 import React from "react";
-import UserPageIdentityHeaderCICRateStats from "../../../../../../components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRateStats";
-import { renderWithAuth } from "../../../../../utils/testContexts";
-import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
+import UserPageIdentityHeaderCICRateStats from "@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRateStats";
+import { renderWithAuth } from "@/__tests__/utils/testContexts";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 jest.mock("next/link", () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock("../../../../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   formatNumberWithCommas: (n: number) => `f${n}`,
 }));
 

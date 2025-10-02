@@ -1,24 +1,24 @@
 import { render } from '@testing-library/react';
 import { act } from '@testing-library/react';
 import React from 'react';
-import UserPageIdentityAddStatementsContact from '../../../../../../../components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContact';
-import { STATEMENT_TYPE, STATEMENT_GROUP } from '../../../../../../../helpers/Types';
+import UserPageIdentityAddStatementsContact from '@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContact';
+import { STATEMENT_TYPE, STATEMENT_GROUP } from '@/helpers/Types';
 
 let headerProps: any;
 let itemsProps: any;
 let formProps: any;
 
-jest.mock('../../../../../../../components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactHeader', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactHeader', () => (props: any) => {
   headerProps = props;
   return <div data-testid="header" />;
 });
 
-jest.mock('../../../../../../../components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems', () => (props: any) => {
   itemsProps = props;
   return <div data-testid="items" />;
 });
 
-jest.mock('../../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => (props: any) => {
   formProps = props;
   return <div data-testid="form" />;
 });

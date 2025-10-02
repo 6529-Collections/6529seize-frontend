@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import PencilIcon, { PencilIconSize } from "../../../../utils/icons/PencilIcon";
-import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import PencilIcon, { PencilIconSize } from "@/components/utils/icons/PencilIcon";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import UserPageHeaderEditClassification from "./UserPageHeaderEditClassification";
 
 export default function UserPageClassificationWrapper({

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 
 jest.mock('@google/model-viewer', () => {});
-import NFTModel from '../../../components/nft-image/NFTModel';
+import NFTModel from '@/components/nft-image/NFTModel';
 
 const nft = {
   id: 1,

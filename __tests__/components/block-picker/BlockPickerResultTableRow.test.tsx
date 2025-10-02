@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import BlockPickerResultTableRow from '../../../components/block-picker/result/BlockPickerResultTableRow';
+import BlockPickerResultTableRow from '@/components/block-picker/result/BlockPickerResultTableRow';
 
-jest.mock('../../../components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({
+jest.mock('@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({
   __esModule: true,
   default: ({ children, showModal, onClose }: any) => showModal ? (
     <div data-testid="modal">
@@ -13,7 +13,7 @@ jest.mock('../../../components/allowlist-tool/common/modals/AllowlistToolCommonM
   AllowlistToolModalSize: { X_LARGE: 'X_LARGE' },
 }));
 
-jest.mock('../../../components/block-picker/result/BlockPickerResultTableRowModal', () => ({
+jest.mock('@/components/block-picker/result/BlockPickerResultTableRowModal', () => ({
   __esModule: true,
   default: ({ predictedBlock }: any) => <div>{`Blocks that include ${predictedBlock.blockNumberIncludes}`}</div>,
 }));

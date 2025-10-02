@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useReducer } from "react";
-import { useMyStreamWaveMessages } from "../contexts/wave/MyStreamContext";
+import { useMyStreamWaveMessages } from "@/contexts/wave/MyStreamContext";
 
-import { Drop } from "../helpers/waves/drop.helpers";
-import { WaveMessages } from "../contexts/wave/hooks/types";
+import { Drop } from "@/helpers/waves/drop.helpers";
+import { WaveMessages } from "@/contexts/wave/hooks/types";
 import { useDropMessages } from "./useDropMessages";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import UserCICHighlyAccurateIcon from '../../../../../../components/user/utils/user-cic-type/icons/UserCICHighlyAccurateIcon';
+import UserCICHighlyAccurateIcon from '@/components/user/utils/user-cic-type/icons/UserCICHighlyAccurateIcon';
 
 describe('UserCICHighlyAccurateIcon', () => {
   it('renders svg icon', () => {

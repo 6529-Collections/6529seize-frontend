@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MemesLeaderboardDropVoteSummary from '../../../../components/memes/drops/MemesLeaderboardDropVoteSummary';
+import MemesLeaderboardDropVoteSummary from '@/components/memes/drops/MemesLeaderboardDropVoteSummary';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ children, href }: any) => <a href={href}>{children}</a> }));
-jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <div data-testid="progress" /> }));
+jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <div data-testid="progress" /> }));
 
 describe('MemesLeaderboardDropVoteSummary', () => {
   const voter = { profile: { handle: 'bob', pfp: '' }, rating: 2 } as any;

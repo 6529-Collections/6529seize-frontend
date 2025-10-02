@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProxyCreateAction from '../../../../../../components/user/proxy/proxy/create-action/ProxyCreateAction';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import ProxyCreateAction from '@/components/user/proxy/proxy/create-action/ProxyCreateAction';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 
 // Mock fetch
@@ -16,14 +16,14 @@ global.fetch = jest.fn(() =>
 
 jest.mock('@tanstack/react-query');
 
-jest.mock('../../../../../../components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectType', () => ({
+jest.mock('@/components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectType', () => ({
   __esModule: true,
   default: ({ setSelectedActionType, onCancel }: any) => (
     <button onClick={() => setSelectedActionType('vote')} data-testid="select">select</button>
   ),
 }));
 
-jest.mock('../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfig', () => ({
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfig', () => ({
   __esModule: true,
   default: ({ onSubmit }: any) => <button onClick={() => onSubmit({ type: 'vote' })} data-testid="submit">config</button>,
 }));

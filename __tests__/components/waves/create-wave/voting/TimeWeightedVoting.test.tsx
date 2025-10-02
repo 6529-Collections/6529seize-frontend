@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import TimeWeightedVoting from '../../../../../components/waves/create-wave/voting/TimeWeightedVoting';
+import TimeWeightedVoting from '@/components/waves/create-wave/voting/TimeWeightedVoting';
 const renderComponent = (config: {
   enabled: boolean;
   averagingInterval: number;

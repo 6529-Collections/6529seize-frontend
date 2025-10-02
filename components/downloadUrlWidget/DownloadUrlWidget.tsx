@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import { Spinner } from "../dotLoader/DotLoader";
 import { Button, Modal } from "react-bootstrap";
-import { getAuthJwt, getStagingAuth } from "../../services/auth/auth.utils";
+import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {

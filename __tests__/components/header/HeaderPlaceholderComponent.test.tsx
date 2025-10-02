@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
-import HeaderPlaceholder from '../../../components/header/HeaderPlaceholder';
-import useCapacitor from '../../../hooks/useCapacitor';
-import styles from '../../../components/header/Header.module.scss';
+import HeaderPlaceholder from '@/components/header/HeaderPlaceholder';
+import useCapacitor from '@/hooks/useCapacitor';
+import styles from '@/components/header/Header.module.scss';
 
-jest.mock('../../../hooks/useCapacitor');
+jest.mock('@/hooks/useCapacitor');
 
 const mockUseCapacitor = useCapacitor as jest.MockedFunction<typeof useCapacitor>;
 

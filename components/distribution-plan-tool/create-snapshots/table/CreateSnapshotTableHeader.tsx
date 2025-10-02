@@ -1,4 +1,4 @@
-import DistributionPlanTableHeaderWrapper from "../../common/DistributionPlanTableHeaderWrapper";
+import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
 
 export default function CreateSnapshotTableHeader() {
   return (

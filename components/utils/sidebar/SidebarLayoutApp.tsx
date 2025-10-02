@@ -1,8 +1,8 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import GroupsSidebarApp from "../../groups/sidebar/GroupsSidebarApp";
-import GroupsSidebarAppToggle from "../../groups/sidebar/GroupsSidebarAppToggle";
+import GroupsSidebarApp from "@/components/groups/sidebar/GroupsSidebarApp";
+import GroupsSidebarAppToggle from "@/components/groups/sidebar/GroupsSidebarAppToggle";
 
 export default function SidebarLayoutApp({
   children,

@@ -1,14 +1,14 @@
 import styles from "./TheMemes.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { NULL_ADDRESS } from "../../constants";
-import { NFT, NftRank, NftTDH } from "../../entities/INFT";
+import { NULL_ADDRESS } from "@/constants";
+import { NFT, NftRank, NftTDH } from "@/entities/INFT";
 import {
   areEqualAddresses,
   numberWithCommas,
   printMintDate,
-} from "../../helpers/Helpers";
-import { Transaction } from "../../entities/ITransaction";
-import { ConsolidatedTDH } from "../../entities/ITDH";
+} from "@/helpers/Helpers";
+import { Transaction } from "@/entities/ITransaction";
+import { ConsolidatedTDH } from "@/entities/ITDH";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 
 export function MemePageYourCardsRightMenu(props: {

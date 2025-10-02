@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useParams } from "next/navigation";
 import UserPageFollowers from "../followers/UserPageFollowers";
 import { Tooltip } from "react-tooltip";

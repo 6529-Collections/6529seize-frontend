@@ -1,6 +1,6 @@
 import { publicEnv } from "@/config/env";
 import { goerli, sepolia } from "wagmi/chains";
-import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
+import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 
 const options = { method: "GET", headers: { accept: "application/json" } };
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./About.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 import { AboutSection } from "@/enums";
@@ -617,9 +618,13 @@ export default function AboutTermsOfService() {
               incorporated by reference into these Terms.
               <br />
               <br />
-              <a href="/dispute-resolution" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="/dispute-resolution"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 6529.io/dispute-resolution
-              </a>{" "}
+              </Link>{" "}
             </li>
             <br />
             <br />

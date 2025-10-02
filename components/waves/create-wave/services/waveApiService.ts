@@ -1,6 +1,6 @@
-import { ApiCreateNewWave } from "../../../../generated/models/ApiCreateNewWave";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { commonApiPost } from "../../../../services/api/common-api";
+import { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiPost } from "@/services/api/common-api";
 import { UseMutationResult, useMutation } from "@tanstack/react-query";
 
 /**

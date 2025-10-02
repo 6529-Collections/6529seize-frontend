@@ -1,8 +1,8 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import EditDropLexical from '../../../../components/waves/drops/EditDropLexical';
-import type { ApiDropMentionedUser } from '../../../../generated/models/ApiDropMentionedUser';
+import EditDropLexical from '@/components/waves/drops/EditDropLexical';
+import type { ApiDropMentionedUser } from '@/generated/models/ApiDropMentionedUser';
 
 type MentionSelectHandler = (user: {
   mentioned_profile_id: string;
@@ -97,23 +97,23 @@ jest.mock('@lexical/react/LexicalListPlugin', () => ({
 jest.mock('@lexical/react/LexicalLinkPlugin', () => ({
   LinkPlugin: () => null,
 }));
-jest.mock('../../../../components/drops/create/lexical/plugins/PlainTextPastePlugin', () => ({
+jest.mock('@/components/drops/create/lexical/plugins/PlainTextPastePlugin', () => ({
   __esModule: true,
   default: () => null,
 }));
-jest.mock('../../../../components/drops/create/lexical/plugins/emoji/EmojiPlugin', () => ({
+jest.mock('@/components/drops/create/lexical/plugins/emoji/EmojiPlugin', () => ({
   __esModule: true,
   default: () => null,
 }));
-jest.mock('../../../../components/waves/CreateDropEmojiPicker', () => ({
+jest.mock('@/components/waves/CreateDropEmojiPicker', () => ({
   __esModule: true,
   default: () => <div data-testid="emoji-picker" />,
 }));
-jest.mock('../../../../hooks/useDeviceInfo', () => ({
+jest.mock('@/hooks/useDeviceInfo', () => ({
   __esModule: true,
   default: () => ({ isApp: false }),
 }));
-jest.mock('../../../../components/drops/create/lexical/plugins/mentions/MentionsPlugin', () => {
+jest.mock('@/components/drops/create/lexical/plugins/mentions/MentionsPlugin', () => {
   const React = require('react');
   return {
     __esModule: true,
@@ -126,24 +126,24 @@ jest.mock('../../../../components/drops/create/lexical/plugins/mentions/Mentions
     }),
   };
 });
-jest.mock('../../../../components/drops/create/lexical/nodes/MentionNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/MentionNode', () => ({
   MentionNode: class MockMentionNode {},
   $createMentionNode: jest.fn(() => ({ type: 'mention' })),
 }));
-jest.mock('../../../../components/drops/create/lexical/nodes/HashtagNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/HashtagNode', () => ({
   HashtagNode: class MockHashtagNode {},
 }));
-jest.mock('../../../../components/drops/create/lexical/nodes/EmojiNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/EmojiNode', () => ({
   EmojiNode: class MockEmojiNode {},
 }));
-jest.mock('../../../../components/drops/create/lexical/ExampleTheme', () => ({
+jest.mock('@/components/drops/create/lexical/ExampleTheme', () => ({
   __esModule: true,
   default: {},
 }));
-jest.mock('../../../../components/drops/create/lexical/transformers/MentionTransformer', () => ({
+jest.mock('@/components/drops/create/lexical/transformers/MentionTransformer', () => ({
   MENTION_TRANSFORMER: {},
 }));
-jest.mock('../../../../components/drops/create/lexical/transformers/HastagTransformer', () => ({
+jest.mock('@/components/drops/create/lexical/transformers/HastagTransformer', () => ({
   HASHTAG_TRANSFORMER: {},
 }));
 jest.mock('@/components/drops/create/lexical/transformers/markdownTransformers', () => ({

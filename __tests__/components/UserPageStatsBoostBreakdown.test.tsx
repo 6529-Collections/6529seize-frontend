@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import UserPageStatsBoostBreakdown from "../../components/user/stats/UserPageStatsBoostBreakdown";
+import UserPageStatsBoostBreakdown from "@/components/user/stats/UserPageStatsBoostBreakdown";
 
 function makeTDH() {
   return {

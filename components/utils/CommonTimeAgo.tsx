@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getTimeAgo, getTimeAgoShort } from "../../helpers/Helpers";
+import { getTimeAgo, getTimeAgoShort } from "@/helpers/Helpers";
 
 export default function CommonTimeAgo({
   timestamp,

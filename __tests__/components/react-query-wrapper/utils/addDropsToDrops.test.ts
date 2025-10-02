@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
-import { addDropToDrops } from '../../../../components/react-query-wrapper/utils/addDropsToDrops';
-import { QueryKey } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
+import { addDropToDrops } from '@/components/react-query-wrapper/utils/addDropsToDrops';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 test('adds drop to relevant caches', () => {
   const qc = new QueryClient();

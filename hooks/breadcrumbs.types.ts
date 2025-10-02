@@ -1,4 +1,4 @@
-import { Crumb } from "../components/breadcrumb/Breadcrumb";
+import { Crumb } from "@/components/breadcrumb/Breadcrumb";
 
 /**
  * Defines the recognized types for dynamic routes within the breadcrumb system.

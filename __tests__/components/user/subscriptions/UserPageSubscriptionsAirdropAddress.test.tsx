@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import { AIRDROPS_USE_CASE } from "../../../../components/delegation/delegation-constants";
-import UserPageSubscriptionsAirdropAddress from "../../../../components/user/subscriptions/UserPageSubscriptionsAirdropAddress";
-import { MEMES_CONTRACT } from "../../../../constants";
+import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
+import UserPageSubscriptionsAirdropAddress from "@/components/user/subscriptions/UserPageSubscriptionsAirdropAddress";
+import { MEMES_CONTRACT } from "@/constants";
 
-jest.mock("../../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   formatAddress: () => "formatted",
 }));
 

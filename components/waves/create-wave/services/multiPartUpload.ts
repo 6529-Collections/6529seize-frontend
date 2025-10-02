@@ -1,8 +1,8 @@
 import axios from "axios";
 import pLimit from "p-limit";
 import pRetry from "p-retry";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { ApiDropMedia } from "../../../../generated/models/ApiDropMedia";
+import { commonApiPost } from "@/services/api/common-api";
+import { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
 const PART_SIZE = 5 * 1024 * 1024; // 5 MB per chunk

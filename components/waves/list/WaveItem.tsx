@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import {
   getRandomColorWithSeed,
   numberWithCommas,
-} from "../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import WaveItemDropped from "./WaveItemDropped";
 import WaveItemFollow from "./WaveItemFollow";
-import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { Tooltip } from "react-tooltip";
 
 export default function WaveItem({

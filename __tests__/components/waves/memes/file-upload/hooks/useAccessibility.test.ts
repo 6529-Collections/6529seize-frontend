@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import useAccessibility from '../../../../../../components/waves/memes/file-upload/hooks/useAccessibility';
+import useAccessibility from '@/components/waves/memes/file-upload/hooks/useAccessibility';
 
 // Mock window.matchMedia
 const mockMatchMedia = jest.fn();

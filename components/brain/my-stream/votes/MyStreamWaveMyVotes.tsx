@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useContext, useState, useMemo } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { AuthContext } from "../../../auth/Auth";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { AuthContext } from "@/components/auth/Auth";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
-} from "../../../../hooks/useWaveDropsLeaderboard";
+} from "@/hooks/useWaveDropsLeaderboard";
 import MyStreamWaveMyVote from "./MyStreamWaveMyVote";
 import { useLayout } from "../layout/LayoutContext";
-import { WaveLeaderboardLoadingBar } from "../../../waves/leaderboard/drops/WaveLeaderboardLoadingBar";
-import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
+import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import MyStreamWaveMyVotesReset from "./MyStreamWaveMyVotesReset";
 
 interface MyStreamWaveMyVotesProps {

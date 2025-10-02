@@ -2,26 +2,26 @@
 
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropLocation } from "../../waves/drops/Drop";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropLocation } from "@/components/waves/drops/Drop";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import MemesLeaderboardDropCard from "./MemesLeaderboardDropCard";
 import MemesLeaderboardDropHeader from "./MemesLeaderboardDropHeader";
 import MemesLeaderboardDropDescription from "./MemesLeaderboardDropDescription";
 import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
 import MemeDropTraits from "./MemeDropTraits";
-import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
-import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
-import WaveDropActionsOpen from "../../waves/drops/WaveDropActionsOpen";
-import { VotingModal, MobileVotingModal } from "../../voting";
-import VotingModalButton from "../../voting/VotingModalButton";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import useLongPressInteraction from "../../../hooks/useLongPressInteraction";
-import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import WaveDropMobileMenuDelete from "../../waves/drops/WaveDropMobileMenuDelete";
-import WaveDropMobileMenuOpen from "../../waves/drops/WaveDropMobileMenuOpen";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import { VotingModal, MobileVotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;

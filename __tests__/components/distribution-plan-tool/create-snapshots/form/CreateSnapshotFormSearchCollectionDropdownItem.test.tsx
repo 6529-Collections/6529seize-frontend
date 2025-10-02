@@ -1,18 +1,18 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateSnapshotFormSearchCollectionDropdownItem from '../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownItem';
-import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { distributionPlanApiFetch } from '../../../../../services/distribution-plan-api';
+import CreateSnapshotFormSearchCollectionDropdownItem from '@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownItem';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { distributionPlanApiFetch } from '@/services/distribution-plan-api';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
 
-jest.mock('../../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   formatNumber: (n: number) => `f${n}`,
   truncateTextMiddle: (s: string) => s
 }));
 
-jest.mock('../../../../../services/distribution-plan-api', () => ({
+jest.mock('@/services/distribution-plan-api', () => ({
   distributionPlanApiFetch: jest.fn()
 }));
 

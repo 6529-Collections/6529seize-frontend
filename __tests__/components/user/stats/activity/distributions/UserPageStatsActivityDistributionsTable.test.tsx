@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityDistributionsTable from '../../../../../../components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTable';
+import UserPageStatsActivityDistributionsTable from '@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTable';
 
-jest.mock('../../../../../../components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableItem', () => (props: any) => (
+jest.mock('@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableItem', () => (props: any) => (
   <tr data-testid="item">{props.item.name}</tr>
 ));
 

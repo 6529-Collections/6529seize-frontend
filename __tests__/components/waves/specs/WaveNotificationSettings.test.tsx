@@ -1,20 +1,20 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveNotificationSettings from '../../../../components/waves/specs/WaveNotificationSettings';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ApiWave } from '../../../../generated/models/ApiWave';
+import WaveNotificationSettings from '@/components/waves/specs/WaveNotificationSettings';
+import { AuthContext } from '@/components/auth/Auth';
+import { ApiWave } from '@/generated/models/ApiWave';
 
-jest.mock('../../../../hooks/useWaveNotificationSubscription', () => ({
+jest.mock('@/hooks/useWaveNotificationSubscription', () => ({
   useWaveNotificationSubscription: jest.fn(),
 }));
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
 }));
 
-jest.mock('../../../../contexts/SeizeSettingsContext', () => ({
+jest.mock('@/contexts/SeizeSettingsContext', () => ({
   useSeizeSettings: () => ({
     seizeSettings: {
       all_drops_notifications_subscribers_limit: 1000,
@@ -49,7 +49,7 @@ const mockAuthContext = {
   setToast: jest.fn(),
 };
 
-const mockUseWaveNotificationSubscription = require('../../../../hooks/useWaveNotificationSubscription').useWaveNotificationSubscription;
+const mockUseWaveNotificationSubscription = require('@/hooks/useWaveNotificationSubscription').useWaveNotificationSubscription;
 
 describe('WaveNotificationSettings', () => {
   beforeEach(() => {
@@ -115,7 +115,7 @@ describe('WaveNotificationSettings', () => {
   });
 
   it('enables all notifications when clicking all button', async () => {
-    const { commonApiPost } = require('../../../../services/api/common-api');
+    const { commonApiPost } = require('@/services/api/common-api');
     const refetch = jest.fn();
     
     mockUseWaveNotificationSubscription.mockReturnValue({
@@ -141,7 +141,7 @@ describe('WaveNotificationSettings', () => {
   });
 
   it('disables all notifications when clicking mentions button', async () => {
-    const { commonApiDelete } = require('../../../../services/api/common-api');
+    const { commonApiDelete } = require('@/services/api/common-api');
     const refetch = jest.fn();
     
     mockUseWaveNotificationSubscription.mockReturnValue({
@@ -166,7 +166,7 @@ describe('WaveNotificationSettings', () => {
   });
 
   it('handles API error when enabling all notifications', async () => {
-    const { commonApiPost } = require('../../../../services/api/common-api');
+    const { commonApiPost } = require('@/services/api/common-api');
     const refetch = jest.fn();
     
     mockUseWaveNotificationSubscription.mockReturnValue({
@@ -190,7 +190,7 @@ describe('WaveNotificationSettings', () => {
   });
 
   it('handles API error when disabling all notifications', async () => {
-    const { commonApiDelete } = require('../../../../services/api/common-api');
+    const { commonApiDelete } = require('@/services/api/common-api');
     const refetch = jest.fn();
     
     mockUseWaveNotificationSubscription.mockReturnValue({
@@ -214,7 +214,7 @@ describe('WaveNotificationSettings', () => {
   });
 
   it('shows loading spinner when toggling notifications', async () => {
-    const { commonApiPost } = require('../../../../services/api/common-api');
+    const { commonApiPost } = require('@/services/api/common-api');
     const refetch = jest.fn();
     
     mockUseWaveNotificationSubscription.mockReturnValue({
@@ -237,7 +237,7 @@ describe('WaveNotificationSettings', () => {
   });
 
   it('does not call API when clicking same notification setting', async () => {
-    const { commonApiPost } = require('../../../../services/api/common-api');
+    const { commonApiPost } = require('@/services/api/common-api');
     
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: { subscribed: true },

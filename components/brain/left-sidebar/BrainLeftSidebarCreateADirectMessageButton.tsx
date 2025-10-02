@@ -5,7 +5,7 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useMemo } from "react";
-import { useAuth } from "../../auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 
 interface BrainLeftSidebarCreateADirectMessageButtonProps {}
 

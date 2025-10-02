@@ -1,6 +1,6 @@
 import { act, cleanup, render } from "@testing-library/react";
-import VirtualScrollWrapper from "../../../../components/waves/drops/VirtualScrollWrapper";
-import { DropSize } from "../../../../helpers/waves/drop.helpers";
+import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
 jest.useFakeTimers();
 
@@ -30,7 +30,7 @@ afterEach(() => {
   cleanup();
 });
 
-jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
 }));
 
@@ -72,7 +72,7 @@ test("renders placeholder when out of view", () => {
 
 test("fetches light drop when entering view", () => {
   const fetchAroundSerialNo = jest.fn();
-  const module = require("../../../../contexts/wave/MyStreamContext");
+  const module = require("@/contexts/wave/MyStreamContext");
   (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
   setup(DropSize.LIGHT);
   act(() => {
@@ -126,7 +126,7 @@ describe("Drop Size Behavior", () => {
 
   test("does not fetch when FULL drop enters view", () => {
     const fetchAroundSerialNo = jest.fn();
-    const module = require("../../../../contexts/wave/MyStreamContext");
+    const module = require("@/contexts/wave/MyStreamContext");
     (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
 
     setup(DropSize.FULL);
@@ -139,7 +139,7 @@ describe("Drop Size Behavior", () => {
 
   test("does not fetch when LIGHT drop leaves view", () => {
     const fetchAroundSerialNo = jest.fn();
-    const module = require("../../../../contexts/wave/MyStreamContext");
+    const module = require("@/contexts/wave/MyStreamContext");
     (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
 
     setup(DropSize.LIGHT);

@@ -1,7 +1,7 @@
 import React from "react";
 import { render, cleanup, act, waitFor } from "@testing-library/react";
-import SelectGroupModal from "../../../../components/utils/select-group/SelectGroupModal";
-import { QueryKey } from "../../../../components/react-query-wrapper/ReactQueryWrapper";
+import SelectGroupModal from "@/components/utils/select-group/SelectGroupModal";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 const useQueryMock = jest.fn(() => ({ data: [{ id: 1, group_name: "g" }], isFetching: false }));
 
@@ -18,18 +18,18 @@ jest.mock("react-use", () => ({
 
 const searchProps: any = {};
 
-jest.mock("../../../../components/utils/select-group/SelectGroupModalHeader", () => (props: any) => (
+jest.mock("@/components/utils/select-group/SelectGroupModalHeader", () => (props: any) => (
   <div data-testid="header" onClick={props.onClose}></div>
 ));
 
-jest.mock("../../../../components/utils/select-group/SelectGroupModalSearch", () => (props: any) => {
+jest.mock("@/components/utils/select-group/SelectGroupModalSearch", () => (props: any) => {
   Object.assign(searchProps, props);
   return <div data-testid="search" />;
 });
 
 const itemsMock = jest.fn();
 
-jest.mock("../../../../components/utils/select-group/SelectGroupModalItems", () => (props: any) => {
+jest.mock("@/components/utils/select-group/SelectGroupModalItems", () => (props: any) => {
   itemsMock(props);
   return <div data-testid="items" />;
 });
@@ -39,7 +39,7 @@ jest.mock("react-dom", () => ({
   createPortal: (node: any) => node,
 }));
 
-jest.mock("../../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn().mockResolvedValue([{ id: 1, group_name: "g" }]),
 }));
 

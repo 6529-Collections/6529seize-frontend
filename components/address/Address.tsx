@@ -1,12 +1,12 @@
 "use client";
 
 import styles from "./Address.module.scss";
-import { numberWithCommas, parseEmojis } from "../../helpers/Helpers";
+import { numberWithCommas, parseEmojis } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import Image from "next/image";
-import { IProfileConsolidation } from "../../entities/IProfile";
+import { IProfileConsolidation } from "@/entities/IProfile";
 import { WalletAddress } from "./WalletAddress";
 import { faArrowsTurnRight } from "@fortawesome/free-solid-svg-icons";
 

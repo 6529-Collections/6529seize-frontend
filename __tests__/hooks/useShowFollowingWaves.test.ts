@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useShowFollowingWaves } from '../../hooks/useShowFollowingWaves';
+import { useShowFollowingWaves } from '@/hooks/useShowFollowingWaves';
 
 beforeEach(() => {
   localStorage.clear();

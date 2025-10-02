@@ -4,12 +4,12 @@ import React from "react";
 import {
   CookieConsentProvider,
   useCookieConsent,
-} from "../../../components/cookies/CookieConsentContext";
+} from "@/components/cookies/CookieConsentContext";
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
-} from "../../../constants";
-import * as api from "../../../services/api/common-api";
+} from "@/constants";
+import * as api from "@/services/api/common-api";
 
 // Mock APIs and Cookies
 jest.mock("js-cookie", () => ({
@@ -17,14 +17,14 @@ jest.mock("js-cookie", () => ({
   set: jest.fn(),
 }));
 
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
 }));
 
 // Mock AuthContext
-jest.mock("../../../components/auth/Auth", () => ({
+jest.mock("@/components/auth/Auth", () => ({
   AuthContext: React.createContext({
     setToast: jest.fn(),
   }),

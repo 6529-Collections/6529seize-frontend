@@ -1,9 +1,9 @@
-import { fetchNftTdhResults, setScrollPosition, PAGE_SIZE } from '../../../components/leaderboard/NFTLeaderboard';
-import { cicToType } from '../../../helpers/Helpers';
-import { commonApiFetch } from '../../../services/api/common-api';
+import { fetchNftTdhResults, setScrollPosition, PAGE_SIZE } from '@/components/leaderboard/NFTLeaderboard';
+import { cicToType } from '@/helpers/Helpers';
+import { commonApiFetch } from '@/services/api/common-api';
 
-jest.mock('../../../services/api/common-api');
-jest.mock('../../../helpers/Helpers', () => ({
+jest.mock('@/services/api/common-api');
+jest.mock('@/helpers/Helpers', () => ({
   cicToType: jest.fn().mockReturnValue('TYPE')
 }));
 

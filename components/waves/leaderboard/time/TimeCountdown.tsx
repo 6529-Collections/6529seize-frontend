@@ -1,5 +1,5 @@
 import React from "react";
-import { TimeLeft } from "../../../../helpers/waves/time.utils";
+import { TimeLeft } from "@/helpers/waves/time.utils";
 import { TimeUnitDisplay } from "./TimeUnitDisplay";
 
 interface TimeCountdownProps {

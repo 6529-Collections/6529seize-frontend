@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityTDHHistory from '../../../../../../components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistory';
+import UserPageStatsActivityTDHHistory from '@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistory';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');
 
-jest.mock('../../../../../../components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryCharts', () => ({ __esModule: true, default: () => <div data-testid="charts" /> }));
-jest.mock('../../../../../../components/utils/animation/CommonCardSkeleton', () => ({ __esModule: true, default: () => <div data-testid="skeleton" /> }));
+jest.mock('@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryCharts', () => ({ __esModule: true, default: () => <div data-testid="charts" /> }));
+jest.mock('@/components/utils/animation/CommonCardSkeleton', () => ({ __esModule: true, default: () => <div data-testid="skeleton" /> }));
 
 describe('UserPageStatsActivityTDHHistory', () => {
   const mockUseQuery = useQuery as jest.Mock;

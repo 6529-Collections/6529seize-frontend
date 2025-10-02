@@ -1,17 +1,17 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import UserPageIdentityStatementsStatementsList from '../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { useSeizeConnectContext } from '../../../../../../components/auth/SeizeConnectContext';
+import UserPageIdentityStatementsStatementsList from '@/components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList';
+import { AuthContext } from '@/components/auth/Auth';
+import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 
-jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
-jest.mock('../../../../../../helpers/Helpers', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/helpers/Helpers', () => ({
   amIUser: jest.fn(() => true),
 }));
 
 let statementProps: any[] = [];
-jest.mock('../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatement', () => (props: any) => { statementProps.push(props); return <li data-testid="statement" />; });
-jest.mock('../../../../../../components/utils/animation/CommonSkeletonLoader', () => ({ __esModule: true, default: () => <div data-testid="loader" /> }));
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityStatementsStatement', () => (props: any) => { statementProps.push(props); return <li data-testid="statement" />; });
+jest.mock('@/components/utils/animation/CommonSkeletonLoader', () => ({ __esModule: true, default: () => <div data-testid="loader" /> }));
 
 describe('UserPageIdentityStatementsStatementsList', () => {
   const addressContext = { address: '0x1' };

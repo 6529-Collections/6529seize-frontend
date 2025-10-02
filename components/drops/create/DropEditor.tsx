@@ -16,10 +16,10 @@ import {
   DropMetadata,
   MentionedUser,
   ReferencedNft,
-} from "../../../entities/IDrop";
+} from "@/entities/IDrop";
 import { CreateDropType, CreateDropViewType } from "./types";
 import CreateDropStormView from "./utils/storm/CreateDropStormView";
-import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
+import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;

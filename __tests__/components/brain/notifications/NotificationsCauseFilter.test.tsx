@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NotificationsCauseFilter from '../../../../components/brain/notifications/NotificationsCauseFilter';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { usePrefetchNotifications } from '../../../../hooks/useNotificationsQuery';
+import NotificationsCauseFilter from '@/components/brain/notifications/NotificationsCauseFilter';
+import { AuthContext } from '@/components/auth/Auth';
+import { usePrefetchNotifications } from '@/hooks/useNotificationsQuery';
 
-jest.mock('../../../../hooks/useNotificationsQuery');
+jest.mock('@/hooks/useNotificationsQuery');
 const prefetch = jest.fn();
 (usePrefetchNotifications as jest.Mock).mockReturnValue(prefetch);
 

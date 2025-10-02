@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import CreateDropMetadataRow from '../../../components/waves/CreateDropMetadataRow';
+import CreateDropMetadataRow from '@/components/waves/CreateDropMetadataRow';
 
 const baseMeta = {
   id: 'meta-1',

@@ -1,23 +1,23 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { MemesSingleWaveDropInfoPanel } from '../../../../components/waves/drop/MemesSingleWaveDropInfoPanel';
-import { ApiDropType } from '../../../../generated/models/ApiDropType';
+import { MemesSingleWaveDropInfoPanel } from '@/components/waves/drop/MemesSingleWaveDropInfoPanel';
+import { ApiDropType } from '@/generated/models/ApiDropType';
 
 jest.mock('framer-motion', () => ({ motion: { div: (p:any)=> <div {...p}/> }, AnimatePresence: ({ children }:any)=> <div>{children}</div> }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid="fa" {...p}/> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropClose', () => ({ SingleWaveDropClose: () => <div data-testid="close"/> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropInfoContainer', () => ({ SingleWaveDropInfoContainer: ({ children }:any) => <div data-testid="container">{children}</div> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropInfoDetails', () => ({ SingleWaveDropInfoDetails: () => <div data-testid="details"/> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropInfoAuthorSection', () => ({ SingleWaveDropInfoAuthorSection: () => <div data-testid="author"/> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropInfoActions', () => ({ SingleWaveDropInfoActions: () => <div data-testid="actions"/> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropPosition', () => ({ SingleWaveDropPosition: () => <div data-testid="position"/> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVotes', () => ({ SingleWaveDropVotes: () => <div data-testid="votes"/> }));
-jest.mock('../../../../components/waves/drop/WinnerBadge', () => ({ WinnerBadge: () => <div data-testid="badge"/> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropTraits', () => ({ SingleWaveDropTraits: () => <div data-testid="traits"/> }));
-jest.mock('../../../../components/utils/button/WaveDropDeleteButton', () => ({ __esModule: true, default: () => <div data-testid="delete"/> }));
-jest.mock('../../../../components/drops/view/item/content/media/DropListItemContentMedia', () => (props:any) => <div data-testid="media" {...props}/>);
-jest.mock('../../../../hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn(() => ({ isWinner:true, canDelete:true })) }));
+jest.mock('@/components/waves/drop/SingleWaveDropClose', () => ({ SingleWaveDropClose: () => <div data-testid="close"/> }));
+jest.mock('@/components/waves/drop/SingleWaveDropInfoContainer', () => ({ SingleWaveDropInfoContainer: ({ children }:any) => <div data-testid="container">{children}</div> }));
+jest.mock('@/components/waves/drop/SingleWaveDropInfoDetails', () => ({ SingleWaveDropInfoDetails: () => <div data-testid="details"/> }));
+jest.mock('@/components/waves/drop/SingleWaveDropInfoAuthorSection', () => ({ SingleWaveDropInfoAuthorSection: () => <div data-testid="author"/> }));
+jest.mock('@/components/waves/drop/SingleWaveDropInfoActions', () => ({ SingleWaveDropInfoActions: () => <div data-testid="actions"/> }));
+jest.mock('@/components/waves/drop/SingleWaveDropPosition', () => ({ SingleWaveDropPosition: () => <div data-testid="position"/> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVotes', () => ({ SingleWaveDropVotes: () => <div data-testid="votes"/> }));
+jest.mock('@/components/waves/drop/WinnerBadge', () => ({ WinnerBadge: () => <div data-testid="badge"/> }));
+jest.mock('@/components/waves/drop/SingleWaveDropTraits', () => ({ SingleWaveDropTraits: () => <div data-testid="traits"/> }));
+jest.mock('@/components/utils/button/WaveDropDeleteButton', () => ({ __esModule: true, default: () => <div data-testid="delete"/> }));
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia', () => (props:any) => <div data-testid="media" {...props}/>);
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn(() => ({ isWinner:true, canDelete:true })) }));
 
 const baseDrop:any = {
   drop_type: ApiDropType.Participatory,

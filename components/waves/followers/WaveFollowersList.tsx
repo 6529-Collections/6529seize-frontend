@@ -1,6 +1,6 @@
-import { ApiWave } from "../../../generated/models/ApiWave";
-import FollowersListWrapper from "../../utils/followers/FollowersListWrapper";
-import { useWaveFollowers } from "../../../hooks/useWaveFollowers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import FollowersListWrapper from "@/components/utils/followers/FollowersListWrapper";
+import { useWaveFollowers } from "@/hooks/useWaveFollowers";
 
 export default function WaveFollowersList({
   wave,

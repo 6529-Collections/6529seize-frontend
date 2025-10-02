@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
-import { WaveSmallLeaderboard } from '../../../../components/waves/small-leaderboard/WaveSmallLeaderboard';
-import { AuthContext } from '../../../../components/auth/Auth';
+import { WaveSmallLeaderboard } from '@/components/waves/small-leaderboard/WaveSmallLeaderboard';
+import { AuthContext } from '@/components/auth/Auth';
 
 const mockHook = jest.fn();
 const mockDrop = jest.fn(() => <div data-testid="drop" />);
 const mockIntersection = jest.fn(() => ({ current: null }));
 
-jest.mock('../../../../hooks/useWaveDropsLeaderboard', () => ({
+jest.mock('@/hooks/useWaveDropsLeaderboard', () => ({
   useWaveDropsLeaderboard: (...args: any) => mockHook(...args),
 }));
 
-jest.mock('../../../../hooks/useIntersectionObserver', () => ({
+jest.mock('@/hooks/useIntersectionObserver', () => ({
   useIntersectionObserver: () => mockIntersection(),
 }));
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardDrop', () => ({
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardDrop', () => ({
   WaveSmallLeaderboardDrop: (props: any) => mockDrop(props),
 }));
 

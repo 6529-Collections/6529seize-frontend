@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import WebsiteIcon from '../../../../../components/user/utils/icons/WebsiteIcon';
+import WebsiteIcon from '@/components/user/utils/icons/WebsiteIcon';
 
 describe('WebsiteIcon', () => {
   it('renders svg with correct attributes', () => {

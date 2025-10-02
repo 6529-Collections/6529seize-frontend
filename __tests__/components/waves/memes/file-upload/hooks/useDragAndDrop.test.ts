@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import useDragAndDrop from '../../../../../../components/waves/memes/file-upload/hooks/useDragAndDrop';
+import useDragAndDrop from '@/components/waves/memes/file-upload/hooks/useDragAndDrop';
 
 function setup(enabled = true) {
   const onFileDrop = jest.fn();

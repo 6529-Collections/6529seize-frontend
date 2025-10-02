@@ -1,25 +1,25 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
-import { AuthContext } from "../../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import {
   AcceptActionRequest,
   AcceptActionRequestActionEnum,
-} from "../../../../../generated/models/AcceptActionRequest";
-import { commonApiPost } from "../../../../../services/api/common-api";
-import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
+} from "@/generated/models/AcceptActionRequest";
+import { commonApiPost } from "@/services/api/common-api";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   haveSeenProfileProxyActionAcceptanceModal,
   setSeenProfileProxyActionAcceptanceModal,
-} from "../../../../../helpers/profile-proxy.helpers";
-import HeaderProxyNewModal from "../../../../header/proxy/HeaderProxyNewModal";
-import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
+} from "@/helpers/profile-proxy.helpers";
+import HeaderProxyNewModal from "@/components/header/proxy/HeaderProxyNewModal";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 
 const ACTION_LABEL: Record<AcceptActionRequestActionEnum, string> = {
   [AcceptActionRequestActionEnum.Accept]: "Accept",

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RepCategorySearchItem from '../../../../../components/utils/input/rep-category/RepCategorySearchItem';
+import RepCategorySearchItem from '@/components/utils/input/rep-category/RepCategorySearchItem';
 
 describe('RepCategorySearchItem', () => {
   it('calls onSelect when clicked', async () => {

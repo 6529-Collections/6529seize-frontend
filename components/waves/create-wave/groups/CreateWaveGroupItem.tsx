@@ -1,10 +1,10 @@
-import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
-import { CreateWaveGroupStatus } from "../../../../types/waves.types";
-import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
+} from "@/helpers/image.helpers";
+import { CreateWaveGroupStatus } from "@/types/waves.types";
+import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 
 export default function CreateWaveGroupItem({
   selectedGroup,

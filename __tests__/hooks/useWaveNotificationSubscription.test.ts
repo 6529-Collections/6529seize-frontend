@@ -6,15 +6,15 @@ jest.mock('@tanstack/react-query', () => ({
 }));
 
 const commonApiFetch = jest.fn();
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: (...args: any) => commonApiFetch(...args),
 }));
 
-jest.mock('../../contexts/SeizeSettingsContext', () => ({
+jest.mock('@/contexts/SeizeSettingsContext', () => ({
   useSeizeSettings: () => ({ seizeSettings: { all_drops_notifications_subscribers_limit: 10 } }),
 }));
 
-import { useWaveNotificationSubscription } from '../../hooks/useWaveNotificationSubscription';
+import { useWaveNotificationSubscription } from '@/hooks/useWaveNotificationSubscription';
 
 describe('useWaveNotificationSubscription', () => {
   it('configures useQuery with proper options', async () => {

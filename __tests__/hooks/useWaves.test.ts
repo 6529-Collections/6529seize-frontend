@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
-import { useWaves } from '../../hooks/useWaves';
+import { useWaves } from '@/hooks/useWaves';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthContext } from '../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
 import React from 'react';
 
 // Mock dependencies
@@ -9,7 +9,7 @@ jest.mock('react-use', () => ({
   useDebounce: jest.fn(),
 }));
 
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn().mockResolvedValue({ waves: [], count: 0 }),
 }));
 

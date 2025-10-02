@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
-import { useDropMetadata } from '../../../../components/waves/hooks/useDropMetadata';
-import { ApiWaveMetadataType } from '../../../../generated/models/ApiWaveMetadataType';
+import { useDropMetadata } from '@/components/waves/hooks/useDropMetadata';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
 
 const required = [{ name: 'foo', type: ApiWaveMetadataType.String }];
 

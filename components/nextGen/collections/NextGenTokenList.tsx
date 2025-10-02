@@ -6,18 +6,18 @@ import {
   NextGenCollection,
   NextGenToken,
   TraitValuePair,
-} from "../../../entities/INextgen";
+} from "@/entities/INextgen";
 import { useEffect, useState } from "react";
-import Pagination from "../../pagination/Pagination";
-import { commonApiFetch } from "../../../services/api/common-api";
-import DotLoader from "../../dotLoader/DotLoader";
+import Pagination from "@/components/pagination/Pagination";
+import { commonApiFetch } from "@/services/api/common-api";
+import DotLoader from "@/components/dotLoader/DotLoader";
 import {
   NextGenListFilters,
   NextGenTokenListedType,
   NextGenTokenRarityType,
 } from "../nextgen_helpers";
-import { SortDirection } from "../../../entities/ISort";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+import { SortDirection } from "@/entities/ISort";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;

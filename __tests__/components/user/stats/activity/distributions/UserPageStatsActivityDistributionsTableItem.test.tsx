@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityDistributionsTableItem from '../../../../../../components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableItem';
-import { formatNumberWithCommasOrDash, getTimeAgo } from '../../../../../../helpers/Helpers';
+import UserPageStatsActivityDistributionsTableItem from '@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableItem';
+import { formatNumberWithCommasOrDash, getTimeAgo } from '@/helpers/Helpers';
 
-jest.mock('../../../../../../helpers/Helpers');
+jest.mock('@/helpers/Helpers');
 const formatMock = formatNumberWithCommasOrDash as jest.Mock;
 const timeAgoMock = getTimeAgo as jest.Mock;
 

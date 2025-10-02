@@ -1,4 +1,4 @@
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 
 export default function CreateWaveFlow({
   title,

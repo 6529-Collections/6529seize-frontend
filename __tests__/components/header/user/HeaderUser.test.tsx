@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import HeaderUser from '../../../../components/header/user/HeaderUser';
+import HeaderUser from '@/components/header/user/HeaderUser';
 
-jest.mock('../../../../components/header/user/HeaderUserConnected', () => ({ __esModule: true, default: (props: any) => <div data-testid="connected">{props.connectedAddress}</div> }));
-jest.mock('../../../../components/header/user/HeaderUserConnect', () => ({ __esModule: true, default: () => <div data-testid="connect" /> }));
+jest.mock('@/components/header/user/HeaderUserConnected', () => ({ __esModule: true, default: (props: any) => <div data-testid="connected">{props.connectedAddress}</div> }));
+jest.mock('@/components/header/user/HeaderUserConnect', () => ({ __esModule: true, default: () => <div data-testid="connect" /> }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
-jest.mock('../../../../components/notifications/NotificationsContext', () => ({ useNotificationsContext: jest.fn() }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/components/notifications/NotificationsContext', () => ({ useNotificationsContext: jest.fn() }));
 
-const { useSeizeConnectContext } = require('../../../../components/auth/SeizeConnectContext');
-const { useNotificationsContext } = require('../../../../components/notifications/NotificationsContext');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
+const { useNotificationsContext } = require('@/components/notifications/NotificationsContext');
 
 describe('HeaderUser', () => {
   const removeAllDeliveredNotifications = jest.fn();

@@ -1,11 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import EmmaListSearchItems from '../../../../../components/utils/input/emma/EmmaListSearchItems';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import EmmaListSearchItems from '@/components/utils/input/emma/EmmaListSearchItems';
+import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
 
 let received: any;
-jest.mock('../../../../../components/utils/input/emma/EmmaListSearchItemsContent', () => (props: any) => { received = props; return <div data-testid="content" />; });
+jest.mock('@/components/utils/input/emma/EmmaListSearchItemsContent', () => (props: any) => { received = props; return <div data-testid="content" />; });
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 

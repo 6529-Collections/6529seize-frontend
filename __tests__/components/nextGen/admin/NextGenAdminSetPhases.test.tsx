@@ -1,17 +1,17 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenAdminSetPhases from '../../../../components/nextGen/admin/NextGenAdminSetPhases';
+import NextGenAdminSetPhases from '@/components/nextGen/admin/NextGenAdminSetPhases';
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ collection_id, onChange }: any) => (
     <input data-testid="collection" value={collection_id} onChange={e=>onChange(e.target.value)} />
   ),
   NextGenAdminHeadingRow: () => <div data-testid="heading" />,
 }));
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: jest.fn(() => ({ data: true })),
   useFunctionAdmin: jest.fn(() => ({ data: true })),
   useCollectionIndex: jest.fn(() => ({ data: 1 })),
@@ -22,13 +22,13 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useMinterContractWrite: jest.fn(),
 }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(() => Promise.resolve([])),
 }));
 
-const helpers = require('../../../../components/nextGen/nextgen_helpers');
+const helpers = require('@/components/nextGen/nextgen_helpers');
 
 describe('NextGenAdminSetPhases', () => {
   beforeEach(() => {

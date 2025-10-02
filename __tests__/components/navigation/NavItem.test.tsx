@@ -1,25 +1,25 @@
 import { render } from '@testing-library/react';
-import NavItem from '../../../components/navigation/NavItem';
-import { useViewContext } from '../../../components/navigation/ViewContext';
-import { useAuth } from '../../../components/auth/Auth';
-import { useTitle } from '../../../contexts/TitleContext';
-import { useUnreadNotifications } from '../../../hooks/useUnreadNotifications';
-import { useUnreadIndicator } from '../../../hooks/useUnreadIndicator';
-import { useNotificationsContext } from '../../../components/notifications/NotificationsContext';
-import { isNavItemActive } from '../../../components/navigation/isNavItemActive';
-import { useWaveData } from '../../../hooks/useWaveData';
-import { useWave } from '../../../hooks/useWave';
+import NavItem from '@/components/navigation/NavItem';
+import { useViewContext } from '@/components/navigation/ViewContext';
+import { useAuth } from '@/components/auth/Auth';
+import { useTitle } from '@/contexts/TitleContext';
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
+import { useUnreadIndicator } from '@/hooks/useUnreadIndicator';
+import { useNotificationsContext } from '@/components/notifications/NotificationsContext';
+import { isNavItemActive } from '@/components/navigation/isNavItemActive';
+import { useWaveData } from '@/hooks/useWaveData';
+import { useWave } from '@/hooks/useWave';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
-jest.mock('../../../components/navigation/ViewContext', () => ({ useViewContext: jest.fn() }));
-jest.mock('../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
-jest.mock('../../../contexts/TitleContext', () => ({ useTitle: jest.fn() }));
-jest.mock('../../../hooks/useUnreadNotifications', () => ({ useUnreadNotifications: jest.fn() }));
-jest.mock('../../../hooks/useUnreadIndicator', () => ({ useUnreadIndicator: jest.fn() }));
-jest.mock('../../../components/notifications/NotificationsContext', () => ({ useNotificationsContext: jest.fn() }));
-jest.mock('../../../components/navigation/isNavItemActive', () => ({ isNavItemActive: jest.fn() }));
-jest.mock('../../../hooks/useWaveData', () => ({ useWaveData: jest.fn() }));
-jest.mock('../../../hooks/useWave', () => ({ useWave: jest.fn() }));
+jest.mock('@/components/navigation/ViewContext', () => ({ useViewContext: jest.fn() }));
+jest.mock('@/components/auth/Auth', () => ({ useAuth: jest.fn() }));
+jest.mock('@/contexts/TitleContext', () => ({ useTitle: jest.fn() }));
+jest.mock('@/hooks/useUnreadNotifications', () => ({ useUnreadNotifications: jest.fn() }));
+jest.mock('@/hooks/useUnreadIndicator', () => ({ useUnreadIndicator: jest.fn() }));
+jest.mock('@/components/notifications/NotificationsContext', () => ({ useNotificationsContext: jest.fn() }));
+jest.mock('@/components/navigation/isNavItemActive', () => ({ isNavItemActive: jest.fn() }));
+jest.mock('@/hooks/useWaveData', () => ({ useWaveData: jest.fn() }));
+jest.mock('@/hooks/useWave', () => ({ useWave: jest.fn() }));
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),

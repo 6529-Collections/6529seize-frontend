@@ -6,14 +6,14 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
-import { fullScreenSupported } from "../../../../helpers/Helpers";
+import { fullScreenSupported } from "@/helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
-import useCapacitor from "../../../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import {
   ImageScale,
   getScaledImageUri,
-} from "../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 import { Tooltip } from "react-tooltip";
 
 const tooltipProps = {

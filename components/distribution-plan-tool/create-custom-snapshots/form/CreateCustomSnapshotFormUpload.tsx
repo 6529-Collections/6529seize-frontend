@@ -1,12 +1,12 @@
 "use client";
 
-import AllowlistToolAnimationHeightOpacity from "../../../allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity";
-import AllowlistToolAnimationWrapper from "../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationHeightOpacity from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity";
+import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import {
   CustomTokenPoolParamsToken,
   Mutable,
-} from "../../../allowlist-tool/allowlist-tool.types";
-import { isEthereumAddress } from "../../../../helpers/AllowlistToolHelpers";
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
 
 export default function CreateCustomSnapshotFormUpload({
   fileName,

@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { SingleWaveDrop } from '../../../../components/waves/drop/SingleWaveDrop';
+import { SingleWaveDrop } from '@/components/waves/drop/SingleWaveDrop';
 
-jest.mock('../../../../components/waves/drop/DefaultSingleWaveDrop', () => ({
+jest.mock('@/components/waves/drop/DefaultSingleWaveDrop', () => ({
   __esModule: true,
   DefaultSingleWaveDrop: () => <div data-testid="default" />,
 }));
 
-jest.mock('../../../../components/waves/drop/MemesSingleWaveDrop', () => ({
+jest.mock('@/components/waves/drop/MemesSingleWaveDrop', () => ({
   __esModule: true,
   MemesSingleWaveDrop: () => <div data-testid="memes" />,
 }));
 
 const useSettings = jest.fn();
 
-jest.mock('../../../../contexts/SeizeSettingsContext', () => ({
+jest.mock('@/contexts/SeizeSettingsContext', () => ({
   useSeizeSettings: () => ({ isMemesWave: useSettings }),
 }));
 

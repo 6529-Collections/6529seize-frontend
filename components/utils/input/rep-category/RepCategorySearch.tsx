@@ -3,10 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import RepCategorySearchDropdown from "./RepCategorySearchDropdown";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 export enum RepCategorySearchSize {
   SM = "SM",
   MD = "MD",

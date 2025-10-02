@@ -10,30 +10,30 @@ import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { DBResponse } from "../../../../entities/IDBResponse";
+import { DBResponse } from "@/entities/IDBResponse";
 import {
   NextGenCollection,
   NextgenTraitSet,
   TraitValues,
-} from "../../../../entities/INextgen";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+} from "@/entities/INextgen";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   capitalizeEveryWord,
   cicToType,
   formatAddress,
-} from "../../../../helpers/Helpers";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import DotLoader from "../../../dotLoader/DotLoader";
-import Pagination from "../../../pagination/Pagination";
+} from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import Pagination from "@/components/pagination/Pagination";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
-} from "../../../searchModal/SearchModal";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
+} from "@/components/searchModal/SearchModal";
+import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import {
   formatNameForUrl,
   normalizeNextgenTokenID,
-} from "../../nextgen_helpers";
+} from "@/components/nextGen/nextgen_helpers";
 import styles from "../NextGen.module.scss";
 import {
   getNextGenIconUrl,

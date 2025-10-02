@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from "react";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../user/utils/UserCICAndLevel";
-import { cicToType } from "../../../helpers/Helpers";
+} from "@/components/user/utils/UserCICAndLevel";
+import { cicToType } from "@/helpers/Helpers";
 import Link from "next/link";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ApiDropPart } from "../../../generated/models/ApiDropPart";
-import DropPartMarkdownWithPropLogger from "../../drops/view/part/DropPartMarkdownWithPropLogger";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropPart } from "@/generated/models/ApiDropPart";
+import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDropTime from "./time/WaveDropTime";
 
 interface WaveDropQuoteProps {

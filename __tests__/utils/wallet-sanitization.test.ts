@@ -3,13 +3,13 @@
  * These tests ensure fail-fast behavior and prevent sensitive data exposure
  */
 
-import { WalletValidationError } from '../../src/errors/wallet-validation'
-import { AppWallet } from '../../components/app-wallets/AppWalletsContext'
+import { WalletValidationError } from '@/src/errors/wallet-validation'
+import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { 
   sanitizeWalletForLogging, 
   validateAppWallet, 
   validateAppWallets 
-} from '../../src/utils/wallet-sanitization'
+} from '@/src/utils/wallet-sanitization'
 
 describe('Wallet Sanitization Utilities', () => {
   describe('sanitizeWalletForLogging - Secure Data Redaction', () => {

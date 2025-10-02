@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import DistributionPlanToolNotConnected from '../../../../components/distribution-plan-tool/connect/distribution-plan-tool-not-connected';
+import DistributionPlanToolNotConnected from '@/components/distribution-plan-tool/connect/distribution-plan-tool-not-connected';
 
 describe('DistributionPlanToolNotConnected', () => {
   it('shows headings prompting user to connect', () => {

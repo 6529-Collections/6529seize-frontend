@@ -1,11 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import UserPageCollectedFiltersSeized from '../../../../../components/user/collected/filters/UserPageCollectedFiltersSeized';
-import { CollectionSeized } from '../../../../../entities/IProfile';
+import UserPageCollectedFiltersSeized from '@/components/user/collected/filters/UserPageCollectedFiltersSeized';
+import { CollectionSeized } from '@/entities/IProfile';
 
 let capturedProps: any = null;
 
-jest.mock('../../../../../components/utils/select/dropdown/CommonDropdown', () => (props: any) => {
+jest.mock('@/components/utils/select/dropdown/CommonDropdown', () => (props: any) => {
   capturedProps = props;
   return <div data-testid="dropdown" />;
 });

@@ -1,4 +1,4 @@
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import CreateWaveApprovalThreshold from "./CreateWaveApprovalThreshold";
 import CreateWaveApprovalThresholdTime from "./CreateWaveApprovalThresholdTime";
 

@@ -1,4 +1,4 @@
-import { GRADIENT_CONTRACT } from '../../constants';
+import { GRADIENT_CONTRACT } from '@/constants';
 
 export const mockGradientNFT = (overrides: Partial<any> = {}) => ({
   id: 1,

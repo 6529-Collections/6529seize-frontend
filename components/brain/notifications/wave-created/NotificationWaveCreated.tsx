@@ -1,19 +1,19 @@
 import Link from "next/link";
-import { INotificationWaveCreated } from "../../../../types/feed.types";
+import { INotificationWaveCreated } from "@/types/feed.types";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
-import { getTimeAgoShort } from "../../../../helpers/Helpers";
+} from "@/helpers/image.helpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import WaveHeaderFollow, {
   WaveFollowBtnSize,
-} from "../../../waves/header/WaveHeaderFollow";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { commonApiFetch } from "../../../../services/api/common-api";
+} from "@/components/waves/header/WaveHeaderFollow";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
-import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 
 export default function NotificationWaveCreated({
   notification,

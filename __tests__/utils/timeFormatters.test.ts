@@ -1,4 +1,4 @@
-import { formatCountdown } from '../../utils/timeFormatters';
+import { formatCountdown } from '@/utils/timeFormatters';
 
 describe('formatCountdown', () => {
   const realDateNow = Date.now;

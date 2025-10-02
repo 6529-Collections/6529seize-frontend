@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import UserPageSubscriptionsHistory from '../../../../components/user/subscriptions/UserPageSubscriptionsHistory';
-import { Page } from '../../../../helpers/Types';
+import UserPageSubscriptionsHistory from '@/components/user/subscriptions/UserPageSubscriptionsHistory';
+import { Page } from '@/helpers/Types';
 
 const page = <T,>(data: T[]): Page<T> => ({ count: data.length, page: 1, next: false, data });
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useContext } from "react";
-import { DistributionPlanToolContext } from "../../../../../DistributionPlanToolContext";
-import { AllowlistOperationCode } from "../../../../../../allowlist-tool/allowlist-tool.types";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 import FinalizeSnapshotsTableSnapshotTooltipTableRow from "./FinalizeSnapshotsTableSnapshotTooltipTableRow";
 
 interface Row {

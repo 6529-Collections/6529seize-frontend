@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesWinners from '../../../../../../components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinners';
-import { CreateWaveOutcomeConfigWinnersCreditValueType, CreateWaveOutcomeType } from '../../../../../../types/waves.types';
+import CreateWaveOutcomesWinners from '@/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinners';
+import { CreateWaveOutcomeConfigWinnersCreditValueType, CreateWaveOutcomeType } from '@/types/waves.types';
 
-jest.mock('../../../../../../components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersRows', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersRows', () => (props: any) => (
   <div data-testid="rows">{props.winners.length}</div>
 ));
 
-jest.mock('../../../../../../components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersAddWinner', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersAddWinner', () => (props: any) => (
   <button onClick={props.addWinner}>add</button>
 ));
 

@@ -20,7 +20,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { fetchAllPages } from "../../services/6529api";
+import { fetchAllPages } from "@/services/6529api";
 import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
 import styles from "./6529Gradient.module.scss";
 

@@ -1,18 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import NextGenTokenList from "../../../../components/nextGen/collections/NextGenTokenList";
+import NextGenTokenList from "@/components/nextGen/collections/NextGenTokenList";
 import {
   NextGenListFilters,
   NextGenTokenListedType,
-} from "../../../../components/nextGen/nextgen_helpers";
-import { SortDirection } from "../../../../entities/ISort";
+} from "@/components/nextGen/nextgen_helpers";
+import { SortDirection } from "@/entities/ISort";
 
-jest.mock("../../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
 jest.mock(
-  "../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage",
+  "@/components/nextGen/collections/nextgenToken/NextGenTokenImage",
   () => ({
     NextGenTokenImage: ({ token }: any) => (
       <div data-testid="token">{token.name}</div>
@@ -21,7 +21,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/pagination/Pagination",
+  "@/components/pagination/Pagination",
   () => (props: any) =>
     (
       <div data-testid="pagination">
@@ -30,11 +30,11 @@ jest.mock(
     )
 );
 
-jest.mock("../../../../components/dotLoader/DotLoader", () => () => (
+jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <div data-testid="loader" />
 ));
 
-jest.mock("../../../../helpers/AllowlistToolHelpers", () => ({
+jest.mock("@/helpers/AllowlistToolHelpers", () => ({
   getRandomObjectId: () => "id",
 }));
 
@@ -46,7 +46,7 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-const { commonApiFetch } = require("../../../../services/api/common-api");
+const { commonApiFetch } = require("@/services/api/common-api");
 
 const collection = { id: 1, name: "Collection" } as any;
 const token = { id: 1, name: "Token", normalised_id: 1 } as any;

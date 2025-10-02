@@ -1,6 +1,6 @@
 import { Tooltip } from "react-tooltip";
-import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
-import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
+import { formatLargeNumber } from "@/helpers/Helpers";
+import { CreateWaveOutcomeConfig } from "@/types/waves.types";
 
 export default function CreateWaveOutcomesRowRepApprove({
   outcome,

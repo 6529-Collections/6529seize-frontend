@@ -3,16 +3,16 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { useDebounce } from "react-use";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { AuthContext } from "../../auth/Auth";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import WaveItem from "../../waves/list/WaveItem";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
+import WaveItem from "@/components/waves/list/WaveItem";
 import UserPageWavesSearch from "./UserPageWavesSearch";
 interface SearchWavesParams {
   readonly author?: string;

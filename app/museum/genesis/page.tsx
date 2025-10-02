@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 const IndexPage = () => (
   <div>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -301,12 +302,12 @@ EARLY ON-CHAIN GENERATIVE ART"
                 <span className="entry-title rich-snippet-hidden">GENESIS</span>
                 <span className="vcard rich-snippet-hidden">
                   <span className="fn">
-                    <a
+                    <Link
                       href="/author/6529er6529-io/"
                       title="Posts by 6529er"
                       rel="author">
                       6529er
-                    </a>
+                    </Link>
                   </span>
                 </span>
                 <span className="updated rich-snippet-hidden">
@@ -486,56 +487,56 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-2"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/autoglyphs/">
+                              <Link href="/museum/genesis/autoglyphs/">
                                 <span style={{ textDecoration: "underline" }}>
                                   <strong>Autoglyphs</strong>
                                 </span>
-                              </a>
+                              </Link>
                               <br />
                               Larva Labs
                             </p>
                             <p>
-                              <a href="/museum/genesis/squiggly-wtf/">
+                              <Link href="/museum/genesis/squiggly-wtf/">
                                 <span style={{ textDecoration: "underline" }}>
                                   <strong>Squiggly.wtf</strong>
                                 </span>
-                              </a>
+                              </Link>
                               <br />
                               natealex
                             </p>
                             <p>
-                              <a href="/museum/genesis/labios">
+                              <Link href="/museum/genesis/labios">
                                 <span style={{ textDecoration: "underline" }}>
                                   <strong>Labios</strong>
                                 </span>
-                              </a>
+                              </Link>
                               <br />
                               Manoloide
                             </p>
                             <p>
-                              <a href="/museum/genesis/cryptocube">
+                              <Link href="/museum/genesis/cryptocube">
                                 <span style={{ textDecoration: "underline" }}>
                                   <strong>Cryptocube</strong>
                                 </span>
-                              </a>
+                              </Link>
                               <br />
                               Han
                             </p>
                             <p>
-                              <a href="/museum/genesis/cryptoarte">
+                              <Link href="/museum/genesis/cryptoarte">
                                 <span style={{ textDecoration: "underline" }}>
                                   <strong>Cryptoarte</strong>
                                 </span>
-                              </a>
+                              </Link>
                               <br />
                               Sebastián Brocher
                             </p>
                             <p>
-                              <a href="/museum/genesis/lost-robbies">
+                              <Link href="/museum/genesis/lost-robbies">
                                 <span style={{ textDecoration: "underline" }}>
                                   <strong>The Lost Robbies</strong>
                                 </span>
-                              </a>
+                              </Link>
                               <br />
                               Robbie Barrat
                             </p>
@@ -570,44 +571,44 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-3"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/chromie-squiggle">
+                              <Link href="/museum/genesis/chromie-squiggle">
                                 <strong>Chromie Squiggle</strong>
-                              </a>
+                              </Link>
                               <br />
                               snowfro
                             </p>
                             <p>
-                              <a href="/museum/genesis/genesis-dca">
+                              <Link href="/museum/genesis/genesis-dca">
                                 <strong>Genesis</strong>
-                              </a>
+                              </Link>
                               <br />
                               DCA
                             </p>
                             <p>
-                              <a href="/museum/genesis/construction-token">
+                              <Link href="/museum/genesis/construction-token">
                                 <strong>Construction Token</strong>
-                              </a>
+                              </Link>
                               <br />
                               Jeff Davis
                             </p>
                             <p>
-                              <a href="/museum/genesis/cryptoblots">
+                              <Link href="/museum/genesis/cryptoblots">
                                 <strong>Cryptoblots</strong>
-                              </a>
+                              </Link>
                               <br />
                               Daïm Aggott-Hönsch
                             </p>
                             <p>
-                              <a href="/museum/genesis/dynamic-slices">
+                              <Link href="/museum/genesis/dynamic-slices">
                                 <strong>Dynamic Slices</strong>
-                              </a>
+                              </Link>
                               <br />
                               pxlq
                             </p>
                             <p>
-                              <a href="/museum/genesis/elevated-deconstructions">
+                              <Link href="/museum/genesis/elevated-deconstructions">
                                 <strong>Elevated Deconstructions</strong>
-                              </a>
+                              </Link>
                               <br />
                               luxpris
                             </p>
@@ -642,100 +643,100 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-4"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/singularity">
+                              <Link href="/museum/genesis/singularity">
                                 <strong>Singularity</strong>
-                              </a>
+                              </Link>
                               <br />
                               Hideki Tsukamoto
                             </p>
                             <p>
-                              <a href="/museum/genesis/ignition">
+                              <Link href="/museum/genesis/ignition">
                                 <strong>Ignition</strong>
-                              </a>
+                              </Link>
                               <br />
                               ge1doot
                             </p>
                             <p>
-                              <a href="/museum/genesis/nimbuds">
+                              <Link href="/museum/genesis/nimbuds">
                                 <strong>NimBuds</strong>
-                              </a>
+                              </Link>
                               <br />
                               Bryan Brinkman
                             </p>
                             <p>
-                              <a href="/museum/genesis/hyperhash">
+                              <Link href="/museum/genesis/hyperhash">
                                 <strong>HyperHash</strong>
-                              </a>
+                              </Link>
                               <br />
                               Beervangeer
                             </p>
                             <p>
-                              <a href="/museum/genesis/unigrids">
+                              <Link href="/museum/genesis/unigrids">
                                 <strong>Unigrids</strong>
-                              </a>
+                              </Link>
                               <br />
                               Zeblocks
                             </p>
                             <p>
-                              <a href="/museum/genesis/ringers">
+                              <Link href="/museum/genesis/ringers">
                                 <strong>Ringers</strong>
-                              </a>
+                              </Link>
                               <br />
                               Dmitri Cherniak
                             </p>
                             <p>
-                              <a href="/museum/genesis/spectron">
+                              <Link href="/museum/genesis/spectron">
                                 <strong>Spectron</strong>
-                              </a>
+                              </Link>
                               <br />
                               Simon De Mai
                             </p>
                             <p>
-                              <a href="/museum/genesis/27-bit-digital">
+                              <Link href="/museum/genesis/27-bit-digital">
                                 <strong>27-Bit Digital</strong>
-                              </a>
+                              </Link>
                               <br />
                               kai
                             </p>
                             <p>
-                              <a href="/museum/genesis/archetype">
+                              <Link href="/museum/genesis/archetype">
                                 <strong>Archetype</strong>
-                              </a>
+                              </Link>
                               <br />
                               Kjetil Golid
                             </p>
                             <p>
-                              <a href="/museum/genesis/720-minutes">
+                              <Link href="/museum/genesis/720-minutes">
                                 <strong>720 Minutes</strong>
-                              </a>
+                              </Link>
                               <br />
                               Alexis André
                             </p>
                             <p>
-                              <a href="/museum/genesis/aerial-view">
+                              <Link href="/museum/genesis/aerial-view">
                                 <strong>Aerial View</strong>
-                              </a>
+                              </Link>
                               <br />
                               daLenz
                             </p>
                             <p>
-                              <a href="/museum/genesis/apparitions">
+                              <Link href="/museum/genesis/apparitions">
                                 <strong>Apparitions</strong>
-                              </a>
+                              </Link>
                               <br />
                               Aaron Penne
                             </p>
                             <p>
-                              <a href="/museum/genesis/inspirals">
+                              <Link href="/museum/genesis/inspirals">
                                 <strong>Inspirals</strong>
-                              </a>
+                              </Link>
                               <br />
                               Radix
                             </p>
                             <p>
-                              <a href="/museum/genesis/secret-surprise">
+                              <Link href="/museum/genesis/secret-surprise">
                                 <strong>Secret Surprise</strong>
-                              </a>
+                              </Link>
                             </p>
                           </div>
                         </div>
@@ -768,86 +769,86 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-5"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/synapses">
+                              <Link href="/museum/genesis/synapses">
                                 <strong>Synapses</strong>
-                              </a>
+                              </Link>
                               <br />
                               Chaosconstruct
                             </p>
                             <p>
-                              <a href="/museum/genesis/algobots">
+                              <Link href="/museum/genesis/algobots">
                                 <strong>Algobots</strong>
-                              </a>
+                              </Link>
                               <br />
                               Stina Jones
                             </p>
                             <p>
-                              <a href="/museum/genesis/elementals">
+                              <Link href="/museum/genesis/elementals">
                                 <strong>Elementals</strong>
-                              </a>
+                              </Link>
                               <br />
                               Michael Connolly
                             </p>
                             <p>
-                              <a href="/museum/genesis/subscapes">
+                              <Link href="/museum/genesis/subscapes">
                                 <strong>Subscapes</strong>
-                              </a>
+                              </Link>
                               <br />
                               Matt DesLauriers
                             </p>
                             <p>
-                              <a href="/museum/genesis/watercolor-dreams">
+                              <Link href="/museum/genesis/watercolor-dreams">
                                 <strong>Watercolor Dreams</strong>
-                              </a>
+                              </Link>
                               <br />
                               NumbersInMotion
                             </p>
                             <p>
-                              <a href="/museum/genesis/bubble-bobbly">
+                              <Link href="/museum/genesis/bubble-bobbly">
                                 <strong>Bubble Bobbly</strong>
-                              </a>
+                              </Link>
                               <br />
                               Jason Ting
                             </p>
                             <p>
-                              <a href="/museum/genesis/frammenti">
+                              <Link href="/museum/genesis/frammenti">
                                 <strong>Frammenti</strong>
-                              </a>
+                              </Link>
                               <br />
                               Stefano Contiero
                             </p>
                             <p>
-                              <a href="/museum/genesis/algorhythms">
+                              <Link href="/museum/genesis/algorhythms">
                                 <strong>AlgoRhythms</strong>
-                              </a>
+                              </Link>
                               <br />
                               Han x Nicolas Daniel
                             </p>
                             <p>
-                              <a href="/museum/genesis/the-blocks-of-art">
+                              <Link href="/museum/genesis/the-blocks-of-art">
                                 <strong>The Blocks of Art</strong>
-                              </a>
+                              </Link>
                               <br />
                               Shvembldr
                             </p>
                             <p>
-                              <a href="/museum/genesis/century">
+                              <Link href="/museum/genesis/century">
                                 <strong>Century</strong>
-                              </a>
+                              </Link>
                               <br />
                               Casey REAS
                             </p>
                             <p>
-                              <a href="/museum/genesis/dreams">
+                              <Link href="/museum/genesis/dreams">
                                 <strong>Dreams</strong>
-                              </a>
+                              </Link>
                               <br />
                               Joshua Bagley
                             </p>
                             <p>
-                              <a href="/museum/genesis/fidenza">
+                              <Link href="/museum/genesis/fidenza">
                                 <strong>Fidenza</strong>
-                              </a>
+                              </Link>
                               <br />
                               Tyler Hobbs
                             </p>
@@ -882,65 +883,65 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-6"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/glitch-crystal-monsters">
+                              <Link href="/museum/genesis/glitch-crystal-monsters">
                                 <strong>Glitch Crystal Monsters</strong>
-                              </a>
+                              </Link>
                               <br />
                               Alida Sun
                             </p>
                             <p>
-                              <a href="/museum/genesis/endless-nameless">
+                              <Link href="/museum/genesis/endless-nameless">
                                 <strong>Endless Nameless</strong>
-                              </a>
+                              </Link>
                               <br />
                               Rafaël Rozendaal
                             </p>
                             <p>
-                              <a href="/museum/genesis/pigments">
+                              <Link href="/museum/genesis/pigments">
                                 <strong>Pigments</strong>
-                              </a>
+                              </Link>
                               <br />
                               Darien Brito
                             </p>
                             <p>
-                              <a href="/museum/genesis/phase">
+                              <Link href="/museum/genesis/phase">
                                 <strong>phase</strong>
-                              </a>
+                              </Link>
                               <br />
                               Loren Bednar
                             </p>
                             <p>
-                              <a href="/museum/genesis/scribbled-boundaries">
+                              <Link href="/museum/genesis/scribbled-boundaries">
                                 <strong>Scribbled Boundaries</strong>
-                              </a>
+                              </Link>
                               <br />
                               William Tan
                             </p>
                             <p>
-                              <a href="/museum/genesis/trossets">
+                              <Link href="/museum/genesis/trossets">
                                 <strong>Trossets</strong>
-                              </a>
+                              </Link>
                               <br />
                               Anna Carreras
                             </p>
                             <p>
-                              <a href="/museum/genesis/geometry-runners">
+                              <Link href="/museum/genesis/geometry-runners">
                                 <strong>Geometry Runners</strong>
-                              </a>
+                              </Link>
                               <br />
                               Rich Lord
                             </p>
                             <p>
-                              <a href="/museum/genesis/fragments-of-an-infinite-field">
+                              <Link href="/museum/genesis/fragments-of-an-infinite-field">
                                 <strong>Fragments of an Infinite Field</strong>
-                              </a>
+                              </Link>
                               <br />
                               Monica Rizzolli
                             </p>
                             <p>
-                              <a href="/museum/genesis/skulptuur">
+                              <Link href="/museum/genesis/skulptuur">
                                 <strong>Skulptuur</strong>
-                              </a>
+                              </Link>
                               <br />
                               Piter Pasma
                             </p>
@@ -975,51 +976,51 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-7"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/edifice">
+                              <Link href="/museum/genesis/edifice">
                                 <strong>Edifice</strong>
-                              </a>
+                              </Link>
                               <br />
                               Ben Kovach
                             </p>
                             <p>
-                              <a href="/museum/genesis/asemica">
+                              <Link href="/museum/genesis/asemica">
                                 <strong>Asemica</strong>
-                              </a>
+                              </Link>
                               <br />
                               Emily Edelman – Dima Ofman – Andrew Badr
                             </p>
                             <p>
-                              <a href="/museum/genesis/autology">
+                              <Link href="/museum/genesis/autology">
                                 <strong>Autology</strong>
-                              </a>
+                              </Link>
                               <br />
                               steganon
                             </p>
                             <p>
-                              <a href="/museum/genesis/bent">
+                              <Link href="/museum/genesis/bent">
                                 <strong>Bent</strong>
-                              </a>
+                              </Link>
                               <br />
                               ippsketch
                             </p>
                             <p>
-                              <a href="/museum/genesis/gazers">
+                              <Link href="/museum/genesis/gazers">
                                 <strong>Gazers</strong>
-                              </a>
+                              </Link>
                               <br />
                               Matt Kane
                             </p>
                             <p>
-                              <a href="/museum/genesis/vortex">
+                              <Link href="/museum/genesis/vortex">
                                 <strong>Vortex</strong>
-                              </a>
+                              </Link>
                               <br />
                               Jen Stark
                             </p>
                             <p>
-                              <a href="/museum/genesis/jiometory-no-compute">
+                              <Link href="/museum/genesis/jiometory-no-compute">
                                 <strong>Jiometory No Compute – </strong>
-                              </a>
+                              </Link>
                               <br />
                               <strong>ジオメトリ ハ ケイサンサレマセン</strong>
                               <br />
@@ -1056,37 +1057,37 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-8"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/chimera">
+                              <Link href="/museum/genesis/chimera">
                                 <strong>Chimera</strong>
-                              </a>
+                              </Link>
                               <br />
                               mpkoz
                             </p>
                             <p>
-                              <a href="/museum/genesis/cosmic-reef">
+                              <Link href="/museum/genesis/cosmic-reef">
                                 <strong>Cosmic Reef</strong>
-                              </a>
+                              </Link>
                               <br />
                               Leo Villareal
                             </p>
                             <p>
-                              <a href="/museum/genesis/screens">
+                              <Link href="/museum/genesis/screens">
                                 <strong>Screens</strong>
-                              </a>
+                              </Link>
                               <br />
                               Thomas Lin Pedersen
                             </p>
                             <p>
-                              <a href="/museum/genesis/para-bellum">
+                              <Link href="/museum/genesis/para-bellum">
                                 <strong>Para Bellum</strong>
-                              </a>
+                              </Link>
                               <br />
                               Matty Mariansky
                             </p>
                             <p>
-                              <a href="/museum/genesis/entretiempos">
+                              <Link href="/museum/genesis/entretiempos">
                                 <strong>entretiempos</strong>
-                              </a>
+                              </Link>
                               <br />
                               Marcelo Soria-Rodríguez
                             </p>
@@ -1124,37 +1125,37 @@ EARLY ON-CHAIN GENERATIVE ART"
                             className="fusion-text fusion-text-9"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/genesis/incomplete-control">
+                              <Link href="/museum/genesis/incomplete-control">
                                 <strong>Incomplete Control</strong>
-                              </a>
+                              </Link>
                               <br />
                               Tyler Hobbs
                             </p>
                             <p>
-                              <a href="/museum/genesis/meridian">
+                              <Link href="/museum/genesis/meridian">
                                 <strong>Meridian</strong>
-                              </a>
+                              </Link>
                               <br />
                               Matt DesLauriers
                             </p>
                             <p>
-                              <a href="/museum/genesis/kai-gen">
+                              <Link href="/museum/genesis/kai-gen">
                                 <strong>Kai-Gen</strong>
-                              </a>
+                              </Link>
                               <br />
                               Takeshi Murata, Christopher Rutledge, J. Krispy
                             </p>
                             <p>
-                              <a href="/museum/genesis/willow-shield">
+                              <Link href="/museum/genesis/willow-shield">
                                 <strong>Willow Shield</strong>
-                              </a>
+                              </Link>
                               <br />
                               ixshells
                             </p>
                             <p>
-                              <a href="/museum/genesis/great-hall-of-generative-art">
+                              <Link href="/museum/genesis/great-hall-of-generative-art">
                                 <strong>Great Hall of Generative Art</strong>
-                              </a>
+                              </Link>
                               <br />
                               Various Artists
                             </p>

@@ -1,4 +1,4 @@
-import { GroupDescriptionType } from "../../../../../entities/IGroup";
+import { GroupDescriptionType } from "@/entities/IGroup";
 import { GroupCardConfigProps } from "./GroupCardConfigs";
 
 export default function GroupCardConfig({

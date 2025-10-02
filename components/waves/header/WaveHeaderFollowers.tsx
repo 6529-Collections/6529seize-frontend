@@ -1,5 +1,5 @@
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { numberWithCommas } from "../../../helpers/Helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { numberWithCommas } from "@/helpers/Helpers";
 
 export default function WaveHeaderFollowers({
   wave,

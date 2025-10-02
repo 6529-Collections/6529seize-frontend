@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import MediaDisplayAudio from '../../../../../../../components/drops/view/item/content/media/MediaDisplayAudio';
+import MediaDisplayAudio from '@/components/drops/view/item/content/media/MediaDisplayAudio';
 
 test('renders placeholder when controls hidden', () => {
   render(<MediaDisplayAudio src="a.mp3" />);

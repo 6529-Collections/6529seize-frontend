@@ -1,4 +1,4 @@
-import UserPageErrorWrapper from "../../utils/UserPageErrorWrapper";
+import UserPageErrorWrapper from "@/components/user/utils/UserPageErrorWrapper";
 
 export default function UserPageRepNewRepError({
   msg,

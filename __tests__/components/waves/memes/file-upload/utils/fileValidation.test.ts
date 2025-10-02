@@ -1,4 +1,4 @@
-import { validateFile, testVideoCompatibility } from '../../../../../../components/waves/memes/file-upload/utils/fileValidation';
+import { validateFile, testVideoCompatibility } from '@/components/waves/memes/file-upload/utils/fileValidation';
 
 // Mock MediaError constants
 const MediaErrorMock = {
@@ -12,13 +12,13 @@ const MediaErrorMock = {
 (global as any).MediaError = MediaErrorMock;
 
 // Mock constants
-jest.mock('../../../../../../components/waves/memes/file-upload/utils/constants', () => ({
+jest.mock('@/components/waves/memes/file-upload/utils/constants', () => ({
   FILE_SIZE_LIMIT: 50 * 1024 * 1024, // 50MB
   COMPATIBILITY_CHECK_TIMEOUT_MS: 5000,
 }));
 
 // Mock format helpers
-jest.mock('../../../../../../components/waves/memes/file-upload/utils/formatHelpers', () => ({
+jest.mock('@/components/waves/memes/file-upload/utils/formatHelpers', () => ({
   getFileExtension: jest.fn((file) => 'mp4'),
   getBrowserSpecificMessage: jest.fn(() => 'Format not supported in this browser'),
 }));

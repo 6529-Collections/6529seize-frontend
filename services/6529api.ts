@@ -1,6 +1,6 @@
-import { DBResponse } from "../entities/IDBResponse";
+import { DBResponse } from "@/entities/IDBResponse";
 import Cookies from "js-cookie";
-import { API_AUTH_COOKIE } from "../constants";
+import { API_AUTH_COOKIE } from "@/constants";
 import { getStagingAuth } from "./auth/auth.utils";
 
 export async function fetchUrl(url: string): Promise<DBResponse | any> {

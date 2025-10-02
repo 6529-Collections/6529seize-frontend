@@ -1,8 +1,8 @@
-import { ApiGroupFull } from "../../../../../../generated/models/ApiGroupFull";
-import { ApiRateMatter } from "../../../../../../generated/models/ApiRateMatter";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import RepCategorySearch, {
   RepCategorySearchSize,
-} from "../../../../../utils/input/rep-category/RepCategorySearch";
+} from "@/components/utils/input/rep-category/RepCategorySearch";
 import { CreditDirection } from "../GroupCard";
 import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
 

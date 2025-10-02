@@ -6,8 +6,8 @@ import { NextgenView } from "@/enums";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import CollectionsDropdown from "../../collections-dropdown/CollectionsDropdown";
-import { LFGButton } from "../../lfg-slideshow/LFGSlideshow";
+import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 
 export default function NextGenNavigationHeader(
   props: Readonly<{

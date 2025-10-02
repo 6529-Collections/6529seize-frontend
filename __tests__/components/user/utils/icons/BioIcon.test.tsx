@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import BioIcon from '../../../../../components/user/utils/icons/BioIcon';
+import BioIcon from '@/components/user/utils/icons/BioIcon';
 
 describe('BioIcon', () => {
   it('renders svg with correct attributes', () => {

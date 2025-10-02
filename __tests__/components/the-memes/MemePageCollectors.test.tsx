@@ -3,20 +3,20 @@ import React from "react";
 import {
   MemePageCollectorsRightMenu,
   MemePageCollectorsSubMenu,
-} from "../../../components/the-memes/MemePageCollectors";
+} from "@/components/the-memes/MemePageCollectors";
 
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   numberWithCommas: jest.fn((n) => n.toString()),
   printMintDate: jest.fn(() => "date"),
 }));
 
 let leaderboardProps: any;
-jest.mock("../../../components/leaderboard/NFTLeaderboard", () => (props: any) => {
+jest.mock("@/components/leaderboard/NFTLeaderboard", () => (props: any) => {
   leaderboardProps = props;
   return <div data-testid="leaderboard" />;
 });
 
-jest.mock("../../../components/nftAttributes/NftStats", () => ({
+jest.mock("@/components/nftAttributes/NftStats", () => ({
   NftPageStats: () => <tr data-testid="stats" />,
 }));
 

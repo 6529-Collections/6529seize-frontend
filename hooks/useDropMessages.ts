@@ -4,20 +4,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import useCapacitor from "./useCapacitor";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
-import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
-import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import {
   generateUniqueKeys,
   mapToExtendedDrops,
-} from "../helpers/waves/wave-drops.helpers";
+} from "@/helpers/waves/wave-drops.helpers";
 
-import { commonApiFetch } from "../services/api/common-api";
-import { ExtendedDrop } from "../helpers/waves/drop.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
-import { WsMessageType, WsDropUpdateMessage } from "../helpers/Types";
-import { useWebSocketMessage } from "../services/websocket/useWebSocketMessage";
-import { WaveDropsSearchStrategy } from "../contexts/wave/hooks/types";
+import { WsMessageType, WsDropUpdateMessage } from "@/helpers/Types";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
 
 export function useDropMessages(waveId: string, dropId: string | null) {
   const { isCapacitor } = useCapacitor();

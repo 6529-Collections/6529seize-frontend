@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useContext, useMemo, useState } from "react";
-import SecondaryButton from "../../../utils/button/SecondaryButton";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import MyStreamWaveMyVotesResetProgress from "./MyStreamWaveMyVotesResetProgress";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { DropRateChangeRequest } from "../../../../entities/IDrop";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { commonApiPost } from "@/services/api/common-api";
+import { DropRateChangeRequest } from "@/entities/IDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useMutation } from "@tanstack/react-query";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 
 interface MyStreamWaveMyVotesResetProps {
   readonly haveDrops: boolean;

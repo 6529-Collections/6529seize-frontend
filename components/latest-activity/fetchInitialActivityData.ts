@@ -1,10 +1,10 @@
 import { publicEnv } from "@/config/env";
-import { DBResponse } from "../../entities/IDBResponse";
-import { NFT } from "../../entities/INFT";
-import { NextGenCollection } from "../../entities/INextgen";
-import { Transaction } from "../../entities/ITransaction";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import { commonApiFetch } from "../../services/api/common-api";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NFT } from "@/entities/INFT";
+import { NextGenCollection } from "@/entities/INextgen";
+import { Transaction } from "@/entities/ITransaction";
+import { fetchAllPages, fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export interface InitialActivityData {
   activity: Transaction[];

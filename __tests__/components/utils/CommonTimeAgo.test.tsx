@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
-import CommonTimeAgo from "../../../components/utils/CommonTimeAgo";
+import CommonTimeAgo from "@/components/utils/CommonTimeAgo";
 
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   getTimeAgo: jest.fn(),
   getTimeAgoShort: jest.fn(),
 }));

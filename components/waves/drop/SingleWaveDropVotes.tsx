@@ -1,10 +1,10 @@
 import React from "react";
-import { ApiDrop } from "../../../generated/models/ObjectSerializer";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { ApiDrop } from "@/generated/models/ObjectSerializer";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
-import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;

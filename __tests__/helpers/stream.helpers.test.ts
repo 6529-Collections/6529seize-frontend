@@ -1,8 +1,8 @@
-import { prefetchWavesOverview } from '../../helpers/stream.helpers';
+import { prefetchWavesOverview } from '@/helpers/stream.helpers';
 
 jest.mock('jwt-decode', () => ({ jwtDecode: () => ({ sub: 'wallet' }) }));
-jest.mock('../../helpers/server.helpers', () => ({ getUserProfile: jest.fn(() => Promise.resolve({ handle: 'bob' })) }));
-jest.mock('../../services/api/common-api', () => ({ commonApiFetch: jest.fn(() => Promise.resolve([])) }));
+jest.mock('@/helpers/server.helpers', () => ({ getUserProfile: jest.fn(() => Promise.resolve({ handle: 'bob' })) }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn(() => Promise.resolve([])) }));
 
 const createClient = () => ({ prefetchInfiniteQuery: jest.fn(), prefetchQuery: jest.fn() });
 

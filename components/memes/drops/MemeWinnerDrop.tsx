@@ -1,17 +1,17 @@
 "use client"
 
 import React, { useCallback } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import WaveDropActions from "../../waves/drops/WaveDropActions";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropInteractionParams, DropLocation } from "@/components/waves/drops/Drop";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
 import MemeDropTraits from "./MemeDropTraits";
-import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
-import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
-import { useDropContext } from "../../waves/drops/DropContext";
+import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import { useDropContext } from "@/components/waves/drops/DropContext";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;

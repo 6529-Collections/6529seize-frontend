@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import MobileMemesArtSubmissionBtn from '../../../../../components/waves/memes/submission/MobileMemesArtSubmissionBtn';
-import { SubmissionStatus, useWave } from '../../../../../hooks/useWave';
+import MobileMemesArtSubmissionBtn from '@/components/waves/memes/submission/MobileMemesArtSubmissionBtn';
+import { SubmissionStatus, useWave } from '@/hooks/useWave';
 
-jest.mock('../../../../../hooks/useWave');
-jest.mock('../../../../../components/waves/memes/MemesArtSubmissionModal', () => ({
+jest.mock('@/hooks/useWave');
+jest.mock('@/components/waves/memes/MemesArtSubmissionModal', () => ({
   __esModule: true,
   default: ({ isOpen }: any) => (isOpen ? <div data-testid="modal">open</div> : null),
 }));

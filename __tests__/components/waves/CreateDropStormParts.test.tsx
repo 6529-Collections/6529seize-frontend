@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import CreateDropStormParts from '../../../components/waves/CreateDropStormParts';
-import { AuthContext } from '../../../components/auth/Auth';
+import CreateDropStormParts from '@/components/waves/CreateDropStormParts';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../components/waves/CreateDropStormPart', () => ({
+jest.mock('@/components/waves/CreateDropStormPart', () => ({
   __esModule: true,
   default: ({ partIndex }: any) => <div data-testid={`part-${partIndex}`} />,
 }));

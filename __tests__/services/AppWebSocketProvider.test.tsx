@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { AppWebSocketProvider } from '../../services/websocket/AppWebSocketProvider';
-import { WebSocketProvider } from '../../services/websocket/WebSocketProvider';
-import { useWebSocket } from '../../services/websocket/useWebSocket';
-import { useWebSocketHealth } from '../../services/websocket/useWebSocketHealth';
-import { getAuthJwt } from '../../services/auth/auth.utils';
-import { DEFAULT_WEBSOCKET_CONFIG } from '../../services/websocket/index';
+import { AppWebSocketProvider } from '@/services/websocket/AppWebSocketProvider';
+import { WebSocketProvider } from '@/services/websocket/WebSocketProvider';
+import { useWebSocket } from '@/services/websocket/useWebSocket';
+import { useWebSocketHealth } from '@/services/websocket/useWebSocketHealth';
+import { getAuthJwt } from '@/services/auth/auth.utils';
+import { DEFAULT_WEBSOCKET_CONFIG } from '@/services/websocket/index';
 
 // Mock all dependencies
-jest.mock('../../services/websocket/WebSocketProvider');
-jest.mock('../../services/websocket/useWebSocket');
-jest.mock('../../services/websocket/useWebSocketHealth');
-jest.mock('../../services/auth/auth.utils');
+jest.mock('@/services/websocket/WebSocketProvider');
+jest.mock('@/services/websocket/useWebSocket');
+jest.mock('@/services/websocket/useWebSocketHealth');
+jest.mock('@/services/auth/auth.utils');
 
 // Mock implementations - create fresh mock functions
 let mockConnect: jest.Mock;

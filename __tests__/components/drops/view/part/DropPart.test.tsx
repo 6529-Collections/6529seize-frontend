@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import DropPart from '../../../../../components/drops/view/part/DropPart';
+import DropPart from '@/components/drops/view/part/DropPart';
 import { useRouter } from 'next/navigation';
 
 const DropPartContentMock = jest.fn(() => null);
-jest.mock('../../../../../components/drops/view/part/DropPartContent', () => (props: any) => {
+jest.mock('@/components/drops/view/part/DropPartContent', () => (props: any) => {
   DropPartContentMock(props);
   return <div data-testid="content" />;
 });

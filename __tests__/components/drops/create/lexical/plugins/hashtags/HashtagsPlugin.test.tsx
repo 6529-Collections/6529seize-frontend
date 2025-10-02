@@ -31,12 +31,12 @@ jest.mock('@lexical/react/LexicalTypeaheadMenuPlugin', () => ({
   useBasicTypeaheadTriggerMatch: () => () => null,
 }));
 
-jest.mock('../../../../../../../components/drops/create/lexical/plugins/hashtags/HashtagsTypeaheadMenu', () => () => <div data-testid="menu" />);
-jest.mock('../../../../../../../components/drops/create/lexical/nodes/HashtagNode', () => ({
+jest.mock('@/components/drops/create/lexical/plugins/hashtags/HashtagsTypeaheadMenu', () => () => <div data-testid="menu" />);
+jest.mock('@/components/drops/create/lexical/nodes/HashtagNode', () => ({
   $createHashtagNode: (text: string) => ({ select: jest.fn(), text }),
 }));
 
-jest.mock('../../../../../../../helpers/AllowlistToolHelpers', () => ({ 
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({ 
   isEthereumAddress: jest.fn(() => true),
   __esModule: true
 }));
@@ -46,7 +46,7 @@ import { render } from '@testing-library/react';
 import NewHashtagsPlugin, {
   HashtagsTypeaheadOption,
   getPossibleQueryMatch,
-} from '../../../../../../../components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
+} from '@/components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
 
 test('renders without crashing', () => {
   render(<NewHashtagsPlugin onSelect={jest.fn()} />);

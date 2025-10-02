@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import PermissionIcon from '../../../../components/utils/icons/PermissionIcon';
+import PermissionIcon from '@/components/utils/icons/PermissionIcon';
 
 describe('PermissionIcon', () => {
   it('renders svg with correct viewBox and default props', () => {

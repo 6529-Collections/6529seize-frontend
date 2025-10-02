@@ -1,4 +1,4 @@
-import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 export default function GroupCreateWalletsCountText({
   loading,

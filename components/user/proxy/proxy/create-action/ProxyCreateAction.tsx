@@ -1,16 +1,16 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import ProxyCreateActionSelectType from "./select-type/ProxyCreateActionSelectType";
-import CommonChangeAnimation from "../../../../utils/animation/CommonChangeAnimation";
-import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
+import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import ProxyCreateActionConfig from "./config/ProxyCreateActionConfig";
-import { CreateProxyAction } from "../../../../../entities/IProxy";
+import { CreateProxyAction } from "@/entities/IProxy";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../../services/api/common-api";
-import { AuthContext } from "../../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function ProxyCreateAction({
   profileProxy,

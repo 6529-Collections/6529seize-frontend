@@ -5,27 +5,27 @@ import { createPortal } from "react-dom";
 import {
   ExtendedDrop,
   convertApiDropToExtendedDrop,
-} from "../../../../helpers/waves/drop.helpers";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+} from "@/helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../../user/utils/UserCICAndLevel";
-import { cicToType, formatNumberWithCommas } from "../../../../helpers/Helpers";
+} from "@/components/user/utils/UserCICAndLevel";
+import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import MemeDropTraits from "../../../memes/drops/MemeDropTraits";
-import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
-import useLongPressInteraction from "../../../../hooks/useLongPressInteraction";
-import WaveDropActionsOpen from "../../../waves/drops/WaveDropActionsOpen";
-import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import WaveDropMobileMenuOpen from "../../../waves/drops/WaveDropMobileMenuOpen";
-import WaveDropTime from "../../../waves/drops/time/WaveDropTime";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;

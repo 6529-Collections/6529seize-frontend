@@ -1,4 +1,4 @@
-import { formatCrumbDisplay, getDynamicParam, buildStaticCrumbs } from '../../hooks/breadcrumbs.utils';
+import { formatCrumbDisplay, getDynamicParam, buildStaticCrumbs } from '@/hooks/breadcrumbs.utils';
 
 describe('breadcrumbs utils', () => {
   describe('formatCrumbDisplay', () => {

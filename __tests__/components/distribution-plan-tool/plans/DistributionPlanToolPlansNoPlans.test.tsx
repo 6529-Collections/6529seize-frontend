@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DistributionPlanToolPlansNoPlans from '../../../../components/distribution-plan-tool/plans/DistributionPlanToolPlansNoPlans';
+import DistributionPlanToolPlansNoPlans from '@/components/distribution-plan-tool/plans/DistributionPlanToolPlansNoPlans';
 
 describe('DistributionPlanToolPlansNoPlans', () => {
   it('renders the no plans message', () => {

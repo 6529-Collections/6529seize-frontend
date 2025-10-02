@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import HeaderUserProxy from "../../../../../components/header/user/proxy/HeaderUserProxy";
+import HeaderUserProxy from "@/components/header/user/proxy/HeaderUserProxy";
 
 let clickAwayCb: () => void;
 let keyPressCb: () => void;
@@ -16,7 +16,7 @@ jest.mock("react-use", () => ({
 
 const dropdownMock = jest.fn();
 jest.mock(
-  "../../../../../components/header/user/proxy/HeaderUserProxyDropdown",
+  "@/components/header/user/proxy/HeaderUserProxyDropdown",
   () => (props: any) => {
     dropdownMock(props);
     return <div data-testid="dropdown" />;

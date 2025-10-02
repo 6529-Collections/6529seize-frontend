@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import GroupsList from '../../../../../components/groups/page/list/GroupsList';
-import { ApiGroupFull } from '../../../../../generated/models/ApiGroupFull';
+import GroupsList from '@/components/groups/page/list/GroupsList';
+import { ApiGroupFull } from '@/generated/models/ApiGroupFull';
 
 let wrapperProps: any = null;
 let searchProps: any = null;
@@ -17,11 +17,11 @@ jest.mock('react-use', () => ({
   useDebounce: (fn: any, _delay: number, deps: any[]) => React.useEffect(fn, deps),
 }));
 
-jest.mock('../../../../../components/utils/infinite-scroll/CommonInfiniteScrollWrapper', () => (props: any) => { wrapperProps = props; return <div data-testid="wrapper">{props.children}</div>; });
+jest.mock('@/components/utils/infinite-scroll/CommonInfiniteScrollWrapper', () => (props: any) => { wrapperProps = props; return <div data-testid="wrapper">{props.children}</div>; });
 
-jest.mock('../../../../../components/groups/page/list/search/GroupsListSearch', () => (props: any) => { searchProps = props; return <div data-testid="search"/>; });
+jest.mock('@/components/groups/page/list/search/GroupsListSearch', () => (props: any) => { searchProps = props; return <div data-testid="search"/>; });
 
-jest.mock('../../../../../components/groups/page/list/card/GroupCard', () => (props: any) => { cardProps.push(props); return <div data-testid={`card-${props.group.id}`}/>; });
+jest.mock('@/components/groups/page/list/card/GroupCard', () => (props: any) => { cardProps.push(props); return <div data-testid={`card-${props.group.id}`}/>; });
 
 const { useInfiniteQuery } = jest.requireMock('@tanstack/react-query');
 

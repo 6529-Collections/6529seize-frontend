@@ -6,7 +6,7 @@ import {
   WebSocketStatus,
   WebSocketConfig,
 } from "./WebSocketTypes";
-import { WsMessageType } from "../../helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
 
 /**
  * Interface for the WebSocket context

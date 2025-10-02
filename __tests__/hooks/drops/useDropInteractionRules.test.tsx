@@ -1,14 +1,14 @@
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import { useDropInteractionRules } from '../../../hooks/drops/useDropInteractionRules';
-import { AuthContext } from '../../../components/auth/Auth';
-import { ApiDropType } from '../../../generated/models/ApiDropType';
+import { useDropInteractionRules } from '@/hooks/drops/useDropInteractionRules';
+import { AuthContext } from '@/components/auth/Auth';
+import { ApiDropType } from '@/generated/models/ApiDropType';
 
 const wrapper = (value: any) => ({ children }: any) => (
   <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 );
 
-jest.mock('../../../helpers/time', () => ({ Time: { currentMillis: jest.fn(() => 2000) } }));
+jest.mock('@/helpers/time', () => ({ Time: { currentMillis: jest.fn(() => 2000) } }));
 
 describe('useDropInteractionRules', () => {
   const baseDrop: any = {

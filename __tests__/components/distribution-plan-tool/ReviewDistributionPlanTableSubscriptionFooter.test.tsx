@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { ReviewDistributionPlanTableSubscriptionFooter } from "../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter";
-import { DistributionPlanToolContext } from "../../../components/distribution-plan-tool/DistributionPlanToolContext";
-import { AuthContext } from "../../../components/auth/Auth";
+import { ReviewDistributionPlanTableSubscriptionFooter } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { AuthContext } from "@/components/auth/Auth";
 
-jest.mock("../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription", () => ({
+jest.mock("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription", () => ({
   SubscriptionConfirm: (props: any) => (
     <div data-testid={props.title} onClick={() => props.onConfirm?.("c", "t")} />
   ),
@@ -12,7 +12,7 @@ jest.mock("../../../components/distribution-plan-tool/review-distribution-plan/t
   isSubscriptionsAdmin: jest.fn(),
 }));
 
-const { isSubscriptionsAdmin } = require("../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
+const { isSubscriptionsAdmin } = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
 
 const distCtx = { distributionPlan: { id: "1", name: "Plan" } } as any;
 const authCtx = { connectedProfile: { wallets: [{ wallet: "0x1" }] }, setToast: jest.fn() } as any;
@@ -59,9 +59,9 @@ test('shows confirm modals when buttons clicked', () => {
 
 test('resetSubscriptions posts data and shows toast', async () => {
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  const { SubscriptionConfirm, download } = require("../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
+  const { SubscriptionConfirm, download } = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
   const commonApiPost = jest.fn().mockResolvedValue({});
-  jest.spyOn(require("../../../services/api/common-api"), "commonApiPost").mockImplementation(commonApiPost);
+  jest.spyOn(require("@/services/api/common-api"), "commonApiPost").mockImplementation(commonApiPost);
 
   render(
     <DistributionPlanToolContext.Provider value={distCtx}>
@@ -82,7 +82,7 @@ test('resetSubscriptions posts data and shows toast', async () => {
 
 test('download success triggers toast', async () => {
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  const { download } = require("../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
+  const { download } = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
   render(
     <DistributionPlanToolContext.Provider value={distCtx}>
       <AuthContext.Provider value={authCtx}>

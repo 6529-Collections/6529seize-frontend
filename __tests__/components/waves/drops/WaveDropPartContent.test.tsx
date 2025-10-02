@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveDropPartContent from '../../../../components/waves/drops/WaveDropPartContent';
+import WaveDropPartContent from '@/components/waves/drops/WaveDropPartContent';
 
-jest.mock('../../../../components/waves/drops/WaveDropPartContentMarkdown', () => (props: any) => (
+jest.mock('@/components/waves/drops/WaveDropPartContentMarkdown', () => (props: any) => (
   <div data-testid="markdown">{props.part.content}</div>
 ));
-jest.mock('../../../../components/waves/drops/WaveDropPartContentMedias', () => (props: any) => (
+jest.mock('@/components/waves/drops/WaveDropPartContentMedias', () => (props: any) => (
   <div data-testid="medias">{props.activePart.media.length}</div>
 ));
 

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
-import LinkPreviewCard from "../../../components/waves/LinkPreviewCard";
+import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 
 const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
   <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
@@ -11,7 +11,7 @@ const mockEnsPreviewCard = jest.fn(({ preview }: any) => (
   <div data-testid="ens-card" data-type={preview?.type ?? "none"} />
 ));
 
-jest.mock("../../../components/waves/OpenGraphPreview", () => {
+jest.mock("@/components/waves/OpenGraphPreview", () => {
   const actual = jest.requireActual("../../../components/waves/OpenGraphPreview");
   return {
     __esModule: true,
@@ -20,17 +20,17 @@ jest.mock("../../../components/waves/OpenGraphPreview", () => {
   };
 });
 
-jest.mock("../../../components/waves/ens/EnsPreviewCard", () => ({
+jest.mock("@/components/waves/ens/EnsPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockEnsPreviewCard(props),
 }));
 
-jest.mock("../../../services/api/link-preview-api", () => ({
+jest.mock("@/services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
 }));
 
 describe("LinkPreviewCard", () => {
-  const { fetchLinkPreview } = require("../../../services/api/link-preview-api");
+  const { fetchLinkPreview } = require("@/services/api/link-preview-api");
 
   beforeEach(() => {
     jest.clearAllMocks();

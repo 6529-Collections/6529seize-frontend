@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import LogoIcon from '../../../../components/common/icons/LogoIcon';
+import LogoIcon from '@/components/common/icons/LogoIcon';
 
 describe('LogoIcon', () => {
   it('renders svg with viewBox and custom class', () => {

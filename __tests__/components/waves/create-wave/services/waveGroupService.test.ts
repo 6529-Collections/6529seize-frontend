@@ -1,7 +1,7 @@
-import { getAdminGroupId } from '../../../../../components/waves/create-wave/services/waveGroupService';
-import { commonApiPost } from '../../../../../services/api/common-api';
+import { getAdminGroupId } from '@/components/waves/create-wave/services/waveGroupService';
+import { commonApiPost } from '@/services/api/common-api';
 
-jest.mock('../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 

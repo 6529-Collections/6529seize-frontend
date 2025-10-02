@@ -1,11 +1,11 @@
-import { cicToType, getTimeAgoShort } from "../../../../../helpers/Helpers";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import { cicToType, getTimeAgoShort } from "@/helpers/Helpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropAuthorHandle from "./DropAuthorHandle";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../../../user/utils/UserCICAndLevel";
-import { DropPartSize } from "../../../view/part/DropPart";
-import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
+} from "@/components/user/utils/UserCICAndLevel";
+import { DropPartSize } from "@/components/drops/view/part/DropPart";
+import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 interface DropAuthorProps {
   readonly profile: ProfileMinWithoutSubs;

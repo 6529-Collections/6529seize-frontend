@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import CreateDropSelectedFileIcon from '../../../../../../components/drops/create/utils/file/CreateDropSelectedFileIcon';
+import CreateDropSelectedFileIcon from '@/components/drops/create/utils/file/CreateDropSelectedFileIcon';
 
 describe('CreateDropSelectedFileIcon', () => {
   function renderIcon(type: string) {

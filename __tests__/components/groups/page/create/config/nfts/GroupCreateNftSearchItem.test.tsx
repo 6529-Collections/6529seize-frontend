@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateNftSearchItem from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftSearchItem';
-import { MEMES_CONTRACT } from '../../../../../../../constants';
-import { ApiGroupOwnsNftNameEnum } from '../../../../../../../generated/models/ApiGroupOwnsNft';
+import GroupCreateNftSearchItem from '@/components/groups/page/create/config/nfts/GroupCreateNftSearchItem';
+import { MEMES_CONTRACT } from '@/constants';
+import { ApiGroupOwnsNftNameEnum } from '@/generated/models/ApiGroupOwnsNft';
 
-jest.mock('../../../../../../../helpers/image.helpers');
+jest.mock('@/helpers/image.helpers');
 const imageHelpers = jest.requireMock('../../../../../../../helpers/image.helpers');
 const getScaledImageUriMock = imageHelpers.getScaledImageUri as jest.Mock;
 imageHelpers.ImageScale = { W_AUTO_H_50: 'scale' };

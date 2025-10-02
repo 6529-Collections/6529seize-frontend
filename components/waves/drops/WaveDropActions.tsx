@@ -7,16 +7,16 @@ import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import { useContext } from "react";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import WaveDropFollowAuthor from "./WaveDropFollowAuthor";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
-import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
 import WaveDropActionsDownload from "./WaveDropActionsDownload";
-import { getFileInfoFromUrl } from "../../../helpers/file.helpers";
+import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;

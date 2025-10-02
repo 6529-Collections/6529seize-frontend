@@ -1,18 +1,18 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useWaveTopVoters } from '../../hooks/useWaveTopVoters';
+import { useWaveTopVoters } from '@/hooks/useWaveTopVoters';
 import React from 'react';
 
 // Mock the API fetch
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock('../../components/react-query-wrapper/utils/query-utils', () => ({
+jest.mock('@/components/react-query-wrapper/utils/query-utils', () => ({
   getDefaultQueryRetry: jest.fn(() => ({ retry: 3 })),
 }));
 
-import { commonApiFetch } from '../../services/api/common-api';
+import { commonApiFetch } from '@/services/api/common-api';
 
 const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<typeof commonApiFetch>;
 

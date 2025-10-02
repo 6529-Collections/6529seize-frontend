@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "@/components/nextGen/nextgen_contracts";
 import { DistributionLink } from "../NextGen";
 import styles from "../NextGen.module.scss";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";

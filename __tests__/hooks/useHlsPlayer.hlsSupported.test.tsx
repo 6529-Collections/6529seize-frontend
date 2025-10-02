@@ -28,7 +28,7 @@ jest.mock('hls.js', () => {
 });
 
 // must import after mocking
-import { useHlsPlayer } from '../../hooks/useHlsPlayer';
+import { useHlsPlayer } from '@/hooks/useHlsPlayer';
 
 Object.defineProperty(HTMLVideoElement.prototype, 'play', { writable: true, value: jest.fn(() => Promise.resolve()) });
 Object.defineProperty(HTMLVideoElement.prototype, 'load', { writable: true, value: jest.fn() });

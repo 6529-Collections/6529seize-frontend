@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveVoting from '../../../../../components/waves/create-wave/voting/CreateWaveVoting';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { ApiWaveCreditType } from '../../../../../generated/models/ApiWaveCreditType';
+import CreateWaveVoting from '@/components/waves/create-wave/voting/CreateWaveVoting';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
-jest.mock('../../../../../components/utils/radio/CommonBorderedRadioButton', () => (props: any) => (
+jest.mock('@/components/utils/radio/CommonBorderedRadioButton', () => (props: any) => (
   <button data-testid={`radio-${props.type}`} onClick={() => props.onChange(props.type)}>{props.label}</button>
 ));
 
-jest.mock('../../../../../components/waves/create-wave/voting/CreateWaveVotingRep', () => () => <div data-testid="rep" />);
-jest.mock('../../../../../components/waves/create-wave/voting/NegativeVotingToggle', () => () => <div data-testid="negative" />);
-jest.mock('../../../../../components/waves/create-wave/voting/TimeWeightedVoting', () => () => <div data-testid="time-weighted" />);
+jest.mock('@/components/waves/create-wave/voting/CreateWaveVotingRep', () => () => <div data-testid="rep" />);
+jest.mock('@/components/waves/create-wave/voting/NegativeVotingToggle', () => () => <div data-testid="negative" />);
+jest.mock('@/components/waves/create-wave/voting/TimeWeightedVoting', () => () => <div data-testid="time-weighted" />);
 
 describe('CreateWaveVoting', () => {
   const baseProps = {

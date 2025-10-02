@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateName from '../../../../../components/groups/page/create/GroupCreateName';
+import GroupCreateName from '@/components/groups/page/create/GroupCreateName';
 
 describe('GroupCreateName', () => {
   it('renders input with provided name and label', () => {

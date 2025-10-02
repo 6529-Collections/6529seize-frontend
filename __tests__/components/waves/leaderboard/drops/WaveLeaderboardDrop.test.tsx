@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { WaveLeaderboardDrop } from '../../../../../components/waves/leaderboard/drops/WaveLeaderboardDrop';
+import { WaveLeaderboardDrop } from '@/components/waves/leaderboard/drops/WaveLeaderboardDrop';
 
-jest.mock('../../../../../components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop', () => ({ DefaultWaveLeaderboardDrop: (p:any) => <div data-testid="default">{p.drop.id}</div> }));
-jest.mock('../../../../../components/memes/drops/MemesLeaderboardDrop', () => ({ MemesLeaderboardDrop: (p:any) => <div data-testid="memes">{p.drop.id}</div> }));
-jest.mock('../../../../../hooks/useWave', () => ({ useWave: jest.fn() }));
+jest.mock('@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop', () => ({ DefaultWaveLeaderboardDrop: (p:any) => <div data-testid="default">{p.drop.id}</div> }));
+jest.mock('@/components/memes/drops/MemesLeaderboardDrop', () => ({ MemesLeaderboardDrop: (p:any) => <div data-testid="memes">{p.drop.id}</div> }));
+jest.mock('@/hooks/useWave', () => ({ useWave: jest.fn() }));
 
-const useWave = require('../../../../../hooks/useWave').useWave as jest.Mock;
+const useWave = require('@/hooks/useWave').useWave as jest.Mock;
 
 describe('WaveLeaderboardDrop', () => {
   const wave = { id: 'w' } as any;

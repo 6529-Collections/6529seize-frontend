@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import StepHeader from '../../../../components/distribution-plan-tool/common/StepHeader';
-import { DistributionPlanToolStep, DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import StepHeader from '@/components/distribution-plan-tool/common/StepHeader';
+import { DistributionPlanToolStep, DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 function renderComponent(step: DistributionPlanToolStep, ctx?: Partial<React.ContextType<typeof DistributionPlanToolContext>>) {
   const defaultCtx = {

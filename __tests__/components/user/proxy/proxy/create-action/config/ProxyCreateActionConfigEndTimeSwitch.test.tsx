@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import Switch from '../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch';
+import Switch from '@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch';
 
 describe('ProxyCreateActionConfigEndTimeSwitch', () => {
   it('toggles active state', async () => {

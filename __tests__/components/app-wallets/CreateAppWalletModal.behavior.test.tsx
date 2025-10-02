@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CreateAppWalletModal } from '../../../components/app-wallets/AppWalletModal';
+import { CreateAppWalletModal } from '@/components/app-wallets/AppWalletModal';
 
 jest.mock('react-bootstrap', () => {
   const Modal = ({ show, children }: any) => (show ? <div data-testid="modal">{children}</div> : null);
@@ -14,7 +14,7 @@ jest.mock('react-bootstrap', () => {
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg/> }));
 
-jest.mock('../../../components/app-wallets/AppWallet.module.scss', () => ({
+jest.mock('@/components/app-wallets/AppWallet.module.scss', () => ({
   newWalletInput: 'input',
   modalHeader: 'header',
   modalContent: 'content'
@@ -22,12 +22,12 @@ jest.mock('../../../components/app-wallets/AppWallet.module.scss', () => ({
 
 const createAppWallet = jest.fn();
 const importAppWallet = jest.fn();
-jest.mock('../../../components/app-wallets/AppWalletsContext', () => ({
+jest.mock('@/components/app-wallets/AppWalletsContext', () => ({
   useAppWallets: () => ({ createAppWallet: (...a:any[]) => createAppWallet(...a), importAppWallet: (...a:any[]) => importAppWallet(...a) })
 }));
 
 const setToast = jest.fn();
-jest.mock('../../../components/auth/Auth', () => ({ useAuth: () => ({ setToast }) }));
+jest.mock('@/components/auth/Auth', () => ({ useAuth: () => ({ setToast }) }));
 
 it('shows error for invalid wallet name', async () => {
   const onHide = jest.fn();

@@ -8,19 +8,19 @@ import {
   DropMetadata,
   MentionedUser,
   ReferencedNft,
-} from "../../../../../entities/IDrop";
+} from "@/entities/IDrop";
 import CreateDropContent, {
   CreateDropContentHandles,
-} from "../../utils/CreateDropContent";
+} from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
-import { CreateDropType, CreateDropViewType } from "../../types";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
-import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
-import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
-import { ApiWaveParticipationRequirement } from "../../../../../generated/models/ApiWaveParticipationRequirement";
-import { ApiWaveRequiredMetadata } from "../../../../../generated/models/ApiWaveRequiredMetadata";
-import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
+import { CreateDropType, CreateDropViewType } from "@/components/drops/create/types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import CreateDropSelectedFileIcon from "@/components/drops/create/utils/file/CreateDropSelectedFileIcon";
+import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",

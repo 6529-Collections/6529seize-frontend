@@ -1,15 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import RestrictedPage from '@/app/restricted/page';
-import { AuthContext } from '../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
 import { useRouter } from 'next/navigation';
-import { getStagingAuth } from '../../services/auth/auth.utils';
+import { getStagingAuth } from '@/services/auth/auth.utils';
 
 jest.mock('next/image', () => (props: any) => <img alt="" {...props} />);
 jest.mock('@/app/access/page', () => ({ LoginImage: (p: any) => <img alt="" {...p} /> }));
 
 jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
-jest.mock('../../services/auth/auth.utils', () => ({ getStagingAuth: jest.fn() }));
+jest.mock('@/services/auth/auth.utils', () => ({ getStagingAuth: jest.fn() }));
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>{children}</AuthContext.Provider>
@@ -17,7 +17,7 @@ const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 
 // Mock TitleContext
-jest.mock('../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),

@@ -1,4 +1,4 @@
-import { getVideoConversions, isVideoUrl, checkVideoAvailability } from '../../helpers/video.helpers';
+import { getVideoConversions, isVideoUrl, checkVideoAvailability } from '@/helpers/video.helpers';
 
 beforeEach(() => {
   jest.resetAllMocks();

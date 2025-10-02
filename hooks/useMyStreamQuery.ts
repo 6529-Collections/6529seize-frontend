@@ -6,11 +6,11 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { TypedFeedItem } from "../types/feed.types";
-import { commonApiFetch } from "../services/api/common-api";
+import { TypedFeedItem } from "@/types/feed.types";
+import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
-import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 
 interface UseMyStreamQueryProps {
   readonly reverse: boolean;

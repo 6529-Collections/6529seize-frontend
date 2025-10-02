@@ -1,10 +1,10 @@
-import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
+import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch, {
   IdentitySearchSize,
-} from "../../../../utils/input/identity/IdentitySearch";
+} from "@/components/utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
-import { ApiGroupFilterDirection } from "../../../../../generated/models/ApiGroupFilterDirection";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 
 export default function GroupCreateCIC({
   cic,

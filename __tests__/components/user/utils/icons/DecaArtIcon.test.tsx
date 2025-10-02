@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import DecaArtIcon from '../../../../../components/user/utils/icons/DecaArtIcon';
+import DecaArtIcon from '@/components/user/utils/icons/DecaArtIcon';
 
 describe('DecaArtIcon', () => {
   it('renders image with alt text', () => {

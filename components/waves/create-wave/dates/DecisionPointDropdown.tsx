@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faCheck } from "@fortawesome/free-solid-svg-icons";
-import { Period } from "../../../../helpers/Types";
+import { Period } from "@/helpers/Types";
 import { useAnimate } from "framer-motion";
 
 interface DecisionPointDropdownProps {

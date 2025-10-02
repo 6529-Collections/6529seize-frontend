@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import CreateWaveOutcomeWarning from "../../../../../components/waves/create-wave/outcomes/CreateWaveOutcomeWarning";
-import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
+import CreateWaveOutcomeWarning from "@/components/waves/create-wave/outcomes/CreateWaveOutcomeWarning";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock(
-  "../../../../../components/waves/create-wave/utils/CreateWaveWarning",
+  "@/components/waves/create-wave/utils/CreateWaveWarning",
   () => ({
     __esModule: true,
     default: ({ title, description }: any) => (

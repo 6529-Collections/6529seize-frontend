@@ -1,5 +1,5 @@
 import { render, fireEvent } from '@testing-library/react';
-import GroupCreatePrivate from '../../components/groups/page/create/config/include-me-and-private/GroupCreatePrivate';
+import GroupCreatePrivate from '@/components/groups/page/create/config/include-me-and-private/GroupCreatePrivate';
 
 describe('GroupCreatePrivate', () => {
   it('toggles checkbox and calls callback', () => {

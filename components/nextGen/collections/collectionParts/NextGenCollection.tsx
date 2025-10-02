@@ -10,7 +10,7 @@ import { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/enums";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { formatNameForUrl } from "../../nextgen_helpers";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import styles from "../NextGen.module.scss";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";

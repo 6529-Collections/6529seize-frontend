@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import NextGenCollectionMint from '../../../../../../components/nextGen/collections/collectionParts/mint/NextGenCollectionMint';
+import NextGenCollectionMint from '@/components/nextGen/collections/collectionParts/mint/NextGenCollectionMint';
 import { useReadContract } from 'wagmi';
 
 jest.mock('react-bootstrap', () => {
@@ -16,12 +16,12 @@ const MockNextGenMint = jest.fn((props: any) => (
   <div data-testid="mint-props">{props.mint_price}:{props.burn_amount}</div>
 ));
 
-jest.mock('../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMint', () => ({
+jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMint', () => ({
   __esModule: true,
   default: (props: any) => MockNextGenMint(props),
 }));
 
-jest.mock('../../../../../../components/nextGen/collections/NextGenNavigationHeader', () => () => <div data-testid="header" />);
+jest.mock('@/components/nextGen/collections/NextGenNavigationHeader', () => () => <div data-testid="header" />);
 
 jest.mock('wagmi', () => ({ useReadContract: jest.fn() }));
 

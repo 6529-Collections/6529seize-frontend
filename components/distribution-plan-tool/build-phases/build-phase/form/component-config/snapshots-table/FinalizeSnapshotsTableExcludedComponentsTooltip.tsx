@@ -1,8 +1,8 @@
-import DistributionPlanTableBodyWrapper from "../../../../../common/DistributionPlanTableBodyWrapper";
-import DistributionPlanTableHeaderWrapper from "../../../../../common/DistributionPlanTableHeaderWrapper";
-import DistributionPlanTableRowWrapper from "../../../../../common/DistributionPlanTableRowWrapper";
-import DistributionPlanTableWrapper from "../../../../../common/DistributionPlanTableWrapper";
-import { BuildPhasesPhase } from "../../../../BuildPhases";
+import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
+import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
+import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
+import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 
 interface ExcludedComponent {
   readonly id: string;

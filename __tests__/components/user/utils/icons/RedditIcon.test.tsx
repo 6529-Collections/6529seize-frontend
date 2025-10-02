@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import RedditIcon from '../../../../../components/user/utils/icons/RedditIcon';
+import RedditIcon from '@/components/user/utils/icons/RedditIcon';
 
 describe('RedditIcon', () => {
   it('renders svg with correct attributes', () => {

@@ -1,11 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import NextGenAdminUploadAL from '../../../../components/nextGen/admin/NextGenAdminUploadAL';
+import NextGenAdminUploadAL from '@/components/nextGen/admin/NextGenAdminUploadAL';
 import { useSignMessage } from 'wagmi';
 
 jest.mock('wagmi', () => ({ useSignMessage: jest.fn() }));
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: () => ({ data: true }),
   useFunctionAdmin: () => ({ data: true }),
   useCollectionIndex: () => ({}),
@@ -13,7 +13,7 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   getCollectionIdsForAddress: () => ['1'],
   useParsedCollectionIndex: () => ([]),
 }));
-jest.mock('../../../../services/6529api', () => ({ postFormData: jest.fn(() => Promise.resolve({ status: 200, response: { merkle_root: 'x' } })) }));
+jest.mock('@/services/6529api', () => ({ postFormData: jest.fn(() => Promise.resolve({ status: 200, response: { merkle_root: 'x' } })) }));
 
 (useSignMessage as jest.Mock).mockReturnValue({ signMessage: jest.fn(), reset: jest.fn() });
 

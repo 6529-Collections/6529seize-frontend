@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateWaveDropsType from '../../../../../../components/waves/create-wave/drops/types/CreateWaveDropsType';
-import { ExtendedWaveParticipationRequirement } from '../../../../../../components/waves/create-wave/drops/types/CreateWaveDropsTypes';
+import CreateWaveDropsType from '@/components/waves/create-wave/drops/types/CreateWaveDropsType';
+import { ExtendedWaveParticipationRequirement } from '@/components/waves/create-wave/drops/types/CreateWaveDropsTypes';
 
 describe('CreateWaveDropsType', () => {
   it('calls change handler when clicked', () => {

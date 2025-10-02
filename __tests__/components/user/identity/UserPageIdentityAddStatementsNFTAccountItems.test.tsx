@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageIdentityAddStatementsNFTAccountItems from "../../../../components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems";
-import { NFT_ACCOUNTS_STATEMENT_TYPES } from "../../../../helpers/Types";
+import UserPageIdentityAddStatementsNFTAccountItems from "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems";
+import { NFT_ACCOUNTS_STATEMENT_TYPES } from "@/helpers/Types";
 
 const mockButton = jest.fn((props: any) => (
   <button data-testid="btn" data-type={props.statementType} onClick={props.onClick} />
 ));
 
-jest.mock("../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton", () =>
+jest.mock("@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton", () =>
   (props: any) => mockButton(props)
 );
 

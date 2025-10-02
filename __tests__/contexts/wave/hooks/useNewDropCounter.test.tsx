@@ -1,13 +1,13 @@
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import useNewDropCounter from '../../../../contexts/wave/hooks/useNewDropCounter';
-import { AuthContext } from '../../../../components/auth/Auth';
+import useNewDropCounter from '@/contexts/wave/hooks/useNewDropCounter';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../services/websocket/useWebSocketMessage', () => ({
+jest.mock('@/services/websocket/useWebSocketMessage', () => ({
   useWebSocketMessage: jest.fn(),
 }));
 
-const { useWebSocketMessage } = require('../../../../services/websocket/useWebSocketMessage');
+const { useWebSocketMessage } = require('@/services/websocket/useWebSocketMessage');
 
 const waves = [
   { id: 'wave1', metrics: { latest_drop_timestamp: 10 } },

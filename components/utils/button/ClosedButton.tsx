@@ -1,5 +1,5 @@
 import React, { type JSX } from "react";
-import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 interface ClosedButtonProps {
   readonly loading?: boolean;

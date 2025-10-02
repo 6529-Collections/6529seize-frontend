@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateDistributionPlan from '../../../components/distribution-plan-tool/create-plan/CreateDistributionPlan';
-import { distributionPlanApiPost } from '../../../services/distribution-plan-api';
+import CreateDistributionPlan from '@/components/distribution-plan-tool/create-plan/CreateDistributionPlan';
+import { distributionPlanApiPost } from '@/services/distribution-plan-api';
 
-jest.mock('../../../services/distribution-plan-api');
+jest.mock('@/services/distribution-plan-api');
 
 const mockedPost = distributionPlanApiPost as jest.Mock;
 

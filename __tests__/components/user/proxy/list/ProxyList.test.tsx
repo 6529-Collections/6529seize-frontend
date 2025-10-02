@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProxyList, { ProfileProxyListType } from '../../../../../components/user/proxy/list/ProxyList';
-import { ProxyMode } from '../../../../../components/user/proxy/UserPageProxy';
+import ProxyList, { ProfileProxyListType } from '@/components/user/proxy/list/ProxyList';
+import { ProxyMode } from '@/components/user/proxy/UserPageProxy';
 
-jest.mock('../../../../../components/user/proxy/list/filters/ProxyListFilters', () => ({
+jest.mock('@/components/user/proxy/list/filters/ProxyListFilters', () => ({
   __esModule: true,
   default: ({ setSelected, selected }: any) => (
     <div>
@@ -13,12 +13,12 @@ jest.mock('../../../../../components/user/proxy/list/filters/ProxyListFilters', 
   ),
 }));
 
-jest.mock('../../../../../components/user/proxy/list/ProxyListItem', () => ({
+jest.mock('@/components/user/proxy/list/ProxyListItem', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="item">{props.profileProxy.id}</div>,
 }));
 
-jest.mock('../../../../../components/utils/button/PrimaryButton', () => ({
+jest.mock('@/components/utils/button/PrimaryButton', () => ({
   __esModule: true,
   default: ({ onClicked, children }: any) => <button onClick={onClicked}>{children}</button>,
 }));

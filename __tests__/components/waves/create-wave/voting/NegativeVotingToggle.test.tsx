@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import NegativeVotingToggle from '../../../../../components/waves/create-wave/voting/NegativeVotingToggle';
+import NegativeVotingToggle from '@/components/waves/create-wave/voting/NegativeVotingToggle';
 
 test('does not call onChange when disabled', () => {
   const onChange = jest.fn();

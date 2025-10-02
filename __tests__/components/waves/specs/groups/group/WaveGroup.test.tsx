@@ -1,17 +1,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import WaveGroup, { WaveGroupType } from '../../../../../../components/waves/specs/groups/group/WaveGroup';
-import { AuthContext } from '../../../../../../components/auth/Auth';
+import WaveGroup, { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../../../components/waves/specs/groups/group/WaveGroupTitle', () => () => <div data-testid="title" />);
-jest.mock('../../../../../../components/waves/specs/groups/group/edit/WaveGroupEditButtons', () => () => <div data-testid="edit" />);
-jest.mock('../../../../../../components/waves/specs/groups/group/WaveGroupScope', () => ({ group }: any) => group ? <div data-testid="scope" /> : <span>Anyone</span>);
+jest.mock('@/components/waves/specs/groups/group/WaveGroupTitle', () => () => <div data-testid="title" />);
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButtons', () => () => <div data-testid="edit" />);
+jest.mock('@/components/waves/specs/groups/group/WaveGroupScope', () => ({ group }: any) => group ? <div data-testid="scope" /> : <span>Anyone</span>);
 
-jest.mock('../../../../../../helpers/waves/waves.helpers', () => ({ canEditWave: jest.fn() }));
-jest.mock('../../../../../../hooks/isMobileDevice', () => ({ __esModule: true, default: jest.fn() }));
+jest.mock('@/helpers/waves/waves.helpers', () => ({ canEditWave: jest.fn() }));
+jest.mock('@/hooks/isMobileDevice', () => ({ __esModule: true, default: jest.fn() }));
 
-const canEditWave = require('../../../../../../helpers/waves/waves.helpers').canEditWave as jest.Mock;
-const useIsMobileDevice = require('../../../../../../hooks/isMobileDevice').default as jest.Mock;
+const canEditWave = require('@/helpers/waves/waves.helpers').canEditWave as jest.Mock;
+const useIsMobileDevice = require('@/hooks/isMobileDevice').default as jest.Mock;
 
 const auth = { connectedProfile: { handle: 'a' }, activeProfileProxy: null } as any;
 const wrapper = ({ children }: any) => (

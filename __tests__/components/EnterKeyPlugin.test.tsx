@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import EnterKeyPlugin from "../../components/drops/create/lexical/plugins/enter/EnterKeyPlugin";
+import EnterKeyPlugin from "@/components/drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $createParagraphNode,
@@ -55,10 +55,10 @@ jest.mock("@lexical/rich-text", () => ({
 
 const headingMock = jest.requireMock("@lexical/rich-text");
 
-jest.mock("../../hooks/isMobileDevice", () => jest.fn(() => false));
+jest.mock("@/hooks/isMobileDevice", () => jest.fn(() => false));
 const isMobileMock = jest.requireMock("../../hooks/isMobileDevice");
 
-jest.mock("../../hooks/useCapacitor", () => ({
+jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
 }));

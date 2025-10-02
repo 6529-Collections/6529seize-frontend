@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDrops from '../../../../../components/waves/create-wave/drops/CreateWaveDrops';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
+import CreateWaveDrops from '@/components/waves/create-wave/drops/CreateWaveDrops';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../components/waves/create-wave/drops/types/CreateWaveDropsTypes', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/drops/types/CreateWaveDropsTypes', () => (props: any) => (
   <div data-testid="types" onClick={() => props.onRequiredTypeChange(['A'])} />
 ));
 
-jest.mock('../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadata', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadata', () => (props: any) => (
   <div data-testid="metadata" onClick={() => props.onRequiredMetadataChange([{foo:'bar'}])} />
 ));
 
-jest.mock('../../../../../components/waves/create-wave/drops/terms/CreateWaveTermsOfService', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/drops/terms/CreateWaveTermsOfService', () => (props: any) => (
   <button onClick={() => props.setTerms('terms')} data-testid="terms" />
 ));
 

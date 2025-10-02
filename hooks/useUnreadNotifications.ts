@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { ApiNotificationsResponse } from "../generated/models/ApiNotificationsResponse";
-import { commonApiFetch } from "../services/api/common-api";
+import { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
+import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
-import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 export function useUnreadNotifications(handle: string | null) {
   const { isCapacitor } = useCapacitor();
 

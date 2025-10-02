@@ -1,5 +1,5 @@
 import { TraitsData } from "../types/TraitsData";
-import { traitDefinitions, FieldDefinition } from "../../traits/schema";
+import { traitDefinitions, FieldDefinition } from "@/components/waves/memes/traits/schema";
 import {
   ValidationOptions,
   ValidationResult,

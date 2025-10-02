@@ -1,10 +1,10 @@
 import React from "react";
-import { ApiWaveVoter } from "../../../../generated/models/ApiWaveVoter";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
-import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;

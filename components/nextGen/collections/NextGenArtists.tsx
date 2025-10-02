@@ -3,10 +3,10 @@
 import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { DBResponse } from "../../../entities/IDBResponse";
-import { NextGenCollection } from "../../../entities/INextgen";
-import { areEqualAddresses } from "../../../helpers/Helpers";
-import { fetchUrl } from "../../../services/6529api";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NextGenCollection } from "@/entities/INextgen";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
 
 export default function NextGenArtists() {

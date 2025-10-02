@@ -1,18 +1,18 @@
-jest.mock('../../../../../services/distribution-plan-api');
-jest.mock('../../../../../helpers/AllowlistToolHelpers', () => {
+jest.mock('@/services/distribution-plan-api');
+jest.mock('@/helpers/AllowlistToolHelpers', () => {
   const actual = jest.requireActual('../../../../../helpers/AllowlistToolHelpers');
   return { __esModule: true, ...actual, getRandomObjectId: jest.fn(() => 'phase-1') };
 });
-jest.mock('../../../../../components/distribution-plan-tool/common/DistributionPlanAddOperationBtn', () => ({ children, loading }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn', () => ({ children, loading }: any) => (
   <button type="submit" disabled={loading}>{children}</button>
 ));
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreatePhasesForm from '../../../../../components/distribution-plan-tool/create-phases/form/CreatePhasesForm';
-import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { distributionPlanApiPost } from '../../../../../services/distribution-plan-api';
-import { AllowlistOperationCode } from '../../../../../components/allowlist-tool/allowlist-tool.types';
+import CreatePhasesForm from '@/components/distribution-plan-tool/create-phases/form/CreatePhasesForm';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { distributionPlanApiPost } from '@/services/distribution-plan-api';
+import { AllowlistOperationCode } from '@/components/allowlist-tool/allowlist-tool.types';
 
 function renderForm(ctx?: Partial<React.ContextType<typeof DistributionPlanToolContext>>) {
   const defaultCtx = { distributionPlan: { id: 'dp1' }, fetchOperations: jest.fn(), setToasts: jest.fn() } as any;

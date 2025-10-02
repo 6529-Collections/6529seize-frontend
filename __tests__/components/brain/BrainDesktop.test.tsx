@@ -7,21 +7,21 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
   usePathname: jest.fn()
 }));
-jest.mock('../../../components/brain/left-sidebar/BrainLeftSidebar', () => ({ __esModule:true, default: () => <div data-testid="left"/> }));
+jest.mock('@/components/brain/left-sidebar/BrainLeftSidebar', () => ({ __esModule:true, default: () => <div data-testid="left"/> }));
 const rightMock = jest.fn(() => <div data-testid="right"/>);
-jest.mock('../../../components/brain/right-sidebar/BrainRightSidebar', () => ({ __esModule:true, default: rightMock, SidebarTab:{ ABOUT: 'ABOUT' } }));
-jest.mock('../../../components/brain/BrainDesktopDrop', () => jest.fn(({ onClose }) => <div data-testid="drop" onClick={onClose}/>));
-jest.mock('../../../components/brain/ContentTabContext', () => ({ ContentTabProvider: ({children}:any) => <div>{children}</div> }));
-jest.mock('../../../components/brain/my-stream/layout/LayoutContext', () => ({ useLayout: () => ({ contentContainerStyle:{} }) }));
+jest.mock('@/components/brain/right-sidebar/BrainRightSidebar', () => ({ __esModule:true, default: rightMock, SidebarTab:{ ABOUT: 'ABOUT' } }));
+jest.mock('@/components/brain/BrainDesktopDrop', () => jest.fn(({ onClose }) => <div data-testid="drop" onClick={onClose}/>));
+jest.mock('@/components/brain/ContentTabContext', () => ({ ContentTabProvider: ({children}:any) => <div>{children}</div> }));
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({ useLayout: () => ({ contentContainerStyle:{} }) }));
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn(), keepPreviousData:{} }));
 
-import BrainDesktop from '../../../components/brain/BrainDesktop';
+import BrainDesktop from '@/components/brain/BrainDesktop';
 
 const mockedRouter = useRouter as jest.Mock;
 const mockedUseSearchParams = useSearchParams as jest.Mock;
 const mockedUsePathname = usePathname as jest.Mock;
 const mockedUseQuery = useQuery as jest.Mock;
-const mockedDrop = require('../../../components/brain/BrainDesktopDrop');
+const mockedDrop = require('@/components/brain/BrainDesktopDrop');
 
 function setup(query:any){
   const push = jest.fn();

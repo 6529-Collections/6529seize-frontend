@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
-import { getTimeAgo } from "../../../../../helpers/Helpers";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { getTimeAgo } from "@/helpers/Helpers";
 import { useContext } from "react";
-import { AuthContext } from "../../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import GroupCardEditActions from "./actions/GroupCardEditActions";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 
 export default function GroupCardHeader({
   group,

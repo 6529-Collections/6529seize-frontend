@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { ApiDrop } from "../../../generated/models/ObjectSerializer";
+import { ApiDrop } from "@/generated/models/ObjectSerializer";
 
 export enum SingleWaveDropVoteSize {
   NORMAL = "NORMAL",

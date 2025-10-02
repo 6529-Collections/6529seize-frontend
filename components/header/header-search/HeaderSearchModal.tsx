@@ -4,22 +4,22 @@ import { useQuery } from "@tanstack/react-query";
 import FocusTrap from "focus-trap-react";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { CommunityMemberMinimal } from "../../../entities/IProfile";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
+import { commonApiFetch } from "@/services/api/common-api";
 import HeaderSearchModalItem, {
   NFTSearchResult,
   HeaderSearchModalItemType,
 } from "./HeaderSearchModalItem";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
-import { getProfileTargetRoute } from "../../../helpers/Helpers";
-import { UserPageTabType } from "../../user/layout/UserPageTabs";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 import { createPortal } from "react-dom";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import type { ApiWave } from "../../../generated/models/ApiWave";
-import { useWaves } from "../../../hooks/useWaves";
-import useLocalPreference from "../../../hooks/useLocalPreference";
-import { TabToggle } from "../../common/TabToggle";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { useWaves } from "@/hooks/useWaves";
+import useLocalPreference from "@/hooks/useLocalPreference";
+import { TabToggle } from "@/components/common/TabToggle";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 enum STATE {

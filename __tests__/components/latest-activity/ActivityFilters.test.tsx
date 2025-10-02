@@ -1,8 +1,8 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ActivityFilters from "../../../components/latest-activity/ActivityFilters";
-import { TypeFilter, ContractFilter } from "../../../hooks/useActivityData";
+import ActivityFilters from "@/components/latest-activity/ActivityFilters";
+import { TypeFilter, ContractFilter } from "@/hooks/useActivityData";
 
 // Mock react-bootstrap components to simplify testing
 jest.mock("react-bootstrap", () => {
@@ -28,7 +28,7 @@ jest.mock("react-bootstrap", () => {
 });
 
 // Mock the SCSS module
-jest.mock("../../../components/latest-activity/LatestActivity.module.scss", () => ({
+jest.mock("@/components/latest-activity/LatestActivity.module.scss", () => ({
   filterDropdown: "mock-filter-dropdown",
 }));
 

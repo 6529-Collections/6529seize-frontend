@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import { AuthContext } from "../../components/auth/Auth";
-import { CookieConsentProvider } from "../../components/cookies/CookieConsentContext";
+import { AuthContext } from "@/components/auth/Auth";
+import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 export type AuthContextType = React.ContextType<typeof AuthContext>;
 
 const defaultConnectedProfile = {

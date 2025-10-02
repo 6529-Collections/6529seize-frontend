@@ -1,4 +1,4 @@
-import { Status } from "../../../components/nextGen/nextgen_entities";
+import { Status } from "@/components/nextGen/nextgen_entities";
 import {
   formatNameForUrl,
   getBlurLink,
@@ -8,8 +8,8 @@ import {
   getOpenseaLink,
   getStatusFromDates,
   normalizeNextgenTokenID,
-} from "../../../components/nextGen/nextgen_helpers";
-import { NextGenCollection } from "../../../entities/INextgen";
+} from "@/components/nextGen/nextgen_helpers";
+import { NextGenCollection } from "@/entities/INextgen";
 
 describe("nextgen_helpers utility functions", () => {
   it("determines status from dates", () => {

@@ -13,16 +13,16 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
-import { useElectron } from "../../../hooks/useElectron";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useCapacitor from "@/hooks/useCapacitor";
+import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
+import { useElectron } from "@/hooks/useElectron";
 import {
   getRefreshToken,
   getWalletAddress,
   getWalletRole,
-} from "../../../services/auth/auth.utils";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+} from "@/services/auth/auth.utils";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import styles from "./HeaderShare.module.scss";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 

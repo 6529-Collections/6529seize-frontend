@@ -1,23 +1,23 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveDropActions from '../../../../components/waves/drops/WaveDropActions';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { useDropInteractionRules } from '../../../../hooks/drops/useDropInteractionRules';
-import { useSeizeSettings } from '../../../../contexts/SeizeSettingsContext';
-import { ApiDropType } from '../../../../generated/models/ApiDropType';
+import WaveDropActions from '@/components/waves/drops/WaveDropActions';
+import { AuthContext } from '@/components/auth/Auth';
+import { useDropInteractionRules } from '@/hooks/drops/useDropInteractionRules';
+import { useSeizeSettings } from '@/contexts/SeizeSettingsContext';
+import { ApiDropType } from '@/generated/models/ApiDropType';
 
-jest.mock('../../../../components/waves/drops/WaveDropActionsRate', () => () => <div data-testid="rate" />);
-jest.mock('../../../../components/waves/drops/WaveDropActionsReply', () => () => <div data-testid="reply" />);
-jest.mock('../../../../components/waves/drops/WaveDropActionsQuote', () => () => <div data-testid="quote" />);
-jest.mock('../../../../components/waves/drops/WaveDropActionsCopyLink', () => () => <div data-testid="copy" />);
-jest.mock('../../../../components/waves/drops/WaveDropActionsOptions', () => () => <div data-testid="options" />);
-jest.mock('../../../../components/waves/drops/WaveDropActionsOpen', () => () => <div data-testid="open" />);
-jest.mock('../../../../components/waves/drops/WaveDropFollowAuthor', () => () => <div data-testid="follow" />);
-jest.mock('../../../../components/waves/drops/WaveDropActionsAddReaction', () => () => <div data-testid="add-reaction" />);
+jest.mock('@/components/waves/drops/WaveDropActionsRate', () => () => <div data-testid="rate" />);
+jest.mock('@/components/waves/drops/WaveDropActionsReply', () => () => <div data-testid="reply" />);
+jest.mock('@/components/waves/drops/WaveDropActionsQuote', () => () => <div data-testid="quote" />);
+jest.mock('@/components/waves/drops/WaveDropActionsCopyLink', () => () => <div data-testid="copy" />);
+jest.mock('@/components/waves/drops/WaveDropActionsOptions', () => () => <div data-testid="options" />);
+jest.mock('@/components/waves/drops/WaveDropActionsOpen', () => () => <div data-testid="open" />);
+jest.mock('@/components/waves/drops/WaveDropFollowAuthor', () => () => <div data-testid="follow" />);
+jest.mock('@/components/waves/drops/WaveDropActionsAddReaction', () => () => <div data-testid="add-reaction" />);
 
-jest.mock('../../../../hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
-jest.mock('../../../../contexts/SeizeSettingsContext', () => ({ useSeizeSettings: jest.fn() }));
-jest.mock('../../../../contexts/EmojiContext', () => ({ 
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
+jest.mock('@/contexts/SeizeSettingsContext', () => ({ useSeizeSettings: jest.fn() }));
+jest.mock('@/contexts/EmojiContext', () => ({ 
   useEmoji: () => ({ emojiMap: [], loading: false, categories: [], categoryIcons: {}, findNativeEmoji: jest.fn() })
 }));
 

@@ -1,4 +1,4 @@
-import { Crumb } from "../components/breadcrumb/Breadcrumb";
+import { Crumb } from "@/components/breadcrumb/Breadcrumb";
 
 export const formatCrumbDisplay = (segment: string): string => {
   if (!segment) return "";

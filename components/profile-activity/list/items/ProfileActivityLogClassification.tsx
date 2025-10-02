@@ -1,7 +1,7 @@
 import {
   CLASSIFICATIONS,
   ProfileActivityLogClassificationEdit,
-} from "../../../../entities/IProfile";
+} from "@/entities/IProfile";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 export default function ProfileActivityLogClassification({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import ComponentConfigMeta from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta';
+import ComponentConfigMeta from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta';
 
 describe('ComponentConfigMeta', () => {
   it('renders container with expected classes', () => {

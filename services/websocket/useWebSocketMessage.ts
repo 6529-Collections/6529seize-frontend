@@ -3,7 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { useWebSocket } from "./useWebSocket";
 import { WebSocketStatus } from "./WebSocketTypes";
-import { WsMessageType } from "../../helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
 
 /**
  * Hook to subscribe to a specific WebSocket message type using a callback pattern

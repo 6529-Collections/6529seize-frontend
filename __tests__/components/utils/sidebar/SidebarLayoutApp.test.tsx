@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SidebarLayoutApp from '../../../../components/utils/sidebar/SidebarLayoutApp';
+import SidebarLayoutApp from '@/components/utils/sidebar/SidebarLayoutApp';
 
-jest.mock('../../../../components/groups/sidebar/GroupsSidebarApp', () => ({
+jest.mock('@/components/groups/sidebar/GroupsSidebarApp', () => ({
   __esModule: true,
   default: ({ open }: any) => <div data-testid="sidebar">{open ? 'open' : 'closed'}</div>,
 }));
 
-jest.mock('../../../../components/groups/sidebar/GroupsSidebarAppToggle', () => ({
+jest.mock('@/components/groups/sidebar/GroupsSidebarAppToggle', () => ({
   __esModule: true,
   default: ({ open, setOpen }: any) => (
     <button data-testid="toggle" onClick={() => setOpen(!open)}>toggle</button>

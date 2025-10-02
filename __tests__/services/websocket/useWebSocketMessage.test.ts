@@ -1,12 +1,12 @@
 import { renderHook } from '@testing-library/react';
-import { useWebSocketMessage } from '../../../services/websocket/useWebSocketMessage';
-import { WebSocketStatus } from '../../../services/websocket/WebSocketTypes';
+import { useWebSocketMessage } from '@/services/websocket/useWebSocketMessage';
+import { WebSocketStatus } from '@/services/websocket/WebSocketTypes';
 
-jest.mock('../../../services/websocket/useWebSocket', () => ({
+jest.mock('@/services/websocket/useWebSocket', () => ({
   useWebSocket: jest.fn(),
 }));
 
-const { useWebSocket } = require('../../../services/websocket/useWebSocket');
+const { useWebSocket } = require('@/services/websocket/useWebSocket');
 
 describe('useWebSocketMessage', () => {
   it('subscribes when connected and cleans up on unmount', () => {
@@ -33,7 +33,7 @@ describe('useWebSocketMessage', () => {
 describe('useWebsocketStatus', () => {
   it('returns websocket status from context', () => {
     useWebSocket.mockReturnValue({ subscribe: jest.fn(), status: WebSocketStatus.CONNECTED });
-    const { useWebsocketStatus } = require('../../../services/websocket/useWebSocketMessage');
+    const { useWebsocketStatus } = require('@/services/websocket/useWebSocketMessage');
     const { result } = renderHook(() => useWebsocketStatus());
     expect(result.current).toBe(WebSocketStatus.CONNECTED);
   });

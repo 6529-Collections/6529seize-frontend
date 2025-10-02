@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import DropPlaceholder from '../../../components/waves/DropPlaceholder';
-import { ChatRestriction, SubmissionRestriction } from '../../../hooks/useDropPriviledges';
+import DropPlaceholder from '@/components/waves/DropPlaceholder';
+import { ChatRestriction, SubmissionRestriction } from '@/hooks/useDropPriviledges';
 
 describe('DropPlaceholder', () => {
   describe('chat restrictions', () => {

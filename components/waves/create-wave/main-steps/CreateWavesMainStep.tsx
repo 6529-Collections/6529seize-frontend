@@ -1,8 +1,8 @@
-import { getCreateWaveStepStatus } from "../../../../helpers/waves/waves.helpers";
+import { getCreateWaveStepStatus } from "@/helpers/waves/waves.helpers";
 import {
   CreateWaveStep,
   CreateWaveStepStatus,
-} from "../../../../types/waves.types";
+} from "@/types/waves.types";
 import CreateWavesMainStepIcon from "./CreateWavesMainStepIcon";
 import CreateWavesMainStepConnectionLine from "./CreateWavesMainStepConnectionLine";
 

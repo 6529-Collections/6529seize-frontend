@@ -1,4 +1,4 @@
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { GroupCardState } from "./GroupCard";
 import GroupCardContent from "./GroupCardContent";
 import GroupCardHeader from "./GroupCardHeader";

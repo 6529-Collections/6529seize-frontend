@@ -1,5 +1,5 @@
-import { COLLECTED_COLLECTIONS_META, convertAddressToLowerCase } from "../../../../../components/user/collected/filters/user-page-collected-filters.helpers";
-import { CollectedCollectionType, CollectionSort } from "../../../../../entities/IProfile";
+import { COLLECTED_COLLECTIONS_META, convertAddressToLowerCase } from "@/components/user/collected/filters/user-page-collected-filters.helpers";
+import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
 
 describe("COLLECTED_COLLECTIONS_META", () => {
   it("contains correct metadata for MEMES", () => {

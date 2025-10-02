@@ -3,11 +3,11 @@
 import { Col, Row, Table } from "react-bootstrap";
 import styles from "./LatestActivity.module.scss";
 import LatestActivityRow from "./LatestActivityRow";
-import { areEqualAddresses, isNextgenContract } from "../../helpers/Helpers";
+import { areEqualAddresses, isNextgenContract } from "@/helpers/Helpers";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
-import { Transaction } from "../../entities/ITransaction";
-import { NFT } from "../../entities/INFT";
-import { NextGenCollection } from "../../entities/INextgen";
+import { Transaction } from "@/entities/ITransaction";
+import { NFT } from "@/entities/INFT";
+import { NextGenCollection } from "@/entities/INextgen";
 
 interface ActivityTableProps {
   readonly activity: Transaction[];

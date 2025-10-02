@@ -1,13 +1,13 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
-import { AuthContext } from "../../../../../../auth/Auth";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import { AuthContext } from "@/components/auth/Auth";
 import PencilIcon, {
   PencilIconSize,
-} from "../../../../../../utils/icons/PencilIcon";
-import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
+} from "@/components/utils/icons/PencilIcon";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 export default function ProfileProxyCredit({
   profileProxy,

@@ -3,6 +3,13 @@ import { render, screen } from "@testing-library/react";
 
 const setTitleMock = jest.fn();
 
+jest.mock("next/navigation", () => ({
+  __esModule: true,
+  useRouter: () => ({
+    back: jest.fn(),
+  }),
+}));
+
 jest.mock("@/contexts/TitleContext", () => ({
   __esModule: true,
   useTitle: () => ({
@@ -43,9 +50,9 @@ describe("NotFound", () => {
     ).toBeInTheDocument();
 
     // Home link
-    const homeLink = screen.getByRole("link", { name: "TAKE ME HOME" });
+    const homeLink = screen.getByRole("link", { name: "6529 HOME" });
     expect(homeLink).toHaveAttribute("href", "/");
-    expect(homeLink).toHaveClass("tw-mt-4", "tw-text-md", "tw-font-semibold");
+    expect(homeLink).toHaveClass("tw-mt-5", "tw-text-lg", "tw-font-semibold");
 
     // Images render
     expect(screen.getByAltText("SummerGlasses")).toBeInTheDocument();

@@ -8,12 +8,12 @@ import { useViewContext } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
-import { useHeaderContext } from "../../contexts/HeaderContext";
-import { useDeepLinkNavigation } from "../../hooks/useDeepLinkNavigation";
+import { useHeaderContext } from "@/contexts/HeaderContext";
+import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
 import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 import { useSelector } from "react-redux";
-import { selectEditingDropId } from "../../store/editSlice";
-import useDeviceInfo from "../../hooks/useDeviceInfo";
+import { selectEditingDropId } from "@/store/editSlice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,

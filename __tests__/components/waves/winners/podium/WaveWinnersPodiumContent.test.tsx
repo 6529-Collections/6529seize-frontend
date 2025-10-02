@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { WaveWinnersPodiumContent } from '../../../../../components/waves/winners/podium/WaveWinnersPodiumContent';
+import { WaveWinnersPodiumContent } from '@/components/waves/winners/podium/WaveWinnersPodiumContent';
 
-jest.mock('../../../../../components/waves/winners/podium/WavePodiumItem', () => ({
+jest.mock('@/components/waves/winners/podium/WavePodiumItem', () => ({
   __esModule: true,
   WavePodiumItem: (props: any) => <div data-testid={`item-${props.position}`} />,
 }));

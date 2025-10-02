@@ -1,21 +1,21 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityWalletTableWrapper from '../../../../../../../components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTableWrapper';
-import { UserPageStatsActivityWalletFilterType } from '../../../../../../../components/user/stats/activity/wallet/UserPageStatsActivityWallet';
+import UserPageStatsActivityWalletTableWrapper from '@/components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTableWrapper';
+import { UserPageStatsActivityWalletFilterType } from '@/components/user/stats/activity/wallet/UserPageStatsActivityWallet';
 
-jest.mock('../../../../../../../components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilter', () => (props: any) => (
+jest.mock('@/components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilter', () => (props: any) => (
   <div data-testid="filter" data-active={props.activeFilter} />
 ));
 
-jest.mock('../../../../../../../components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTable', () => () => <div data-testid="table" />);
+jest.mock('@/components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTable', () => () => <div data-testid="table" />);
 
-jest.mock('../../../../../../../components/utils/table/paginator/CommonTablePagination', () => (props: any) => (
+jest.mock('@/components/utils/table/paginator/CommonTablePagination', () => (props: any) => (
   <div data-testid="pagination" data-page={props.currentPage} data-total={props.totalPages} />
 ));
 
-jest.mock('../../../../../../../components/utils/animation/CommonCardSkeleton', () => () => <div data-testid="skeleton" />);
+jest.mock('@/components/utils/animation/CommonCardSkeleton', () => () => <div data-testid="skeleton" />);
 
-jest.mock('../../../../../../../components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
 
 describe('UserPageStatsActivityWalletTableWrapper', () => {
   const profile = { id: 'p' } as any;

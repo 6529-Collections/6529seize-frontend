@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
-import ParticipationDropContainer from '../../../../../components/waves/drops/participation/ParticipationDropContainer';
-import { ApiDropType } from '../../../../../generated/models/ApiDropType';
-import { DropLocation } from '../../../../../components/waves/drops/Drop';
+import ParticipationDropContainer from '@/components/waves/drops/participation/ParticipationDropContainer';
+import { ApiDropType } from '@/generated/models/ApiDropType';
+import { DropLocation } from '@/components/waves/drops/Drop';
 
 const baseDrop = { drop_type: ApiDropType.Participatory, rank: 1 } as any;
 

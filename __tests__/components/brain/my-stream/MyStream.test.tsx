@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import MyStream from '../../../../components/brain/my-stream/MyStream';
+import MyStream from '@/components/brain/my-stream/MyStream';
 
-jest.mock('../../../../components/brain/feed/FeedWrapper', () => ({ __esModule: true, default: jest.fn(() => <div data-testid="wrapper" />) }));
+jest.mock('@/components/brain/feed/FeedWrapper', () => ({ __esModule: true, default: jest.fn(() => <div data-testid="wrapper" />) }));
 
-const FeedWrapperMock = require('../../../../components/brain/feed/FeedWrapper').default as jest.Mock;
+const FeedWrapperMock = require('@/components/brain/feed/FeedWrapper').default as jest.Mock;
 
 // Mock TitleContext
-jest.mock('../../../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),
@@ -24,7 +24,7 @@ jest.mock('../../../../contexts/TitleContext', () => ({
 }));
 
 // Mock MyStreamContext if needed
-jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({
     waveId: null,
     setWaveId: jest.fn(),

@@ -1,4 +1,4 @@
-import { validateFile, testVideoCompatibility } from "../../components/waves/memes/file-upload/utils/fileValidation";
+import { validateFile, testVideoCompatibility } from "@/components/waves/memes/file-upload/utils/fileValidation";
 
 // Mock MediaError constants
 const MediaErrorMock = {
