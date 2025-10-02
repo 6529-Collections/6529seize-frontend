@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { AboutSection } from "@/enums";
 import styles from "@/styles/Home.module.scss";
@@ -78,9 +79,9 @@ export default function DisputeResolutionPage() {
             </ol>
             <br />
             <p>
-              <a href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
+              <Link href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
                 Back to Terms of Service
-              </a>{" "}
+              </Link>{" "}
             </p>
           </Col>
         </Row>

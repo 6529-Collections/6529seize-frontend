@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 const IndexPage = () => (
   <div>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -403,7 +404,7 @@ const IndexPage = () => (
                             </p>
                             <ul>
                               <li>
-                                <a href="/om/">/om/</a>
+                                <Link href="/om/">/om/</Link>
                               </li>
                               <li>
                                 <a
@@ -432,12 +433,12 @@ const IndexPage = () => (
                 </div>
                 <span className="vcard rich-snippet-hidden">
                   <span className="fn">
-                    <a
+                    <Link
                       href="/author/6529er6529-io/"
                       title="Posts by 6529er"
                       rel="author">
                       6529er
-                    </a>
+                    </Link>
                   </span>
                 </span>
                 <span className="updated rich-snippet-hidden">

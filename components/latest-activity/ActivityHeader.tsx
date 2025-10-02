@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Col } from "react-bootstrap";
 import homeStyles from "@/styles/Home.module.scss";
 import DotLoader from "../dotLoader/DotLoader";
@@ -24,9 +25,9 @@ export default function ActivityHeader({
           <span className="font-lightest">NFT</span> Activity{" "}
         </h1>
         {showViewAll ? (
-          <a href="/nft-activity" className={homeStyles.viewAllLink}>
+          <Link href="/nft-activity" className={homeStyles.viewAllLink}>
             <span>View All</span>
-          </a>
+          </Link>
         ) : (
           fetching && <DotLoader />
         )}

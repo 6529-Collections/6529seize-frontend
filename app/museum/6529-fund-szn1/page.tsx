@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 const IndexPage = () => (
   <div>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -347,12 +348,12 @@ Matt Kane"
                 </span>
                 <span className="vcard rich-snippet-hidden">
                   <span className="fn">
-                    <a
+                    <Link
                       href="/author/6529er6529-io/"
                       title="Posts by 6529er"
                       rel="author">
                       6529er
-                    </a>
+                    </Link>
                   </span>
                 </span>
                 <span className="updated rich-snippet-hidden">
@@ -500,24 +501,24 @@ Matt Kane"
                             className="fusion-text fusion-text-2"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/6529-fund-szn1/fidenza/">
+                              <Link href="/museum/6529-fund-szn1/fidenza/">
                                 <strong>Fidenza</strong>
-                              </a>
+                              </Link>
                               <br />
                               Tyler Hobbs
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/xcopy/">
+                              <Link href="/museum/6529-fund-szn1/xcopy/">
                                 <strong>XCOPY</strong>
-                              </a>
+                              </Link>
                               <br />
                               XCOPYART
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/meridian/">
+                                <Link href="/museum/6529-fund-szn1/meridian/">
                                   Meridian
-                                </a>
+                                </Link>
                                 <br />
                                 <span style={{ fontWeight: 400 }}>
                                   Matt DesLauriers
@@ -526,74 +527,74 @@ Matt Kane"
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/ringers/">
+                                <Link href="/museum/6529-fund-szn1/ringers/">
                                   Ringers
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Dmitri Cherniak
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/bored-ape-yacht-club/">
+                              <Link href="/museum/6529-fund-szn1/bored-ape-yacht-club/">
                                 <strong>Bored Ape Yacht Club</strong>
-                              </a>
+                              </Link>
                               <br />
                               Yuga Labs
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/cryptopunks/">
+                                <Link href="/museum/6529-fund-szn1/cryptopunks/">
                                   CryptoPunks
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Yuga Labs
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/nouns/">
+                                <Link href="/museum/6529-fund-szn1/nouns/">
                                   Nouns
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               NounsDAO
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/gazers/">
+                                <Link href="/museum/6529-fund-szn1/gazers/">
                                   Gazers
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Matt Kane
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/intensify-modeling/">
+                                <Link href="/museum/6529-fund-szn1/intensify-modeling/">
                                   Intensify Modeling
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Botto
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/dead-ringers/">
+                              <Link href="/museum/6529-fund-szn1/dead-ringers/">
                                 <strong>Dead Ringers</strong>
-                              </a>
+                              </Link>
                               <br />
                               Dmitri Cherniak
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/azuki/">
+                              <Link href="/museum/6529-fund-szn1/azuki/">
                                 <strong>Azuki</strong>
-                              </a>
+                              </Link>
                               <br />
                               Chiru Labs
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/mfers/">
+                              <Link href="/museum/6529-fund-szn1/mfers/">
                                 <strong>mfers</strong>
-                              </a>
+                              </Link>
                               <br />
                               Sartoshi
                             </p>
@@ -616,34 +617,34 @@ Matt Kane"
                             style={{ color: "#000000" }}>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/where-my-vans-go/">
+                                <Link href="/museum/6529-fund-szn1/where-my-vans-go/">
                                   Where My Vans Go
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               DrifterShoots
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/archeology-of-the-future/">
+                                <Link href="/museum/6529-fund-szn1/archeology-of-the-future/">
                                   Archeology of the Future
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Neurocolor
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/act-of-kindness/">
+                              <Link href="/museum/6529-fund-szn1/act-of-kindness/">
                                 <strong>Act of Kindness</strong>
-                              </a>
+                              </Link>
                               <br />
                               Danguiz
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/twin-flames/">
+                                <Link href="/museum/6529-fund-szn1/twin-flames/">
                                   Twin Flames
-                                </a>
+                                </Link>
                                 <br />
                                 <span style={{ fontWeight: 400 }}>
                                   Justin Aversano
@@ -652,9 +653,9 @@ Matt Kane"
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/conflicting-metaphysics/">
+                                <Link href="/museum/6529-fund-szn1/conflicting-metaphysics/">
                                   Conflicting Metaphysics
-                                </a>
+                                </Link>
                                 <br />
                                 <span style={{ fontWeight: 400 }}>
                                   Victor Fota
@@ -663,9 +664,9 @@ Matt Kane"
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/ballad-of-ghosts/">
+                                <Link href="/museum/6529-fund-szn1/ballad-of-ghosts/">
                                   Ballad of Ghosts
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               <span style={{ fontWeight: 400 }}>
@@ -674,18 +675,18 @@ Matt Kane"
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/image-with-arrow/">
+                                <Link href="/museum/6529-fund-szn1/image-with-arrow/">
                                   Image with Arrow
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Coldie
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/an-incomparable-love/">
+                                <Link href="/museum/6529-fund-szn1/an-incomparable-love/">
                                   An Incomparable Love
-                                </a>
+                                </Link>
                                 <br />
                                 <span style={{ fontWeight: 400 }}>
                                   Kevin Abosch
@@ -694,35 +695,35 @@ Matt Kane"
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/faraway/">
+                                <Link href="/museum/6529-fund-szn1/faraway/">
                                   FARAWAY
-                                </a>
+                                </Link>
                               </strong>
                               <br />
                               CA Chou
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/wild-child-2022/">
+                                <Link href="/museum/6529-fund-szn1/wild-child-2022/">
                                   Wild Child 2022
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Ali Sabet
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/primary-colors-of-neural-bricolage/">
+                                <Link href="/museum/6529-fund-szn1/primary-colors-of-neural-bricolage/">
                                   Primary Colors of Neural Bricolage
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Helena Sarin
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/videodrome/">
+                              <Link href="/museum/6529-fund-szn1/videodrome/">
                                 <strong>Videodrome</strong>
-                              </a>
+                              </Link>
                               <br />
                               Robby Barrat
                             </p>
@@ -745,43 +746,43 @@ Matt Kane"
                             style={{ color: "#000000" }}>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/incomplete-control/">
+                                <Link href="/museum/6529-fund-szn1/incomplete-control/">
                                   <strong>Incomplete Control</strong>
-                                </a>
+                                </Link>
                                 <br />
                                 Tyler Hobbs
                               </span>
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/cryptocubes/">
+                                <Link href="/museum/6529-fund-szn1/cryptocubes/">
                                   <strong>CryptoCubes</strong>
-                                </a>
+                                </Link>
                                 <br />
                                 HanRGB
                               </span>
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/proof-grails-wall/">
+                              <Link href="/museum/6529-fund-szn1/proof-grails-wall/">
                                 <strong>Wall</strong>
-                              </a>
+                              </Link>
                               <br />
                               Tyler Hobbs
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/proof-grails-protoglyph/">
+                                <Link href="/museum/6529-fund-szn1/proof-grails-protoglyph/">
                                   Protoglyph
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Larva Labs
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/subscapes/">
+                                <Link href="/museum/6529-fund-szn1/subscapes/">
                                   Subscapes
-                                </a>
+                                </Link>
                               </strong>
                               <br />
                               Matt DesLauriers
@@ -791,27 +792,27 @@ Matt Kane"
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/chromie-squiggle/">
+                                <Link href="/museum/6529-fund-szn1/chromie-squiggle/">
                                   Chromie Squiggle
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Snowfro
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/genesis/">
+                                <Link href="/museum/6529-fund-szn1/genesis/">
                                   <strong>Genesis</strong>
-                                </a>
+                                </Link>
                                 <br />
                                 Daniel Calderon
                               </span>
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/non-either/">
+                                <Link href="/museum/6529-fund-szn1/non-either/">
                                   Non Either
-                                </a>
+                                </Link>
                                 <br />
                                 <span style={{ fontWeight: 400 }}>
                                   Rafael Rozendaal
@@ -821,34 +822,34 @@ Matt Kane"
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/entretiempos/">
+                                <Link href="/museum/6529-fund-szn1/entretiempos/">
                                   <strong>Entretiempos</strong>
-                                </a>
+                                </Link>
                                 <br />
                                 Marcelo Soria-Rodriguez
                               </span>
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/construction-token/">
+                              <Link href="/museum/6529-fund-szn1/construction-token/">
                                 <strong>Construction Token</strong>
-                              </a>
+                              </Link>
                               <br />
                               Jeff Davis
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/jiometory-no-compute/">
+                                <Link href="/museum/6529-fund-szn1/jiometory-no-compute/">
                                   Jiometory No Compute
-                                </a>
+                                </Link>
                                 <br />
                               </strong>
                               Samsy
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/screens/">
+                                <Link href="/museum/6529-fund-szn1/screens/">
                                   Screens
-                                </a>
+                                </Link>
                                 <br />
                                 <span style={{ fontWeight: 400 }}>
                                   Thomas Lin Pedersen
@@ -873,25 +874,25 @@ Matt Kane"
                             className="fusion-text fusion-text-5"
                             style={{ color: "#000000" }}>
                             <p>
-                              <a href="/museum/6529-fund-szn1/grifters/">
+                              <Link href="/museum/6529-fund-szn1/grifters/">
                                 <strong>Grifters</strong>
-                              </a>
+                              </Link>
                               <br />
                               XCOPY
                             </p>
                             <p>
                               <strong>
-                                <a href="/museum/6529-fund-szn1/cryptoadz/">
+                                <Link href="/museum/6529-fund-szn1/cryptoadz/">
                                   CrypToadz
-                                </a>
+                                </Link>
                               </strong>
                               <br />
                               gremplin
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/clonex/">
+                              <Link href="/museum/6529-fund-szn1/clonex/">
                                 <strong>CloneX</strong>
-                              </a>
+                              </Link>
                               <br />
                               RTFKT x{" "}
                               <span style={{ fontWeight: 400 }}>
@@ -900,9 +901,9 @@ Matt Kane"
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/rarepepe/">
+                                <Link href="/museum/6529-fund-szn1/rarepepe/">
                                   <strong>RAREPEPE</strong>
-                                </a>
+                                </Link>
                                 <br />
                               </span>
                               <span style={{ fontWeight: 400 }}>
@@ -910,58 +911,58 @@ Matt Kane"
                               </span>
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/fakerares/">
+                              <Link href="/museum/6529-fund-szn1/fakerares/">
                                 <strong>FARERARES</strong>
-                              </a>
+                              </Link>
                               <br />
                               Various Artists
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/capsule-house/">
+                              <Link href="/museum/6529-fund-szn1/capsule-house/">
                                 <strong>Capsule House</strong>
-                              </a>
+                              </Link>
                               <br />
                               SeerLight + Kaejunni
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/nuclear-nerds/">
+                              <Link href="/museum/6529-fund-szn1/nuclear-nerds/">
                                 <strong>Nuclear Nerds</strong>
-                              </a>
+                              </Link>
                               <br />
                               Bazooka Labs
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/invisible-friends/">
+                                <Link href="/museum/6529-fund-szn1/invisible-friends/">
                                   <strong>Invisible Friends</strong>
-                                </a>
+                                </Link>
                                 <br />
                                 Markus Magnusson{" "}
                               </span>
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/the-key-the-trial/">
+                                <Link href="/museum/6529-fund-szn1/the-key-the-trial/">
                                   <strong>The Trial</strong>
-                                </a>
+                                </Link>
                                 <br />
                                 k-art
                               </span>
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/madhouse/">
+                                <Link href="/museum/6529-fund-szn1/madhouse/">
                                   <strong>MAD</strong>
-                                </a>
+                                </Link>
                                 <br />
                               </span>
                               k-art
                             </p>
                             <p>
                               <span style={{ fontWeight: 400 }}>
-                                <a href="/museum/6529-fund-szn1/queens-kings/">
+                                <Link href="/museum/6529-fund-szn1/queens-kings/">
                                   <strong>Queens + Kings</strong>
-                                </a>
+                                </Link>
                                 <br />
                                 Hackatao
                                 <br />
@@ -970,18 +971,18 @@ Matt Kane"
                             <p>
                               <span style={{ fontWeight: 400 }}>
                                 <strong>
-                                  <a href="/museum/6529-fund-szn1/cod/">
+                                  <Link href="/museum/6529-fund-szn1/cod/">
                                     Async Blueprints cods
-                                  </a>
+                                  </Link>
                                 </strong>
                                 <br />
                               </span>
                               k-art
                             </p>
                             <p>
-                              <a href="/museum/6529-fund-szn1/cryptoad-punks/">
+                              <Link href="/museum/6529-fund-szn1/cryptoad-punks/">
                                 <strong>CrypToad Punks</strong>
-                              </a>
+                              </Link>
                             </p>
                           </div>
                         </div>

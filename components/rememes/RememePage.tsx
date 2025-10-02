@@ -7,6 +7,7 @@ import { useTitle } from "@/contexts/TitleContext";
 import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEnsName } from "wagmi";
@@ -344,9 +345,9 @@ export default function RememePage(props: Readonly<Props>) {
                     .filter((rep) => rep != parseInt(rememe.id))
                     .map((rep) => (
                       <span className={styles.replica} key={`replica-rep`}>
-                        <a href={`/rememes/${rememe.contract}/${rep}`}>
+                        <Link href={`/rememes/${rememe.contract}/${rep}`}>
                           #{rep}
-                        </a>
+                        </Link>
                       </span>
                     ))}
                 </Col>
