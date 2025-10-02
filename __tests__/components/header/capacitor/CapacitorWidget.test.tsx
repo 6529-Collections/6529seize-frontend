@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CapacitorWidget from '../../../../components/header/capacitor/CapacitorWidget';
+import CapacitorWidget from '@/components/header/capacitor/CapacitorWidget';
 
-jest.mock('../../../../hooks/useNavigationHistory', () => ({
+jest.mock('@/hooks/useNavigationHistory', () => ({
   useNavigationHistory: () => ({
     canGoBack: true,
     canGoForward: true,
@@ -14,12 +14,12 @@ jest.mock('../../../../hooks/useNavigationHistory', () => ({
 }));
 
 const mockUseCapacitor = jest.fn();
-jest.mock('../../../../hooks/useCapacitor', () => ({
+jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: () => mockUseCapacitor(),
 }));
 
-jest.mock('../../../../hooks/useDeepLinkNavigation', () => ({
+jest.mock('@/hooks/useDeepLinkNavigation', () => ({
   useDeepLinkNavigation: jest.fn(),
 }));
 

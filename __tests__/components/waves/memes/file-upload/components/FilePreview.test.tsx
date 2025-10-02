@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import FilePreview from '../../../../../../components/waves/memes/file-upload/components/FilePreview';
+import FilePreview from '@/components/waves/memes/file-upload/components/FilePreview';
 
-jest.mock('../../../../../../components/waves/memes/file-upload/components/VideoFallbackPreview', () => () => <div data-testid="fallback" />);
+jest.mock('@/components/waves/memes/file-upload/components/VideoFallbackPreview', () => () => <div data-testid="fallback" />);
 
 const file = new File(['a'], 'a.mp4', { type: 'video/mp4' });
 

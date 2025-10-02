@@ -6,10 +6,10 @@ import {
   PhaseGroupSnapshotConfig,
   TopHolderType,
 } from "../../BuildPhaseFormConfigModal";
-import AllowlistToolAnimationWrapper from "../../../../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import { Pool } from "../../../../../../allowlist-tool/allowlist-tool.types";
+import AllowlistToolAnimationWrapper from "@/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import { Pool } from "@/allowlist-tool/allowlist-tool.types";
 import FinalizeSnapshotsTableRow from "./FinalizeSnapshotsTableRow";
-import { BuildPhasesPhase } from "../../../../BuildPhases";
+import { BuildPhasesPhase } from "@/BuildPhases";
 
 export interface FinalizeSnapshotRow {
   readonly groupSnapshotId: string;

@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveOutcome from '../../../../components/brain/my-stream/MyStreamWaveOutcome';
+import MyStreamWaveOutcome from '@/components/brain/my-stream/MyStreamWaveOutcome';
 
-jest.mock('../../../../components/waves/outcome/WaveOutcome', () => ({
+jest.mock('@/components/waves/outcome/WaveOutcome', () => ({
   __esModule: true,
   WaveOutcome: ({ outcome }: any) => <div data-testid="outcome">{outcome.type}</div>
 }));
 
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ outcomeViewStyle: { height: 50 } })
 }));
 

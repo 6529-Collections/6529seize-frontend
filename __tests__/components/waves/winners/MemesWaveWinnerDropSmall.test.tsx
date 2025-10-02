@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { MemesWaveWinnerDropSmall } from '../../../../components/waves/winners/MemesWaveWinnerDropSmall';
+import { MemesWaveWinnerDropSmall } from '@/components/waves/winners/MemesWaveWinnerDropSmall';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, onClick, className }: any) => <a href={href} onClick={onClick} className={className}>{children}</a> }));
-jest.mock('../../../../helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => String(n) }));
-jest.mock('../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => 'scaled-' + u, ImageScale: { W_AUTO_H_50: '50' } }));
-jest.mock('../../../../components/waves/winners/drops/DropContentSmall', () => ({ DropContentSmall: () => <div data-testid='content' /> }));
-jest.mock('../../../../components/waves/winners/WaveWinnersSmallOutcome', () => ({ WaveWinnersSmallOutcome: () => <div data-testid='outcome' /> }));
-jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => ({ __esModule: true, default: ({ rank }: any) => <div data-testid='badge'>{rank}</div> }));
-jest.mock('../../../../components/waves/drops/time/WaveDropTime', () => ({ __esModule: true, default: () => <span data-testid='time' /> }));
+jest.mock('@/helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => String(n) }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => 'scaled-' + u, ImageScale: { W_AUTO_H_50: '50' } }));
+jest.mock('@/components/waves/winners/drops/DropContentSmall', () => ({ DropContentSmall: () => <div data-testid='content' /> }));
+jest.mock('@/components/waves/winners/WaveWinnersSmallOutcome', () => ({ WaveWinnersSmallOutcome: () => <div data-testid='outcome' /> }));
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => ({ __esModule: true, default: ({ rank }: any) => <div data-testid='badge'>{rank}</div> }));
+jest.mock('@/components/waves/drops/time/WaveDropTime', () => ({ __esModule: true, default: () => <span data-testid='time' /> }));
 
 describe('MemesWaveWinnerDropSmall', () => {
   const wave = { voting_credit_type: 'REP' } as any;

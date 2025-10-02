@@ -1,19 +1,19 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-jest.mock('../../../../../../../components/drops/view/item/content/media/MediaDisplayImage', () => (props: any) => (
+jest.mock('@/components/drops/view/item/content/media/MediaDisplayImage', () => (props: any) => (
   <div data-testid="image" data-src={props.src} />
 ));
-jest.mock('../../../../../../../components/drops/view/item/content/media/MediaDisplayVideo', () => (props: any) => (
+jest.mock('@/components/drops/view/item/content/media/MediaDisplayVideo', () => (props: any) => (
   <div data-testid="video" data-src={props.src} data-controls={String(props.showControls)} data-disable={String(props.disableClickHandler)} />
 ));
-jest.mock('../../../../../../../components/drops/view/item/content/media/MediaDisplayAudio', () => (props: any) => (
+jest.mock('@/components/drops/view/item/content/media/MediaDisplayAudio', () => (props: any) => (
   <div data-testid="audio" data-src={props.src} data-controls={String(props.showControls)} />
 ));
 
 jest.mock('next/dynamic', () => (importFn: any) => importFn().then ? () => <div data-testid="glb" /> : () => <div data-testid="glb" />);
 
-import MediaDisplay from '../../../../../../../components/drops/view/item/content/media/MediaDisplay';
+import MediaDisplay from '@/components/drops/view/item/content/media/MediaDisplay';
 
 describe('MediaDisplay', () => {
   it('renders image', () => {

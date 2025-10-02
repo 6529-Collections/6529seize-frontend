@@ -1,7 +1,7 @@
-import { IMAGE_TRANSFORMER } from '../../../../../../components/drops/create/lexical/transformers/ImageTransformer';
-import { $createImageNode } from '../../../../../../components/drops/create/lexical/nodes/ImageNode';
+import { IMAGE_TRANSFORMER } from '@/components/drops/create/lexical/transformers/ImageTransformer';
+import { $createImageNode } from '@/components/drops/create/lexical/nodes/ImageNode';
 
-jest.mock('../../../../../../components/drops/create/lexical/nodes/ImageNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/ImageNode', () => ({
   $createImageNode: jest.fn((opts) => ({ node: 'image', ...opts })),
   $isImageNode: jest.fn((n) => n && n.type === 'image'),
   ImageNode: class {},

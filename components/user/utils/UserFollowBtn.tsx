@@ -7,13 +7,13 @@ import {
 } from "../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../auth/Auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
+import { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiFetch,
   commonApiPost,
-} from "../../../services/api/common-api";
-import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
+} from "@/services/api/common-api";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";

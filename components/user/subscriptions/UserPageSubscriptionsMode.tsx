@@ -4,8 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import Toggle from "react-toggle";
 import { AuthContext } from "../../auth/Auth";
-import { commonApiPost } from "../../../services/api/common-api";
-import { SubscriptionDetails } from "../../../entities/ISubscription";
+import { commonApiPost } from "@/services/api/common-api";
+import { SubscriptionDetails } from "@/entities/ISubscription";
 import { Spinner } from "../../dotLoader/DotLoader";
 
 export default function UserPageSubscriptionsMode(

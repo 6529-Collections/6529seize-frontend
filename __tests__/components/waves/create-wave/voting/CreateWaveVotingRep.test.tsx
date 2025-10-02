@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveVotingRep from '../../../../../components/waves/create-wave/voting/CreateWaveVotingRep';
-import { CREATE_WAVE_VALIDATION_ERROR } from '../../../../../helpers/waves/create-wave.validation';
+import CreateWaveVotingRep from '@/components/waves/create-wave/voting/CreateWaveVotingRep';
+import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.validation';
 
-jest.mock('../../../../../components/utils/input/identity/IdentitySearch', () => ({
+jest.mock('@/components/utils/input/identity/IdentitySearch', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="identity" data-error={props.error} />,
 }));
 
-jest.mock('../../../../../components/utils/input/rep-category/RepCategorySearch', () => ({
+jest.mock('@/components/utils/input/rep-category/RepCategorySearch', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="category" data-error={props.error} />,
 }));

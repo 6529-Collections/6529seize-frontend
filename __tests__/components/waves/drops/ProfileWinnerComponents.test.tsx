@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ProfileWinnerBadge } from '../../../../components/waves/drops/ProfileWinnerBadge';
+import { ProfileWinnerBadge } from '@/components/waves/drops/ProfileWinnerBadge';
 
 describe('ProfileWinnerBadge', () => {
   it('returns null when winCount is 0', () => {

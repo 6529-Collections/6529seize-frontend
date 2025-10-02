@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveDropPartTitle from '../../../../components/waves/drops/WaveDropPartTitle';
+import WaveDropPartTitle from '@/components/waves/drops/WaveDropPartTitle';
 
 describe('WaveDropPartTitle', () => {
   it('renders title when provided', () => {

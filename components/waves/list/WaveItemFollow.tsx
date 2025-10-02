@@ -1,15 +1,15 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
-} from "../../../services/api/common-api";
-import { ApiWaveSubscriptionActions } from "../../../generated/models/ApiWaveSubscriptionActions";
+} from "@/services/api/common-api";
+import { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "../../react-query-wrapper/utils/query-utils";
 

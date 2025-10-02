@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import DropListItemContentPart from "../../../../../../components/drops/view/item/content/DropListItemContentPart";
-import { DropContentPartType } from "../../../../../../components/drops/view/part/DropPartMarkdown";
+import DropListItemContentPart from "@/components/drops/view/item/content/DropListItemContentPart";
+import { DropContentPartType } from "@/components/drops/view/part/DropPartMarkdown";
 
-jest.mock("../../../../../../components/drops/view/item/content/nft-tag/DropListItemContentNft", () => (props: any) => (
+jest.mock("@/components/drops/view/item/content/nft-tag/DropListItemContentNft", () => (props: any) => (
   <div data-testid="nft">{props.nft.id}</div>
 ));
 
-jest.mock("../../../../../../components/drops/view/item/content/DropListItemContentMention", () => (props: any) => (
+jest.mock("@/components/drops/view/item/content/DropListItemContentMention", () => (props: any) => (
   <div data-testid="mention">{props.user.handle}</div>
 ));
 

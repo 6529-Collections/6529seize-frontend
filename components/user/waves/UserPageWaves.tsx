@@ -3,9 +3,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { useDebounce } from "react-use";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,

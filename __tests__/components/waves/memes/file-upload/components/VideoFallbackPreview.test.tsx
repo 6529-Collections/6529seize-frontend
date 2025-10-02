@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import VideoFallbackPreview from '../../../../../../components/waves/memes/file-upload/components/VideoFallbackPreview';
+import VideoFallbackPreview from '@/components/waves/memes/file-upload/components/VideoFallbackPreview';
 
-jest.mock('../../../../../../components/waves/memes/file-upload/utils/formatHelpers', () => ({
+jest.mock('@/components/waves/memes/file-upload/utils/formatHelpers', () => ({
   getFileExtension: jest.fn(() => 'MP4'),
   formatFileSize: jest.fn(() => '2 KB'),
   getBrowserSpecificMessage: jest.fn(() => 'Browser msg')

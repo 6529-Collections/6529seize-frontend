@@ -1,31 +1,31 @@
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import ProxyActionRowDataMode from '../../../../../../components/user/proxy/proxy/list/ProxyActionRowDataMode';
-import { PROXY_ACTION_ROW_VIEW_MODE } from '../../../../../../components/user/proxy/proxy/list/ProxyActionRow';
-import { ApiProfileProxyActionType } from '../../../../../../generated/models/ApiProfileProxyActionType';
-import { PROFILE_PROXY_ACTION_LABELS } from '../../../../../../entities/IProxy';
+import ProxyActionRowDataMode from '@/components/user/proxy/proxy/list/ProxyActionRowDataMode';
+import { PROXY_ACTION_ROW_VIEW_MODE } from '@/components/user/proxy/proxy/list/ProxyActionRow';
+import { ApiProfileProxyActionType } from '@/generated/models/ApiProfileProxyActionType';
+import { PROFILE_PROXY_ACTION_LABELS } from '@/entities/IProxy';
 
-jest.mock('../../../../../../helpers/profile-proxy.helpers', () => ({
+jest.mock('@/helpers/profile-proxy.helpers', () => ({
   getProfileProxyActionStatus: jest.fn(() => 'status'),
 }));
 
-jest.mock('../../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   getTimeAgo: jest.fn(() => 'time'),
 }));
 
-jest.mock('../../../../../../components/user/proxy/proxy/list/ProxyActionRowStatus', () => (props: any) => (
+jest.mock('@/components/user/proxy/proxy/list/ProxyActionRowStatus', () => (props: any) => (
   <div data-testid={`status-${props.side}`}>{props.status}</div>
 ));
 
-jest.mock('../../../../../../components/user/proxy/proxy/action/utils/credit/ProfileProxyCredit', () => (props: any) => (
+jest.mock('@/components/user/proxy/proxy/action/utils/credit/ProfileProxyCredit', () => (props: any) => (
   <button data-testid="credit" onClick={props.onCreditEdit}>credit</button>
 ));
 
-jest.mock('../../../../../../components/user/proxy/proxy/action/utils/time/ProfileProxyEndTime', () => (props: any) => (
+jest.mock('@/components/user/proxy/proxy/action/utils/time/ProfileProxyEndTime', () => (props: any) => (
   <button data-testid="end" onClick={props.onEndTimeEdit}>end</button>
 ));
 
-jest.mock('../../../../../../components/user/proxy/proxy/action/ProxyActionAcceptanceButton', () => () => (
+jest.mock('@/components/user/proxy/proxy/action/ProxyActionAcceptanceButton', () => () => (
   <div data-testid="accept" />
 ));
 

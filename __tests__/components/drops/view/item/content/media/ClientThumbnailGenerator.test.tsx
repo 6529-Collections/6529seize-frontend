@@ -1,5 +1,5 @@
 import { render, screen, act } from '@testing-library/react';
-import ClientThumbnailGenerator from '../../../../../../../components/drops/view/item/content/media/ClientThumbnailGenerator';
+import ClientThumbnailGenerator from '@/components/drops/view/item/content/media/ClientThumbnailGenerator';
 
 describe('ClientThumbnailGenerator', () => {
   const originalCreate = document.createElement;

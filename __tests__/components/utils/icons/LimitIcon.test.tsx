@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import LimitIcon from '../../../../components/utils/icons/LimitIcon';
+import LimitIcon from '@/components/utils/icons/LimitIcon';
 
 describe('LimitIcon', () => {
   it('renders svg with className', () => {

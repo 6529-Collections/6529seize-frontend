@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
-import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import GroupItem from "./item/GroupItem";
 import {
   selectActiveGroupId,
   setActiveGroupId,
-} from "../../../store/groupSlice";
+} from "@/store/groupSlice";
 
 export default function GroupItems({
   groups,

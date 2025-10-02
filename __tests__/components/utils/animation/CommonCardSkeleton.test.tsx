@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import CommonCardSkeleton from '../../../../components/utils/animation/CommonCardSkeleton';
+import CommonCardSkeleton from '@/components/utils/animation/CommonCardSkeleton';
 
 describe('CommonCardSkeleton', () => {
   it('renders skeleton with pulse animation class', () => {

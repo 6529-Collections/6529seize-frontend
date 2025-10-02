@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import SelectSnapshotDropdownListItem from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownListItem';
-import { Pool } from '../../../../../../../../components/allowlist-tool/allowlist-tool.types';
+import SelectSnapshotDropdownListItem from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownListItem';
+import { Pool } from '@/components/allowlist-tool/allowlist-tool.types';
 
 describe('SelectSnapshotDropdownListItem', () => {
   const snapshot = { id: 's1', name: 'Snap', poolType: Pool.TOKEN_POOL, walletsCount: 3 } as any;

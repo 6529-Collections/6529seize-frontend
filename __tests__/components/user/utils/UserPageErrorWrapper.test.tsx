@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageErrorWrapper from '../../../../components/user/utils/UserPageErrorWrapper';
+import UserPageErrorWrapper from '@/components/user/utils/UserPageErrorWrapper';
 
 describe('UserPageErrorWrapper', () => {
   it('renders children and handles close', async () => {

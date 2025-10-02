@@ -1,34 +1,34 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveOutcomes from '../../../../../components/waves/create-wave/outcomes/CreateWaveOutcomes';
-import { CreateWaveOutcomeType } from '../../../../../types/waves.types';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
+import CreateWaveOutcomes from '@/components/waves/create-wave/outcomes/CreateWaveOutcomes';
+import { CreateWaveOutcomeType } from '@/types/waves.types';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../components/waves/create-wave/outcomes/CreateWaveOutcomeTypes', () => ({
+jest.mock('@/components/waves/create-wave/outcomes/CreateWaveOutcomeTypes', () => ({
   __esModule: true,
   default: () => <div data-testid="types" />,
 }));
 
-jest.mock('../../../../../components/waves/create-wave/outcomes/manual/CreateWaveOutcomesManual', () => ({
+jest.mock('@/components/waves/create-wave/outcomes/manual/CreateWaveOutcomesManual', () => ({
   __esModule: true,
   default: () => <div data-testid="manual" />,
 }));
 
-jest.mock('../../../../../components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRep', () => ({
+jest.mock('@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRep', () => ({
   __esModule: true,
   default: () => <div data-testid="rep" />,
 }));
 
-jest.mock('../../../../../components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCIC', () => ({
+jest.mock('@/components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCIC', () => ({
   __esModule: true,
   default: () => <div data-testid="cic" />,
 }));
 
-jest.mock('../../../../../components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRows', () => ({
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRows', () => ({
   __esModule: true,
   default: () => <div data-testid="rows" />,
 }));
 
-jest.mock('../../../../../components/utils/animation/CommonAnimationHeight', () => ({
+jest.mock('@/components/utils/animation/CommonAnimationHeight', () => ({
   __esModule: true,
   default: ({ children }: any) => <div>{children}</div>,
 }));

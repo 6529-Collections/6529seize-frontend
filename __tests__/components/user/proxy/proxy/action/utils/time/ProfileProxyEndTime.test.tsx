@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProfileProxyEndTime from '../../../../../../../../components/user/proxy/proxy/action/utils/time/ProfileProxyEndTime';
-import { AuthContext } from '../../../../../../../../components/auth/Auth';
+import ProfileProxyEndTime from '@/components/user/proxy/proxy/action/utils/time/ProfileProxyEndTime';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../../../../../helpers/Helpers', () => ({ getTimeUntil: () => 'in 1 hour' }));
-jest.mock('../../../../../../../../components/utils/icons/PencilIcon', () => ({ __esModule: true, default: () => <svg data-testid="pencil" />, PencilIconSize: { SMALL: 'SMALL' }}));
+jest.mock('@/helpers/Helpers', () => ({ getTimeUntil: () => 'in 1 hour' }));
+jest.mock('@/components/utils/icons/PencilIcon', () => ({ __esModule: true, default: () => <svg data-testid="pencil" />, PencilIconSize: { SMALL: 'SMALL' }}));
 
 describe('ProfileProxyEndTime', () => {
   const action = { end_time: Date.now() + 3600_000 } as any;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CommonSwitch from '../../../../components/utils/switch/CommonSwitch';
+import CommonSwitch from '@/components/utils/switch/CommonSwitch';
 
 describe('CommonSwitch', () => {
   it('renders and toggles', async () => {

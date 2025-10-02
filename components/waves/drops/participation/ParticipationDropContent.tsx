@@ -1,5 +1,5 @@
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import React from "react";
 import WaveDropContent from "../WaveDropContent";
 

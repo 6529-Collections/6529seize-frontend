@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveOutcomesRowCIC from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCIC';
-import { ApiWaveType } from '../../../../../../../../generated/models/ApiWaveType';
+import CreateWaveOutcomesRowCIC from '@/components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCIC';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../../../../components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCICApprove', () => () => <div data-testid="approve" />);
-jest.mock('../../../../../../../../components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCICRank', () => () => <div data-testid="rank" />);
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCICApprove', () => () => <div data-testid="approve" />);
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/cic/CreateWaveOutcomesRowCICRank', () => () => <div data-testid="rank" />);
 
 describe('CreateWaveOutcomesRowCIC', () => {
   const baseProps = { outcome: {} as any, removeOutcome: jest.fn() };

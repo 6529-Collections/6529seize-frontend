@@ -1,13 +1,13 @@
 "use client"
 
 import { useCallback, useMemo } from "react";
-import useDmWavesList from "../../../hooks/useDmWavesList";
+import useDmWavesList from "@/hooks/useDmWavesList";
 import useNewDropCounter, {
   MinimalWaveNewDropsCount,
   getNewestTimestamp,
 } from "./useNewDropCounter";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 export interface MinimalWave {
   id: string;

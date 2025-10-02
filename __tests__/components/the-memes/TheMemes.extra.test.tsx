@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { printVolumeTypeDropdown } from '../../../components/the-memes/TheMemes';
+import { printVolumeTypeDropdown } from '@/components/the-memes/TheMemes';
 
 jest.mock('@headlessui/react', () => ({
   Menu: ({ children, className }: any) => <div data-testid="dropdown" className={className}>{children}</div>,
@@ -9,7 +9,7 @@ jest.mock('@headlessui/react', () => ({
   MenuItem: (p: any) => <div onClick={p.onClick}>{typeof p.children === 'function' ? p.children({ focus: false }) : p.children}</div>,
 }));
 
-jest.mock('../../../components/the-memes/TheMemes.module.scss', () => ({
+jest.mock('@/components/the-memes/TheMemes.module.scss', () => ({
   volumeDropdown: 'volumeDropdown',
   volumeDropdownEnabled: 'enabled',
 }));

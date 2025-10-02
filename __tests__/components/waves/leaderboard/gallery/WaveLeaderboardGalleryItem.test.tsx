@@ -1,21 +1,21 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WaveLeaderboardGalleryItem } from '../../../../../components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem';
+import { WaveLeaderboardGalleryItem } from '@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem';
 
-jest.mock('../../../../../components/drops/view/item/content/media/MediaDisplay', () => (props: any) => <div data-testid="media" data-url={props.media_url} />);
-jest.mock('../../../../../components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes', () => (props: any) => <div data-testid="votes" data-variant={props.variant} />);
-jest.mock('../../../../../components/waves/drops/winner/WinnerDropBadge', () => () => <div data-testid="badge" />);
-jest.mock('../../../../../components/voting', () => ({
+jest.mock('@/components/drops/view/item/content/media/MediaDisplay', () => (props: any) => <div data-testid="media" data-url={props.media_url} />);
+jest.mock('@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes', () => (props: any) => <div data-testid="votes" data-variant={props.variant} />);
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => () => <div data-testid="badge" />);
+jest.mock('@/components/voting', () => ({
   VotingModal: (props: any) => <div data-testid="modal" data-open={props.isOpen} />,
   MobileVotingModal: (props: any) => <div data-testid="mobile-modal" data-open={props.isOpen} />
 }));
-jest.mock('../../../../../components/voting/VotingModalButton', () => (props: any) => <button data-testid="vote-btn" onClick={props.onClick} />);
-jest.mock('../../../../../hooks/isMobileScreen', () => () => false);
-jest.mock('../../../../../hooks/drops/useDropInteractionRules', () => ({
+jest.mock('@/components/voting/VotingModalButton', () => (props: any) => <button data-testid="vote-btn" onClick={props.onClick} />);
+jest.mock('@/hooks/isMobileScreen', () => () => false);
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({
   useDropInteractionRules: () => ({ canShowVote: true })
 }));
-jest.mock('../../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => `scaled:${u}`, ImageScale: { AUTOx450: 'x' } }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => `scaled:${u}`, ImageScale: { AUTOx450: 'x' } }));
 
 describe('WaveLeaderboardGalleryItem', () => {
   const drop: any = {

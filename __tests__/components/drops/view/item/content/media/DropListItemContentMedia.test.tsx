@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import DropListItemContentMedia from '../../../../../../../components/drops/view/item/content/media/DropListItemContentMedia';
+import DropListItemContentMedia from '@/components/drops/view/item/content/media/DropListItemContentMedia';
 
-jest.mock('../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaImage', () => ({ __esModule: true, default: () => <div data-testid="image" /> }));
-jest.mock('../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaVideo', () => ({ __esModule: true, default: () => <div data-testid="video" /> }));
-jest.mock('../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaAudio', () => ({ __esModule: true, default: () => <div data-testid="audio" /> }));
-jest.mock('../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaGLB', () => ({ __esModule: true, default: () => <div data-testid="glb" /> }));
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaImage', () => ({ __esModule: true, default: () => <div data-testid="image" /> }));
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaVideo', () => ({ __esModule: true, default: () => <div data-testid="video" /> }));
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaAudio', () => ({ __esModule: true, default: () => <div data-testid="audio" /> }));
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaGLB', () => ({ __esModule: true, default: () => <div data-testid="glb" /> }));
 jest.mock('next/dynamic', () => (importer: any) => () => <div data-testid="glb" />);
 
 describe('DropListItemContentMedia', () => {

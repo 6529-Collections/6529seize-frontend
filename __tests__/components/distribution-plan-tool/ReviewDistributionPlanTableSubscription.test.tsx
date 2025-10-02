@@ -1,11 +1,11 @@
 const mockFetch = jest.fn();
-jest.mock('../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: (...args: any[]) => mockFetch(...args),
   commonApiPost: jest.fn(),
 }));
 
-import { download, isSubscriptionsAdmin } from '../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription';
-import { ApiIdentity } from '../../../generated/models/ApiIdentity';
+import { download, isSubscriptionsAdmin } from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('react-bootstrap', () => ({
   __esModule: true,
@@ -44,7 +44,7 @@ describe('ReviewDistributionPlanTableSubscription utilities', () => {
   });
 });
 
-import { SubscriptionConfirm } from '../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription';
+import { SubscriptionConfirm } from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 

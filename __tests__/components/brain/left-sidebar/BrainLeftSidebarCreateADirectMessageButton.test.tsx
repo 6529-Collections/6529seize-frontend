@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { useAuth } from "../../../../components/auth/Auth";
-import BrainLeftSidebarCreateADirectMessageButton from "../../../../components/brain/left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
+import { useAuth } from "@/components/auth/Auth";
+import BrainLeftSidebarCreateADirectMessageButton from "@/components/brain/left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
 
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
 }));
-jest.mock("../../../../components/auth/Auth");
+jest.mock("@/components/auth/Auth");
 
 const mockedUseAuth = useAuth as jest.Mock;
 

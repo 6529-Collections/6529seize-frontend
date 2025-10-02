@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 jest.mock('@google/model-viewer', () => ({}));
-import MediaDisplayGLB from '../../../../../../../components/drops/view/item/content/media/MediaDisplayGLB';
+import MediaDisplayGLB from '@/components/drops/view/item/content/media/MediaDisplayGLB';
 
 describe('MediaDisplayGLB', () => {
   it('renders model-viewer with provided src', () => {

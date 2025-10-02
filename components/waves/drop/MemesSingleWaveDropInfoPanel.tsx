@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { SingleWaveDropClose } from "./SingleWaveDropClose";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
@@ -16,10 +16,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
 import { faCompress } from "@fortawesome/free-solid-svg-icons";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { WinnerBadge } from "./WinnerBadge";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropDeleteButton from "../../utils/button/WaveDropDeleteButton";
 
 interface MemesSingleWaveDropInfoPanelProps {

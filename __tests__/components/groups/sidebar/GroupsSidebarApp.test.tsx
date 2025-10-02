@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupsSidebarApp from '../../../../components/groups/sidebar/GroupsSidebarApp';
+import GroupsSidebarApp from '@/components/groups/sidebar/GroupsSidebarApp';
 
-jest.mock('../../../../components/groups/sidebar/GroupsSidebar', () => () => (
+jest.mock('@/components/groups/sidebar/GroupsSidebar', () => () => (
   <div data-testid="sidebar" />
 ));
 

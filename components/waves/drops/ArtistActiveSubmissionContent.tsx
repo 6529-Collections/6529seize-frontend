@@ -10,16 +10,16 @@ import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import {
   useUserArtSubmissions,
   useSubmissionDrops,
-} from "../../../hooks/useUserArtSubmissions";
+} from "@/hooks/useUserArtSubmissions";
 import {
   SingleWaveDropVote,
   SingleWaveDropVoteSize,
 } from "../drop/SingleWaveDropVote";
 import { SubmissionPosition } from "./SubmissionPosition";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;

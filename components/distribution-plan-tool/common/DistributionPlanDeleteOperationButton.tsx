@@ -3,7 +3,7 @@
 import { useContext, useState } from "react";
 import AllowlistToolLoader from "../../allowlist-tool/common/AllowlistToolLoader";
 import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
-import { distributionPlanApiDelete } from "../../../services/distribution-plan-api";
+import { distributionPlanApiDelete } from "@/services/distribution-plan-api";
 
 export default function DistributionPlanDeleteOperationButton({
   allowlistId,

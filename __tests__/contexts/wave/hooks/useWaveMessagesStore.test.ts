@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import useWaveMessagesStore from '../../../../contexts/wave/hooks/useWaveMessagesStore';
+import useWaveMessagesStore from '@/contexts/wave/hooks/useWaveMessagesStore';
 
 describe('useWaveMessagesStore', () => {
   const baseDrop = {

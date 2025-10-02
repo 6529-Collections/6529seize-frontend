@@ -1,39 +1,39 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { WaveSmallLeaderboardTopThreeDrop } from '../../../../components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop';
-import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
-import { ApiWave } from '../../../../generated/models/ApiWave';
+import { WaveSmallLeaderboardTopThreeDrop } from '@/components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop';
+import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import { ApiWave } from '@/generated/models/ApiWave';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, onClick, className }: any) => (
   <a href={href} onClick={onClick} className={className}>{children}</a>
 )}));
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemContent', () => ({
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent', () => ({
   WaveSmallLeaderboardItemContent: ({ drop, onDropClick }: any) => (
     <div data-testid="content" onClick={() => onDropClick(drop)} />
   ),
 }));
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes', () => ({
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes', () => ({
   WaveSmallLeaderboardItemOutcomes: () => <div data-testid="outcomes" />,
 }));
 
-jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => ({
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => ({
   __esModule: true,
   default: () => <div data-testid="badge" />,
 }));
 
-jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => ({
+jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => ({
   __esModule: true,
   default: () => <div data-testid="progress" />,
 }));
 
-jest.mock('../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   cicToType: (cic: number) => (cic >= 10000 ? 'ACCURATE' : 'PROBABLY_ACCURATE'),
   formatNumberWithCommas: (n: number) => String(n),
 }));
 
-jest.mock('../../../../helpers/AllowlistToolHelpers', () => ({ assertUnreachable: jest.fn() }));
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({ assertUnreachable: jest.fn() }));
 
 describe('WaveSmallLeaderboardTopThreeDrop', () => {
   const wave: ApiWave = { id: 'w1', name: 'Wave' } as ApiWave;

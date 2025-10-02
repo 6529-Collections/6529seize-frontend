@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import { WinnerBadge } from '../../../../components/waves/drop/WinnerBadge';
-import { useDropInteractionRules } from '../../../../hooks/drops/useDropInteractionRules';
+import { WinnerBadge } from '@/components/waves/drop/WinnerBadge';
+import { useDropInteractionRules } from '@/hooks/drops/useDropInteractionRules';
 
-jest.mock('../../../../hooks/drops/useDropInteractionRules');
-jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => ({ __esModule: true, default: (p: any) => <div data-testid="badge">{p.rank}</div> }));
+jest.mock('@/hooks/drops/useDropInteractionRules');
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => ({ __esModule: true, default: (p: any) => <div data-testid="badge">{p.rank}</div> }));
 
 const useRules = useDropInteractionRules as jest.Mock;
 

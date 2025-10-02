@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RoundedJsonIconButton from '../../../../components/distribution-plan-tool/common/RoundedJsonIconButton';
+import RoundedJsonIconButton from '@/components/distribution-plan-tool/common/RoundedJsonIconButton';
 
-jest.mock('../../../../components/distribution-plan-tool/common/JsonIcon', () => () => <svg data-testid="json-icon" />);
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/components/distribution-plan-tool/common/JsonIcon', () => () => <svg data-testid="json-icon" />);
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
 
 describe('RoundedJsonIconButton', () => {
   it('renders json icon when not loading and handles click', async () => {

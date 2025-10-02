@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
-import UserPageFollowers from '../../../../components/user/followers/UserPageFollowers';
-import { ApiIdentity } from '../../../../generated/models/ApiIdentity';
+import UserPageFollowers from '@/components/user/followers/UserPageFollowers';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 let wrapperProps: any;
 const fetchNextPage = jest.fn();
@@ -9,7 +9,7 @@ jest.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: jest.fn(),
 }));
 
-jest.mock('../../../../components/utils/followers/FollowersListWrapper', () => (props: any) => { wrapperProps = props; return <div data-testid="wrapper" />; });
+jest.mock('@/components/utils/followers/FollowersListWrapper', () => (props: any) => { wrapperProps = props; return <div data-testid="wrapper" />; });
 
 const { useInfiniteQuery } = require('@tanstack/react-query');
 

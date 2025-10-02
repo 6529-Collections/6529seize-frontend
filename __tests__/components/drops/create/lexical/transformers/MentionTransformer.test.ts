@@ -1,7 +1,7 @@
-import { MENTION_TRANSFORMER } from '../../../../../../components/drops/create/lexical/transformers/MentionTransformer';
-import { $isMentionNode } from '../../../../../../components/drops/create/lexical/nodes/MentionNode';
+import { MENTION_TRANSFORMER } from '@/components/drops/create/lexical/transformers/MentionTransformer';
+import { $isMentionNode } from '@/components/drops/create/lexical/nodes/MentionNode';
 
-jest.mock('../../../../../../components/drops/create/lexical/nodes/MentionNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/MentionNode', () => ({
   $isMentionNode: jest.fn((n: any) => n && n.type === 'mention'),
   $createMentionNode: jest.fn((text: string) => ({ type: 'mention', text })),
   MentionNode: class {},

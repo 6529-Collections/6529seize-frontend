@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import DistributionPlanWarnings from '../../../../components/distribution-plan-tool/common/DistributionPlanWarnings';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistRunStatus } from '../../../../components/allowlist-tool/allowlist-tool.types';
+import DistributionPlanWarnings from '@/components/distribution-plan-tool/common/DistributionPlanWarnings';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistRunStatus } from '@/components/allowlist-tool/allowlist-tool.types';
 
-jest.mock('../../../../components/distribution-plan-tool/common/DistributionPlanErrorWarning', () => ({
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanErrorWarning', () => ({
   __esModule: true,
   default: () => <div data-testid="error-warning" />,
 }));

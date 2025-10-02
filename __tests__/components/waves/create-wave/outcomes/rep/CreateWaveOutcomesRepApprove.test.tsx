@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesRepApprove from '../../../../../../components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepApprove';
-import { ApiWaveType } from '../../../../../../generated/models/ApiWaveType';
+import CreateWaveOutcomesRepApprove from '@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepApprove';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../../components/utils/input/rep-category/RepCategorySearch', () => {
+jest.mock('@/components/utils/input/rep-category/RepCategorySearch', () => {
   return function RepCategorySearch({ category, setCategory }: any) {
     return <input data-testid="category" value={category || ''} onChange={e => setCategory(e.target.value)} />;
   };
 });
 
-jest.mock('../../../../../../components/utils/button/PrimaryButton', () => {
+jest.mock('@/components/utils/button/PrimaryButton', () => {
   return function PrimaryButton({ onClicked, children }: any) {
     return <button onClick={onClicked}>{children}</button>;
   };

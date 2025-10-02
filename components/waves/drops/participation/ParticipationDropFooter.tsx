@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 import { format } from "date-fns";
-import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
-import { VotingModal, MobileVotingModal } from "../../../../components/voting";
-import VotingModalButton from "../../../../components/voting/VotingModalButton";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { VotingModal, MobileVotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import WaveDropReactions from "../WaveDropReactions";
 
 interface ParticipationDropFooterProps {

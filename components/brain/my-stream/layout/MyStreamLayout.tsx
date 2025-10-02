@@ -3,13 +3,13 @@
 import { ReactNode, useContext, useMemo } from "react";
 import Head from "next/head";
 import Brain from "../../Brain";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/auth/Auth";
 import { useLayout } from "./LayoutContext";
-import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
+import HeaderUserConnect from "@/header/user/HeaderUserConnect";
 import Image from "next/image";
-import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
-import ClientOnly from "../../../client-only/ClientOnly";
-import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
+import { useSeizeConnectContext } from "@/auth/SeizeConnectContext";
+import ClientOnly from "@/client-only/ClientOnly";
+import UserSetUpProfileCta from "@/user/utils/set-up-profile/UserSetUpProfileCta";
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveWinnersDropHeaderAuthorPfp from '../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorPfp';
+import WaveWinnersDropHeaderAuthorPfp from '@/components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorPfp';
 
 const baseWinner = { drop: { author: { pfp: null } } } as any;
 

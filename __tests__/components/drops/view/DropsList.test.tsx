@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import DropsList from '../../../../components/drops/view/DropsList';
-import { DropSize } from '../../../../helpers/waves/drop.helpers';
+import DropsList from '@/components/drops/view/DropsList';
+import { DropSize } from '@/helpers/waves/drop.helpers';
 
 let dropProps: any[] = [];
 let lightProps: any[] = [];
 let wrapperProps: any[] = [];
 
-jest.mock('../../../../components/waves/drops/Drop', () => {
+jest.mock('@/components/waves/drops/Drop', () => {
   const MockedDrop = (props: any) => {
     dropProps.push(props);
     return <div data-testid="drop" />;
@@ -22,12 +22,12 @@ jest.mock('../../../../components/waves/drops/Drop', () => {
   };
 });
 
-jest.mock('../../../../components/waves/drops/LightDrop', () => (props: any) => {
+jest.mock('@/components/waves/drops/LightDrop', () => (props: any) => {
   lightProps.push(props);
   return <div data-testid="light" />;
 });
 
-jest.mock('../../../../components/waves/drops/VirtualScrollWrapper', () => (props: any) => {
+jest.mock('@/components/waves/drops/VirtualScrollWrapper', () => (props: any) => {
   wrapperProps.push(props);
   return <div data-testid="wrapper">{props.children}</div>;
 });

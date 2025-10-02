@@ -1,12 +1,12 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
-import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
-import { CICType } from "../../../entities/IProfile";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { CICType } from "@/entities/IProfile";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";

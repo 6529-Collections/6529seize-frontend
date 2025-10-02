@@ -1,6 +1,6 @@
-import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { Tooltip } from "react-tooltip";
-import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 enum RoyaltiesType {
   NONE = "NONE",

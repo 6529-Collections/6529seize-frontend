@@ -1,4 +1,4 @@
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import CommonCardSkeleton from "../../utils/animation/CommonCardSkeleton";
 import CommonSkeletonLoader from "../../utils/animation/CommonSkeletonLoader";
 

@@ -9,12 +9,12 @@ import {
   faRefresh,
   faShare,
 } from "@fortawesome/free-solid-svg-icons";
-import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
+import { useNavigationHistory } from "@/hooks/useNavigationHistory";
 import { useState, useEffect } from "react";
 import { Share } from "@capacitor/share";
 import Hammer from "hammerjs";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { useDeepLinkNavigation } from "../../../hooks/useDeepLinkNavigation";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
 
 export default function CapacitorWidget() {
   useDeepLinkNavigation();

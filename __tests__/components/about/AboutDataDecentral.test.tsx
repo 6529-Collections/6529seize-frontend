@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutDataDecentral from '../../../components/about/AboutDataDecentral';
+import AboutDataDecentral from '@/components/about/AboutDataDecentral';
 
 describe('AboutDataDecentral', () => {
   it('renders data decentralization heading', () => {

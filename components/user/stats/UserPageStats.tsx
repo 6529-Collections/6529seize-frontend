@@ -1,18 +1,18 @@
 "use client";
 
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useEffect, useState } from "react";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 
 import UserPageStatsCollected from "./UserPageStatsCollected";
 import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
 import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddressesSelectDropdown";
-import { MemeSeason } from "../../../entities/ISeason";
-import { OwnerBalance, OwnerBalanceMemes } from "../../../entities/IBalances";
+import { MemeSeason } from "@/entities/ISeason";
+import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
-import { ConsolidatedTDH, TDH } from "../../../entities/ITDH";
+import { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 
 export function getStatsPath(
   profile: ApiIdentity,

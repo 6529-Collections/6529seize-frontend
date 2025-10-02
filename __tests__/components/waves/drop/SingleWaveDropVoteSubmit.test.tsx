@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import SingleWaveDropVoteSubmit, { SingleWaveDropVoteSubmitHandles } from '../../../../components/waves/drop/SingleWaveDropVoteSubmit';
-import { ApiDrop } from '../../../../generated/models/ApiDrop';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
-import * as commonApi from '../../../../services/api/common-api';
+import SingleWaveDropVoteSubmit, { SingleWaveDropVoteSubmitHandles } from '@/components/waves/drop/SingleWaveDropVoteSubmit';
+import { ApiDrop } from '@/generated/models/ApiDrop';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import * as commonApi from '@/services/api/common-api';
 
 // Mock dependencies
 jest.mock('@mojs/core', () => ({
@@ -32,16 +32,16 @@ jest.mock('@mojs/core', () => ({
   },
 }));
 
-jest.mock('../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: jest.fn(() => 'test-id-123'),
 }));
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 
 // Mock CSS module
-jest.mock('../../../../components/waves/drop/VoteButton.module.scss', () => ({
+jest.mock('@/components/waves/drop/VoteButton.module.scss', () => ({
   buttonContent: 'buttonContent',
   buttonText: 'buttonText',
   enter: 'enter',

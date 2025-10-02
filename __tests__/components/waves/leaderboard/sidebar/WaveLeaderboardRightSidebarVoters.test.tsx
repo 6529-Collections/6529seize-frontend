@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import { WaveLeaderboardRightSidebarVoters } from '../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters';
-import { ApiWave } from '../../../../../generated/models/ObjectSerializer';
-import { useAuth } from '../../../../../components/auth/Auth';
-import { useWaveTopVoters } from '../../../../../hooks/useWaveTopVoters';
-import { useIntersectionObserver } from '../../../../../hooks/useIntersectionObserver';
+import { WaveLeaderboardRightSidebarVoters } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters';
+import { ApiWave } from '@/generated/models/ObjectSerializer';
+import { useAuth } from '@/components/auth/Auth';
+import { useWaveTopVoters } from '@/hooks/useWaveTopVoters';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
-jest.mock('../../../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
-jest.mock('../../../../../hooks/useWaveTopVoters');
-jest.mock('../../../../../hooks/useIntersectionObserver');
-jest.mock('../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoter', () => ({
+jest.mock('@/components/auth/Auth', () => ({ useAuth: jest.fn() }));
+jest.mock('@/hooks/useWaveTopVoters');
+jest.mock('@/hooks/useIntersectionObserver');
+jest.mock('@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoter', () => ({
   WaveLeaderboardRightSidebarVoter: (props: any) => <div data-testid="voter">{props.voter.voter.handle}</div>
 }));
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import GroupCardHeader from '../../../../../../components/groups/page/list/card/GroupCardHeader';
-import { AuthContext } from '../../../../../../components/auth/Auth';
+import GroupCardHeader from '@/components/groups/page/list/card/GroupCardHeader';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../../../components/groups/page/list/card/actions/GroupCardEditActions', () => () => <div data-testid="edit" />);
-jest.mock('../../../../../../helpers/Helpers', () => ({ getTimeAgo: jest.fn(() => '1d') }));
-jest.mock('../../../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u + '?s', ImageScale: { W_AUTO_H_50: 'scale' } }));
+jest.mock('@/components/groups/page/list/card/actions/GroupCardEditActions', () => () => <div data-testid="edit" />);
+jest.mock('@/helpers/Helpers', () => ({ getTimeAgo: jest.fn(() => '1d') }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u + '?s', ImageScale: { W_AUTO_H_50: 'scale' } }));
 
 const baseGroup: any = {
   created_by: { handle: 'alice', pfp: 'pic.png' },

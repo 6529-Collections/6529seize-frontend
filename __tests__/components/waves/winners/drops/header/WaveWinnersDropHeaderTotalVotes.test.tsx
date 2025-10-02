@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import WaveWinnersDropHeaderTotalVotes from '../../../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderTotalVotes';
+import WaveWinnersDropHeaderTotalVotes from '@/components/waves/winners/drops/header/WaveWinnersDropHeaderTotalVotes';
 
 const baseWinner = {
   place: 4,

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import LightDrop from '../../../../components/waves/drops/LightDrop';
+import LightDrop from '@/components/waves/drops/LightDrop';
 
 const dummyDrop = { id: '1' } as any;
 

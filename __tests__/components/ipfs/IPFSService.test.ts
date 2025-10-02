@@ -1,4 +1,4 @@
-import IpfsService from "../../../components/ipfs/IPFSService";
+import IpfsService from "@/components/ipfs/IPFSService";
 jest.mock("form-data", () => {
   return class {
     append = jest.fn();

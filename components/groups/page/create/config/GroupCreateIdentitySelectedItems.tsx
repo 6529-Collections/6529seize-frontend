@@ -1,4 +1,4 @@
-import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
 
 import React from "react";
 

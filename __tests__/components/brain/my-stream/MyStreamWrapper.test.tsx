@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MyStreamWrapper from '../../../../components/brain/my-stream/MyStreamWrapper';
+import MyStreamWrapper from '@/components/brain/my-stream/MyStreamWrapper';
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
@@ -14,35 +14,35 @@ const push = jest.fn();
 const useMyStreamQueryMock = jest.fn();
 const usePollingQueryMock = jest.fn();
 
-jest.mock('../../../../hooks/useMyStreamQuery', () => ({
+jest.mock('@/hooks/useMyStreamQuery', () => ({
   useMyStreamQuery: (...args: any[]) => useMyStreamQueryMock(...args),
   usePollingQuery: (...args: any[]) => usePollingQueryMock(...args),
 }));
 
 let streamProps: any;
-jest.mock('../../../../components/brain/my-stream/MyStream', () => ({
+jest.mock('@/components/brain/my-stream/MyStream', () => ({
   __esModule: true,
   default: (props: any) => { streamProps = props; return <div data-testid="stream"/>; }
 }));
 
-jest.mock('../../../../components/brain/my-stream/MyStreamWave', () => ({
+jest.mock('@/components/brain/my-stream/MyStreamWave', () => ({
   __esModule: true,
   default: ({ waveId }: any) => <div data-testid="wave">{waveId}</div>
 }));
 
-jest.mock('../../../../components/brain/content/BrainContent', () => ({
+jest.mock('@/components/brain/content/BrainContent', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="content">{children}</div>
 }));
 
-jest.mock('../../../../components/auth/Auth', () => ({
+jest.mock('@/components/auth/Auth', () => ({
   AuthContext: React.createContext({ setTitle: jest.fn() }),
   TitleType: { MY_STREAM: 'MY_STREAM' }
 }));
 
 
 // Mock TitleContext
-jest.mock('../../../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),
@@ -59,7 +59,7 @@ jest.mock('../../../../contexts/TitleContext', () => ({
 }));
 
 // Mock MyStreamContext if needed
-jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({
     waveId: null,
     setWaveId: jest.fn(),

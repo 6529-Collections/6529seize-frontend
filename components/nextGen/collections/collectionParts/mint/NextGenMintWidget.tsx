@@ -7,29 +7,29 @@ import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
-import { NULL_ADDRESS } from "../../../../../constants";
-import { NextGenCollection } from "../../../../../entities/INextgen";
+import { NULL_ADDRESS } from "@/constants";
+import { NextGenCollection } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   capitalizeFirstChar,
   createArray,
   getNetworkName,
   isValidEthAddress,
-} from "../../../../../helpers/Helpers";
-import { fetchUrl } from "../../../../../services/6529api";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import DotLoader from "../../../../dotLoader/DotLoader";
-import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_MINTER } from "../../../nextgen_contracts";
+} from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { useSeizeConnectContext } from "@/auth/SeizeConnectContext";
+import DotLoader from "@/dotLoader/DotLoader";
+import NextGenContractWriteStatus from "@/NextGenContractWriteStatus";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_MINTER } from "@/nextgen_contracts";
 import {
   ProofResponse,
   Status,
   TokensPerAddress,
-} from "../../../nextgen_entities";
+} from "@/nextgen_entities";
 import {
   getStatusFromDates,
   useMintSharedState,
-} from "../../../nextgen_helpers";
+} from "@/nextgen_helpers";
 import styles from "../../NextGen.module.scss";
 import { Spinner } from "./NextGenMint";
 import { NextGenMintingFor } from "./NextGenMintShared";

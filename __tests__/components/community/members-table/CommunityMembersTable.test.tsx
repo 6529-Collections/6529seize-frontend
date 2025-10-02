@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import CommunityMembersTable from '../../../../components/community/members-table/CommunityMembersTable';
-import { CommunityMemberOverview } from '../../../../entities/IProfile';
-import { CommunityMembersSortOption } from '../../../../enums';
-import { SortDirection } from '../../../../entities/ISort';
+import CommunityMembersTable from '@/components/community/members-table/CommunityMembersTable';
+import { CommunityMemberOverview } from '@/entities/IProfile';
+import { CommunityMembersSortOption } from '@/enums';
+import { SortDirection } from '@/entities/ISort';
 
-jest.mock('../../../../components/community/members-table/CommunityMembersTableHeader', () => ({
+jest.mock('@/components/community/members-table/CommunityMembersTableHeader', () => ({
   __esModule: true,
   default: (props: any) => (
     <thead data-testid="header">
@@ -16,7 +16,7 @@ jest.mock('../../../../components/community/members-table/CommunityMembersTableH
   ),
 }));
 
-jest.mock('../../../../components/community/members-table/CommunityMembersTableRow', () => ({
+jest.mock('@/components/community/members-table/CommunityMembersTableRow', () => ({
   __esModule: true,
   default: ({ rank, member }: any) => (
     <tr data-testid="row">
@@ -25,12 +25,12 @@ jest.mock('../../../../components/community/members-table/CommunityMembersTableR
   ),
 }));
 
-jest.mock('../../../../components/community/members-table/CommunityMembersMobileFilterBar', () => ({
+jest.mock('@/components/community/members-table/CommunityMembersMobileFilterBar', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="filter">filter-{props.activeSort}-{props.sortDirection}-{String(props.isLoading)}</div>,
 }));
 
-jest.mock('../../../../components/community/members-table/CommunityMembersMobileCard', () => ({
+jest.mock('@/components/community/members-table/CommunityMembersMobileCard', () => ({
   __esModule: true,
   default: ({ rank, member }: any) => <div data-testid="mobile-card">{rank}-{member.display}</div>,
 }));

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDropsMetadataRowType from '../../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRowType';
-import { ApiWaveMetadataType } from '../../../../../../generated/models/ApiWaveMetadataType';
+import CreateWaveDropsMetadataRowType from '@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRowType';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
 
 describe('CreateWaveDropsMetadataRowType', () => {
   it('calls onTypeChange when buttons clicked', async () => {

@@ -3,7 +3,7 @@ import {
   DelegationExpiryCalendar,
   DelegationTokenSelection,
   DelegationCloseButton,
-} from '../../../components/delegation/DelegationFormParts';
+} from '@/components/delegation/DelegationFormParts';
 
 jest.mock('react-bootstrap', () => ({
   __esModule: true,
@@ -59,7 +59,7 @@ describe('Delegation form helpers', () => {
 
   it('DelegationFormOptionsFormGroup selects option', () => {
     const setSelected = jest.fn();
-    const mod = require('../../../components/delegation/DelegationFormParts');
+    const mod = require('@/components/delegation/DelegationFormParts');
     const { DelegationFormOptionsFormGroup } = mod;
     const { container } = render(
       <DelegationFormOptionsFormGroup
@@ -76,7 +76,7 @@ describe('Delegation form helpers', () => {
   });
 
   it('DelegationFormLabel renders tooltip', () => {
-    const mod = require('../../../components/delegation/DelegationFormParts');
+    const mod = require('@/components/delegation/DelegationFormParts');
     const { DelegationFormLabel } = mod;
     const { getByText, getByTestId } = render(
       <DelegationFormLabel title="Label" tooltip="info" />

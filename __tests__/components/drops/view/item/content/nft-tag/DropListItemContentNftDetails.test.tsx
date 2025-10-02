@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DropListItemContentNftDetails from '../../../../../../../components/drops/view/item/content/nft-tag/DropListItemContentNftDetails';
-import { getScaledImageUri } from '../../../../../../../helpers/image.helpers';
+import DropListItemContentNftDetails from '@/components/drops/view/item/content/nft-tag/DropListItemContentNftDetails';
+import { getScaledImageUri } from '@/helpers/image.helpers';
 
-jest.mock('../../../../../../../helpers/image.helpers', () => ({
+jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: jest.fn(() => 'scaled'),
   ImageScale: { W_AUTO_H_50: 'W_AUTO_H_50' },
 }));

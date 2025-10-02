@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
-import GroupCreate from '../../../../../components/groups/page/create/GroupCreate';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import GroupCreate from '@/components/groups/page/create/GroupCreate';
+import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({
@@ -12,12 +12,12 @@ jest.mock('@tanstack/react-query', () => ({
 let includeProps: any;
 let nameProps: any;
 
-jest.mock('../../../../../components/groups/page/create/GroupCreateWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
-jest.mock('../../../../../components/groups/page/create/GroupCreateHeader', () => () => <div data-testid="header" />);
-jest.mock('../../../../../components/groups/page/create/GroupCreateName', () => (props: any) => { nameProps = props; return <div data-testid="name" />; });
-jest.mock('../../../../../components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMeAndPrivate', () => (props: any) => { includeProps = props; return <div data-testid="include" />; });
-jest.mock('../../../../../components/groups/page/create/config/GroupCreateConfig', () => () => <div data-testid="config" />);
-jest.mock('../../../../../components/groups/page/create/actions/GroupCreateActions', () => () => <div data-testid="actions" />);
+jest.mock('@/components/groups/page/create/GroupCreateWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
+jest.mock('@/components/groups/page/create/GroupCreateHeader', () => () => <div data-testid="header" />);
+jest.mock('@/components/groups/page/create/GroupCreateName', () => (props: any) => { nameProps = props; return <div data-testid="name" />; });
+jest.mock('@/components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMeAndPrivate', () => (props: any) => { includeProps = props; return <div data-testid="include" />; });
+jest.mock('@/components/groups/page/create/config/GroupCreateConfig', () => () => <div data-testid="config" />);
+jest.mock('@/components/groups/page/create/actions/GroupCreateActions', () => () => <div data-testid="actions" />);
 
 const mockedUseQuery = useQuery as jest.Mock;
 mockedUseQuery.mockReturnValue({ isFetching: false, data: null });

@@ -1,16 +1,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES, STATEMENT_TYPE } from '../../../../../../../helpers/Types';
+import { SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES, STATEMENT_TYPE } from '@/helpers/Types';
 
 let buttonProps: any[] = [];
 
-jest.mock('../../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton', () => (props: any) => {
   buttonProps.push(props);
   return <button data-testid={props.statementType} onClick={props.onClick} />;
 });
 
-const Component = require('../../../../../../../components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems').default;
+const Component = require('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems').default;
 
 describe('UserPageIdentityAddStatementsSocialMediaAccountItems', () => {
   beforeEach(() => { buttonProps = []; });

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { areEqualAddresses, numberWithCommas } from "../../../helpers/Helpers";
-import { ApiWallet } from "../../../generated/models/ApiWallet";
+import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
+import { ApiWallet } from "@/generated/models/ApiWallet";
 
 export default function UserSettingsPrimaryWalletItem({
   wallet,

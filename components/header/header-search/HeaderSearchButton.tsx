@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import CommonAnimationWrapper from "../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../utils/animation/CommonAnimationOpacity";
 import HeaderSearchModal from "./HeaderSearchModal";

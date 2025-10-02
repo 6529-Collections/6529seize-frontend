@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ParticipationDropRatings } from '../../../../../components/waves/drops/participation/ParticipationDropRatings';
+import { ParticipationDropRatings } from '@/components/waves/drops/participation/ParticipationDropRatings';
 
 const mockContainer = jest.fn(() => <div data-testid="container" />);
 
-jest.mock('../../../../../components/waves/drops/participation/ratings/ParticipationDropRatingsContainer', () => (props: any) => {
+jest.mock('@/components/waves/drops/participation/ratings/ParticipationDropRatingsContainer', () => (props: any) => {
   mockContainer(props);
   return <div data-testid="container" />;
 });

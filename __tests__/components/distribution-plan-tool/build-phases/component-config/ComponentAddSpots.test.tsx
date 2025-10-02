@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ComponentAddSpots from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentAddSpots';
-import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import ComponentAddSpots from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentAddSpots';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 // Mock nested components to keep the test focused on behavior
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn',
   () => ({ onNext, onSkip, showNextBtn, showSkipBtn, isDisabled, children }: any) => (
     <div>
       <button disabled={isDisabled} onClick={onNext} data-testid="next-btn">
@@ -20,17 +20,17 @@ jest.mock(
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle',
   () => () => <div data-testid="title" />
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta',
   () => ({ walletsCount }: any) => <div data-testid="meta">{walletsCount}</div>
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/common/DistributionPlanSecondaryText',
+  '@/components/distribution-plan-tool/common/DistributionPlanSecondaryText',
   () => ({ children }: any) => <div>{children}</div>
 );
 

@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenAdminCreateCollection from '../../../../components/nextGen/admin/NextGenAdminCreateCollection';
+import NextGenAdminCreateCollection from '@/components/nextGen/admin/NextGenAdminCreateCollection';
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenAdminTextFormGroup: ({ title, value, setValue }: any) => (
     <input data-testid={title} value={value} onChange={e => setValue(e.target.value)} />
   ),
@@ -12,10 +12,10 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenAdminHeadingRow: () => <div data-testid="heading" />
 }));
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({ useCoreContractWrite: jest.fn() }));
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({ useCoreContractWrite: jest.fn() }));
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
 
-const helpers = require('../../../../components/nextGen/nextgen_helpers');
+const helpers = require('@/components/nextGen/nextgen_helpers');
 
 describe('NextGenAdminCreateCollection', () => {
   beforeEach(() => {

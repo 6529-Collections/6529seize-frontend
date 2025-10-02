@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
-import UserPageCollectedFiltersCollection from '../../../../../components/user/collected/filters/UserPageCollectedFiltersCollection';
-import { CollectedCollectionType } from '../../../../../entities/IProfile';
+import UserPageCollectedFiltersCollection from '@/components/user/collected/filters/UserPageCollectedFiltersCollection';
+import { CollectedCollectionType } from '@/entities/IProfile';
 
 let capturedProps: any = null;
-jest.mock('../../../../../components/utils/select/CommonSelect', () => (props: any) => {
+jest.mock('@/components/utils/select/CommonSelect', () => (props: any) => {
   capturedProps = props;
   return <div data-testid="select" />;
 });

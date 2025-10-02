@@ -1,16 +1,16 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import NextGenCollectionSlideshow from "../../../../../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
-import { NextGenCollection, NextGenToken } from "../../../../../entities/INextgen";
+import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
+import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 
 // Mock the child components
-jest.mock("../../../../../components/nextGen/collections/collectionParts/hooks/SlideshowHeader", () => {
+jest.mock("@/components/nextGen/collections/collectionParts/hooks/SlideshowHeader", () => {
   return function MockSlideshowHeader({ collectionName }: { collectionName: string }) {
     return <div data-testid="slideshow-header">Header for {collectionName}</div>;
   };
 });
 
-jest.mock("../../../../../components/nextGen/collections/collectionParts/hooks/TokenSlideshow", () => {
+jest.mock("@/components/nextGen/collections/collectionParts/hooks/TokenSlideshow", () => {
   return function MockTokenSlideshow({ collectionId, initialTokens }: { collectionId: number; initialTokens?: any[] }) {
     return (
       <div data-testid="token-slideshow">

@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import StartDates from '../../../../../components/waves/create-wave/dates/StartDates';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { CreateWaveDatesConfig } from '../../../../../types/waves.types';
+import StartDates from '@/components/waves/create-wave/dates/StartDates';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { CreateWaveDatesConfig } from '@/types/waves.types';
 
-jest.mock('../../../../../components/utils/calendar/CommonCalendar', () => (props: any) => (
+jest.mock('@/components/utils/calendar/CommonCalendar', () => (props: any) => (
   <button onClick={() => props.setSelectedTimestamp(123)}>calendar</button>
 ));
-jest.mock('../../../../../components/common/DateAccordion', () => (props: any) => (
+jest.mock('@/components/common/DateAccordion', () => (props: any) => (
   <div>
     <div onClick={props.onToggle}>{props.title}</div>
     {props.isExpanded ? props.children : props.collapsedContent}

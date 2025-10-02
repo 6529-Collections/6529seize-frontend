@@ -2,7 +2,7 @@
 
 import React, { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 
 interface WaveDropMobileMenuEditProps {

@@ -1,20 +1,20 @@
 "use client";
 
 import React, { useState, memo, useEffect } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import {
   ExtendedDrop,
   convertApiDropToExtendedDrop,
-} from "../../../helpers/waves/drop.helpers";
-import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
-import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
+} from "@/helpers/waves/drop.helpers";
+import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 
 // Import extracted components
 import { WaveWinnerItemSmall } from "./WaveWinnerItemSmall";
 import { WaveWinnersSmallLoading } from "./WaveWinnersSmallLoading";
 import { WaveWinnersSmallEmpty } from "./WaveWinnersSmallEmpty";
 import { WaveWinnersSmallDecisionSelector } from "./WaveWinnersSmallDecisionSelector";
-import { useWave } from "../../../hooks/useWave";
+import { useWave } from "@/hooks/useWave";
 
 interface WaveWinnersSmallProps {
   readonly wave: ApiWave;

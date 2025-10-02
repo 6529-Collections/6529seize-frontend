@@ -16,13 +16,13 @@ jest.mock('react-dom', () => ({
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderNameEditModal from '../../../../../components/waves/header/name/WaveHeaderNameEditModal';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import WaveHeaderNameEditModal from '@/components/waves/header/name/WaveHeaderNameEditModal';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
-import { convertWaveToUpdateWave } from '../../../../../helpers/waves/waves.helpers';
+import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
 
-jest.mock('../../../../../helpers/waves/waves.helpers', () => ({ convertWaveToUpdateWave: jest.fn(() => ({ id: '1' })) }));
+jest.mock('@/helpers/waves/waves.helpers', () => ({ convertWaveToUpdateWave: jest.fn(() => ({ id: '1' })) }));
 jest.mock('@tanstack/react-query');
 
 const mutateAsync = jest.fn();

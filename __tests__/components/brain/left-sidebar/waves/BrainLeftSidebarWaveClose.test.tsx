@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import BrainLeftSidebarWaveClose from '../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaveClose';
+import BrainLeftSidebarWaveClose from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveClose';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({

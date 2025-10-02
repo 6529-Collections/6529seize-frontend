@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
+import DistributionPlanSecondaryText from "@/common/DistributionPlanSecondaryText";
 import {
   DistributionPlanSnapshot,
   PhaseGroupConfig,
@@ -11,7 +11,7 @@ import {
 import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
-import { BuildPhasesPhase } from "../../../BuildPhases";
+import { BuildPhasesPhase } from "@/BuildPhases";
 
 export default function FinalizeComponent({
   onSave,

@@ -2,8 +2,8 @@
 
 import React, { useCallback, useRef } from "react";
 import { useLayout } from "../layout/LayoutContext";
-import { useWave } from "../../../../hooks/useWave";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { useWave } from "@/hooks/useWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
 import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
 

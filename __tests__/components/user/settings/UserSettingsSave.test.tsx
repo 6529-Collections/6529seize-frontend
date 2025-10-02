@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import UserSettingsSave from '../../../../components/user/settings/UserSettingsSave';
+import UserSettingsSave from '@/components/user/settings/UserSettingsSave';
 
 describe('UserSettingsSave', () => {
   it('disables button when loading or disabled', () => {

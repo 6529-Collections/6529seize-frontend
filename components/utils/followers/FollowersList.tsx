@@ -1,4 +1,4 @@
-import { ApiIdentityAndSubscriptionActions } from "../../../generated/models/ApiIdentityAndSubscriptionActions";
+import { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
 import Follower from "./Follower";
 
 export default function FollowersList({

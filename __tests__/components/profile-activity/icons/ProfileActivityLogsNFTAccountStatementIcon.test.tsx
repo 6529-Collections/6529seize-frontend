@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import Icon from '../../../../components/profile-activity/icons/ProfileActivityLogsNFTAccountStatementIcon';
+import Icon from '@/components/profile-activity/icons/ProfileActivityLogsNFTAccountStatementIcon';
 
 test('renders svg element', () => {
   const { container } = render(<Icon />);

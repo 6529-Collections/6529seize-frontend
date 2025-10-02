@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { AppWalletsProvider, useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
+import { AppWalletsProvider, useAppWallets } from '@/components/app-wallets/AppWalletsContext';
 
-jest.mock('../../../hooks/useCapacitor', () => ({
+jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false })
 }));

@@ -1,10 +1,10 @@
-import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import {
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
-} from "../../../../types/waves.types";
+} from "@/types/waves.types";
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
 import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";

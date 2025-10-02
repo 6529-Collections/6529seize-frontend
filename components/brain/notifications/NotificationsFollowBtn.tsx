@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useState, useContext, useEffect } from "react";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import {
   FOLLOW_BTN_BUTTON_CLASSES,
   FOLLOW_BTN_LOADER_SIZES,
@@ -12,12 +12,12 @@ import { useMutation } from "@tanstack/react-query";
 import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../auth/Auth";
-import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
+import { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
-} from "../../../services/api/common-api";
-import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
+} from "@/services/api/common-api";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 
 interface NotificationsFollowBtnProps {
   readonly profile: ApiProfileMin;

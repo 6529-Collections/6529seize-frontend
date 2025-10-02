@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
-import { DelegationSubmitGroups } from "../../../components/delegation/DelegationFormParts";
+import { DelegationSubmitGroups } from "@/components/delegation/DelegationFormParts";
 
 import { useWriteContract } from "wagmi";
 

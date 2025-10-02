@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProxyListFilters from '../../../../../../components/user/proxy/list/filters/ProxyListFilters';
-import { ProfileProxyListType } from '../../../../../../components/user/proxy/list/ProxyList';
+import ProxyListFilters from '@/components/user/proxy/list/filters/ProxyListFilters';
+import { ProfileProxyListType } from '@/components/user/proxy/list/ProxyList';
 
-jest.mock('../../../../../../components/utils/select/CommonSelect', () => ({
+jest.mock('@/components/utils/select/CommonSelect', () => ({
   __esModule: true,
   default: ({ items, activeItem, setSelected }: any) => (
     <div data-testid="select">

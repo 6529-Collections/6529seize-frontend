@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
-const { displayScore, NextgenRarityToggle, NextgenTokenTraits } = require('../../../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties');
+const { displayScore, NextgenRarityToggle, NextgenTokenTraits } = require('@/components/nextGen/collections/nextgenToken/NextGenTokenProperties');
 
 describe('displayScore', () => {
   beforeEach(() => {

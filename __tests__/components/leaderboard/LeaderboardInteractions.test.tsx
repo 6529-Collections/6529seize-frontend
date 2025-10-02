@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
-import LeaderboardInteractionsComponent from '../../../components/leaderboard/LeaderboardInteractions';
-import { Content, Collector } from '../../../components/leaderboard/Leaderboard';
+import LeaderboardInteractionsComponent from '@/components/leaderboard/LeaderboardInteractions';
+import { Content, Collector } from '@/components/leaderboard/Leaderboard';
 
-jest.mock('../../../components/leaderboard/leaderboard_helpers', () => {
-  const original = jest.requireActual('../../../components/leaderboard/leaderboard_helpers');
+jest.mock('@/components/leaderboard/leaderboard_helpers', () => {
+  const original = jest.requireActual('@/components/leaderboard/leaderboard_helpers');
   return {
     ...original,
     useFetchLeaderboard: jest.fn(),
   };
 });
 
-const useFetchLeaderboard = require('../../../components/leaderboard/leaderboard_helpers').useFetchLeaderboard as jest.Mock;
+const useFetchLeaderboard = require('@/components/leaderboard/leaderboard_helpers').useFetchLeaderboard as jest.Mock;
 
 const baseProps = {
   block: 1,

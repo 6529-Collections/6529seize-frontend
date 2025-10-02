@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import HomeIcon from '../../../../components/common/icons/HomeIcon';
+import HomeIcon from '@/components/common/icons/HomeIcon';
 
 describe('HomeIcon', () => {
   it('renders svg with provided class and attributes', () => {

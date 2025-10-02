@@ -1,16 +1,16 @@
 import {
   CommunityMemberOverview,
   CIC_TO_TEXT,
-} from "../../../entities/IProfile";
+} from "@/entities/IProfile";
 import {
   formatNumberWithCommasOrDash,
   cicToType,
-} from "../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import UserLevel from "../../user/utils/level/UserLevel";
 import { Tooltip } from "react-tooltip";
 import UserCICTypeIcon from "../../user/utils/user-cic-type/UserCICTypeIcon";
-import { isEthereumAddress } from "../../../helpers/AllowlistToolHelpers";
-import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
+import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
+import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import CommonTimeAgo from "../../utils/CommonTimeAgo";
 import Link from "next/link";
 

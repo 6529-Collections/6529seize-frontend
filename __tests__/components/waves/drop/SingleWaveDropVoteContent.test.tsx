@@ -1,19 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SingleWaveDropVoteContent } from '../../../../components/waves/drop/SingleWaveDropVoteContent';
-import { ApiDrop } from '../../../../generated/models/ApiDrop';
-import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
+import { SingleWaveDropVoteContent } from '@/components/waves/drop/SingleWaveDropVoteContent';
+import { ApiDrop } from '@/generated/models/ApiDrop';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: ({ flip }: any) => <span data-testid="font-awesome-icon" data-flip={flip} /> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteSubmit', () => {
+jest.mock('@/components/waves/drop/SingleWaveDropVoteSubmit', () => {
   return React.forwardRef(function MockSubmit(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({ handleClick: jest.fn() }));
     return <div data-testid="vote-submit"><button onClick={() => props.onVoteSuccess?.()}>Submit Vote</button><span data-testid="new-rating">{props.newRating}</span></div>;
   });
 });
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteSlider', () => ({ __esModule: true, default: (props: any) => <div data-testid="vote-slider"><input data-testid="slider-input" type="range" min={props.minValue} max={props.maxValue} value={props.voteValue} onChange={(e) => props.setVoteValue(Number(e.target.value))} /><span data-testid="slider-value">{props.voteValue}</span><span data-testid="slider-credit-type">{props.creditType}</span><span data-testid="slider-rank">{props.rank}</span></div> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteInput', () => ({ __esModule: true, SingleWaveDropVoteInput: (props: any) => <div data-testid="vote-input"><input data-testid="numeric-input" type="number" min={props.minValue} max={props.maxValue} value={props.voteValue} onChange={(e) => props.setVoteValue(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && props.onSubmit()} /><span data-testid="input-credit-type">{props.creditType}</span></div> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteStats', () => ({ __esModule: true, SingleWaveDropVoteStats: (props: any) => <div data-testid="vote-stats"><span data-testid="current-rating">{props.currentRating}</span><span data-testid="max-rating">{props.maxRating}</span><span data-testid="stats-credit-type">{props.creditType}</span></div> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVoteSlider', () => ({ __esModule: true, default: (props: any) => <div data-testid="vote-slider"><input data-testid="slider-input" type="range" min={props.minValue} max={props.maxValue} value={props.voteValue} onChange={(e) => props.setVoteValue(Number(e.target.value))} /><span data-testid="slider-value">{props.voteValue}</span><span data-testid="slider-credit-type">{props.creditType}</span><span data-testid="slider-rank">{props.rank}</span></div> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVoteInput', () => ({ __esModule: true, SingleWaveDropVoteInput: (props: any) => <div data-testid="vote-input"><input data-testid="numeric-input" type="number" min={props.minValue} max={props.maxValue} value={props.voteValue} onChange={(e) => props.setVoteValue(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && props.onSubmit()} /><span data-testid="input-credit-type">{props.creditType}</span></div> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVoteStats', () => ({ __esModule: true, SingleWaveDropVoteStats: (props: any) => <div data-testid="vote-stats"><span data-testid="current-rating">{props.currentRating}</span><span data-testid="max-rating">{props.maxRating}</span><span data-testid="stats-credit-type">{props.creditType}</span></div> }));
 
 export enum SingleWaveDropVoteSize {
   NORMAL = "NORMAL",

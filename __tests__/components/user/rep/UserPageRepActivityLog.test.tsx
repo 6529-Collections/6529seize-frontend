@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import UserPageRepActivityLog from '../../../../components/user/rep/UserPageRepActivityLog';
+import UserPageRepActivityLog from '@/components/user/rep/UserPageRepActivityLog';
 
-jest.mock('../../../../components/profile-activity/ProfileActivityLogs', () => (props: any) => (
+jest.mock('@/components/profile-activity/ProfileActivityLogs', () => (props: any) => (
   <div data-testid="logs">{JSON.stringify(props.initialParams)}</div>
 ));
-jest.mock('../../../../components/profile-activity/ProfileName', () => ({
+jest.mock('@/components/profile-activity/ProfileName', () => ({
   __esModule: true,
   default: () => <span>ProfileName</span>,
   ProfileNameType: { POSSESSION: 'POSSESSION' }

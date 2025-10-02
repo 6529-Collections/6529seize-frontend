@@ -1,7 +1,7 @@
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AllowlistToolSelectMenuMultiple, { AllowlistToolSelectMenuMultipleOption } from '../../../../../components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple';
-jest.mock('../../../../../components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
+import AllowlistToolSelectMenuMultiple, { AllowlistToolSelectMenuMultipleOption } from '@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple';
+jest.mock('@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
 
 // Mock framer-motion to avoid animations and capture useAnimate
 const animateMock = jest.fn();

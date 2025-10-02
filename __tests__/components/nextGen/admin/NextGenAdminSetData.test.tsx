@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenAdminSetData from '../../../../components/nextGen/admin/NextGenAdminSetData';
+import NextGenAdminSetData from '@/components/nextGen/admin/NextGenAdminSetData';
 
 // Mock dependencies
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
-jest.mock('../../../../components/nextGen/nextgen_helpers');
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/components/nextGen/nextgen_helpers');
 
-const { useSeizeConnectContext } = require('../../../../components/auth/SeizeConnectContext');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
 const {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -17,21 +17,21 @@ const {
   useCollectionAdditionalData,
   useCoreContractWrite,
   getCollectionIdsForAddress,
-} = require('../../../../components/nextGen/nextgen_helpers');
+} = require('@/components/nextGen/nextgen_helpers');
 
 
-jest.mock('../../../../components/nextGen/nextgen_contracts', () => ({
+jest.mock('@/components/nextGen/nextgen_contracts', () => ({
   FunctionSelectors: {
     SET_COLLECTION_DATA: 'setCollectionData',
   },
 }));
 
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => (
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => (
   <div data-testid="contract-write-status" />
 ));
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdmin', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdmin', () => ({
   printAdminErrors: (errors: string[]) => (
     <div data-testid="admin-errors">
       {errors.map((error, index) => (
@@ -41,7 +41,7 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdmin', () => ({
   ),
 }));
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ collection_id, onChange }: any) => (
     <div data-testid="collection-id-form-group">
       <input

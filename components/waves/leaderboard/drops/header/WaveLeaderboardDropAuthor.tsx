@@ -1,14 +1,14 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import { cicToType } from "../../../../../helpers/Helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { cicToType } from "@/helpers/Helpers";
 
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../../../user/utils/UserCICAndLevel";
-import WinnerDropBadge from "../../../../waves/drops/winner/WinnerDropBadge";
-import WaveDropTime from "../../../../waves/drops/time/WaveDropTime";
-import UserProfileTooltipWrapper from "../../../../utils/tooltip/UserProfileTooltipWrapper";
+} from "@/user/utils/UserCICAndLevel";
+import WinnerDropBadge from "@/waves/drops/winner/WinnerDropBadge";
+import WaveDropTime from "@/waves/drops/time/WaveDropTime";
+import UserProfileTooltipWrapper from "@/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;

@@ -1,7 +1,7 @@
 import { NextgenView } from "@/enums";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenCollection } from "../../../entities/INextgen";
+import { NextGenCollection } from "@/entities/INextgen";
 import { Status } from "../nextgen_entities";
 import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";

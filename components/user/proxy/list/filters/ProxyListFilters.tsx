@@ -1,6 +1,6 @@
 import CommonSelect, {
   CommonSelectItem,
-} from "../../../../utils/select/CommonSelect";
+} from "@/utils/select/CommonSelect";
 import { ProfileProxyListType } from "../ProxyList";
 
 export default function ProxyListFilters({

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
-import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 
 interface SingleWaveDropInfoContainerProps {
   readonly activeTab: SingleWaveDropTab;

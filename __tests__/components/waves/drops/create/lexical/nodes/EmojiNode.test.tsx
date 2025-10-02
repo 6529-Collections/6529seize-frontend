@@ -25,10 +25,10 @@ jest.mock("lexical", () => {
 import {
   EmojiNode,
   EmojiComponent,
-} from "../../../../../../../components/drops/create/lexical/nodes/EmojiNode";
-import { useEmoji } from "../../../../../../../contexts/EmojiContext";
+} from "@/components/drops/create/lexical/nodes/EmojiNode";
+import { useEmoji } from "@/contexts/EmojiContext";
 
-jest.mock("../../../../../../../contexts/EmojiContext");
+jest.mock("@/contexts/EmojiContext");
 
 describe("EmojiNode class", () => {
   const TEST_ID = "smile";

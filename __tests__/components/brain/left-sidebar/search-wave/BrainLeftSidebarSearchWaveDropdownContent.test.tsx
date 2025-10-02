@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import BrainLeftSidebarSearchWaveDropdownContent from '../../../../../components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveDropdownContent';
+import BrainLeftSidebarSearchWaveDropdownContent from '@/components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveDropdownContent';
 
-jest.mock('../../../../../components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveItem', () => ({
+jest.mock('@/components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveItem', () => ({
   __esModule: true,
   default: ({ wave }: any) => <li data-testid="wave-item">{wave.name}</li>
 }));

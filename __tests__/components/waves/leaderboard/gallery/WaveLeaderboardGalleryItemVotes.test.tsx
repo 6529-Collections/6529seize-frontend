@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import WaveLeaderboardGalleryItemVotes from '../../../../../components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes';
+import WaveLeaderboardGalleryItemVotes from '@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes';
 
-jest.mock('../../../../../components/drops/view/utils/DropVoteProgressing', () => ({
+jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="progress" data-current={props.current} data-projected={props.projected} data-subtle={props.subtle} />,
 }));

@@ -1,11 +1,11 @@
-import { canEditWave, createDirectMessageWave, convertWaveToUpdateWave, getCreateWaveStepStatus } from '../../../helpers/waves/waves.helpers';
-import { CreateWaveStepStatus } from '../../../types/waves.types';
+import { canEditWave, createDirectMessageWave, convertWaveToUpdateWave, getCreateWaveStepStatus } from '@/helpers/waves/waves.helpers';
+import { CreateWaveStepStatus } from '@/types/waves.types';
 
-jest.mock('../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(() => Promise.resolve('wave')),
 }));
 
-import { commonApiPost } from '../../../services/api/common-api';
+import { commonApiPost } from '@/services/api/common-api';
 
 describe('waves.helpers', () => {
   afterEach(() => {

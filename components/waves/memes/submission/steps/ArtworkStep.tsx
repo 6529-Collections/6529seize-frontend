@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useMemo } from "react";
-import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import PrimaryButton from "@/utils/button/PrimaryButton";
 import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";

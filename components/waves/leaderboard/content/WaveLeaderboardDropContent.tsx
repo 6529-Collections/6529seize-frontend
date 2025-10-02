@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropContent from "../../drops/WaveDropContent";
 import WaveDropMetadata from "../../drops/WaveDropMetadata";
 import { useRouter } from "next/navigation";

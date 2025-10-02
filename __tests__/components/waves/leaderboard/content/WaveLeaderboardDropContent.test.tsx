@@ -1,16 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { WaveLeaderboardDropContent } from "../../../../../components/waves/leaderboard/content/WaveLeaderboardDropContent";
+import { WaveLeaderboardDropContent } from "@/components/waves/leaderboard/content/WaveLeaderboardDropContent";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
-jest.mock("../../../../../components/waves/drops/WaveDropContent", () => ({
+jest.mock("@/components/waves/drops/WaveDropContent", () => ({
   __esModule: true,
   default: ({ onDropContentClick, drop }: any) => (
     <div data-testid="content" onClick={() => onDropContentClick(drop)} />
   ),
 }));
-jest.mock("../../../../../components/waves/drops/WaveDropMetadata", () => ({
+jest.mock("@/components/waves/drops/WaveDropMetadata", () => ({
   __esModule: true,
   default: ({ metadata }: any) => (
     <div data-testid="meta">{metadata.length}</div>

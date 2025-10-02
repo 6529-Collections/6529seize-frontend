@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenCollection } from "../../../entities/INextgen";
+import { NextGenCollection } from "@/entities/INextgen";
 import { formatNameForUrl } from "../nextgen_helpers";
 import { NextGenMintCounts } from "./collectionParts/NextGenCollectionHeader";
 import styles from "./NextGen.module.scss";

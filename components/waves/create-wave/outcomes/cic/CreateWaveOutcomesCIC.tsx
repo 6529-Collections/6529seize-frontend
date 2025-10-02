@@ -1,8 +1,8 @@
 import {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
-} from "../../../../../types/waves.types";
-import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
+} from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import CreateWaveOutcomesCICRank from "./CreateWaveOutcomesCICRank";
 import CreateWaveOutcomesCICApprove from "./CreateWaveOutcomesCICApprove";
 

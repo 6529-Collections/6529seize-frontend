@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SortDirection } from "../../../../entities/ISort";
+import { SortDirection } from "@/entities/ISort";
 
 const rotatedDirections: Record<SortDirection, SortDirection> = {
   [SortDirection.ASC]: SortDirection.DESC,

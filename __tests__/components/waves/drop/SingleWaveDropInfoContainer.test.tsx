@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SingleWaveDropInfoContainer } from '../../../../components/waves/drop/SingleWaveDropInfoContainer';
-import { SingleWaveDropTab } from '../../../../components/waves/drop/SingleWaveDrop';
-import { useLayout } from '../../../../components/brain/my-stream/layout/LayoutContext';
+import { SingleWaveDropInfoContainer } from '@/components/waves/drop/SingleWaveDropInfoContainer';
+import { SingleWaveDropTab } from '@/components/waves/drop/SingleWaveDrop';
+import { useLayout } from '@/components/brain/my-stream/layout/LayoutContext';
 
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: jest.fn(),
 }));
 

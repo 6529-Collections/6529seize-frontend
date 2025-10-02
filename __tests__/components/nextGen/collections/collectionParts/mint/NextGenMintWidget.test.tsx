@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { getJsonData } from '../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintWidget';
+import { getJsonData } from '@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget';
 
 describe('getJsonData', () => {
   it('parses json and capitalizes keys', () => {

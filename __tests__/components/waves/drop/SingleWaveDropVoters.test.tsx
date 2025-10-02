@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SingleWaveDropVoters } from '../../../../components/waves/drop/SingleWaveDropVoters';
-import { useWaveTopVoters } from '../../../../hooks/useWaveTopVoters';
-import { useAuth } from '../../../../components/auth/Auth';
+import { SingleWaveDropVoters } from '@/components/waves/drop/SingleWaveDropVoters';
+import { useWaveTopVoters } from '@/hooks/useWaveTopVoters';
+import { useAuth } from '@/components/auth/Auth';
 
 let intersectionCb: any;
 
-jest.mock('../../../../hooks/useWaveTopVoters');
-jest.mock('../../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
-jest.mock('../../../../hooks/useIntersectionObserver', () => ({
+jest.mock('@/hooks/useWaveTopVoters');
+jest.mock('@/components/auth/Auth', () => ({ useAuth: jest.fn() }));
+jest.mock('@/hooks/useIntersectionObserver', () => ({
   useIntersectionObserver: (cb: any) => {
     intersectionCb = cb;
     return { current: null };
   },
 }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoter', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropVoter', () => ({
   SingleWaveDropVoter: (props: any) => <div data-testid="voter">{props.voter.voter.id}</div>,
 }));
 

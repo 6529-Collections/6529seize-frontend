@@ -1,4 +1,4 @@
-import { useParsedCollectionIndex, getCollectionIdsForAddress } from '../../../components/nextGen/nextgen_helpers';
+import { useParsedCollectionIndex, getCollectionIdsForAddress } from '@/components/nextGen/nextgen_helpers';
 
 describe('nextgen_helpers extra coverage', () => {
   it('parses collection index', () => {

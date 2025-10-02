@@ -1,8 +1,8 @@
-import { formatWaveMessages, createEmptyWaveMessages, mergeDrops, fetchNewestWaveMessages, maxOrNull } from '../../../../contexts/wave/utils/wave-messages-utils';
-import { DropSize } from '../../../../helpers/waves/drop.helpers';
-import { commonApiFetch } from '../../../../services/api/common-api';
+import { formatWaveMessages, createEmptyWaveMessages, mergeDrops, fetchNewestWaveMessages, maxOrNull } from '@/contexts/wave/utils/wave-messages-utils';
+import { DropSize } from '@/helpers/waves/drop.helpers';
+import { commonApiFetch } from '@/services/api/common-api';
 
-jest.mock('../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 const waveId = 'wave1';
 const drop = { id: 'a', serial_no: 1, created_at: '2020', wave: { id: waveId }, parts: [], author: {}, metadata: [] } as any;

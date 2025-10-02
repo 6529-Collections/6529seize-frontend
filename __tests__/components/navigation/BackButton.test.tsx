@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import BackButton from "../../../components/navigation/BackButton";
+import BackButton from "@/components/navigation/BackButton";
 
-jest.mock("../../../contexts/NavigationHistoryContext", () => ({
+jest.mock("@/contexts/NavigationHistoryContext", () => ({
   useNavigationHistoryContext: jest.fn(),
 }));
-jest.mock("../../../components/navigation/ViewContext", () => ({
+jest.mock("@/components/navigation/ViewContext", () => ({
   useViewContext: jest.fn(),
 }));
 jest.mock("next/navigation", () => ({
@@ -14,24 +14,24 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
-jest.mock("../../../hooks/useWaveData", () => ({
+jest.mock("@/hooks/useWaveData", () => ({
   useWaveData: jest.fn(),
 }));
-jest.mock("../../../hooks/useWave", () => ({
+jest.mock("@/hooks/useWave", () => ({
   useWave: jest.fn(),
 }));
-jest.mock("../../../components/utils/Spinner", () => ({
+jest.mock("@/components/utils/Spinner", () => ({
   __esModule: true,
   default: () => <div data-testid="spinner" />,
 }));
 
 const {
   useNavigationHistoryContext,
-} = require("../../../contexts/NavigationHistoryContext");
-const { useViewContext } = require("../../../components/navigation/ViewContext");
+} = require("@/contexts/NavigationHistoryContext");
+const { useViewContext } = require("@/components/navigation/ViewContext");
 const { useRouter, useSearchParams, usePathname } = require("next/navigation");
-const { useWaveData } = require("../../../hooks/useWaveData");
-const { useWave } = require("../../../hooks/useWave");
+const { useWaveData } = require("@/hooks/useWaveData");
+const { useWave } = require("@/hooks/useWave");
 
 function setup(query: any = {}, opts: any = {}) {
   const replace = jest.fn();

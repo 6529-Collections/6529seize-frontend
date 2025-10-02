@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { RatingStats } from "../../../../../entities/IProfile";
-import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
+import { RatingStats } from "@/entities/IProfile";
+import CommonAnimationWrapper from "@/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../../modify-rep/UserPageRepModifyModal";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function UserPageRepRepsTableItem({
   rep,
   profile,

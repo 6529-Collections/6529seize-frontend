@@ -4,16 +4,16 @@ import { useContext, useEffect, useState } from "react";
 import {
   assertUnreachable,
   getRandomObjectId,
-} from "../../../../../helpers/AllowlistToolHelpers";
+} from "@/helpers/AllowlistToolHelpers";
 import SelectSnapshot from "./component-config/select-snapshot/SelectSnapshot";
-import { DistributionPlanToolContext } from "../../../DistributionPlanToolContext";
+import { DistributionPlanToolContext } from "@/DistributionPlanToolContext";
 import {
   AllowlistOperation,
   AllowlistOperationBase,
   AllowlistOperationCode,
   DistributionPlanSearchContractMetadataResult,
   Pool,
-} from "../../../../allowlist-tool/allowlist-tool.types";
+} from "@/allowlist-tool/allowlist-tool.types";
 import SnapshotExcludeComponentWinners from "./component-config/SnapshotExcludeComponentWinners";
 import { BuildPhasesPhase } from "../../BuildPhases";
 import SnapshotSelectTopHolders from "./component-config/SnapshotSelectTopHolders";
@@ -27,7 +27,7 @@ import { ComponentRandomHoldersWeightType } from "./component-config/utils/Compo
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
-} from "../../../../../services/distribution-plan-api";
+} from "@/services/distribution-plan-api";
 import SnapshotSelectTokenIds from "./component-config/SnapshotSelectTokenIds";
 
 export enum PhaseConfigStep {

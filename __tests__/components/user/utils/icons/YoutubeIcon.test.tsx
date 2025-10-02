@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import YoutubeIcon from '../../../../../components/user/utils/icons/YoutubeIcon';
+import YoutubeIcon from '@/components/user/utils/icons/YoutubeIcon';
 
 describe('YoutubeIcon', () => {
   it('renders svg with play button', () => {

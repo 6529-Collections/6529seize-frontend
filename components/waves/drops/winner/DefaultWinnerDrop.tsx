@@ -2,10 +2,10 @@
 
 import { memo, useCallback, useState } from "react";
 import Link from "next/link";
-import { Drop, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+import { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropReply from "../WaveDropReply";
 import WaveDropContent from "../WaveDropContent";
@@ -14,7 +14,7 @@ import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropRatings from "../WaveDropRatings";
 import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
-import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WinnerDropBadge from "./WinnerDropBadge";
 import WaveDropReactions from "../WaveDropReactions";
 

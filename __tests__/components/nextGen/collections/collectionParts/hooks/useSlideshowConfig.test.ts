@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useSlideshowConfig } from '../../../../../../components/nextGen/collections/collectionParts/hooks/useSlideshowConfig';
+import { useSlideshowConfig } from '@/components/nextGen/collections/collectionParts/hooks/useSlideshowConfig';
 
 describe('useSlideshowConfig', () => {
   const originalInnerWidth = window.innerWidth;

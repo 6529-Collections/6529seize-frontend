@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
-import UserPageStatsActivityWalletTableRowIcon from '../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowIcon';
-import { TransactionType } from '../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow';
+import UserPageStatsActivityWalletTableRowIcon from '@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowIcon';
+import { TransactionType } from '@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow';
 
 describe('UserPageStatsActivityWalletTableRowIcon', () => {
   it('renders sale icon for sale transaction', () => {

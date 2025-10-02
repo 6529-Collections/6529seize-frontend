@@ -1,16 +1,16 @@
 "use client"
 
 import React, { useMemo } from "react";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
-import InfoButton from "../../../utils/button/InfoButton";
-import ClosedButton from "../../../utils/button/ClosedButton";
-import ClockIcon from "../../../utils/icons/ClockIcon";
-import CalendarClosedIcon from "../../../utils/icons/CalendarClosedIcon";
-import LimitIcon from "../../../utils/icons/LimitIcon";
-import PermissionIcon from "../../../utils/icons/PermissionIcon";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { useWave, SubmissionStatus } from "../../../../hooks/useWave";
-import { useCountdown } from "../../../../hooks/useCountdown";
+import PrimaryButton from "@/utils/button/PrimaryButton";
+import InfoButton from "@/utils/button/InfoButton";
+import ClosedButton from "@/utils/button/ClosedButton";
+import ClockIcon from "@/utils/icons/ClockIcon";
+import CalendarClosedIcon from "@/utils/icons/CalendarClosedIcon";
+import LimitIcon from "@/utils/icons/LimitIcon";
+import PermissionIcon from "@/utils/icons/PermissionIcon";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useWave, SubmissionStatus } from "@/hooks/useWave";
+import { useCountdown } from "@/hooks/useCountdown";
 
 interface MyStreamWaveTabsMemeSubmitProps {
   readonly wave: ApiWave;

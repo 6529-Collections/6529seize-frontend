@@ -1,7 +1,7 @@
-import { removeBaseEndpoint } from "../../../helpers/Helpers";
+import { removeBaseEndpoint } from "@/helpers/Helpers";
 import Link from "next/link";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
-import { useDrop } from "../../../hooks/useDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useDrop } from "@/hooks/useDrop";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { SingleWaveDropPosition } from "../drop/SingleWaveDropPosition";
 import { SingleWaveDropVotes } from "../drop/SingleWaveDropVotes";

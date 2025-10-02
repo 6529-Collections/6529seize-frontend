@@ -1,5 +1,5 @@
-import { EMOJI_TRANSFORMER } from '../../../../../../components/drops/create/lexical/transformers/EmojiTransformer';
-import { EmojiNode } from '../../../../../../components/drops/create/lexical/nodes/EmojiNode';
+import { EMOJI_TRANSFORMER } from '@/components/drops/create/lexical/transformers/EmojiTransformer';
+import { EmojiNode } from '@/components/drops/create/lexical/nodes/EmojiNode';
 import { $applyNodeReplacement } from 'lexical';
 
 jest.mock('lexical', () => ({
@@ -8,7 +8,7 @@ jest.mock('lexical', () => ({
 
 const mockEmojiNodeInstance = { __emojiId: 'smile' };
 
-jest.mock('../../../../../../components/drops/create/lexical/nodes/EmojiNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/EmojiNode', () => ({
   EmojiNode: jest.fn().mockImplementation(function(this: any, id: string) {
     this.__emojiId = id;
   })

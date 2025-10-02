@@ -3,15 +3,15 @@
 import { useContext, useEffect, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
-} from "../../../../../allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
-import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { BuildPhasesPhase } from "../../../BuildPhases";
+} from "@/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+import DistributionPlanSecondaryText from "@/common/DistributionPlanSecondaryText";
+import { BuildPhasesPhase } from "@/BuildPhases";
 import {
   PhaseConfigStep,
   PhaseGroupSnapshotConfig,
 } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
+import { DistributionPlanToolContext } from "@/DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 

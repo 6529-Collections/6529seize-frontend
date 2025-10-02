@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityDistributionsTableWrapper from '../../../../../../components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableWrapper';
+import UserPageStatsActivityDistributionsTableWrapper from '@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableWrapper';
 
-jest.mock('../../../../../../components/utils/animation/CommonCardSkeleton', () => () => <div data-testid="skeleton" />);
-jest.mock('../../../../../../components/utils/table/paginator/CommonTablePagination', () => (props: any) => <div data-testid="pagination" data-page={props.currentPage} />);
-jest.mock('../../../../../../components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTable', () => (props: any) => <div data-testid="table" data-count={props.items.length} />);
+jest.mock('@/components/utils/animation/CommonCardSkeleton', () => () => <div data-testid="skeleton" />);
+jest.mock('@/components/utils/table/paginator/CommonTablePagination', () => (props: any) => <div data-testid="pagination" data-page={props.currentPage} />);
+jest.mock('@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTable', () => (props: any) => <div data-testid="table" data-count={props.items.length} />);
 
 describe('UserPageStatsActivityDistributionsTableWrapper', () => {
   const profile = { id: 'p' } as any;

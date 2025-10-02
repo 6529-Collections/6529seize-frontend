@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import WaveSpecs from "../../waves/specs/WaveSpecs";
 import WaveGroups from "../../waves/groups/WaveGroups";
 

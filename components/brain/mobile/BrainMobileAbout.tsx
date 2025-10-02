@@ -5,9 +5,9 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import WaveHeader, {
   WaveHeaderPinnedSide,
 } from "../../waves/header/WaveHeader";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 
-import { commonApiFetch } from "../../../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "../right-sidebar/BrainRightSidebarFollowers";
 import { useLayout } from "../my-stream/layout/LayoutContext";

@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateNftsSelectedItem from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftsSelectedItem';
+import GroupCreateNftsSelectedItem from '@/components/groups/page/create/config/nfts/GroupCreateNftsSelectedItem';
 import { useQuery } from '@tanstack/react-query';
-import { getScaledImageUri } from '../../../../../../../helpers/image.helpers';
-import { ApiGroupOwnsNftNameEnum } from '../../../../../../../generated/models/ApiGroupOwnsNft';
+import { getScaledImageUri } from '@/helpers/image.helpers';
+import { ApiGroupOwnsNftNameEnum } from '@/generated/models/ApiGroupOwnsNft';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../../../../../helpers/image.helpers');
+jest.mock('@/helpers/image.helpers');
 
 const mockUseQuery = useQuery as jest.Mock;
 const getScaledImageUriMock = getScaledImageUri as jest.Mock;

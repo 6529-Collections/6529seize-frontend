@@ -2,8 +2,8 @@
 
 import { FC, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAward } from "@fortawesome/free-solid-svg-icons";
 

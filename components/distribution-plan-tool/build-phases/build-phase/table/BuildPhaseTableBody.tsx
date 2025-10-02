@@ -1,4 +1,4 @@
-import DistributionPlanTableBodyWrapper from "../../../common/DistributionPlanTableBodyWrapper";
+import DistributionPlanTableBodyWrapper from "@/common/DistributionPlanTableBodyWrapper";
 import { BuildPhasesPhase } from "../../BuildPhases";
 import BuildPhaseTableRow from "./BuildPhaseTableRow";
 

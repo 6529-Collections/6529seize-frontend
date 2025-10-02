@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
-import { useArtworkSubmissionForm } from '../../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionForm';
+import { useArtworkSubmissionForm } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionForm';
 
-jest.mock('../../../../../../components/waves/memes/traits/schema', () => ({ initialTraits: { title: '', description: '', artist: '', seizeArtistProfile: '' } }));
-jest.mock('../../../../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
+jest.mock('@/components/waves/memes/traits/schema', () => ({ initialTraits: { title: '', description: '', artist: '', seizeArtistProfile: '' } }));
+jest.mock('@/components/auth/Auth', () => ({ useAuth: jest.fn() }));
 
-const { useAuth } = require('../../../../../../components/auth/Auth');
+const { useAuth } = require('@/components/auth/Auth');
 
 describe('useArtworkSubmissionForm', () => {
   beforeEach(() => {

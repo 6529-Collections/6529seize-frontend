@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import CreateDropContentMissingMediaWarning from '../../../../../../components/drops/create/utils/storm/CreateDropContentMissingMediaWarning';
-import { ApiWaveParticipationRequirement } from '../../../../../../generated/models/ApiWaveParticipationRequirement';
+import CreateDropContentMissingMediaWarning from '@/components/drops/create/utils/storm/CreateDropContentMissingMediaWarning';
+import { ApiWaveParticipationRequirement } from '@/generated/models/ApiWaveParticipationRequirement';
 
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children, id }: any) => (

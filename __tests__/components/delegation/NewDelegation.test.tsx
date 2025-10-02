@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NewDelegation from '../../../components/delegation/NewDelegation';
+import NewDelegation from '@/components/delegation/NewDelegation';
 
-jest.mock('../../../components/delegation/DelegationFormParts', () => ({
+jest.mock('@/components/delegation/DelegationFormParts', () => ({
   DelegationExpiryCalendar: () => <div data-testid="calendar" />,
   DelegationTokenSelection: () => <div data-testid="token" />,
   DelegationCloseButton: () => <div />,

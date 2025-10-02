@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserSettingsImgSelectMeme, { MemeLite } from '../../../../components/user/settings/UserSettingsImgSelectMeme';
+import UserSettingsImgSelectMeme, { MemeLite } from '@/components/user/settings/UserSettingsImgSelectMeme';
 
 describe('UserSettingsImgSelectMeme', () => {
   const memes: MemeLite[] = [

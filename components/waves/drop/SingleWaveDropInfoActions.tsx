@@ -1,7 +1,7 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropVote } from "./SingleWaveDropVote";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 interface SingleWaveDropInfoActionsProps {
   readonly drop: ExtendedDrop;

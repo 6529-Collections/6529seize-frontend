@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import MediumIcon from '../../../../../components/user/utils/icons/MediumIcon';
+import MediumIcon from '@/components/user/utils/icons/MediumIcon';
 
 test('renders svg icon', () => {
   const { container } = render(<MediumIcon />);

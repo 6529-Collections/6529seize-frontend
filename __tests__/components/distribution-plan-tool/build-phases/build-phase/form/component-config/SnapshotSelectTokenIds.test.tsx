@@ -2,13 +2,13 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle', () => (props: any) => <div data-testid="title">{props.title}</div>);
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta', () => () => <div />);
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => (props: any) => (
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle', () => (props: any) => <div data-testid="title">{props.title}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta', () => () => <div />);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => (props: any) => (
   <button disabled={props.isDisabled} onClick={props.onNext} data-testid="next">Next{props.children}</button>
 ));
 
-import SnapshotSelectTokenIds from '../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotSelectTokenIds';
+import SnapshotSelectTokenIds from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotSelectTokenIds';
 
 describe('SnapshotSelectTokenIds', () => {
   it('calls onSelectTokenIds on next', async () => {

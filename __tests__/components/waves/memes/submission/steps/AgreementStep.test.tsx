@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import AgreementStep from '../../../../../../components/waves/memes/submission/steps/AgreementStep';
+import AgreementStep from '@/components/waves/memes/submission/steps/AgreementStep';
 
-jest.mock('../../../../../../components/utils/button/PrimaryButton', () => (props: any) => (
+jest.mock('@/components/utils/button/PrimaryButton', () => (props: any) => (
   <button onClick={props.onClicked} disabled={props.disabled} data-testid="primary">
     {props.children}
   </button>
 ));
 
 type Wave = { participation: { terms: string } };
-jest.mock('../../../../../../components/waves/memes/submission/steps/AgreementStepAgreement', () => (p: any) => <div data-testid="agreement">{p.text}</div>);
+jest.mock('@/components/waves/memes/submission/steps/AgreementStepAgreement', () => (p: any) => <div data-testid="agreement">{p.text}</div>);
 
 const wave: Wave = { participation: { terms: 'terms' } } as any;
 

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import BrainLeftSidebarSearchWaveItem from '../../../../../components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveItem';
+import BrainLeftSidebarSearchWaveItem from '@/components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveItem';
 
 const push = jest.fn();
 const registerWave = jest.fn();
@@ -12,10 +12,10 @@ jest.mock('next/navigation', () => ({
     get: jest.fn().mockReturnValue(null)
   })
 }));
-jest.mock('../../../../../hooks/usePrefetchWaveData', () => ({ usePrefetchWaveData: () => prefetchWaveData }));
-jest.mock('../../../../../contexts/wave/MyStreamContext', () => ({ useMyStream: () => ({ registerWave }) }));
-jest.mock('../../../../../hooks/useWave', () => ({ useWave: () => ({ isDm: false }) }));
-jest.mock('../../../../../components/waves/WavePicture', () => ({ __esModule: true, default: () => <div data-testid="pic" /> }));
+jest.mock('@/hooks/usePrefetchWaveData', () => ({ usePrefetchWaveData: () => prefetchWaveData }));
+jest.mock('@/contexts/wave/MyStreamContext', () => ({ useMyStream: () => ({ registerWave }) }));
+jest.mock('@/hooks/useWave', () => ({ useWave: () => ({ isDm: false }) }));
+jest.mock('@/components/waves/WavePicture', () => ({ __esModule: true, default: () => <div data-testid="pic" /> }));
 
 describe('BrainLeftSidebarSearchWaveItem', () => {
   const wave = { id: 'w1', name: 'Wave', picture: 'p', contributors_overview: [], author: { handle: 'user' }, wave: { type: 'CHAT' } } as any;

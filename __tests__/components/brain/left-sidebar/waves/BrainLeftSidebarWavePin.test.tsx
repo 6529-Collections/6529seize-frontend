@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import BrainLeftSidebarWavePin from '../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWavePin';
-import { MAX_PINNED_WAVES, usePinnedWavesServer } from '../../../../../hooks/usePinnedWavesServer';
-import { useMyStream } from '../../../../../contexts/wave/MyStreamContext';
-import { useAuth } from '../../../../../components/auth/Auth';
+import BrainLeftSidebarWavePin from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin';
+import { MAX_PINNED_WAVES, usePinnedWavesServer } from '@/hooks/usePinnedWavesServer';
+import { useMyStream } from '@/contexts/wave/MyStreamContext';
+import { useAuth } from '@/components/auth/Auth';
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -21,9 +21,9 @@ jest.mock('react-tooltip', () => ({
   ),
 }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
-jest.mock('../../../../../contexts/wave/MyStreamContext');
-jest.mock('../../../../../hooks/usePinnedWavesServer');
-jest.mock('../../../../../components/auth/Auth');
+jest.mock('@/contexts/wave/MyStreamContext');
+jest.mock('@/hooks/usePinnedWavesServer');
+jest.mock('@/components/auth/Auth');
 
 const addPinnedWave = jest.fn();
 const removePinnedWave = jest.fn();

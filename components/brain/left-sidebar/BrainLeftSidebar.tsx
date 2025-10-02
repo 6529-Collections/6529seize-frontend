@@ -6,13 +6,13 @@ import BrainLeftSidebarSearchWave from "./search-wave/BrainLeftSidebarSearchWave
 import BrainLeftSidebarWaves from "./waves/BrainLeftSidebarWaves";
 import { TabToggle } from "../../common/TabToggle";
 import { useContentTab } from "../ContentTabContext";
-import { MyStreamWaveTab } from "../../../types/waves.types";
+import { MyStreamWaveTab } from "@/types/waves.types";
 import DirectMessagesList from "../direct-messages/DirectMessagesList";
 import { useSearchParams } from "next/navigation";
-import { useUnreadIndicator } from "../../../hooks/useUnreadIndicator";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useAuth } from "../../auth/Auth";
-import { useWaveData } from "../../../hooks/useWaveData";
-import { useWave } from "../../../hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
+import { useWave } from "@/hooks/useWave";
 
 interface BrainLeftSidebarProps {
   readonly activeWaveId: string | null | undefined;

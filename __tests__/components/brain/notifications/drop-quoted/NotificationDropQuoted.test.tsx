@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NotificationDropQuoted from '../../../../../components/brain/notifications/drop-quoted/NotificationDropQuoted';
+import NotificationDropQuoted from '@/components/brain/notifications/drop-quoted/NotificationDropQuoted';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({
@@ -9,7 +9,7 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
 
-jest.mock('../../../../../components/waves/drops/Drop', () => ({
+jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
   default: (props: any) => (
     <div>

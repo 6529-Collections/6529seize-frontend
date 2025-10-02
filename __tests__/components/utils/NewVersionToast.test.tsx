@@ -1,15 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import NewVersionToast from "../../../components/utils/NewVersionToast";
-import { useIsVersionStale } from "../../../hooks/useIsVersionStale";
+import NewVersionToast from "@/components/utils/NewVersionToast";
+import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { useRouter } from "next/navigation";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
-jest.mock("../../../hooks/useIsVersionStale", () => ({
+jest.mock("@/hooks/useIsVersionStale", () => ({
   useIsVersionStale: jest.fn(),
 }));
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
-jest.mock("../../../hooks/useDeviceInfo", () => ({
+jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(),
 }));

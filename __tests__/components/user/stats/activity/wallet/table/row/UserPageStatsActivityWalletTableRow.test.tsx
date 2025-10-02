@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityWalletTableRow from '../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow';
-jest.mock('../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowIcon', () => () => <div data-testid="icon" />);
-jest.mock('../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowMainAddress', () => () => <div data-testid="main" />);
-jest.mock('../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowSecondAddress', () => () => <div data-testid="second" />);
-jest.mock('../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowGas', () => () => <div data-testid="gas" />);
-jest.mock('../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowRoyalties', () => () => <div data-testid="roy" />);
+import UserPageStatsActivityWalletTableRow from '@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow';
+jest.mock('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowIcon', () => () => <div data-testid="icon" />);
+jest.mock('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowMainAddress', () => () => <div data-testid="main" />);
+jest.mock('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowSecondAddress', () => () => <div data-testid="second" />);
+jest.mock('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowGas', () => () => <div data-testid="gas" />);
+jest.mock('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowRoyalties', () => () => <div data-testid="roy" />);
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 

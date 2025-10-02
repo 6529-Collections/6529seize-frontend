@@ -1,6 +1,6 @@
-import { getMissingRequirements } from '../../../../components/waves/utils/getMissingRequirements';
-import { ApiWaveParticipationRequirement } from '../../../../generated/models/ApiWaveParticipationRequirement';
-import { ApiWaveMetadataType } from '../../../../generated/models/ApiWaveMetadataType';
+import { getMissingRequirements } from '@/components/waves/utils/getMissingRequirements';
+import { ApiWaveParticipationRequirement } from '@/generated/models/ApiWaveParticipationRequirement';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
 
 describe('getMissingRequirements', () => {
   function createFile(type: string): File {

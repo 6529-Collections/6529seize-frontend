@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import PrivilegedDropCreator, { DropMode } from '../../../components/waves/PrivilegedDropCreator';
-import { useDropPrivileges } from '../../../hooks/useDropPriviledges';
+import PrivilegedDropCreator, { DropMode } from '@/components/waves/PrivilegedDropCreator';
+import { useDropPrivileges } from '@/hooks/useDropPriviledges';
 
-jest.mock('../../../hooks/useDropPriviledges');
-jest.mock('../../../components/auth/Auth', () => ({ useAuth: () => ({}) }));
-jest.mock('../../../components/waves/DropPlaceholder', () => ({ __esModule: true, default: (props: any) => <div data-testid="placeholder" data-type={props.type} /> }));
-jest.mock('../../../components/waves/CreateDrop', () => ({ __esModule: true, default: () => <div data-testid="create" /> }));
+jest.mock('@/hooks/useDropPriviledges');
+jest.mock('@/components/auth/Auth', () => ({ useAuth: () => ({}) }));
+jest.mock('@/components/waves/DropPlaceholder', () => ({ __esModule: true, default: (props: any) => <div data-testid="placeholder" data-type={props.type} /> }));
+jest.mock('@/components/waves/CreateDrop', () => ({ __esModule: true, default: () => <div data-testid="create" /> }));
 
 const mockPriv = useDropPrivileges as jest.Mock;
 const wave: any = { chat: { authenticated_user_eligible: true, enabled: true }, participation: { authenticated_user_eligible: true }, metrics:{} };

@@ -2,12 +2,12 @@
 
 import { useContext, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   AllowlistOperationCode,
-} from "../../../allowlist-tool/allowlist-tool.types";
+} from "@/allowlist-tool/allowlist-tool.types";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
-import { distributionPlanApiPost } from "../../../../services/distribution-plan-api";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 
 export default function CreatePhasesForm() {
   const { setToasts, distributionPlan, fetchOperations } = useContext(

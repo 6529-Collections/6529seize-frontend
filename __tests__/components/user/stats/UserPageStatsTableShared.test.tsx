@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { UserPageStatsTableHead, UserPageStatsTableHr } from '../../../../components/user/stats/UserPageStatsTableShared';
+import { UserPageStatsTableHead, UserPageStatsTableHr } from '@/components/user/stats/UserPageStatsTableShared';
 
 describe('UserPageStatsTableShared', () => {
   it('renders table head with all columns', () => {

@@ -1,12 +1,12 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import WaveItemFollow from '../../../../components/waves/list/WaveItemFollow';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
+import WaveItemFollow from '@/components/waves/list/WaveItemFollow';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
-import { commonApiPost, commonApiDeleteWithBody } from '../../../../services/api/common-api';
+import { commonApiPost, commonApiDeleteWithBody } from '@/services/api/common-api';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 const onWaveFollowChange = jest.fn();
 

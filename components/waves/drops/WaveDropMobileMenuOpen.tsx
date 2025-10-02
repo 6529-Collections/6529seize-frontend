@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface WaveDropMobileMenuOpenProps {

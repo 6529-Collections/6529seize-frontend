@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import FinalizeSnapshotsTableExcludedSnapshotsTooltip from '../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableExcludedSnapshotsTooltip';
-import { DistributionPlanToolContext } from '../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode, Pool } from '../../../components/allowlist-tool/allowlist-tool.types';
+import FinalizeSnapshotsTableExcludedSnapshotsTooltip from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableExcludedSnapshotsTooltip';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistOperationCode, Pool } from '@/components/allowlist-tool/allowlist-tool.types';
 
 const renderWithContext = (ui: React.ReactElement, ctx: any) => {
   return render(

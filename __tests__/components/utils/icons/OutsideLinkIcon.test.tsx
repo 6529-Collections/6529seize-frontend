@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import OutsideLinkIcon from '../../../../components/utils/icons/OutsideLinkIcon';
+import OutsideLinkIcon from '@/components/utils/icons/OutsideLinkIcon';
 
 describe('OutsideLinkIcon', () => {
   it('renders svg with expected attributes', () => {

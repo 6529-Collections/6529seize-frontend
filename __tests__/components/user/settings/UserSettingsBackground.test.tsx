@@ -1,5 +1,5 @@
 import { render, fireEvent } from '@testing-library/react';
-import UserSettingsBackground from '../../../../components/user/settings/UserSettingsBackground';
+import UserSettingsBackground from '@/components/user/settings/UserSettingsBackground';
 
 describe('UserSettingsBackground', () => {
   it('updates colors and handles icon clicks', async () => {

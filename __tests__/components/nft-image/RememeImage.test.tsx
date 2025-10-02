@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import RememeImage from '../../../components/nft-image/RememeImage';
+import RememeImage from '@/components/nft-image/RememeImage';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img {...p} /> }));
-jest.mock('../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   parseIpfsUrl: (url: string) => `parsed-${url}`,
   parseIpfsUrlToGateway: (url: string) => `gateway-${url}`,
 }));

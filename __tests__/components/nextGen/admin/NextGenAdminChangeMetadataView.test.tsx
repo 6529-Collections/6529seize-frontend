@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import NextGenAdminChangeMetadataView from "../../../../components/nextGen/admin/NextGenAdminChangeMetadataView";
+import NextGenAdminChangeMetadataView from "@/components/nextGen/admin/NextGenAdminChangeMetadataView";
 
-jest.mock("../../../../components/nextGen/NextGenContractWriteStatus", () => () => <div data-testid="status" />);
+jest.mock("@/components/nextGen/NextGenContractWriteStatus", () => () => <div data-testid="status" />);
 
-jest.mock("../../../../components/nextGen/admin/NextGenAdminShared", () => ({
+jest.mock("@/components/nextGen/admin/NextGenAdminShared", () => ({
   NextGenCollectionIdFormGroup: (props: any) => (
     <input
       data-testid="collection-id"
@@ -17,7 +17,7 @@ jest.mock("../../../../components/nextGen/admin/NextGenAdminShared", () => ({
 }));
 
 const writeContract = jest.fn();
-jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   useGlobalAdmin: () => ({ data: true }),
   useFunctionAdmin: () => ({ data: true }),
   useCollectionIndex: () => "1",
@@ -38,7 +38,7 @@ jest.mock("wagmi", () => ({
   useReadContract: () => ({ data: undefined }),
 }));
 
-jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x1" }),
 }));
 

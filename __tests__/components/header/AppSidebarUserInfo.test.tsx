@@ -1,30 +1,30 @@
 import { render, screen } from '@testing-library/react';
-import AppSidebarUserInfo from '../../../components/header/AppSidebarUserInfo';
+import AppSidebarUserInfo from '@/components/header/AppSidebarUserInfo';
 import React from 'react';
 
-jest.mock('../../../components/header/AppSidebarUserStats', () => (props: any) => {
+jest.mock('@/components/header/AppSidebarUserStats', () => (props: any) => {
   return <div data-testid="stats">{JSON.stringify(props)}</div>;
 });
 
-jest.mock('../../../components/user/utils/level/UserLevel', () => (props: any) => {
+jest.mock('@/components/user/utils/level/UserLevel', () => (props: any) => {
   return <div data-testid="level">{JSON.stringify(props)}</div>;
 });
 
-jest.mock('../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-jest.mock('../../../components/auth/Auth', () => ({
+jest.mock('@/components/auth/Auth', () => ({
   useAuth: jest.fn(),
 }));
 
-jest.mock('../../../hooks/useIdentity', () => ({
+jest.mock('@/hooks/useIdentity', () => ({
   useIdentity: jest.fn(),
 }));
 
-const { useSeizeConnectContext } = require('../../../components/auth/SeizeConnectContext');
-const { useAuth } = require('../../../components/auth/Auth');
-const { useIdentity } = require('../../../hooks/useIdentity');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
+const { useAuth } = require('@/components/auth/Auth');
+const { useIdentity } = require('@/hooks/useIdentity');
 
 function setup(options: any) {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: options.address });

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useMemo, useEffect, type JSX } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { TabToggleWithOverflow } from "../../common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,
@@ -15,7 +15,7 @@ import { Mode, SidebarTab } from "./BrainRightSidebar";
 import { WaveSmallLeaderboard } from "../../waves/small-leaderboard/WaveSmallLeaderboard";
 import { WaveLeaderboardRightSidebarVoters } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
-import { useWaveTimers } from "../../../hooks/useWaveTimers";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
 
 interface WaveContentProps {
   readonly wave: ApiWave;

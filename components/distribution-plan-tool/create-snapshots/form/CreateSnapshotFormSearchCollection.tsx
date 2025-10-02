@@ -7,16 +7,16 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
   DistributionPlanSearchContractMetadataResult,
-} from "../../../allowlist-tool/allowlist-tool.types";
-import { MEMES_CONTRACT } from "../../../../constants";
+} from "@/allowlist-tool/allowlist-tool.types";
+import { MEMES_CONTRACT } from "@/constants";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
-} from "../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+} from "@/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import CreateSnapshotFormSearchCollectionMemesModal from "./CreateSnapshotFormSearchCollectionMemesModal";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
-} from "../../../../services/distribution-plan-api";
+} from "@/services/distribution-plan-api";
 
 export default function CreateSnapshotFormSearchCollection({
   setCollection,

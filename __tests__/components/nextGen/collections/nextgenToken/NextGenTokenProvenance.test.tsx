@@ -1,24 +1,24 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenTokenProvenance from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenProvenance';
-import { NextGenCollection } from '../../../../../entities/INextgen';
+import NextGenTokenProvenance from '@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance';
+import { NextGenCollection } from '@/entities/INextgen';
 
-jest.mock('../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock('../../../../../components/latest-activity/LatestActivityRow', () => (props: any) => (
+jest.mock('@/components/latest-activity/LatestActivityRow', () => (props: any) => (
   <tr data-testid="activity-row">{props.tr.id}</tr>
 ));
 
-jest.mock('../../../../../components/nextGen/collections/collectionParts/NextGenCollectionProvenance', () => ({
+jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance', () => ({
   NextGenCollectionProvenanceRow: (props: any) => (
     <div data-testid="log-row">{props.log.id}</div>
   ),
 }));
 
-jest.mock('../../../../../components/pagination/Pagination', () => (props: any) => (
+jest.mock('@/components/pagination/Pagination', () => (props: any) => (
   <div data-testid="pagination">
     <button onClick={() => props.setPage(props.page + 1)}>next</button>
   </div>
@@ -34,7 +34,7 @@ jest.mock('react-bootstrap', () => {
   };
 });
 
-const { commonApiFetch } = require('../../../../../services/api/common-api');
+const { commonApiFetch } = require('@/services/api/common-api');
 
 const collection: NextGenCollection = { id: 1 } as any;
 const transaction = { id: 't1', from_address: 'a', to_address: 'b', transaction: 'tx', token_id: 7 } as any;

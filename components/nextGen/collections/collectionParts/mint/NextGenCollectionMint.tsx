@@ -8,8 +8,8 @@ import {
   NEXTGEN_CORE,
   NEXTGEN_CHAIN_ID,
   NEXTGEN_MINTER,
-} from "../../../nextgen_contracts";
-import { NextGenCollection } from "../../../../../entities/INextgen";
+} from "@/nextgen_contracts";
+import { NextGenCollection } from "@/entities/INextgen";
 import NextGenNavigationHeader from "../../NextGenNavigationHeader";
 
 interface Props {

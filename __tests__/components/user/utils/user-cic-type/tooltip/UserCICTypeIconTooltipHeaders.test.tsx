@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import UserCICTypeIconTooltipHeaders from "../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipHeaders";
+import UserCICTypeIconTooltipHeaders from "@/components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipHeaders";
 
 describe("UserCICTypeIconTooltipHeaders", () => {
   it("displays tooltip header text", () => {

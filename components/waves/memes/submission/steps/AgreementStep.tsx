@@ -1,6 +1,6 @@
 import React from "react";
-import PrimaryButton from "../../../../utils/button/PrimaryButton";
-import { ApiWave } from "../../../../../generated/models/ApiWave";
+import PrimaryButton from "@/utils/button/PrimaryButton";
+import { ApiWave } from "@/generated/models/ApiWave";
 import AgreementStepAgreement from "./AgreementStepAgreement";
 
 interface AgreementStepProps {

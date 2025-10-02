@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import BrainRightSidebarFollowers from '../../../../components/brain/right-sidebar/BrainRightSidebarFollowers';
+import BrainRightSidebarFollowers from '@/components/brain/right-sidebar/BrainRightSidebarFollowers';
 
 let capturedProps: any;
-jest.mock('../../../../components/waves/followers/WaveFollowersList', () => ({ __esModule: true, default: (props: any) => { capturedProps = props; return <div data-testid="list"/>; } }));
+jest.mock('@/components/waves/followers/WaveFollowersList', () => ({ __esModule: true, default: (props: any) => { capturedProps = props; return <div data-testid="list"/>; } }));
 
 describe('BrainRightSidebarFollowers', () => {
   it('passes wave and close handler to list', () => {

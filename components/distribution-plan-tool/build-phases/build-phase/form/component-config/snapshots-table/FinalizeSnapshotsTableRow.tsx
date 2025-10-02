@@ -1,11 +1,11 @@
 import React from "react";
-import DistributionPlanTableRowWrapper from "../../../../../common/DistributionPlanTableRowWrapper";
+import DistributionPlanTableRowWrapper from "@/common/DistributionPlanTableRowWrapper";
 import { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
 import { Tooltip } from "react-tooltip";
 import FinalizeSnapshotsTableSnapshotTooltip from "./FinalizeSnapshotsTableSnapshotTooltip";
 import FinalizeSnapshotsTableExcludedSnapshotsTooltip from "./FinalizeSnapshotsTableExcludedSnapshotsTooltip";
 import FinalizeSnapshotsTableExcludedComponentsTooltip from "./FinalizeSnapshotsTableExcludedComponentsTooltip";
-import { BuildPhasesPhase } from "../../../../BuildPhases";
+import { BuildPhasesPhase } from "@/BuildPhases";
 
 export default function FinalizeSnapshotsTableRow({
   row,

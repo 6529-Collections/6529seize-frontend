@@ -1,6 +1,6 @@
 import HeaderUserConnecting from "./HeaderUserConnecting";
 import HeaderUserContext from "./HeaderUserContext";
-import { useIdentity } from "../../../hooks/useIdentity";
+import { useIdentity } from "@/hooks/useIdentity";
 
 export default function HeaderUserConnected({
   connectedAddress,

@@ -5,11 +5,11 @@ import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { FetchResultsType } from "../../review-distribution-plan/table/ReviewDistributionPlanTable";
 import {
   DistributionPlanSnapshotToken,
-} from "../../../allowlist-tool/allowlist-tool.types";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+} from "@/allowlist-tool/allowlist-tool.types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
-import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 
 export default function CreateSnapshotTableRowDownload({
   tokenPoolId,

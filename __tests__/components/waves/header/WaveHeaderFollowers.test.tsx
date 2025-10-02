@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderFollowers from '../../../../components/waves/header/WaveHeaderFollowers';
+import WaveHeaderFollowers from '@/components/waves/header/WaveHeaderFollowers';
 
-jest.mock('../../../../helpers/Helpers', () => ({ numberWithCommas: (n: number) => `num-${n}` }));
+jest.mock('@/helpers/Helpers', () => ({ numberWithCommas: (n: number) => `num-${n}` }));
 
 describe('WaveHeaderFollowers', () => {
   it('displays follower count and handles click', async () => {

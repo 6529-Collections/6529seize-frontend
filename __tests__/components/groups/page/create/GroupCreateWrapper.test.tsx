@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import GroupCreateWrapper from '../../../../../components/groups/page/create/GroupCreateWrapper';
+import GroupCreateWrapper from '@/components/groups/page/create/GroupCreateWrapper';
 
 describe('GroupCreateWrapper', () => {
   it('renders children inside wrapper with correct classes', () => {

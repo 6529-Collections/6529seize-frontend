@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import CommonIntersectionElement from '../../../components/utils/CommonIntersectionElement';
+import CommonIntersectionElement from '@/components/utils/CommonIntersectionElement';
 
 const useIntersection = jest.fn();
 jest.mock('react-use', () => ({

@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateSnapshotFormSearchCollectionMemesModal from '../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionMemesModal';
-import { MEMES_CONTRACT } from '../../../../../constants';
-import { distributionPlanApiFetch } from '../../../../../services/distribution-plan-api';
+import CreateSnapshotFormSearchCollectionMemesModal from '@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionMemesModal';
+import { MEMES_CONTRACT } from '@/constants';
+import { distributionPlanApiFetch } from '@/services/distribution-plan-api';
 
-jest.mock('../../../../../services/distribution-plan-api', () => ({
+jest.mock('@/services/distribution-plan-api', () => ({
   distributionPlanApiFetch: jest.fn(),
 }));
 

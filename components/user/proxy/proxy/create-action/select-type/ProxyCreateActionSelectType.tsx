@@ -1,7 +1,7 @@
-import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "../../../../../../entities/IProxy";
-import { ApiProfileProxyAction } from "../../../../../../generated/models/ApiProfileProxyAction";
-import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "@/entities/IProxy";
+import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProxyCreateActionSelectTypeItem from "./ProxyCreateActionSelectTypeItem";
 
 export default function ProxyCreateActionSelectType({

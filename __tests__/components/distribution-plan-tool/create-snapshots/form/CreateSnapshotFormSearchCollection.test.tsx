@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateSnapshotFormSearchCollection from '../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollection';
-import { MEMES_CONTRACT } from '../../../../../constants';
-import { distributionPlanApiFetch, distributionPlanApiPost } from '../../../../../services/distribution-plan-api';
+import CreateSnapshotFormSearchCollection from '@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollection';
+import { MEMES_CONTRACT } from '@/constants';
+import { distributionPlanApiFetch, distributionPlanApiPost } from '@/services/distribution-plan-api';
 
 let clickAwayCb: () => void;
 let keyPressCb: () => void;
@@ -24,26 +24,26 @@ jest.mock('react-use', () => {
   };
 });
 
-jest.mock('../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionInput', () => (props: any) => (
+jest.mock('@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionInput', () => (props: any) => (
   <input data-testid="input" value={props.keyword} onChange={(e: any) => props.setKeyword(e.target.value)} onClick={props.openDropdown} />
 ));
 
-jest.mock('../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdown', () => (props: any) => (
+jest.mock('@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdown', () => (props: any) => (
   <button data-testid="dropdown" onClick={() => props.onCollection(dropdownSelection)}>select</button>
 ));
 
-jest.mock('../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionMemesModal', () => (props: any) => (
+jest.mock('@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionMemesModal', () => (props: any) => (
   <button data-testid="memes-modal-button" onClick={() => props.onMemesCollection({ address: MEMES_CONTRACT.toLowerCase(), name: 'The Memes by 6529', tokenIds: null })} />
 ));
 
-jest.mock('../../../../../components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({
+jest.mock('@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({
   __esModule: true,
   default: ({ showModal, children }: any) =>
     showModal ? <div data-testid="modal">{children}</div> : null,
   AllowlistToolModalSize: { X_LARGE: 'X_LARGE' }
 }));
 
-jest.mock('../../../../../services/distribution-plan-api', () => ({
+jest.mock('@/services/distribution-plan-api', () => ({
   distributionPlanApiFetch: jest.fn(),
   distributionPlanApiPost: jest.fn(),
 }));

@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
-import RepCategorySearch from '../../../../../components/utils/input/rep-category/RepCategorySearch';
+import RepCategorySearch from '@/components/utils/input/rep-category/RepCategorySearch';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../../../components/utils/input/rep-category/RepCategorySearchDropdown', () => (props: any) => {
+jest.mock('@/components/utils/input/rep-category/RepCategorySearchDropdown', () => (props: any) => {
   dropdownProps = props;
   return <div data-testid="dropdown" />;
 });

@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import { SingleWaveDropPosition } from '../../../../components/waves/drop/SingleWaveDropPosition';
+import { SingleWaveDropPosition } from '@/components/waves/drop/SingleWaveDropPosition';
 
-jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => () => <div data-testid="badge" />);
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => () => <div data-testid="badge" />);
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p: any) => <svg data-testid="fa" {...p} /> }));
 
 test('returns null when no rank', () => {

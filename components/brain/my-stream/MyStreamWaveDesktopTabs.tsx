@@ -2,15 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { TabToggle } from "../../common/TabToggle";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { MyStreamWaveTab } from "../../../types/waves.types";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
-import { useWave } from "../../../hooks/useWave";
-import { useWaveTimers } from "../../../hooks/useWaveTimers";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
-import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
-import { Time } from "../../../helpers/time";
-import { calculateTimeLeft, TimeLeft } from "../../../helpers/waves/time.utils";
+import { useWave } from "@/hooks/useWave";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
+import { Time } from "@/helpers/time";
+import { calculateTimeLeft, TimeLeft } from "@/helpers/waves/time.utils";
 import { CompactTimeCountdown } from "../../waves/leaderboard/time/CompactTimeCountdown";
 
 interface MyStreamWaveDesktopTabsProps {

@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import NextGenAdminSetSplits from '../../../../components/nextGen/admin/NextGenAdminSetSplits';
+import NextGenAdminSetSplits from '@/components/nextGen/admin/NextGenAdminSetSplits';
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: () => ({ data: true }),
   useFunctionAdmin: () => ({ data: true }),
   useCollectionIndex: () => ({ data: 1 }),
@@ -11,15 +11,15 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useParsedCollectionIndex: () => 1,
 }));
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ onChange }: any) => <input data-testid="collection" onChange={e => onChange(e.target.value)} />,
   NextGenAdminHeadingRow: () => <div />,
   NextGenAdminTextFormGroup: ({ title, value, setValue }: any) => <input aria-label={title} value={value} onChange={e=>setValue(e.target.value)} />,
 }));
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div />);
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div />);
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
 
 jest.mock('wagmi', () => ({ useReadContract: jest.fn(() => ({ data: [] })) }));
 

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import PhoneIcon from '../../../../../components/user/utils/icons/PhoneIcon';
+import PhoneIcon from '@/components/user/utils/icons/PhoneIcon';
 
 describe('PhoneIcon', () => {
   it('renders svg element', () => {

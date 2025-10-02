@@ -6,20 +6,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
-import { NULL_ADDRESS } from "../../../../constants";
-import { NextGenCollection, NextGenLog } from "../../../../entities/INextgen";
+import { NULL_ADDRESS } from "@/constants";
+import { NextGenCollection, NextGenLog } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   formatAddress,
   getDateDisplay,
   getTransactionLink,
-} from "../../../../helpers/Helpers";
-import { commonApiFetch } from "../../../../services/api/common-api";
+} from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   printGas,
   printRoyalties,
-} from "../../../latest-activity/LatestActivityRow";
-import Pagination from "../../../pagination/Pagination";
+} from "@/latest-activity/LatestActivityRow";
+import Pagination from "@/pagination/Pagination";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import styles from "../NextGen.module.scss";
 import {

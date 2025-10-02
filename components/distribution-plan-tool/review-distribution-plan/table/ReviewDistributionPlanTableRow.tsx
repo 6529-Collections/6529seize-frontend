@@ -10,12 +10,12 @@ import {
   ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import { AllowlistResult } from "../../../allowlist-tool/allowlist-tool.types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { AllowlistResult } from "@/allowlist-tool/allowlist-tool.types";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
-import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 
 export default function ReviewDistributionPlanTableRow({

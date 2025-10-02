@@ -1,5 +1,5 @@
-import { ProfileActivityLog } from "../../../../../entities/IProfile";
-import { getTimeAgo } from "../../../../../helpers/Helpers";
+import { ProfileActivityLog } from "@/entities/IProfile";
+import { getTimeAgo } from "@/helpers/Helpers";
 
 export default function ProfileActivityLogItemTimeAgo({
   log,

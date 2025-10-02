@@ -1,9 +1,9 @@
 import { FC, type JSX } from "react";
-import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
+import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import { WaveRepOutcome } from "./WaveRepOutcome";
 import { WaveNICOutcome } from "./WaveNICOutcome";
 import { WaveManualOutcome } from "./WaveManualOutcome";
-import { ApiWaveOutcomeCredit } from "../../../generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 
 enum OutcomeType {
   MANUAL = "MANUAL",

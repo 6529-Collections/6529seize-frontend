@@ -2,10 +2,10 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import Page from "@/app/museum/genesis/glitch-crystal-monsters/page";
 
-jest.mock("../../../../../components/header/Header", () => () => (
+jest.mock("@/components/header/Header", () => () => (
   <div data-testid="header">Header</div>
 ));
-jest.mock("../../../../../components/header/HeaderPlaceholder", () => () => (
+jest.mock("@/components/header/HeaderPlaceholder", () => () => (
   <div data-testid="header-placeholder">Header Placeholder</div>
 ));
 

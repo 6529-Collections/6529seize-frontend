@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CommonTablePagination from '../../../../../components/utils/table/paginator/CommonTablePagination';
+import CommonTablePagination from '@/components/utils/table/paginator/CommonTablePagination';
 
 describe('CommonTablePagination', () => {
   it('handles previous and next clicks', async () => {

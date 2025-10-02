@@ -1,17 +1,17 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
+import DistributionPlanSecondaryText from "@/common/DistributionPlanSecondaryText";
 import {
   PhaseGroupSnapshotConfig,
   TopHolderType,
 } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
+import { DistributionPlanToolContext } from "@/DistributionPlanToolContext";
 import {
   AllowlistOperationCode,
   Pool,
-} from "../../../../../allowlist-tool/allowlist-tool.types";
+} from "@/allowlist-tool/allowlist-tool.types";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import BuildPhaseFormConfigModalSidebar, {
   BuildPhaseFormConfigModalSidebarOption,

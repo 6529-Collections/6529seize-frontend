@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ProfileActivityLogProfileArchived from '../../../../../components/profile-activity/list/items/ProfileActivityLogProfileArchived';
+import ProfileActivityLogProfileArchived from '@/components/profile-activity/list/items/ProfileActivityLogProfileArchived';
 
 describe('ProfileActivityLogProfileArchived', () => {
   it('displays handle', () => {

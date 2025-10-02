@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import WavesListSearch from '../../../../../components/waves/list/header/WavesListSearch';
+import WavesListSearch from '@/components/waves/list/header/WavesListSearch';
 
 // Create enum first for both mock and real use
 enum IdentitySearchSize {
@@ -8,7 +8,7 @@ enum IdentitySearchSize {
 }
 
 // Mock IdentitySearch component
-jest.mock('../../../../../components/utils/input/identity/IdentitySearch', () => {
+jest.mock('@/components/utils/input/identity/IdentitySearch', () => {
   const MockIdentitySearch = ({ identity, setIdentity, label, size }: any) => (
     <div data-testid="identity-search">
       <input

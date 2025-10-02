@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import ParticipationDropRatingsTotalSection from '../../../../../../components/waves/drops/participation/ratings/ParticipationDropRatingsTotalSection';
+import ParticipationDropRatingsTotalSection from '@/components/waves/drops/participation/ratings/ParticipationDropRatingsTotalSection';
 
-jest.mock('../../../../../../components/waves/drops/participation/ratings/tooltips/VoteBreakdownTooltip', () => ({
+jest.mock('@/components/waves/drops/participation/ratings/tooltips/VoteBreakdownTooltip', () => ({
   __esModule: true,
   default: () => <div data-testid="tooltip" />
 }));
 
-jest.mock('../../../../../../components/drops/view/utils/DropVoteProgressing', () => ({
+jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="progress" data-current={props.current} data-projected={props.projected} />
 }));

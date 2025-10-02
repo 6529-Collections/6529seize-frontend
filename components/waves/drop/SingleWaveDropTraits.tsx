@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import { ApiDropMetadata } from "../../../generated/models/ApiDropMetadata";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { TraitsData } from "../memes/submission/types/TraitsData";
 import {
   FIELD_TO_LABEL_MAP,

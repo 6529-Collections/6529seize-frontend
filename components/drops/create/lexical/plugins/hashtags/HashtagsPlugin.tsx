@@ -21,9 +21,9 @@ import * as ReactDOM from "react-dom";
 
 import { $createHashtagNode } from "../../nodes/HashtagNode";
 import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
-import { isEthereumAddress } from "../../../../../../helpers/AllowlistToolHelpers";
-import { ReferencedNft } from "../../../../../../entities/IDrop";
-import { ReservoirTokensResponseTokenElement } from "../../../../../../entities/IReservoir";
+import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
+import { ReferencedNft } from "@/entities/IDrop";
+import { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
 import { isInCodeContext } from "../../utils/codeContextDetection";
 
 const PUNCTUATION =

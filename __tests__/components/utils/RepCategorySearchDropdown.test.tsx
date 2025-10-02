@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import RepCategorySearchDropdown from '../../../components/utils/input/rep-category/RepCategorySearchDropdown';
+import RepCategorySearchDropdown from '@/components/utils/input/rep-category/RepCategorySearchDropdown';
 
-jest.mock('../../../components/utils/input/rep-category/RepCategorySearchItem', () => ({
+jest.mock('@/components/utils/input/rep-category/RepCategorySearchItem', () => ({
   __esModule: true,
   default: ({ category }: any) => <li data-testid="item">{category}</li>,
 }));

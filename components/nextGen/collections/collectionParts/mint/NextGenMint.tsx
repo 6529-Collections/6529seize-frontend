@@ -17,19 +17,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract, useReadContracts } from "wagmi";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../../nextgen_contracts";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "@/nextgen_contracts";
 import {
   AllowlistType,
   CollectionWithMerkle,
   Status,
-} from "../../../nextgen_entities";
+} from "@/nextgen_entities";
 import {
   formatNameForUrl,
   getStatusFromDates,
   useCollectionCostsHook,
   useMintSharedState,
   useSharedState,
-} from "../../../nextgen_helpers";
+} from "@/nextgen_helpers";
 import styles from "../../NextGen.module.scss";
 import {
   NextGenCountdown,

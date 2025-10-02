@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { render } from '@testing-library/react';
 import React from 'react';
-import GroupCreateLevel from '../../../../../../components/groups/page/create/config/GroupCreateLevel';
+import GroupCreateLevel from '@/components/groups/page/create/config/GroupCreateLevel';
 
-jest.mock('../../../../../../components/groups/page/create/config/common/GroupCreateNumericValue', () => ({
+jest.mock('@/components/groups/page/create/config/common/GroupCreateNumericValue', () => ({
   __esModule: true,
   default: (props: any) => {
     mockProps = props;

@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import CommonCalendar from "../../../utils/calendar/CommonCalendar";
-import TimePicker from "../../../common/TimePicker";
+import CommonCalendar from "@/utils/calendar/CommonCalendar";
+import TimePicker from "@/common/TimePicker";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import TooltipIconButton from "../../../common/TooltipIconButton";
+import TooltipIconButton from "@/common/TooltipIconButton";
 
 interface DecisionsFirstProps {
   readonly firstDecisionTime: number;

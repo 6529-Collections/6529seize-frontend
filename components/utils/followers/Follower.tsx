@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ApiIdentityAndSubscriptionActions } from "../../../generated/models/ApiIdentityAndSubscriptionActions";
-import { cicToType } from "../../../helpers/Helpers";
+import { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
+import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";

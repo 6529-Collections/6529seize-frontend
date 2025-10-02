@@ -9,9 +9,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectActiveGroupId,
   setActiveGroupId,
-} from "../../../store/groupSlice";
-import { useHeaderContext } from "../../../contexts/HeaderContext";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+} from "@/store/groupSlice";
+import { useHeaderContext } from "@/contexts/HeaderContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import SidebarLayoutApp from "./SidebarLayoutApp";
 
 export default function SidebarLayout({

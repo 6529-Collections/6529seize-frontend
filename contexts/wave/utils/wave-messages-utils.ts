@@ -1,20 +1,20 @@
-import { WAVE_DROPS_PARAMS } from "../../../components/react-query-wrapper/utils/query-utils";
+import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
-} from "../../../services/api/common-api";
-import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+} from "@/services/api/common-api";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   DropSize,
   getStableDropKey,
   Drop,
-} from "../../../helpers/waves/drop.helpers";
+} from "@/helpers/waves/drop.helpers";
 import { WaveMessagesUpdate } from "../hooks/types";
 import {
   ApiDropSearchStrategy,
   ApiLightDrop,
-} from "../../../generated/models/ObjectSerializer";
+} from "@/generated/models/ObjectSerializer";
 
 /**
  * Fetches wave messages (drops) for a specific wave

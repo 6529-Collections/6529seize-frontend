@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import IdentitySearch from '../../../../../components/utils/input/identity/IdentitySearch';
+import IdentitySearch from '@/components/utils/input/identity/IdentitySearch';
 import { useQuery } from '@tanstack/react-query';
 
 let receivedProps: any;
-jest.mock('../../../../../components/utils/input/profile-search/CommonProfileSearchItems', () => (props: any) => { receivedProps = props; return <div data-testid="items" />; });
+jest.mock('@/components/utils/input/profile-search/CommonProfileSearchItems', () => (props: any) => { receivedProps = props; return <div data-testid="items" />; });
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 
-jest.mock('../../../../../helpers/AllowlistToolHelpers', () => ({ getRandomObjectId: () => 'id' }));
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({ getRandomObjectId: () => 'id' }));
 
 describe('IdentitySearch', () => {
   const setIdentity = jest.fn();

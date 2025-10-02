@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreatePhasesTableHeader from '../../../components/distribution-plan-tool/create-phases/table/CreatePhasesTableHeader';
+import CreatePhasesTableHeader from '@/components/distribution-plan-tool/create-phases/table/CreatePhasesTableHeader';
 
 describe('CreatePhasesTableHeader', () => {
   it('renders expected column headers', () => {
