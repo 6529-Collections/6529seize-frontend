@@ -26,29 +26,23 @@ jest.mock("@/components/memelab/MemeLabCollection", () => ({
 jest.mock(
   "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper",
   () =>
-    ({ children }: any) => {
-      const MockWrapperComponent = () => (
-        <div data-testid="wrapper">{children}</div>
-      );
-      MockWrapperComponent.displayName = "MockWrapperComponent";
-      return MockWrapperComponent;
+    function MockDistributionPlanToolWrapper({ children }: any) {
+      return <div data-testid="wrapper">{children}</div>;
     }
 );
 jest.mock(
   "@/components/distribution-plan-tool/plans/DistributionPlanToolPlans",
-  () => () => {
-    const MockPlansComponent = () => <div data-testid="plans" />;
-    MockPlansComponent.displayName = "MockPlansComponent";
-    return MockPlansComponent;
-  }
+  () =>
+    function MockDistributionPlanToolPlans() {
+      return <div data-testid="plans" />;
+    }
 );
 jest.mock(
   "@/components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan",
-  () => () => {
-    const MockCreatePlanComponent = () => <div data-testid="create" />;
-    MockCreatePlanComponent.displayName = "MockCreatePlanComponent";
-    return MockCreatePlanComponent;
-  }
+  () =>
+    function MockDistributionPlanToolCreatePlan() {
+      return <div data-testid="create" />;
+    }
 );
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
