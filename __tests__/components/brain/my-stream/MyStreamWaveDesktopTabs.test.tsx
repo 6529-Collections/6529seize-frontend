@@ -44,7 +44,11 @@ jest.mock('../../../../hooks/useWaveTimers', () => ({
 }));
 
 jest.mock('../../../../hooks/waves/useDecisionPoints', () => ({
-  useDecisionPoints: () => ({ allDecisions: mockDecisions }),
+  useDecisionPoints: () => ({
+    allDecisions: mockDecisions,
+    hasMoreFuture: false,
+    loadMoreFuture: jest.fn(),
+  }),
 }));
 
 jest.mock('../../../../components/waves/leaderboard/time/CompactTimeCountdown', () => ({

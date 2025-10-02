@@ -21,7 +21,7 @@ import {
   ReferencedNft,
 } from "../../../../entities/IDrop";
 import { createBreakpoint } from "react-use";
-import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import { $convertToMarkdownString } from "@lexical/markdown";
 import { CreateDropType, CreateDropViewType } from "../types";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
@@ -34,6 +34,7 @@ import { ApiWaveMetadataType } from "../../../../generated/models/ApiWaveMetadat
 import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
+import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "../../../../src/errors/wallet";
@@ -195,7 +196,7 @@ const CreateDropWrapper = forwardRef<
     const getMarkdown = () =>
       editorState?.read(() =>
         $convertToMarkdownString([
-          ...TRANSFORMERS,
+          ...SAFE_MARKDOWN_TRANSFORMERS,
           MENTION_TRANSFORMER,
           HASHTAG_TRANSFORMER,
           IMAGE_TRANSFORMER,
