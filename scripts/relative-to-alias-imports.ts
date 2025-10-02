@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { Node, Project, SyntaxKind } from "ts-morph";
 
 const project = new Project({
@@ -33,15 +33,17 @@ for (const file of files) {
       const absPath = path.resolve(fromDir, spec);
 
       const projectRoot = project.getDirectoryOrThrow(".").getPath();
-      let relToRoot = path.relative(projectRoot, absPath).replace(/\\/g, "/");
+      let relToRoot = path
+        .relative(projectRoot, absPath)
+        .replaceAll(/\\/g, "/");
       // normalize by removing any leading "../"
-      relToRoot = relToRoot.replace(/^(\.\.\/)+/, "");
+      relToRoot = relToRoot.replaceAll(/^(\.\.\/)+/, "");
 
       // candidate 1: alias path from project root
       const aliasPath = `@/${relToRoot}`;
 
       // candidate 2: relative path from current file
-      let relFromFile = path.relative(fromDir, absPath).replace(/\\/g, "/");
+      let relFromFile = path.relative(fromDir, absPath).replaceAll(/\\/g, "/");
       if (!relFromFile.startsWith(".")) {
         relFromFile = `./${relFromFile}`;
       }
@@ -96,15 +98,17 @@ for (const file of files) {
       const absPath = path.resolve(fromDir, spec);
 
       const projectRoot = project.getDirectoryOrThrow(".").getPath();
-      let relToRoot = path.relative(projectRoot, absPath).replace(/\\/g, "/");
+      let relToRoot = path
+        .relative(projectRoot, absPath)
+        .replaceAll(/\\/g, "/");
       // normalize by removing any leading "../"
-      relToRoot = relToRoot.replace(/^(\.\.\/)+/, "");
+      relToRoot = relToRoot.replaceAll(/^(\.\.\/)+/, "");
 
       // candidate 1: alias
       const aliasPath = `@/${relToRoot}`;
 
       // candidate 2: relative from file
-      let relFromFile = path.relative(fromDir, absPath).replace(/\\/g, "/");
+      let relFromFile = path.relative(fromDir, absPath).replaceAll(/\\/g, "/");
       if (!relFromFile.startsWith(".")) {
         relFromFile = `./${relFromFile}`;
       }
@@ -148,13 +152,15 @@ for (const file of files) {
       const absPath = path.resolve(fromDir, spec);
 
       const projectRoot = project.getDirectoryOrThrow(".").getPath();
-      let relToRoot = path.relative(projectRoot, absPath).replace(/\\/g, "/");
+      let relToRoot = path
+        .relative(projectRoot, absPath)
+        .replaceAll(/\\/g, "/");
       // normalize by removing any leading "../"
-      relToRoot = relToRoot.replace(/^(\.\.\/)+/, "");
+      relToRoot = relToRoot.replaceAll(/^(\.\.\/)+/, "");
 
       const aliasPath = `@/${relToRoot}`;
 
-      let relFromFile = path.relative(fromDir, absPath).replace(/\\/g, "/");
+      let relFromFile = path.relative(fromDir, absPath).replaceAll(/\\/g, "/");
       if (!relFromFile.startsWith(".")) {
         relFromFile = `./${relFromFile}`;
       }
