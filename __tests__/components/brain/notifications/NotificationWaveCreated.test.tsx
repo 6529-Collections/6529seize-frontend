@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import NotificationWaveCreated from '../../../../components/brain/notifications/wave-created/NotificationWaveCreated';
+import NotificationWaveCreated from '@/components/brain/notifications/wave-created/NotificationWaveCreated';
 
 const queryMock = jest.fn();
 jest.mock('@tanstack/react-query', () => ({ useQuery: (...args:any[]) => queryMock(...args) }));
 jest.mock('next/link', () => ({ __esModule: true, default: (p:any) => <a {...p}>{p.children}</a> }));
-jest.mock('../../../../components/waves/header/WaveHeaderFollow', () => ({ __esModule: true, default: () => <div data-testid="wave-follow" />, WaveFollowBtnSize:{} }));
-jest.mock('../../../../components/brain/notifications/NotificationsFollowBtn', () => ({ __esModule: true, default: () => <div data-testid="follow-btn" /> }));
-jest.mock('../../../../helpers/image.helpers', () => ({ getScaledImageUri: () => 'scaled.jpg', ImageScale:{} }));
-jest.mock('../../../../helpers/Helpers', () => ({ getTimeAgoShort: () => '1m' }));
+jest.mock('@/components/waves/header/WaveHeaderFollow', () => ({ __esModule: true, default: () => <div data-testid="wave-follow" />, WaveFollowBtnSize:{} }));
+jest.mock('@/components/brain/notifications/NotificationsFollowBtn', () => ({ __esModule: true, default: () => <div data-testid="follow-btn" /> }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: () => 'scaled.jpg', ImageScale:{} }));
+jest.mock('@/helpers/Helpers', () => ({ getTimeAgoShort: () => '1m' }));
 
 const notification = {
   related_identity: { handle: 'alice', pfp: 'pfp.png' },

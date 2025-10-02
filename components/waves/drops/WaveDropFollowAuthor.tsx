@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -9,12 +9,12 @@ import { useMutation } from "@tanstack/react-query";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
-} from "../../../services/api/common-api";
+} from "@/services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
-import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
-import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
+import { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 
 enum FOLLOW_STATE {
   FOLLOWING = "FOLLOWING",

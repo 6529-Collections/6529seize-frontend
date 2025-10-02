@@ -3,7 +3,7 @@
 import { useReducer, useEffect, useCallback } from "react";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";
-import { useAuth } from "../../../../auth/Auth";
+import { useAuth } from "@/auth/Auth";
 
 /**
  * Action types for the form reducer - drastically simplified

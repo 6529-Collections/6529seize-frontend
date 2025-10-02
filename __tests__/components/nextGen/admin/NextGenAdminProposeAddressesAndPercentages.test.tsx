@@ -1,10 +1,10 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenAdminProposeAddressesAndPercentages, { ProposalType } from '../../../../components/nextGen/admin/NextGenAdminProposeAddressesAndPercentages';
+import NextGenAdminProposeAddressesAndPercentages, { ProposalType } from '@/components/nextGen/admin/NextGenAdminProposeAddressesAndPercentages';
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: () => ({ data: true }),
   useFunctionAdmin: () => ({ data: true }),
   useCollectionIndex: () => ({ data: 1 }),
@@ -13,7 +13,7 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useParsedCollectionIndex: () => 1,
 }));
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ collection_id, onChange }: any) => (
     <input data-testid="collection" value={collection_id} onChange={e=>onChange(e.target.value)} />
   ),
@@ -23,10 +23,10 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
   ),
 }));
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
-jest.mock('../../../../components/nextGen/admin/NextGenAdmin', () => ({ printAdminErrors: (errs: string[]) => <ul>{errs.map(e => <li key={e}>{e}</li>)}</ul> }));
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
+jest.mock('@/components/nextGen/admin/NextGenAdmin', () => ({ printAdminErrors: (errs: string[]) => <ul>{errs.map(e => <li key={e}>{e}</li>)}</ul> }));
 
-const helpers = require('../../../../components/nextGen/nextgen_helpers');
+const helpers = require('@/components/nextGen/nextgen_helpers');
 
 beforeEach(() => {
   (helpers.useMinterContractWrite as jest.Mock).mockReturnValue({

@@ -1,11 +1,11 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import WinnerDrop from '../../../components/waves/drops/winner/WinnerDrop';
+import WinnerDrop from '@/components/waves/drops/winner/WinnerDrop';
 
-jest.mock('../../../components/memes/drops/MemeWinnerDrop', () => (props: any) => <div data-testid="meme" />);
-jest.mock('../../../components/waves/drops/winner/DefaultWinnerDrop', () => (props: any) => <div data-testid="default" />);
+jest.mock('@/components/memes/drops/MemeWinnerDrop', () => (props: any) => <div data-testid="meme" />);
+jest.mock('@/components/waves/drops/winner/DefaultWinnerDrop', () => (props: any) => <div data-testid="default" />);
 
-jest.mock('../../../contexts/SeizeSettingsContext', () => ({
+jest.mock('@/contexts/SeizeSettingsContext', () => ({
   useSeizeSettings: () => ({ isMemesWave: (id: string) => id === 'meme' })
 }));
 

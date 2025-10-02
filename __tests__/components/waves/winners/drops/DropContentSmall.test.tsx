@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { DropContentSmall } from "../../../../../components/waves/winners/drops/DropContentSmall";
+import { DropContentSmall } from "@/components/waves/winners/drops/DropContentSmall";
 
-jest.mock("../../../../../components/waves/drops/WaveDropContent", () => ({
+jest.mock("@/components/waves/drops/WaveDropContent", () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="wave-drop-content" onClick={() => props.onDropContentClick(props.drop)} />

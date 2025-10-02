@@ -1,4 +1,4 @@
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 
 export interface RatingsSectionProps {
   readonly drop: ApiDrop;

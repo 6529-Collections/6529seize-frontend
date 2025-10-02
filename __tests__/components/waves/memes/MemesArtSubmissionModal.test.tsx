@@ -1,8 +1,8 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import MemesArtSubmissionModal from '../../../../components/waves/memes/MemesArtSubmissionModal';
+import MemesArtSubmissionModal from '@/components/waves/memes/MemesArtSubmissionModal';
 
-jest.mock('../../../../components/waves/memes/submission/MemesArtSubmissionContainer', () => ({
+jest.mock('@/components/waves/memes/submission/MemesArtSubmissionContainer', () => ({
   __esModule: true,
   default: () => <div data-testid="container" />,
 }));

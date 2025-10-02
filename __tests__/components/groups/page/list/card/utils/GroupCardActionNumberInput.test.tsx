@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import GroupCardActionNumberInput from '../../../../../../../components/groups/page/list/card/utils/GroupCardActionNumberInput';
-import { CreditDirection } from '../../../../../../../components/groups/page/list/card/GroupCard';
+import GroupCardActionNumberInput from '@/components/groups/page/list/card/utils/GroupCardActionNumberInput';
+import { CreditDirection } from '@/components/groups/page/list/card/GroupCard';
 
-jest.mock('../../../../../../../components/groups/page/list/card/utils/GroupCardActionCreditDirection', () => (props: any) => (
+jest.mock('@/components/groups/page/list/card/utils/GroupCardActionCreditDirection', () => (props: any) => (
   <div data-testid="credit-direction" onClick={() => props.setCreditDirection('ADD')} />
 ));
 

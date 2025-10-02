@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WaveLeaderboardRightSidebarActivityLog } from '../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLog';
-import { ApiWaveLog } from '../../../../../generated/models/ApiWaveLog';
-import { ApiWaveCreditType } from '../../../../../generated/models/ApiWaveCreditType';
+import { WaveLeaderboardRightSidebarActivityLog } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLog';
+import { ApiWaveLog } from '@/generated/models/ApiWaveLog';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 // Mock dependencies
-jest.mock('../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommas: jest.fn((num) => num >= 1000 ? `${Math.floor(num/1000)},${(num%1000).toString().padStart(3, '0')}` : num.toString()),
   getTimeAgoShort: jest.fn(() => '5m'),
 }));
@@ -21,7 +21,7 @@ jest.mock('next/link', () => {
   };
 });
 
-jest.mock('../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogDrop', () => ({
+jest.mock('@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogDrop', () => ({
   WaveLeaderboardRightSidebarActivityLogDrop: function({ log, onDropClick }: any) {
     return (
       <button onClick={() => onDropClick(log)} data-testid="drop-click-button">
@@ -31,7 +31,7 @@ jest.mock('../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRi
   },
 }));
 
-jest.mock('../../../../../components/common/SystemAdjustmentPill', () => ({
+jest.mock('@/components/common/SystemAdjustmentPill', () => ({
   SystemAdjustmentPill: function() {
     return <span data-testid="system-adjustment-pill">System Adjustment</span>;
   },
@@ -222,7 +222,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   });
 
   it('formats numbers with commas in vote display', () => {
-    const { formatNumberWithCommas } = require('../../../../../helpers/Helpers');
+    const { formatNumberWithCommas } = require('@/helpers/Helpers');
     formatNumberWithCommas.mockReturnValue('1,000');
     
     const largeVoteLog = {

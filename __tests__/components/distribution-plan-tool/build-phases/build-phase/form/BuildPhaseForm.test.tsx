@@ -1,14 +1,14 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import BuildPhaseForm from "../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseForm";
-import { BuildPhasesPhase } from "../../../../../../components/distribution-plan-tool/build-phases/BuildPhases";
+import BuildPhaseForm from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseForm";
+import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
-} from "../../../../../../components/distribution-plan-tool/DistributionPlanToolContext";
+} from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 // Mock sub components to keep test focused
 jest.mock(
-  "../../../../../../components/distribution-plan-tool/common/DistributionPlanAddOperationBtn",
+  "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn",
   () =>
     ({ children }: any) =>
       (
@@ -20,7 +20,7 @@ jest.mock(
 
 const modalMock = jest.fn();
 jest.mock(
-  "../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal",
+  "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal",
   () => ({
     __esModule: true,
     default: (props: any) => {
@@ -31,7 +31,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../../../components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper",
+  "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper",
   () => ({
     __esModule: true,
     AllowlistToolModalSize: { X_LARGE: "X_LARGE" },

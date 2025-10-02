@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderPinButton from '../../../../components/waves/header/WaveHeaderPinButton';
-import { AuthContext } from '../../../../components/auth/Auth';
+import WaveHeaderPinButton from '@/components/waves/header/WaveHeaderPinButton';
+import { AuthContext } from '@/components/auth/Auth';
 
 // Create mocks that we can access
 const mockAddPinnedWave = jest.fn();
 const mockRemovePinnedWave = jest.fn();
 
 // Mock the MyStreamContext
-jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({
     waves: {
       addPinnedWave: mockAddPinnedWave,
@@ -22,7 +22,7 @@ jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
 const mockUsePinnedWavesServer = jest.fn();
 const mockIsOperationInProgress = jest.fn(() => false);
 
-jest.mock('../../../../hooks/usePinnedWavesServer', () => ({
+jest.mock('@/hooks/usePinnedWavesServer', () => ({
   usePinnedWavesServer: () => mockUsePinnedWavesServer(),
   MAX_PINNED_WAVES: 3,
 }));

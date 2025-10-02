@@ -1,17 +1,17 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import GroupCardChat from '../../../../../../components/groups/page/list/card/GroupCardChat';
+import GroupCardChat from '@/components/groups/page/list/card/GroupCardChat';
 
 const mockUseQuery = jest.fn();
 jest.mock('@tanstack/react-query', () => ({ useQuery: (...args: any) => mockUseQuery(...args) }));
 
 const mockGroupCard = jest.fn(() => <div data-testid="card" />);
-jest.mock('../../../../../../components/groups/page/list/card/GroupCard', () => (props: any) => { mockGroupCard(props); return <div data-testid="card" />; });
+jest.mock('@/components/groups/page/list/card/GroupCard', () => (props: any) => { mockGroupCard(props); return <div data-testid="card" />; });
 
 const mockButtons = jest.fn(() => <div data-testid="buttons" />);
-jest.mock('../../../../../../components/waves/ChatItemHrefButtons', () => (props: any) => { mockButtons(props); return <div data-testid="buttons" />; });
+jest.mock('@/components/waves/ChatItemHrefButtons', () => (props: any) => { mockButtons(props); return <div data-testid="buttons" />; });
 
-jest.mock('../../../../../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
 
 describe('GroupCardChat', () => {
   it('fetches group and renders components', () => {

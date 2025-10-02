@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDates from '../../../../../components/waves/create-wave/dates/CreateWaveDates';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { CreateWaveDatesConfig } from '../../../../../types/waves.types';
+import CreateWaveDates from '@/components/waves/create-wave/dates/CreateWaveDates';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { CreateWaveDatesConfig } from '@/types/waves.types';
 
-jest.mock('../../../../../components/waves/create-wave/dates/StartDates', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/dates/StartDates', () => (props: any) => (
   <button
     data-testid="start"
     data-expanded={props.isExpanded}
@@ -15,7 +15,7 @@ jest.mock('../../../../../components/waves/create-wave/dates/StartDates', () => 
   >start</button>
 ));
 
-jest.mock('../../../../../components/waves/create-wave/dates/Decisions', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/dates/Decisions', () => (props: any) => (
   <button
     data-testid="decisions"
     data-expanded={props.isExpanded}
@@ -25,11 +25,11 @@ jest.mock('../../../../../components/waves/create-wave/dates/Decisions', () => (
   >decisions</button>
 ));
 
-jest.mock('../../../../../components/waves/create-wave/dates/RollingEndDate', () => () => (
+jest.mock('@/components/waves/create-wave/dates/RollingEndDate', () => () => (
   <div data-testid="rolling" />
 ));
 
-jest.mock('../../../../../components/waves/create-wave/services/waveDecisionService', () => ({
+jest.mock('@/components/waves/create-wave/services/waveDecisionService', () => ({
   adjustDatesAfterSubmissionChange: jest.fn((d, ts) => ({ ...d, submissionStartDate: ts })),
   calculateEndDate: jest.fn(() => 123),
   validateDateSequence: jest.fn(() => []),

@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
 import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";

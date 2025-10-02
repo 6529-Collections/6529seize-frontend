@@ -15,7 +15,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 // Mock useCapacitor hook
 const mockUseCapacitor = jest.fn();
-jest.mock('../../../../../../hooks/useCapacitor', () => ({
+jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: mockUseCapacitor,
 }));
@@ -28,7 +28,7 @@ jest.mock('swiper/react', () => ({
 }));
 
 // Import after mocks are set up
-import SwiperAutoplayButton from "../../../../../../components/nextGen/collections/collectionParts/hooks/SwiperAutoplayButton";
+import SwiperAutoplayButton from "@/components/nextGen/collections/collectionParts/hooks/SwiperAutoplayButton";
 
 describe('SwiperAutoplayButton', () => {
   // Mock swiper instance with autoplay controls

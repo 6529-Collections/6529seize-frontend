@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserSettingsUsername from '../../../../components/user/settings/UserSettingsUsername';
+import UserSettingsUsername from '@/components/user/settings/UserSettingsUsername';
 
 jest.mock('react-use', () => {
   const React = require('react');
@@ -10,11 +10,11 @@ jest.mock('react-use', () => {
   };
 });
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
-const { commonApiFetch } = require('../../../../services/api/common-api');
+const { commonApiFetch } = require('@/services/api/common-api');
 
 describe('UserSettingsUsername', () => {
   it('checks username availability on change', async () => {

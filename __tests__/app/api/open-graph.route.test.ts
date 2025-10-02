@@ -16,7 +16,7 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-jest.mock("../../../app/api/open-graph/utils", () => ({
+jest.mock("@/app/api/open-graph/utils", () => ({
   buildResponse: jest.fn(),
   buildGoogleWorkspaceResponse: jest.fn(),
   HTML_ACCEPT_HEADER:
@@ -40,7 +40,7 @@ jest.mock("@/lib/security/urlGuard", () => {
   };
 });
 
-jest.mock("../../../app/api/open-graph/compound/service", () => ({
+jest.mock("@/app/api/open-graph/compound/service", () => ({
   createCompoundPlan: jest.fn(() => null),
 }));
 
@@ -49,7 +49,7 @@ jest.mock("@/app/api/open-graph/ens", () => ({
   fetchEnsPreview: jest.fn(),
 }));
 
-type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
+type GetHandler = typeof import("@/app/api/open-graph/route").GET;
 let GET: GetHandler;
 
 let utils: {
@@ -78,9 +78,9 @@ const mockFetch = jest.fn();
 
 async function loadRoute(): Promise<void> {
   jest.resetModules();
-  ({ GET } = await import("../../../app/api/open-graph/route"));
+  ({ GET } = await import("@/app/api/open-graph/route"));
   ({ UrlGuardError } = jest.requireActual("@/lib/security/urlGuard"));
-  utils = jest.requireMock("../../../app/api/open-graph/utils") as {
+  utils = jest.requireMock("@/app/api/open-graph/utils") as {
     buildResponse: jest.Mock;
     buildGoogleWorkspaceResponse: jest.Mock;
   };
@@ -90,7 +90,7 @@ async function loadRoute(): Promise<void> {
     fetchPublicUrl: jest.Mock;
   };
   compound = jest.requireMock(
-    "../../../app/api/open-graph/compound/service"
+    "@/app/api/open-graph/compound/service"
   ) as {
     createCompoundPlan: jest.Mock;
   };

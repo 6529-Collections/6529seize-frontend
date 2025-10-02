@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveDropPartContentMedias from '../../../../components/waves/drops/WaveDropPartContentMedias';
+import WaveDropPartContentMedias from '@/components/waves/drops/WaveDropPartContentMedias';
 
-jest.mock('../../../../components/drops/view/item/content/media/MediaDisplay', () => ({
+jest.mock('@/components/drops/view/item/content/media/MediaDisplay', () => ({
   __esModule: true,
   default: () => <div data-testid="media-display" />,
 }));
 
-jest.mock('../../../../components/drops/view/item/content/media/DropListItemContentMedia', () => ({
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia', () => ({
   __esModule: true,
   default: () => <div data-testid="drop-media" />,
 }));

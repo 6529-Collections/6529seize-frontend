@@ -1,17 +1,17 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import EndedParticipationDrop from '../../../../../components/waves/drops/participation/EndedParticipationDrop';
+import EndedParticipationDrop from '@/components/waves/drops/participation/EndedParticipationDrop';
 
 jest.mock('next/navigation', () => ({ useRouter: jest.fn(() => ({ push: jest.fn() })) }));
-jest.mock('../../../../../hooks/isMobileDevice', () => jest.fn(() => true));
+jest.mock('@/hooks/isMobileDevice', () => jest.fn(() => true));
 
 const WaveDropContentMock = jest.fn(() => null);
 const WaveDropMobileMenuMock = jest.fn(() => null);
-jest.mock('../../../../../components/waves/drops/WaveDropContent', () => (props: any) => {
+jest.mock('@/components/waves/drops/WaveDropContent', () => (props: any) => {
   WaveDropContentMock(props);
   return <div data-testid="content" />;
 });
-jest.mock('../../../../../components/waves/drops/WaveDropMobileMenu', () => (props: any) => {
+jest.mock('@/components/waves/drops/WaveDropMobileMenu', () => (props: any) => {
   WaveDropMobileMenuMock(props);
   return <div data-testid="menu" />;
 });

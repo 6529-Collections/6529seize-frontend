@@ -1,6 +1,6 @@
 "use client";
 
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";

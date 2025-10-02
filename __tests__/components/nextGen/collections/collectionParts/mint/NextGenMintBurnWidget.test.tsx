@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import NextGenMintBurnWidget from '../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintBurnWidget';
-import { Status } from '../../../../../../components/nextGen/nextgen_entities';
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from '../../../../../../components/nextGen/nextgen_contracts';
+import NextGenMintBurnWidget from '@/components/nextGen/collections/collectionParts/mint/NextGenMintBurnWidget';
+import { Status } from '@/components/nextGen/nextgen_entities';
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from '@/components/nextGen/nextgen_contracts';
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');
@@ -20,19 +20,19 @@ jest.mock('react-bootstrap', () => {
   };
 });
 
-jest.mock('../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintShared', () => ({
+jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMintShared', () => ({
   NextGenMintingFor: () => <div data-testid="minting-for" />,
 }));
 
-jest.mock('../../../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
 
 const mockFetchUrl = jest.fn();
-jest.mock('../../../../../../services/6529api', () => ({ fetchUrl: (...args: any[]) => mockFetchUrl(...args) }));
+jest.mock('@/services/6529api', () => ({ fetchUrl: (...args: any[]) => mockFetchUrl(...args) }));
 
 const mockGetNfts = jest.fn();
-jest.mock('../../../../../../services/alchemy-api', () => ({ getNftsForContractAndOwner: (...args: any[]) => mockGetNfts(...args) }));
+jest.mock('@/services/alchemy-api', () => ({ getNftsForContractAndOwner: (...args: any[]) => mockGetNfts(...args) }));
 
-jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
@@ -41,14 +41,14 @@ jest.mock('wagmi', () => ({
   useWriteContract: jest.fn(),
 }));
 
-jest.mock('../../../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useMintSharedState: jest.fn(),
   getStatusFromDates: jest.fn(),
 }));
 
 const { useChainId, useWriteContract } = require('wagmi');
-const { useSeizeConnectContext } = require('../../../../../../components/auth/SeizeConnectContext');
-const { useMintSharedState, getStatusFromDates } = require('../../../../../../components/nextGen/nextgen_helpers');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
+const { useMintSharedState, getStatusFromDates } = require('@/components/nextGen/nextgen_helpers');
 
 function createMintState(overrides: Partial<any> = {}) {
   return {

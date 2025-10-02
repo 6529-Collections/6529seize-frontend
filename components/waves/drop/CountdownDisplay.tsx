@@ -1,5 +1,5 @@
 import React from "react";
-import { TimeLeft } from "../../../helpers/waves/time.utils";
+import { TimeLeft } from "@/helpers/waves/time.utils";
 
 // Using the existing TimeLeft type from time.utils.ts
 type TimeRemaining = TimeLeft;

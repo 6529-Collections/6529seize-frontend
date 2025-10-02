@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesWinnersRows from '../../../../../../components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersRows';
-import { CreateWaveOutcomeConfigWinner, CreateWaveOutcomeConfigWinnersCreditValueType, CreateWaveOutcomeType } from '../../../../../../types/waves.types';
+import CreateWaveOutcomesWinnersRows from '@/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersRows';
+import { CreateWaveOutcomeConfigWinner, CreateWaveOutcomeConfigWinnersCreditValueType, CreateWaveOutcomeType } from '@/types/waves.types';
 
 const sampleWinners: CreateWaveOutcomeConfigWinner[] = [{ value: 1 }, { value: 2 }];
 

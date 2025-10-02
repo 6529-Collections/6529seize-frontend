@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import MirrorIcon from '../../../../../components/user/utils/icons/MirrorIcon';
+import MirrorIcon from '@/components/user/utils/icons/MirrorIcon';
 
 describe('MirrorIcon', () => {
   it('renders svg with correct viewBox', () => {

@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
-import useFileUploader from '../../../../../../components/waves/memes/file-upload/hooks/useFileUploader';
+import useFileUploader from '@/components/waves/memes/file-upload/hooks/useFileUploader';
 
-jest.mock('../../../../../../components/waves/memes/file-upload/utils/fileValidation', () => ({
+jest.mock('@/components/waves/memes/file-upload/utils/fileValidation', () => ({
   validateFile: jest.fn(() => ({ valid: true })),
   testVideoCompatibility: jest.fn(() => Promise.resolve({ canPlay: true, tested: true }))
 }));
@@ -17,7 +17,7 @@ describe('useFileUploader', () => {
   const file = new File(['a'], 'a.png', { type: 'image/png' });
 
   beforeEach(() => {
-    const { validateFile } = require('../../../../../../components/waves/memes/file-upload/utils/fileValidation');
+    const { validateFile } = require('@/components/waves/memes/file-upload/utils/fileValidation');
     validateFile.mockClear();
   });
 
@@ -48,7 +48,7 @@ describe('useFileUploader', () => {
   });
 
   it('shows error toast on invalid file', async () => {
-    const { validateFile } = require('../../../../../../components/waves/memes/file-upload/utils/fileValidation');
+    const { validateFile } = require('@/components/waves/memes/file-upload/utils/fileValidation');
     validateFile.mockReturnValueOnce({ valid: false, error: 'nope' });
     const onFileSelect = jest.fn();
     const setUploaded = jest.fn();
@@ -62,7 +62,7 @@ describe('useFileUploader', () => {
   });
 
   it('retries processing when handleRetry called', async () => {
-    const { validateFile } = require('../../../../../../components/waves/memes/file-upload/utils/fileValidation');
+    const { validateFile } = require('@/components/waves/memes/file-upload/utils/fileValidation');
     validateFile
       .mockReturnValueOnce({ valid: false, error: 'err' })
       .mockReturnValue({ valid: true });

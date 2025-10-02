@@ -1,5 +1,5 @@
 import React from "react";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export default function HeaderSearchModalItemHighlight({
   text,

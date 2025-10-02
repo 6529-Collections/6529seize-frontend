@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { createRef } from 'react';
-import CreateDropFullDesktop, { CreateDropFullDesktopHandles } from '../../../../../../components/drops/create/full/desktop/CreateDropFullDesktop';
-import { CreateDropType, CreateDropViewType } from '../../../../../../components/drops/create/types';
+import CreateDropFullDesktop, { CreateDropFullDesktopHandles } from '@/components/drops/create/full/desktop/CreateDropFullDesktop';
+import { CreateDropType, CreateDropViewType } from '@/components/drops/create/types';
 
-jest.mock('../../../../../../components/drops/create/utils/CreateDropContent', () =>
+jest.mock('@/components/drops/create/utils/CreateDropContent', () =>
   React.forwardRef((props: any, ref) => {
     React.useImperativeHandle(ref, () => ({ clearEditorState: jest.fn() }));
     return (
@@ -12,9 +12,9 @@ jest.mock('../../../../../../components/drops/create/utils/CreateDropContent', (
   })
 );
 
-jest.mock('../../../../../../components/drops/create/utils/file/CreateDropSelectedFileIcon', () => ({ file }: any) => <span data-testid="icon">{file.name}</span>);
-jest.mock('../../../../../../components/drops/create/utils/file/CreateDropSelectedFilePreview', () => ({ file }: any) => <div data-testid="preview">{file.name}</div>);
-jest.mock('../../../../../../components/drops/create/utils/CreateDropDesktopFooter', () => (props: any) => (
+jest.mock('@/components/drops/create/utils/file/CreateDropSelectedFileIcon', () => ({ file }: any) => <span data-testid="icon">{file.name}</span>);
+jest.mock('@/components/drops/create/utils/file/CreateDropSelectedFilePreview', () => ({ file }: any) => <div data-testid="preview">{file.name}</div>);
+jest.mock('@/components/drops/create/utils/CreateDropDesktopFooter', () => (props: any) => (
   <button onClick={props.onDrop}>{props.type === 'DROP' ? 'Drop' : 'Quote'}</button>
 ));
 

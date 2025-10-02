@@ -1,4 +1,4 @@
-import PrimaryButton from "../../../../../utils/button/PrimaryButton";
+import PrimaryButton from "@/utils/button/PrimaryButton";
 
 export default function GroupCardActionFooter({
   loading,

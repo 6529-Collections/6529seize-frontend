@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
   assertUnreachable,
   isEthereumAddress,
-} from "../../../helpers/AllowlistToolHelpers";
+} from "@/helpers/AllowlistToolHelpers";
 import DistributionPlanToolNotConnected from "./distribution-plan-tool-not-connected";
 import DistributionPlanToolConnected from "./distribution-plan-tool-connected";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";

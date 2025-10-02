@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
-import UserCICInaccurateIcon from '../../../../../../components/user/utils/user-cic-type/icons/UserCICInaccurateIcon';
-import UserCICUnknownIcon from '../../../../../../components/user/utils/user-cic-type/icons/UserCICUnknownIcon';
+import UserCICInaccurateIcon from '@/components/user/utils/user-cic-type/icons/UserCICInaccurateIcon';
+import UserCICUnknownIcon from '@/components/user/utils/user-cic-type/icons/UserCICUnknownIcon';
 
 describe('User CIC Icons', () => {
   it('renders the inaccurate icon svg correctly', () => {

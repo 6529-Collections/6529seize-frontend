@@ -24,12 +24,12 @@ import {
   NextGenCollection,
   TraitValuePair,
   TraitValues,
-} from "../../../../entities/INextgen";
-import { SortDirection } from "../../../../entities/ISort";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { areEqualAddresses } from "../../../../helpers/Helpers";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import DotLoader from "../../../dotLoader/DotLoader";
+} from "@/entities/INextgen";
+import { SortDirection } from "@/entities/ISort";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import DotLoader from "@/dotLoader/DotLoader";
 import {
   NextGenListFilters,
   NextGenTokenListedType,

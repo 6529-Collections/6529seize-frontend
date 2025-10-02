@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WaveDropCreate } from '../../../../../components/waves/leaderboard/create/WaveDropCreate';
-import { ApiWave } from '../../../../../generated/models/ApiWave';
+import { WaveDropCreate } from '@/components/waves/leaderboard/create/WaveDropCreate';
+import { ApiWave } from '@/generated/models/ApiWave';
 
-jest.mock('../../../../../components/waves/PrivilegedDropCreator', () => ({ __esModule: true, default: (p: any) => <div data-testid="creator" onClick={() => p.onAllDropsAdded()} />, DropMode: { PARTICIPATION: 'PARTICIPATION' } }));
+jest.mock('@/components/waves/PrivilegedDropCreator', () => ({ __esModule: true, default: (p: any) => <div data-testid="creator" onClick={() => p.onAllDropsAdded()} />, DropMode: { PARTICIPATION: 'PARTICIPATION' } }));
 
 const wave = { id: '1' } as ApiWave;
 

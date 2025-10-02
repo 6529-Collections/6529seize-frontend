@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NotificationDropReplied from '../../../../../components/brain/notifications/drop-replied/NotificationDropReplied';
-import { ApiNotificationCause } from '../../../../../generated/models/ApiNotificationCause';
+import NotificationDropReplied from '@/components/brain/notifications/drop-replied/NotificationDropReplied';
+import { ApiNotificationCause } from '@/generated/models/ApiNotificationCause';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({
@@ -10,7 +10,7 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
 
-jest.mock('../../../../../components/waves/drops/Drop', () => ({
+jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
   DropLocation: { MY_STREAM: 'MY_STREAM' },
   default: (props: any) => (
@@ -21,7 +21,7 @@ jest.mock('../../../../../components/waves/drops/Drop', () => ({
   )
 }));
 
-jest.mock('../../../../../components/brain/notifications/NotificationsFollowBtn', () => ({
+jest.mock('@/components/brain/notifications/NotificationsFollowBtn', () => ({
   __esModule: true,
   default: () => <div data-testid="follow" />
 }));

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import NextgenCollectionMintingPlan from '../../../../../../components/nextGen/collections/collectionParts/mint/NextgenCollectionMintingPlan';
+import NextgenCollectionMintingPlan from '@/components/nextGen/collections/collectionParts/mint/NextgenCollectionMintingPlan';
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');
@@ -21,22 +21,22 @@ jest.mock('react-bootstrap', () => {
 
 jest.mock('next/dynamic', () => () => () => <div data-testid='pdf' />);
 
-jest.mock('../../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock('../../../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => () => <div data-testid='header' />);
-jest.mock('../../../../../../components/pagination/Pagination', () => (props: any) => (
+jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => () => <div data-testid='header' />);
+jest.mock('@/components/pagination/Pagination', () => (props: any) => (
   <div data-testid='pagination'>
     <button onClick={() => props.setPage(props.page + 1)}>next</button>
   </div>
 ));
-jest.mock('../../../../../../components/searchModal/SearchModal', () => ({
+jest.mock('@/components/searchModal/SearchModal', () => ({
   SearchModalDisplay: () => <div data-testid='search-modal' />,
   SearchWalletsDisplay: () => <div data-testid='search-wallets' />,
 }));
 
-const { commonApiFetch } = require('../../../../../../services/api/common-api');
+const { commonApiFetch } = require('@/services/api/common-api');
 
 const collection = { id: 1, name: 'COL', public_start: 0, public_end: 0, distribution_plan: 'plan.pdf' } as any;
 const phases = [{ phase: 'Phase1', start_time: 0, end_time: 0 }];

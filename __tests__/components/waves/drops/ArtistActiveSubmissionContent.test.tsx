@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ArtistActiveSubmissionContent } from '../../../../components/waves/drops/ArtistActiveSubmissionContent';
-import { ApiProfileMin } from '../../../../generated/models/ApiProfileMin';
+import { ArtistActiveSubmissionContent } from '@/components/waves/drops/ArtistActiveSubmissionContent';
+import { ApiProfileMin } from '@/generated/models/ApiProfileMin';
 
 // Mock dependencies
 const mockPush = jest.fn();
@@ -20,7 +20,7 @@ jest.mock('framer-motion', () => ({
   },
 }));
 
-jest.mock('../../../../components/drops/view/item/content/media/MediaDisplay', () => ({
+jest.mock('@/components/drops/view/item/content/media/MediaDisplay', () => ({
   __esModule: true,
   default: ({ media_url }: any) => <img src={media_url} alt="submission" data-testid="media-display" />,
 }));
@@ -42,7 +42,7 @@ const mockSubmissions = [
   },
 ];
 
-jest.mock('../../../../hooks/useUserArtSubmissions', () => ({
+jest.mock('@/hooks/useUserArtSubmissions', () => ({
   useUserArtSubmissions: jest.fn(() => ({
     submissions: mockSubmissions,
     isLoading: false,
@@ -98,7 +98,7 @@ describe('ArtistActiveSubmissionContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset to default mock state with submissions
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
@@ -137,7 +137,7 @@ describe('ArtistActiveSubmissionContent', () => {
   });
 
   it('shows loading state', () => {
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: [],
       isLoading: true,
@@ -154,7 +154,7 @@ describe('ArtistActiveSubmissionContent', () => {
   });
 
   it('renders empty grid when no submissions', () => {
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: [],
       isLoading: false,
@@ -173,7 +173,7 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('renders submissions grid', () => {
     // Reset mock to return submissions
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
@@ -199,7 +199,7 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('handles submission click navigation', () => {
     // Reset mock to return submissions
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
@@ -228,7 +228,7 @@ describe('ArtistActiveSubmissionContent', () => {
 
   it('closes modal after navigation', () => {
     // Reset mock to return submissions
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: mockSubmissions,
       isLoading: false,
@@ -301,7 +301,7 @@ describe('ArtistActiveSubmissionContent', () => {
       title: undefined,
     }];
 
-    const { useUserArtSubmissions, useSubmissionDrops } = require('../../../../hooks/useUserArtSubmissions');
+    const { useUserArtSubmissions, useSubmissionDrops } = require('@/hooks/useUserArtSubmissions');
     useUserArtSubmissions.mockReturnValue({
       submissions: submissionsWithoutTitle,
       isLoading: false,

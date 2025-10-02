@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenAdminUpdateCollection, { UpdateType } from '../../../../components/nextGen/admin/NextGenAdminUpdateCollection';
+import NextGenAdminUpdateCollection, { UpdateType } from '@/components/nextGen/admin/NextGenAdminUpdateCollection';
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ collection_id, collection_ids, onChange }: any) => (
     <select data-testid="collection" value={collection_id} onChange={e=>onChange(e.target.value)}>
       <option value="" />
@@ -20,7 +20,7 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
   )
 }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
 
 const contractWriteMock = {
   params: { foo: 'bar' },
@@ -31,7 +31,7 @@ const contractWriteMock = {
   isError: false,
 };
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: () => ({ data: true }),
   useFunctionAdmin: () => ({ data: true }),
   useCollectionIndex: () => '1',
@@ -43,7 +43,7 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useCoreContractWrite: () => contractWriteMock,
 }));
 
-const helpers = require('../../../../components/nextGen/nextgen_helpers');
+const helpers = require('@/components/nextGen/nextgen_helpers');
 
 describe('NextGenAdminUpdateCollection', () => {
   it('shows validation error when required fields missing', async () => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import HeaderSearchButton from '../../../../components/header/header-search/HeaderSearchButton';
-import useDeviceInfo from '../../../../hooks/useDeviceInfo';
+import HeaderSearchButton from '@/components/header/header-search/HeaderSearchButton';
+import useDeviceInfo from '@/hooks/useDeviceInfo';
 
 let keyFilter: (e: KeyboardEvent) => boolean;
 let keyCb: () => void;
@@ -13,17 +13,17 @@ jest.mock('react-use', () => ({
   },
 }));
 
-jest.mock('../../../../components/utils/animation/CommonAnimationWrapper', () => ({
+jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="wrapper">{children}</div>,
 }));
 
-jest.mock('../../../../components/utils/animation/CommonAnimationOpacity', () => ({
+jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({
   __esModule: true,
   default: ({ children, ...props }: any) => <div {...props}>{children}</div>,
 }));
 
-jest.mock('../../../../components/header/header-search/HeaderSearchModal', () => ({
+jest.mock('@/components/header/header-search/HeaderSearchModal', () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="modal" onClick={() => props.onClose()}></div>
@@ -34,7 +34,7 @@ jest.mock('@heroicons/react/24/outline', () => ({
   MagnifyingGlassIcon: (props: any) => <svg data-testid="icon" {...props} />,
 }));
 
-jest.mock('../../../../hooks/useDeviceInfo');
+jest.mock('@/hooks/useDeviceInfo');
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<typeof useDeviceInfo>;
 

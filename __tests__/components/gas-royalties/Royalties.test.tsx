@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import Royalties from "../../../components/gas-royalties/Royalties";
+import Royalties from "@/components/gas-royalties/Royalties";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { fetchUrl } from "../../../services/6529api";
+import { fetchUrl } from "@/services/6529api";
 import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("next/navigation", () => ({
@@ -10,7 +10,7 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 
-jest.mock("../../../services/6529api", () => ({
+jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(),
 }));
 
@@ -35,7 +35,7 @@ const mockState: any = {
   toBlock: undefined,
 };
 
-jest.mock("../../../components/gas-royalties/GasRoyalties", () => ({
+jest.mock("@/components/gas-royalties/GasRoyalties", () => ({
   GasRoyaltiesCollectionFocus: { MEMES: "the-memes", MEMELAB: "meme-lab" },
   GasRoyaltiesHeader: () => <div data-testid="header" />,
   GasRoyaltiesTokenImage: ({ name }: any) => (

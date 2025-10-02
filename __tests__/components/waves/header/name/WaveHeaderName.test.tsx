@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveHeaderName from '../../../../../components/waves/header/name/WaveHeaderName';
+import WaveHeaderName from '@/components/waves/header/name/WaveHeaderName';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
-jest.mock('../../../../../components/waves/header/name/WaveHeaderNameEdit', () => (props: any) => <div data-testid="edit" />);
+jest.mock('@/components/waves/header/name/WaveHeaderNameEdit', () => (props: any) => <div data-testid="edit" />);
 
-jest.mock('../../../../../helpers/waves/waves.helpers', () => ({ canEditWave: jest.fn() }));
+jest.mock('@/helpers/waves/waves.helpers', () => ({ canEditWave: jest.fn() }));
 
-const { canEditWave } = require('../../../../../helpers/waves/waves.helpers');
+const { canEditWave } = require('@/helpers/waves/waves.helpers');
 
 describe('WaveHeaderName', () => {
   const wave = { id: 'w1', name: 'Wave', author: { handle: 'bob' }, wave: {} } as any;

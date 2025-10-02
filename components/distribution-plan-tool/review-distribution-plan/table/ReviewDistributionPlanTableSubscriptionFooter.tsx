@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { commonApiPost } from "../../../../services/api/common-api";
+import { commonApiPost } from "@/services/api/common-api";
 import CircleLoader from "../../common/CircleLoader";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
@@ -9,7 +9,7 @@ import {
   download,
   isSubscriptionsAdmin,
 } from "./ReviewDistributionPlanTableSubscription";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/auth/Auth";
 
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan } = useContext(DistributionPlanToolContext);

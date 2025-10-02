@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageRepNewRepError from '../../../../../components/user/rep/new-rep/UserPageRepNewRepError';
+import UserPageRepNewRepError from '@/components/user/rep/new-rep/UserPageRepNewRepError';
 
-jest.mock('../../../../../components/user/utils/UserPageErrorWrapper', () => (props:any) => (
+jest.mock('@/components/user/utils/UserPageErrorWrapper', () => (props:any) => (
   <div data-testid="wrapper" onClick={props.closeError}>{props.children}</div>
 ));
 

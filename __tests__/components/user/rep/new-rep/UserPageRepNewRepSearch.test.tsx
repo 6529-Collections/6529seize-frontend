@@ -1,20 +1,20 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageRepNewRepSearch from "../../../../../components/user/rep/new-rep/UserPageRepNewRepSearch";
+import UserPageRepNewRepSearch from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
 import { useQuery } from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
 
-jest.mock("../../../../../components/user/rep/new-rep/UserPageRepNewRepSearchHeader", () => () => <div data-testid="header" />);
-jest.mock("../../../../../components/user/rep/new-rep/UserPageRepNewRepSearchDropdown", () => (props: any) => (
+jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepSearchHeader", () => () => <div data-testid="header" />);
+jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown", () => (props: any) => (
   <div data-testid="dropdown">
     {props.categories.map((c: string) => (
       <button key={c} onClick={() => props.onRepSelect(c)}>{c}</button>
     ))}
   </div>
 ));
-jest.mock("../../../../../components/user/rep/new-rep/UserPageRepNewRepError", () => () => <div data-testid="error" />);
-jest.mock("../../../../../components/distribution-plan-tool/common/CircleLoader", () => () => <div data-testid="loader" />);
+jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepError", () => () => <div data-testid="error" />);
+jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => () => <div data-testid="loader" />);
 jest.mock("services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 
 describe("UserPageRepNewRepSearch", () => {

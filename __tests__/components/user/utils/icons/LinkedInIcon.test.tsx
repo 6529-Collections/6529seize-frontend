@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import LinkedInIcon from '../../../../../components/user/utils/icons/LinkedInIcon';
+import LinkedInIcon from '@/components/user/utils/icons/LinkedInIcon';
 
 describe('LinkedInIcon', () => {
   it('renders svg with correct attributes', () => {

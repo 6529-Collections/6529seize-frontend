@@ -1,19 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import UserPageFollowers from '../../../../../components/user/user-page-header/followers/UserPageFollowers';
+import UserPageFollowers from '@/components/user/user-page-header/followers/UserPageFollowers';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
-jest.mock('../../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
   CircleLoaderSize: { SMALL: 'SMALL' }
 }));
 
-jest.mock('../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommas: (n: number) => `fmt-${n}`
 }));
 

@@ -2,7 +2,7 @@ import {
   SubmissionStep,
   stepEnumToIndex,
   stepIndexToEnum,
-} from '../../../../../../components/waves/memes/submission/types/Steps';
+} from '@/components/waves/memes/submission/types/Steps';
 
 describe('SubmissionStep enum', () => {
   it('contains expected values', () => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import { useContentTab } from "../../ContentTabContext";
 interface MyStreamWaveTabsDefaultProps {

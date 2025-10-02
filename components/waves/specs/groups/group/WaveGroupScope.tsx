@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ApiGroup } from "../../../../../generated/models/ApiGroup";
+import { ApiGroup } from "@/generated/models/ApiGroup";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 
 export default function WaveGroupScope({
   group,

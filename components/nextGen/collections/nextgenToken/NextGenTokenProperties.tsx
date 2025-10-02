@@ -7,7 +7,7 @@ import {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
-} from "../../../../entities/INextgen";
+} from "@/entities/INextgen";
 
 import Link from "next/link";
 import { useState } from "react";

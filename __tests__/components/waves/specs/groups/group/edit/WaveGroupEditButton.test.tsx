@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import WaveGroupEditButton from '../../../../../../../components/waves/specs/groups/group/edit/WaveGroupEditButton';
-import { ApiWave } from '../../../../../../../generated/models/ApiWave';
+import WaveGroupEditButton from '@/components/waves/specs/groups/group/edit/WaveGroupEditButton';
+import { ApiWave } from '@/generated/models/ApiWave';
 
 let editProps: any;
 
-jest.mock('../../../../../../../components/waves/specs/groups/group/edit/WaveGroupEdit', () => (props: any) => {
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEdit', () => (props: any) => {
   editProps = props;
   return <div data-testid="edit" data-open={props.isEditOpen} onClick={() => props.onEdit('body')} />;
 });

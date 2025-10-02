@@ -1,6 +1,6 @@
 import React, { createRef } from 'react';
 import { render, act } from '@testing-library/react';
-import NewMentionsPlugin, { MentionTypeaheadOption } from '../../../../../../../components/drops/create/lexical/plugins/mentions/MentionsPlugin';
+import NewMentionsPlugin, { MentionTypeaheadOption } from '@/components/drops/create/lexical/plugins/mentions/MentionsPlugin';
 
 jest.mock('@lexical/react/LexicalComposerContext', () => ({
   useLexicalComposerContext: () => [{ update: (fn: any) => fn() }],
@@ -16,16 +16,16 @@ jest.mock('@lexical/react/LexicalTypeaheadMenuPlugin', () => ({
   useBasicTypeaheadTriggerMatch: () => jest.fn(),
 }));
 
-jest.mock('../../../../../../../hooks/useIdentitiesSearch', () => ({
+jest.mock('@/hooks/useIdentitiesSearch', () => ({
   useIdentitiesSearch: jest.fn(),
 }));
 
-jest.mock('../../../../../../../components/drops/create/lexical/nodes/MentionNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/MentionNode', () => ({
   $createMentionNode: jest.fn(() => ({ replace: jest.fn(), select: jest.fn() })),
 }));
 
-const { useIdentitiesSearch } = require('../../../../../../../hooks/useIdentitiesSearch');
-const { $createMentionNode } = require('../../../../../../../components/drops/create/lexical/nodes/MentionNode');
+const { useIdentitiesSearch } = require('@/hooks/useIdentitiesSearch');
+const { $createMentionNode } = require('@/components/drops/create/lexical/nodes/MentionNode');
 
 describe('MentionsPlugin', () => {
   it('builds options from identities and exposes open state', () => {

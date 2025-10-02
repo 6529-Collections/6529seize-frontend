@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import CreateDropFullMobileWrapper from '../../../../../../components/drops/create/full/mobile/CreateDropFullMobileWrapper';
-import { CreateDropType } from '../../../../../../components/drops/create/types';
+import CreateDropFullMobileWrapper from '@/components/drops/create/full/mobile/CreateDropFullMobileWrapper';
+import { CreateDropType } from '@/components/drops/create/types';
 
 // use real MobileWrapperDialog
 

@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import BlockPickerAdvancedItemBlock from '../../../../components/block-picker/advanced/BlockPickerAdvancedItemBlock';
+import BlockPickerAdvancedItemBlock from '@/components/block-picker/advanced/BlockPickerAdvancedItemBlock';
 
 jest.useFakeTimers();
 

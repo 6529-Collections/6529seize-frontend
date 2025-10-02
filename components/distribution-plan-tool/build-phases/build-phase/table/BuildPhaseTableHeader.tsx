@@ -1,4 +1,4 @@
-import DistributionPlanTableHeaderWrapper from "../../../common/DistributionPlanTableHeaderWrapper";
+import DistributionPlanTableHeaderWrapper from "@/common/DistributionPlanTableHeaderWrapper";
 
 export default function BuildPhaseTableHeader() {
   return (

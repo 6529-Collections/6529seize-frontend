@@ -1,5 +1,5 @@
-import { getMediaType, MediaType } from '../../../../components/nft-image/utils/media-type';
-import { BaseNFT, NFTLite } from '../../../../entities/INFT';
+import { getMediaType, MediaType } from '@/components/nft-image/utils/media-type';
+import { BaseNFT, NFTLite } from '@/entities/INFT';
 
 describe('media-type utils', () => {
   describe('getMediaType', () => {

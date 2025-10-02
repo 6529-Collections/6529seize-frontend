@@ -1,16 +1,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SelectGroupModalItems from '../../../components/utils/select-group/SelectGroupModalItems';
-import { ApiGroupFull } from '../../../generated/models/ApiGroupFull';
+import SelectGroupModalItems from '@/components/utils/select-group/SelectGroupModalItems';
+import { ApiGroupFull } from '@/generated/models/ApiGroupFull';
 
-jest.mock('../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
   CircleLoaderSize: { XXLARGE: 'xx' }
 }));
 
-jest.mock('../../../components/groups/select/item/GroupItem', () => ({ __esModule: true, default: (props: any) => (
+jest.mock('@/components/groups/select/item/GroupItem', () => ({ __esModule: true, default: (props: any) => (
   <div data-testid={`group-${props.group.id}`} onClick={() => props.onActiveGroupId()} />
 ) }));
 

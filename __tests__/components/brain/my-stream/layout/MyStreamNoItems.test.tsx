@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import MyStreamNoItems from "../../../../../components/brain/my-stream/layout/MyStreamNoItems";
+import MyStreamNoItems from "@/components/brain/my-stream/layout/MyStreamNoItems";
 
 jest.mock("next/link", () => ({
   __esModule: true,

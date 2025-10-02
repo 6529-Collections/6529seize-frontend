@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import {
   ActiveDropState,
-} from "../../../types/dropInteractionTypes";
+} from "@/types/dropInteractionTypes";
 import BrainContent from "../content/BrainContent";
 import Notifications from "./Notifications";
 

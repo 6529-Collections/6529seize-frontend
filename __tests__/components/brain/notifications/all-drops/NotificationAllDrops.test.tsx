@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import NotificationAllDrops from '../../../../../components/brain/notifications/all-drops/NotificationAllDrops';
+import NotificationAllDrops from '@/components/brain/notifications/all-drops/NotificationAllDrops';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({
@@ -10,7 +10,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 const DropMock = jest.fn(() => <div data-testid="drop" />);
-jest.mock('../../../../../components/waves/drops/Drop', () => ({
+jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
   default: (props: any) => { DropMock(props); return <div data-testid="drop" />; },
   DropLocation: {

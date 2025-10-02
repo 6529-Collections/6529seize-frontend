@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveOutcomesRowManual from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManual';
-import { ApiWaveType } from '../../../../../../../../generated/models/ApiWaveType';
-import { CreateWaveOutcomeConfig } from '../../../../../../../../types/waves.types';
+import CreateWaveOutcomesRowManual from '@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManual';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { CreateWaveOutcomeConfig } from '@/types/waves.types';
 
-jest.mock('../../../../../../../../components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualApprove', () => 
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualApprove', () => 
   function MockApprove(props: any) {
     return (
       <div 
@@ -19,7 +19,7 @@ jest.mock('../../../../../../../../components/waves/create-wave/outcomes/winners
   }
 );
 
-jest.mock('../../../../../../../../components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualRank', () => 
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualRank', () => 
   function MockRank(props: any) {
     return (
       <div 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import HeaderUserProfile from "./HeaderUserProfile";
 import HeaderUserProxy from "./proxy/HeaderUserProxy";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";

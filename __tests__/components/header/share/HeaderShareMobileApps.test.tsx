@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ShareMobileApp } from '../../../../components/header/share/HeaderShareMobileApps';
-import { MOBILE_APP_IOS, MOBILE_APP_ANDROID } from '../../../../constants';
+import { ShareMobileApp } from '@/components/header/share/HeaderShareMobileApps';
+import { MOBILE_APP_IOS, MOBILE_APP_ANDROID } from '@/constants';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
 jest.mock('next/link', () => ({

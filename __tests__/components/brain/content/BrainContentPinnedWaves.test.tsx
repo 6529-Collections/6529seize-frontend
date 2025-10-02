@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 const addId = jest.fn();
 const removeId = jest.fn();
 
-jest.mock('../../../../hooks/usePinnedWaves', () => ({
+jest.mock('@/hooks/usePinnedWaves', () => ({
   usePinnedWaves: () => ({ pinnedIds: mockPinnedIds, addId, removeId }),
 }));
 
@@ -18,14 +18,14 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => searchParams,
 }));
 
-jest.mock('../../../../components/brain/content/BrainContentPinnedWave', () => ({
+jest.mock('@/components/brain/content/BrainContentPinnedWave', () => ({
   __esModule: true,
   default: ({ waveId, onRemove }: any) => (
     <div data-testid={`wave-${waveId}`} onClick={() => onRemove(waveId)}>wave {waveId}</div>
   ),
 }));
 
-import BrainContentPinnedWaves from '../../../../components/brain/content/BrainContentPinnedWaves';
+import BrainContentPinnedWaves from '@/components/brain/content/BrainContentPinnedWaves';
 
 beforeAll(() => {
   (window as any).matchMedia = (window as any).matchMedia || (() => ({ matches: false, addListener: jest.fn(), removeListener: jest.fn() }));

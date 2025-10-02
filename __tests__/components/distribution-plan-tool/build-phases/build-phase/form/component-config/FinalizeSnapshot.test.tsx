@@ -1,12 +1,12 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import FinalizeSnapshot from '../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/FinalizeSnapshot';
+import FinalizeSnapshot from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/FinalizeSnapshot';
 
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle', () => ({ title }: any) => <div data-testid="title">{title}</div>);
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta', () => ({ walletsCount }: any) => <div data-testid="meta">{walletsCount}</div>);
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable', () => (props: any) => <div data-testid="table">{props.groupSnapshots.length}</div>);
-jest.mock('../../../../../../../components/distribution-plan-tool/common/DistributionPlanSecondaryText', () => ({ children }: any) => <div data-testid="secondary">{children}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle', () => ({ title }: any) => <div data-testid="title">{title}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta', () => ({ walletsCount }: any) => <div data-testid="meta">{walletsCount}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable', () => (props: any) => <div data-testid="table">{props.groupSnapshots.length}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanSecondaryText', () => ({ children }: any) => <div data-testid="secondary">{children}</div>);
 
 describe('FinalizeSnapshot', () => {
   const baseProps = {

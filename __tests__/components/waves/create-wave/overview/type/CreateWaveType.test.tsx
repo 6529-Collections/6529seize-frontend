@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveType from '../../../../../../components/waves/create-wave/overview/type/CreateWaveType';
-import { ApiWaveType } from '../../../../../../generated/models/ApiWaveType';
+import CreateWaveType from '@/components/waves/create-wave/overview/type/CreateWaveType';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../../components/waves/create-wave/overview/type/CreateWaveTypeInputs', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/overview/type/CreateWaveTypeInputs', () => (props: any) => (
   <button data-testid="inputs" onClick={() => props.onChange(ApiWaveType.Rank)}>inputs</button>
 ));
 

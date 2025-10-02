@@ -7,17 +7,17 @@ import {
   AllowlistOperationCode,
   CustomTokenPoolParamsToken,
   ResolvedEns,
-} from "../../../allowlist-tool/allowlist-tool.types";
+} from "@/allowlist-tool/allowlist-tool.types";
 import {
   getRandomObjectId,
   isEthereumAddress,
-} from "../../../../helpers/AllowlistToolHelpers";
+} from "@/helpers/AllowlistToolHelpers";
 import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
-import { distributionPlanApiPost } from "../../../../services/distribution-plan-api";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
-} from "../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+} from "@/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormAddWalletsModal";
 
 export default function CreateCustomSnapshotForm() {

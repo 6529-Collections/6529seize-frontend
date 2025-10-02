@@ -1,24 +1,24 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import WaveGroupEditButtons from '../../../../../../../components/waves/specs/groups/group/edit/WaveGroupEditButtons';
-import { WaveGroupType } from '../../../../../../../components/waves/specs/groups/group/WaveGroup';
-import { AuthContext } from '../../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import WaveGroupEditButtons from '@/components/waves/specs/groups/group/edit/WaveGroupEditButtons';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
 
-jest.mock('../../../../../../../components/waves/specs/groups/group/edit/WaveGroupEditButton', () => ({
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => ({
   __esModule: true,
   default: ({ onEdit }: any) => <button onClick={() => onEdit({})}>edit</button>,
 }));
 
-jest.mock('../../../../../../../components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => ({
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => ({
   __esModule: true,
   default: ({ onEdit }: any) => <button onClick={() => onEdit({})}>remove</button>,
 }));
 
-jest.mock('../../../../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
 }));

@@ -1,9 +1,9 @@
 "use client"
 
 import { useMemo, RefObject, useCallback, memo } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { DropSize, ExtendedDrop, Drop as DropType } from "../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { DropSize, ExtendedDrop, Drop as DropType } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import Drop, { DropLocation } from "../../waves/drops/Drop";
 import VirtualScrollWrapper from "../../waves/drops/VirtualScrollWrapper";
 import LightDrop from "../../waves/drops/LightDrop";

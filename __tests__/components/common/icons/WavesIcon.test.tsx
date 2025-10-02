@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import WavesIcon from '../../../../components/common/icons/WavesIcon';
+import WavesIcon from '@/components/common/icons/WavesIcon';
 
 describe('WavesIcon', () => {
   it('renders svg with class and viewBox', () => {

@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock('../../../../../components/brain/notifications/NotificationsFollowBtn', () => () => <div data-testid="follow"/>);
-jest.mock('../../../../../components/waves/drops/Drop', () => ({
+jest.mock('@/components/brain/notifications/NotificationsFollowBtn', () => () => <div data-testid="follow"/>);
+jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
   default: (props: any) => {
     props.onReplyClick(1);
@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
 
-import NotificationIdentityMentioned from '../../../../../components/brain/notifications/identity-mentioned/NotificationIdentityMentioned';
+import NotificationIdentityMentioned from '@/components/brain/notifications/identity-mentioned/NotificationIdentityMentioned';
 
 const notification = {
   id: 1,

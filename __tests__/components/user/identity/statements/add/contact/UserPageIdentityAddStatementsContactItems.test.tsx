@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageIdentityAddStatementsContactItems from '../../../../../../../components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems';
-import { CONTACT_STATEMENT_TYPES } from '../../../../../../../helpers/Types';
+import UserPageIdentityAddStatementsContactItems from '@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems';
+import { CONTACT_STATEMENT_TYPES } from '@/helpers/Types';
 
-jest.mock('../../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton', () => ({ statementType, onClick, isActive }: any) => (
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton', () => ({ statementType, onClick, isActive }: any) => (
   <button data-testid="btn" onClick={onClick}>{statementType}{isActive ? '!' : ''}</button>
 ));
 

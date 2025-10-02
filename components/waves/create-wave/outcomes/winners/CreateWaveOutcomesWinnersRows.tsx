@@ -2,7 +2,7 @@ import {
   CreateWaveOutcomeConfigWinner,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
-} from "../../../../../types/waves.types";
+} from "@/types/waves.types";
 import CreateWaveOutcomesWinnersRow from "./CreateWaveOutcomesWinnersRow";
 
 export default function CreateWaveOutcomesWinnersRows({

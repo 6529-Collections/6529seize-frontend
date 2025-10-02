@@ -8,10 +8,10 @@ import {
 } from "react";
 import { ExtraProps } from "react-markdown";
 
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import type { DropListItemContentPartProps } from "../../item/content/DropListItemContentPart";
-import { ApiDropMentionedUser } from "../../../../../generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "../../../../../generated/models/ApiDropReferencedNFT";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 
 export enum DropContentPartType {
   MENTION = "MENTION",

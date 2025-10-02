@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 jest.mock('@google/model-viewer', () => ({}));
-import DropListItemContentMediaGLB from '../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaGLB';
+import DropListItemContentMediaGLB from '@/components/drops/view/item/content/media/DropListItemContentMediaGLB';
 
 describe('DropListItemContentMediaGLB', () => {
   it('renders GLB component with model-viewer', () => {

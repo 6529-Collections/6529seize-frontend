@@ -1,10 +1,10 @@
-import { ProfileActivityLogPfpEdit } from "../../../../entities/IProfile";
+import { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
 import Image from "next/image";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 
 export default function ProfileActivityLogPfp({
   log,

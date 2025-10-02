@@ -1,15 +1,15 @@
 "use client";
 
-import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
+import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch, {
   IdentitySearchSize,
-} from "../../../../utils/input/identity/IdentitySearch";
+} from "@/utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import RepCategorySearch, {
   RepCategorySearchSize,
-} from "../../../../utils/input/rep-category/RepCategorySearch";
-import { ApiGroupFilterDirection } from "../../../../../generated/models/ApiGroupFilterDirection";
+} from "@/utils/input/rep-category/RepCategorySearch";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { useState } from "react";
 import PositiveOnlyToggle from "./rep/PositiveOnlyToggle";
 

@@ -1,5 +1,5 @@
-import { SortDirection } from "../../../entities/ISort";
-import { CommunityMembersSortOption } from "../../../enums";
+import { SortDirection } from "@/entities/ISort";
+import { CommunityMembersSortOption } from "@/enums";
 import CommonTableSortIcon from "../../user/utils/icons/CommonTableSortIcon";
 import CircleLoader, {
   CircleLoaderSize,

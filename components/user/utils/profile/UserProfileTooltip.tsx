@@ -1,16 +1,16 @@
 "use client"
 
-import DropPfp from "../../../drops/create/utils/DropPfp";
-import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
-import { useIdentity } from "../../../../hooks/useIdentity";
-import { useIdentityBalance } from "../../../../hooks/useIdentityBalance";
+import DropPfp from "@/drops/create/utils/DropPfp";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useIdentityBalance } from "@/hooks/useIdentityBalance";
 import UserCICTypeIcon from "../user-cic-type/UserCICTypeIcon";
 import UserLevel from "../level/UserLevel";
-import { CLASSIFICATIONS, CicStatement } from "../../../../entities/IProfile";
+import { CLASSIFICATIONS, CicStatement } from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { QueryKey } from "@/react-query-wrapper/ReactQueryWrapper";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useEffect, useState } from "react";
 
 export default function UserProfileTooltip({

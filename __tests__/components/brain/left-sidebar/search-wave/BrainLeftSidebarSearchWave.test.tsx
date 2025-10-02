@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import BrainLeftSidebarSearchWave from '../../../../../components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWave';
+import BrainLeftSidebarSearchWave from '@/components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWave';
 
 let escapeHandler: (() => void) | undefined;
 const clickAwayHandlers: Array<() => void> = [];
@@ -16,7 +16,7 @@ jest.mock('react-use', () => ({
   },
 }));
 
-jest.mock('../../../../../components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveDropdown', () => ({
+jest.mock('@/components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWaveDropdown', () => ({
   __esModule: true,
   default: ({ open, searchCriteria, onClose }: any) => (
     <div data-testid="dropdown">

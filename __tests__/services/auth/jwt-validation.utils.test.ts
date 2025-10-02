@@ -7,7 +7,7 @@ import {
   validateProxyRole,
   synchronizeRoles,
   handleTokenRefresh,
-} from '../../../services/auth/jwt-validation.utils';
+} from '@/services/auth/jwt-validation.utils';
 import {
   getAuthJwt,
   getRefreshToken,
@@ -15,27 +15,27 @@ import {
   getWalletRole,
   setAuthJwt,
   syncWalletRoleWithServer,
-} from '../../../services/auth/auth.utils';
-import { redeemRefreshTokenWithRetries } from '../../../services/auth/token-refresh.utils';
-import { areEqualAddresses } from '../../../helpers/Helpers';
-import { validateRoleForAuthentication } from '../../../utils/role-validation';
-import { logErrorSecurely } from '../../../utils/error-sanitizer';
+} from '@/services/auth/auth.utils';
+import { redeemRefreshTokenWithRetries } from '@/services/auth/token-refresh.utils';
+import { areEqualAddresses } from '@/helpers/Helpers';
+import { validateRoleForAuthentication } from '@/utils/role-validation';
+import { logErrorSecurely } from '@/utils/error-sanitizer';
 import {
   TokenRefreshCancelledError,
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
   InvalidRoleStateError,
-} from '../../../errors/authentication';
-import { ApiProfileProxy } from '../../../generated/models/ApiProfileProxy';
+} from '@/errors/authentication';
+import { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
 
 // Mock all dependencies
 jest.mock('jwt-decode');
-jest.mock('../../../services/auth/auth.utils');
-jest.mock('../../../services/auth/token-refresh.utils');
-jest.mock('../../../helpers/Helpers');
-jest.mock('../../../utils/role-validation');
-jest.mock('../../../utils/error-sanitizer');
+jest.mock('@/services/auth/auth.utils');
+jest.mock('@/services/auth/token-refresh.utils');
+jest.mock('@/helpers/Helpers');
+jest.mock('@/utils/role-validation');
+jest.mock('@/utils/error-sanitizer');
 
 const mockedJwtDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
 const mockedGetAuthJwt = getAuthJwt as jest.MockedFunction<typeof getAuthJwt>;

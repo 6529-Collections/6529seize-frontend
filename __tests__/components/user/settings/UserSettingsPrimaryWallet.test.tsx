@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import UserSettingsPrimaryWallet from '../../../../components/user/settings/UserSettingsPrimaryWallet';
+import UserSettingsPrimaryWallet from '@/components/user/settings/UserSettingsPrimaryWallet';
 
 let clickAway: () => void;
 let escapeCb: () => void;
@@ -18,7 +18,7 @@ jest.mock('framer-motion', () => ({
 }));
 
 let items: any[] = [];
-jest.mock('../../../../components/user/settings/UserSettingsPrimaryWalletItem', () => (props: any) => { items.push(props); return <li data-testid="item" onClick={() => props.onSelect(props.wallet.wallet)}>{props.wallet.display}</li>; });
+jest.mock('@/components/user/settings/UserSettingsPrimaryWalletItem', () => (props: any) => { items.push(props); return <li data-testid="item" onClick={() => props.onSelect(props.wallet.wallet)}>{props.wallet.display}</li>; });
 
 describe('UserSettingsPrimaryWallet', () => {
   const wallets = [

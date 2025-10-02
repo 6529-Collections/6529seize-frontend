@@ -1,17 +1,17 @@
 // @ts-nocheck
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import NextGenAdminInitializeExternalBurnSwap from "../../../../components/nextGen/admin/NextGenAdminInitializeExternalBurnSwap";
+import NextGenAdminInitializeExternalBurnSwap from "@/components/nextGen/admin/NextGenAdminInitializeExternalBurnSwap";
 
 jest.mock(
-  "../../../../components/nextGen/NextGenContractWriteStatus",
+  "@/components/nextGen/NextGenContractWriteStatus",
   () => () => <div data-testid="write-status" />
 );
-jest.mock("../../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
-jest.mock("../../../../services/6529api", () => ({ postData: jest.fn() }));
-jest.mock("../../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock("@/services/6529api", () => ({ postData: jest.fn() }));
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   useGlobalAdmin: jest.fn(),
   useFunctionAdmin: jest.fn(),
   useCollectionIndex: jest.fn(),
@@ -24,7 +24,7 @@ jest.mock("uuid", () => ({ v4: () => "uuid" }));
 jest.mock("wagmi", () => ({ useSignMessage: jest.fn() }));
 
 import { useSignMessage } from "wagmi";
-import { useSeizeConnectContext } from "../../../../components/auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -33,7 +33,7 @@ import {
   useGlobalAdmin,
   useMinterContractWrite,
   useParsedCollectionIndex,
-} from "../../../../components/nextGen/nextgen_helpers";
+} from "@/components/nextGen/nextgen_helpers";
 
 const signMessageState: any = {
   signMessage: jest.fn(),

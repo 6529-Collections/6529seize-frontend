@@ -1,12 +1,12 @@
 import { act, render, screen } from "@testing-library/react";
-import CommonTimeAgo from "../../../components/utils/CommonTimeAgo";
+import CommonTimeAgo from "@/components/utils/CommonTimeAgo";
 
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   getTimeAgo: jest.fn(),
   getTimeAgoShort: jest.fn(),
 }));
 
-const helpers = jest.requireMock("../../../helpers/Helpers");
+const helpers = jest.requireMock("@/helpers/Helpers");
 
 describe("CommonTimeAgo", () => {
   let toLocaleStringSpy: jest.SpyInstance<

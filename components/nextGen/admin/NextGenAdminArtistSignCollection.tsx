@@ -10,7 +10,7 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { areEqualAddresses } from "../../../helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,

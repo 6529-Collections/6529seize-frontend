@@ -1,17 +1,17 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import { useSetTitle } from "../../../contexts/TitleContext";
+import { useSetTitle } from "@/contexts/TitleContext";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
 import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
-import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
+import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import NotificationsCauseFilter, {

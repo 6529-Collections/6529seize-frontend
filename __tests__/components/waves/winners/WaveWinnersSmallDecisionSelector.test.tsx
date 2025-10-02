@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { WaveWinnersSmallDecisionSelector } from '../../../../components/waves/winners/WaveWinnersSmallDecisionSelector';
+import { WaveWinnersSmallDecisionSelector } from '@/components/waves/winners/WaveWinnersSmallDecisionSelector';
 
 jest.mock('framer-motion', () => ({ useAnimate: () => [React.createRef(), jest.fn()] }));
 

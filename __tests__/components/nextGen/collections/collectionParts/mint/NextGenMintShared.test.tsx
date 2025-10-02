@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { NextGenMintingFor } from '../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintShared';
+import { NextGenMintingFor } from '@/components/nextGen/collections/collectionParts/mint/NextGenMintShared';
 
 jest.mock('wagmi', () => ({ useEnsName: jest.fn(() => ({ data: null })) }));
-jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: () => ({ address: '0xabc' })
 }));
 

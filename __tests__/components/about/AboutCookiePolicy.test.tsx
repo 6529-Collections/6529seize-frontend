@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AboutCookiePolicy from '../../../components/about/AboutCookiePolicy';
+import AboutCookiePolicy from '@/components/about/AboutCookiePolicy';
 
 jest.mock('react-toggle', () => (props: any) => (
   <input type="checkbox" {...props} />
 ));
 
-jest.mock('../../../components/cookies/CookieConsentContext', () => ({
+jest.mock('@/components/cookies/CookieConsentContext', () => ({
   useCookieConsent: jest.fn(),
   getCookieConsentByName: jest.fn(),
 }));
 
 const { useCookieConsent, getCookieConsentByName } = jest.requireMock(
-  '../../../components/cookies/CookieConsentContext'
+  '@/components/cookies/CookieConsentContext'
 );
 
 describe('AboutCookiePolicy', () => {

@@ -1,13 +1,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import CreateDropWrapper from '../../../../../components/drops/create/utils/CreateDropWrapper';
-import { WalletValidationError } from '../../../../../src/errors/wallet';
-import { CreateDropType, CreateDropViewType } from '../../../../../components/drops/create/types';
+import CreateDropWrapper from '@/components/drops/create/utils/CreateDropWrapper';
+import { WalletValidationError } from '@/src/errors/wallet';
+import { CreateDropType, CreateDropViewType } from '@/components/drops/create/types';
 
 // Mock the SeizeConnectContext
 const mockUseSeizeConnectContext = jest.fn();
-jest.mock('../../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: () => mockUseSeizeConnectContext()
 }));
 
@@ -23,32 +23,32 @@ jest.mock('@lexical/markdown', () => ({
 }));
 
 // Mock transformers
-jest.mock('../../../../../components/drops/create/lexical/transformers/MentionTransformer', () => ({
+jest.mock('@/components/drops/create/lexical/transformers/MentionTransformer', () => ({
   MENTION_TRANSFORMER: {}
 }));
 
-jest.mock('../../../../../components/drops/create/lexical/transformers/HastagTransformer', () => ({
+jest.mock('@/components/drops/create/lexical/transformers/HastagTransformer', () => ({
   HASHTAG_TRANSFORMER: {}
 }));
 
-jest.mock('../../../../../components/drops/create/lexical/transformers/ImageTransformer', () => ({
+jest.mock('@/components/drops/create/lexical/transformers/ImageTransformer', () => ({
   IMAGE_TRANSFORMER: {}
 }));
 
 // Mock components
-jest.mock('../../../../../components/drops/create/compact/CreateDropCompact', () => {
+jest.mock('@/components/drops/create/compact/CreateDropCompact', () => {
   return React.forwardRef((props: any, ref: any) => {
     return <div data-testid="create-drop-compact">Compact View</div>;
   });
 });
 
-jest.mock('../../../../../components/drops/create/full/CreateDropFull', () => {
+jest.mock('@/components/drops/create/full/CreateDropFull', () => {
   return React.forwardRef((props: any, ref: any) => {
     return <div data-testid="create-drop-full">Full View</div>;
   });
 });
 
-jest.mock('../../../../../components/utils/animation/CommonAnimationHeight', () => {
+jest.mock('@/components/utils/animation/CommonAnimationHeight', () => {
   return ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 });
 

@@ -1,8 +1,8 @@
 import { render, fireEvent } from '@testing-library/react';
-import VotingModalButton from '../../../components/voting/VotingModalButton';
-import { useDropInteractionRules } from '../../../hooks/drops/useDropInteractionRules';
+import VotingModalButton from '@/components/voting/VotingModalButton';
+import { useDropInteractionRules } from '@/hooks/drops/useDropInteractionRules';
 
-jest.mock('../../../hooks/drops/useDropInteractionRules');
+jest.mock('@/hooks/drops/useDropInteractionRules');
 
 const useRules = useDropInteractionRules as jest.Mock;
 

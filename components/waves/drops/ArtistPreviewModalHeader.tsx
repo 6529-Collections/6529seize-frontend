@@ -1,6 +1,6 @@
 import React from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 
 interface ArtistPreviewModalHeaderProps {
   readonly user: ApiProfileMin;

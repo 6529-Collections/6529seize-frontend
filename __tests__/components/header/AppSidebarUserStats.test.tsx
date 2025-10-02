@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import AppSidebarUserStats from '../../../components/header/AppSidebarUserStats';
-import { QueryKey } from '../../../components/react-query-wrapper/ReactQueryWrapper';
+import AppSidebarUserStats from '@/components/header/AppSidebarUserStats';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 const useQueryMock = jest.fn();
 
@@ -14,11 +14,11 @@ jest.mock('next/link', () => ({
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
 }));
 
-jest.mock('../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
-const { commonApiFetch } = require('../../../services/api/common-api');
+const { commonApiFetch } = require('@/services/api/common-api');
 
 beforeEach(() => {
   useQueryMock.mockReset();

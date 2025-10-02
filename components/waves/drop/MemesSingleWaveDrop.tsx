@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import { SingleWaveDropHeader } from "./SingleWaveDropHeader";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
-import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useDrop } from "../../../hooks/useDrop";
-import { useWaveData } from "../../../hooks/useWaveData";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDrop } from "@/hooks/useDrop";
+import { useWaveData } from "@/hooks/useWaveData";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
 import { useRouter, usePathname } from "next/navigation";
 

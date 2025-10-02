@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreateTablePhasesRow from '../../../components/distribution-plan-tool/create-phases/table/CreateTablePhasesRow';
+import CreateTablePhasesRow from '@/components/distribution-plan-tool/create-phases/table/CreateTablePhasesRow';
 
-jest.mock('../../../components/distribution-plan-tool/common/DistributionPlanTableRowWrapper', () => ({ children }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper', () => ({ children }: any) => (
   <tr data-testid="wrapper">{children}</tr>
 ));
 
-jest.mock('../../../components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton', () => ({ allowlistId, order }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton', () => ({ allowlistId, order }: any) => (
   <button data-testid="delete-btn">{allowlistId}-{order}</button>
 ));
 

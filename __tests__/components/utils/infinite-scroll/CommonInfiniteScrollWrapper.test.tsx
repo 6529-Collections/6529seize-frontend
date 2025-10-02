@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import CommonInfiniteScrollWrapper from '../../../../components/utils/infinite-scroll/CommonInfiniteScrollWrapper';
+import CommonInfiniteScrollWrapper from '@/components/utils/infinite-scroll/CommonInfiniteScrollWrapper';
 import userEvent from '@testing-library/user-event';
 
 const Trigger = jest.fn((props: any) => <button onClick={() => props.onIntersection(true)}>trigger</button>);
 const Loader = () => <div data-testid="loader" />;
 
-jest.mock('../../../../components/utils/infinite-scroll/InfiniteScrollTrigger', () => ({ __esModule: true, default: (props: any) => Trigger(props) }));
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({ __esModule: true, default: () => Loader(), CircleLoaderSize: { MEDIUM: 'MEDIUM' } }));
+jest.mock('@/components/utils/infinite-scroll/InfiniteScrollTrigger', () => ({ __esModule: true, default: (props: any) => Trigger(props) }));
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({ __esModule: true, default: () => Loader(), CircleLoaderSize: { MEDIUM: 'MEDIUM' } }));
 
 describe('CommonInfiniteScrollWrapper', () => {
   it('shows loader when loading', () => {

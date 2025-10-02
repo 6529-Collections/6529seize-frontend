@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import UserCICStatus, { CIC_META } from '../../../../../components/user/utils/user-cic-status/UserCICStatus';
-import { CICType } from '../../../../../entities/IProfile';
+import UserCICStatus, { CIC_META } from '@/components/user/utils/user-cic-status/UserCICStatus';
+import { CICType } from '@/entities/IProfile';
 
 test('renders status text and class', () => {
   render(<UserCICStatus cic={15000} />); // ACCURATE

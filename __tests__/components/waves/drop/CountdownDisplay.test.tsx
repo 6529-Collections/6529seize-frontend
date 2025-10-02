@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { CountdownDisplay } from '../../../../components/waves/drop/CountdownDisplay';
+import { CountdownDisplay } from '@/components/waves/drop/CountdownDisplay';
 
 it('shows time remaining with default labels', () => {
   render(

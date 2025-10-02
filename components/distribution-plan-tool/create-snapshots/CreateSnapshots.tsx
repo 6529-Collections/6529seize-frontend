@@ -17,7 +17,7 @@ import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 import { useInterval } from "react-use";
-import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 
 export interface CreateSnapshotSnapshot {
   id: string;

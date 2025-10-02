@@ -1,4 +1,4 @@
-import { AllowlistCustomTokenPool } from "../../../allowlist-tool/allowlist-tool.types";
+import { AllowlistCustomTokenPool } from "@/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableBodyWrapper from "../../common/DistributionPlanTableBodyWrapper";
 import CreateCustomSnapshotTableRow from "./CreateCustomSnapshotTableRow";
 

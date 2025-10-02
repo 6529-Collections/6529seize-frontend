@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import ManifoldMintingWidget from '../../../components/manifoldMinting/ManifoldMintingWidget';
-import { ManifoldClaimStatus, ManifoldPhase } from '../../../hooks/useManifoldClaim';
+import ManifoldMintingWidget from '@/components/manifoldMinting/ManifoldMintingWidget';
+import { ManifoldClaimStatus, ManifoldPhase } from '@/hooks/useManifoldClaim';
 import {
   useReadContract,
   useReadContracts,
@@ -12,11 +12,11 @@ import {
 
 jest.mock('wagmi');
 
-jest.mock('../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(() => ({ address: '0x1' })),
 }));
 
-jest.mock('../../../components/manifoldMinting/ManifoldMintingConnect', () =>
+jest.mock('@/components/manifoldMinting/ManifoldMintingConnect', () =>
   function MockConnect(props: any) {
     return <button data-testid="connect" onClick={() => props.onMintFor('0xabc')}>connect</button>;
   }

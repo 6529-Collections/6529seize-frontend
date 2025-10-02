@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import GroupsSidebar from "../../../../components/groups/sidebar/GroupsSidebar";
+import GroupsSidebar from "@/components/groups/sidebar/GroupsSidebar";
 
-jest.mock("../../../../components/groups/header/GroupHeader", () => () => (
+jest.mock("@/components/groups/header/GroupHeader", () => () => (
   <div data-testid="group-header" />
 ));
 
-jest.mock("../../../../components/groups/select/GroupSelect", () => () => (
+jest.mock("@/components/groups/select/GroupSelect", () => () => (
   <div data-testid="group-select" />
 ));
 

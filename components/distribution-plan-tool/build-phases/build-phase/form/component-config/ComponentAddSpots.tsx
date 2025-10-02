@@ -1,9 +1,9 @@
 "use client";
 
-import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
+import DistributionPlanSecondaryText from "@/common/DistributionPlanSecondaryText";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { useContext, useEffect, useState } from "react";
-import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
+import { DistributionPlanToolContext } from "@/DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 

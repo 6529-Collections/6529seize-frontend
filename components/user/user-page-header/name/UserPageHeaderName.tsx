@@ -1,5 +1,5 @@
-import { CLASSIFICATIONS } from "../../../../entities/IProfile";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { CLASSIFICATIONS } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserCICTypeIconWrapper from "../../utils/user-cic-type/UserCICTypeIconWrapper";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";

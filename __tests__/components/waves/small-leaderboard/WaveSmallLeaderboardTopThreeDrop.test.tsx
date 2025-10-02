@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { WaveSmallLeaderboardTopThreeDrop } from '../../../../components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop';
-import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
-import { ApiWave } from '../../../../generated/models/ApiWave';
+import { WaveSmallLeaderboardTopThreeDrop } from '@/components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop';
+import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import { ApiWave } from '@/generated/models/ApiWave';
 
 // Mock dependencies
 jest.mock('next/link', () => {
@@ -15,7 +15,7 @@ jest.mock('next/link', () => {
   };
 });
 
-jest.mock('../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   cicToType: (cic: number) => {
     if (cic >= 90) return 'HIGHLY_ACCURATE';
     if (cic >= 70) return 'ACCURATE';
@@ -26,11 +26,11 @@ jest.mock('../../../../helpers/Helpers', () => ({
   formatNumberWithCommas: (num: number) => num.toLocaleString('en-US'),
 }));
 
-jest.mock('../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   assertUnreachable: jest.fn(),
 }));
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemContent', () => {
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent', () => {
   return {
     WaveSmallLeaderboardItemContent: function MockWaveSmallLeaderboardItemContent({ drop, onDropClick }: any) {
       return (
@@ -42,7 +42,7 @@ jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardIt
   };
 });
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes', () => {
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes', () => {
   return {
     WaveSmallLeaderboardItemOutcomes: function MockWaveSmallLeaderboardItemOutcomes({ drop, wave }: any) {
       return <div data-testid="item-outcomes">Outcomes for {drop.id}</div>;
@@ -50,7 +50,7 @@ jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardIt
   };
 });
 
-jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => {
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => {
   return {
     __esModule: true,
     default: function MockWinnerDropBadge({ rank, decisionTime }: any) {
@@ -63,7 +63,7 @@ jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => {
   };
 });
 
-jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => {
+jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => {
   return {
     __esModule: true,
     default: function MockDropVoteProgressing({ current, projected }: any) {

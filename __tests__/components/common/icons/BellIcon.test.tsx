@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import BellIcon from '../../../../components/common/icons/BellIcon';
+import BellIcon from '@/components/common/icons/BellIcon';
 
 describe('BellIcon', () => {
   it('renders svg with given class and attributes', () => {

@@ -1,7 +1,7 @@
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 import { DropPartSize } from "../../view/part/DropPart";
 
 export default function DropPfp({

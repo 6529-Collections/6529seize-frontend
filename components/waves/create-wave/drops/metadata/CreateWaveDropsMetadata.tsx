@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreateWaveDropsRequiredMetadata } from "../../../../../types/waves.types";
+import { CreateWaveDropsRequiredMetadata } from "@/types/waves.types";
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
-import { ApiWaveMetadataType } from "../../../../../generated/models/ApiWaveMetadataType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.validation";
+import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 export default function CreateWaveDropsMetadata({
   requiredMetadata,

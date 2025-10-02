@@ -5,17 +5,17 @@ jest.mock('react-use', () => ({
   createBreakpoint: () => useBreakpointMock,
 }));
 
-jest.mock('../../../components/brain/BrainMobile', () => ({
+jest.mock('@/components/brain/BrainMobile', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="mobile">{children}</div>,
 }));
 
-jest.mock('../../../components/brain/BrainDesktop', () => ({
+jest.mock('@/components/brain/BrainDesktop', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="desktop">{children}</div>,
 }));
 
-import Brain from '../../../components/brain/Brain';
+import Brain from '@/components/brain/Brain';
 
 describe('Brain', () => {
   beforeEach(() => {

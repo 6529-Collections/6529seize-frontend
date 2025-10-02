@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import UserPageIdentityAddStatementsSelect from '../../../../../../components/user/identity/statements/add/UserPageIdentityAddStatementsSelect';
-import { STATEMENT_ADD_VIEW } from '../../../../../../components/user/identity/statements/add/UserPageIdentityAddStatements';
+import UserPageIdentityAddStatementsSelect from '@/components/user/identity/statements/add/UserPageIdentityAddStatementsSelect';
+import { STATEMENT_ADD_VIEW } from '@/components/user/identity/statements/add/UserPageIdentityAddStatements';
 
 describe('UserPageIdentityAddStatementsSelect', () => {
   it('calls onClose when close button clicked', () => {

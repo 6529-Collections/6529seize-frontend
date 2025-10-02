@@ -3,12 +3,12 @@ import React from 'react';
 
 const MockSelect = jest.fn(() => <div data-testid="select" />);
 
-jest.mock('../../../../components/groups/header/GroupHeaderSelect', () => ({
+jest.mock('@/components/groups/header/GroupHeaderSelect', () => ({
   __esModule: true,
   default: () => MockSelect()
 }));
 
-const GroupHeader = require('../../../../components/groups/header/GroupHeader').default;
+const GroupHeader = require('@/components/groups/header/GroupHeader').default;
 
 describe('GroupHeader', () => {
   it('renders wrapper with GroupHeaderSelect inside', () => {

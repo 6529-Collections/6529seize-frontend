@@ -1,6 +1,6 @@
-import { getFileExtension, formatFileSize, getBrowserSpecificMessage } from '../../../../../../components/waves/memes/file-upload/utils/formatHelpers';
+import { getFileExtension, formatFileSize, getBrowserSpecificMessage } from '@/components/waves/memes/file-upload/utils/formatHelpers';
 
-jest.mock('../../../../../../components/waves/memes/file-upload/utils/browserDetection', () => ({
+jest.mock('@/components/waves/memes/file-upload/utils/browserDetection', () => ({
   detectBrowser: () => 'Chrome'
 }));
 

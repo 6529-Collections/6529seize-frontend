@@ -1,19 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { WaveLeaderboardGallery } from '../../../components/waves/leaderboard/gallery/WaveLeaderboardGallery';
-import { AuthContext } from '../../../components/auth/Auth';
+import { WaveLeaderboardGallery } from '@/components/waves/leaderboard/gallery/WaveLeaderboardGallery';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../hooks/useWaveDropsLeaderboard', () => ({
+jest.mock('@/hooks/useWaveDropsLeaderboard', () => ({
   useWaveDropsLeaderboard: jest.fn(),
   WaveDropsLeaderboardSort: { RANK: 'RANK' },
 }));
-jest.mock('../../../components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem', () => ({
+jest.mock('@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem', () => ({
   WaveLeaderboardGalleryItem: ({ drop, onDropClick }: any) => (
     <div data-testid="item" onClick={() => onDropClick(drop)}>{drop.id}</div>
   ),
 }));
 
-const { useWaveDropsLeaderboard } = require('../../../hooks/useWaveDropsLeaderboard');
+const { useWaveDropsLeaderboard } = require('@/hooks/useWaveDropsLeaderboard');
 
 const wave = { id: '1' } as any;
 const authValue = { connectedProfile: { handle: 'user' } } as any;

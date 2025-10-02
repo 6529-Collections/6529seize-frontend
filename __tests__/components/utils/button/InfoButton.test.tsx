@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import InfoButton from '../../../../components/utils/button/InfoButton';
+import InfoButton from '@/components/utils/button/InfoButton';
 
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
 }));

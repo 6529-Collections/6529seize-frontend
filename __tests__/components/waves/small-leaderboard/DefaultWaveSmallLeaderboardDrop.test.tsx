@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DefaultWaveSmallLeaderboardDrop } from '../../../../components/waves/small-leaderboard/DefaultWaveSmallLeaderboardDrop';
-import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
-import { ApiWave } from '../../../../generated/models/ApiWave';
+import { DefaultWaveSmallLeaderboardDrop } from '@/components/waves/small-leaderboard/DefaultWaveSmallLeaderboardDrop';
+import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import { ApiWave } from '@/generated/models/ApiWave';
 
 // Mock the child components
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop', () => ({
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop', () => ({
   WaveSmallLeaderboardTopThreeDrop: function({ drop, wave, onDropClick }: any) {
     return (
       <div data-testid="top-three-drop" onClick={() => onDropClick(drop)}>
@@ -16,7 +16,7 @@ jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardTo
   },
 }));
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardDefaultDrop', () => ({
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardDefaultDrop', () => ({
   WaveSmallLeaderboardDefaultDrop: function({ drop, wave, onDropClick }: any) {
     return (
       <div data-testid="default-drop" onClick={() => onDropClick(drop)}>

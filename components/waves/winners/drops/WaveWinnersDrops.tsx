@@ -1,8 +1,8 @@
 import React from "react";
 import { WaveWinnersDrop } from "./WaveWinnersDrop";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ObjectSerializer";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWaveDecisionWinner } from "@/generated/models/ObjectSerializer";
 
 interface WaveWinnersDropsProps {
   readonly wave: ApiWave;

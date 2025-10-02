@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAt } from "@fortawesome/free-solid-svg-icons";
-import { useWaveNotificationSubscription } from "../../../hooks/useWaveNotificationSubscription";
+import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
 import {
   commonApiDelete,
   commonApiPost,
-} from "../../../services/api/common-api";
+} from "@/services/api/common-api";
 import { useAuth } from "../../auth/Auth";
-import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { Spinner } from "../../dotLoader/DotLoader";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 

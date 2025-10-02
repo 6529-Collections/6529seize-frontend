@@ -1,30 +1,30 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import FinalizeComponent from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/FinalizeComponent';
-import { RandomHoldersType, PhaseGroupConfig, PhaseGroupSnapshotConfig } from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
-import { ComponentRandomHoldersWeightType } from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight';
-import { BuildPhasesPhase } from '../../../../../components/distribution-plan-tool/build-phases/BuildPhases';
+import FinalizeComponent from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/FinalizeComponent';
+import { RandomHoldersType, PhaseGroupConfig, PhaseGroupSnapshotConfig } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
+import { ComponentRandomHoldersWeightType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight';
+import { BuildPhasesPhase } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 
 // Mock child components to keep tests focused
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle',
   () => ({ title }: any) => <div data-testid="title">{title}</div>
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta',
   () => ({ walletsCount }: any) => <div data-testid="meta">{walletsCount}</div>
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable',
   () => ({ groupSnapshots }: any) => (
     <div data-testid="table">{groupSnapshots.length}</div>
   )
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/common/DistributionPlanSecondaryText',
+  '@/components/distribution-plan-tool/common/DistributionPlanSecondaryText',
   () => ({ children }: any) => <div>{children}</div>
 );
 

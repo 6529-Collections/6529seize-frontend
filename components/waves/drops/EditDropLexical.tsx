@@ -46,10 +46,10 @@ import ExampleTheme from "../../drops/create/lexical/ExampleTheme";
 import NewMentionsPlugin, {
   NewMentionsPluginHandles,
 } from "../../drops/create/lexical/plugins/mentions/MentionsPlugin";
-import { MentionedUser } from "../../../entities/IDrop";
-import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
+import { MentionedUser } from "@/entities/IDrop";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import EmojiPlugin from "../../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../../drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";

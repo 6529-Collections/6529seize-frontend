@@ -7,9 +7,9 @@ import {
   CONTACT_STATEMENT_TYPE,
   STATEMENT_GROUP,
   STATEMENT_TYPE,
-} from "../../../../../../helpers/Types";
+} from "@/helpers/Types";
 import UserPageIdentityAddStatementsForm from "../../utils/UserPageIdentityAddStatementsForm";
-import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageIdentityAddStatementsContact({
   profile,

@@ -3,7 +3,7 @@
 import { publicEnv } from "@/config/env";
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;

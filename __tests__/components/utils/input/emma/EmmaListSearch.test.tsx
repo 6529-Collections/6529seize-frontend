@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import EmmaListSearch from '../../../../../components/utils/input/emma/EmmaListSearch';
-import { AllowlistDescription } from '../../../../../helpers/AllowlistToolHelpers';
+import EmmaListSearch from '@/components/utils/input/emma/EmmaListSearch';
+import { AllowlistDescription } from '@/helpers/AllowlistToolHelpers';
 
 let receivedProps: any;
-jest.mock('../../../../../components/utils/input/emma/EmmaListSearchItems', () => (props: any) => {
+jest.mock('@/components/utils/input/emma/EmmaListSearchItems', () => (props: any) => {
   receivedProps = props;
   return <div data-testid="items" />;
 });

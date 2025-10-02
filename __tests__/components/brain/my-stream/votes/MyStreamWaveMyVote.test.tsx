@@ -1,29 +1,29 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import MyStreamWaveMyVote from '../../../../../components/brain/my-stream/votes/MyStreamWaveMyVote';
+import MyStreamWaveMyVote from '@/components/brain/my-stream/votes/MyStreamWaveMyVote';
 
-jest.mock('../../../../../components/drops/view/item/content/media/DropListItemContentMedia', () => ({
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia', () => ({
   __esModule: true,
   default: () => <div data-testid="media" />,
 }));
 
-jest.mock('../../../../../components/brain/my-stream/votes/MyStreamWaveMyVoteVotes', () => ({
+jest.mock('@/components/brain/my-stream/votes/MyStreamWaveMyVoteVotes', () => ({
   __esModule: true,
   default: () => <div data-testid="votes" />,
 }));
 
-jest.mock('../../../../../components/brain/my-stream/votes/MyStreamWaveMyVoteInput', () => ({
+jest.mock('@/components/brain/my-stream/votes/MyStreamWaveMyVoteInput', () => ({
   __esModule: true,
   default: () => <div data-testid="input" />,
 }));
 
-jest.mock('../../../../../components/user/utils/UserCICAndLevel', () => ({
+jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   __esModule: true,
   default: () => <div data-testid="cic" />,
   UserCICAndLevelSize: { SMALL: 'SMALL' },
 }));
 
-jest.mock('../../../../../components/waves/drop/SingleWaveDropPosition', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropPosition', () => ({
   __esModule: true,
   SingleWaveDropPosition: ({ rank }: any) => <div data-testid="pos">{rank}</div>,
   default: ({ rank }: any) => <div data-testid="pos">{rank}</div>

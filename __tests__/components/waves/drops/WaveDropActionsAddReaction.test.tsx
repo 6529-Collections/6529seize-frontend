@@ -1,17 +1,17 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import WaveDropActionsAddReaction from "../../../../components/waves/drops/WaveDropActionsAddReaction";
+import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActionsAddReaction";
 
 const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
 const setToastMock = jest.fn();
 
-jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
     applyOptimisticDropUpdate: applyOptimisticDropUpdateMock,
   })),
 }));
 
-jest.mock("../../../../components/auth/Auth", () => ({
+jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
     setToast: setToastMock,
     connectedProfile: {
@@ -32,7 +32,7 @@ jest.mock("../../../../components/auth/Auth", () => ({
   })),
 }));
 
-jest.mock("../../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(() => Promise.resolve({})),
 }));
 
@@ -52,7 +52,7 @@ jest.mock("@emoji-mart/data", () => ({
 }));
 
 // Mock useEmoji
-jest.mock("../../../../contexts/EmojiContext", () => ({
+jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(() => ({
     emojiMap: [],
     categories: [],

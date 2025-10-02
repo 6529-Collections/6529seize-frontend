@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import TermsOfServiceModal from '../../../components/terms/TermsOfServiceModal';
+import TermsOfServiceModal from '@/components/terms/TermsOfServiceModal';
 
-jest.mock('../../../components/waves/memes/submission/layout/ModalLayout', () => ({
+jest.mock('@/components/waves/memes/submission/layout/ModalLayout', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="layout">{children}</div>,
 }));
 
 jest.mock('focus-trap-react', () => ({ FocusTrap: ({ children }: any) => <div>{children}</div> }));
 
-jest.mock('../../../components/utils/button/PrimaryButton', () => ({
+jest.mock('@/components/utils/button/PrimaryButton', () => ({
   __esModule: true,
   default: ({ children, onClicked, ...props }: any) => (
     <button data-testid="primary" onClick={onClicked} {...props}>{children}</button>

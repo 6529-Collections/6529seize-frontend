@@ -2,8 +2,8 @@ import { render, screen, act } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { editSlice } from '../../../../store/editSlice';
-import MyStreamWaveChat from '../../../../components/brain/my-stream/MyStreamWaveChat';
+import { editSlice } from '@/store/editSlice';
+import MyStreamWaveChat from '@/components/brain/my-stream/MyStreamWaveChat';
 
 const replaceMock = jest.fn();
 const searchParamsMock = { get: jest.fn() };
@@ -15,14 +15,14 @@ jest.mock('next/navigation', () => ({
 }));
 
 let mockIsMemesWave = false;
-jest.mock('../../../../hooks/useWave', () => ({ useWave: () => ({ isMemesWave: mockIsMemesWave }) }));
+jest.mock('@/hooks/useWave', () => ({ useWave: () => ({ isMemesWave: mockIsMemesWave }) }));
 
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ waveViewStyle: { height: '1px' } })
 }));
 
 let capturedProps: any = {};
-jest.mock('../../../../components/waves/drops/WaveDropsAll', () => ({
+jest.mock('@/components/waves/drops/WaveDropsAll', () => ({
   __esModule: true,
   default: (props: any) => {
     capturedProps = props;
@@ -30,22 +30,22 @@ jest.mock('../../../../components/waves/drops/WaveDropsAll', () => ({
   }
 }));
 
-jest.mock('../../../../components/waves/CreateDropWaveWrapper', () => ({
+jest.mock('@/components/waves/CreateDropWaveWrapper', () => ({
   CreateDropWaveWrapper: ({ children }: any) => <div>{children}</div>
 }));
 
-jest.mock('../../../../components/waves/PrivilegedDropCreator', () => ({
+jest.mock('@/components/waves/PrivilegedDropCreator', () => ({
   __esModule: true,
   default: () => <div data-testid="creator" />,
   DropMode: { BOTH: 'BOTH' }
 }));
 
-jest.mock('../../../../components/waves/memes/submission/MobileMemesArtSubmissionBtn', () => ({
+jest.mock('@/components/waves/memes/submission/MobileMemesArtSubmissionBtn', () => ({
   __esModule: true,
   default: () => <div data-testid="memes-btn" />
 }));
 
-jest.mock('../../../../hooks/useDeviceInfo', () => ({
+jest.mock('@/hooks/useDeviceInfo', () => ({
   __esModule: true,
   default: () => ({ isApp: false }),
 }));

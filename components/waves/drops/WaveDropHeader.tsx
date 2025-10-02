@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { cicToType } from "../../../helpers/Helpers";
+import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";

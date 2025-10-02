@@ -1,23 +1,23 @@
 "use client";
 
-import { CicStatement } from "../../../entities/IProfile";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { CicStatement } from "@/entities/IProfile";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserLevel from "../utils/level/UserLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useContext, useEffect, useState } from "react";
-import { amIUser, getRandomColor } from "../../../helpers/Helpers";
+import { amIUser, getRandomColor } from "@/helpers/Helpers";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useParams, useRouter } from "next/navigation";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { AuthContext } from "../../auth/Auth";
 import dynamic from "next/dynamic";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import { createDirectMessageWave } from "../../../helpers/waves/waves.helpers";
+import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
 

@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { AuthContext } from "../../auth/Auth";
-import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import WavesListWrapper from "./WavesListWrapper";
 import WavesListHeader from "./header/WavesListHeader";
 import WavesListSearchResults from "./WavesListSearchResults";

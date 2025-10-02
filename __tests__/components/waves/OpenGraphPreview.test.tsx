@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import OpenGraphPreview from '../../../components/waves/OpenGraphPreview';
+import OpenGraphPreview from '@/components/waves/OpenGraphPreview';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -24,11 +24,11 @@ jest.mock('next/image', () => ({
   },
 }));
 
-jest.mock('../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   removeBaseEndpoint: jest.fn((url: string) => url.replace('https://example.com', '')),
 }));
 
-jest.mock('../../../components/waves/ChatItemHrefButtons', () => ({
+jest.mock('@/components/waves/ChatItemHrefButtons', () => ({
   __esModule: true,
   default: function MockChatItemHrefButtons(props: any) {
     return (
@@ -37,7 +37,7 @@ jest.mock('../../../components/waves/ChatItemHrefButtons', () => ({
   },
 }));
 
-const { removeBaseEndpoint } = require('../../../helpers/Helpers');
+const { removeBaseEndpoint } = require('@/helpers/Helpers');
 
 describe('OpenGraphPreview', () => {
   beforeEach(() => {

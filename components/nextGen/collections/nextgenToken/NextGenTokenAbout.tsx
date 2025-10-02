@@ -9,9 +9,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { ETHEREUM_ICON_TEXT } from "../../../../constants";
-import { DBResponse } from "../../../../entities/IDBResponse";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { ETHEREUM_ICON_TEXT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   cicToType,
@@ -20,14 +20,14 @@ import {
   isNullAddress,
   numberWithCommas,
   printMintDate,
-} from "../../../../helpers/Helpers";
-import useCapacitor from "../../../../hooks/useCapacitor";
-import { useIdentity } from "../../../../hooks/useIdentity";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
-import { useCookieConsent } from "../../../cookies/CookieConsentContext";
-import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
+} from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useSeizeConnectContext } from "@/auth/SeizeConnectContext";
+import { useCookieConsent } from "@/cookies/CookieConsentContext";
+import EthereumIcon from "@/user/utils/icons/EthereumIcon";
+import UserCICAndLevel from "@/user/utils/UserCICAndLevel";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import {
   formatNameForUrl,

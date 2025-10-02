@@ -1,4 +1,4 @@
-import { MentionNode, $createMentionNode, $isMentionNode } from '../../../../../../components/drops/create/lexical/nodes/MentionNode';
+import { MentionNode, $createMentionNode, $isMentionNode } from '@/components/drops/create/lexical/nodes/MentionNode';
 import { $applyNodeReplacement } from 'lexical';
 
 jest.mock('lexical', () => {

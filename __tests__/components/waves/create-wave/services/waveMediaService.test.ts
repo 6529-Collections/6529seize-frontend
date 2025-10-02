@@ -1,7 +1,7 @@
-import { generateDropPart } from '../../../../../components/waves/create-wave/services/waveMediaService';
-import { multiPartUpload } from '../../../../../components/waves/create-wave/services/multiPartUpload';
+import { generateDropPart } from '@/components/waves/create-wave/services/waveMediaService';
+import { multiPartUpload } from '@/components/waves/create-wave/services/multiPartUpload';
 
-jest.mock('../../../../../components/waves/create-wave/services/multiPartUpload');
+jest.mock('@/components/waves/create-wave/services/multiPartUpload');
 
 const mockFile = (name: string) => new File(['content'], name, { type: 'text/plain' });
 

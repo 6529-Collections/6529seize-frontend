@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Tooltip } from "react-tooltip";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
-import { ApiWaveOutcomeCredit } from "../../../../generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "../../../../generated/models/ApiWaveOutcomeType";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { OutcomeType } from "../../../../hooks/drops/useDropOutcomes";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { OutcomeType } from "@/hooks/drops/useDropOutcomes";
 
 interface WavePodiumItemContentOutcomesProps {
   readonly winner: ApiWaveDecisionWinner;

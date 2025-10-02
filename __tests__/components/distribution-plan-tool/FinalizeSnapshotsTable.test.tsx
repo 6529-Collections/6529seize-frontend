@@ -1,15 +1,15 @@
 import { render } from '@testing-library/react';
-import FinalizeSnapshotsTable, { FinalizeSnapshotRow } from '../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
-import { Pool } from '../../../components/allowlist-tool/allowlist-tool.types';
-import { TopHolderType } from '../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
+import FinalizeSnapshotsTable, { FinalizeSnapshotRow } from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
+import { Pool } from '@/components/allowlist-tool/allowlist-tool.types';
+import { TopHolderType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
 
-jest.mock('../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableRow', () => (props: any) => {
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableRow', () => (props: any) => {
   // push rows for assertion
   rows.push(props.row);
   return <tr data-testid={`row-${props.row.groupSnapshotId}`} />;
 });
 
-jest.mock('../../../components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper', () => (props: any) => <tbody>{props.children}</tbody>);
+jest.mock('@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper', () => (props: any) => <tbody>{props.children}</tbody>);
 
 const rows: FinalizeSnapshotRow[] = [];
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import DistributionPlanSecondaryText from '../../../../components/distribution-plan-tool/common/DistributionPlanSecondaryText';
+import DistributionPlanSecondaryText from '@/components/distribution-plan-tool/common/DistributionPlanSecondaryText';
 
 describe('DistributionPlanSecondaryText', () => {
   it('renders children inside paragraph', () => {

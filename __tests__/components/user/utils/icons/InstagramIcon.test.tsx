@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import InstagramIcon from '../../../../../components/user/utils/icons/InstagramIcon';
+import InstagramIcon from '@/components/user/utils/icons/InstagramIcon';
 
 describe('InstagramIcon', () => {
   it('renders svg element', () => {

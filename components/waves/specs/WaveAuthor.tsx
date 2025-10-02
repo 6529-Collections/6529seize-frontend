@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
 
 export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {

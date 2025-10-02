@@ -1,7 +1,7 @@
 import { RefObject } from "react";
-import { MEMES_SEASON } from "../../../../enums";
-import { CommonSelectItem } from "../../../utils/select/CommonSelect";
-import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
+import { MEMES_SEASON } from "@/enums";
+import { CommonSelectItem } from "@/utils/select/CommonSelect";
+import CommonDropdown from "@/utils/select/dropdown/CommonDropdown";
 
 type SelectedType = MEMES_SEASON | null;
 

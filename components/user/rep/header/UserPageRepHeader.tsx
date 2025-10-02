@@ -1,5 +1,5 @@
-import { ApiProfileRepRatesState } from "../../../../entities/IProfile";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 export default function UserPageRepHeader({
   repRates,

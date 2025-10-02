@@ -22,11 +22,11 @@ jest.mock("react-bootstrap", () => {
 });
 
 
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   formatAddress: (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`
 }));
 
-jest.mock("../../../components/searchModal/SearchModal.module.scss", () => ({
+jest.mock("@/components/searchModal/SearchModal.module.scss", () => ({
   shakeWalletInput: "shakeWalletInput",
   modalInput: "modal-input",
   modalButton: "modal-button",
@@ -48,7 +48,7 @@ jest.mock("@fortawesome/free-solid-svg-icons", () => ({
   faTimesCircle: "fa-times-circle"
 }));
 
-import { SearchWalletsDisplay, SearchModalDisplay } from "../../../components/searchModal/SearchModal";
+import { SearchWalletsDisplay, SearchModalDisplay } from "@/components/searchModal/SearchModal";
 
 
 

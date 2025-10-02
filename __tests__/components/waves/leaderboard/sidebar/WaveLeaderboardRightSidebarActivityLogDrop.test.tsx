@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { WaveLeaderboardRightSidebarActivityLogDrop } from '../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogDrop';
-import { useDrop } from '../../../../../hooks/useDrop';
+import { WaveLeaderboardRightSidebarActivityLogDrop } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogDrop';
+import { useDrop } from '@/hooks/useDrop';
 
-jest.mock('../../../../../hooks/useDrop');
+jest.mock('@/hooks/useDrop');
 
 const useDropMock = useDrop as jest.MockedFunction<typeof useDrop>;
 

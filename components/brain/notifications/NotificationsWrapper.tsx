@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { TypedNotification } from "../../../types/feed.types";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { TypedNotification } from "@/types/feed.types";
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../../types/dropInteractionTypes";
+} from "@/types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/navigation";

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import SubmissionProgress, { SubmissionPhase } from '../../../../../../components/waves/memes/submission/ui/SubmissionProgress';
+import SubmissionProgress, { SubmissionPhase } from '@/components/waves/memes/submission/ui/SubmissionProgress';
 
 describe('SubmissionProgress', () => {
   const defaultProps = {

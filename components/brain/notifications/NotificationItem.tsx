@@ -1,8 +1,8 @@
-import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { TypedNotification } from "../../../types/feed.types";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { TypedNotification } from "@/types/feed.types";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
 import NotificationDropReplied from "./drop-replied/NotificationDropReplied";

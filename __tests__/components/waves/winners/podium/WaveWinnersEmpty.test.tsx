@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { WaveWinnersEmpty } from '../../../../../components/waves/winners/podium/WaveWinnersEmpty';
+import { WaveWinnersEmpty } from '@/components/waves/winners/podium/WaveWinnersEmpty';
 
 describe('WaveWinnersEmpty', () => {
   it('shows empty text', () => {

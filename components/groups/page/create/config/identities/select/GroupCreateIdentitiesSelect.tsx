@@ -1,5 +1,5 @@
 import GroupCreateIdentitiesSearch from "./GroupCreateIdentitiesSearch";
-import { CommunityMemberMinimal } from "../../../../../../../entities/IProfile";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
 import GroupCreateIdentitySelectedItems from "../../GroupCreateIdentitySelectedItems";
 
 export default function GroupCreateIdentitiesSelect({

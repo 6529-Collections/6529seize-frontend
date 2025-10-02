@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { Form, Row, Col } from "react-bootstrap";
 import { useEnsName } from "wagmi";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/auth/SeizeConnectContext";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 function NextGenMintAddressOption(props: Readonly<{ address: string }>) {

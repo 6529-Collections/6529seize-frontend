@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import BlockPickerBlockNumberIncludes from '../../../components/block-picker/BlockPickerBlockNumberIncludes';
+import BlockPickerBlockNumberIncludes from '@/components/block-picker/BlockPickerBlockNumberIncludes';
 
 describe('BlockPickerBlockNumberIncludes', () => {
   it('renders with provided value', () => {

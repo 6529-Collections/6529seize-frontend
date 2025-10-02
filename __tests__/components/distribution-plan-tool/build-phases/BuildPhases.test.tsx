@@ -1,16 +1,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import BuildPhases from '../../../../components/distribution-plan-tool/build-phases/BuildPhases';
+import BuildPhases from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
-} from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode } from '../../../../components/allowlist-tool/allowlist-tool.types';
+} from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistOperationCode } from '@/components/allowlist-tool/allowlist-tool.types';
 
 // Mock child BuildPhase component to simplify rendering and expose props
 jest.mock(
-  '../../../../components/distribution-plan-tool/build-phases/build-phase/BuildPhase',
+  '@/components/distribution-plan-tool/build-phases/build-phase/BuildPhase',
   () => ({ selectedPhase, phases, onNextStep }: any) => (
     <div data-testid="mock-build-phase">
       <div data-testid="phase-name">{selectedPhase.name}</div>

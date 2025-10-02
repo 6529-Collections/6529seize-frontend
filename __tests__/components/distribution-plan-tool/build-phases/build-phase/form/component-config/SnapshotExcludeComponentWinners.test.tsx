@@ -1,24 +1,24 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import SnapshotExcludeComponentWinners from '../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeComponentWinners';
-import { DistributionPlanToolContext } from '../../../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import SnapshotExcludeComponentWinners from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeComponentWinners';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => ({
   __esModule: true,
   default: (props: any) => <button onClick={props.onNext} data-testid="next">next{props.children}</button>,
 }));
 
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle', () => ({
   __esModule: true,
   default: ({ title }: any) => <div>{title}</div>,
 }));
 
-jest.mock('../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta', () => ({
   __esModule: true,
   default: () => <div data-testid="meta" />,
 }));
 
-jest.mock('../../../../../../../components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple', () => ({
+jest.mock('@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple', () => ({
   __esModule: true,
   default: (props: any) => (
     <div>

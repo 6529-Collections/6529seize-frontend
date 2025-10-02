@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import AllowlistToolLoader, {
   AllowlistToolLoaderSize,
-} from '../../../../components/allowlist-tool/common/AllowlistToolLoader';
+} from '@/components/allowlist-tool/common/AllowlistToolLoader';
 
 describe('AllowlistToolLoader', () => {
   it('renders with default small size', () => {

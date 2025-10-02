@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import WeiboIcon from '../../../../../components/user/utils/icons/WeiboIcon';
+import WeiboIcon from '@/components/user/utils/icons/WeiboIcon';
 
 describe('WeiboIcon', () => {
   it('renders svg with red fill', () => {

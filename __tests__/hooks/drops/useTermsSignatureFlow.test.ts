@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
-import { useTermsSignatureFlow } from '../../../hooks/drops/useTermsSignatureFlow';
-import { useDropSignature } from '../../../hooks/drops/useDropSignature';
+import { useTermsSignatureFlow } from '@/hooks/drops/useTermsSignatureFlow';
+import { useDropSignature } from '@/hooks/drops/useDropSignature';
 
-jest.mock('../../../hooks/drops/useDropSignature');
+jest.mock('@/hooks/drops/useDropSignature');
 
 const mockSignDrop = jest.fn().mockResolvedValue({ success: true, signature: 'sig' });
 (useDropSignature as jest.Mock).mockReturnValue({ signDrop: mockSignDrop, isLoading: false });

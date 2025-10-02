@@ -1,7 +1,7 @@
-import { ApiCreateGroup } from "../../../../generated/models/ApiCreateGroup";
-import { ApiGroupFilterDirection } from "../../../../generated/models/ApiGroupFilterDirection";
-import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
-import { commonApiPost } from "../../../../services/api/common-api";
+import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { commonApiPost } from "@/services/api/common-api";
 
 /**
  * Creates a group that only includes the specified wallet

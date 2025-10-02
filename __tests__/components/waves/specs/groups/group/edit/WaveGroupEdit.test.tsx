@@ -1,15 +1,15 @@
 import { render } from '@testing-library/react';
-import WaveGroupEdit from '../../../../../../../components/waves/specs/groups/group/edit/WaveGroupEdit';
-import { WaveGroupType } from '../../../../../../../components/waves/specs/groups/group/WaveGroup';
-import { convertWaveToUpdateWave } from '../../../../../../../helpers/waves/waves.helpers';
+import WaveGroupEdit from '@/components/waves/specs/groups/group/edit/WaveGroupEdit';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
 
 let triggerSelect: (g: any) => void;
-jest.mock('../../../../../../../components/utils/select-group/SelectGroupModalWrapper', () => (props: any) => {
+jest.mock('@/components/utils/select-group/SelectGroupModalWrapper', () => (props: any) => {
   triggerSelect = props.onGroupSelect;
   return null;
 });
 
-jest.mock('../../../../../../../helpers/waves/waves.helpers');
+jest.mock('@/helpers/waves/waves.helpers');
 
 (convertWaveToUpdateWave as jest.Mock).mockReturnValue({
   visibility: { scope: {} },

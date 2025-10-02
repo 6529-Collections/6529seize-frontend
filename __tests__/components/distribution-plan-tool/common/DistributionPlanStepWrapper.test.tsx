@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DistributionPlanStepWrapper from '../../../../components/distribution-plan-tool/common/DistributionPlanStepWrapper';
+import DistributionPlanStepWrapper from '@/components/distribution-plan-tool/common/DistributionPlanStepWrapper';
 
 const CHILD_TEXT = 'wrapped content';
 

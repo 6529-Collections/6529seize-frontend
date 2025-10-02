@@ -1,20 +1,20 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import VotingModal from '../../../components/voting/VotingModal';
+import VotingModal from '@/components/voting/VotingModal';
 
-jest.mock('../../../components/waves/drop/SingleWaveDropVote', () => {
+jest.mock('@/components/waves/drop/SingleWaveDropVote', () => {
   const MockSingleWaveDropVote = (props: any) => <button data-testid="vote" onClick={props.onVoteSuccess} />;
   MockSingleWaveDropVote.displayName = 'MockSingleWaveDropVote';
   return { SingleWaveDropVote: MockSingleWaveDropVote };
 });
 
-jest.mock('../../../components/waves/memes/submission/layout/ModalLayout', () => {
+jest.mock('@/components/waves/memes/submission/layout/ModalLayout', () => {
   const MockModalLayout = (props: any) => <div data-testid="layout">{props.children}</div>;
   MockModalLayout.displayName = 'MockModalLayout';
   return MockModalLayout;
 });
 
-jest.mock('../../../components/utils/button/SecondaryButton', () => {
+jest.mock('@/components/utils/button/SecondaryButton', () => {
   const MockSecondaryButton = (props: any) => <button onClick={props.onClicked}>{props.children}</button>;
   MockSecondaryButton.displayName = 'MockSecondaryButton';
   return MockSecondaryButton;

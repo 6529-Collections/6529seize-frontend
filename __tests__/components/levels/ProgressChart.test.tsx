@@ -21,7 +21,7 @@ afterAll(() => {
   window.matchMedia = originalMatchMedia;
 });
 
-const ProgressChart = require("../../../components/levels/ProgressChart").default;
+const ProgressChart = require("@/components/levels/ProgressChart").default;
 
 describe("ProgressChart", () => {
   it("dispatches level-hover event on hover", () => {

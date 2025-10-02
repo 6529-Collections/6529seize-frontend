@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 
-import WikimediaCard from "../../../components/waves/WikimediaCard";
+import WikimediaCard from "@/components/waves/WikimediaCard";
 
-jest.mock("../../../services/api/wikimedia-card", () => ({
+jest.mock("@/services/api/wikimedia-card", () => ({
   fetchWikimediaCard: jest.fn(),
 }));
 
 describe("WikimediaCard", () => {
-  const { fetchWikimediaCard } = require("../../../services/api/wikimedia-card");
+  const { fetchWikimediaCard } = require("@/services/api/wikimedia-card");
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -1,7 +1,7 @@
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import NextGenCollectionArt from "../NextGenCollectionArt";
-import { NextGenCollection } from "../../../../../entities/INextgen";
+import { NextGenCollection } from "@/entities/INextgen";
 import NextGenNavigationHeader from "../../NextGenNavigationHeader";
 
 interface Props {

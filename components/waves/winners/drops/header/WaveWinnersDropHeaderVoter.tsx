@@ -2,10 +2,10 @@ import { Tooltip } from "react-tooltip";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../helpers/image.helpers";
-import { ApiDropRater } from "../../../../../generated/models/ApiDropRater";
-import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+} from "@/helpers/image.helpers";
+import { ApiDropRater } from "@/generated/models/ApiDropRater";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 
 interface WaveWinnersDropHeaderVoterProps {

@@ -1,4 +1,4 @@
-import { useWaveById } from "../../../hooks/useWaveById";
+import { useWaveById } from "@/hooks/useWaveById";
 import ChatItemHrefButtons from "../ChatItemHrefButtons";
 import WaveItem from "./WaveItem";
 

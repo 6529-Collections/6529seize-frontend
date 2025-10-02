@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../auth/Auth";
-import { useTitle } from "../../../contexts/TitleContext";
+import { useTitle } from "@/contexts/TitleContext";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 
 export default function HeaderNotifications() {

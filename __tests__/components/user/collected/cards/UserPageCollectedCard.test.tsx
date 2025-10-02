@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import UserPageCollectedCard from '../../../../../components/user/collected/cards/UserPageCollectedCard';
-import { CollectedCollectionType } from '../../../../../entities/IProfile';
+import UserPageCollectedCard from '@/components/user/collected/cards/UserPageCollectedCard';
+import { CollectedCollectionType } from '@/entities/IProfile';
 
 const memeCard = {
   collection: CollectedCollectionType.MEMES,

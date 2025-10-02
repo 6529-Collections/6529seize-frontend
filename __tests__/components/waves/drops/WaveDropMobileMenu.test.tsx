@@ -4,37 +4,37 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 jest.mock(
-  "../../../../components/waves/drops/WaveDropMobileMenuDelete",
+  "@/components/waves/drops/WaveDropMobileMenuDelete",
   () => () => (
     <div data-testid="delete" />
   )
 );
 jest.mock(
-  "../../../../components/waves/drops/WaveDropMobileMenuFollow",
+  "@/components/waves/drops/WaveDropMobileMenuFollow",
   () => () => (
     <div data-testid="follow" />
   )
 );
 jest.mock(
-  "../../../../components/waves/drops/WaveDropMobileMenuOpen",
+  "@/components/waves/drops/WaveDropMobileMenuOpen",
   () => () => (
     <div data-testid="open" />
   )
 );
 jest.mock(
-  "../../../../components/waves/drops/WaveDropActionsRate",
+  "@/components/waves/drops/WaveDropActionsRate",
   () => () => (
     <div data-testid="clap" />
   )
 );
 jest.mock(
-  "../../../../components/waves/drops/WaveDropActionsAddReaction",
+  "@/components/waves/drops/WaveDropActionsAddReaction",
   () => () => (
     <div data-testid="add-reaction" />
   )
 );
 jest.mock(
-  "../../../../components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
+  "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => (props: any) =>
     props.isOpen ? <div data-testid="wrapper">{props.children}</div> : null
 );

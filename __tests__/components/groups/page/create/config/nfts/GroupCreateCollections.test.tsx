@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateCollections from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateCollections';
-import { ApiGroupOwnsNftNameEnum } from '../../../../../../../generated/models/ApiGroupOwnsNft';
+import GroupCreateCollections from '@/components/groups/page/create/config/nfts/GroupCreateCollections';
+import { ApiGroupOwnsNftNameEnum } from '@/generated/models/ApiGroupOwnsNft';
 
 describe('GroupCreateCollections', () => {
   it('adds collection when button clicked', async () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { WaveWinnersPodiumPlaceholder } from '../../../../../components/waves/winners/podium/WaveWinnersPodiumPlaceholder';
+import { WaveWinnersPodiumPlaceholder } from '@/components/waves/winners/podium/WaveWinnersPodiumPlaceholder';
 
 describe('WaveWinnersPodiumPlaceholder', () => {
   it('applies color based on position', () => {

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageSubscriptionsBalance from '../../../../components/user/subscriptions/UserPageSubscriptionsBalance';
+import UserPageSubscriptionsBalance from '@/components/user/subscriptions/UserPageSubscriptionsBalance';
 
-jest.mock('../../../../components/dotLoader/DotLoader', () => ({
+jest.mock('@/components/dotLoader/DotLoader', () => ({
   __esModule: true,
   default: () => <div>Loading...</div>,
   Spinner: () => <div>Spinner</div>,

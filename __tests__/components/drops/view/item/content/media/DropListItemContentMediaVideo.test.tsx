@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import DropListItemContentMediaVideo from '../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaVideo';
+import DropListItemContentMediaVideo from '@/components/drops/view/item/content/media/DropListItemContentMediaVideo';
 
-jest.mock('../../../../../../../hooks/useDeviceInfo', () => () => ({ isApp: false }));
-jest.mock('../../../../../../../hooks/useInView', () => ({ useInView: jest.fn() }));
-jest.mock('../../../../../../../hooks/useOptimizedVideo', () => ({ useOptimizedVideo: jest.fn() }));
+jest.mock('@/hooks/useDeviceInfo', () => () => ({ isApp: false }));
+jest.mock('@/hooks/useInView', () => ({ useInView: jest.fn() }));
+jest.mock('@/hooks/useOptimizedVideo', () => ({ useOptimizedVideo: jest.fn() }));
 
-const mockUseInView = require('../../../../../../../hooks/useInView').useInView as jest.Mock;
-const mockUseOptimizedVideo = require('../../../../../../../hooks/useOptimizedVideo').useOptimizedVideo as jest.Mock;
+const mockUseInView = require('@/hooks/useInView').useInView as jest.Mock;
+const mockUseOptimizedVideo = require('@/hooks/useOptimizedVideo').useOptimizedVideo as jest.Mock;
 
 describe('DropListItemContentMediaVideo', () => {
   beforeEach(() => {

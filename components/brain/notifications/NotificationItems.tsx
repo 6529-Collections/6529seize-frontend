@@ -1,8 +1,8 @@
-import { TypedNotification } from "../../../types/feed.types";
+import { TypedNotification } from "@/types/feed.types";
 import NotificationItem from "./NotificationItem";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 
 interface NotificationItemsProps {

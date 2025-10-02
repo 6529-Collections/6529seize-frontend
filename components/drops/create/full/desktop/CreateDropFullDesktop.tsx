@@ -9,17 +9,17 @@ import {
   DropMetadata,
   MentionedUser,
   ReferencedNft,
-} from "../../../../../entities/IDrop";
+} from "@/entities/IDrop";
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
 import CreateDropDesktopFooter from "../../utils/CreateDropDesktopFooter";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { CreateDropType, CreateDropViewType } from "../../types";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
-import { ApiWaveParticipationRequirement } from "../../../../../generated/models/ApiWaveParticipationRequirement";
-import { ApiWaveRequiredMetadata } from "../../../../../generated/models/ApiWaveRequiredMetadata";
-import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",

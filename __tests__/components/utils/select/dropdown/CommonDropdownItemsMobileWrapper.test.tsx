@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import CommonDropdownItemsMobileWrapper from '../../../../../components/utils/select/dropdown/CommonDropdownItemsMobileWrapper';
+import CommonDropdownItemsMobileWrapper from '@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper';
 
 jest.mock('@headlessui/react', () => {
   const Comp = (p: any) => <div {...p}>{p.children}</div>;

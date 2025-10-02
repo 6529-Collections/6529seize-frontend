@@ -1,7 +1,7 @@
-import { ApiIdentity } from "../../../../../../../generated/models/ApiIdentity";
-import { Transaction } from "../../../../../../../entities/ITransaction";
-import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import { formatAddress } from "../../../../../../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { Transaction } from "@/entities/ITransaction";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { formatAddress } from "@/helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
 
 export default function UserPageStatsActivityWalletTableRowMainAddress({

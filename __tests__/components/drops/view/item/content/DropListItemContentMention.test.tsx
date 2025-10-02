@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import DropListItemContentMention from '../../../../../../components/drops/view/item/content/DropListItemContentMention';
+import DropListItemContentMention from '@/components/drops/view/item/content/DropListItemContentMention';
 
-jest.mock('../../../../../../components/utils/tooltip/UserProfileTooltipWrapper', () => ({ user, children }: any) => <div data-testid="tooltip-wrapper" data-user={user}>{children}</div>);
+jest.mock('@/components/utils/tooltip/UserProfileTooltipWrapper', () => ({ user, children }: any) => <div data-testid="tooltip-wrapper" data-user={user}>{children}</div>);
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
 
 describe('DropListItemContentMention', () => {

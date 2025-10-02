@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
-import UserPageHeaderProfileEnabledAt from '../../../../components/user/user-page-header/UserPageHeaderProfileEnabledAt';
+import UserPageHeaderProfileEnabledAt from '@/components/user/user-page-header/UserPageHeaderProfileEnabledAt';
 
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
 }));
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
 // Mock formatTimestampToMonthYear to ensure English formatting
-jest.mock('../../../../helpers/Helpers', () => ({
-  ...jest.requireActual('../../../../helpers/Helpers'),
+jest.mock('@/helpers/Helpers', () => ({
+  ...jest.requireActual('@/helpers/Helpers'),
   formatTimestampToMonthYear: jest.fn((timestamp: number): string => {
     const date = new Date(timestamp);
     return date.toLocaleString("en-US", { month: "long", year: "numeric" });
@@ -19,7 +19,7 @@ jest.mock('../../../../helpers/Helpers', () => ({
 }));
 
 const { useQuery } = require('@tanstack/react-query');
-const { commonApiFetch } = require('../../../../services/api/common-api');
+const { commonApiFetch } = require('@/services/api/common-api');
 
 describe('UserPageHeaderProfileEnabledAt', () => {
   it('renders formatted date when data present', () => {

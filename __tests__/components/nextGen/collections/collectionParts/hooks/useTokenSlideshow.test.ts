@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
-import { useTokenSlideshow } from '../../../../../../components/nextGen/collections/collectionParts/hooks/useTokenSlideshow';
-import { NextGenToken } from '../../../../../../entities/INextgen';
-import { commonApiFetch } from '../../../../../../services/api/common-api';
+import { useTokenSlideshow } from '@/components/nextGen/collections/collectionParts/hooks/useTokenSlideshow';
+import { NextGenToken } from '@/entities/INextgen';
+import { commonApiFetch } from '@/services/api/common-api';
 
 // Mock the API service
-jest.mock('../../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 

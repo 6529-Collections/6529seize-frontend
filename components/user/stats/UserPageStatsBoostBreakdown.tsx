@@ -3,8 +3,8 @@ import {
   ConsolidatedTDH,
   TDH,
   TDHBoostBreakdown,
-} from "../../../entities/ITDH";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+} from "@/entities/ITDH";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { Tooltip } from "react-tooltip";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 

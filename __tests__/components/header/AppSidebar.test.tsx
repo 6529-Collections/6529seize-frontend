@@ -1,19 +1,19 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import AppSidebar from '../../../components/header/AppSidebar';
+import AppSidebar from '@/components/header/AppSidebar';
 
 let headerProps: any = null;
 let menuProps: any = null;
 let connectProps: any = null;
 
-jest.mock('../../../components/header/AppSidebarHeader', () => (props: any) => { headerProps = props; return <div data-testid="header" />; });
-jest.mock('../../../components/header/AppSidebarMenuItems', () => (props: any) => { menuProps = props; return <div data-testid="menu" />; });
-jest.mock('../../../components/header/AppUserConnect', () => (props: any) => { connectProps = props; return <div data-testid="connect" />; });
+jest.mock('@/components/header/AppSidebarHeader', () => (props: any) => { headerProps = props; return <div data-testid="header" />; });
+jest.mock('@/components/header/AppSidebarMenuItems', () => (props: any) => { menuProps = props; return <div data-testid="menu" />; });
+jest.mock('@/components/header/AppUserConnect', () => (props: any) => { connectProps = props; return <div data-testid="connect" />; });
 
-jest.mock('../../../components/app-wallets/AppWalletsContext');
+jest.mock('@/components/app-wallets/AppWalletsContext');
 
 (describe => {
-  const { useAppWallets } = require('../../../components/app-wallets/AppWalletsContext');
+  const { useAppWallets } = require('@/components/app-wallets/AppWalletsContext');
 
   describe('AppSidebar', () => {
     beforeEach(() => { headerProps = menuProps = connectProps = null; });

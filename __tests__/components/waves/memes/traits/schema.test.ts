@@ -1,4 +1,4 @@
-import { getFormSections, getInitialTraitsValues, initialTraits } from '../../../../../components/waves/memes/traits/schema';
+import { getFormSections, getInitialTraitsValues, initialTraits } from '@/components/waves/memes/traits/schema';
 
 describe('traits schema helpers', () => {
   it('replaces profile placeholder', () => {

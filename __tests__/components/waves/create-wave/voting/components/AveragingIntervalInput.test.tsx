@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import AveragingIntervalInput from '../../../../../../components/waves/create-wave/voting/components/AveragingIntervalInput';
-import { MIN_MINUTES } from '../../../../../../components/waves/create-wave/voting/types';
+import AveragingIntervalInput from '@/components/waves/create-wave/voting/components/AveragingIntervalInput';
+import { MIN_MINUTES } from '@/components/waves/create-wave/voting/types';
 
 describe('AveragingIntervalInput', () => {
   const onIntervalChange = jest.fn();

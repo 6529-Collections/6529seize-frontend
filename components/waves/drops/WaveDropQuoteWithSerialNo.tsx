@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from "react";
 
 import WaveDropQuote from "./WaveDropQuote";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { WaveDropsSearchStrategy } from "../../../contexts/wave/hooks/types";
-import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 interface WaveDropQuoteWithSerialNoProps {
   readonly serialNo: number;

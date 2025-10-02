@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDatesEndDateSelectPeriodItem from '../../../../../../components/waves/create-wave/dates/end-date/CreateWaveDatesEndDateSelectPeriodItem';
-import { Period } from '../../../../../../helpers/Types';
+import CreateWaveDatesEndDateSelectPeriodItem from '@/components/waves/create-wave/dates/end-date/CreateWaveDatesEndDateSelectPeriodItem';
+import { Period } from '@/helpers/Types';
 
 describe('CreateWaveDatesEndDateSelectPeriodItem', () => {
   it('calls onPeriodSelect when clicked', async () => {

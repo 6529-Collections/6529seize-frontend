@@ -10,12 +10,12 @@ import {
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import {
   AllowlistResult,
-} from "../../../allowlist-tool/allowlist-tool.types";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+} from "@/allowlist-tool/allowlist-tool.types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
-import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 
 export default function ReviewDistributionPlanTableHeader({
   rows,

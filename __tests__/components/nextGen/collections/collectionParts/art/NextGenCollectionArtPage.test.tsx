@@ -1,22 +1,22 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import NextGenCollectionArtPage from '../../../../../../components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage';
-import { NextGenCollection } from '../../../../../../entities/INextgen';
+import NextGenCollectionArtPage from '@/components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage';
+import { NextGenCollection } from '@/entities/INextgen';
 
 let headerProps: any = null;
 let artProps: any = null;
 
-jest.mock('../../../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => (props: any) => {
+jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => (props: any) => {
   headerProps = props;
   return <div data-testid="header" />;
 });
 
-jest.mock('../../../../../../components/nextGen/collections/collectionParts/NextGenCollectionArt', () => (props: any) => {
+jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionArt', () => (props: any) => {
   artProps = props;
   return <div data-testid="art" />;
 });
 
-jest.mock('../../../../../../components/nextGen/collections/NextGenNavigationHeader', () => () => <div data-testid="nav" />);
+jest.mock('@/components/nextGen/collections/NextGenNavigationHeader', () => () => <div data-testid="nav" />);
 
 describe('NextGenCollectionArtPage', () => {
   beforeEach(() => {

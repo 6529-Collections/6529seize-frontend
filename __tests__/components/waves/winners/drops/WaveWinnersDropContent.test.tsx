@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { WaveWinnersDropContent } from "../../../../../components/waves/winners/drops/WaveWinnersDropContent";
+import { WaveWinnersDropContent } from "@/components/waves/winners/drops/WaveWinnersDropContent";
 
 const push = jest.fn();
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -13,7 +13,7 @@ const WaveDropContentMock = jest.fn((props: any) => (
   />
 ));
 
-jest.mock("../../../../../components/waves/drops/WaveDropContent", () => ({
+jest.mock("@/components/waves/drops/WaveDropContent", () => ({
   __esModule: true,
   default: (props: any) => WaveDropContentMock(props),
 }));

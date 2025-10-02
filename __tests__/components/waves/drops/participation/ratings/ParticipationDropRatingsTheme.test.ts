@@ -1,4 +1,4 @@
-import { getThemeColors } from '../../../../../../components/waves/drops/participation/ratings/ParticipationDropRatingsTheme';
+import { getThemeColors } from '@/components/waves/drops/participation/ratings/ParticipationDropRatingsTheme';
 
 describe('getThemeColors', () => {
   it('returns colors for rank 1', () => {

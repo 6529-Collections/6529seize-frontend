@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import AllowlistToolSelectMenuMultipleList from '../../../../../components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultipleList';
+import AllowlistToolSelectMenuMultipleList from '@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultipleList';
 
-jest.mock('../../../../../components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultipleListItem', () => ({
+jest.mock('@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultipleListItem', () => ({
   __esModule: true,
   default: ({ option, toggleSelectedOption }: any) => (
     <li data-testid="item" onClick={() => toggleSelectedOption(option)}>{option.title}</li>

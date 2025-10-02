@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import {
   CollectedCollectionType,
   CollectionSeized,
-} from "../../../../entities/IProfile";
-import { MEMES_SEASON } from "../../../../enums";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+} from "@/entities/IProfile";
+import { MEMES_SEASON } from "@/enums";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { ProfileCollectedFilters } from "../UserPageCollected";
 
 export default function UserPageCollectedCardsNoCards({

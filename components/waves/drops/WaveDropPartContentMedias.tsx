@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiDropPart } from "../../../generated/models/ApiDropPart";
+import { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 

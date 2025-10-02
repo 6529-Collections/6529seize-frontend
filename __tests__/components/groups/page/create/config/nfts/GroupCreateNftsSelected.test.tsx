@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateNftsSelected from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftsSelected';
-import { ApiGroupOwnsNftNameEnum } from '../../../../../../../generated/models/ApiGroupOwnsNft';
+import GroupCreateNftsSelected from '@/components/groups/page/create/config/nfts/GroupCreateNftsSelected';
+import { ApiGroupOwnsNftNameEnum } from '@/generated/models/ApiGroupOwnsNft';
 
 const captured: { nft: any; onRemove: () => void }[] = [];
 
-jest.mock('../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftsSelectedItem', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNftsSelectedItem', () => ({
   __esModule: true,
   default: ({ nft, onRemove }: any) => {
     captured.push({ nft, onRemove });

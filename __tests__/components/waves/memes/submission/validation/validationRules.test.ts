@@ -1,9 +1,9 @@
-import { validationRulesByType } from '../../../../../../components/waves/memes/submission/validation/validationRules';
-import { FieldType } from '../../../../../../components/waves/memes/traits/schema';
+import { validationRulesByType } from '@/components/waves/memes/submission/validation/validationRules';
+import { FieldType } from '@/components/waves/memes/traits/schema';
 import {
   FieldValidationContext,
   FieldValidationResult,
-} from '../../../../../../components/waves/memes/submission/validation/validationTypes';
+} from '@/components/waves/memes/submission/validation/validationTypes';
 
 describe('validationRules', () => {
   describe('validateTextField', () => {

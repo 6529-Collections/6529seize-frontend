@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { sanitizeErrorForUser } from "../../../utils/error-sanitizer";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { commonApiFetch } from "@/services/api/common-api";
+import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import {
   ProcessedContent,
   isVideoMimeType,

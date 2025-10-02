@@ -1,19 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { MyStreamWaveTab } from '../../../../types/waves.types';
+import { MyStreamWaveTab } from '@/types/waves.types';
 
 const setActiveContentTab = jest.fn();
 
-jest.mock('../../../../components/brain/ContentTabContext', () => ({
+jest.mock('@/components/brain/ContentTabContext', () => ({
   useContentTab: () => ({ setActiveContentTab }),
 }));
 
 const useLayoutMock = jest.fn();
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => useLayoutMock(),
 }));
 
-import MyStreamWaveFAQ from '../../../../components/brain/my-stream/MyStreamWaveFAQ';
+import MyStreamWaveFAQ from '@/components/brain/my-stream/MyStreamWaveFAQ';
 
 describe('MyStreamWaveFAQ', () => {
   beforeEach(() => {

@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import MapDelegations from '../../../../components/distribution-plan-tool/map-delegations/MapDelegations';
-import { DistributionPlanToolContext, DistributionPlanToolStep } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode } from '../../../../components/allowlist-tool/allowlist-tool.types';
+import MapDelegations from '@/components/distribution-plan-tool/map-delegations/MapDelegations';
+import { DistributionPlanToolContext, DistributionPlanToolStep } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistOperationCode } from '@/components/allowlist-tool/allowlist-tool.types';
 
-jest.mock('../../../../components/distribution-plan-tool/common/StepHeader', () => ({ step }: any) => <div data-testid="header">{step}</div>);
-jest.mock('../../../../components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
-jest.mock('../../../../components/distribution-plan-tool/map-delegations/MapDelegationsForm', () => () => <div data-testid="form" />);
-jest.mock('../../../../components/distribution-plan-tool/map-delegations/MapDelegationsDone', () => ({ contract }: any) => <div data-testid="done">{contract}</div>);
-jest.mock('../../../../components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ showRunAnalysisBtn, showNextBtn, showSkipBtn, onNextStep }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/StepHeader', () => ({ step }: any) => <div data-testid="header">{step}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
+jest.mock('@/components/distribution-plan-tool/map-delegations/MapDelegationsForm', () => () => <div data-testid="form" />);
+jest.mock('@/components/distribution-plan-tool/map-delegations/MapDelegationsDone', () => ({ contract }: any) => <div data-testid="done">{contract}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ showRunAnalysisBtn, showNextBtn, showSkipBtn, onNextStep }: any) => (
   <button data-testid="next" onClick={onNextStep}>
     {showRunAnalysisBtn && 'run'}{showNextBtn && 'next'}{showSkipBtn && 'skip'}
   </button>

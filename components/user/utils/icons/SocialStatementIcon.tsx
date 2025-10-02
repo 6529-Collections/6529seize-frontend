@@ -1,5 +1,5 @@
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import { STATEMENT_TYPE } from "../../../../helpers/Types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { STATEMENT_TYPE } from "@/helpers/Types";
 import DiscordIcon from "./DiscordIcon";
 import EmailIcon from "./EmailIcon";
 import FacebookIcon from "./FacebookIcon";

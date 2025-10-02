@@ -5,9 +5,9 @@ import { SingleWaveDropHeader } from "./SingleWaveDropHeader";
 import { SingleWaveDropInfoPanel } from "./SingleWaveDropInfoPanel";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
-import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useDrop } from "../../../hooks/useDrop";
-import { useWaveData } from "../../../hooks/useWaveData";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDrop } from "@/hooks/useDrop";
+import { useWaveData } from "@/hooks/useWaveData";
 import { useRouter, usePathname } from "next/navigation";
 
 interface DefaultSingleWaveDropProps {

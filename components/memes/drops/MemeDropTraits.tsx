@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import MemeDropTrait from "./MemeDropTrait";
 import {
   FIELD_TO_LABEL_MAP,

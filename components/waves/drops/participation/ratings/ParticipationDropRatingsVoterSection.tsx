@@ -1,11 +1,11 @@
 import React from "react";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 import { RatingsSectionProps, RatingsData } from "./types";
 
 interface ParticipationDropRatingsVoterSectionProps

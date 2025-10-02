@@ -1,7 +1,7 @@
 import {
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE,
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES,
-} from "../../../../../../helpers/Types";
+} from "@/helpers/Types";
 import UserPageIdentityAddStatementsTypeButton from "../../utils/UserPageIdentityAddStatementsTypeButton";
 
 export default function UserPageIdentityAddStatementsSocialMediaAccountItems({

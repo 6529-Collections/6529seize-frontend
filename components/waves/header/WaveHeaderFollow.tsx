@@ -1,13 +1,13 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
-import { ApiWaveSubscriptionActions } from "../../../generated/models/ApiWaveSubscriptionActions";
+import { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
-} from "../../../services/api/common-api";
+} from "@/services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import CircleLoader, {

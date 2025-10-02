@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import GroupCardConfigs from '../../../../../../components/groups/page/list/card/GroupCardConfigs';
-import { ApiGroupFilterDirection } from '../../../../../../generated/models/ApiGroupFilterDirection';
-import { GroupDescriptionType } from '../../../../../../entities/IGroup';
+import GroupCardConfigs from '@/components/groups/page/list/card/GroupCardConfigs';
+import { ApiGroupFilterDirection } from '@/generated/models/ApiGroupFilterDirection';
+import { GroupDescriptionType } from '@/entities/IGroup';
 
-jest.mock('../../../../../../components/groups/page/list/card/GroupCardConfig', () => ({ config }: any) => <div data-testid={`config-${config.key}`}>{config.value}</div>);
+jest.mock('@/components/groups/page/list/card/GroupCardConfig', () => ({ config }: any) => <div data-testid={`config-${config.key}`}>{config.value}</div>);
 
 describe('GroupCardConfigs', () => {
   it('shows default wallets when group undefined', () => {

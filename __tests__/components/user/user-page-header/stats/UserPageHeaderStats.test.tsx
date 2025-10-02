@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import UserPageHeaderStats from '../../../../../components/user/user-page-header/stats/UserPageHeaderStats';
+import UserPageHeaderStats from '@/components/user/user-page-header/stats/UserPageHeaderStats';
 import { useParams } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({ useParams: jest.fn() }));
 
-jest.mock('../../../../../components/user/user-page-header/followers/UserPageFollowers', () => (props: any) => {
+jest.mock('@/components/user/user-page-header/followers/UserPageFollowers', () => (props: any) => {
   capturedProps = props;
   return <div data-testid="followers" />;
 });
 
-jest.mock('../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommas: (n: number) => `fmt-${n}`
 }));
 

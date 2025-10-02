@@ -58,7 +58,7 @@ const resetUrlGuardMocks = () => {
 const loadRoute = async () => {
   jest.resetModules();
   resetUrlGuardMocks();
-  ({ GET } = await import("../../../app/api/farcaster/route"));
+  ({ GET } = await import("@/app/api/farcaster/route"));
 };
 
 describe("farcaster API route", () => {

@@ -3,7 +3,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import { useWaves } from "../../../hooks/useWaves";
+import { useWaves } from "@/hooks/useWaves";
 
 export default function WavesListSearchResults({
   identity,

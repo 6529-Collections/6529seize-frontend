@@ -8,9 +8,9 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { areEqualURLS } from "../../../helpers/Helpers";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
+import { areEqualURLS } from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useAuth } from "../../auth/Auth";
 
 export default function HeaderQRScanner({

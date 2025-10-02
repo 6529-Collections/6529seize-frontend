@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getTimeAgoShort } from "../../../../helpers/Helpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 
 interface BrainLeftSidebarWaveDropTimeProps {
   readonly time: number;

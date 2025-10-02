@@ -1,7 +1,7 @@
 import {
   NFT_ACCOUNTS_STATEMENT_TYPE,
   NFT_ACCOUNTS_STATEMENT_TYPES,
-} from "../../../../../../helpers/Types";
+} from "@/helpers/Types";
 import UserPageIdentityAddStatementsTypeButton from "../../utils/UserPageIdentityAddStatementsTypeButton";
 
 export default function UserPageIdentityAddStatementsNFTAccountItems({

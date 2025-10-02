@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import Icon from '../../../../components/profile-activity/icons/ProfileActivityLogsProxyCreatedIcon';
+import Icon from '@/components/profile-activity/icons/ProfileActivityLogsProxyCreatedIcon';
 
 describe('ProfileActivityLogsProxyCreatedIcon', () => {
   it('renders svg with viewBox', () => {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SingleWaveDropVoteInput } from '../../../../components/waves/drop/SingleWaveDropVoteInput';
-import { ApiWaveCreditType } from '../../../../generated/models/ObjectSerializer';
+import { SingleWaveDropVoteInput } from '@/components/waves/drop/SingleWaveDropVoteInput';
+import { ApiWaveCreditType } from '@/generated/models/ObjectSerializer';
 
 // Mock timers for testing interval behavior
 jest.useFakeTimers();

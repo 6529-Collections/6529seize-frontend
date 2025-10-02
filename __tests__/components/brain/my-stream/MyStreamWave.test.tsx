@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import MyStreamWave from '../../../../components/brain/my-stream/MyStreamWave';
-import { MyStreamWaveTab } from '../../../../types/waves.types';
+import MyStreamWave from '@/components/brain/my-stream/MyStreamWave';
+import { MyStreamWaveTab } from '@/types/waves.types';
 
-jest.mock('../../../../components/brain/my-stream/MyStreamWaveChat', () => ({
+jest.mock('@/components/brain/my-stream/MyStreamWaveChat', () => ({
   __esModule: true,
   default: () => <div data-testid="chat" />,
 }));
 
-jest.mock('../../../../components/brain/my-stream/MyStreamWaveLeaderboard', () => ({
+jest.mock('@/components/brain/my-stream/MyStreamWaveLeaderboard', () => ({
   __esModule: true,
   default: ({ onDropClick }: any) => (
     <button data-testid="leaderboard" onClick={() => onDropClick({ id: 'd1' })}>
@@ -17,12 +17,12 @@ jest.mock('../../../../components/brain/my-stream/MyStreamWaveLeaderboard', () =
   ),
 }));
 
-jest.mock('../../../../components/brain/my-stream/MyStreamWaveOutcome', () => ({
+jest.mock('@/components/brain/my-stream/MyStreamWaveOutcome', () => ({
   __esModule: true,
   default: () => <div data-testid="outcome" />,
 }));
 
-jest.mock('../../../../components/waves/winners/WaveWinners', () => ({
+jest.mock('@/components/waves/winners/WaveWinners', () => ({
   __esModule: true,
   WaveWinners: ({ onDropClick }: any) => (
     <button data-testid="winners" onClick={() => onDropClick({ id: 'd1' })}>
@@ -31,28 +31,28 @@ jest.mock('../../../../components/waves/winners/WaveWinners', () => ({
   ),
 }));
 
-jest.mock('../../../../components/brain/my-stream/votes/MyStreamWaveMyVotes', () => ({
+jest.mock('@/components/brain/my-stream/votes/MyStreamWaveMyVotes', () => ({
   __esModule: true,
   default: () => <div data-testid="myvotes" />,
 }));
 
-jest.mock('../../../../components/brain/my-stream/MyStreamWaveFAQ', () => ({
+jest.mock('@/components/brain/my-stream/MyStreamWaveFAQ', () => ({
   __esModule: true,
   default: () => <div data-testid="faq" />,
 }));
 
-jest.mock('../../../../components/brain/my-stream/tabs/MyStreamWaveTabs', () => ({
+jest.mock('@/components/brain/my-stream/tabs/MyStreamWaveTabs', () => ({
   __esModule: true,
   MyStreamWaveTabs: ({ wave }: any) => <div data-testid="tabs">{wave.id}</div>,
 }));
 
 const useContentTab = jest.fn();
-jest.mock('../../../../components/brain/ContentTabContext', () => ({
+jest.mock('@/components/brain/ContentTabContext', () => ({
   useContentTab: (...args: any[]) => useContentTab(...args),
 }));
 
 const useWaveData = jest.fn();
-jest.mock('../../../../hooks/useWaveData', () => ({
+jest.mock('@/hooks/useWaveData', () => ({
   useWaveData: (...args: any[]) => useWaveData(...args),
 }));
 
@@ -70,7 +70,7 @@ let mockBreakpoint = 'LG';
 jest.mock('react-use', () => ({ createBreakpoint: () => () => mockBreakpoint }));
 
 // Mock TitleContext
-jest.mock('../../../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),
@@ -87,7 +87,7 @@ jest.mock('../../../../contexts/TitleContext', () => ({
 }));
 
 // Mock MyStreamContext if needed
-jest.mock('../../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({
     waveId: null,
     setWaveId: jest.fn(),

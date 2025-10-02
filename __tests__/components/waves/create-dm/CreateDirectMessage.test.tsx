@@ -1,19 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import CreateDirectMessage from "../../../../components/waves/create-dm/CreateDirectMessage";
+import CreateDirectMessage from "@/components/waves/create-dm/CreateDirectMessage";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../../../components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
-jest.mock("../../../../components/auth/Auth", () => ({
+jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
-jest.mock("../../../../helpers/waves/waves.helpers", () => ({
+jest.mock("@/helpers/waves/waves.helpers", () => ({
   createDirectMessageWave: jest.fn().mockResolvedValue({ id: 1 }),
 }));
 
 jest.mock(
-  "../../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect",
+  "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect",
   () => (props: any) =>
     (
       <button onClick={() => props.onIdentitySelect({ wallet: "0x2" })}>

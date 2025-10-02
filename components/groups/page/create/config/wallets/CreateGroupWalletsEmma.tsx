@@ -1,16 +1,16 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import EmmaListSearch from "../../../../../utils/input/emma/EmmaListSearch";
+import EmmaListSearch from "@/utils/input/emma/EmmaListSearch";
 import {
   AllowlistDescription,
   AllowlistResult,
-} from "../../../../../allowlist-tool/allowlist-tool.types";
+} from "@/allowlist-tool/allowlist-tool.types";
 import { useQuery } from "@tanstack/react-query";
-import { distributionPlanApiFetch } from "../../../../../../services/distribution-plan-api";
-import { AuthContext } from "../../../../../auth/Auth";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { AuthContext } from "@/auth/Auth";
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/react-query-wrapper/ReactQueryWrapper";
 
 export default function CreateGroupWalletsEmma({
   wallets,

@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveGroups from '../../../../../components/waves/create-wave/groups/CreateWaveGroups';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { CREATE_WAVE_GROUPS } from '../../../../../helpers/waves/waves.constants';
+import CreateWaveGroups from '@/components/waves/create-wave/groups/CreateWaveGroups';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { CREATE_WAVE_GROUPS } from '@/helpers/waves/waves.constants';
 
-jest.mock('../../../../../components/waves/create-wave/groups/CreateWaveGroup', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/groups/CreateWaveGroup', () => (props: any) => (
   <div data-testid="group">{props.groupType}</div>
 ));
-jest.mock('../../../../../components/waves/create-wave/utils/CreateWaveWarning', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/utils/CreateWaveWarning', () => (props: any) => (
   <div data-testid="warning">{props.title}</div>
 ));
 

@@ -1,13 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import CreateDropFullMobile from '../../../../../../components/drops/create/full/mobile/CreateDropFullMobile';
-import { CreateDropType } from '../../../../../../components/drops/create/types';
+import CreateDropFullMobile from '@/components/drops/create/full/mobile/CreateDropFullMobile';
+import { CreateDropType } from '@/components/drops/create/types';
 
-jest.mock('../../../../../../components/drops/create/full/mobile/CreateDropFullMobileWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
-jest.mock('../../../../../../components/drops/create/utils/CreateDropContent', () => React.forwardRef(() => <div data-testid="content" />));
-jest.mock('../../../../../../components/drops/create/utils/file/CreateDropSelectedFileIcon', () => ({ file }: any) => <span data-testid="icon">{file.name}</span>);
-jest.mock('../../../../../../components/drops/create/utils/file/CreateDropSelectedFilePreview', () => ({ file }: any) => <div data-testid="preview">{file.name}</div>);
-jest.mock('../../../../../../components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/components/drops/create/full/mobile/CreateDropFullMobileWrapper', () => (props: any) => <div data-testid="wrapper">{props.children}</div>);
+jest.mock('@/components/drops/create/utils/CreateDropContent', () => React.forwardRef(() => <div data-testid="content" />));
+jest.mock('@/components/drops/create/utils/file/CreateDropSelectedFileIcon', () => ({ file }: any) => <span data-testid="icon">{file.name}</span>);
+jest.mock('@/components/drops/create/utils/file/CreateDropSelectedFilePreview', () => ({ file }: any) => <div data-testid="preview">{file.name}</div>);
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
 
 describe('CreateDropFullMobile', () => {
   const onDrop = jest.fn();

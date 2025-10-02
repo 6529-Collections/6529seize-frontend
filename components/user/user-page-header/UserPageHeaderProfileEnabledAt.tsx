@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
-import { CountlessPage } from "../../../helpers/Types";
-import { ProfileActivityLog } from "../../../entities/IProfile";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { formatTimestampToMonthYear } from "../../../helpers/Helpers";
+import { CountlessPage } from "@/helpers/Types";
+import { ProfileActivityLog } from "@/entities/IProfile";
+import { commonApiFetch } from "@/services/api/common-api";
+import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 
 interface UserPageHeaderProfileEnabledAtProps {
   readonly handleOrWallet: string | null;

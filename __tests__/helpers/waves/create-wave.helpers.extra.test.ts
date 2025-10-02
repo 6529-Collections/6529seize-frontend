@@ -1,6 +1,6 @@
-import { getCreateNewWaveBody } from '../../../helpers/waves/create-wave.helpers';
-import { ApiWaveType } from '../../../generated/models/ApiWaveType';
-import { ApiWaveMetadataType } from '../../../generated/models/ApiWaveMetadataType';
+import { getCreateNewWaveBody } from '@/helpers/waves/create-wave.helpers';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
 
 describe('create-wave.helpers extra', () => {
   it('clamps time weighted lock duration', () => {

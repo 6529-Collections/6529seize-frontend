@@ -1,10 +1,10 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
-import { CICType } from "../../../entities/IProfile";
-import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { CICType } from "@/entities/IProfile";
+import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";

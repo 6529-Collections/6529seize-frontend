@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserSettingsClassificationItem from "./UserSettingsClassificationItem";
-import { ApiProfileClassification } from "../../../generated/models/ApiProfileClassification";
-import { CLASSIFICATIONS } from "../../../entities/IProfile";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { CLASSIFICATIONS } from "@/entities/IProfile";
 
 export default function UserSettingsClassification({
   selected,

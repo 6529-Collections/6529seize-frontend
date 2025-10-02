@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SnapshotExcludeOtherSnapshots from '../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeOtherSnapshots';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { Pool } from '../../../../components/allowlist-tool/allowlist-tool.types';
+import SnapshotExcludeOtherSnapshots from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeOtherSnapshots';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { Pool } from '@/components/allowlist-tool/allowlist-tool.types';
 
-jest.mock('../../../../components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple', () => ({
+jest.mock('@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple', () => ({
   __esModule: true,
   default: ({ options, selectedOptions, toggleSelectedOption }: any) => (
     <div>
@@ -18,7 +18,7 @@ jest.mock('../../../../components/allowlist-tool/common/select-menu-multiple/All
   )
 }));
 
-jest.mock('../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => ({
   __esModule: true,
   default: ({ onNext, children }: any) => (
     <div>

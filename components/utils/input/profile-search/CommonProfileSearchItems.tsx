@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { CommunityMemberMinimal } from "../../../../entities/IProfile";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
 import CommonProfileSearchItem from "./CommonProfileSearchItem";
 
 export default function CommonProfileSearchItems({

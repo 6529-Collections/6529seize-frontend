@@ -23,7 +23,7 @@ import {
   CreateDropConfig,
   MentionedUser,
   ReferencedNft,
-} from "../../../../entities/IDrop";
+} from "@/entities/IDrop";
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
@@ -38,7 +38,7 @@ import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { CreateDropType, CreateDropViewType } from "../types";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import ClearEditorPlugin, {
   ClearEditorPluginHandles,
@@ -53,9 +53,9 @@ import {
 } from "react";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
-import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
-import { ApiWaveRequiredMetadata } from "../../../../generated/models/ApiWaveRequiredMetadata";
+import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMissingMetadataWarning";
 import DragDropPastePlugin from "../lexical/plugins/DragDropPastePlugin";
 import { ImageNode } from "../lexical/nodes/ImageNode";
@@ -67,7 +67,7 @@ import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTran
 import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
 import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
 import { EmojiNode } from "../lexical/nodes/EmojiNode";
-import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
+import CreateDropEmojiPicker from "@/waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 import PlainTextPastePlugin from "../lexical/plugins/PlainTextPastePlugin";
 

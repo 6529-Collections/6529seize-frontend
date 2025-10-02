@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import RateClapOutlineIcon from '../../../../components/utils/icons/RateClapOutlineIcon';
+import RateClapOutlineIcon from '@/components/utils/icons/RateClapOutlineIcon';
 
 describe('RateClapOutlineIcon', () => {
   it('renders svg element', () => {

@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenAdminSetFinalSupply from '../../../../components/nextGen/admin/NextGenAdminSetFinalSupply';
+import NextGenAdminSetFinalSupply from '@/components/nextGen/admin/NextGenAdminSetFinalSupply';
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: jest.fn(),
   useFunctionAdmin: jest.fn(),
   useCollectionIndex: jest.fn(),
@@ -13,17 +13,17 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   getCollectionIdsForAddress: jest.fn(),
 }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => {
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => {
   return function MockWriteStatus() {
     return <div data-testid="write-status">Write Status</div>;
   };
 });
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ collection_id, collection_ids, onChange }: any) => (
     <div data-testid="collection-form-group">
       <select
@@ -48,7 +48,7 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
   ),
 }));
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdmin', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdmin', () => ({
   printAdminErrors: (errors: string[]) => (
     <div data-testid="admin-errors">
       {errors.map((error, index) => (
@@ -58,8 +58,8 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdmin', () => ({
   ),
 }));
 
-const mockHelpers = require('../../../../components/nextGen/nextgen_helpers');
-const mockSeizeConnect = require('../../../../components/auth/SeizeConnectContext');
+const mockHelpers = require('@/components/nextGen/nextgen_helpers');
+const mockSeizeConnect = require('@/components/auth/SeizeConnectContext');
 
 describe('NextGenAdminSetFinalSupply', () => {
   const mockProps = {

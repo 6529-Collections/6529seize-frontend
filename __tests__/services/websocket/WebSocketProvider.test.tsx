@@ -1,13 +1,13 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { WebSocketProvider } from '../../../services/websocket/WebSocketProvider';
-import { WebSocketContext } from '../../../services/websocket/WebSocketContext';
-import { WebSocketStatus, WebSocketConfig } from '../../../services/websocket/WebSocketTypes';
-import { WsMessageType } from '../../../helpers/Types';
-import * as authUtils from '../../../services/auth/auth.utils';
+import { WebSocketProvider } from '@/services/websocket/WebSocketProvider';
+import { WebSocketContext } from '@/services/websocket/WebSocketContext';
+import { WebSocketStatus, WebSocketConfig } from '@/services/websocket/WebSocketTypes';
+import { WsMessageType } from '@/helpers/Types';
+import * as authUtils from '@/services/auth/auth.utils';
 
 // Mock auth utils
-jest.mock('../../../services/auth/auth.utils', () => ({
+jest.mock('@/services/auth/auth.utils', () => ({
   getAuthJwt: jest.fn()
 }));
 

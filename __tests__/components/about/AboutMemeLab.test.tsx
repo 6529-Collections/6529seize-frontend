@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutMemeLab from '../../../components/about/AboutMemeLab';
+import AboutMemeLab from '@/components/about/AboutMemeLab';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
 

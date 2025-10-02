@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateNftSearchItems from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftSearchItems';
+import GroupCreateNftSearchItems from '@/components/groups/page/create/config/nfts/GroupCreateNftSearchItems';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');
 
-jest.mock('../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftSearchItemsContent', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNftSearchItemsContent', () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="content">

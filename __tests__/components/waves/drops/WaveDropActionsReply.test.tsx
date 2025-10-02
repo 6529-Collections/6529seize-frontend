@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import WaveDropActionsReply from '../../../../components/waves/drops/WaveDropActionsReply';
-import { WaveEligibilityProvider } from '../../../../contexts/wave/WaveEligibilityContext';
+import WaveDropActionsReply from '@/components/waves/drops/WaveDropActionsReply';
+import { WaveEligibilityProvider } from '@/contexts/wave/WaveEligibilityContext';
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({

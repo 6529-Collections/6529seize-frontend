@@ -8,7 +8,7 @@ import { faArrowsRotate, faCube } from "@fortawesome/free-solid-svg-icons";
 
 // Dynamically import GLB viewer to avoid SSR issues
 const MediaDisplayGLB = dynamic(
-  () => import("../../../../drops/view/item/content/media/MediaDisplayGLB"),
+  () => import("@/drops/view/item/content/media/MediaDisplayGLB"),
   {
     ssr: false,
     loading: () => (
