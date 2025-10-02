@@ -5,7 +5,6 @@ export default function BlogFromFibonacciToFidenzaPage() {
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -417,7 +416,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/sabrinaxdoll"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Sabrina Khan
                                   </a>
                                 </b>
@@ -450,14 +449,14 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/tylerxhobbs"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Tyler Hobbs
                                   </a>
                                   , who dazzled the art scene with his{" "}
                                   <a
                                     href="https://tylerxhobbs.com/fidenza"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     Fidenza
                                   </a>{" "}
                                   collection, we are left in the afterglow with
@@ -542,7 +541,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://www.youtube.com/watch?v=z9d1mxgZ0ag"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     sunflower
                                   </a>
                                   .{" "}
@@ -582,7 +581,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                 <a
                                   href="https://commons.wikimedia.org/wiki/File:Espiral_de_semillas_de_Girasol.jpg"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   source
                                 </a>
                                 )
@@ -620,7 +619,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                 <a
                                   href="https://momath.org/home/fibonacci-numbers-of-sunflower-seed-spirals/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   source
                                 </a>
                                 )
@@ -731,7 +730,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                 <a
                                   href="https://www.phimatrix.com/art-composition-golden-ratio/"
                                   target="_blank"
-                                  rel="noopener">
+                                  rel="noopener noreferrer">
                                   source)
                                 </a>
                               </p>
@@ -996,7 +995,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="https://twitter.com/punk6529"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     p
                                   </a>
                                 </span>
@@ -1263,7 +1262,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
                                   <a
                                     href="/blog/a-tale-of-two-artists/"
                                     target="_blank"
-                                    rel="noopener">
+                                    rel="noopener noreferrer">
                                     <b>
                                       A Tale of Two Artists: Van Gogh and XCOPY
                                     </b>
@@ -1301,9 +1300,13 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-        <button type="button" className="fusion-one-page-text-link fusion-page-load-link" tabIndex={-1} aria-hidden="true">
-          Page load link
-        </button>
+      <button
+        type="button"
+        className="fusion-one-page-text-link fusion-page-load-link"
+        tabIndex={-1}
+        aria-hidden="true">
+        Page load link
+      </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
@@ -1313,6 +1316,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>
@@ -1323,18 +1327,16 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-          <button type="button" id="toTop" className="fusion-top-top-link">
-            <span id="awb-to-top-label" className="screen-reader-text">
-              Go to Top
-            </span>
-          </button>
+        <button type="button" id="toTop" className="fusion-top-top-link">
+          <span id="awb-to-top-label" className="screen-reader-text">
+            Go to Top
+          </span>
+        </button>
       </section>
     </div>
-);
+  );
 }
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({ title: "FROM FIBONACCI TO FIDENZA - 6529.io" });
 }
-

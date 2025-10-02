@@ -366,7 +366,7 @@ export default function RememeAddPage() {
                             className="font-color"
                             href={`${publicEnv.BASE_ENDPOINT}/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noopener noreferrer">
                             view
                           </a>
                         </Col>

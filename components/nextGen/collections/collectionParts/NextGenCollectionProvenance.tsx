@@ -292,7 +292,7 @@ export function NextGenCollectionProvenanceRow(
                       )}
                       onClick={(e) => e.stopPropagation()}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon
                         style={{

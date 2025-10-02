@@ -141,7 +141,7 @@ export function MemePageArt(props: {
                           className={styles.arweaveLink}
                           href={props.nft.metadata.image}
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           {props.nft.metadata.image}
                         </Link>
                         <Download
@@ -166,7 +166,7 @@ export function MemePageArt(props: {
                                 : props.nft.metadata.animation_url
                             }
                             target="_blank"
-                            rel="noreferrer">
+                            rel="noopener noreferrer">
                             {props.nft.metadata.animation
                               ? props.nft.metadata.animation
                               : props.nft.metadata.animation_url}
@@ -270,8 +270,14 @@ export function MemePageArt(props: {
                     <Col>
                       <Link
                         href={distributionPlanLink}
-                        target={props.nft.has_distribution ? "_self" : "_blank"}
-                        rel="noreferrer"
+                        target={
+                          props.nft.has_distribution ? "_self" : "_blank"
+                        }
+                        rel={
+                          props.nft.has_distribution
+                            ? undefined
+                            : "noopener noreferrer"
+                        }
                         className={styles.distributionPlanLink}>
                         Distribution Plan
                       </Link>

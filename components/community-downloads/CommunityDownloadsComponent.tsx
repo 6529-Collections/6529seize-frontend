@@ -45,7 +45,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
           <tr key={download.date.toString()}>
             <td>{formatDate(download.date.toString())}</td>
             <td>
-              <a href={download.url} target="_blank" rel="noreferrer">
+              <a href={download.url} target="_blank" rel="noopener noreferrer">
                 {download.url}
               </a>
             </td>

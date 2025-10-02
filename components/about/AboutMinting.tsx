@@ -41,7 +41,7 @@ export default function AboutMinting() {
               <a
                 href="https://x.com/6529collections"
                 target="_blank"
-                rel="noreferrer">
+                rel="noopener noreferrer">
                 https://x.com/6529collections
               </a>
             </li>
@@ -52,7 +52,7 @@ export default function AboutMinting() {
               <a
                 href="https://x.com/6529collections"
                 target="_blank"
-                rel="noreferrer">
+                rel="noopener noreferrer">
                 6529collections
               </a>{" "}
               for details
@@ -538,7 +538,7 @@ export default function AboutMinting() {
             <br />
             <li>
               For our full analysis of our Network Metrics, go here:{" "}
-              <a href="/network/metrics" target="_blank" rel="noreferrer">
+              <a href="/network/metrics" target="_blank" rel="noopener noreferrer">
                 6529.io/network/metrics
               </a>
             </li>
@@ -569,7 +569,7 @@ export default function AboutMinting() {
             <li>
               On a daily basis, we publish to Arweave the statistics we use to
               create our own allowlists. You can find them here:{" "}
-              <a href="/open-data" target="_blank" rel="noreferrer">
+              <a href="/open-data" target="_blank" rel="noopener noreferrer">
                 6529.io/open-data
               </a>
             </li>

@@ -523,7 +523,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       contractWriteRevoke.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a><br />Waiting for confirmation...`,
@@ -538,7 +538,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       contractWriteRevoke.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a>`,
@@ -572,7 +572,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       contractWriteBatchRevoke.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a><br />Waiting for confirmation...`,
@@ -588,7 +588,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       contractWriteBatchRevoke.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a>`,
@@ -625,7 +625,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       collectionLockWrite.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a><br />Waiting for confirmation...`,
@@ -640,7 +640,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       collectionLockWrite.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a>`,
@@ -678,7 +678,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       useCaseLockWrite.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a><br />Waiting for confirmation...`,
@@ -693,7 +693,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       useCaseLockWrite.data
                     )}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className=${styles.etherscanLink}>
                     view
                   </a>`,

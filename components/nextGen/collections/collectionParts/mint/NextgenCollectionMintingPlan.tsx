@@ -242,7 +242,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                     <Link
                       href={`/${al.address}`}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="decoration-hover-underline">
                       {al.wallet_display && `${al.wallet_display} - `}
                       {al.address}

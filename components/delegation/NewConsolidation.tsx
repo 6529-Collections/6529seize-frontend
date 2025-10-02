@@ -169,7 +169,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
                 <a
                   href={`/delegation/delegation-faq/register-consolidation`}
                   target="_blank"
-                  rel="noreferrer">
+                  rel="noopener noreferrer">
                   <FontAwesomeIcon
                     className={styles.infoIconLink}
                     icon={faInfoCircle}></FontAwesomeIcon>

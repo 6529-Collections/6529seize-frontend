@@ -88,11 +88,28 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
 const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT => ({
   id: 1,
   contract: "0x123",
-  token_id: "1",
-  name: "Test NFT",
-  image: "https://example.com/image.png",
+  collection: "Test Collection",
+  token_type: "ERC721",
+  description: "Test description",
+  artist: "Test Artist",
+  artist_seize_handle: "testartist",
+  uri: "https://example.com/token/1",
+  icon: "https://example.com/icon.png",
   thumbnail: "https://example.com/thumb.png",
   scaled: "https://example.com/scaled.png",
+  image: "https://example.com/image.png",
+  animation: "https://example.com/animation.mp4",
+  market_cap: 0,
+  floor_price: 0.05,
+  total_volume_last_24_hours: 50,
+  total_volume_last_7_days: 200,
+  total_volume_last_1_month: 500,
+  total_volume: 1000,
+  highest_offer: 0.08,
+  mint_price: 0.06529,
+  supply: 10,
+  name: "Test NFT",
+  created_at: new Date(),
   metadata: {
     image: "https://example.com/metadata-image.png",
     name: "Test NFT",
@@ -107,8 +124,6 @@ const createDefaultProps = (
 ): BaseRendererProps => ({
   nft: createMockNFT(),
   height: 300,
-  showOwnedIfLoggedIn: false,
-  showUnseizedIfLoggedIn: false,
   heightStyle: "height-300",
   imageStyle: "image-style",
   bgStyle: "bg-style",
@@ -389,8 +404,21 @@ describe("NFTImageRenderer", () => {
   });
 
   describe("Performance Attributes", () => {
-    it("sets correct loading and priority attributes", () => {
+    it("uses lazy loading for grid-sized images", () => {
       const props = createDefaultProps();
+      render(<NFTImageRenderer {...props} />);
+
+      const image = screen.getByRole("img");
+      expect(image).toHaveAttribute("data-loading", "lazy");
+      expect(image).toHaveAttribute("data-priority", "false");
+      expect(image).toHaveAttribute("data-fetch-priority", "auto");
+    });
+
+    it("prioritizes larger feature images", () => {
+      const props = createDefaultProps({
+        height: 650,
+        heightStyle: "height-650",
+      });
       render(<NFTImageRenderer {...props} />);
 
       const image = screen.getByRole("img");

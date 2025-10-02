@@ -24,6 +24,7 @@ import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
 import { isEthereumAddress } from "../../../../../../helpers/AllowlistToolHelpers";
 import { ReferencedNft } from "../../../../../../entities/IDrop";
 import { ReservoirTokensResponseTokenElement } from "../../../../../../entities/IReservoir";
+import { isInCodeContext } from "../../utils/codeContextDetection";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -238,6 +239,10 @@ const NewHashtagsPlugin = forwardRef<
 
   const checkForHashtagMatch = useCallback(
     (text: string) => {
+      if (isInCodeContext(editor)) {
+        return null;
+      }
+
       const slashMatch = checkForSlashTriggerMatch(text, editor);
       if (slashMatch !== null) {
         return null;

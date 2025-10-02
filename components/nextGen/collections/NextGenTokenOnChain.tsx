@@ -188,7 +188,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                     <Link
                       href={tokenMetadataUrl}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon
                         className={styles.copyIcon}
@@ -206,7 +206,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       <Link
                         href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         data-tooltip-id={`opensea-${props.token_id}`}
                       >
                         <Image

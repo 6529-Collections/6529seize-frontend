@@ -16,7 +16,7 @@ export default function PdfViewer({ file, name }: Readonly<Props>) {
     return (
       <h3>
         Open{" "}
-        <Link href={pdfUrlWithPage} target="_blank">
+        <Link href={pdfUrlWithPage} target="_blank" rel="noopener noreferrer">
           {name}
         </Link>
       </h3>

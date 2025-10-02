@@ -225,8 +225,14 @@ export function MemePageLiveRightMenu(props: {
               <Col>
                 <Link
                   href={distributionPlanLink}
-                  target={props.nft.has_distribution ? "_self" : "_blank"}
-                  rel="noreferrer">
+                  target={
+                    props.nft.has_distribution ? "_self" : "_blank"
+                  }
+                  rel={
+                    props.nft.has_distribution
+                      ? undefined
+                      : "noopener noreferrer"
+                  }>
                   Distribution Plan
                 </Link>
               </Col>

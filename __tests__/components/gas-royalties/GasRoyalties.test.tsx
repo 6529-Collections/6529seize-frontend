@@ -309,7 +309,7 @@ describe("GasRoyaltiesTokenImage", () => {
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/memes/1");
     expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noreferrer");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
 
     const image = screen.getByAltText("Meme1");
     expect(image).toBeInTheDocument();

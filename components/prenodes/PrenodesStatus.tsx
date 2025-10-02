@@ -124,7 +124,7 @@ export default function PrenodesStatus() {
         <a
           href={href}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="decoration-none">
           <Container className={`no-padding ${styles.prenode}`}>
             <Row>
