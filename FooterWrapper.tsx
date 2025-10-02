@@ -38,13 +38,9 @@ export default function FooterWrapper() {
   // Paths where footer should be hidden
   const hideFooter =
     isApp ||
-    [
-      "/waves",
-      "/messages",
-      "/notifications",
-      "/my-stream",
-      "/open-mobile"
-    ].some((path) => pathname?.startsWith(path)) ||
+    ["/waves", "/messages", "/notifications", "/open-mobile"].some((path) =>
+      pathname?.startsWith(path)
+    ) ||
     (pathname === "/" && homeActiveTab === "feed");
 
   if (hideFooter) return null;

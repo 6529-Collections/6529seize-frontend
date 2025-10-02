@@ -9,15 +9,14 @@ import { usePathname } from "next/navigation";
 import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import { getNotificationsRoute } from "../../../helpers/navigation.helpers";
 
 export default function HeaderNotifications() {
   const { connectedProfile } = useAuth();
   const pathname = usePathname();
   const { setNotificationCount } = useTitle();
   const { isApp } = useDeviceInfo();
-
-  // Use new route for desktop, old route for mobile app
-  const notificationsPath = isApp ? "/my-stream/notifications" : "/notifications";
+  const notificationsPath = getNotificationsRoute(isApp);
   const [linkHref, setLinkHref] = useState(notificationsPath);
 
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
@@ -38,8 +37,10 @@ export default function HeaderNotifications() {
   ]);
 
   useEffect(() => {
-    // Handle reload for both old and new notification paths
-    if (pathname === "/my-stream/notifications" || pathname === "/notifications") {
+    const isNotificationsRoute =
+      pathname === "/my-stream/notifications" || pathname === "/notifications";
+
+    if (isNotificationsRoute) {
       setLinkHref(`${pathname}?reload=true`);
     } else {
       setLinkHref(notificationsPath);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { createBreakpoint } from "react-use";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
@@ -18,6 +18,7 @@ interface BrainContentProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly keyboardAdjustment?: number;
+  readonly showPinnedWaves?: boolean;
 }
 
 const BrainContent: React.FC<BrainContentProps> = ({
@@ -25,6 +26,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   activeDrop,
   onCancelReplyQuote,
   keyboardAdjustment = 40,
+  showPinnedWaves = true,
 }) => {
   // Get layout context registration function for measuring
   const { registerRef } = useLayout();
@@ -39,31 +41,41 @@ const BrainContent: React.FC<BrainContentProps> = ({
   // Local refs for component-specific needs
   const pinnedElementRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    if (!showPinnedWaves) {
+      registerRef("pinned", null);
+    }
+  }, [showPinnedWaves, registerRef]);
+
   // Callback refs for registration with LayoutContext
   const setPinnedRef = useCallback(
     (element: HTMLDivElement | null) => {
       // Update local ref
       pinnedElementRef.current = element;
 
-      // Register with LayoutContext
-      registerRef("pinned", element);
+      if (showPinnedWaves) {
+        // Register with LayoutContext
+        registerRef("pinned", element);
+      }
     },
-    [registerRef]
+    [registerRef, showPinnedWaves]
   );
 
   // Only show pinned waves in mobile apps, not mobile browsers
-  const shouldShowPinnedWaves = breakpoint === "S" && isApp;
+  const shouldShowPinnedWaves = showPinnedWaves && breakpoint === "S" && isApp;
 
   // Only apply Android keyboard adjustments when input is visible
   const containerStyle = activeDrop ? getContainerStyle({}, keyboardAdjustment) : {};
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full" style={containerStyle}>
-      <div
-        ref={setPinnedRef}
-        className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-hidden">
-        {shouldShowPinnedWaves && <BrainContentPinnedWaves />}
-      </div>
+      {showPinnedWaves && (
+        <div
+          ref={setPinnedRef}
+          className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-hidden">
+          {shouldShowPinnedWaves && <BrainContentPinnedWaves />}
+        </div>
+      )}
       <div className="tw-flex-1 tw-overflow-hidden">
         <div className="tw-h-full">
           {children}

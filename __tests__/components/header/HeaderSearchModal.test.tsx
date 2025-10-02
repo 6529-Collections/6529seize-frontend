@@ -13,6 +13,7 @@ const usePathname = jest.fn();
 const useSearchParams = jest.fn();
 const useWaves = jest.fn();
 const useLocalPreference = jest.fn();
+const useDeviceInfo = jest.fn();
 
 jest.mock("react-use", () => {
   return {
@@ -40,6 +41,10 @@ jest.mock("next/navigation", () => ({
   usePathname: () => usePathname(),
   useSearchParams: () => useSearchParams(),
 }));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => useDeviceInfo(),
+}));
 jest.mock("@/hooks/useWaves", () => ({
   useWaves: (...args: any[]) => useWaves(...args),
 }));
@@ -62,6 +67,11 @@ function setup() {
   useRouter.mockReturnValue({ push });
   usePathname.mockReturnValue("/");
   useSearchParams.mockReturnValue(new URLSearchParams());
+  useDeviceInfo.mockReturnValue({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  });
   useWaves.mockReturnValue({ waves: [], isFetching: false });
   useLocalPreference.mockReturnValue(["PROFILES", jest.fn()]);
   useQueryMock.mockImplementation(({ queryKey }) => {

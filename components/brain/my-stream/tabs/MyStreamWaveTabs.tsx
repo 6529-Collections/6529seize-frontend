@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useLayout } from "../layout/LayoutContext";
 import { useWave } from "../../../../hooks/useWave";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
 import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;
@@ -14,9 +15,16 @@ interface MyStreamWaveTabsProps {
 export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({ wave }) => {
   const { isMemesWave } = useWave(wave);
   const { registerRef } = useLayout();
+  const { isApp } = useDeviceInfo();
 
   // Reference to store tabs element for local measurements
   const tabsElementRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (isApp) {
+      registerRef("tabs", null);
+    }
+  }, [isApp, registerRef]);
 
   // Callback function to set tabs element reference
   const setTabsRef = useCallback(
@@ -29,6 +37,10 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({ wave }) => {
     },
     [registerRef]
   );
+
+  if (isApp) {
+    return null;
+  }
 
   return (
     <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">

@@ -9,6 +9,15 @@ jest.mock("react-use", () => ({
   useHoverDirty: (...args: any[]) => useHoverDirty(...args),
 }));
 
+jest.mock("../../../hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  })),
+}));
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children, onClick }: any) => (

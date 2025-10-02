@@ -71,7 +71,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams?.toString() || '');
       params.delete('wave');
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      const newUrl = params.toString()
+        ? `${pathname}?${params.toString()}`
+        : pathname || '/my-stream';
       router.push(newUrl, { scroll: false });
     },
   });
@@ -92,7 +94,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const onDropClose = () => {
     const params = new URLSearchParams(searchParams?.toString() || '');
     params.delete('drop');
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+    const newUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname || '/my-stream';
     router.push(newUrl, { scroll: false });
   };
 
@@ -109,6 +113,10 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       setActiveView(BrainView.NOTIFICATIONS);
     } else if (pathname === "/my-stream" && !waveId) {
       setActiveView(BrainView.DEFAULT);
+    } else if (pathname === "/waves" && !waveId) {
+      setActiveView(BrainView.WAVES);
+    } else if (pathname === "/messages" && !waveId) {
+      setActiveView(BrainView.MESSAGES);
     }
   }, [pathname, waveId]);
 

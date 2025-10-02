@@ -18,9 +18,11 @@ const WavesView: React.FC = () => {
 
   const serialisedWaveId = searchParams?.get('wave') || null;
 
+  const showPlaceholder = !serialisedWaveId && !isApp;
+
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
-  ) : (
+  ) : showPlaceholder ? (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-center tw-p-8">
       <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
         Select a Wave
@@ -28,8 +30,8 @@ const WavesView: React.FC = () => {
       <p className="tw-text-iron-400 tw-max-w-md tw-mb-6 tw-text-sm sm:tw-text-base">
         Choose a wave to view its content and participate in the discussion.
       </p>
-      
-      {!isApp && connectedProfile && (
+
+      {connectedProfile && (
         <PrimaryButton
           onClicked={() => setIsCreateModalOpen(true)}
           disabled={false}
@@ -39,9 +41,8 @@ const WavesView: React.FC = () => {
           Create Wave
         </PrimaryButton>
       )}
-    
     </div>
-  );
+  ) : null;
 
   // Note: Wave views (MyStreamWave) manage their own activeDrop state
   // internally via MyStreamWaveChat. We pass null to BrainContent because

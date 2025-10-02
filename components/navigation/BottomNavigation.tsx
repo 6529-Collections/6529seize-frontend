@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import NavItem from "./NavItem";
 import type { NavItem as NavItemData } from "./navTypes";
 import HomeIcon from "../common/icons/HomeIcon";
@@ -12,6 +12,8 @@ import UsersIcon from "../common/icons/UsersIcon";
 import LogoIcon from "../common/icons/LogoIcon";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import useCapacitor from "../../hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getNotificationsRoute } from "@/helpers/navigation.helpers";
 
 export const items: NavItemData[] = [
   {
@@ -39,7 +41,7 @@ export const items: NavItemData[] = [
   {
     kind: "route",
     name: "Stream",
-    href: "/my-stream",
+    href: "/",
     icon: "stream",
     iconComponent: LogoIcon,
     iconSizeClass: "tw-size-9",
@@ -70,6 +72,7 @@ export const items: NavItemData[] = [
 const BottomNavigation: React.FC = () => {
   const { registerRef } = useLayout();
   const { isAndroid } = useCapacitor();
+  const { isApp } = useDeviceInfo();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
 
@@ -80,6 +83,19 @@ const BottomNavigation: React.FC = () => {
       registerRef("mobileNav", node);
     },
     [registerRef]
+  );
+
+  const navItems = useMemo(
+    () =>
+      items.map((item) =>
+        item.name === "Notifications"
+          ? {
+              ...item,
+              href: getNotificationsRoute(isApp),
+            }
+          : item
+      ),
+    [isApp]
   );
   
   // Only add safe area padding on Android
@@ -93,7 +109,7 @@ const BottomNavigation: React.FC = () => {
         <ul
           className="tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)]
     tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl tw-mx-auto">
-          {items.map((item) => (
+          {navItems.map((item) => (
             <li
               key={item.name}
               className={`tw-flex tw-flex-1 tw-justify-center tw-items-end ${

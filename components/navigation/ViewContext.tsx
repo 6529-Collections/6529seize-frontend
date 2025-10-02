@@ -13,11 +13,26 @@ import type { ViewKey, NavItem } from "./navTypes";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { useSearchParams, useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import {
+  getHomeFeedRoute,
+  getHomeLatestRoute,
+  getMessagesBaseRoute,
+  getWaveRoute,
+  getWavesBaseRoute,
+} from "@/helpers/navigation.helpers";
+import {
+  HOME_TAB_EVENT,
+  HomeTab,
+  getStoredHomeTab,
+  setStoredHomeTab,
+} from "@/components/home/useHomeTabs";
 
 interface ViewContextType {
   activeView: ViewKey | null;
   hardBack: (v: ViewKey) => void;
   handleNavClick: (item: NavItem) => void;
+  homeActiveTab: HomeTab;
 }
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
@@ -27,9 +42,33 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isApp } = useDeviceInfo();
   const [activeView, setActiveView] = useState<ViewKey | null>(null);
   const [lastVisitedWave, setLastVisitedWave] = useState<string | null>(null);
   const [lastVisitedDm, setLastVisitedDm] = useState<string | null>(null);
+  const [homeActiveTab, setHomeActiveTab] = useState<HomeTab>(() =>
+    getStoredHomeTab()
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleTabEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{ tab?: HomeTab }>).detail;
+      const tab = detail?.tab;
+      if (tab !== "feed" && tab !== "latest") return;
+      setHomeActiveTab(tab);
+    };
+
+    window.addEventListener(HOME_TAB_EVENT, handleTabEvent as EventListener);
+
+    return () => {
+      window.removeEventListener(
+        HOME_TAB_EVENT,
+        handleTabEvent as EventListener
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const wave = searchParams?.get("wave");
@@ -62,43 +101,66 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const handleNavClick = useCallback(
     async (item: NavItem) => {
       if (item.kind === "route") {
-        if (item.name === "Stream" && item.href === "/my-stream") {
+        if (item.name === "Stream") {
           setActiveView(null);
           setLastVisitedWave(null);
           setLastVisitedDm(null);
-          router.push("/my-stream");
+          setHomeActiveTab("feed");
+          setStoredHomeTab("feed");
+          router.push(getHomeFeedRoute());
+        } else if (item.name === "Home") {
+          setActiveView(null);
+          setHomeActiveTab("latest");
+          setStoredHomeTab("latest");
+          router.push(getHomeLatestRoute());
         } else {
           router.push(item.href);
         }
-      } else if (item.kind === "view" && item.viewKey === "waves" && lastVisitedWave) {
-        router.push(`/my-stream?wave=${lastVisitedWave}`);
       } else if (item.kind === "view" && item.viewKey === "waves") {
-        router.push("/my-stream?view=waves");
-      } else if (item.kind === "view" && item.viewKey === "messages" && lastVisitedDm) {
-        router.push(`/my-stream?wave=${lastVisitedDm}`);
+        if (lastVisitedWave) {
+          router.push(
+            getWaveRoute({
+              waveId: lastVisitedWave,
+              isDirectMessage: false,
+              isApp,
+            })
+          );
+        } else {
+          router.push(getWavesBaseRoute(isApp));
+        }
       } else if (item.kind === "view" && item.viewKey === "messages") {
-        router.push("/my-stream?view=messages");
+        if (lastVisitedDm) {
+          router.push(
+            getWaveRoute({
+              waveId: lastVisitedDm,
+              isDirectMessage: true,
+              isApp,
+            })
+          );
+        } else {
+          router.push(getMessagesBaseRoute(isApp));
+        }
       }
     },
-    [router, lastVisitedWave, lastVisitedDm]
+    [router, lastVisitedWave, lastVisitedDm, isApp]
   );
 
   const hardBack = useCallback(
     (v: ViewKey) => {
       if (v === "messages") {
         setLastVisitedDm(null);
-        router.push("/my-stream?view=messages");
+        router.push(getMessagesBaseRoute(isApp));
       } else if (v === "waves") {
         setLastVisitedWave(null);
-        router.push("/my-stream?view=waves");
+        router.push(getWavesBaseRoute(isApp));
       }
     },
-    [router, setLastVisitedDm, setLastVisitedWave]
+    [router, setLastVisitedDm, setLastVisitedWave, isApp]
   );
 
   const providerValue = useMemo(
-    () => ({ activeView, handleNavClick, hardBack }),
-    [activeView, handleNavClick, hardBack]
+    () => ({ activeView, handleNavClick, hardBack, homeActiveTab }),
+    [activeView, handleNavClick, hardBack, homeActiveTab]
   );
 
   return (

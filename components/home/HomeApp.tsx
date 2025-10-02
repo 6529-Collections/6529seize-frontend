@@ -1,10 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
 import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import HomeFeed from "./HomeFeed";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import ConnectWallet from "../common/ConnectWallet";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import { useHomeTabs } from "./useHomeTabs";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface HomeAppProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -21,14 +27,52 @@ export default function HomeApp({
   initialTokens,
   isMemeMintingActive,
 }: HomeAppProps) {
-  // App version shows the Home component directly (latest drop content)
+  const { isAuthenticated } = useSeizeConnectContext();
+  const { registerRef } = useLayout();
+  const { activeTab } = useHomeTabs();
+  const { isApp } = useDeviceInfo();
+
+  useEffect(() => {
+    registerRef("tabs", null);
+  }, [registerRef]);
+
+  useEffect(() => {
+    if (!isApp) return;
+
+    const previousOverflow = document.body.style.overflow;
+
+    if (activeTab === "feed") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = previousOverflow || "";
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow || "";
+    };
+  }, [activeTab, isApp]);
+
   return (
-    <Home
-      featuredNft={featuredNft}
-      isMemeMintingActive={isMemeMintingActive}
-      featuredNextgen={featuredNextgen}
-      initialActivityData={initialActivityData}
-      initialTokens={initialTokens}
-    />
+    <div>
+      <div>
+        {activeTab === "feed" ? (
+          isAuthenticated ? (
+            <div className=" tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 sm:tw-px-4">
+              <HomeFeed />
+            </div>
+          ) : (
+            <ConnectWallet />
+          )
+        ) : (
+          <Home
+            featuredNft={featuredNft}
+            isMemeMintingActive={isMemeMintingActive}
+            featuredNextgen={featuredNextgen}
+            initialActivityData={initialActivityData}
+            initialTokens={initialTokens}
+          />
+        )}
+      </div>
+    </div>
   );
 }

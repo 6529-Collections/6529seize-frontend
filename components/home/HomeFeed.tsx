@@ -10,6 +10,7 @@ import BrainContent from "../brain/content/BrainContent";
 import MyStream from "../brain/my-stream/MyStream";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export default function HomeFeed() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
@@ -18,9 +19,17 @@ export default function HomeFeed() {
   const { isApp, hasTouchScreen } = useDeviceInfo();
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    // Navigate to waves for desktop, my-stream for app
-    const baseRoute = isApp ? '/my-stream' : '/waves';
-    const url = `${baseRoute}?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`;
+    const waveInfo = drop.wave as any;
+    const isDirectMessage =
+      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+
+    const url = getWaveRoute({
+      waveId: drop.wave.id,
+      serialNo: drop.serial_no,
+      isDirectMessage,
+      isApp,
+    });
+
     router.push(url, { scroll: false });
   };
 
@@ -72,26 +81,33 @@ export default function HomeFeed() {
     }
   };
 
+  const content = (
+    <BrainContent
+      activeDrop={activeDrop}
+      onCancelReplyQuote={onCancelReplyQuote}>
+      <MyStream
+        key="home-feed"
+        onReply={onReply}
+        onQuote={onQuote}
+        onDropContentClick={onDropContentClick}
+        activeDrop={activeDrop}
+        items={items}
+        isFetching={isFetching}
+        onBottomIntersection={onBottomIntersection}
+        haveNewItems={haveNewItems}
+        status={status}
+        isInitialQueryDone={isInitialQueryDone}
+      />
+    </BrainContent>
+  );
+
+  if (isApp) {
+    return content;
+  }
+
   return (
     <div style={hasTouchScreen ? smallScreenFeedStyle : homepageFeedStyle}>
-      <BrainContent
-        activeDrop={activeDrop}
-        onCancelReplyQuote={onCancelReplyQuote}
-      >
-        <MyStream
-          key="home-feed"
-          onReply={onReply}
-          onQuote={onQuote}
-          onDropContentClick={onDropContentClick}
-          activeDrop={activeDrop}
-          items={items}
-          isFetching={isFetching}
-          onBottomIntersection={onBottomIntersection}
-          haveNewItems={haveNewItems}
-          status={status}
-          isInitialQueryDone={isInitialQueryDone}
-        />
-      </BrainContent>
+      {content}
     </div>
   );
 }

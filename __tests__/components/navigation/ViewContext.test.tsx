@@ -6,6 +6,15 @@ import {
 } from "@/components/navigation/ViewContext";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
@@ -50,7 +59,28 @@ describe("ViewContext", () => {
         <Test />
       </ViewProvider>
     );
-    expect(push).toHaveBeenCalledWith("/home");
+    expect(push).toHaveBeenCalledWith("/");
+  });
+
+  it("navigates to feed tab when Stream is clicked", () => {
+    function Test() {
+      const { handleNavClick } = useViewContext();
+      React.useEffect(() => {
+        handleNavClick({
+          kind: "route",
+          name: "Stream",
+          href: "/",
+          icon: "s",
+        });
+      }, []);
+      return null;
+    }
+    render(
+      <ViewProvider>
+        <Test />
+      </ViewProvider>
+    );
+    expect(push).toHaveBeenCalledWith("/");
   });
 
   it("navigates to waves view when no last visited wave", () => {

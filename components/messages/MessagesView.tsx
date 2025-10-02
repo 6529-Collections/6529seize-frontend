@@ -9,20 +9,24 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModal";
 import { useAuth } from "../auth/Auth";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 const MessagesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { isApp } = useDeviceInfo();
 
   const serialisedWaveId = searchParams?.get("wave") || null;
+
+  const showPlaceholder = !serialisedWaveId && !isApp;
 
   const component = serialisedWaveId ? (
     <MyStreamWave
       key={`dm-wave-${serialisedWaveId}`}
       waveId={serialisedWaveId}
     />
-  ) : (
+  ) : showPlaceholder ? (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-center tw-p-8">
       <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
         Select a Conversation
@@ -44,7 +48,7 @@ const MessagesView: React.FC = () => {
         <span>New Direct Message</span>
       </PrimaryButton>
     </div>
-  );
+  ) : null;
 
   return (
     <>

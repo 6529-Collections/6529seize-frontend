@@ -16,7 +16,7 @@ afterEach(() => jest.clearAllMocks());
 
 describe("HeaderActionButtons", () => {
   it("creates new wave when active view is waves", async () => {
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "waves" });
+    (useCtx as jest.Mock).mockReturnValue({ activeView: "waves", homeActiveTab: "latest" });
     const push = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push });
     render(<HeaderActionButtons />);
@@ -25,7 +25,7 @@ describe("HeaderActionButtons", () => {
   });
 
   it("creates new dm when active view is messages", async () => {
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "messages" });
+    (useCtx as jest.Mock).mockReturnValue({ activeView: "messages", homeActiveTab: "latest" });
     const push = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push });
     render(<HeaderActionButtons />);
@@ -34,7 +34,7 @@ describe("HeaderActionButtons", () => {
   });
 
   it("renders nothing for other views", () => {
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "other" });
+    (useCtx as jest.Mock).mockReturnValue({ activeView: "other", homeActiveTab: "latest" });
     (useRt as jest.Mock).mockReturnValue({ push: jest.fn() });
     const { container } = render(<HeaderActionButtons />);
     expect(container.firstChild).toBeNull();

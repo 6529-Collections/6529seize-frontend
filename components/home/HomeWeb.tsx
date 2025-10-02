@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -14,8 +14,7 @@ import { InitialActivityData } from "../latest-activity/fetchInitialActivityData
 import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-
-const HOME_TAB_STORAGE_KEY = "home.activeTab";
+import { useHomeTabs } from "./useHomeTabs";
 
 interface HomeWebProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -36,32 +35,7 @@ export default function HomeWeb({
   const { isAuthenticated } = useSeizeConnectContext();
   const { registerRef } = useLayout();
   const { drop, isDropOpen, onDropClose } = useDropModal();
-  const [activeTab, setActiveTab] = useState<"feed" | "latest">("latest");
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const savedTab = window.localStorage.getItem(HOME_TAB_STORAGE_KEY);
-      if (savedTab === "feed" || savedTab === "latest") {
-        setActiveTab(savedTab);
-      }
-    } catch (error) {
-      console.warn("Failed to read home tab from storage", error);
-    }
-  }, []);
-
-  const handleTabChange = useCallback((tab: "feed" | "latest") => {
-    setActiveTab(tab);
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem(HOME_TAB_STORAGE_KEY, tab);
-        // Notify other components about tab change
-        window.dispatchEvent(new CustomEvent("homeTabChange", { detail: { tab } }));
-      } catch (error) {
-        console.warn("Failed to persist home tab to storage", error);
-      }
-    }
-  }, []);
+  const { activeTab, handleTabChange } = useHomeTabs();
 
   // Callback ref for registration with LayoutContext
   const setTabsRef = useMemo(

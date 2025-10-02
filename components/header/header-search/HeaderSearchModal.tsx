@@ -21,6 +21,11 @@ import { useWaves } from "../../../hooks/useWaves";
 import useLocalPreference from "../../../hooks/useLocalPreference";
 import { TabToggle } from "../../common/TabToggle";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import {
+  getWaveHomeRoute,
+  getWaveRoute,
+} from "../../../helpers/navigation.helpers";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -46,6 +51,7 @@ export default function HeaderSearchModal({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isApp } = useDeviceInfo();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -174,9 +180,17 @@ export default function HeaderSearchModal({
     }
     if (selectedCategory === CATEGORY.WAVES) {
       const wave = item as ApiWave;
-      const currentWaveId = searchParams?.get("wave") as string | undefined;
+      const currentWaveId = searchParams?.get("wave") ?? undefined;
+      const isDirectMessage =
+        wave.chat?.scope?.group?.is_direct_message ?? false;
       const target =
-        currentWaveId === wave.id ? "/my-stream" : `/my-stream?wave=${wave.id}`;
+        currentWaveId === wave.id
+          ? getWaveHomeRoute({ isDirectMessage, isApp })
+          : getWaveRoute({
+              waveId: wave.id,
+              isDirectMessage,
+              isApp,
+            });
       router.push(target);
       onClose();
     }
