@@ -392,7 +392,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               </>
             )}
             {nftNotFound && (
-              <Row className="tw-mt-6">
+              <Row>
                 <Col>
                   <UpcomingMemePage id={nftId} />
                 </Col>
