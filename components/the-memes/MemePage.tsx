@@ -126,7 +126,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }, [nft, nftId, activeTab, setTitle]);
 
   useEffect(() => {
-    if (focusParam === activeTab) {
+    if (!nftNotFound && focusParam === activeTab) {
       return;
     }
     let params = new URLSearchParams(searchParamsString);
@@ -172,6 +172,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           setNftMeta(nftMetas[0]);
           const mynft = nftResponse.data?.[0];
           setNft(mynft);
+          setNftNotFound(false);
         } else {
           setNftMeta(undefined);
           setNft(undefined);
