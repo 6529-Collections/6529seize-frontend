@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 
-jest.mock("next/dynamic", () => () => () => {
+jest.mock("next/dynamic", () => () => {
   const MockDynamicComponent = () => <div data-testid="dynamic" />;
   MockDynamicComponent.displayName = "MockDynamicComponent";
   return MockDynamicComponent;

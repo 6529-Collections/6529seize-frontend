@@ -327,9 +327,7 @@ export default function AuthorLadysabrinaPage() {
                             <div className="fusion-rollover-content">
                               <Link
                                 className="fusion-rollover-link"
-                                href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                                href="/blog/disney-deekay-their-secret-to-animation/">
                                 Disney and DeeKay: Their Secret to Animation
                               </Link>
                               <div className="fusion-rollover-sep" />
