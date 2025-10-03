@@ -1,5 +1,6 @@
-import styles from "./About.module.scss";
+import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+import styles from "./About.module.scss";
 
 export default function AboutLicense() {
   return (
@@ -28,12 +29,12 @@ export default function AboutLicense() {
           </p>
           <p>
             Link to the formal text of the CC0 license:{" "}
-            <a
+            <Link
               href="https://creativecommons.org/share-your-work/public-domain/cc0/"
               target="_blank"
               rel="noopener noreferrer">
               https://creativecommons.org/share-your-work/public-domain/cc0/
-            </a>
+            </Link>
           </p>
           <p>
             This means that, whether or not you own a The Memes or Meme Lab NFT,
@@ -55,9 +56,12 @@ export default function AboutLicense() {
             that are not in the public domain. For example, Meme Card #1 is a
             derivative of Punk 6529, the copyright for which is owned by Yuga
             Labs. &#64;
-            <a href="https://x.com/6529er" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://x.com/6529er"
+              target="_blank"
+              rel="noopener noreferrer">
               6529er
-            </a>{" "}
+            </Link>{" "}
             , the artist, is putting whatever rights he may have in Meme Card #1
             in the public domain. That means if you use Meme Card #1, he will
             not pursue any claims against you. But he does not have the right to

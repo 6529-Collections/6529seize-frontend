@@ -1,5 +1,6 @@
-import { Col, Container, Row } from "react-bootstrap";
 import Image from "next/image";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutGradients() {
   return (
@@ -56,9 +57,12 @@ export default function AboutGradients() {
           </p>
           <p>
             It is the artist&apos;s (&#64;
-            <a href="https://x.com/6529er" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://x.com/6529er"
+              target="_blank"
+              rel="noopener noreferrer">
               6529er
-            </a>
+            </Link>
             ) preferred interpretation of his work and his vision for it in its
             purest form. It reminds us of the Chromie Squiggles Perfect
             Spectrums - much less flashy than the HyperRainbows, but it is an

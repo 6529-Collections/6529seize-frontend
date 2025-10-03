@@ -1,18 +1,19 @@
 "use client";
 
-import Toggle from "react-toggle";
-import styles from "./About.module.scss";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { useState } from "react";
-import {
-  useCookieConsent,
-  getCookieConsentByName,
-} from "../cookies/CookieConsentContext";
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants";
+import Link from "next/link";
+import { useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import Toggle from "react-toggle";
+import {
+  getCookieConsentByName,
+  useCookieConsent,
+} from "../cookies/CookieConsentContext";
+import styles from "./About.module.scss";
 
 export default function AboutCookiePolicy() {
   const { showCookieConsent, consent, reject } = useCookieConsent();
@@ -100,12 +101,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>6529.io</td>
                       <td>
-                        <a
+                        <Link
                           href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS"
                           target="_blank"
                           rel="noopener noreferrer">
                           AWSALBTGCORS
-                        </a>{" "}
+                        </Link>{" "}
                         (Amazon Web Services)
                       </td>
                       <td>First Party</td>
@@ -114,12 +115,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>6529.io</td>
                       <td>
-                        <a
+                        <Link
                           href="https://cookiepedia.co.uk/cookies/AWSALBTG"
                           target="_blank"
                           rel="noopener noreferrer">
                           AWSALBTG
-                        </a>{" "}
+                        </Link>{" "}
                         (Amazon Web Services)
                       </td>
                       <td>First Party</td>
@@ -207,12 +208,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>.6529.io</td>
                       <td>
-                        <a
+                        <Link
                           href="https://cookiepedia.co.uk/cookies/_ga_"
                           target="_blank"
                           rel="noopener noreferrer">
                           _ga_71NLVV3KY3
-                        </a>{" "}
+                        </Link>{" "}
                         (Google Analytics)
                       </td>
                       <td>First Party</td>
@@ -221,12 +222,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>.6529.io</td>
                       <td>
-                        <a
+                        <Link
                           href="https://cookiepedia.co.uk/cookies/_ga"
                           target="_blank"
                           rel="noopener noreferrer">
                           _ga
-                        </a>{" "}
+                        </Link>{" "}
                         (Google Analytics)
                       </td>
                       <td>First Party</td>
@@ -235,12 +236,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>.6529.io</td>
                       <td>
-                        <a
+                        <Link
                           href="https://cookiepedia.co.uk/cookies/_gid"
                           target="_blank"
                           rel="noopener noreferrer">
                           _gid
-                        </a>{" "}
+                        </Link>{" "}
                         (Google Analytics)
                       </td>
                       <td>First Party</td>

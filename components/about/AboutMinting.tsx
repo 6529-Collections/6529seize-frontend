@@ -1,5 +1,5 @@
-import { Col, Container, Row } from "react-bootstrap";
 import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutMinting() {
   return (
@@ -38,23 +38,23 @@ export default function AboutMinting() {
             <br />
             <li>
               Minting time and dates are announced on{" "}
-              <a
+              <Link
                 href="https://x.com/6529collections"
                 target="_blank"
                 rel="noopener noreferrer">
                 https://x.com/6529collections
-              </a>
+              </Link>
             </li>
             <br />
             <li>
               Currently, the mints are happening Mon/Wed/Fri at 11am ET (4pm
               UTC), but times may vary. Please follow &#64;
-              <a
+              <Link
                 href="https://x.com/6529collections"
                 target="_blank"
                 rel="noopener noreferrer">
                 6529collections
-              </a>{" "}
+              </Link>{" "}
               for details
             </li>
             <br />
@@ -538,7 +538,10 @@ export default function AboutMinting() {
             <br />
             <li>
               For our full analysis of our Network Metrics, go here:{" "}
-              <Link href="/network/metrics" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="/network/metrics"
+                target="_blank"
+                rel="noopener noreferrer">
                 6529.io/network/metrics
               </Link>
             </li>

@@ -4,6 +4,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { DELEGATION_CONTRACT } from "@/constants";
 import { DelegationCenterSection } from "@/enums";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row, Toast, ToastContainer } from "react-bootstrap";
@@ -215,8 +216,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   props.section === DelegationCenterSection.CENTER
                     ? styles.menuLeftItemActive
                     : ""
-                }`}
-              >
+                }`}>
                 Delegation Center
               </Col>
             </Row>
@@ -231,8 +231,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   props.section === DelegationCenterSection.WALLET_ARCHITECTURE
                     ? styles.menuLeftItemActive
                     : ""
-                }`}
-              >
+                }`}>
                 Wallet Architecture
               </Col>
             </Row>
@@ -247,8 +246,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                     pathname?.startsWith("/delegation/delegation-faq/"))
                     ? styles.menuLeftItemActive
                     : ""
-                }`}
-              >
+                }`}>
                 Delegation FAQs
               </Col>
             </Row>
@@ -264,8 +262,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   DelegationCenterSection.CONSOLIDATION_USE_CASES
                     ? styles.menuLeftItemActive
                     : ""
-                }`}
-              >
+                }`}>
                 Consolidation Use Cases
               </Col>
             </Row>
@@ -278,8 +275,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   props.section === DelegationCenterSection.CHECKER
                     ? styles.menuLeftItemActive
                     : ""
-                }`}
-              >
+                }`}>
                 Wallet Checker
               </Col>
             </Row>
@@ -312,8 +308,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         props.section === DelegationCenterSection.CENTER
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}
-                    >
+                      }`}>
                       Delegation Center
                     </Col>
                   </Row>
@@ -329,8 +324,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         DelegationCenterSection.WALLET_ARCHITECTURE
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}
-                    >
+                      }`}>
                       Wallet Architecture
                     </Col>
                   </Row>
@@ -343,8 +337,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         props.section === DelegationCenterSection.FAQ
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}
-                    >
+                      }`}>
                       Delegation FAQs
                     </Col>
                   </Row>
@@ -360,8 +353,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         DelegationCenterSection.CONSOLIDATION_USE_CASES
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}
-                    >
+                      }`}>
                       Consolidation Use Cases
                     </Col>
                   </Row>
@@ -374,8 +366,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                         props.section === DelegationCenterSection.CHECKER
                           ? styles.menuLeftItemActive
                           : ""
-                      }`}
-                    >
+                      }`}>
                       Wallet Checker
                     </Col>
                   </Row>
@@ -413,7 +404,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
 
 function EtherscanLink() {
   return (
-    <a
+    <Link
       href={
         DELEGATION_CONTRACT.chain_id === sepolia.id
           ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
@@ -421,8 +412,7 @@ function EtherscanLink() {
       }
       target="_blank"
       rel="noopener noreferrer"
-      className={styles.delegationLink}
-    >
+      className={styles.delegationLink}>
       <Image
         unoptimized
         src="/etherscan_w.png"
@@ -431,18 +421,17 @@ function EtherscanLink() {
         height={30}
       />
       <span>Etherscan</span>
-    </a>
+    </Link>
   );
 }
 
 function GithubLink() {
   return (
-    <a
+    <Link
       href={`https://github.com/6529-Collections/nftdelegation`}
       target="_blank"
       rel="noopener noreferrer"
-      className={styles.delegationLink}
-    >
+      className={styles.delegationLink}>
       <Image
         unoptimized
         src="/github_w.png"
@@ -451,7 +440,7 @@ function GithubLink() {
         height={30}
       />
       <span>Github</span>
-    </a>
+    </Link>
   );
 }
 
@@ -470,13 +459,11 @@ export function DelegationToast(
         if (!props.toastRef.current?.contains(e.target as Node)) {
           props.setShowToast(false);
         }
-      }}
-    >
+      }}>
       <ToastContainer
         position={"top-center"}
         className={styles.toast}
-        ref={props.toastRef}
-      >
+        ref={props.toastRef}>
         <Toast onClose={() => props.setShowToast(false)} show={props.showToast}>
           <Toast.Header>
             <span className="me-auto">{props.toast.title}</span>
@@ -485,8 +472,7 @@ export function DelegationToast(
             <Toast.Body
               dangerouslySetInnerHTML={{
                 __html: props.toast.message,
-              }}
-            ></Toast.Body>
+              }}></Toast.Body>
           )}
         </Toast>
       </ToastContainer>

@@ -1,5 +1,6 @@
-import styles from "./About.module.scss";
+import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+import styles from "./About.module.scss";
 
 export default function AboutCopyright() {
   return (
@@ -20,8 +21,8 @@ export default function AboutCopyright() {
           <p>
             6529.io, a platform of 6529 Collection LLC, respects the
             intellectual property rights of others and expects its users to do
-            the same. It is 6529.io&apos;s policy to respond to clear notices
-            of alleged copyright infringement that comply with the Digital
+            the same. It is 6529.io&apos;s policy to respond to clear notices of
+            alleged copyright infringement that comply with the Digital
             Millennium Copyright Act (DMCA).
           </p>
         </Col>
@@ -78,7 +79,7 @@ export default function AboutCopyright() {
             DMCA Compliance, 6529 Collection LLC, 2810 N Church Street, PMB
             76435, Wilmington, DE 19802-4447
             <br />
-            Email: <a href="mailto:6529Ops@6529.io">6529Ops@6529.io</a>
+            Email: <Link href="mailto:6529Ops@6529.io">6529Ops@6529.io</Link>
             <br />
             Phone: 302.219.0696
           </p>
@@ -120,7 +121,7 @@ export default function AboutCopyright() {
             DMCA Compliance, 6529 Collection LLC, 2810 N Church Street, PMB
             76435, Wilmington, DE 19802-4447
             <br />
-            Email: <a href="mailto:6529Ops@6529.io">6529Ops@6529.io</a>
+            Email: <Link href="mailto:6529Ops@6529.io">6529Ops@6529.io</Link>
             <br />
             Phone: 302.219.0696
           </p>
@@ -158,8 +159,8 @@ export default function AboutCopyright() {
           <p>
             6529 Collection LLC reserves the right to modify the terms of this
             DMCA Policy at any time and for any reason. By continuing to access
-            or use the 6529.io after those revisions become effective, you
-            agree to be bound by the revised policy.
+            or use the 6529.io after those revisions become effective, you agree
+            to be bound by the revised policy.
           </p>
         </Col>
       </Row>
@@ -175,7 +176,7 @@ export default function AboutCopyright() {
             DMCA Compliance, 6529 Collection LLC, 2810 N Church Street, PMB
             76435, Wilmington, DE 19802-4447
             <br />
-            Email: <a href="mailto:6529Ops@6529.io">6529Ops@6529.io</a>
+            Email: <Link href="mailto:6529Ops@6529.io">6529Ops@6529.io</Link>
             <br />
             Phone: 302.219.0696
           </p>
