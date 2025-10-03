@@ -245,13 +245,13 @@ export default function AboutApply() {
               }}>
               <p style={{ color: "rgb(154, 154, 154)" }} className="mb-3">
                 Carefully read the{" "}
-                <Link
+                <a
                   href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="link-info">
                   Artist Brief
-                </Link>{" "}
+                </a>{" "}
                 before submitting. It outlines the collection's mission, vision,
                 themes, and guidelines. <br /> High-quality, mission-aligned
                 submissions perform best. Low-effort or off-theme submissions
@@ -299,25 +299,25 @@ export default function AboutApply() {
                       The Memes - FAQ wave
                     </Link>{" "}
                     after reading the{" "}
-                    <Link
+                    <a
                       href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="link-info">
                       Artist Brief
-                    </Link>
+                    </a>
                     {"."}
                   </div>
                   <div style={{ color: "rgb(154, 154, 154)" }} className="mt-2">
                     <span className="text-success me-2">✓</span>
                     For other inquiries, email us at{" "}
-                    <Link
+                    <a
                       href="mailto:collections@6529.io"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="link-info">
                       collections@6529.io
-                    </Link>
+                    </a>
                     {"."}
                   </div>
                 </div>

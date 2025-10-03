@@ -38,23 +38,23 @@ export default function AboutMinting() {
             <br />
             <li>
               Minting time and dates are announced on{" "}
-              <Link
+              <a
                 href="https://x.com/6529collections"
                 target="_blank"
                 rel="noopener noreferrer">
                 https://x.com/6529collections
-              </Link>
+              </a>
             </li>
             <br />
             <li>
               Currently, the mints are happening Mon/Wed/Fri at 11am ET (4pm
               UTC), but times may vary. Please follow &#64;
-              <Link
+              <a
                 href="https://x.com/6529collections"
                 target="_blank"
                 rel="noopener noreferrer">
                 6529collections
-              </Link>{" "}
+              </a>{" "}
               for details
             </li>
             <br />

@@ -23,8 +23,7 @@ export default function AboutContactUs() {
             </Link>
           </p>
           <p>
-            or email us at{" "}
-            <Link href="mailto:support@6529.io">support@6529.io</Link>
+            or email us at <a href="mailto:support@6529.io">support@6529.io</a>
           </p>
           <br />
           <p>Alternative, but not as good, methods to contact us are:</p>

@@ -128,7 +128,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             answered by reading the presentation and we will quietly think a
             little less of you and nobody wants that.
           </p>
-          <Link
+          <a
             href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
             target="_blank"
             rel="noopener noreferrer"
@@ -138,7 +138,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               icon={faArrowRight}
               className="tw-ml-2 tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
-          </Link>
+          </a>
           <p className="tw-text-iron-500 tw-mt-4 tw-text-sm">
             These FAQs are a summary of this presentation but not a substitute
             for reading it.

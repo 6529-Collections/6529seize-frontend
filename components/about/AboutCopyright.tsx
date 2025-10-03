@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
 
@@ -79,7 +78,7 @@ export default function AboutCopyright() {
             DMCA Compliance, 6529 Collection LLC, 2810 N Church Street, PMB
             76435, Wilmington, DE 19802-4447
             <br />
-            Email: <Link href="mailto:6529Ops@6529.io">6529Ops@6529.io</Link>
+            Email: <a href="mailto:6529Ops@6529.io">6529Ops@6529.io</a>
             <br />
             Phone: 302.219.0696
           </p>
@@ -121,7 +120,7 @@ export default function AboutCopyright() {
             DMCA Compliance, 6529 Collection LLC, 2810 N Church Street, PMB
             76435, Wilmington, DE 19802-4447
             <br />
-            Email: <Link href="mailto:6529Ops@6529.io">6529Ops@6529.io</Link>
+            Email: <a href="mailto:6529Ops@6529.io">6529Ops@6529.io</a>
             <br />
             Phone: 302.219.0696
           </p>
@@ -176,7 +175,7 @@ export default function AboutCopyright() {
             DMCA Compliance, 6529 Collection LLC, 2810 N Church Street, PMB
             76435, Wilmington, DE 19802-4447
             <br />
-            Email: <Link href="mailto:6529Ops@6529.io">6529Ops@6529.io</Link>
+            Email: <a href="mailto:6529Ops@6529.io">6529Ops@6529.io</a>
             <br />
             Phone: 302.219.0696
           </p>

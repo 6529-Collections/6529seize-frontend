@@ -101,12 +101,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>6529.io</td>
                       <td>
-                        <Link
+                        <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS"
                           target="_blank"
                           rel="noopener noreferrer">
                           AWSALBTGCORS
-                        </Link>{" "}
+                        </a>{" "}
                         (Amazon Web Services)
                       </td>
                       <td>First Party</td>

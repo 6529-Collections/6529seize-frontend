@@ -317,12 +317,12 @@ export default function AboutPrivacyPolicy() {
               you visit. We currently do not respond to &quot;Do Not Track&quot;
               signals. To find out more about &quot;Do Not Track,&quot; please
               visit{" "}
-              <Link
+              <a
                 href={`http://www.allaboutdnt.com`}
                 target="_blank"
                 rel="noopener noreferrer">
                 http://www.allaboutdnt.com
-              </Link>
+              </a>
               .
             </p>
             <p>
@@ -539,12 +539,12 @@ export default function AboutPrivacyPolicy() {
             <ul>
               <li>
                 Email:{" "}
-                <Link
+                <a
                   href="mailto:privacy@6529.io"
                   target="_blank"
                   rel="noopener noreferrer">
                   privacy&#64;6529.io
-                </Link>
+                </a>
               </li>
               <li>
                 Mail:
