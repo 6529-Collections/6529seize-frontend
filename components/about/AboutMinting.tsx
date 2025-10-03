@@ -1,5 +1,5 @@
-import { Col, Container, Row } from "react-bootstrap";
 import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutMinting() {
   return (
@@ -538,7 +538,10 @@ export default function AboutMinting() {
             <br />
             <li>
               For our full analysis of our Network Metrics, go here:{" "}
-              <Link href="/network/metrics" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="/network/metrics"
+                target="_blank"
+                rel="noopener noreferrer">
                 6529.io/network/metrics
               </Link>
             </li>

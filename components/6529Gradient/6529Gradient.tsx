@@ -12,15 +12,16 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import { NFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
+import { fetchAllPages } from "@/services/6529api";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { fetchAllPages } from "@/services/6529api";
 import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
 import styles from "./6529Gradient.module.scss";
 
@@ -104,7 +105,7 @@ export default function GradientsComponent() {
         sm={{ span: 4 }}
         md={{ span: 3 }}
         lg={{ span: 3 }}>
-        <a
+        <Link
           href={`/6529-gradient/${nft.id}`}
           className="decoration-none scale-hover">
           <Container fluid className="no-padding">
@@ -146,7 +147,7 @@ export default function GradientsComponent() {
               </Col>
             </Row>
           </Container>
-        </a>
+        </Link>
       </Col>
     );
   }

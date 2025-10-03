@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
 import { fetchAboutSectionFile } from "./about.helpers";
-import { useEffect, useState } from "react";
 
 export default function AboutGDRC1() {
   const [html, setHtml] = useState<string>("");
@@ -23,12 +24,12 @@ export default function AboutGDRC1() {
       <Row>
         <Col className="pt-2 pb-2">
           We support{" "}
-          <a
+          <Link
             href="https://digitalrightscharter.org/"
             target="_blank"
             rel="noopener noreferrer">
             The Global Digital Rights Charter 1
-          </a>
+          </Link>
           .
           <br />
           <br />

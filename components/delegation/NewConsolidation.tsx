@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
-import styles from "./Delegation.module.scss";
-
 import { DELEGATION_ABI } from "@/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
 } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import styles from "./Delegation.module.scss";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
@@ -166,14 +166,14 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Note: For TDH Consolidation use either &apos;Any
                 Collection&apos; or &apos;The Memes&apos;
-                <a
+                <Link
                   href={`/delegation/delegation-faq/register-consolidation`}
                   target="_blank"
                   rel="noopener noreferrer">
                   <FontAwesomeIcon
                     className={styles.infoIconLink}
                     icon={faInfoCircle}></FontAwesomeIcon>
-                </a>
+                </Link>
               </Form.Label>
             </Form.Group>
             <DelegationSubmitGroups

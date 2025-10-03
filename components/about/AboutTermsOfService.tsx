@@ -1,7 +1,7 @@
-import Link from "next/link";
-import styles from "./About.module.scss";
-import { Col, Container, Row } from "react-bootstrap";
 import { AboutSection } from "@/enums";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+import styles from "./About.module.scss";
 
 export default function AboutTermsOfService() {
   return (
@@ -48,13 +48,19 @@ export default function AboutTermsOfService() {
               <br />
               <br />
               &quot;Our Platform&quot;: the website located at{" "}
-              <a href="https://6529.io" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://6529.io"
+                target="_blank"
+                rel="noopener noreferrer">
                 6529.io
-              </a>{" "}
+              </Link>{" "}
               , any websites hosted at sub-domains of{" "}
-              <a href="https://6529.io" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://6529.io"
+                target="_blank"
+                rel="noopener noreferrer">
                 6529.io
-              </a>{" "}
+              </Link>{" "}
               , including hosted minting or primary sales pages, any primary
               mints or sales directly from our smart contracts, any mobile or
               metaverse applications we may make, and any content (data,
@@ -135,9 +141,12 @@ export default function AboutTermsOfService() {
               <br />
               <br />
               &#64;
-              <a href="https://x.com/punk6529" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://x.com/punk6529"
+                target="_blank"
+                rel="noopener noreferrer">
                 punk6529
-              </a>{" "}
+              </Link>{" "}
               tweets a lot and has a lot of ideas that may change from time to
               time.
               <br />
@@ -206,33 +215,33 @@ export default function AboutTermsOfService() {
               Terms.
               <br />
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.MEMES}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.MEMES}
-              </a>
+              </Link>
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.GRADIENTS}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.GRADIENTS}
-              </a>
+              </Link>
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.MEME_LAB}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.MEME_LAB}
-              </a>
+              </Link>
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.FAQ}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.FAQ}
-              </a>
+              </Link>
             </li>
             <br />
             <br />
@@ -248,12 +257,12 @@ export default function AboutTermsOfService() {
               incorporated by reference into these Terms.
               <br />
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.LICENSE}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.LICENSE}
-              </a>
+              </Link>
             </li>
             <br />
             <br />
@@ -270,12 +279,12 @@ export default function AboutTermsOfService() {
               incorporated by reference into these Terms.
               <br />
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.MINTING}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.MINTING}
-              </a>
+              </Link>
             </li>
             <br />
             <br />
@@ -287,12 +296,12 @@ export default function AboutTermsOfService() {
               data in the United States or other countries.
               <br />
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.PRIVACY_POLICY}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.PRIVACY_POLICY}
-              </a>
+              </Link>
             </li>
             <br />
             <br />
@@ -303,12 +312,12 @@ export default function AboutTermsOfService() {
               Our Copyright policy can be found here
               <br />
               <br />
-              <a
+              <Link
                 href={`/about/${AboutSection.COPYRIGHT}`}
                 target="_blank"
                 rel="noopener noreferrer">
                 6529.io/about/{AboutSection.COPYRIGHT}
-              </a>
+              </Link>
             </li>
             <br />
             <br />
@@ -621,8 +630,7 @@ export default function AboutTermsOfService() {
               <Link
                 href="/dispute-resolution"
                 target="_blank"
-                rel="noopener noreferrer"
-              >
+                rel="noopener noreferrer">
                 6529.io/dispute-resolution
               </Link>{" "}
             </li>

@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
-import styles from "./Delegation.module.scss";
-
 import { DELEGATION_ABI } from "@/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import {
   DELEGATION_USE_CASES,
   DelegationCollection,
 } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import styles from "./Delegation.module.scss";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
@@ -296,14 +296,14 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Note: The currently supported use cases on 6529.io are: #1 -
                 All, #2 - Minting/Allowlist, #3 - Airdrops{" "}
-                <a
+                <Link
                   href={`/delegation/delegation-faq/use-cases-overview`}
                   target="_blank"
                   rel="noopener noreferrer">
                   <FontAwesomeIcon
                     className={styles.infoIconLink}
                     icon={faInfoCircle}></FontAwesomeIcon>
-                </a>
+                </Link>
               </Form.Label>
             </Form.Group>
             <DelegationSubmitGroups

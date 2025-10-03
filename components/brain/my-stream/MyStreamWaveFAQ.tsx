@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBook,
-  faUser,
-  faCrown,
-  faVoteYea,
-  faTools,
-  faChartLine,
-  faCubes,
-  faArrowRight,
-} from "@fortawesome/free-solid-svg-icons";
-import { useContentTab } from "../ContentTabContext";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import {
+  faArrowRight,
+  faBook,
+  faChartLine,
+  faCrown,
+  faCubes,
+  faTools,
+  faUser,
+  faVoteYea,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import React, { useEffect, useMemo } from "react";
+import { useContentTab } from "../ContentTabContext";
 import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveFAQProps {
@@ -350,7 +351,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             Go to the The Memes - Seeking Nomination wave and share your
             existing work and story and someone may nominate you:
           </p>
-          <a
+          <Link
             href="https://6529.io/my-stream?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
             target="_blank"
             rel="noopener noreferrer"
@@ -360,7 +361,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               icon={faArrowRight}
               className="tw-ml-2 tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
-          </a>
+          </Link>
           <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
             Once you are eligible, you can submit up to 3 cards at a time. If
             you remove a submission or one of your submissions is selected to be
@@ -393,7 +394,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             What if I have general questions? Go to the The Memes - FAQ wave
             (after you have read the artist brief)
           </p>
-          <a
+          <Link
             href="https://6529.io/my-stream?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
             target="_blank"
             rel="noopener noreferrer"
@@ -403,7 +404,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               icon={faArrowRight}
               className="tw-ml-2 tw-text-base tw-size-3 tw-flex-shrink-0 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
-          </a>
+          </Link>
         </section>
         <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
           <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex tw-items-center">
@@ -424,7 +425,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             primarily rewards longevity.
           </p>
           <div className="tw-flex tw-gap-4">
-            <a
+            <Link
               href="https://x.com/punk6529/status/1906753171751412006"
               target="_blank"
               rel="noopener noreferrer"
@@ -434,8 +435,8 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
                 icon={faArrowRight}
                 className="tw-ml-2 tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
               />
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://6529.io/network/metrics"
               target="_blank"
               rel="noopener noreferrer"
@@ -445,7 +446,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
                 icon={faArrowRight}
                 className="tw-ml-2 tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
               />
-            </a>
+            </Link>
           </div>
         </section>
         <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
@@ -487,7 +488,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             You can get priority within your Phase by subscribing in advance
             from your profile page. Details are here:
           </p>
-          <a
+          <Link
             href="https://6529.io/about/subscriptions"
             target="_blank"
             rel="noopener noreferrer"
@@ -497,7 +498,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               icon={faArrowRight}
               className="tw-ml-2 tw-text-base tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
-          </a>
+          </Link>
         </section>
         <div className="tw-text-center tw-p-5 tw-rounded-lg">
           <p className="tw-text-iron-200 tw-text-base tw-font-medium tw-mb-0">

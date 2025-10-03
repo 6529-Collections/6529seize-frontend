@@ -1,6 +1,6 @@
-import { Col, Container, Row } from "react-bootstrap";
+import { faArrowRight, faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendar, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutApply() {
   return (
@@ -20,8 +20,7 @@ export default function AboutApply() {
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
-              }}
-            >
+              }}>
               How Does Submission Work?
             </h4>
 
@@ -30,8 +29,7 @@ export default function AboutApply() {
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
-              }}
-            >
+              }}>
               <p className="fw-bold mb-3">
                 There are two ways you can be eligible to submit:
               </p>
@@ -61,8 +59,7 @@ export default function AboutApply() {
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
-              }}
-            >
+              }}>
               Seeking a Nomination (New Artists)
             </h4>
 
@@ -71,16 +68,14 @@ export default function AboutApply() {
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
-              }}
-            >
+              }}>
               <p className="mb-4">
                 Visit the{" "}
                 <a
                   href="https://6529.io/my-stream?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link-info"
-                >
+                  className="link-info">
                   The Memes - Seeking Nomination
                 </a>{" "}
                 wave and share your existing work and story. Community members
@@ -89,8 +84,7 @@ export default function AboutApply() {
 
               <div
                 className="mb-4 pb-3"
-                style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}
-              >
+                style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}>
                 <div className="mb-1 fw-bold">Gather Support</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   Community members nominate you by allocating their
@@ -113,8 +107,7 @@ export default function AboutApply() {
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
-              }}
-            >
+              }}>
               Submitting Your Meme Cards (Eligible Artists)
             </h4>
 
@@ -123,12 +116,10 @@ export default function AboutApply() {
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
-              }}
-            >
+              }}>
               <div
                 className="mb-4 pb-3"
-                style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}
-              >
+                style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}>
                 <div className="mb-1 fw-bold">Three Active Submissions</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   You can have up to 3 Meme Card designs submitted
@@ -138,8 +129,7 @@ export default function AboutApply() {
 
               <div
                 className="mb-4 pb-3"
-                style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}
-              >
+                style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}>
                 <div className="mb-1 fw-bold">Replace Submissions</div>
                 <div style={{ color: "rgb(154, 154, 154)" }}>
                   If you remove a submission or one of your submissions is
@@ -161,12 +151,10 @@ export default function AboutApply() {
                   style={{
                     backgroundColor: "rgb(20, 20, 20)",
                     border: "1px solid rgb(40, 40, 40)",
-                  }}
-                >
+                  }}>
                   <div
                     className="mb-2 fw-bold"
-                    style={{ color: "rgb(215, 215, 215)" }}
-                  >
+                    style={{ color: "rgb(215, 215, 215)" }}>
                     <FontAwesomeIcon
                       icon={faCalendar}
                       width={16}
@@ -181,8 +169,7 @@ export default function AboutApply() {
                           color: "#0dcaf0",
                           fontWeight: "bold",
                           width: "100px",
-                        }}
-                      >
+                        }}>
                         Monday
                       </span>
                       <span className="ms-2">
@@ -201,8 +188,7 @@ export default function AboutApply() {
                           color: "#0dcaf0",
                           fontWeight: "bold",
                           width: "100px",
-                        }}
-                      >
+                        }}>
                         Wednesday
                       </span>
                       <span className="ms-2">
@@ -221,8 +207,7 @@ export default function AboutApply() {
                           color: "#0dcaf0",
                           fontWeight: "bold",
                           width: "100px",
-                        }}
-                      >
+                        }}>
                         Friday
                       </span>
                       <span className="ms-2">
@@ -247,8 +232,7 @@ export default function AboutApply() {
               style={{
                 color: "rgb(215, 215, 215)",
                 borderBottom: "1px solid rgb(68, 68, 68)",
-              }}
-            >
+              }}>
               Creative Guidelines (Important!)
             </h4>
 
@@ -257,16 +241,14 @@ export default function AboutApply() {
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
-              }}
-            >
+              }}>
               <p style={{ color: "rgb(154, 154, 154)" }} className="mb-3">
                 Carefully read the{" "}
                 <a
                   href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link-info"
-                >
+                  className="link-info">
                   Artist Brief
                 </a>{" "}
                 before submitting. It outlines the collection's mission, vision,
@@ -288,22 +270,19 @@ export default function AboutApply() {
 
               <div
                 className="mt-4 pt-4"
-                style={{ borderTop: "1px solid rgb(40, 40, 40)" }}
-              >
+                style={{ borderTop: "1px solid rgb(40, 40, 40)" }}>
                 <div
                   className="mb-4 pb-3"
-                  style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}
-                >
+                  style={{ borderBottom: "1px solid rgb(40, 40, 40)" }}>
                   <div className="mb-1 fw-bold">Need Artistic Feedback?</div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
-                    <span className="text-success me-2">✓</span>
-                    {" "}DM{" "}
+                    <span className="text-success me-2">✓</span> DM{" "}
                     <span className="text-light">@6529er</span>
                     {", "}
                     <span className="text-light">@teexels</span>
                     {", and "}
-                    <span className="text-light">@darrensrs</span>{" "}
-                    into a group chat for feedback and creative guidance.
+                    <span className="text-light">@darrensrs</span> into a group
+                    chat for feedback and creative guidance.
                   </div>
                 </div>
 
@@ -315,18 +294,15 @@ export default function AboutApply() {
                       href="https://6529.io/my-stream?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link-info"
-                    >
+                      className="link-info">
                       The Memes - FAQ wave
-                    </a>
-                    {" "}
+                    </a>{" "}
                     after reading the{" "}
                     <a
                       href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link-info"
-                    >
+                      className="link-info">
                       Artist Brief
                     </a>
                     {"."}
@@ -338,8 +314,7 @@ export default function AboutApply() {
                       href="mailto:collections@6529.io"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link-info"
-                    >
+                      className="link-info">
                       collections@6529.io
                     </a>
                     {"."}
@@ -352,12 +327,10 @@ export default function AboutApply() {
                 style={{
                   backgroundColor: "rgb(20, 20, 20)",
                   border: "1px solid rgb(40, 40, 40)",
-                }}
-              >
+                }}>
                 <p
                   className="mb-0 fst-italic small"
-                  style={{ color: "rgb(154, 154, 154)" }}
-                >
+                  style={{ color: "rgb(154, 154, 154)" }}>
                   We receive many messages; thank you for your patience if
                   responses are delayed.
                 </p>

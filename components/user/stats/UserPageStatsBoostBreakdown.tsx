@@ -1,12 +1,9 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  ConsolidatedTDH,
-  TDH,
-  TDHBoostBreakdown,
-} from "@/entities/ITDH";
+import { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { Tooltip } from "react-tooltip";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { Tooltip } from "react-tooltip";
 
 export default function UserPageStatsBoostBreakdown({
   tdh,
@@ -127,11 +124,11 @@ export default function UserPageStatsBoostBreakdown({
           Boost Breakdown
         </h3>
         <span>
-          <a
+          <Link
             href="/network/metrics#tdh-1.3"
             className="decoration-hover-underline tw-text-sm">
             TDH Version: 1.3
-          </a>
+          </Link>
         </span>
       </div>
       <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-x-auto">
@@ -232,8 +229,7 @@ function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
           color: "white",
           padding: "4px 8px",
           zIndex: 10,
-        }}
-      >
+        }}>
         {info.length > 1 ? (
           <ul
             className="mb-0"
