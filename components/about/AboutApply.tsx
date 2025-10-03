@@ -72,13 +72,13 @@ export default function AboutApply() {
               }}>
               <p className="mb-4">
                 Visit the{" "}
-                <Link
+                <a
                   href="https://6529.io/my-stream?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="link-info">
                   The Memes - Seeking Nomination
-                </Link>{" "}
+                </a>{" "}
                 wave and share your existing work and story. Community members
                 may then nominate you.
               </p>
