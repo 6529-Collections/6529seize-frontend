@@ -5,7 +5,6 @@ import {
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants";
-import Link from "next/link";
 import { useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Toggle from "react-toggle";
@@ -115,12 +114,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>6529.io</td>
                       <td>
-                        <Link
+                        <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTG"
                           target="_blank"
                           rel="noopener noreferrer">
                           AWSALBTG
-                        </Link>{" "}
+                        </a>{" "}
                         (Amazon Web Services)
                       </td>
                       <td>First Party</td>
@@ -208,12 +207,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>.6529.io</td>
                       <td>
-                        <Link
+                        <a
                           href="https://cookiepedia.co.uk/cookies/_ga_"
                           target="_blank"
                           rel="noopener noreferrer">
                           _ga_71NLVV3KY3
-                        </Link>{" "}
+                        </a>{" "}
                         (Google Analytics)
                       </td>
                       <td>First Party</td>
@@ -222,12 +221,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>.6529.io</td>
                       <td>
-                        <Link
+                        <a
                           href="https://cookiepedia.co.uk/cookies/_ga"
                           target="_blank"
                           rel="noopener noreferrer">
                           _ga
-                        </Link>{" "}
+                        </a>{" "}
                         (Google Analytics)
                       </td>
                       <td>First Party</td>
@@ -236,12 +235,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>.6529.io</td>
                       <td>
-                        <Link
+                        <a
                           href="https://cookiepedia.co.uk/cookies/_gid"
                           target="_blank"
                           rel="noopener noreferrer">
                           _gid
-                        </Link>{" "}
+                        </a>{" "}
                         (Google Analytics)
                       </td>
                       <td>First Party</td>

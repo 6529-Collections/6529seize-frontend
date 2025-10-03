@@ -1,6 +1,5 @@
 import { faArrowRight, faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutApply() {
@@ -291,13 +290,13 @@ export default function AboutApply() {
                   <div className="mb-1 fw-bold">General Questions?</div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
                     Visit{" "}
-                    <Link
+                    <a
                       href="https://6529.io/my-stream?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="link-info">
                       The Memes - FAQ wave
-                    </Link>{" "}
+                    </a>{" "}
                     after reading the{" "}
                     <a
                       href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
