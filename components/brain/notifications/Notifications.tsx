@@ -1,6 +1,7 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { UIEventHandler } from "react";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -10,7 +11,6 @@ import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { useLayout } from "../my-stream/layout/LayoutContext";
@@ -18,6 +18,8 @@ import NotificationsCauseFilter, {
   NotificationFilter,
 } from "./NotificationsCauseFilter";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
+
+const TOP_SCROLL_THRESHOLD_PX = 160;
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -27,7 +29,10 @@ interface NotificationsProps {
 export default function Notifications({ activeDrop, setActiveDrop }: NotificationsProps) {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const hasInitializedScrollRef = useRef(false);
+  const isPrependingRef = useRef(false);
+  const previousScrollHeightRef = useRef(0);
   const { notificationsViewStyle } = useLayout();
   const searchParams = useSearchParams();
 
@@ -102,17 +107,62 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     if (!state) {
       return;
     }
-    if (isFetching) {
-      return;
-    }
     if (isFetchingNextPage) {
       return;
     }
     if (!hasNextPage) {
       return;
     }
+    const container = scrollContainerRef.current;
+    if (container) {
+      previousScrollHeightRef.current = container.scrollHeight;
+    }
+    isPrependingRef.current = true;
     fetchNextPage();
   };
+
+  useLayoutEffect(() => {
+    const scrollElement = scrollContainerRef.current;
+    if (!scrollElement) {
+      return;
+    }
+
+    if (items.length === 0) {
+      return;
+    }
+
+    if (!hasInitializedScrollRef.current) {
+      scrollElement.scrollTop = scrollElement.scrollHeight;
+      hasInitializedScrollRef.current = true;
+    }
+  }, [items]);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      hasInitializedScrollRef.current = false;
+      isPrependingRef.current = false;
+      previousScrollHeightRef.current = 0;
+    }
+  }, [items.length]);
+
+  useLayoutEffect(() => {
+    if (!isPrependingRef.current) {
+      return;
+    }
+
+    const container = scrollContainerRef.current;
+    if (!container) {
+      isPrependingRef.current = false;
+      return;
+    }
+
+    const delta = container.scrollHeight - previousScrollHeightRef.current;
+    if (delta !== 0) {
+      container.scrollTop += delta;
+    }
+
+    isPrependingRef.current = false;
+  }, [items]);
 
   const handleScrollUpNearTop = () => {
     onBottomIntersection(true);
@@ -120,29 +170,20 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
 
   const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
   const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
+  const shouldEnableInfiniteScroll = !showLoader && !showNoItems;
 
-  let mainContent: React.ReactNode;
+  const handleScroll: UIEventHandler<HTMLDivElement> = (event) => {
+    if (!shouldEnableInfiniteScroll) {
+      return;
+    }
 
-  if (showLoader) {
-    mainContent = <SpinnerLoader text="Loading notifications..." />;
-  } else if (showNoItems) {
-    mainContent = <MyStreamNoItems />;
-  } else {
-    mainContent = (
-      <FeedScrollContainer
-        ref={scrollRef}
-        onScrollUpNearTop={handleScrollUpNearTop}
-        isFetchingNextPage={isFetching}>
-        <NotificationsWrapper
-          items={items}
-          loading={isFetching && items.length > 0}
-          activeDrop={activeDrop}
-          setActiveDrop={setActiveDrop}
-          scrollContainerRef={scrollRef}
-        />
-      </FeedScrollContainer>
-    );
-  }
+    const container = event.currentTarget;
+    if (container.scrollTop <= TOP_SCROLL_THRESHOLD_PX) {
+      if (!isFetchingNextPage && hasNextPage) {
+        handleScrollUpNearTop();
+      }
+    }
+  };
 
   return (
     <div
@@ -153,7 +194,27 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
         />
-        {mainContent}
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="tw-flex tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+          {showLoader ? (
+            <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
+              <SpinnerLoader text="Loading notifications..." />
+            </div>
+          ) : showNoItems ? (
+            <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-start tw-min-h-full">
+              <MyStreamNoItems />
+            </div>
+          ) : (
+            <NotificationsWrapper
+              items={items}
+              loadingOlder={isFetchingNextPage}
+              activeDrop={activeDrop}
+              setActiveDrop={setActiveDrop}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

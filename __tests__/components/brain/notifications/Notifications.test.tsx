@@ -43,12 +43,6 @@ jest.mock('@/components/brain/notifications/NotificationsCauseFilter', () => ({
   default: () => <div data-testid="filter" />,
 }));
 
-jest.mock('@/components/brain/feed/FeedScrollContainer', () => ({
-  FeedScrollContainer: React.forwardRef((props: any, ref) => (
-    <div data-testid="scroll" ref={ref} {...props} />
-  )),
-}));
-
 jest.mock('@/components/brain/content/input/BrainContentInput', () => ({
   __esModule: true,
   default: () => <div data-testid="input" />,
@@ -109,7 +103,7 @@ describe('Notifications component', () => {
       isInitialQueryDone: false,
     });
 
-    render(<Notifications />);
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByText('Loading notifications...', { selector: 'div' })).toBeInTheDocument();
     expect(mutateAsyncMock).toHaveBeenCalled();
@@ -127,7 +121,7 @@ describe('Notifications component', () => {
       isInitialQueryDone: true,
     });
 
-    render(<Notifications />);
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByTestId('wrapper')).toBeInTheDocument();
   });
@@ -143,7 +137,7 @@ describe('Notifications component', () => {
       isInitialQueryDone: true,
     });
 
-    render(<Notifications />);
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByTestId('no-items')).toBeInTheDocument();
   });

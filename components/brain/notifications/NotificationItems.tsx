@@ -1,10 +1,9 @@
-import { memo, useMemo, type RefObject } from "react";
+import { memo, useMemo } from "react";
 import { TypedNotification } from "@/types/feed.types";
 import NotificationItem from "./NotificationItem";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import NotificationVirtualWrapper from "./NotificationVirtualWrapper";
 
 interface NotificationItemsProps {
   readonly items: TypedNotification[];
@@ -12,7 +11,6 @@ interface NotificationItemsProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly scrollContainerRef?: RefObject<HTMLDivElement | null>;
 }
 
 function NotificationItemsComponent({
@@ -21,7 +19,6 @@ function NotificationItemsComponent({
   onReply,
   onQuote,
   onDropContentClick,
-  scrollContainerRef,
 }: NotificationItemsProps) {
   const keyedNotifications = useMemo(
     () =>
@@ -36,15 +33,13 @@ function NotificationItemsComponent({
     <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3 lg:tw-pr-2">
       {keyedNotifications.map(({ notification, key }) => (
         <div key={key} id={`feed-item-${notification.id}`}>
-          <NotificationVirtualWrapper scrollContainerRef={scrollContainerRef}>
-            <NotificationItem
-              notification={notification}
-              activeDrop={activeDrop}
-              onReply={onReply}
-              onQuote={onQuote}
-              onDropContentClick={onDropContentClick}
-            />
-          </NotificationVirtualWrapper>
+          <NotificationItem
+            notification={notification}
+            activeDrop={activeDrop}
+            onReply={onReply}
+            onQuote={onQuote}
+            onDropContentClick={onDropContentClick}
+          />
         </div>
       ))}
     </div>
@@ -59,8 +54,7 @@ const NotificationItems = memo(
       prevProps.activeDrop === nextProps.activeDrop &&
       prevProps.onReply === nextProps.onReply &&
       prevProps.onQuote === nextProps.onQuote &&
-      prevProps.onDropContentClick === nextProps.onDropContentClick &&
-      prevProps.scrollContainerRef === nextProps.scrollContainerRef
+      prevProps.onDropContentClick === nextProps.onDropContentClick
     );
   }
 );
