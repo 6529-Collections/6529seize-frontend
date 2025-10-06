@@ -20,6 +20,8 @@ import NotificationsCauseFilter, {
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import { NEAR_TOP_SCROLL_THRESHOLD_PX } from "../constants";
 
+const STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX = 32;
+
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
@@ -30,6 +32,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     useContext(AuthContext);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const hasInitializedScrollRef = useRef(false);
+  const isPinnedToBottomRef = useRef(true);
   const hasMarkedAllAsReadRef = useRef(false);
   const isPrependingRef = useRef(false);
   const previousScrollHeightRef = useRef(0);
@@ -142,6 +145,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     if (!hasInitializedScrollRef.current) {
       scrollElement.scrollTop = scrollElement.scrollHeight;
       hasInitializedScrollRef.current = true;
+      isPinnedToBottomRef.current = true;
     }
   }, [items]);
 
@@ -150,11 +154,13 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
       hasInitializedScrollRef.current = false;
       isPrependingRef.current = false;
       previousScrollHeightRef.current = 0;
+      isPinnedToBottomRef.current = true;
     }
   }, [items.length]);
 
   useEffect(() => {
     hasInitializedScrollRef.current = false;
+    isPinnedToBottomRef.current = true;
   }, [activeFilter?.cause]);
 
   useLayoutEffect(() => {
@@ -180,12 +186,68 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
   const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
   const shouldEnableInfiniteScroll = !showLoader && !showNoItems;
 
+  useLayoutEffect(() => {
+    const scrollElement = scrollContainerRef.current;
+    if (!scrollElement) {
+      return;
+    }
+
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    const observationTarget =
+      (scrollElement.firstElementChild as HTMLElement | null) ?? scrollElement;
+
+    let rafId: number | null = null;
+
+    const observer = new ResizeObserver(() => {
+      if (!hasInitializedScrollRef.current || !isPinnedToBottomRef.current) {
+        return;
+      }
+
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+
+      rafId = requestAnimationFrame(() => {
+        const container = scrollContainerRef.current;
+        if (!container) {
+          return;
+        }
+
+        container.scrollTop = container.scrollHeight;
+        rafId = null;
+      });
+    });
+
+    observer.observe(observationTarget);
+
+    return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      observer.disconnect();
+    };
+  }, [items, showLoader, showNoItems]);
+
   const handleScroll: UIEventHandler<HTMLDivElement> = (event) => {
+    const container = event.currentTarget;
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    const isNearBottom =
+      distanceFromBottom <= STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX;
+
+    if (isNearBottom) {
+      isPinnedToBottomRef.current = true;
+    } else if (distanceFromBottom > STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX) {
+      isPinnedToBottomRef.current = false;
+    }
+
     if (!shouldEnableInfiniteScroll) {
       return;
     }
 
-    const container = event.currentTarget;
     if (container.scrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX) {
       if (!isFetchingNextPage && hasNextPage) {
         triggerFetchOlder();
