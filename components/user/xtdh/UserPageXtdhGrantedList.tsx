@@ -5,6 +5,30 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import { parseTokenExpressionToRanges } from "@/components/nft-picker/NftPicker.utils";
+
+const formatTargetTokens = (tokens: readonly string[]): string => {
+  if (!tokens.length) {
+    return "All tokens";
+  }
+
+  try {
+    const ranges = parseTokenExpressionToRanges(tokens.join(","));
+    if (!ranges.length) {
+      return "All tokens";
+    }
+
+    return ranges
+      .map((range) => {
+        const start = range.start.toString();
+        const end = range.end.toString();
+        return range.start === range.end ? start : `${start}-${end}`;
+      })
+      .join(", ");
+  } catch (error) {
+    return tokens.join(", ");
+  }
+};
 
 const formatDateTime = (timestampSeconds: number | null) => {
   if (!timestampSeconds || timestampSeconds <= 0) {
@@ -109,9 +133,7 @@ export default function UserPageXtdhGrantedList({
     content = (
       <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
         {grants.map((grant) => {
-          const tokensLabel = grant.target_tokens.length
-            ? grant.target_tokens.join(", ")
-            : "All tokens";
+          const tokensLabel = formatTargetTokens(grant.target_tokens);
 
           return (
             <li
