@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -14,7 +15,7 @@ import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 import type { JSX } from "react";
 import NotificationDropReacted from "./drop-reacted/NotificationDropReacted";
 
-export default function NotificationItem({
+function NotificationItemComponent({
   notification,
   activeDrop,
   onReply,
@@ -99,3 +100,9 @@ export default function NotificationItem({
     </div>
   );
 }
+
+const NotificationItem = memo(NotificationItemComponent);
+
+NotificationItem.displayName = "NotificationItem";
+
+export default NotificationItem;
