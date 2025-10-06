@@ -146,6 +146,66 @@ function parseTokenValue(
   return BigInt(value);
 }
 
+function parseSingleTokenSegment(
+  value: string,
+  segment: Segment,
+  errors: ParseError[]
+): TokenRange[] {
+  const parsedValue = parseTokenValue(value, segment, errors);
+  return parsedValue === null ? [] : [{ start: parsedValue, end: parsedValue }];
+}
+
+function parseRangeSegment(
+  startValueRaw: string,
+  endValueRaw: string,
+  segment: Segment,
+  errors: ParseError[]
+): TokenRange | null {
+  const startValue = parseTokenValue(startValueRaw, segment, errors);
+  const endStartIndex = segment.end - endValueRaw.length;
+  const endSegment: Segment = {
+    value: endValueRaw,
+    start: endStartIndex,
+    end: segment.end,
+  };
+  const endValue = parseTokenValue(endValueRaw, endSegment, errors, endStartIndex);
+  if (startValue === null || endValue === null) {
+    return null;
+  }
+  const [rangeStart, rangeEnd] =
+    startValue <= endValue ? [startValue, endValue] : [endValue, startValue];
+  const rangeSize = rangeEnd - rangeStart + BIGINT_ONE;
+  if (rangeSize > MAX_ENUMERATION) {
+    const limit = MAX_ENUMERATION.toString();
+    const size = rangeSize.toString();
+    errors.push(
+      makeError(
+        segment,
+        `Range expands to ${size} tokens, exceeding the limit of ${limit}.`,
+        "range-too-large"
+      )
+    );
+    return null;
+  }
+  return { start: rangeStart, end: rangeEnd };
+}
+
+function parseSegmentToRanges(segment: Segment, errors: ParseError[]): TokenRange[] {
+  if (!segment.value) {
+    return [];
+  }
+  const parts = segment.value.split("-");
+  if (parts.length === 1) {
+    return parseSingleTokenSegment(parts[0], segment, errors);
+  }
+  if (parts.length === 2) {
+    const range = parseRangeSegment(parts[0], parts[1], segment, errors);
+    return range ? [range] : [];
+  }
+  errors.push(makeError(segment, "Invalid range expression"));
+  return [];
+}
+
 function canonicalizeRanges(ranges: TokenRange[]): TokenRange[] {
   if (!ranges.length) {
     return [];
@@ -192,50 +252,7 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
   const errors: ParseError[] = [];
   const ranges: TokenRange[] = [];
   for (const segment of segments) {
-    if (!segment.value) {
-      continue;
-    }
-    const parts = segment.value.split("-");
-    if (parts.length === 1) {
-      const value = parseTokenValue(parts[0], segment, errors);
-      if (value !== null) {
-        ranges.push({ start: value, end: value });
-      }
-      continue;
-    }
-    if (parts.length === 2) {
-      const [startValueRaw, endValueRaw] = parts;
-      const startValue = parseTokenValue(startValueRaw, segment, errors);
-      const endStartIndex = segment.end - endValueRaw.length;
-      const endSegment: Segment = {
-        value: endValueRaw,
-        start: endStartIndex,
-        end: segment.end,
-      };
-      const endValue = parseTokenValue(endValueRaw, endSegment, errors, endStartIndex);
-      if (startValue === null || endValue === null) {
-        continue;
-      }
-      const [rangeStart, rangeEnd] = startValue <= endValue
-        ? [startValue, endValue]
-        : [endValue, startValue];
-      const rangeSize = rangeEnd - rangeStart + BIGINT_ONE;
-      if (rangeSize > MAX_ENUMERATION) {
-        const limit = MAX_ENUMERATION.toString();
-        const size = rangeSize.toString();
-        errors.push(
-          makeError(
-            segment,
-            `Range expands to ${size} tokens, exceeding the limit of ${limit}.`,
-            "range-too-large"
-          )
-        );
-        continue;
-      }
-      ranges.push({ start: rangeStart, end: rangeEnd });
-      continue;
-    }
-    errors.push(makeError(segment, "Invalid range expression"));
+    ranges.push(...parseSegmentToRanges(segment, errors));
   }
   if (errors.length) {
     throwParseErrors(errors);

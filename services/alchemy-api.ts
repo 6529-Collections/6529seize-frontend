@@ -8,7 +8,6 @@ import type {
 } from "@/components/nft-picker/NftPicker.types";
 import { getAddress } from "viem";
 import { goerli, sepolia } from "wagmi/chains";
-import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 
 import { fetchUrl, postData } from "./6529api";
 
@@ -305,9 +304,10 @@ export async function searchNftCollections(
   if (pageKey) {
     url.searchParams.set("pageKey", pageKey);
   }
-  const response = (await fetchUrl(url.toString(), { signal })) as
-    | AlchemySearchResponse
-    | undefined;
+  const response = await fetchUrl<AlchemySearchResponse | undefined>(
+    url.toString(),
+    { signal }
+  );
   const contracts = response?.contracts ?? [];
   const suggestions = contracts
     .map((contract) => extractContract(contract))
@@ -338,9 +338,10 @@ export async function getContractOverview(
   }
   const network = resolveNetwork(chain);
   const url = `https://${network}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getContractMetadata?contractAddress=${checksum}`;
-  const response = (await fetchUrl(url, { signal })) as
-    | AlchemyContractMetadataResponse
-    | undefined;
+  const response = await fetchUrl<AlchemyContractMetadataResponse | undefined>(
+    url,
+    { signal }
+  );
   if (!response) {
     return null;
   }

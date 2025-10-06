@@ -92,34 +92,14 @@ export function NftEditRanges({
     }
 
     try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(canonical);
-        setCopyStatus("copied");
-        return;
+      if (!navigator?.clipboard?.writeText) {
+        throw new Error("Clipboard API unavailable");
       }
-    } catch (error) {
-      console.warn("NftEditRanges: clipboard API unavailable", error);
-    }
 
-    try {
-      const textarea = document.createElement("textarea");
-      textarea.value = canonical;
-      textarea.setAttribute("readonly", "");
-      textarea.style.position = "absolute";
-      textarea.style.left = "-9999px";
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        textarea.setSelectionRange(0, textarea.value.length);
-      } catch {}
-      const successful = document.execCommand("copy");
-      textarea.remove();
-      if (!successful) {
-        throw new Error("execCommand copy failed");
-      }
+      await navigator.clipboard.writeText(canonical);
       setCopyStatus("copied");
     } catch (error) {
-      console.warn("NftEditRanges: legacy copy failed", error);
+      console.warn("NftEditRanges: clipboard copy failed", error);
       setCopyStatus("error");
     }
   };
