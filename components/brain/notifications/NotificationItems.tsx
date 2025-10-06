@@ -1,10 +1,9 @@
-import { useMemo, type RefObject } from "react";
+import { memo, useMemo, type RefObject } from "react";
 import { TypedNotification } from "@/types/feed.types";
 import NotificationItem from "./NotificationItem";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
 import NotificationVirtualWrapper from "./NotificationVirtualWrapper";
 
 interface NotificationItemsProps {
@@ -16,7 +15,7 @@ interface NotificationItemsProps {
   readonly scrollContainerRef?: RefObject<HTMLDivElement | null>;
 }
 
-export default function NotificationItems({
+function NotificationItemsComponent({
   items,
   activeDrop,
   onReply,
@@ -38,18 +37,34 @@ export default function NotificationItems({
       {keyedNotifications.map(({ notification, key }) => (
         <div key={key} id={`feed-item-${notification.id}`}>
           <NotificationVirtualWrapper scrollContainerRef={scrollContainerRef}>
-            <CommonChangeAnimation>
-              <NotificationItem
-                notification={notification}
-                activeDrop={activeDrop}
-                onReply={onReply}
-                onQuote={onQuote}
-                onDropContentClick={onDropContentClick}
-              />
-            </CommonChangeAnimation>
+            <NotificationItem
+              notification={notification}
+              activeDrop={activeDrop}
+              onReply={onReply}
+              onQuote={onQuote}
+              onDropContentClick={onDropContentClick}
+            />
           </NotificationVirtualWrapper>
         </div>
       ))}
     </div>
   );
 }
+
+const NotificationItems = memo(
+  NotificationItemsComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.items === nextProps.items &&
+      prevProps.activeDrop === nextProps.activeDrop &&
+      prevProps.onReply === nextProps.onReply &&
+      prevProps.onQuote === nextProps.onQuote &&
+      prevProps.onDropContentClick === nextProps.onDropContentClick &&
+      prevProps.scrollContainerRef === nextProps.scrollContainerRef
+    );
+  }
+);
+
+NotificationItems.displayName = "NotificationItems";
+
+export default NotificationItems;

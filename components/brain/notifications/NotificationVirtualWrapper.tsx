@@ -9,7 +9,7 @@ interface NotificationVirtualWrapperProps {
 }
 
 const DEFAULT_MEASUREMENT_DELAY = 150;
-const DEFAULT_ROOT_MARGIN = "1200px 0px";
+const DEFAULT_ROOT_MARGIN = "600px 0px";
 
 /**
  * Lightweight virtualization wrapper for notification list items.
@@ -26,17 +26,41 @@ export default function NotificationVirtualWrapper({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isInView, setIsInView] = useState(true);
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
+  const measureRafRef = useRef<number | null>(null);
 
   const isServer = typeof window === "undefined";
 
   const measureHeight = useCallback(() => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      // Ignore zero height which can happen while content is transitioning.
-      if (rect.height > 0) {
-        setMeasuredHeight(rect.height);
-      }
+    const element = containerRef.current;
+    if (!element) {
+      return;
     }
+
+    const readDimensions = () => {
+      const rect = element.getBoundingClientRect();
+      if (rect.height <= 0) {
+        return;
+      }
+
+      const nextHeight = Math.round(rect.height);
+      setMeasuredHeight((previous) =>
+        previous === nextHeight ? previous : nextHeight
+      );
+    };
+
+    if (typeof window === "undefined") {
+      readDimensions();
+      return;
+    }
+
+    if (measureRafRef.current !== null) {
+      window.cancelAnimationFrame(measureRafRef.current);
+    }
+
+    measureRafRef.current = window.requestAnimationFrame(() => {
+      measureRafRef.current = null;
+      readDimensions();
+    });
   }, []);
 
   useEffect(() => {
@@ -108,7 +132,19 @@ export default function NotificationVirtualWrapper({
       }
       observer.disconnect();
     };
-  }, [isServer, scrollContainerRef?.current, measureHeight]);
+  }, [isServer, scrollContainerRef, measureHeight]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+      if (measureRafRef.current !== null) {
+        window.cancelAnimationFrame(measureRafRef.current);
+        measureRafRef.current = null;
+      }
+    };
+  }, []);
 
   const shouldRenderChildren = isServer || measuredHeight === null || isInView;
 

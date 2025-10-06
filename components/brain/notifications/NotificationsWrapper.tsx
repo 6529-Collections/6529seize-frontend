@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { TypedNotification } from "@/types/feed.types";
 import {
@@ -28,27 +28,36 @@ export default function NotificationsWrapper({
 }: NotificationsWrapperProps) {
   const router = useRouter();
 
-  const onDropContentClick = (drop: ExtendedDrop) => {
-    router.push(
-      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`
-    );
-  };
+  const onDropContentClick = useCallback(
+    (drop: ExtendedDrop) => {
+      router.push(
+        `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`
+      );
+    },
+    [router]
+  );
 
-  const onReply = (param: DropInteractionParams) => {
-    setActiveDrop({
-      action: ActiveDropAction.REPLY,
-      drop: param.drop,
-      partId: param.partId,
-    });
-  };
+  const onReply = useCallback(
+    (param: DropInteractionParams) => {
+      setActiveDrop({
+        action: ActiveDropAction.REPLY,
+        drop: param.drop,
+        partId: param.partId,
+      });
+    },
+    [setActiveDrop]
+  );
 
-  const onQuote = (param: DropInteractionParams) => {
-    setActiveDrop({
-      action: ActiveDropAction.QUOTE,
-      drop: param.drop,
-      partId: param.partId,
-    });
-  };
+  const onQuote = useCallback(
+    (param: DropInteractionParams) => {
+      setActiveDrop({
+        action: ActiveDropAction.QUOTE,
+        drop: param.drop,
+        partId: param.partId,
+      });
+    },
+    [setActiveDrop]
+  );
 
   return (
     <div className="tw-relative">
