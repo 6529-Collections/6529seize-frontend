@@ -21,6 +21,7 @@ const formatDateTime = (date: Date) =>
 export default function UserPageXtdhGrant() {
   const [contract, setContract] = useState<ContractOverview | null>(null);
   const [selection, setSelection] = useState<NftPickerSelection | null>(null);
+  const [amount, setAmount] = useState<string>("");
 
   const baselineExpiry = useMemo(() => {
     const date = new Date();
@@ -102,8 +103,7 @@ export default function UserPageXtdhGrant() {
       return "Search for a collection to begin granting xTDH.";
     }
 
-    const collectionLabel =
-      contract?.name ?? contract?.symbol ?? contract?.address;
+    const collectionLabel = contract?.name ?? contract?.symbol ?? contract?.address;
 
     if (!selection) {
       return collectionLabel
@@ -111,17 +111,43 @@ export default function UserPageXtdhGrant() {
         : "Choose token IDs to grant.";
     }
 
+    let selectionText: string;
+    let tokenCount: number | null = null;
+
     if (selection.allSelected) {
-      return collectionLabel
+      selectionText = collectionLabel
         ? `All tokens from ${collectionLabel} will receive a grant.`
         : "All tokens from the selected collection will receive a grant.";
+    } else {
+      tokenCount = selection.tokenIdsRaw.length;
+      selectionText = collectionLabel
+        ? `${tokenCount} token${tokenCount === 1 ? "" : "s"} selected from ${collectionLabel}.`
+        : `${tokenCount} token${tokenCount === 1 ? "" : "s"} selected.`;
     }
 
-    const tokenCount = selection.tokenIdsRaw.length;
-    return collectionLabel
-      ? `${tokenCount} token${tokenCount === 1 ? "" : "s"} selected from ${collectionLabel}.`
-      : `${tokenCount} token${tokenCount === 1 ? "" : "s"} selected.`;
-  }, [contract, selection]);
+    const totalAmount = Number(amount);
+    if (!amount || Number.isNaN(totalAmount) || totalAmount <= 0) {
+      return selectionText;
+    }
+
+    const formattedTotal = totalAmount.toLocaleString(undefined, {
+      maximumFractionDigits: 6,
+    });
+
+    const perTokenText =
+      tokenCount && tokenCount > 0
+        ? (() => {
+            const perToken = totalAmount / tokenCount;
+            return Number.isFinite(perToken)
+              ? ` (~${perToken.toLocaleString(undefined, {
+                  maximumFractionDigits: 6,
+                })} xTDH per token)`
+              : "";
+          })()
+        : "";
+
+    return `${selectionText} Total grant: ${formattedTotal} xTDH${perTokenText}.`;
+  }, [amount, contract, selection]);
 
   const validitySummary = useMemo(() => {
     if (neverExpires) {
@@ -138,6 +164,25 @@ export default function UserPageXtdhGrant() {
       </div>
 
       <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-2xl tw-p-4 tw-space-y-4">
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          <label
+            htmlFor="xtdh-grant-amount"
+            className="tw-text-sm tw-font-medium tw-text-iron-100">
+            Total amount
+          </label>
+          <input
+            id="xtdh-grant-amount"
+            type="number"
+            min="0"
+            step="any"
+            inputMode="decimal"
+            placeholder="Enter total xTDH amount"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+          />
+        </div>
+
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
           <h3 className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-m-0">
             Validity
