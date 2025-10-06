@@ -3,15 +3,12 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "@/constants";
 import { getStagingAuth } from "./auth/auth.utils";
 
-const isRelativeUrl = (value: string): boolean =>
-  !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(value) && !value.startsWith("//");
-
 export async function fetchUrl<T = DBResponse>(
   url: string,
   init?: RequestInit
 ): Promise<T> {
   const baseHeaders = new Headers(init?.headers);
-  const apiAuth = isRelativeUrl(url) ? getStagingAuth() : null;
+  const apiAuth = getStagingAuth();
   if (apiAuth) {
     baseHeaders.set("x-6529-auth", apiAuth);
   }
@@ -44,7 +41,7 @@ export async function postData(url: string, body: any, init?: RequestInit) {
   if (!baseHeaders.has("Content-Type")) {
     baseHeaders.set("Content-Type", "application/json");
   }
-  const apiAuth = isRelativeUrl(url) ? getStagingAuth() : null;
+  const apiAuth = getStagingAuth();
   if (apiAuth) {
     baseHeaders.set("x-6529-auth", apiAuth);
   }
@@ -67,7 +64,7 @@ export async function postData(url: string, body: any, init?: RequestInit) {
 
 export async function postFormData(url: string, formData: FormData) {
   let headers: any = {};
-  const apiAuth = isRelativeUrl(url) ? getStagingAuth() : null;
+  const apiAuth = getStagingAuth();
   if (apiAuth) {
     headers = { "x-6529-auth": apiAuth };
   }
