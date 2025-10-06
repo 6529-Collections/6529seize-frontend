@@ -1,5 +1,6 @@
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
+import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
   ManifoldClaim,
@@ -75,9 +76,9 @@ afterEach(() => {
 
 describe("MemePageMintCountdown", () => {
   describe("Loading State", () => {
-    it("shows skeleton loading state when manifoldClaim is null", () => {
+    it("shows skeleton loading state when manifoldClaim is undefined", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
-      mockUseManifoldClaim.mockReturnValue(null);
+      mockUseManifoldClaim.mockReturnValue(undefined);
 
       const { container } = render(
         <MemePageMintCountdown
@@ -101,7 +102,7 @@ describe("MemePageMintCountdown", () => {
 
     it("shows skeleton button when not hiding mint button", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
-      mockUseManifoldClaim.mockReturnValue(null);
+      mockUseManifoldClaim.mockReturnValue(undefined);
 
       const { container } = render(
         <MemePageMintCountdown
@@ -119,7 +120,7 @@ describe("MemePageMintCountdown", () => {
 
     it("hides skeleton button when hide_mint_btn is true", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
-      mockUseManifoldClaim.mockReturnValue(null);
+      mockUseManifoldClaim.mockReturnValue(undefined);
 
       const { container } = render(
         <MemePageMintCountdown
@@ -252,10 +253,18 @@ describe("MemePageMintCountdown", () => {
   describe("Phase Name Display", () => {
     it("shows custom meme phase name when in allowlist phase with memePhase", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
+      const start = Time.now();
+      const end = start.plusSeconds(100);
       mockUseManifoldClaim.mockReturnValue({
         ...baseClaim,
         phase: ManifoldPhase.ALLOWLIST,
-        memePhase: { name: "Custom Phase Name" },
+        memePhase: {
+          id: "0",
+          type: ManifoldPhase.ALLOWLIST,
+          start,
+          end,
+          name: "Custom Phase Name",
+        },
         status: ManifoldClaimStatus.UPCOMING,
         startDate: 90,
       });
@@ -550,7 +559,7 @@ describe("MemePageMintCountdown", () => {
 
     it("applies correct Bootstrap column classes based on is_full_width", () => {
       mockUseCapacitor.mockReturnValue({ isIos: false } as any);
-      mockUseManifoldClaim.mockReturnValue(null);
+      mockUseManifoldClaim.mockReturnValue(undefined);
 
       const { container, rerender } = render(
         <MemePageMintCountdown

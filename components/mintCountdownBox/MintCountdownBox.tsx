@@ -30,7 +30,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
             date={new Date(props.date * 1000)}
           />
         </Col>
-        {!props.hide_mint_btn &&
+        {!props.hide_mint_btn && props.buttons.length > 0 &&
           props.buttons.map((btn) => (
             <Col
               className="pt-2 pb-2"
@@ -53,9 +53,11 @@ export default function MintCountdownBox(props: Readonly<Props>) {
             </Col>
           ))}
       </Row>
-      <Row>
-        <Col>{props.additional_elements}</Col>
-      </Row>
+      {props.additional_elements && (
+        <Row>
+          <Col>{props.additional_elements}</Col>
+        </Row>
+      )}
     </Container>
   );
 }
