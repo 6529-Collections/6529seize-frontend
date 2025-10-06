@@ -73,7 +73,7 @@ export default function RoyaltiesComponent() {
 
   function fetchRoyalties() {
     setFetching(true);
-    fetchUrl(getUrlWithParams()).then((res: Royalty[]) => {
+    fetchUrl<Royalty[]>(getUrlWithParams()).then((res: Royalty[]) => {
       res.forEach((r) => {
         r.volume = Math.round(r.volume * 100000) / 100000;
         r.proceeds = Math.round(r.proceeds * 100000) / 100000;
