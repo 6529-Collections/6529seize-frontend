@@ -63,7 +63,7 @@ export default function NotificationsWrapper({
         <div className="tw-flex tw-w-full tw-justify-center tw-py-3">
           <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400">
             <span className="tw-inline-flex tw-h-4 tw-w-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-400 tw-border-t-transparent" />
-            Loading older notifications...
+            <span>Loading older notifications...</span>
           </div>
         </div>
       )}

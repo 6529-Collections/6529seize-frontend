@@ -185,6 +185,30 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     }
   };
 
+  let notificationsContent = null;
+  if (showLoader) {
+    notificationsContent = (
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
+        <SpinnerLoader text="Loading notifications..." />
+      </div>
+    );
+  } else if (showNoItems) {
+    notificationsContent = (
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-start tw-min-h-full">
+        <MyStreamNoItems />
+      </div>
+    );
+  } else {
+    notificationsContent = (
+      <NotificationsWrapper
+        items={items}
+        loadingOlder={isFetchingNextPage}
+        activeDrop={activeDrop}
+        setActiveDrop={setActiveDrop}
+      />
+    );
+  }
+
   return (
     <div
       className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
@@ -198,22 +222,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
           ref={scrollContainerRef}
           onScroll={handleScroll}
           className="tw-flex tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-          {showLoader ? (
-            <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
-              <SpinnerLoader text="Loading notifications..." />
-            </div>
-          ) : showNoItems ? (
-            <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-start tw-min-h-full">
-              <MyStreamNoItems />
-            </div>
-          ) : (
-            <NotificationsWrapper
-              items={items}
-              loadingOlder={isFetchingNextPage}
-              activeDrop={activeDrop}
-              setActiveDrop={setActiveDrop}
-            />
-          )}
+          {notificationsContent}
         </div>
       </div>
     </div>

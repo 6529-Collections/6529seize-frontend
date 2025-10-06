@@ -84,51 +84,56 @@ export const FeedScrollContainer = forwardRef<
         const isNearTop = currentScrollTop <= TOP_SCROLL_THRESHOLD_PX;
 
         throttleTimeoutRef.current = setTimeout(() => {
+          const clearThrottle = () => {
+            throttleTimeoutRef.current = null;
+          };
+
           const direction = currentScrollTop > lastScrollTop ? "down" : "up";
           setLastScrollTop(currentScrollTop);
 
-          if (onScrollUpNearTop) {
-            if (isNearTop) {
-              onScrollUpNearTop();
-              throttleTimeoutRef.current = null;
-              return;
-            }
-
-            if (direction === "up") {
-              const dropElements =
-                contentRef.current?.querySelectorAll("[id^='feed-item-']");
-              if (!dropElements) {
-                throttleTimeoutRef.current = null;
-                return;
-              }
-
-              const containerRect = currentTarget.getBoundingClientRect();
-              let outOfViewCount = 0;
-
-              dropElements.forEach((el) => {
-                const rect = el.getBoundingClientRect();
-                if (rect.bottom < containerRect.top) {
-                  outOfViewCount++;
-                }
-              });
-
-              if (outOfViewCount <= MIN_OUT_OF_VIEW_COUNT) {
-                onScrollUpNearTop();
-              }
-            }
+          if (isNearTop) {
+            onScrollUpNearTop();
+            clearThrottle();
+            return;
           }
 
-          if (direction === "down" && onScrollDownNearBottom) {
-            const { scrollHeight, scrollTop, clientHeight } = currentTarget;
-            const scrolledToBottom =
-              scrollHeight - scrollTop - clientHeight < 100;
+          if (direction === "down") {
+            if (onScrollDownNearBottom) {
+              const { scrollHeight, scrollTop, clientHeight } = currentTarget;
+              const scrolledToBottom =
+                scrollHeight - scrollTop - clientHeight < 100;
 
-            if (scrolledToBottom) {
-              onScrollDownNearBottom();
+              if (scrolledToBottom) {
+                onScrollDownNearBottom();
+              }
             }
+
+            clearThrottle();
+            return;
           }
 
-          throttleTimeoutRef.current = null;
+          const dropElements =
+            contentRef.current?.querySelectorAll("[id^='feed-item-']");
+          if (!dropElements) {
+            clearThrottle();
+            return;
+          }
+
+          const containerRect = currentTarget.getBoundingClientRect();
+          let outOfViewCount = 0;
+
+          dropElements.forEach((el) => {
+            const rect = el.getBoundingClientRect();
+            if (rect.bottom < containerRect.top) {
+              outOfViewCount++;
+            }
+          });
+
+          if (outOfViewCount <= MIN_OUT_OF_VIEW_COUNT) {
+            onScrollUpNearTop();
+          }
+
+          clearThrottle();
         }, 100);
       },
       [
