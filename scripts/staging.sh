@@ -20,7 +20,7 @@ git pull
 
 # Step 2: Reinstall dependencies
 print_message "Reinstalling dependencies..."
-npm install
+npm ci
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
