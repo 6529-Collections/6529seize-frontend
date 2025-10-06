@@ -71,34 +71,35 @@ export function NftSuggestList({
         ref={listContainerRef}
         style={{ height: virtualization.totalHeight, position: "relative" }}
       >
-        <div
+        <ul
           id="nft-picker-suggest-list"
           role="listbox"
           aria-label="NFT collections suggestions"
-          className="tw-relative tw-m-0 tw-p-0"
+          className="tw-relative tw-m-0 tw-list-none tw-p-0"
           style={{ height: "100%" }}
           tabIndex={-1}
         >
           {virtualization.virtualItems.map((virtual) => {
             if (virtual.index >= items.length) {
               return (
-                <div
+                <li
                   key="suggestions-sentinel"
                   className="tw-absolute tw-w-full"
                   style={{ top: virtual.start, height: virtual.size }}
                   aria-hidden="true"
+                  role="presentation"
                 >
                   <div
                     ref={virtualization.sentinelRef}
                     style={{ height: "100%", width: "100%" }}
                   />
-                </div>
+                </li>
               );
             }
             const suggestion = items[virtual.index];
             const isActive = virtual.index === activeIndex;
             return (
-              <div
+              <li
                 key={suggestion.address}
                 role="option"
                 aria-selected={isActive}
@@ -168,10 +169,10 @@ export function NftSuggestList({
                     )}
                   </div>
                 </div>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </div>
       {hideSpam && hiddenCount > 0 && (
         <div className="tw-border-t tw-border-iron-700 tw-px-3 tw-py-2 tw-text-xs tw-text-amber-300">
