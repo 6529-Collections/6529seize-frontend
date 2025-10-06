@@ -60,7 +60,7 @@ export default function MemePageMintCountdown(
                   <div
                     className={`${styles.skeletonText} ${styles.skeletonTitle}`}></div>
                   <div
-                    className={`${styles.skeletonText} ${styles.skeletonCountdown}`}></div>
+                    className={`mt-2 ${styles.skeletonText} ${styles.skeletonCountdown}`}></div>
                 </Col>
                 {!props.hide_mint_btn && (
                   <Col
