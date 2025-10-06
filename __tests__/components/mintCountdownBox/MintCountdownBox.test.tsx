@@ -433,10 +433,10 @@ describe("MintCountdownBox", () => {
       );
 
       const buttons = screen.getAllByRole("button");
-      buttons.forEach((button) => {
+      for (const button of buttons) {
         expect(button).toBeVisible();
         expect(button).toBeEnabled();
-      });
+      }
     });
 
     it("maintains proper link semantics", () => {
@@ -449,7 +449,7 @@ describe("MintCountdownBox", () => {
       );
 
       const links = screen.getAllByRole("link");
-      links.forEach((link) => {
+      for (const link of links) {
         expect(link).toBeVisible();
         expect(link).toHaveAttribute("href");
         const target = link.getAttribute("target");
@@ -458,7 +458,7 @@ describe("MintCountdownBox", () => {
         } else {
           expect(link).not.toHaveAttribute("rel");
         }
-      });
+      }
     });
 
     it("supports keyboard navigation", () => {
@@ -472,9 +472,9 @@ describe("MintCountdownBox", () => {
 
       const buttons = screen.getAllByRole("button");
       // Buttons should be focusable by default
-      buttons.forEach((button) => {
+      for (const button of buttons) {
         expect(button).not.toHaveAttribute("tabindex", "-1");
-      });
+      }
     });
   });
 });
