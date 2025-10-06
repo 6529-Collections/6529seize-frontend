@@ -169,7 +169,6 @@
     "react-toggle": {
       "react": "$react",
       "react-dom": "$react-dom"
-    },
-    "pino": "10.0.0"
+    }
   }
 }

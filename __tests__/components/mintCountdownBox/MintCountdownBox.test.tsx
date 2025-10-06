@@ -1,5 +1,7 @@
+import MintCountdownBox, {
+  MemePageMintBtn,
+} from "@/components/mintCountdownBox/MintCountdownBox";
 import { render, screen } from "@testing-library/react";
-import MintCountdownBox, { MemePageMintBtn } from "@/components/mintCountdownBox/MintCountdownBox";
 
 // Mock DateCountdown component
 jest.mock("@/components/date-countdown/DateCountdown", () => {
@@ -96,7 +98,7 @@ describe("MintCountdownBox", () => {
   describe("Button Rendering", () => {
     it("renders single button correctly", () => {
       const singleButton = [mockButtons[0]];
-      
+
       render(
         <MintCountdownBox
           title="Test Countdown"
@@ -109,7 +111,7 @@ describe("MintCountdownBox", () => {
       expect(button).toHaveTextContent("Mint");
       expect(button).toHaveClass("btn-block");
       expect(button).toHaveClass("no-wrap");
-      
+
       const link = screen.getByRole("link");
       expect(link).toHaveAttribute("href", "/the-memes/mint");
       expect(link).toHaveAttribute("target", "_self");
@@ -127,10 +129,10 @@ describe("MintCountdownBox", () => {
 
       const buttons = screen.getAllByRole("button");
       expect(buttons).toHaveLength(2);
-      
+
       expect(buttons[0]).toHaveTextContent("Mint");
       expect(buttons[1]).toHaveTextContent("Secondary Mint");
-      
+
       const links = screen.getAllByRole("link");
       expect(links[0]).toHaveAttribute("href", "/the-memes/mint");
       expect(links[0]).toHaveAttribute("target", "_self");
@@ -157,7 +159,9 @@ describe("MintCountdownBox", () => {
       );
 
       expect(screen.getByTestId("jsx-label")).toBeInTheDocument();
-      expect(screen.getByTestId("jsx-label")).toHaveTextContent("Complex Label");
+      expect(screen.getByTestId("jsx-label")).toHaveTextContent(
+        "Complex Label"
+      );
     });
 
     it("uses button link as key for rendering", () => {
@@ -184,7 +188,7 @@ describe("MintCountdownBox", () => {
 
       const buttons = screen.getAllByRole("button");
       expect(buttons).toHaveLength(2);
-      
+
       const links = screen.getAllByRole("link");
       expect(links[0]).toHaveAttribute("href", "/mint-1");
       expect(links[1]).toHaveAttribute("href", "/mint-2");
@@ -273,7 +277,7 @@ describe("MintCountdownBox", () => {
       // Check for Container, Row, Col structure
       expect(container.querySelector(".container")).toBeInTheDocument();
       expect(container.querySelector(".row")).toBeInTheDocument();
-      expect(container.querySelector(".col")).toBeInTheDocument();
+      expect(container.querySelector("[class*='col-']")).toBeInTheDocument();
     });
 
     it("applies proper CSS classes to countdown container", () => {
@@ -351,13 +355,7 @@ describe("MintCountdownBox", () => {
 
     it("handles edge case timestamps", () => {
       // Test with timestamp 0 (epoch)
-      render(
-        <MintCountdownBox
-          title="Epoch Test"
-          date={0}
-          buttons={[]}
-        />
-      );
+      render(<MintCountdownBox title="Epoch Test" date={0} buttons={[]} />);
 
       expect(screen.getByTestId("countdown-date")).toHaveTextContent("0");
     });
@@ -435,7 +433,7 @@ describe("MintCountdownBox", () => {
       );
 
       const buttons = screen.getAllByRole("button");
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         expect(button).toBeVisible();
         expect(button).toBeEnabled();
       });
@@ -451,7 +449,7 @@ describe("MintCountdownBox", () => {
       );
 
       const links = screen.getAllByRole("link");
-      links.forEach(link => {
+      links.forEach((link) => {
         expect(link).toBeVisible();
         expect(link).toHaveAttribute("href");
         const target = link.getAttribute("target");
@@ -474,7 +472,7 @@ describe("MintCountdownBox", () => {
 
       const buttons = screen.getAllByRole("button");
       // Buttons should be focusable by default
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         expect(button).not.toHaveAttribute("tabindex", "-1");
       });
     });

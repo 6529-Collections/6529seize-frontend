@@ -139,14 +139,12 @@ function sharedConfig(publicEnv, assetPrefix) {
       config.resolve.alias["@react-native-async-storage/async-storage"] = false;
       config.resolve.alias["react-native"] = false;
       if (!dev && !isServer) config.devtool = "source-map";
-      if (!isServer) config.resolve.alias.pino = "pino/browser";
       return config;
     },
     turbopack: {
       resolveAlias: {
         canvas: "./stubs/empty.js",
         encoding: "./stubs/empty.js",
-        pino: "pino/browser",
         "@react-native-async-storage/async-storage": "./stubs/empty.js",
         "react-native": "./stubs/empty.js",
       },
