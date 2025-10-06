@@ -38,6 +38,12 @@ const TABS = [
     metaLabel: "Collected",
   },
   {
+    id: "xtdh",
+    title: "xTDH",
+    route: "xtdh",
+    metaLabel: "xTDH",
+  },
+  {
     id: "stats",
     title: "Stats",
     route: "stats",
