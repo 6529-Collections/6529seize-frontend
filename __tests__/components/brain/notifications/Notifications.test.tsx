@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 const mutateAsyncMock = jest.fn();
@@ -88,11 +88,12 @@ import Notifications from '@/components/brain/notifications/Notifications';
 describe('Notifications component', () => {
   beforeEach(() => {
     mutateAsyncMock.mockClear();
+    mutateAsyncMock.mockResolvedValue(undefined);
     useNotificationsQueryMock.mockReset();
     setTitleMock.mockClear();
   });
 
-  it('shows loader when fetching and no items', () => {
+  it('shows loader when fetching and no items', async () => {
     useNotificationsQueryMock.mockReturnValue({
       items: [],
       isFetching: true,
@@ -106,11 +107,13 @@ describe('Notifications component', () => {
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByText('Loading notifications...', { selector: 'div' })).toBeInTheDocument();
-    expect(mutateAsyncMock).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
     // Title is set via TitleContext hooks
   });
 
-  it('renders wrapper with items', () => {
+  it('renders wrapper with items', async () => {
     useNotificationsQueryMock.mockReturnValue({
       items: ['a'],
       isFetching: false,
@@ -124,9 +127,12 @@ describe('Notifications component', () => {
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByTestId('wrapper')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
   });
 
-  it('shows no items component when query done but empty', () => {
+  it('shows no items component when query done but empty', async () => {
     useNotificationsQueryMock.mockReturnValue({
       items: [],
       isFetching: false,
@@ -140,5 +146,8 @@ describe('Notifications component', () => {
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByTestId('no-items')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
   });
 });

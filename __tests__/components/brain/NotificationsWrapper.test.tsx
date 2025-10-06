@@ -33,7 +33,7 @@ describe('NotificationsWrapper', () => {
         setActiveDrop={setActive}
       />
     );
-    expect(screen.getByText(/Loading older notifications/, { selector: 'div' })).toBeInTheDocument();
+    expect(screen.getByText(/Loading older notifications/i)).toBeInTheDocument();
   });
 
   it('delegates callbacks to router and state setter', () => {

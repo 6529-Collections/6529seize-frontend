@@ -3,6 +3,34 @@ import { act } from 'react-dom/test-utils';
 import React, { createRef } from 'react';
 import { FeedScrollContainer } from '@/components/brain/feed/FeedScrollContainer';
 
+beforeAll(() => {
+  class IntersectionObserverMock implements IntersectionObserver {
+    readonly root: Element | Document | null = null;
+    readonly rootMargin = '';
+    readonly thresholds = [] as ReadonlyArray<number>;
+
+    constructor(public callback: IntersectionObserverCallback) {}
+
+    disconnect(): void {}
+
+    observe(): void {}
+
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
+
+    unobserve(): void {}
+  }
+
+  (globalThis as typeof globalThis & {
+    IntersectionObserver: typeof IntersectionObserver;
+  }).IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
+});
+
+afterAll(() => {
+  delete (globalThis as Record<string, unknown>).IntersectionObserver;
+});
+
 jest.useFakeTimers();
 
 describe('FeedScrollContainer', () => {
