@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import MemeDropTrait from '../../../../components/memes/drops/MemeDropTrait';
+import MemeDropTrait from '@/components/memes/drops/MemeDropTrait';
 
-jest.mock('../../../../helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => `f-${n}` }));
-jest.mock('../../../../components/waves/memes/traits/schema', () => ({ FIELD_TO_LABEL_MAP: { pointsLoki: 'Points' } }));
-jest.mock('../../../../hooks/isMobileDevice', () => () => false);
+jest.mock('@/helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => `f-${n}` }));
+jest.mock('@/components/waves/memes/traits/schema', () => ({ FIELD_TO_LABEL_MAP: { pointsLoki: 'Points' } }));
+jest.mock('@/hooks/isMobileDevice', () => () => false);
 
 describe('MemeDropTrait', () => {
   it('converts boolean values', () => {

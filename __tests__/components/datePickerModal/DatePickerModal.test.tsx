@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import DatePickerModal from '../../../components/datePickerModal/DatePickerModal';
+import DatePickerModal from '@/components/datePickerModal/DatePickerModal';
 
 jest.mock('react-bootstrap', () => {
   const RB: any = {

@@ -1,4 +1,4 @@
-import { DropMetadata } from "../../../../../entities/IDrop";
+import { DropMetadata } from "@/entities/IDrop";
 import CreateDropMetadataItem from "./CreateDropMetadataItem";
 
 export default function CreateDropMetadataItems({

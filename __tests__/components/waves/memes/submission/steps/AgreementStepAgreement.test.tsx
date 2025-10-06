@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AgreementStepAgreement from '../../../../../../components/waves/memes/submission/steps/AgreementStepAgreement';
+import AgreementStepAgreement from '@/components/waves/memes/submission/steps/AgreementStepAgreement';
 
 describe('AgreementStepAgreement', () => {
   it('renders markdown content', () => {

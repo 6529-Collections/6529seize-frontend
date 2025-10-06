@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
-import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
-import { useHeaderContext } from "../../contexts/HeaderContext";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
+import { useHeaderContext } from "@/contexts/HeaderContext";
 
 const Header = dynamic(() => import("../header/Header"), {
   ssr: false,

@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useMemo } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { WaveOutcome } from "../../waves/outcome/WaveOutcome";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
 import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveOutcomeProps {

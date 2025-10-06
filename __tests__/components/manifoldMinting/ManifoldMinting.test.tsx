@@ -1,8 +1,8 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ManifoldMinting from "../../../components/manifoldMinting/ManifoldMinting";
-import { Time } from "../../../helpers/time";
+import ManifoldMinting from "@/components/manifoldMinting/ManifoldMinting";
+import { Time } from "@/helpers/time";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -18,21 +18,21 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-jest.mock("../../../components/nft-image/NFTImage", () => () => (
+jest.mock("@/components/nft-image/NFTImage", () => () => (
   <div data-testid="image" />
 ));
-jest.mock("../../../components/nftAttributes/NFTAttributes", () => () => (
+jest.mock("@/components/nftAttributes/NFTAttributes", () => () => (
   <div data-testid="attrs" />
 ));
-jest.mock("../../../components/manifoldMinting/ManifoldMintingWidget", () => () => (
+jest.mock("@/components/manifoldMinting/ManifoldMintingWidget", () => () => (
   <div data-testid="widget" />
 ));
-jest.mock("../../../components/the-memes/MemePageMintCountdown", () => () => (
+jest.mock("@/components/the-memes/MemePageMintCountdown", () => () => (
   <div data-testid="countdown" />
 ));
 
 // Mock the Time class used in the component
-jest.mock("../../../helpers/time", () => ({
+jest.mock("@/helpers/time", () => ({
   Time: {
     now: jest.fn(() => ({
       toMillis: jest.fn(() => Date.now()),
@@ -58,7 +58,7 @@ jest.mock("../../../helpers/time", () => ({
 }));
 
 // Mock all the helper functions to avoid implementation complexity
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   areEqualAddresses: jest.fn(() => true),
   capitalizeEveryWord: jest.fn((s: string) => s),
   fromGWEI: jest.fn((n: number) => n / 1000000000),
@@ -68,7 +68,7 @@ jest.mock("../../../helpers/Helpers", () => ({
   parseNftDescriptionToHtml: jest.fn((d: string) => d),
 }));
 
-jest.mock("../../../hooks/useManifoldClaim", () => {
+jest.mock("@/hooks/useManifoldClaim", () => {
   // Create mock Time objects that include all necessary methods
   const createMockTime = (ms = Date.now()) => ({
     lt: jest.fn(() => false),
@@ -118,12 +118,12 @@ jest.mock("../../../hooks/useManifoldClaim", () => {
 });
 
 // Mock the constants
-jest.mock("../../../constants", () => ({
+jest.mock("@/constants", () => ({
   ETHEREUM_ICON_TEXT: "Ξ",
   MEMES_CONTRACT: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
 }));
 
-const { useManifoldClaim } = require("../../../hooks/useManifoldClaim") as {
+const { useManifoldClaim } = require("@/hooks/useManifoldClaim") as {
   useManifoldClaim: jest.Mock;
 };
 
@@ -263,7 +263,7 @@ describe("Component Structure", () => {
     await waitFor(() => {
       expect(screen.getByText("Test NFT")).toBeInTheDocument();
       // Check that the mock functions were called for rendering data
-      const helpers = require("../../../helpers/Helpers");
+      const helpers = require("@/helpers/Helpers");
       expect(helpers.numberWithCommas).toHaveBeenCalled();
       expect(helpers.fromGWEI).toHaveBeenCalled();
     }, { timeout: 3000 });

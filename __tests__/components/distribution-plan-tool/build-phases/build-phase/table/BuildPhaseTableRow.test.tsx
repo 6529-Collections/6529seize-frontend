@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import BuildPhaseTableRow from '../../../../../../components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableRow';
-import { BuildPhasesPhaseComponent } from '../../../../../../components/distribution-plan-tool/build-phases/BuildPhases';
+import BuildPhaseTableRow from '@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableRow';
+import { BuildPhasesPhaseComponent } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 
-jest.mock('../../../../../../components/distribution-plan-tool/common/DistributionPlanTableRowWrapper', () => ({ children }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper', () => ({ children }: any) => (
   <tr data-testid="wrapper">{children}</tr>
 ));
 
-jest.mock('../../../../../../components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton', () => ({ allowlistId, order }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton', () => ({ allowlistId, order }: any) => (
   <button data-testid="delete-btn">{allowlistId}-{order}</button>
 ));
 

@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useMemo, useEffect, type JSX } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { TabToggleWithOverflow } from "../../common/TabToggleWithOverflow";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,
-} from "../../waves/header/WaveHeader";
-import { WaveWinnersSmall } from "../../waves/winners/WaveWinnersSmall";
+} from "@/components/waves/header/WaveHeader";
+import { WaveWinnersSmall } from "@/components/waves/winners/WaveWinnersSmall";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
-import { WaveSmallLeaderboard } from "../../waves/small-leaderboard/WaveSmallLeaderboard";
-import { WaveLeaderboardRightSidebarVoters } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
-import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
-import { useWaveTimers } from "../../../hooks/useWaveTimers";
+import { WaveSmallLeaderboard } from "@/components/waves/small-leaderboard/WaveSmallLeaderboard";
+import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
+import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
 
 interface WaveContentProps {
   readonly wave: ApiWave;

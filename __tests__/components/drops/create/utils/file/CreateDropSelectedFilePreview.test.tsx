@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import CreateDropSelectedFilePreview from '../../../../../../components/drops/create/utils/file/CreateDropSelectedFilePreview';
+import CreateDropSelectedFilePreview from '@/components/drops/create/utils/file/CreateDropSelectedFilePreview';
 
 beforeAll(() => {
   (global as any).URL.createObjectURL = jest.fn(() => 'blob:preview');

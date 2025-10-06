@@ -1,4 +1,4 @@
-import { ImageNode, $createImageNode, $isImageNode } from '../../../../../../components/drops/create/lexical/nodes/ImageNode';
+import { ImageNode, $createImageNode, $isImageNode } from '@/components/drops/create/lexical/nodes/ImageNode';
 
 jest.mock('lexical', () => {
   class DecoratorNode {

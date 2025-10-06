@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 import {
   NextgenRarityToggle,
   NextgenTokenTraits,
-} from "../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties";
+} from "@/components/nextGen/collections/nextgenToken/NextGenTokenProperties";
 
 // Mock the displayScore function to ensure consistent locale behavior
-jest.mock("../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties", () => ({
+jest.mock("@/components/nextGen/collections/nextgenToken/NextGenTokenProperties", () => ({
   ...jest.requireActual("../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties"),
   displayScore: jest.fn((number: number) => {
     const precision = 3;
@@ -26,7 +26,7 @@ jest.mock("../../../components/nextGen/collections/nextgenToken/NextGenTokenProp
 }));
 
 // Import the mocked function for testing
-const { displayScore } = require("../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties");
+const { displayScore } = require("@/components/nextGen/collections/nextgenToken/NextGenTokenProperties");
 
 describe("displayScore", () => {
   it("formats numbers >= 0.01 with three decimals", () => {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState, useEffect, useContext } from "react";
-import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
-import { usePrefetchNotifications } from "../../../hooks/useNotificationsQuery";
-import { AuthContext } from "../../auth/Auth";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
+import { AuthContext } from "@/components/auth/Auth";
 
 export interface NotificationFilter {
   cause: ApiNotificationCause[];

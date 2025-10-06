@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 import SecondaryButton from "../utils/button/SecondaryButton";

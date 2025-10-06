@@ -1,14 +1,14 @@
 "use client";
 
-import { ApiWaveScope } from "../../../../../generated/models/ApiWaveScope";
+import { ApiWaveScope } from "@/generated/models/ApiWaveScope";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../../auth/Auth";
-import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { canEditWave } from "../../../../../helpers/waves/waves.helpers";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveGroupScope from "./WaveGroupScope";
-import useIsMobileDevice from "../../../../../hooks/isMobileDevice";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 export enum WaveGroupType {
   VIEW = "VIEW",

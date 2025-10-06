@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import LeaderboardCardsCollectedComponent from '../../../components/leaderboard/LeaderboardCardsCollected';
-import { Content, Collector } from '../../../components/leaderboard/Leaderboard';
+import LeaderboardCardsCollectedComponent from '@/components/leaderboard/LeaderboardCardsCollected';
+import { Content, Collector } from '@/components/leaderboard/Leaderboard';
 
-jest.mock('../../../components/leaderboard/leaderboard_helpers', () => {
+jest.mock('@/components/leaderboard/leaderboard_helpers', () => {
   const original = jest.requireActual('../../../components/leaderboard/leaderboard_helpers');
   return {
     ...original,
@@ -10,7 +10,7 @@ jest.mock('../../../components/leaderboard/leaderboard_helpers', () => {
   };
 });
 
-const useFetchLeaderboard = require('../../../components/leaderboard/leaderboard_helpers').useFetchLeaderboard as jest.Mock;
+const useFetchLeaderboard = require('@/components/leaderboard/leaderboard_helpers').useFetchLeaderboard as jest.Mock;
 
 const baseProps = {
   block: 1,

@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import WaveDropContent from '../../../../components/waves/drops/WaveDropContent';
+import WaveDropContent from '@/components/waves/drops/WaveDropContent';
 
 let partProps: any;
-jest.mock('../../../../components/waves/drops/WaveDropPart', () => (props: any) => { partProps = props; return <div data-testid="part" />; });
+jest.mock('@/components/waves/drops/WaveDropPart', () => (props: any) => { partProps = props; return <div data-testid="part" />; });
 
 describe('WaveDropContent', () => {
   it('passes props to WaveDropPart', () => {

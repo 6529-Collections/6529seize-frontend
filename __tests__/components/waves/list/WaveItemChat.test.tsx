@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveItemChat from '../../../../components/waves/list/WaveItemChat';
+import WaveItemChat from '@/components/waves/list/WaveItemChat';
 
-jest.mock('../../../../hooks/useWaveById', () => ({ useWaveById: jest.fn() }));
-jest.mock('../../../../components/waves/ChatItemHrefButtons', () => (p: any) => <div data-testid="href-buttons">{p.relativeHref}</div>);
-jest.mock('../../../../components/waves/list/WaveItem', () => (p: any) => <div data-testid="wave-item">{p.wave ? p.wave.id : 'none'}</div>);
+jest.mock('@/hooks/useWaveById', () => ({ useWaveById: jest.fn() }));
+jest.mock('@/components/waves/ChatItemHrefButtons', () => (p: any) => <div data-testid="href-buttons">{p.relativeHref}</div>);
+jest.mock('@/components/waves/list/WaveItem', () => (p: any) => <div data-testid="wave-item">{p.wave ? p.wave.id : 'none'}</div>);
 
-const { useWaveById } = require('../../../../hooks/useWaveById');
+const { useWaveById } = require('@/hooks/useWaveById');
 
 describe('WaveItemChat', () => {
   it('passes wave data and relative link', () => {

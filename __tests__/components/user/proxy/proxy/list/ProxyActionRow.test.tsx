@@ -1,23 +1,23 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import ProxyActionRow, { PROXY_ACTION_ROW_VIEW_MODE } from '../../../../../../components/user/proxy/proxy/list/ProxyActionRow';
+import ProxyActionRow, { PROXY_ACTION_ROW_VIEW_MODE } from '@/components/user/proxy/proxy/list/ProxyActionRow';
 
-jest.mock('../../../../../../components/user/proxy/proxy/list/ProxyActionRowDataMode', () => ({
+jest.mock('@/components/user/proxy/proxy/list/ProxyActionRowDataMode', () => ({
   __esModule: true,
   default: ({ setViewMode }: any) => <button onClick={() => setViewMode(PROXY_ACTION_ROW_VIEW_MODE.CREDIT_EDIT)}>data</button>,
 }));
 
-jest.mock('../../../../../../components/user/proxy/proxy/action/utils/credit/ProfileProxyCreditEdit', () => ({
+jest.mock('@/components/user/proxy/proxy/action/utils/credit/ProfileProxyCreditEdit', () => ({
   __esModule: true,
   default: ({ setViewMode }: any) => <button onClick={setViewMode}>credit</button>,
 }));
 
-jest.mock('../../../../../../components/user/proxy/proxy/action/utils/time/ProfileProxyEndTimeEdit', () => ({
+jest.mock('@/components/user/proxy/proxy/action/utils/time/ProfileProxyEndTimeEdit', () => ({
   __esModule: true,
   default: ({ setViewMode }: any) => <button onClick={setViewMode}>time</button>,
 }));
 
-jest.mock('../../../../../../components/utils/animation/CommonChangeAnimation.tsx', () => ({ __esModule: true, default: (p:any) => <div>{p.children}</div> }));
+jest.mock('@/components/utils/animation/CommonChangeAnimation.tsx', () => ({ __esModule: true, default: (p:any) => <div>{p.children}</div> }));
 
 describe('ProxyActionRow', () => {
   const baseProps = {

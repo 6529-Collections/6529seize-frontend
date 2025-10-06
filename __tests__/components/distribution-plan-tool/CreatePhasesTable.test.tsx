@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreatePhasesTable from '../../../components/distribution-plan-tool/create-phases/table/CreatePhasesTable';
+import CreatePhasesTable from '@/components/distribution-plan-tool/create-phases/table/CreatePhasesTable';
 
 // Mock child components to simplify rendering and assert props
-jest.mock('../../../components/distribution-plan-tool/create-phases/table/CreatePhasesTableHeader', () => () => <thead data-testid="header" />);
-jest.mock('../../../components/distribution-plan-tool/create-phases/table/CreatePhasesTableBody', () => ({ phases }: any) => (
+jest.mock('@/components/distribution-plan-tool/create-phases/table/CreatePhasesTableHeader', () => () => <thead data-testid="header" />);
+jest.mock('@/components/distribution-plan-tool/create-phases/table/CreatePhasesTableBody', () => ({ phases }: any) => (
   <tbody data-testid="body">{phases.map((p: any) => (<tr key={p.id}><td>{p.name}</td></tr>))}</tbody>
 ));
 

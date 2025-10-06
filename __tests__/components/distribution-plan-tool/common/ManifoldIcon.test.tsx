@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import ManifoldIcon from '../../../../components/distribution-plan-tool/common/ManifoldIcon';
+import ManifoldIcon from '@/components/distribution-plan-tool/common/ManifoldIcon';
 
 describe('ManifoldIcon', () => {
   it('renders svg with expected attributes', () => {

@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { render } from '@testing-library/react';
 import React from 'react';
-import GroupCreateTDH from '../../../../../../components/groups/page/create/config/GroupCreateTDH';
+import GroupCreateTDH from '@/components/groups/page/create/config/GroupCreateTDH';
 
-jest.mock('../../../../../../components/groups/page/create/config/common/GroupCreateNumericValue', () => ({
+jest.mock('@/components/groups/page/create/config/common/GroupCreateNumericValue', () => ({
   __esModule: true,
   default: (props: any) => { mockProps = props; return <div data-testid="numeric" />; }
 }));

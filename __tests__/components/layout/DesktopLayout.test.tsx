@@ -1,11 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 const registerRef = jest.fn();
 const setHeaderRef = jest.fn();
 let pathname = "/";
 
-jest.mock("next/dynamic", () => () => () => <div data-testid="header" />);
+jest.mock("next/dynamic", () => () => {
+  const MockDynamicComponent = () => <div data-testid="header" />;
+  MockDynamicComponent.displayName = "MockDynamicComponent";
+  return MockDynamicComponent;
+});
 jest.mock("@/hooks/useBreadcrumbs", () => ({
   useBreadcrumbs: () => [{ display: "Home", href: "/" }],
 }));

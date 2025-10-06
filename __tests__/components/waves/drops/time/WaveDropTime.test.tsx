@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveDropTime from '../../../../../components/waves/drops/time/WaveDropTime';
+import WaveDropTime from '@/components/waves/drops/time/WaveDropTime';
 
 function renderWithTime(ts: number) {
   render(<WaveDropTime timestamp={ts} />);

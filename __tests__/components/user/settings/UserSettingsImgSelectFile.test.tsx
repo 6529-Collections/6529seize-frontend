@@ -1,8 +1,8 @@
 import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import UserSettingsImgSelectFile from '../../../../components/user/settings/UserSettingsImgSelectFile';
-import { AuthContext } from '../../../../components/auth/Auth';
+import UserSettingsImgSelectFile from '@/components/user/settings/UserSettingsImgSelectFile';
+import { AuthContext } from '@/components/auth/Auth';
 
 const setToast = jest.fn();
 const setFile = jest.fn();

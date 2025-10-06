@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot';
-import { DistributionPlanToolContext } from '../../../../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode } from '../../../../../../../../components/allowlist-tool/allowlist-tool.types';
+import FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistOperationCode } from '@/components/allowlist-tool/allowlist-tool.types';
 
 describe('FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot', () => {
   it('renders rows with custom pool info', () => {

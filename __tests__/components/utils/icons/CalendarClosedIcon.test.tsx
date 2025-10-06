@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import CalendarClosedIcon from '../../../../components/utils/icons/CalendarClosedIcon';
+import CalendarClosedIcon from '@/components/utils/icons/CalendarClosedIcon';
 
 describe('CalendarClosedIcon', () => {
   it('renders svg paths and forwards className', () => {

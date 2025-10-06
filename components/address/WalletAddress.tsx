@@ -5,7 +5,7 @@ import {
   containsEmojis,
   formatAddress,
   parseEmojis,
-} from "../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
 import { Dropdown } from "react-bootstrap";

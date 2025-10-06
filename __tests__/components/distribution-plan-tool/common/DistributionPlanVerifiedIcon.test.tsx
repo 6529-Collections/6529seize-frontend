@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import DistributionPlanVerifiedIcon from '../../../../components/distribution-plan-tool/common/DistributionPlanVerifiedIcon';
+import DistributionPlanVerifiedIcon from '@/components/distribution-plan-tool/common/DistributionPlanVerifiedIcon';
 
 describe('DistributionPlanVerifiedIcon', () => {
   it('renders SVG with two paths', () => {

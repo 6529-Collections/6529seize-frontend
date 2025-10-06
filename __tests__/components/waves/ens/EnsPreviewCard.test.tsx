@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import EnsPreviewCard from "../../../../components/waves/ens/EnsPreviewCard";
+import EnsPreviewCard from "@/components/waves/ens/EnsPreviewCard";
 import {
   type EnsAddressPreview,
   type EnsContentPreview,
   type EnsNamePreview,
-} from "../../../../components/waves/ens/types";
+} from "@/components/waves/ens/types";
 
 describe("EnsPreviewCard", () => {
   it("renders ENS name information", () => {

@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import UserPageStatsTagsSet from "./UserPageStatsTagsSet";
-import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import {
   OwnerBalance,
   OwnerBalanceMemes,
-} from "../../../../entities/IBalances";
-import { MemeSeason } from "../../../../entities/ISeason";
+} from "@/entities/IBalances";
+import { MemeSeason } from "@/entities/ISeason";
 
 export interface UserPageStatsTag {
   readonly id: string;

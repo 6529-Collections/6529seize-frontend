@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import CreateCustomSnapshotFormAddWalletsModal from '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal';
+import CreateCustomSnapshotFormAddWalletsModal from '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal';
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload',
+  '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload',
   () => ({ fileName, setFileName, setTokens }: any) => (
     <div data-testid="upload" onClick={() => setFileName('file.csv')} />
   )
@@ -11,7 +11,7 @@ jest.mock(
 
 const tableMock = jest.fn((props: any) => <div data-testid="table" />);
 jest.mock(
-  '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable',
+  '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable',
   () => ({
     __esModule: true,
     default: (props: any) => tableMock(props),

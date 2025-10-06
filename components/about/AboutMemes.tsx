@@ -76,25 +76,25 @@ export default function AboutMemes() {
           </p>
           <p>
             All The Memes:{" "}
-            <a href={`/the-memes`} target="_blank" rel="noreferrer">
+            <Link href="/the-memes" target="_blank" rel="noopener noreferrer">
               6529.io/the-memes
-            </a>
+            </Link>
           </p>
           <p>
             The Memes Network:{" "}
-            <a href={`/network`} target="_blank" rel="noreferrer">
+            <Link href="/network" target="_blank" rel="noopener noreferrer">
               6529.io/network
-            </a>
+            </Link>
           </p>
           <p>
             FAQs:{" "}
-            <a
+            <Link
               href={`/about/${AboutSection.FAQ}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               6529.io/about/faq
-            </a>
+            </Link>
           </p>
           <p>
             The Memes chat on Brain:{" "}
@@ -104,13 +104,13 @@ export default function AboutMemes() {
           </p>
           <p>
             Minting Memes:{" "}
-            <a
+            <Link
               href={`/about/${AboutSection.MINTING}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               6529.io/about/minting
-            </a>
+            </Link>
           </p>
         </Col>
       </Row>

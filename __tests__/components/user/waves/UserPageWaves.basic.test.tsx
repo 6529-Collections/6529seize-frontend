@@ -4,7 +4,7 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { createMockAuthContext } from "../../../utils/testContexts";
+import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 
 jest.mock("@tanstack/react-query", () => ({ useInfiniteQuery: jest.fn() }));
 jest.mock("react-use", () => ({ useDebounce: jest.fn() }));

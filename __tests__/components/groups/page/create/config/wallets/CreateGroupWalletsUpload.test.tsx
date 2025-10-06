@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import CreateGroupWalletsUpload from '../../../../../../../components/groups/page/create/config/wallets/CreateGroupWalletsUpload';
-import { GroupCreateWalletsType } from '../../../../../../../components/groups/page/create/config/wallets/GroupCreateWallets';
+import CreateGroupWalletsUpload from '@/components/groups/page/create/config/wallets/CreateGroupWalletsUpload';
+import { GroupCreateWalletsType } from '@/components/groups/page/create/config/wallets/GroupCreateWallets';
 
 let mockContent = '';
 class MockFileReader {

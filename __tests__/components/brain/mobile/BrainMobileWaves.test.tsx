@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
-import BrainMobileWaves from '../../../../components/brain/mobile/BrainMobileWaves';
+import BrainMobileWaves from '@/components/brain/mobile/BrainMobileWaves';
 
 let receivedRef: any;
 
-jest.mock('../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaves', () => ({
+jest.mock('@/components/brain/left-sidebar/waves/BrainLeftSidebarWaves', () => ({
   __esModule: true,
   default: ({ scrollContainerRef }: any) => {
     receivedRef = scrollContainerRef;
@@ -11,7 +11,7 @@ jest.mock('../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaves
   }
 }));
 
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ mobileWavesViewStyle: { height: '42px' } })
 }));
 

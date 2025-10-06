@@ -1,5 +1,5 @@
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
-import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
 
 export default function CreateWaveNameInput({
   name,

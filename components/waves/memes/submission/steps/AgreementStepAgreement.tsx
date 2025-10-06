@@ -64,7 +64,7 @@ export default function AgreementStepAgreement({ text }: AgreementStepAgreementP
               <a
                 href={href}
                 target="_blank"
-                rel="noopener noreferrer nofollow"
+                rel="nofollow noopener noreferrer"
                 className="tw-text-blue-400 hover:tw-text-blue-300 tw-underline"
               >
                 {children}

@@ -5,11 +5,11 @@ import {
   DistributionPlanSnapshot,
   PhaseGroupSnapshotConfig,
   TopHolderType,
-} from "../../BuildPhaseFormConfigModal";
-import AllowlistToolAnimationWrapper from "../../../../../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import { Pool } from "../../../../../../allowlist-tool/allowlist-tool.types";
+} from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
+import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
 import FinalizeSnapshotsTableRow from "./FinalizeSnapshotsTableRow";
-import { BuildPhasesPhase } from "../../../../BuildPhases";
+import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 
 export interface FinalizeSnapshotRow {
   readonly groupSnapshotId: string;

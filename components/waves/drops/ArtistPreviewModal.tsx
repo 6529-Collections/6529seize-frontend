@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import { createPortal } from "react-dom";
 import { Dialog, Transition } from "@headlessui/react";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 

@@ -1,7 +1,7 @@
 import React from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPart from "./WaveDropPart";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveDropContentProps {
   readonly drop: ExtendedDrop;

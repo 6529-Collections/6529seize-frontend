@@ -1,9 +1,9 @@
-import { ApiUpdateWaveRequest } from "../../../../../../generated/models/ApiUpdateWaveRequest";
-import { ApiWave } from "../../../../../../generated/models/ApiWave";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
-import { convertWaveToUpdateWave } from "../../../../../../helpers/waves/waves.helpers";
-import CommonAnimationOpacity from "../../../../../utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "../../../../../utils/animation/CommonAnimationWrapper";
+import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import { WaveGroupType } from "../WaveGroup";
 import WaveGroupRemoveModal from "./WaveGroupRemoveModal";
 

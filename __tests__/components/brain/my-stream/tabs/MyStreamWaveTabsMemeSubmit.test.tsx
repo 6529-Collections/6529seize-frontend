@@ -1,39 +1,39 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveTabsMemeSubmit from '../../../../../components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit';
-import { SubmissionStatus } from '../../../../../hooks/useWave';
+import MyStreamWaveTabsMemeSubmit from '@/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit';
+import { SubmissionStatus } from '@/hooks/useWave';
 
 const useWave = jest.fn();
 const useCountdown = jest.fn();
 
-jest.mock('../../../../../hooks/useWave', () => ({
+jest.mock('@/hooks/useWave', () => ({
   useWave: (...args: any[]) => useWave(...args),
   SubmissionStatus: jest.requireActual('../../../../../hooks/useWave').SubmissionStatus,
 }));
 
-jest.mock('../../../../../hooks/useCountdown', () => ({
+jest.mock('@/hooks/useCountdown', () => ({
   useCountdown: (...args: any[]) => useCountdown(...args),
 }));
 
-jest.mock('../../../../../components/utils/button/PrimaryButton', () => ({
+jest.mock('@/components/utils/button/PrimaryButton', () => ({
   __esModule: true,
   default: ({ children, ...props }: any) => <button data-testid="primary" {...props}>{children}</button>,
 }));
 
-jest.mock('../../../../../components/utils/button/InfoButton', () => ({
+jest.mock('@/components/utils/button/InfoButton', () => ({
   __esModule: true,
   default: ({ children, ...props }: any) => <button data-testid="info" {...props}>{children}</button>,
 }));
 
-jest.mock('../../../../../components/utils/button/ClosedButton', () => ({
+jest.mock('@/components/utils/button/ClosedButton', () => ({
   __esModule: true,
   default: ({ children, ...props }: any) => <button data-testid="closed" {...props}>{children}</button>,
 }));
 
-jest.mock('../../../../../components/utils/icons/ClockIcon', () => ({ __esModule: true, default: () => <svg data-testid="clock" /> }));
-jest.mock('../../../../../components/utils/icons/CalendarClosedIcon', () => ({ __esModule: true, default: () => <svg data-testid="calendar" /> }));
-jest.mock('../../../../../components/utils/icons/LimitIcon', () => ({ __esModule: true, default: () => <svg data-testid="limit" /> }));
-jest.mock('../../../../../components/utils/icons/PermissionIcon', () => ({ __esModule: true, default: () => <svg data-testid="permission" /> }));
+jest.mock('@/components/utils/icons/ClockIcon', () => ({ __esModule: true, default: () => <svg data-testid="clock" /> }));
+jest.mock('@/components/utils/icons/CalendarClosedIcon', () => ({ __esModule: true, default: () => <svg data-testid="calendar" /> }));
+jest.mock('@/components/utils/icons/LimitIcon', () => ({ __esModule: true, default: () => <svg data-testid="limit" /> }));
+jest.mock('@/components/utils/icons/PermissionIcon', () => ({ __esModule: true, default: () => <svg data-testid="permission" /> }));
 
 const baseInfo = {
   voting: {},

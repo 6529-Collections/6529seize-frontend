@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import HeaderUserProxyDropdown from '../../../../../components/header/user/proxy/HeaderUserProxyDropdown';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import HeaderUserProxyDropdown from '@/components/header/user/proxy/HeaderUserProxyDropdown';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../../components/header/user/proxy/HeaderUserProxyDropdownItem', () => () => <div data-testid="item" />);
-jest.mock('../../../../../components/auth/SeizeConnectContext');
+jest.mock('@/components/header/user/proxy/HeaderUserProxyDropdownItem', () => () => <div data-testid="item" />);
+jest.mock('@/components/auth/SeizeConnectContext');
 
-const { useSeizeConnectContext: mockConnect } = require('../../../../../components/auth/SeizeConnectContext');
+const { useSeizeConnectContext: mockConnect } = require('@/components/auth/SeizeConnectContext');
 
 const profileBase = {
   handle: 'alice',

@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageHeaderPfpWrapper from '../../../../components/user/user-page-header/pfp/UserPageHeaderPfpWrapper';
+import UserPageHeaderPfpWrapper from '@/components/user/user-page-header/pfp/UserPageHeaderPfpWrapper';
 
-jest.mock('../../../../components/utils/icons/PencilIcon', () => () => <span data-testid="pencil" />);
-jest.mock('../../../../components/user/user-page-header/pfp/UserPageHeaderEditPfp', () => (props: any) => (
+jest.mock('@/components/utils/icons/PencilIcon', () => () => <span data-testid="pencil" />);
+jest.mock('@/components/user/user-page-header/pfp/UserPageHeaderEditPfp', () => (props: any) => (
   <div data-testid="edit" onClick={props.onClose} />
 ));
 
-jest.mock('../../../../components/utils/animation/CommonAnimationWrapper', () => ({ children }: any) => <div>{children}</div>);
-jest.mock('../../../../components/utils/animation/CommonAnimationOpacity', () => ({ children, onClicked }: any) => (
+jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ children }: any) => <div>{children}</div>);
+jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ children, onClicked }: any) => (
   <div data-testid="opacity" onClick={onClicked}>{children}</div>
 ));
 

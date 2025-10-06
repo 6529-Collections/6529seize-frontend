@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import GroupCreateTest from '../../../../../../components/groups/page/create/actions/GroupCreateTest';
-import { AuthContext } from '../../../../../../components/auth/Auth';
+import GroupCreateTest from '@/components/groups/page/create/actions/GroupCreateTest';
+import { AuthContext } from '@/components/auth/Auth';
 
 const commonApiPost = jest.fn();
 const commonApiFetch = jest.fn();
 
-jest.mock('../../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: (...args: any[]) => commonApiPost(...args),
   commonApiFetch: (...args: any[]) => commonApiFetch(...args),
 }));

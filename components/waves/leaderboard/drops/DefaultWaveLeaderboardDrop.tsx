@@ -2,23 +2,23 @@
 
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
 import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
-import { ApiWave } from "../../../../generated/models/ObjectSerializer";
-import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
+import { ApiWave } from "@/generated/models/ObjectSerializer";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
-import WaveDropActionsOptions from "../../drops/WaveDropActionsOptions";
-import WaveDropActionsOpen from "../../drops/WaveDropActionsOpen";
-import WaveDropMobileMenuOpen from "../../drops/WaveDropMobileMenuOpen";
-import WaveDropMobileMenuDelete from "../../drops/WaveDropMobileMenuDelete";
-import { VotingModal, MobileVotingModal } from "../../../../components/voting";
-import VotingModalButton from "../../../../components/voting/VotingModalButton";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
-import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import useLongPressInteraction from "../../../../hooks/useLongPressInteraction";
+import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
+import { VotingModal, MobileVotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;

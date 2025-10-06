@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import {
   ApiProfileRepRatesState,
   RatingStats,
-} from "../../../../entities/IProfile";
+} from "@/entities/IProfile";
 import UserPageRepNewRepSearch from "./UserPageRepNewRepSearch";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageRepNewRep({
   profile,

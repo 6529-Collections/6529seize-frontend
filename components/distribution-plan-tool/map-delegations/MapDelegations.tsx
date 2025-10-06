@@ -9,7 +9,7 @@ import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 import StepHeader from "../common/StepHeader";
 import MapDelegationsForm from "./MapDelegationsForm";
-import { AllowlistOperationCode } from "../../allowlist-tool/allowlist-tool.types";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 import MapDelegationsDone from "./MapDelegationsDone";
 
 export default function MapDelegations() {

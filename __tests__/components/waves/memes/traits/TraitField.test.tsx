@@ -1,23 +1,23 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TraitField } from '../../../../../components/waves/memes/traits/TraitField';
-import { FieldType } from '../../../../../components/waves/memes/traits/schema';
+import { TraitField } from '@/components/waves/memes/traits/TraitField';
+import { FieldType } from '@/components/waves/memes/traits/schema';
 
 const TextTraitMock = jest.fn(() => <div data-testid="text" />);
 const NumberTraitMock = jest.fn(() => <div data-testid="number" />);
 const DropdownTraitMock = jest.fn(() => <div data-testid="dropdown" />);
 const BooleanTraitMock = jest.fn(() => <div data-testid="boolean" />);
 
-jest.mock('../../../../../components/waves/memes/traits/TextTrait', () => ({
+jest.mock('@/components/waves/memes/traits/TextTrait', () => ({
   TextTrait: (props: any) => TextTraitMock(props),
 }));
-jest.mock('../../../../../components/waves/memes/traits/NumberTrait', () => ({
+jest.mock('@/components/waves/memes/traits/NumberTrait', () => ({
   NumberTrait: (props: any) => NumberTraitMock(props),
 }));
-jest.mock('../../../../../components/waves/memes/traits/DropdownTrait', () => ({
+jest.mock('@/components/waves/memes/traits/DropdownTrait', () => ({
   DropdownTrait: (props: any) => DropdownTraitMock(props),
 }));
-jest.mock('../../../../../components/waves/memes/traits/BooleanTrait', () => ({
+jest.mock('@/components/waves/memes/traits/BooleanTrait', () => ({
   BooleanTrait: (props: any) => BooleanTraitMock(props),
 }));
 

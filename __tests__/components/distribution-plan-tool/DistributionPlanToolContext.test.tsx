@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import DistributionPlanToolContextWrapper, { DistributionPlanToolContext, DistributionPlanToolStep } from '../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import DistributionPlanToolContextWrapper, { DistributionPlanToolContext, DistributionPlanToolStep } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
-jest.mock('../../../services/distribution-plan-api', () => ({
+jest.mock('@/services/distribution-plan-api', () => ({
   distributionPlanApiFetch: jest.fn(),
   distributionPlanApiPost: jest.fn(),
 }));
 
-import { distributionPlanApiFetch, distributionPlanApiPost } from '../../../services/distribution-plan-api';
+import { distributionPlanApiFetch, distributionPlanApiPost } from '@/services/distribution-plan-api';
 
 jest.mock('react-use', () => ({
   useInterval: jest.fn(),

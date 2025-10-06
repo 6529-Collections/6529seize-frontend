@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import ValidationFeedback from '../../../../../../components/waves/create-wave/voting/components/ValidationFeedback';
-import { MIN_MINUTES, MAX_HOURS } from '../../../../../../components/waves/create-wave/voting/types';
+import ValidationFeedback from '@/components/waves/create-wave/voting/components/ValidationFeedback';
+import { MIN_MINUTES, MAX_HOURS } from '@/components/waves/create-wave/voting/types';
 
 describe('ValidationFeedback', () => {
   it('shows error message when provided', () => {

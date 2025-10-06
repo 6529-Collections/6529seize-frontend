@@ -1,10 +1,10 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import TermsSignatureFlow from '../../components/terms/TermsSignatureFlow';
+import TermsSignatureFlow from '@/components/terms/TermsSignatureFlow';
 
 const mockSignDrop = jest.fn(async () => ({ success: true, signature: 'sig' }));
 
-jest.mock('../../hooks/drops/useDropSignature', () => ({
+jest.mock('@/hooks/drops/useDropSignature', () => ({
   useDropSignature: () => ({ signDrop: mockSignDrop, isLoading: false })
 }));
 

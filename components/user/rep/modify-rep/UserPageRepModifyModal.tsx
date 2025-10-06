@@ -5,24 +5,24 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import {
   ApiProfileRepRatesState,
   RatingStats,
-} from "../../../../entities/IProfile";
+} from "@/entities/IProfile";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import {
   commonApiFetch,
   commonApiPost,
-} from "../../../../services/api/common-api";
-import { getStringAsNumberOrZero } from "../../../../helpers/Helpers";
+} from "@/services/api/common-api";
+import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
-import UserRateAdjustmentHelper from "../../utils/rate/UserRateAdjustmentHelper";
+import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../../react-query-wrapper/ReactQueryWrapper";
-import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
-import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
   readonly category: string;

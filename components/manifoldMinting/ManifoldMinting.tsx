@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "../../constants";
-import { Distribution } from "../../entities/IDistribution";
+import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "@/constants";
+import { Distribution } from "@/entities/IDistribution";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
@@ -13,15 +13,15 @@ import {
   getPathForContract,
   numberWithCommas,
   parseNftDescriptionToHtml,
-} from "../../helpers/Helpers";
-import { Time } from "../../helpers/time";
+} from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
 import {
   buildMemesPhases,
   ManifoldClaim,
   ManifoldClaimStatus,
   MemePhase,
   useManifoldClaim,
-} from "../../hooks/useManifoldClaim";
+} from "@/hooks/useManifoldClaim";
 import { Spinner } from "../dotLoader/DotLoader";
 import NFTImage from "../nft-image/NFTImage";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
@@ -329,7 +329,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <a
             href="https://x.com/6529collections"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="font-color-h font-color-hover">
             &#64;6529collections
           </a>{" "}

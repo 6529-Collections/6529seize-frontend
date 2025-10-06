@@ -1,15 +1,15 @@
 "use client";
 
 import { useContext, useRef, useState } from "react";
-import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
-import { AuthContext } from "../../../../../auth/Auth";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { AuthContext } from "@/components/auth/Auth";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiDelete } from "../../../../../../services/api/common-api";
-import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
-import { ApiDropType } from "../../../../../../generated/models/ApiDropType";
-import { useMyStream } from "../../../../../../contexts/wave/MyStreamContext";
+import { commonApiDelete } from "@/services/api/common-api";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 export default function DropsListItemDeleteDropModal({
   drop,

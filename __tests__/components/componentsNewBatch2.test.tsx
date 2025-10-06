@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ComponentRandomHoldersWeightItem from '../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeightItem';
-import { ComponentRandomHoldersWeightType } from '../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight';
+import ComponentRandomHoldersWeightItem from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeightItem';
+import { ComponentRandomHoldersWeightType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight';
 
 describe('ComponentRandomHoldersWeightItem Tests', () => {
   describe('Basic Rendering', () => {

@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderNameEdit from '../../../../../components/waves/header/name/WaveHeaderNameEdit';
+import WaveHeaderNameEdit from '@/components/waves/header/name/WaveHeaderNameEdit';
 
-jest.mock('../../../../../components/utils/animation/CommonAnimationWrapper', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
-jest.mock('../../../../../components/utils/animation/CommonAnimationOpacity', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
+jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
+jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
 
 let closeFn: () => void;
-jest.mock('../../../../../components/waves/header/name/WaveHeaderNameEditModal', () => (props: any) => {
+jest.mock('@/components/waves/header/name/WaveHeaderNameEditModal', () => (props: any) => {
   closeFn = props.onClose;
   return <div data-testid="modal"><button onClick={props.onClose}>close</button></div>;
 });

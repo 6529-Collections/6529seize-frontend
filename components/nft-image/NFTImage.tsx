@@ -1,4 +1,4 @@
-import { BaseNFT, NFTLite } from "../../entities/INFT";
+import { BaseNFT, NFTLite } from "@/entities/INFT";
 import styles from "./NFTImage.module.scss";
 import NFTHTMLRenderer from "./renderers/NFTHTMLRenderer";
 import NFTImageRenderer from "./renderers/NFTImageRenderer";

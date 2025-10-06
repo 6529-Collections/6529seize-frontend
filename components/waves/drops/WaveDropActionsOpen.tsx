@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { Tooltip } from "react-tooltip";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface WaveDropActionsOpenProps {

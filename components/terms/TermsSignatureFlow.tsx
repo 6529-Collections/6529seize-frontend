@@ -2,8 +2,8 @@
 
 import { FC, useEffect, useState } from "react";
 import TermsOfServiceModal from "./TermsOfServiceModal";
-import { useDropSignature } from "../../hooks/drops/useDropSignature";
-import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
+import { useDropSignature } from "@/hooks/drops/useDropSignature";
+import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 
 interface SigningCompleteResult {
   success: boolean;

@@ -1,24 +1,24 @@
 import { render } from '@testing-library/react';
 import { act } from '@testing-library/react';
 import React from 'react';
-import UserPageIdentityAddStatementsSocialMediaAccount from '../../../../../../../components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount';
-import { STATEMENT_TYPE, STATEMENT_GROUP } from '../../../../../../../helpers/Types';
+import UserPageIdentityAddStatementsSocialMediaAccount from '@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount';
+import { STATEMENT_TYPE, STATEMENT_GROUP } from '@/helpers/Types';
 
 let headerProps: any;
 let itemsProps: any;
 let formProps: any;
 
-jest.mock('../../../../../../../components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountHeader', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountHeader', () => (props: any) => {
   headerProps = props;
   return <div data-testid="header" />;
 });
 
-jest.mock('../../../../../../../components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems', () => (props: any) => {
   itemsProps = props;
   return <div data-testid="items" />;
 });
 
-jest.mock('../../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => (props: any) => {
   formProps = props;
   return <div data-testid="form" />;
 });

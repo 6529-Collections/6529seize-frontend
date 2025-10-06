@@ -1,16 +1,16 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
-import { CICType } from "../../../entities/IProfile";
-import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { CICType } from "@/entities/IProfile";
+import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
-import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
-import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;

@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import ToggleViewButtonPlugin from '../../../../../../components/drops/create/lexical/plugins/ToggleViewButtonPlugin';
+import ToggleViewButtonPlugin from '@/components/drops/create/lexical/plugins/ToggleViewButtonPlugin';
 
 describe('ToggleViewButtonPlugin', () => {
   it('calls onViewClick when button is clicked', () => {

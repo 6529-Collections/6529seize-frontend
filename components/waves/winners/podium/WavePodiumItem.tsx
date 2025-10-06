@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { ImageScale, getScaledImageUri } from "../../../../helpers/image.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner;

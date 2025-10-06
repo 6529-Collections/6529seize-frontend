@@ -1,17 +1,17 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import GroupCreateNfts from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateNfts';
-import { ApiGroupOwnsNftNameEnum } from '../../../../../../../generated/models/ApiGroupOwnsNft';
-import { MEMES_CONTRACT } from '../../../../../../../constants';
+import GroupCreateNfts from '@/components/groups/page/create/config/nfts/GroupCreateNfts';
+import { ApiGroupOwnsNftNameEnum } from '@/generated/models/ApiGroupOwnsNft';
+import { MEMES_CONTRACT } from '@/constants';
 
 let selectProps: any = null;
 let selectedProps: any = null;
 
-jest.mock('../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftsSelect', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNftsSelect', () => ({
   __esModule: true,
   default: (props: any) => { selectProps = props; return <div data-testid="select" />; }
 }));
-jest.mock('../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftsSelected', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNftsSelected', () => ({
   __esModule: true,
   default: (props: any) => { selectedProps = props; return <div data-testid="selected" />; }
 }));

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { WaveNICOutcome } from '../../../../components/waves/outcome/WaveNICOutcome';
+import { WaveNICOutcome } from '@/components/waves/outcome/WaveNICOutcome';
 
 jest.mock('framer-motion', () => ({
   motion: {

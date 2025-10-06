@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BaseNFT } from "../../entities/INFT";
+import { BaseNFT } from "@/entities/INFT";
 
 export default function ArtistProfileHandle(
   props: Readonly<{

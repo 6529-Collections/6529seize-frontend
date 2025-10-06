@@ -1,10 +1,10 @@
-import * as api from '../../services/6529api';
+import * as api from '@/services/6529api';
 import Cookies from 'js-cookie';
-import { getStagingAuth } from '../../services/auth/auth.utils';
-import { API_AUTH_COOKIE } from '../../constants';
+import { getStagingAuth } from '@/services/auth/auth.utils';
+import { API_AUTH_COOKIE } from '@/constants';
 
 jest.mock('js-cookie', () => ({ remove: jest.fn() }));
-jest.mock('../../services/auth/auth.utils', () => ({ getStagingAuth: jest.fn() }));
+jest.mock('@/services/auth/auth.utils', () => ({ getStagingAuth: jest.fn() }));
 
 const { fetchUrl, fetchAllPages, postData, postFormData } = api;
 

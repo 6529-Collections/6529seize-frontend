@@ -1,5 +1,5 @@
 import { useEnsName } from "wagmi";
-import { DELEGATION_CONTRACT } from "../../constants";
+import { DELEGATION_CONTRACT } from "@/constants";
 
 export function useOrignalDelegatorEnsResolution(
   props: Readonly<{

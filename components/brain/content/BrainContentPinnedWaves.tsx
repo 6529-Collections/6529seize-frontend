@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import BrainContentPinnedWave from "./BrainContentPinnedWave";
-import { usePinnedWaves } from "../../../hooks/usePinnedWaves";
+import { usePinnedWaves } from "@/hooks/usePinnedWaves";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const BrainContentPinnedWaves: React.FC = () => {

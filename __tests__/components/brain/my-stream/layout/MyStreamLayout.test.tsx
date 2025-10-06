@@ -1,24 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MyStreamLayout from '../../../../../components/brain/my-stream/layout/MyStreamLayout';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import MyStreamLayout from '@/components/brain/my-stream/layout/MyStreamLayout';
+import { AuthContext } from '@/components/auth/Auth';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props:any) => <img {...props} /> }));
 
 const useLayout = jest.fn();
-jest.mock('../../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: (...args:any[]) => useLayout(...args)
 }));
 
 const useSeizeConnectContext = jest.fn();
-jest.mock('../../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: (...args:any[]) => useSeizeConnectContext(...args)
 }));
 
-jest.mock('../../../../../components/brain/Brain', () => (props:any) => <div data-testid="brain">{props.children}</div>);
-jest.mock('../../../../../components/header/user/HeaderUserConnect', () => () => <div data-testid="connect" />);
-jest.mock('../../../../../components/user/utils/set-up-profile/UserSetUpProfileCta', () => () => <div data-testid="setup" />);
-jest.mock('../../../../../components/client-only/ClientOnly', () => ({ __esModule: true, default: ({ children }: any) => <>{children}</> }));
+jest.mock('@/components/brain/Brain', () => (props:any) => <div data-testid="brain">{props.children}</div>);
+jest.mock('@/components/header/user/HeaderUserConnect', () => () => <div data-testid="connect" />);
+jest.mock('@/components/user/utils/set-up-profile/UserSetUpProfileCta', () => () => <div data-testid="setup" />);
+jest.mock('@/components/client-only/ClientOnly', () => ({ __esModule: true, default: ({ children }: any) => <>{children}</> }));
 
 describe('MyStreamLayout', () => {
   beforeEach(() => {

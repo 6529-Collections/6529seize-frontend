@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { motion } from "framer-motion";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 
 import FilePreview from "./file-upload/components/FilePreview";
 import UploadArea from "./file-upload/components/UploadArea";

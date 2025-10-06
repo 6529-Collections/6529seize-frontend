@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { HorizontalTimeline } from '../../../../../components/waves/leaderboard/time/HorizontalTimeline';
+import { HorizontalTimeline } from '@/components/waves/leaderboard/time/HorizontalTimeline';
 
 const decisions = [
   { id: '1', timestamp: 1 },

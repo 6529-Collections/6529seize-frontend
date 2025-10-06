@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SortDirection } from "../../../entities/ISort";
-import CommonTableSortIcon from "../../user/utils/icons/CommonTableSortIcon";
+import { SortDirection } from "@/entities/ISort";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
-import { CommunityMembersSortOption } from "../../../enums";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { CommunityMembersSortOption } from "@/enums";
 
 export default function CommunityMembersTableHeaderSortableContent({
   sort,

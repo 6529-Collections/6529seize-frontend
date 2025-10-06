@@ -1,13 +1,13 @@
 "use client";
 
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropContent from "../WaveDropContent";
@@ -15,8 +15,8 @@ import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../../user/utils/UserCICAndLevel";
-import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
+} from "@/components/user/utils/UserCICAndLevel";
+import { cicToType, getTimeAgoShort } from "@/helpers/Helpers";
 import WaveDropReactions from "../WaveDropReactions";
 
 interface EndedParticipationDropProps {

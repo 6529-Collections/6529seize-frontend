@@ -1,4 +1,3 @@
-import React from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";
 
@@ -7,7 +6,6 @@ export default function EducationCollaborationFormPage() {
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -17,10 +15,7 @@ export default function EducationCollaborationFormPage() {
       <link rel="canonical" href="/education/education-collaboration-form/" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
-      <meta
-        property="og:title"
-        content="EDUCATION COLLABORATION FORM"
-      />
+      <meta property="og:title" content="EDUCATION COLLABORATION FORM" />
       <meta
         property="og:url"
         content="/education/education-collaboration-form/"
@@ -54,10 +49,7 @@ EDUCATION COLLABORATION FORM"
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="article" />
       <meta property="og:site_name" content="6529.io" />
-      <meta
-        property="og:title"
-        content="EDUCATION COLLABORATION FORM"
-      />
+      <meta property="og:title" content="EDUCATION COLLABORATION FORM" />
       <meta
         property="og:description"
         content="If you would like to collaborate with 6529 to help educate or conduct research in the fields of cryptocurrecny, digital rights, NFTs or metaverse, please fill in the form below: 
@@ -708,6 +700,7 @@ EDUCATION COLLABORATION FORM"
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

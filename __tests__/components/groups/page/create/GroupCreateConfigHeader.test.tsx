@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import GroupCreateConfigHeader from '../../../../../components/groups/page/create/GroupCreateConfigHeader';
+import GroupCreateConfigHeader from '@/components/groups/page/create/GroupCreateConfigHeader';
 
 describe('GroupCreateConfigHeader', () => {
   it('renders header with icon and label', () => {

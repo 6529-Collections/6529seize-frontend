@@ -7,16 +7,16 @@ import {
   syncWalletRoleWithServer,
 } from "./auth.utils";
 import { redeemRefreshTokenWithRetries } from "./token-refresh.utils";
-import { areEqualAddresses } from "../../helpers/Helpers";
-import { logErrorSecurely } from "../../utils/error-sanitizer";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
   TokenRefreshCancelledError,
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
   InvalidRoleStateError,
-} from "../../errors/authentication";
-import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
+} from "@/errors/authentication";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 
 interface JwtPayload {
   id: string;

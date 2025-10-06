@@ -9,8 +9,8 @@ import React, {
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { ethers } from "ethers";
 import { encryptData } from "./app-wallet-helpers";
-import { Time } from "../../helpers/time";
-import useCapacitor from "../../hooks/useCapacitor";
+import { Time } from "@/helpers/time";
+import useCapacitor from "@/hooks/useCapacitor";
 import EventEmitter from "events";
 
 export interface AppWallet {

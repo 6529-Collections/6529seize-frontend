@@ -1,5 +1,5 @@
 import { Tooltip } from "react-tooltip";
-import { formatNumberWithCommasOrDash } from "../../../../../../../helpers/Helpers";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 
 export default function UserPageStatsActivityWalletTableRowGas({
   gas,

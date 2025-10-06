@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import CommonProfileSearchItem from "../../../../../components/utils/input/profile-search/CommonProfileSearchItem";
+import CommonProfileSearchItem from "@/components/utils/input/profile-search/CommonProfileSearchItem";
 
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", pfp: "img.png" } as any;
 

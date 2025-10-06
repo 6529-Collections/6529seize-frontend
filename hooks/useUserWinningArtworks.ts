@@ -1,8 +1,8 @@
 import { useQueries } from "@tanstack/react-query";
-import { ApiDrop } from "../generated/models/ApiDrop";
-import { ApiProfileMin } from "../generated/models/ApiProfileMin";
-import { commonApiFetch } from "../services/api/common-api";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { commonApiFetch } from "@/services/api/common-api";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseUserWinningArtworksProps {
   readonly user: ApiProfileMin;

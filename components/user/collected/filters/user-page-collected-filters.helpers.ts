@@ -1,7 +1,7 @@
 import {
   CollectedCollectionType,
   CollectionSort,
-} from "../../../../entities/IProfile";
+} from "@/entities/IProfile";
 
 interface CollectedCollectionMeta {
   readonly label: string;

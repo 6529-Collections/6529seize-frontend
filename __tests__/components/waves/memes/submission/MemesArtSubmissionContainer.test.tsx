@@ -1,19 +1,19 @@
 import { render, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import MemesArtSubmissionContainer from '../../../../../components/waves/memes/submission/MemesArtSubmissionContainer';
-import { SubmissionStep } from '../../../../../components/waves/memes/submission/types/Steps';
-import { useArtworkSubmissionForm } from '../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionForm';
-import { useArtworkSubmissionMutation } from '../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionMutation';
-import { useSeizeConnectContext } from '../../../../../components/auth/SeizeConnectContext';
+import MemesArtSubmissionContainer from '@/components/waves/memes/submission/MemesArtSubmissionContainer';
+import { SubmissionStep } from '@/components/waves/memes/submission/types/Steps';
+import { useArtworkSubmissionForm } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionForm';
+import { useArtworkSubmissionMutation } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation';
+import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 
-jest.mock('../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionForm');
-jest.mock('../../../../../components/waves/memes/submission/hooks/useArtworkSubmissionMutation');
-jest.mock('../../../../../components/auth/SeizeConnectContext');
-jest.mock('../../../../../components/waves/memes/submission/layout/ModalLayout', () => ({ children }: any) => <div>{children}</div>);
-jest.mock('../../../../../components/waves/memes/submission/steps/AgreementStep', () => (props: any) => <div data-testid="agreement" {...props} />);
+jest.mock('@/components/waves/memes/submission/hooks/useArtworkSubmissionForm');
+jest.mock('@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation');
+jest.mock('@/components/auth/SeizeConnectContext');
+jest.mock('@/components/waves/memes/submission/layout/ModalLayout', () => ({ children }: any) => <div>{children}</div>);
+jest.mock('@/components/waves/memes/submission/steps/AgreementStep', () => (props: any) => <div data-testid="agreement" {...props} />);
 let artworkProps: any;
-jest.mock('../../../../../components/waves/memes/submission/steps/ArtworkStep', () => (props: any) => {
+jest.mock('@/components/waves/memes/submission/steps/ArtworkStep', () => (props: any) => {
   artworkProps = props; return <div data-testid="artwork" />;
 });
 

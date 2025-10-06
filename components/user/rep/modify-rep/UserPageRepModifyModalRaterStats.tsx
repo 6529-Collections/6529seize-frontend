@@ -1,11 +1,11 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { RatingStats } from "../../../../entities/IProfile";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { AuthContext } from "../../../auth/Auth";
+import { RatingStats } from "@/entities/IProfile";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { AuthContext } from "@/components/auth/Auth";
 import Link from "next/link";
-import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function UserPageRepModifyModalRaterStats({
   repState,

@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import CommonSelect from '../../../../components/utils/select/CommonSelect';
-import { SortDirection } from '../../../../entities/ISort';
+import CommonSelect from '@/components/utils/select/CommonSelect';
+import { SortDirection } from '@/entities/ISort';
 
 let bpValue = 'S';
 jest.mock('react-use', () => ({ createBreakpoint: () => () => bpValue }));
 
-jest.mock('../../../../components/utils/select/tabs/CommonTabs', () => ({ __esModule: true, default: () => <div data-testid="tabs" /> }));
-jest.mock('../../../../components/utils/select/dropdown/CommonDropdown', () => ({ __esModule: true, default: () => <div data-testid="dropdown" /> }));
+jest.mock('@/components/utils/select/tabs/CommonTabs', () => ({ __esModule: true, default: () => <div data-testid="tabs" /> }));
+jest.mock('@/components/utils/select/dropdown/CommonDropdown', () => ({ __esModule: true, default: () => <div data-testid="dropdown" /> }));
 
 describe('CommonSelect', () => {
   const props = {

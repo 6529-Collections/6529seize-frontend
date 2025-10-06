@@ -15,16 +15,16 @@ import useWaveMessagesStore, {
   Listener as WaveMessagesListener,
 } from "./hooks/useWaveMessagesStore";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
-import { ApiDrop } from "../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   ProcessIncomingDropType,
   useWaveRealtimeUpdater,
 } from "./hooks/useWaveRealtimeUpdater";
-import { Drop } from "../../helpers/waves/drop.helpers";
+import { Drop } from "@/helpers/waves/drop.helpers";
 import { WaveMessages } from "./hooks/types";
-import { useWebsocketStatus } from "../../services/websocket/useWebSocketMessage";
-import useCapacitor from "../../hooks/useCapacitor";
-import { ApiLightDrop } from "../../generated/models/ApiLightDrop";
+import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
+import useCapacitor from "@/hooks/useCapacitor";
+import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
 import { NextPageProps } from "./hooks/useWavePagination";
 import useEnhancedWavesList, {
   MinimalWave,

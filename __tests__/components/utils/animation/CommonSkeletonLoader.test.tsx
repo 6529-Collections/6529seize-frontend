@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import CommonSkeletonLoader from '../../../../components/utils/animation/CommonSkeletonLoader';
+import CommonSkeletonLoader from '@/components/utils/animation/CommonSkeletonLoader';
 
 describe('CommonSkeletonLoader', () => {
   it('renders loader with pulse animation class', () => {

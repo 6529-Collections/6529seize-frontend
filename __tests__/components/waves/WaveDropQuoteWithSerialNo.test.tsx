@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
-jest.mock('../../../components/waves/drops/WaveDropQuote', () => (props: any) => (
+jest.mock('@/components/waves/drops/WaveDropQuote', () => (props: any) => (
   <div data-testid="quote">{props.drop ? props.drop.id : 'none'}</div>
 ));
 
@@ -10,9 +10,9 @@ jest.mock('@tanstack/react-query', () => ({
   useQuery: (...args: any) => useQueryMock(...args),
 }));
 
-import WaveDropQuoteWithSerialNo from '../../../components/waves/drops/WaveDropQuoteWithSerialNo';
-import { QueryKey } from '../../../components/react-query-wrapper/ReactQueryWrapper';
-import { WaveDropsSearchStrategy } from '../../../contexts/wave/hooks/types';
+import WaveDropQuoteWithSerialNo from '@/components/waves/drops/WaveDropQuoteWithSerialNo';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { WaveDropsSearchStrategy } from '@/contexts/wave/hooks/types';
 
 describe('WaveDropQuoteWithSerialNo', () => {
   it('fetches drop by serial number and renders quote', async () => {

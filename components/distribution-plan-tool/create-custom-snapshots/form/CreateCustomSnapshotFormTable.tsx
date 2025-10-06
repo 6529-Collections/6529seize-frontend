@@ -1,4 +1,4 @@
-import { CustomTokenPoolParamsToken } from "../../../allowlist-tool/allowlist-tool.types";
+import { CustomTokenPoolParamsToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateCustomSnapshotFormTableItem from "./CreateCustomSnapshotFormTableItem";
 
 export default function CreateCustomSnapshotFormTable({

@@ -8,13 +8,13 @@ import BrainContent from "../content/BrainContent";
 import {
   useMyStreamQuery,
   usePollingQuery,
-} from "../../../hooks/useMyStreamQuery";
+} from "@/hooks/useMyStreamQuery";
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropInteractionParams } from "../../waves/drops/Drop";
+} from "@/types/dropInteractionTypes";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
 
 const MyStreamWrapper: React.FC = () => {
   const searchParams = useSearchParams();

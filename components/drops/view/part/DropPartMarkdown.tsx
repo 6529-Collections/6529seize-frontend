@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Children,
   memo,
@@ -14,32 +16,29 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import type { PluggableList } from "unified";
 
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
-import { useEmoji } from "../../../../contexts/EmojiContext";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import { useEmoji } from "@/contexts/EmojiContext";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 
 import {
   DropContentPartType,
   createMarkdownContentRenderers,
 } from "./dropPartMarkdown/content";
-import {
-  createLinkRenderer,
-
-} from "./dropPartMarkdown/linkHandlers";
 import { highlightCodeElement } from "./dropPartMarkdown/highlight";
+import { createLinkRenderer } from "./dropPartMarkdown/linkHandlers";
 
 const BreakComponent = () => <br />;
 
-const mergeClassNames = (
-  ...classes: Array<string | undefined>
-): string => classes.filter(Boolean).join(" ");
+const mergeClassNames = (...classes: Array<string | undefined>): string =>
+  classes.filter(Boolean).join(" ");
 
 const headingClassName = "tw-text-iron-200 tw-break-words word-break";
 
-type MarkdownRendererProps<T extends ElementType> = ComponentPropsWithoutRef<T> &
-  ExtraProps & { children?: ReactNode; className?: string };
+type MarkdownRendererProps<T extends ElementType> =
+  ComponentPropsWithoutRef<T> &
+    ExtraProps & { children?: ReactNode; className?: string };
 
 type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
   inline?: boolean;
@@ -64,8 +63,7 @@ const InlineCodeRenderer = ({
     className={mergeClassNames(
       "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
       className
-    )}
-  >
+    )}>
     {children}
   </code>
 );
@@ -124,8 +122,7 @@ const CodeBlockRenderer = ({
       className={mergeClassNames(
         "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
         className
-      )}
-    >
+      )}>
       {children}
     </code>
   );
@@ -176,8 +173,7 @@ const createMarkdownComponents = ({
       className={mergeClassNames(
         "tw-text-md tw-text-iron-200 tw-break-words word-break",
         className
-      )}
-    >
+      )}>
       {customRenderer(children)}
     </li>
   );
@@ -192,8 +188,7 @@ const createMarkdownComponents = ({
       className={mergeClassNames(
         "tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0",
         className
-      )}
-    >
+      )}>
       {customRenderer(children)}
     </blockquote>
   );
@@ -241,12 +236,10 @@ function DropPartMarkdown({
     }
   }, [isMobile, textSize]);
 
-
-
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
-        onQuoteClick
+        onQuoteClick,
       }),
     [onQuoteClick]
   );
@@ -339,8 +332,7 @@ function DropPartMarkdown({
       rehypePlugins={rehypePlugins}
       remarkPlugins={remarkPlugins}
       className="tw-w-full"
-      components={markdownComponents}
-    >
+      components={markdownComponents}>
       {processedContent}
     </Markdown>
   );

@@ -1,15 +1,25 @@
 "use client";
 
 import { useTitle } from "@/contexts/TitleContext";
+import { faArrowLeft, faHome } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Button } from "react-bootstrap";
 
 export default function ErrorComponent() {
   const { setTitle } = useTitle();
+  const router = useRouter();
+
   useEffect(() => {
     setTitle("6529 Error");
-  }, []);
+  }, [setTitle]);
+
+  const handleGoBack = () => {
+    router.back();
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen">
@@ -33,8 +43,18 @@ export default function ErrorComponent() {
         Looks like something went wrong. Try again or reach out to us at{" "}
         <a href="mailto:support@6529.io">support@6529.io</a>
       </p>
-      <Link href="/" className="tw-mt-4 tw-text-md tw-font-semibold">
-        TAKE ME HOME
+      <Button
+        variant="outline-light"
+        onClick={() => handleGoBack()}
+        className="tw-mt-4 tw-flex tw-items-center tw-gap-x-2">
+        <FontAwesomeIcon icon={faArrowLeft} />
+        <span>BACK TO PREVIOUS PAGE</span>
+      </Button>
+      <Link
+        href="/"
+        className="decoration-none tw-mt-5 tw-text-lg tw-font-semibold tw-flex tw-items-center tw-gap-x-2">
+        <FontAwesomeIcon icon={faHome} />
+        <span>6529 HOME</span>
       </Link>
     </div>
   );

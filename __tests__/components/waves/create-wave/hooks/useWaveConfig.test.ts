@@ -1,14 +1,14 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveConfig } from '../../../../../components/waves/create-wave/hooks/useWaveConfig';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { ApiWaveCreditType } from '../../../../../generated/models/ApiWaveCreditType';
-import { CreateWaveStep, CreateWaveGroupConfigType, CreateWaveOutcomeType } from '../../../../../types/waves.types';
-import { ApiGroupFull } from '../../../../../generated/models/ApiGroupFull';
-import * as createWaveValidation from '../../../../../helpers/waves/create-wave.validation';
+import { useWaveConfig } from '@/components/waves/create-wave/hooks/useWaveConfig';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
+import { CreateWaveStep, CreateWaveGroupConfigType, CreateWaveOutcomeType } from '@/types/waves.types';
+import { ApiGroupFull } from '@/generated/models/ApiGroupFull';
+import * as createWaveValidation from '@/helpers/waves/create-wave.validation';
 
 // Mock dependencies
-jest.mock('../../../../../helpers/waves/create-wave.validation');
-jest.mock('../../../../../helpers/time', () => ({
+jest.mock('@/helpers/waves/create-wave.validation');
+jest.mock('@/helpers/time', () => ({
   Time: {
     currentMillis: jest.fn(() => 1000000),
   },

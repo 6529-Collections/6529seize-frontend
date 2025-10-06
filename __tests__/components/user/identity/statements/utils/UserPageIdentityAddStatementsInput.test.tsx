@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import UserPageIdentityAddStatementsContactInput from "../../../../../../components/user/identity/statements/utils/UserPageIdentityAddStatementsInput";
-import { STATEMENT_META, STATEMENT_TYPE } from "../../../../../../helpers/Types";
+import UserPageIdentityAddStatementsContactInput from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsInput";
+import { STATEMENT_META, STATEMENT_TYPE } from "@/helpers/Types";
 
 describe("UserPageIdentityAddStatementsContactInput", () => {
   it("focuses input and calls onChange when typing", async () => {

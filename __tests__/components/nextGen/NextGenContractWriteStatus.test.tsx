@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import NextGenContractWriteStatus from '../../../components/nextGen/NextGenContractWriteStatus';
+import NextGenContractWriteStatus from '@/components/nextGen/NextGenContractWriteStatus';
 import { useWaitForTransactionReceipt } from 'wagmi';
-import * as Helpers from '../../../helpers/Helpers';
+import * as Helpers from '@/helpers/Helpers';
 
 jest.mock('wagmi');
-jest.mock('../../../components/dotLoader/DotLoader', () => () => <span data-testid="loader" />);
+jest.mock('@/components/dotLoader/DotLoader', () => () => <span data-testid="loader" />);
 
 const waitVal: any = { isLoading: false, isSuccess: false, data: undefined };
 (useWaitForTransactionReceipt as jest.Mock).mockImplementation(() => waitVal);

@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import NotificationItem from '../../../../../components/brain/notifications/NotificationItem';
-import { ApiNotificationCause } from '../../../../../generated/models/ApiNotificationCause';
+import NotificationItem from '@/components/brain/notifications/NotificationItem';
+import { ApiNotificationCause } from '@/generated/models/ApiNotificationCause';
 
-jest.mock('../../../../../components/brain/notifications/drop-quoted/NotificationDropQuoted', () => ({ __esModule: true, default: () => <div data-testid="quoted" /> }));
-jest.mock('../../../../../components/brain/notifications/drop-replied/NotificationDropReplied', () => ({ __esModule: true, default: () => <div data-testid="replied" /> }));
+jest.mock('@/components/brain/notifications/drop-quoted/NotificationDropQuoted', () => ({ __esModule: true, default: () => <div data-testid="quoted" /> }));
+jest.mock('@/components/brain/notifications/drop-replied/NotificationDropReplied', () => ({ __esModule: true, default: () => <div data-testid="replied" /> }));
 
 describe('NotificationItem', () => {
   const base = { id: '1' } as any;

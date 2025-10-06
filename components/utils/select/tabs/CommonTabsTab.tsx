@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SortDirection } from "../../../../entities/ISort";
-import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
+import { SortDirection } from "@/entities/ISort";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
 
 export default function CommonTabsTab<T, U = unknown>(

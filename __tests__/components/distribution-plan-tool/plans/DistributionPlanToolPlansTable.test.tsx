@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DistributionPlanToolPlansTable from '../../../../components/distribution-plan-tool/plans/DistributionPlanToolPlansTable';
+import DistributionPlanToolPlansTable from '@/components/distribution-plan-tool/plans/DistributionPlanToolPlansTable';
 
 const captured: any[] = [];
-jest.mock('../../../../components/distribution-plan-tool/plans/DistributionPlanToolPlansTableItem', () => (props: any) => {
+jest.mock('@/components/distribution-plan-tool/plans/DistributionPlanToolPlansTableItem', () => (props: any) => {
   captured.push(props);
   return <tr data-testid={`row-${props.plan.id}`} />;
 });

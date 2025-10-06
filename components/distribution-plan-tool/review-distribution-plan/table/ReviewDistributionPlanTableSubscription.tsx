@@ -5,10 +5,10 @@ import { Modal, Button, Col, Container, Row } from "react-bootstrap";
 import {
   SUBSCRIPTIONS_ADMIN_WALLETS,
   MEMES_CONTRACT,
-} from "../../../../constants";
-import { areEqualAddresses, formatAddress } from "../../../../helpers/Helpers";
-import { AllowlistDescription } from "../../../allowlist-tool/allowlist-tool.types";
-import { AuthContext } from "../../../auth/Auth";
+} from "@/constants";
+import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
+import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import { AuthContext } from "@/components/auth/Auth";
 import {
   ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTableItemType,
@@ -16,9 +16,9 @@ import {
 import {
   commonApiFetch,
   commonApiPost,
-} from "../../../../services/api/common-api";
-import CircleLoader from "../../common/CircleLoader";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+} from "@/services/api/common-api";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 interface WalletResult {
   wallet: string;

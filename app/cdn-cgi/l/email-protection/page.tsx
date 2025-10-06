@@ -14,7 +14,7 @@ export default function EmailProtectionPage() {
       <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
       <meta httpEquiv="X-UA-Compatible" content="IE=Edge" />
       <meta name="robots" content="noindex, nofollow" />
-      <meta name="viewport" content="width=device-width,initial-scale=1" />
+
       <link
         rel="stylesheet"
         id="cf_styles-css"

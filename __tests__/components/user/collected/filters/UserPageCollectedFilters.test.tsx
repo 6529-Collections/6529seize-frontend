@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RefObject } from 'react';
-import UserPageCollectedFilters from '../../../../../components/user/collected/filters/UserPageCollectedFilters';
-import { CollectedCollectionType, CollectionSeized, CollectionSort } from '../../../../../entities/IProfile';
-import { MEMES_SEASON } from '../../../../../enums';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
+import UserPageCollectedFilters from '@/components/user/collected/filters/UserPageCollectedFilters';
+import { CollectedCollectionType, CollectionSeized, CollectionSort } from '@/entities/IProfile';
+import { MEMES_SEASON } from '@/enums';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 // Mock the child components
-jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFiltersCollection', () => {
+jest.mock('@/components/user/collected/filters/UserPageCollectedFiltersCollection', () => {
   return function MockUserPageCollectedFiltersCollection({ selected, setSelected }: any) {
     return (
       <div data-testid="collection-filter">
@@ -18,7 +18,7 @@ jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFil
   };
 });
 
-jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFiltersSortBy', () => {
+jest.mock('@/components/user/collected/filters/UserPageCollectedFiltersSortBy', () => {
   return function MockUserPageCollectedFiltersSortBy({ selected, setSelected }: any) {
     return (
       <div data-testid="sort-by-filter">
@@ -29,7 +29,7 @@ jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFil
   };
 });
 
-jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFiltersSeized', () => {
+jest.mock('@/components/user/collected/filters/UserPageCollectedFiltersSeized', () => {
   return function MockUserPageCollectedFiltersSeized({ selected, setSelected }: any) {
     return (
       <div data-testid="seized-filter">
@@ -40,7 +40,7 @@ jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFil
   };
 });
 
-jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFiltersSzn', () => {
+jest.mock('@/components/user/collected/filters/UserPageCollectedFiltersSzn', () => {
   return function MockUserPageCollectedFiltersSzn({ selected, setSelected }: any) {
     return (
       <div data-testid="szn-filter">
@@ -51,7 +51,7 @@ jest.mock('../../../../../components/user/collected/filters/UserPageCollectedFil
   };
 });
 
-jest.mock('../../../../../components/user/utils/addresses-select/UserAddressesSelectDropdown', () => {
+jest.mock('@/components/user/utils/addresses-select/UserAddressesSelectDropdown', () => {
   return function MockUserAddressesSelectDropdown({ wallets, onActiveAddress }: any) {
     return (
       <div data-testid="address-select">
@@ -63,7 +63,7 @@ jest.mock('../../../../../components/user/utils/addresses-select/UserAddressesSe
 });
 
 // Mock the helpers
-jest.mock('../../../../../components/user/collected/filters/user-page-collected-filters.helpers', () => ({
+jest.mock('@/components/user/collected/filters/user-page-collected-filters.helpers', () => ({
   COLLECTED_COLLECTIONS_META: {
     memes: {
       filters: {

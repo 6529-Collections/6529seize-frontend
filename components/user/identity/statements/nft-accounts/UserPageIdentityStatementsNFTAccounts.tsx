@@ -1,6 +1,6 @@
-import { CicStatement } from "../../../../../entities/IProfile";
+import { CicStatement } from "@/entities/IProfile";
 import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityStatementsStatementsList";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageIdentityStatementsNFTAccounts({
   statements,

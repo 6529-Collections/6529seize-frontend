@@ -261,7 +261,7 @@ run().catch((err) => {
               can find the full reference here:{" "}
               <a
                 href={"https://api.6529.io/docs/"}
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="tw-text-blue-500 tw-font-semibold">
                 https://api.6529.io/docs
               </a>

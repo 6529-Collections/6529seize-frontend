@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import csvParser from "csv-parser";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 
 interface PrimaryAddressData {
   profile_id: string;
@@ -132,11 +133,11 @@ export default function AboutPrimaryAddress() {
               {data.map((item) => (
                 <tr key={item.handle}>
                   <td style={tdStyle}>
-                    <a
+                    <Link
                       href={`/${item.current_primary}`}
                       className="decoration-hover-underline">
                       {item.handle}
-                    </a>
+                    </Link>
                   </td>
                   <td style={tdStyle} className="font-smaller">
                     {item.current_primary}

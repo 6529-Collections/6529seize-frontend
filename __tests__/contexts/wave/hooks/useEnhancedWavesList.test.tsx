@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react';
-import useEnhancedWavesList from '../../../../contexts/wave/hooks/useEnhancedWavesList';
-import useWavesList from '../../../../hooks/useWavesList';
-import useNewDropCounter from '../../../../contexts/wave/hooks/useNewDropCounter';
-import { ApiWaveType } from '../../../../generated/models/ApiWaveType';
+import useEnhancedWavesList from '@/contexts/wave/hooks/useEnhancedWavesList';
+import useWavesList from '@/hooks/useWavesList';
+import useNewDropCounter from '@/contexts/wave/hooks/useNewDropCounter';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../hooks/useWavesList');
-jest.mock('../../../../contexts/wave/hooks/useNewDropCounter', () => {
+jest.mock('@/hooks/useWavesList');
+jest.mock('@/contexts/wave/hooks/useNewDropCounter', () => {
   const actual = jest.requireActual('../../../../contexts/wave/hooks/useNewDropCounter');
   return {
     __esModule: true,

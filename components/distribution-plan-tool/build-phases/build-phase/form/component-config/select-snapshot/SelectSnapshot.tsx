@@ -1,13 +1,13 @@
 "use client";
 
 import { useContext, useState } from "react";
-import DistributionPlanSecondaryText from "../../../../../common/DistributionPlanSecondaryText";
+import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import ComponentConfigNextBtn from "../ComponentConfigNextBtn";
-import { DistributionPlanToolContext } from "../../../../../DistributionPlanToolContext";
-import { Pool } from "../../../../../../allowlist-tool/allowlist-tool.types";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
 import BuildPhaseFormConfigModalTitle from "../BuildPhaseFormConfigModalTitle";
 import SelectSnapshotDropdown from "./SelectSnapshotDropdown";
-import { DistributionPlanSnapshot } from "../../BuildPhaseFormConfigModal";
+import { DistributionPlanSnapshot } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
 import ComponentConfigMeta from "../ComponentConfigMeta";
 
 export default function SelectSnapshot({

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import CreateWavesMainStepConnectionLine from '../../../../../components/waves/create-wave/main-steps/CreateWavesMainStepConnectionLine';
+import CreateWavesMainStepConnectionLine from '@/components/waves/create-wave/main-steps/CreateWavesMainStepConnectionLine';
 
 jest.mock('framer-motion', () => ({
   motion: {

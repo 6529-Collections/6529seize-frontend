@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 // Import the media display components
 import MediaDisplayImage from "./MediaDisplayImage";

@@ -1,19 +1,19 @@
 import { renderHook, act } from '@testing-library/react';
-import { useVirtualizedWaveMessages } from '../../hooks/useVirtualizedWaveMessages';
-import { Drop } from '../../helpers/waves/drop.helpers';
+import { useVirtualizedWaveMessages } from '@/hooks/useVirtualizedWaveMessages';
+import { Drop } from '@/helpers/waves/drop.helpers';
 
 jest.useFakeTimers();
 
-jest.mock('../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStreamWaveMessages: jest.fn(),
 }));
 
-jest.mock('../../hooks/useDropMessages', () => ({
+jest.mock('@/hooks/useDropMessages', () => ({
   useDropMessages: jest.fn(),
 }));
 
-const { useMyStreamWaveMessages } = require('../../contexts/wave/MyStreamContext');
-const { useDropMessages } = require('../../hooks/useDropMessages');
+const { useMyStreamWaveMessages } = require('@/contexts/wave/MyStreamContext');
+const { useDropMessages } = require('@/hooks/useDropMessages');
 
 describe('useVirtualizedWaveMessages', () => {
   afterEach(() => jest.clearAllMocks());

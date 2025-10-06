@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProxyCreateTargetSearch from '../../../../../../components/user/proxy/create/target/ProxyCreateTargetSearch';
-import { AuthContext } from '../../../../../../components/auth/Auth';
+import ProxyCreateTargetSearch from '@/components/user/proxy/create/target/ProxyCreateTargetSearch';
+import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));

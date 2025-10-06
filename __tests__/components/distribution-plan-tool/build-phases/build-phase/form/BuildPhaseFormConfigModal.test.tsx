@@ -1,15 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import BuildPhaseFormConfigModal from '../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
-import { DistributionPlanToolContext } from '../../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode, Pool } from '../../../../../../components/allowlist-tool/allowlist-tool.types';
+import BuildPhaseFormConfigModal from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistOperationCode, Pool } from '@/components/allowlist-tool/allowlist-tool.types';
 
-jest.mock('../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshot', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshot', () => ({
   __esModule: true,
   default: ({ onSelectSnapshot }: any) => <button onClick={() => onSelectSnapshot({ snapshotId: '1', snapshotType: Pool.TOKEN_POOL, uniqueWalletsCount: null })}>select</button>,
 }));
 
-jest.mock('../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeOtherSnapshots', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeOtherSnapshots', () => ({
   __esModule: true,
   default: () => <div data-testid="exclude" />,
 }));
@@ -49,12 +49,12 @@ test('moves to next step on select', async () => {
   await waitFor(() => expect(screen.getByTestId('exclude')).toBeInTheDocument());
 });
 
-jest.mock('../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeComponentWinners', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeComponentWinners', () => ({
   __esModule: true,
   default: () => <div data-testid="exclude-winners" />,
 }));
 
-jest.mock('../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotSelectTokenIds', () => ({
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotSelectTokenIds', () => ({
   __esModule: true,
   default: () => <div data-testid="token-ids" />,
 }));

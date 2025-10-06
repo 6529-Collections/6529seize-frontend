@@ -1,8 +1,8 @@
 "use client";
 
-import { CommunityMemberMinimal } from "../../../../../../entities/IProfile";
-import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
-import { AuthContext } from "../../../../../auth/Auth";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { AuthContext } from "@/components/auth/Auth";
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";

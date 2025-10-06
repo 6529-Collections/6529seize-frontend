@@ -8,17 +8,17 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { MemesExtendedData, NFT, Rememe } from "../../entities/INFT";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
   numberWithCommas,
   printMintDate,
-} from "../../helpers/Helpers";
-import useCapacitor from "../../hooks/useCapacitor";
-import { fetchUrl } from "../../services/6529api";
+} from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { fetchUrl } from "@/services/6529api";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 import RememeImage from "../nft-image/RememeImage";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
@@ -225,8 +225,14 @@ export function MemePageLiveRightMenu(props: {
               <Col>
                 <Link
                   href={distributionPlanLink}
-                  target={props.nft.has_distribution ? "_self" : "_blank"}
-                  rel="noreferrer">
+                  target={
+                    props.nft.has_distribution ? "_self" : "_blank"
+                  }
+                  rel={
+                    props.nft.has_distribution
+                      ? undefined
+                      : "noopener noreferrer"
+                  }>
                   Distribution Plan
                 </Link>
               </Col>

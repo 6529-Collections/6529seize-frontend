@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import FoundationIcon from '../../../../../components/user/utils/icons/FoundationIcon';
+import FoundationIcon from '@/components/user/utils/icons/FoundationIcon';
 
 describe('FoundationIcon', () => {
   it('renders img with alt text', () => {

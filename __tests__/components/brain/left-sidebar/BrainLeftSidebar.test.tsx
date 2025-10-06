@@ -1,31 +1,31 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import BrainLeftSidebar from '../../../../components/brain/left-sidebar/BrainLeftSidebar';
-import { MyStreamWaveTab } from '../../../../types/waves.types';
+import BrainLeftSidebar from '@/components/brain/left-sidebar/BrainLeftSidebar';
+import { MyStreamWaveTab } from '@/types/waves.types';
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
-jest.mock('../../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
-jest.mock('../../../../hooks/useUnreadIndicator', () => ({ useUnreadIndicator: jest.fn() }));
-jest.mock('../../../../hooks/useWaveData', () => ({ useWaveData: jest.fn() }));
-jest.mock('../../../../hooks/useWave', () => ({ useWave: jest.fn() }));
-jest.mock('../../../../components/brain/ContentTabContext', () => ({ useContentTab: jest.fn() }));
+jest.mock('@/components/auth/Auth', () => ({ useAuth: jest.fn() }));
+jest.mock('@/hooks/useUnreadIndicator', () => ({ useUnreadIndicator: jest.fn() }));
+jest.mock('@/hooks/useWaveData', () => ({ useWaveData: jest.fn() }));
+jest.mock('@/hooks/useWave', () => ({ useWave: jest.fn() }));
+jest.mock('@/components/brain/ContentTabContext', () => ({ useContentTab: jest.fn() }));
 
-jest.mock('../../../../components/brain/left-sidebar/BrainLeftSidebarViewChange', () => ({
+jest.mock('@/components/brain/left-sidebar/BrainLeftSidebarViewChange', () => ({
   BrainLeftSidebarViewChange: () => <div data-testid="view-change" />,
 }));
-jest.mock('../../../../components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWave', () => ({
+jest.mock('@/components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWave', () => ({
   __esModule: true,
   default: ({ listType }: any) => <div data-testid="search-wave">{listType}</div>,
 }));
-jest.mock('../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaves', () => ({
+jest.mock('@/components/brain/left-sidebar/waves/BrainLeftSidebarWaves', () => ({
   __esModule: true,
   default: () => <div data-testid="waves-list" />,
 }));
-jest.mock('../../../../components/brain/direct-messages/DirectMessagesList', () => ({
+jest.mock('@/components/brain/direct-messages/DirectMessagesList', () => ({
   __esModule: true,
   default: () => <div data-testid="dm-list" />,
 }));

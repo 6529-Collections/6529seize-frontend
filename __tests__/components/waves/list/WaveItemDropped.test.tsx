@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import WaveItemDropped from '../../../../components/waves/list/WaveItemDropped';
+import WaveItemDropped from '@/components/waves/list/WaveItemDropped';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
-jest.mock('../../../../helpers/Helpers', () => ({ numberWithCommas: (n: number) => n.toString() }));
-jest.mock('../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => `scaled-${u}`, ImageScale: { W_AUTO_H_50: 'scale' } }));
+jest.mock('@/helpers/Helpers', () => ({ numberWithCommas: (n: number) => n.toString() }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => `scaled-${u}`, ImageScale: { W_AUTO_H_50: 'scale' } }));
 
 const wave: any = {
   metrics: { drops_count: 2 },

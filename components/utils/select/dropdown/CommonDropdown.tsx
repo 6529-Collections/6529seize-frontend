@@ -5,8 +5,8 @@ import { useAnimate } from "framer-motion";
 import { CommonSelectProps } from "../CommonSelect";
 import CommonDropdownItemsWrapper from "./CommonDropdownItemsWrapper";
 import CommonDropdownItem from "./CommonDropdownItem";
-import { SortDirection } from "../../../../entities/ISort";
-import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
+import { SortDirection } from "@/entities/ISort";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 
 export default function CommonDropdown<T, U = unknown>(
   props: CommonSelectProps<T, U>

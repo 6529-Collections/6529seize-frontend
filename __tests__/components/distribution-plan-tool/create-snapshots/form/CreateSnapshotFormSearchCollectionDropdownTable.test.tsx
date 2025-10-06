@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreateSnapshotFormSearchCollectionDropdownTable from '../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownTable';
+import CreateSnapshotFormSearchCollectionDropdownTable from '@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownTable';
 
 let itemProps: any[] = [];
-jest.mock('../../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownItem', () => (props: any) => { itemProps.push(props); return <tr data-testid={`item-${props.collection.id}`} />; });
+jest.mock('@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownItem', () => (props: any) => { itemProps.push(props); return <tr data-testid={`item-${props.collection.id}`} />; });
 
 describe('CreateSnapshotFormSearchCollectionDropdownTable', () => {
   beforeEach(() => { itemProps = []; });

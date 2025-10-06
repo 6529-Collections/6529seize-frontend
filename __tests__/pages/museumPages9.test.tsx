@@ -12,10 +12,10 @@ import CosmicReefPage from "@/app/museum/genesis/cosmic-reef/page";
 import GenesisDcaPage from "@/app/museum/genesis/genesis-dca/page";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
-jest.mock("../../components/header/Header", () => () => (
+jest.mock("@/components/header/Header", () => () => (
   <div data-testid="header" />
 ));
-jest.mock("../../components/header/HeaderPlaceholder", () => () => (
+jest.mock("@/components/header/HeaderPlaceholder", () => () => (
   <div data-testid="placeholder" />
 ));
 

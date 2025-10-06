@@ -1,4 +1,4 @@
-import { Period } from '../../../../../components/waves/create-wave/types/period';
+import { Period } from '@/components/waves/create-wave/types/period';
 
 describe('Period enum', () => {
   it('contains expected values', () => {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import NFTImage from '../../../components/nft-image/NFTImage';
+import NFTImage from '@/components/nft-image/NFTImage';
 
 // Mock next/image
 jest.mock('next/image', () => {
@@ -10,7 +10,7 @@ jest.mock('next/image', () => {
 });
 
 // Mock all renderer components
-jest.mock('../../../components/nft-image/renderers/NFTImageRenderer', () => {
+jest.mock('@/components/nft-image/renderers/NFTImageRenderer', () => {
   return function MockNFTImageRenderer(props: any) {
     return (
       <div data-testid="nft-image-renderer">
@@ -23,7 +23,7 @@ jest.mock('../../../components/nft-image/renderers/NFTImageRenderer', () => {
   };
 });
 
-jest.mock('../../../components/nft-image/renderers/NFTVideoRenderer', () => {
+jest.mock('@/components/nft-image/renderers/NFTVideoRenderer', () => {
   return function MockNFTVideoRenderer(props: any) {
     return (
       <div data-testid="nft-video-renderer">
@@ -36,7 +36,7 @@ jest.mock('../../../components/nft-image/renderers/NFTVideoRenderer', () => {
   };
 });
 
-jest.mock('../../../components/nft-image/renderers/NFTHTMLRenderer', () => {
+jest.mock('@/components/nft-image/renderers/NFTHTMLRenderer', () => {
   return function MockNFTHTMLRenderer(props: any) {
     return (
       <div data-testid="nft-html-renderer">
@@ -49,7 +49,7 @@ jest.mock('../../../components/nft-image/renderers/NFTHTMLRenderer', () => {
   };
 });
 
-jest.mock('../../../components/nft-image/renderers/NFTModelRenderer', () => {
+jest.mock('@/components/nft-image/renderers/NFTModelRenderer', () => {
   return function MockNFTModelRenderer(props: any) {
     return (
       <div data-testid="nft-model">

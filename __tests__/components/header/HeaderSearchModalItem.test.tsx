@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import HeaderSearchModalItem from "../../../components/header/header-search/HeaderSearchModalItem";
-import { MEMES_CONTRACT } from "../../../constants";
+import HeaderSearchModalItem from "@/components/header/header-search/HeaderSearchModalItem";
+import { MEMES_CONTRACT } from "@/constants";
 
 const useHoverDirty = jest.fn();
 const useRouter = jest.fn();
@@ -20,19 +20,19 @@ jest.mock("next/link", () => ({
 
 const getProfileTargetRouteMock = jest.fn(() => "/profile-route");
 
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   cicToType: (n: number) => `type${n}`,
   formatNumberWithCommas: (n: number) => `formatted-${n}`,
   getProfileTargetRoute: () => getProfileTargetRouteMock(),
 }));
 
-jest.mock("../../../components/user/utils/UserCICAndLevel", () => ({
+jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   __esModule: true,
   default: () => <div data-testid="level" />,
 }));
 
 jest.mock(
-  "../../../components/header/header-search/HeaderSearchModalItemMedia",
+  "@/components/header/header-search/HeaderSearchModalItemMedia",
   () => ({
     __esModule: true,
     default: (props: any) => (

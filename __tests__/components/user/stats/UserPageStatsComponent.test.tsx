@@ -5,7 +5,7 @@ jest.mock("@/services/api/common-api", () => ({
 describe("UserPageStatsComponent", () => {
   it("component module loads", () => {
     expect(() =>
-      require("../../../../components/user/stats/UserPageStats")
+      require("@/components/user/stats/UserPageStats")
     ).not.toThrow();
   });
 });

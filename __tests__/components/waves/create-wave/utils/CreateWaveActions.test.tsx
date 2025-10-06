@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveActions from '../../../../../components/waves/create-wave/utils/CreateWaveActions';
-import { CreateWaveStep } from '../../../../../types/waves.types';
+import CreateWaveActions from '@/components/waves/create-wave/utils/CreateWaveActions';
+import { CreateWaveStep } from '@/types/waves.types';
 
-jest.mock('../../../../../components/waves/create-wave/utils/CreateWaveBackStep', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/utils/CreateWaveBackStep', () => (props: any) => (
   <button data-testid="back" onClick={props.onPreviousStep}>back</button>
 ));
-jest.mock('../../../../../components/waves/create-wave/utils/CreateWaveNextStep', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/utils/CreateWaveNextStep', () => (props: any) => (
   <button data-testid="next" onClick={props.onClick} disabled={props.disabled}>next</button>
 ));
 
-jest.mock('../../../../../helpers/waves/create-wave.helpers', () => ({
+jest.mock('@/helpers/waves/create-wave.helpers', () => ({
   getCreateWaveNextStep: jest.fn(() => CreateWaveStep.DATES),
   getCreateWavePreviousStep: jest.fn(() => CreateWaveStep.OVERVIEW),
 }));
@@ -35,7 +35,7 @@ describe('CreateWaveActions', () => {
   });
 
   it('calls onComplete when no next step', async () => {
-    const helpers = require('../../../../../helpers/waves/create-wave.helpers');
+    const helpers = require('@/helpers/waves/create-wave.helpers');
     helpers.getCreateWaveNextStep.mockReturnValue(null);
     const user = userEvent.setup();
     const onComplete = jest.fn();

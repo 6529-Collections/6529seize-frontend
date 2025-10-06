@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { WaveManualOutcome } from '../../../../components/waves/outcome/WaveManualOutcome';
+import { WaveManualOutcome } from '@/components/waves/outcome/WaveManualOutcome';
 
 const outcome = {
   description: 'desc',

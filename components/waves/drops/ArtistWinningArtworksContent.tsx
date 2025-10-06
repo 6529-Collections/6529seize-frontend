@@ -1,16 +1,16 @@
 import React from "react";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { useUserWinningArtworks } from "../../../hooks/useUserWinningArtworks";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { useUserWinningArtworks } from "@/hooks/useUserWinningArtworks";
 import {
   ExtendedDrop,
   convertApiDropToExtendedDrop,
-} from "../../../helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+} from "@/helpers/waves/drop.helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrophy, faEye } from "@fortawesome/free-solid-svg-icons";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
-import { Time } from "../../../helpers/time";
-import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
+import { Time } from "@/helpers/time";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, renderHook, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { SelectModeProvider, useSelectMode } from '../../contexts/SelectModeContext';
+import { SelectModeProvider, useSelectMode } from '@/contexts/SelectModeContext';
 
 // Helper components to reduce nesting
 const TestComponent = ({ onContextValue }: { onContextValue: (value: any) => void }) => {

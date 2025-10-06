@@ -1,4 +1,4 @@
-import { detectBrowser, isBrowserSupported } from '../../components/waves/memes/file-upload/utils/browserDetection';
+import { detectBrowser, isBrowserSupported } from '@/components/waves/memes/file-upload/utils/browserDetection';
 
 describe('browser detection utilities', () => {
   afterEach(() => {

@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import RoundedManifoldIconButton from '../../../../components/distribution-plan-tool/common/RoundedManifoldIconButton';
+import RoundedManifoldIconButton from '@/components/distribution-plan-tool/common/RoundedManifoldIconButton';
 
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
 }));
 
-jest.mock('../../../../components/distribution-plan-tool/common/ManifoldIcon', () => ({
+jest.mock('@/components/distribution-plan-tool/common/ManifoldIcon', () => ({
   __esModule: true,
   default: () => <div data-testid="icon" />,
 }));

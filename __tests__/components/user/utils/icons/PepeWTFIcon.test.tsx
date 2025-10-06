@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import PepeWTFIcon from '../../../../../components/user/utils/icons/PepeWTFIcon';
+import PepeWTFIcon from '@/components/user/utils/icons/PepeWTFIcon';
 
 test('renders img with correct attributes', () => {
   const { container } = render(<PepeWTFIcon />);

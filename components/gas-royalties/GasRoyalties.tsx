@@ -313,7 +313,7 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
     <a
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
-      rel="noreferrer">
+      rel="noopener noreferrer">
       <span className="d-flex justify-content-center aling-items-center gap-3">
         <span>{props.token_id} -</span>
         <Image

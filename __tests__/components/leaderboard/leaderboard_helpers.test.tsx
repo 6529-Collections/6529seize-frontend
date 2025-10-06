@@ -2,14 +2,14 @@ import { render, waitFor } from "@testing-library/react";
 import {
   Collector,
   Content,
-} from "../../../components/leaderboard/Leaderboard";
+} from "@/components/leaderboard/Leaderboard";
 import {
   getLeaderboardDownloadFileName,
   useFetchLeaderboard,
-} from "../../../components/leaderboard/leaderboard_helpers";
-import { SortDirection } from "../../../entities/ISort";
+} from "@/components/leaderboard/leaderboard_helpers";
+import { SortDirection } from "@/entities/ISort";
 
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(() =>
     Promise.resolve({ count: 1, data: [{ cic_score: 1 }], page: 1, next: null })
   ),

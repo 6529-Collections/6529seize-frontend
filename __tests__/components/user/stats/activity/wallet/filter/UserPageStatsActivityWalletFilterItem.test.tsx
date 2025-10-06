@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageStatsActivityWalletFilterItem from '../../../../../../../components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilterItem';
+import UserPageStatsActivityWalletFilterItem from '@/components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilterItem';
 
 enum FilterType { ALL = 'ALL', SENT = 'SENT' }
 

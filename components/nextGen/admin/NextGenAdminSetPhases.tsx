@@ -16,7 +16,7 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { PhaseTimes } from "../nextgen_entities";
-import { NULL_MERKLE } from "../../../constants";
+import { NULL_MERKLE } from "@/constants";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
@@ -25,9 +25,9 @@ import {
 import {
   NextgenAllowlistCollectionType,
   NextgenAllowlistCollection,
-} from "../../../entities/INextgen";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+} from "@/entities/INextgen";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 interface Props {
   close: () => void;
 }

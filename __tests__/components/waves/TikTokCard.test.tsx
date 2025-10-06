@@ -2,15 +2,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
-import TikTokCard from "../../../components/waves/TikTokCard";
+import TikTokCard from "@/components/waves/TikTokCard";
 
-jest.mock("../../../services/api/tiktok-preview", () => ({
+jest.mock("@/services/api/tiktok-preview", () => ({
   fetchTikTokPreview: jest.fn(),
   getCachedTikTokPreview: jest.fn(),
 }));
 
 describe("TikTokCard", () => {
-  const { fetchTikTokPreview, getCachedTikTokPreview } = require("../../../services/api/tiktok-preview");
+  const { fetchTikTokPreview, getCachedTikTokPreview } = require("@/services/api/tiktok-preview");
 
   const successResponse = {
     kind: "video" as const,

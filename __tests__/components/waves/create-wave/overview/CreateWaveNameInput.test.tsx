@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveNameInput from '../../../../../components/waves/create-wave/overview/CreateWaveNameInput';
-import { CREATE_WAVE_VALIDATION_ERROR } from '../../../../../helpers/waves/create-wave.validation';
+import CreateWaveNameInput from '@/components/waves/create-wave/overview/CreateWaveNameInput';
+import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.validation';
 
 beforeAll(() => {
   // Mock ResizeObserver used in CommonAnimationHeight

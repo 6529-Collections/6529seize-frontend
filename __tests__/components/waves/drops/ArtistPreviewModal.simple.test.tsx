@@ -1,9 +1,9 @@
 import React from 'react';
-import { ArtistPreviewModal } from '../../../../components/waves/drops/ArtistPreviewModal';
-import { ApiProfileMin } from '../../../../generated/models/ApiProfileMin';
+import { ArtistPreviewModal } from '@/components/waves/drops/ArtistPreviewModal';
+import { ApiProfileMin } from '@/generated/models/ApiProfileMin';
 
 // Mock all dependencies to prevent DOM testing issues
-jest.mock('../../../../hooks/useDeviceInfo', () => ({
+jest.mock('@/hooks/useDeviceInfo', () => ({
   __esModule: true,
   default: jest.fn(() => ({ isApp: false })),
 }));
@@ -19,11 +19,11 @@ jest.mock('react-dom', () => ({
   createPortal: (node: any) => node,
 }));
 
-jest.mock('../../../../components/waves/drops/ArtistActiveSubmissionContent', () => ({
+jest.mock('@/components/waves/drops/ArtistActiveSubmissionContent', () => ({
   ArtistActiveSubmissionContent: () => <div data-testid="submission-content">Content</div>,
 }));
 
-jest.mock('../../../../components/waves/drops/ArtistPreviewAppWrapper', () => ({
+jest.mock('@/components/waves/drops/ArtistPreviewAppWrapper', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="app-wrapper">{children}</div>,
 }));

@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ContentDisplay from '../../../../components/waves/drops/ContentDisplay';
+import ContentDisplay from '@/components/waves/drops/ContentDisplay';
 
 let segmentProps: any[] = [];
-jest.mock('../../../../components/waves/drops/ContentSegmentComponent', () =>
+jest.mock('@/components/waves/drops/ContentSegmentComponent', () =>
   (props: any) => { segmentProps.push(props); return <div data-testid={`segment-${props.index}`}>{props.segment.content}</div>; });
 
-jest.mock('../../../../components/waves/drops/MediaThumbnail', () =>
+jest.mock('@/components/waves/drops/MediaThumbnail', () =>
   (props: any) => <div data-testid={`media-${props.media.url}`} />);
 
 describe('ContentDisplay', () => {

@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveTabsDefault from '../../../../../components/brain/my-stream/tabs/MyStreamWaveTabsDefault';
+import MyStreamWaveTabsDefault from '@/components/brain/my-stream/tabs/MyStreamWaveTabsDefault';
 
 const useContentTab = jest.fn();
 
-jest.mock('../../../../../components/brain/my-stream/MyStreamWaveDesktopTabs', () => ({
+jest.mock('@/components/brain/my-stream/MyStreamWaveDesktopTabs', () => ({
   __esModule: true,
   default: ({ activeTab, setActiveTab }: any) => (
     <div>
@@ -14,7 +14,7 @@ jest.mock('../../../../../components/brain/my-stream/MyStreamWaveDesktopTabs', (
   )
 }));
 
-jest.mock('../../../../../components/brain/ContentTabContext', () => ({
+jest.mock('@/components/brain/ContentTabContext', () => ({
   useContentTab: (...args: any[]) => useContentTab(...args)
 }));
 

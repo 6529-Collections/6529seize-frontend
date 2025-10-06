@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RollingEndDate from '../../../../../components/waves/create-wave/dates/RollingEndDate';
+import RollingEndDate from '@/components/waves/create-wave/dates/RollingEndDate';
 
-jest.mock('../../../../../components/utils/calendar/CommonCalendar', () => (props: any) => (
+jest.mock('@/components/utils/calendar/CommonCalendar', () => (props: any) => (
   <button onClick={() => props.setSelectedTimestamp(1000)}>calendar</button>
 ));
 
@@ -15,7 +15,7 @@ type Config = {
   isRolling: boolean;
 };
 
-jest.mock('../../../../../components/common/DateAccordion', () => (props: any) => (
+jest.mock('@/components/common/DateAccordion', () => (props: any) => (
   <div>
     <button onClick={props.onToggle}>toggle</button>
     {props.isExpanded && props.children}
@@ -23,15 +23,15 @@ jest.mock('../../../../../components/common/DateAccordion', () => (props: any) =
   </div>
 ));
 
-jest.mock('../../../../../components/common/TimePicker', () => (props: any) => (
+jest.mock('@/components/common/TimePicker', () => (props: any) => (
   <button onClick={() => props.onTimeChange(1, 2)}>time</button>
 ));
 
-jest.mock('../../../../../helpers/waves/create-wave.helpers', () => ({
+jest.mock('@/helpers/waves/create-wave.helpers', () => ({
   calculateLastDecisionTime: () => 1234,
 }));
 
-jest.mock('../../../../../components/waves/create-wave/services/waveDecisionService', () => ({
+jest.mock('@/components/waves/create-wave/services/waveDecisionService', () => ({
   calculateDecisionTimes: jest.fn(() => []),
   countTotalDecisions: jest.fn(() => 1),
   formatDate: (n: number) => `date-${n}`,

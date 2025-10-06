@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { ApiIdentity } from "../generated/models/ApiIdentity";
-import { commonApiFetch } from "../services/api/common-api";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useWaveById } from "./useWaveById";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseIdentitiesSearchProps {
   readonly handle: string;

@@ -15,7 +15,7 @@ jest.mock('next/navigation', () => ({
 
 const setTitleMock = jest.fn();
 
-jest.mock('../../../../components/auth/Auth', () => {
+jest.mock('@/components/auth/Auth', () => {
   const React = require('react');
   return {
     AuthContext: React.createContext({
@@ -28,52 +28,52 @@ jest.mock('../../../../components/auth/Auth', () => {
 });
 
 const invalidateNotifications = jest.fn();
-jest.mock('../../../../components/react-query-wrapper/ReactQueryWrapper', () => {
+jest.mock('@/components/react-query-wrapper/ReactQueryWrapper', () => {
   const React = require('react');
   return { ReactQueryWrapperContext: React.createContext({ invalidateNotifications }) };
 });
 
-jest.mock('../../../../components/brain/notifications/NotificationsWrapper', () => ({
+jest.mock('@/components/brain/notifications/NotificationsWrapper', () => ({
   __esModule: true,
   default: () => <div data-testid="wrapper" />,
 }));
 
-jest.mock('../../../../components/brain/notifications/NotificationsCauseFilter', () => ({
+jest.mock('@/components/brain/notifications/NotificationsCauseFilter', () => ({
   __esModule: true,
   default: () => <div data-testid="filter" />,
 }));
 
-jest.mock('../../../../components/brain/feed/FeedScrollContainer', () => ({
+jest.mock('@/components/brain/feed/FeedScrollContainer', () => ({
   FeedScrollContainer: React.forwardRef((props: any, ref) => (
     <div data-testid="scroll" ref={ref} {...props} />
   )),
 }));
 
-jest.mock('../../../../components/brain/content/input/BrainContentInput', () => ({
+jest.mock('@/components/brain/content/input/BrainContentInput', () => ({
   __esModule: true,
   default: () => <div data-testid="input" />,
 }));
 
-jest.mock('../../../../components/brain/my-stream/layout/MyStreamNoItems', () => ({
+jest.mock('@/components/brain/my-stream/layout/MyStreamNoItems', () => ({
   __esModule: true,
   default: () => <div data-testid="no-items" />,
 }));
 
 const useNotificationsQueryMock = jest.fn();
-jest.mock('../../../../hooks/useNotificationsQuery', () => ({
+jest.mock('@/hooks/useNotificationsQuery', () => ({
   useNotificationsQuery: () => useNotificationsQueryMock(),
 }));
 
-jest.mock('../../../../components/notifications/NotificationsContext', () => ({
+jest.mock('@/components/notifications/NotificationsContext', () => ({
   useNotificationsContext: () => ({ removeAllDeliveredNotifications: jest.fn() }),
 }));
 
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ notificationsViewStyle: { height: '10px' } }),
 }));
 
 // Mock TitleContext
-jest.mock('../../../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),
@@ -89,7 +89,7 @@ jest.mock('../../../../contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import Notifications from '../../../../components/brain/notifications/Notifications';
+import Notifications from '@/components/brain/notifications/Notifications';
 
 describe('Notifications component', () => {
   beforeEach(() => {

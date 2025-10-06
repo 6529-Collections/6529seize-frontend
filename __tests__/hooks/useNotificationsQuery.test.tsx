@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useNotificationsQuery, usePrefetchNotifications } from '../../hooks/useNotificationsQuery';
+import { useNotificationsQuery, usePrefetchNotifications } from '@/hooks/useNotificationsQuery';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');

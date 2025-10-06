@@ -7,12 +7,12 @@ import {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
-} from "../../../../entities/INextgen";
+} from "@/entities/INextgen";
 
 import Link from "next/link";
 import { useState } from "react";
 import Toggle from "react-toggle";
-import { formatNameForUrl } from "../../nextgen_helpers";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;

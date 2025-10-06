@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import BuildPhaseFormConfigModalTitle from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle';
+import BuildPhaseFormConfigModalTitle from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle';
 
 function renderWithParent(onClose: jest.Mock, onParentClick: jest.Mock) {
   return render(

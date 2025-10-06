@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserAddressesSelectDropdownItem from "../../../../../components/user/utils/addresses-select/UserAddressesSelectDropdownItem";
+import UserAddressesSelectDropdownItem from "@/components/user/utils/addresses-select/UserAddressesSelectDropdownItem";
 
 const mockCopy = jest.fn();
 

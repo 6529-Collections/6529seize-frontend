@@ -18,7 +18,7 @@ import {
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
-import { numberWithCommas } from "../../helpers/Helpers";
+import { numberWithCommas } from "@/helpers/Helpers";
 
 ChartJS.register(
   CategoryScale,

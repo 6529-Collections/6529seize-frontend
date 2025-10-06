@@ -2,11 +2,11 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { WaveDropsReverseContainer } from '../../../../components/waves/drops/WaveDropsReverseContainer';
-import { useIntersectionObserver } from '../../../../hooks/scroll/useIntersectionObserver';
-import { editSlice } from '../../../../store/editSlice';
+import { WaveDropsReverseContainer } from '@/components/waves/drops/WaveDropsReverseContainer';
+import { useIntersectionObserver } from '@/hooks/scroll/useIntersectionObserver';
+import { editSlice } from '@/store/editSlice';
 
-jest.mock('../../../../hooks/scroll/useIntersectionObserver');
+jest.mock('@/hooks/scroll/useIntersectionObserver');
 
 const mockUseIntersectionObserver = useIntersectionObserver as jest.Mock;
 

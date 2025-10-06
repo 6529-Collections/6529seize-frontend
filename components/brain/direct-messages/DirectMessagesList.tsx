@@ -7,13 +7,13 @@ import UnifiedWavesListWaves, {
 import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
 import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
-import { useMyStream } from "../../../contexts/wave/MyStreamContext";
-import { AuthContext } from "../../auth/Auth";
-import HeaderUserConnect from "../../header/user/HeaderUserConnect";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { AuthContext } from "@/components/auth/Auth";
+import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Image from "next/image";
-import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface DirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;

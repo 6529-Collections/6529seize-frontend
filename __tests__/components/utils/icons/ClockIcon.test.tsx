@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import ClockIcon from '../../../../components/utils/icons/ClockIcon';
+import ClockIcon from '@/components/utils/icons/ClockIcon';
 
 describe('ClockIcon', () => {
   it('renders svg with viewBox and class', () => {

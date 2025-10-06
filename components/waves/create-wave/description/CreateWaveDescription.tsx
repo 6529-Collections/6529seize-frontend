@@ -1,14 +1,14 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { CreateDropConfig } from "../../../../entities/IDrop";
+import { CreateDropConfig } from "@/entities/IDrop";
 
 import DropEditor, {
   DropEditorHandles,
-} from "../../../drops/create/DropEditor";
-import { profileAndConsolidationsToProfileMin } from "../../../../helpers/ProfileHelpers";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import { CreateDropType } from "../../../drops/create/types";
+} from "@/components/drops/create/DropEditor";
+import { profileAndConsolidationsToProfileMin } from "@/helpers/ProfileHelpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { CreateDropType } from "@/components/drops/create/types";
 export interface CreateWaveDescriptionHandles {
   requestDrop: () => CreateDropConfig | null;
 }

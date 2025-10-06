@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import Squares2X2Icon from '../../../../components/common/icons/Squares2X2Icon';
+import Squares2X2Icon from '@/components/common/icons/Squares2X2Icon';
 
 describe('Squares2X2Icon', () => {
   it('renders svg with given class and attributes', () => {

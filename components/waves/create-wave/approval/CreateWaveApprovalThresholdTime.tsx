@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Period } from "../../../../helpers/Types";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { Period } from "@/helpers/Types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import CreateWaveDatesEndDateSelectPeriod from "../dates/end-date/CreateWaveDatesEndDateSelectPeriod";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 export default function CreateWaveApprovalThresholdTime({
   thresholdTimeMs,

@@ -1,5 +1,5 @@
-import { ApiDrop } from "../../generated/models/ApiDrop";
-import { ActiveDropAction } from "../../types/dropInteractionTypes";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 
 interface CreateDropReplyingProps {
   readonly drop: ApiDrop;

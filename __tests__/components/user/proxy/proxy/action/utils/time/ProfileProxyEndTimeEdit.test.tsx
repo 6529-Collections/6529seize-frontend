@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProfileProxyEndTimeEdit from '../../../../../../../../components/user/proxy/proxy/action/utils/time/ProfileProxyEndTimeEdit';
-import { AuthContext } from '../../../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import ProfileProxyEndTimeEdit from '@/components/user/proxy/proxy/action/utils/time/ProfileProxyEndTimeEdit';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');
 
-jest.mock('../../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch', () => ({
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch', () => ({
   __esModule: true,
   default: ({ isActive, setIsActive }: any) => <button onClick={() => setIsActive(!isActive)}>toggle</button>
 }));
 
-jest.mock('../../../../../../../../components/utils/time/CommonTimeSelect', () => ({
+jest.mock('@/components/utils/time/CommonTimeSelect', () => ({
   __esModule: true,
   default: ({ onMillis }: any) => <button onClick={() => onMillis(Date.now() + 1000)}>time</button>
 }));

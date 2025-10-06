@@ -7,16 +7,16 @@ import { Tooltip } from "react-tooltip";
 import {
   ETHEREUM_ICON_TEXT,
   NEXTGEN_MEDIA_BASE_URL,
-} from "../../../../constants";
-import { NextGenToken } from "../../../../entities/INextgen";
+} from "@/constants";
+import { NextGenToken } from "@/entities/INextgen";
 import {
   cicToType,
   formatAddress,
   getRoyaltyImage,
-} from "../../../../helpers/Helpers";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
-import { NextGenTokenRarityType } from "../../nextgen_helpers";
+} from "@/helpers/Helpers";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
+import { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
 import { TraitScore } from "./NextGenTokenAbout";
 
 export function NextGenTokenImage(

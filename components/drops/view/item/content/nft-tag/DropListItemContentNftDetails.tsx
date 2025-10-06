@@ -1,9 +1,9 @@
-import { ReferencedNft } from "../../../../../../entities/IDrop";
-import { ReservoirTokensResponseTokenElement } from "../../../../../../entities/IReservoir";
+import { ReferencedNft } from "@/entities/IDrop";
+import { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 
 export default function DropListItemContentNftDetails({
   referencedNft: { contract, token, name: tokenName },

@@ -7,8 +7,8 @@ import data from "@emoji-mart/data";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
-import { useEmoji } from "../../contexts/EmojiContext";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useEmoji } from "@/contexts/EmojiContext";
 
 interface CreateDropEmojiPickerProps {
   top?: string;

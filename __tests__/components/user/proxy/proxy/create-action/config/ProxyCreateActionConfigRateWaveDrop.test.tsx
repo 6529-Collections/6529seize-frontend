@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import ProxyCreateActionConfigRateWaveDrop from '../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigRateWaveDrop';
-import { ApiProfileProxyActionType } from '../../../../../../../generated/models/ApiProfileProxyActionType';
+import ProxyCreateActionConfigRateWaveDrop from '@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigRateWaveDrop';
+import { ApiProfileProxyActionType } from '@/generated/models/ApiProfileProxyActionType';
 
 describe('ProxyCreateActionConfigRateWaveDrop', () => {
   it('submits rate wave drop action', async () => {

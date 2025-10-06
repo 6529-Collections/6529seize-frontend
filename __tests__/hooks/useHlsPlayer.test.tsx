@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useHlsPlayer } from '../../hooks/useHlsPlayer';
+import { useHlsPlayer } from '@/hooks/useHlsPlayer';
 
 // Force the dynamic import of `hls.js` to return a minimal unsupported
 // implementation so the hook immediately falls back to the provided source.

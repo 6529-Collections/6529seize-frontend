@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TitleProvider } from '../../contexts/TitleContext';
+import { TitleProvider } from '@/contexts/TitleContext';
 
 // Mock implementation of TitleContext hooks
 export const mockTitleContext = {
@@ -14,7 +14,7 @@ export const mockTitleContext = {
 
 // Mock all TitleContext exports
 export const mockTitleContextModule = () => {
-  jest.mock('../../contexts/TitleContext', () => ({
+  jest.mock('@/contexts/TitleContext', () => ({
     useTitle: () => mockTitleContext,
     useSetTitle: jest.fn(),
     useSetNotificationCount: jest.fn(),

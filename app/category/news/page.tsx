@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export default function CategoryNewsPage() {
@@ -6,7 +7,6 @@ export default function CategoryNewsPage() {
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -301,11 +301,11 @@ export default function CategoryNewsPage() {
                           />
                           <div className="fusion-rollover">
                             <div className="fusion-rollover-content">
-                              <a
+                              <Link
                                 className="fusion-rollover-link"
                                 href="/news/introducing-om/">
                                 INTRODUCING OM
-                              </a>
+                              </Link>
                               <div className="fusion-rollover-sep" />
                               <a
                                 className="fusion-rollover-gallery"
@@ -317,18 +317,18 @@ export default function CategoryNewsPage() {
                                 Gallery{" "}
                               </a>
                               <h4 className="fusion-rollover-title">
-                                <a
+                                <Link
                                   className="fusion-rollover-title-link"
                                   href="/news/introducing-om/">
                                   INTRODUCING OM{" "}
-                                </a>
+                                </Link>
                               </h4>
                               <div className="fusion-rollover-categories">
-                                <a href="/category/news/" rel="tag">
+                                <Link href="/category/news/" rel="tag">
                                   NEWS
-                                </a>
+                                </Link>
                               </div>
-                              <a
+                              <Link
                                 className="fusion-link-wrapper"
                                 href="/news/introducing-om/"
                                 aria-label="INTRODUCING OM"
@@ -339,16 +339,16 @@ export default function CategoryNewsPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <a href="/news/introducing-om/">INTRODUCING OM</a>
+                              <Link href="/news/introducing-om/">INTRODUCING OM</Link>
                             </h2>
                             <span className="vcard rich-snippet-hidden">
                               <span className="fn">
-                                <a
+                                <Link
                                   href="/author/6529er6529-io/"
                                   title="Posts by 6529er"
                                   rel="author">
                                   6529er
-                                </a>
+                                </Link>
                               </span>
                             </span>
                             <span className="updated rich-snippet-hidden">
@@ -368,12 +368,12 @@ export default function CategoryNewsPage() {
                           </span>
                           <span className="vcard rich-snippet-hidden">
                             <span className="fn">
-                              <a
+                              <Link
                                 href="/author/6529er6529-io/"
                                 title="Posts by 6529er"
                                 rel="author">
                                 6529er
-                              </a>
+                              </Link>
                             </span>
                           </span>
                           <span className="updated rich-snippet-hidden">
@@ -394,9 +394,13 @@ export default function CategoryNewsPage() {
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-        <button type="button" className="fusion-one-page-text-link fusion-page-load-link" tabIndex={-1} aria-hidden="true">
-          Page load link
-        </button>
+      <button
+        type="button"
+        className="fusion-one-page-text-link fusion-page-load-link"
+        tabIndex={-1}
+        aria-hidden="true">
+        Page load link
+      </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
@@ -406,6 +410,7 @@ export default function CategoryNewsPage() {
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>
@@ -416,11 +421,11 @@ export default function CategoryNewsPage() {
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-          <button type="button" id="toTop" className="fusion-top-top-link">
-            <span id="awb-to-top-label" className="screen-reader-text">
-              Go to Top
-            </span>
-          </button>
+        <button type="button" id="toTop" className="fusion-top-top-link">
+          <span id="awb-to-top-label" className="screen-reader-text">
+            Go to Top
+          </span>
+        </button>
       </section>
     </div>
   );

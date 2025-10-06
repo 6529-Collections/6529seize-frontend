@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import WaveHeaderNameEditInput from '../../../../../components/waves/header/name/WaveHeaderNameEditInput';
+import WaveHeaderNameEditInput from '@/components/waves/header/name/WaveHeaderNameEditInput';
 
 const wave = { id: 'w1' } as any;
 

@@ -10,9 +10,11 @@ jest.mock("@/services/6529api", () => ({
   fetchUrl: (...args: any[]) => fetchUrlMock(...args),
 }));
 
-jest.mock("@/components/latest-activity/LatestActivityRow", () => () => (
-  <tr data-testid="activity-row" />
-));
+jest.mock("@/components/latest-activity/LatestActivityRow", () => {
+  const MockLatestActivityRow = () => <tr data-testid="activity-row" />;
+  MockLatestActivityRow.displayName = "MockLatestActivityRow";
+  return MockLatestActivityRow;
+});
 
 // Utility NFT object with required fields only
 const nft = {
@@ -101,6 +103,12 @@ describe("MemePageActivity", () => {
   });
 
   describe("Activity Fetching", () => {
+    it("skips fetching when tab is hidden", () => {
+      render(<MemePageActivity show={false} nft={nft} pageSize={10} />);
+
+      expect(fetchUrlMock).not.toHaveBeenCalled();
+    });
+
     it("fetches activity with correct base url", async () => {
       render(<MemePageActivity show nft={nft} pageSize={10} />);
 

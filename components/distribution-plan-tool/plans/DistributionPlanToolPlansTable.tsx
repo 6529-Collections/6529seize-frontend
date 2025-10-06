@@ -1,4 +1,4 @@
-import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";
+import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanToolPlansTableItem from "./DistributionPlanToolPlansTableItem";
 
 export default function DistributionPlanToolPlansTable({

@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import DropPartMarkdownImage from '../../../../../components/drops/view/part/DropPartMarkdownImage';
+import DropPartMarkdownImage from '@/components/drops/view/part/DropPartMarkdownImage';
 import React from 'react';
 
 let escapeCb: () => void = () => {};
@@ -15,10 +15,10 @@ jest.mock('react-zoom-pan-pinch', () => ({
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock('../../../../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
 
-jest.mock('../../../../../helpers/Helpers', () => ({ fullScreenSupported: () => true }));
-jest.mock('../../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u, ImageScale: { AUTOx450: 'auto' } }));
+jest.mock('@/helpers/Helpers', () => ({ fullScreenSupported: () => true }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u, ImageScale: { AUTOx450: 'auto' } }));
 
 
 describe('DropPartMarkdownImage', () => {

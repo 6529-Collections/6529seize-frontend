@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import AllowlistToolCsvIcon from '../../../../components/allowlist-tool/icons/AllowlistToolCsvIcon';
+import AllowlistToolCsvIcon from '@/components/allowlist-tool/icons/AllowlistToolCsvIcon';
 
 describe('AllowlistToolCsvIcon', () => {
   it('renders svg with expected attributes', () => {

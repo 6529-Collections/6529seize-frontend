@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import UserPageIdentityAddStatementsHeader from '../../../../../../components/user/identity/statements/header/UserPageIdentityAddStatementsHeader';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { useSeizeConnectContext } from '../../../../../../components/auth/SeizeConnectContext';
+import UserPageIdentityAddStatementsHeader from '@/components/user/identity/statements/header/UserPageIdentityAddStatementsHeader';
+import { AuthContext } from '@/components/auth/Auth';
+import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 
-jest.mock('../../../../../../components/user/identity/statements/add/UserPageIdentityStatementsAddButton', () => ({
+jest.mock('@/components/user/identity/statements/add/UserPageIdentityStatementsAddButton', () => ({
   __esModule: true,
   default: () => <div data-testid="add-button" />,
 }));
 
-jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 

@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useMyStreamQuery, usePollingQuery } from '../../hooks/useMyStreamQuery';
+import { useMyStreamQuery, usePollingQuery } from '@/hooks/useMyStreamQuery';
 
 jest.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: jest.fn(),
@@ -7,7 +7,7 @@ jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ prefetchInfiniteQuery: jest.fn() }),
 }));
 
-jest.mock('../../services/api/common-api', () => ({ commonApiFetch: jest.fn(() => Promise.resolve([])) }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn(() => Promise.resolve([])) }));
 
 const { useInfiniteQuery, useQuery } = require('@tanstack/react-query');
 

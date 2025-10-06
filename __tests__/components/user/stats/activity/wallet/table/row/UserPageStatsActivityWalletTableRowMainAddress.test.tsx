@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import UserPageStatsActivityWalletTableRowMainAddress from "../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowMainAddress";
-import { TransactionType } from "../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow";
+import UserPageStatsActivityWalletTableRowMainAddress from "@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowMainAddress";
+import { TransactionType } from "@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow";
 
 const profile = {
   wallets: [{ wallet: "0xabc", display: "Main" }],

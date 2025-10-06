@@ -1,4 +1,4 @@
-import { ChatRestriction, SubmissionRestriction } from "../../hooks/useDropPriviledges";
+import { ChatRestriction, SubmissionRestriction } from "@/hooks/useDropPriviledges";
 
 interface DropPlaceholderProps {
   readonly type: "chat" | "submission" | "both";

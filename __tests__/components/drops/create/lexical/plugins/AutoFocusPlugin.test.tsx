@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import AutoFocusPlugin from '../../../../../../components/drops/create/lexical/plugins/AutoFocusPlugin';
+import AutoFocusPlugin from '@/components/drops/create/lexical/plugins/AutoFocusPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 jest.mock('@lexical/react/LexicalComposerContext', () => ({ useLexicalComposerContext: jest.fn() }));

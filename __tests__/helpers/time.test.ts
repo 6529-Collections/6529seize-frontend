@@ -1,4 +1,4 @@
-import { Time } from '../../helpers/time';
+import { Time } from '@/helpers/time';
 
 describe('Time utilities', () => {
   beforeEach(() => {

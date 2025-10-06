@@ -1,17 +1,17 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiRateMatter } from "../../../../../../generated/models/ApiRateMatter";
-import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../../../distribution-plan-tool/common/CircleLoader";
-import { AuthContext } from "../../../../../auth/Auth";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { AuthContext } from "@/components/auth/Auth";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../../../../services/api/common-api";
-import { ApiAvailableRatingCredit } from "../../../../../../generated/models/ApiAvailableRatingCredit";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiAvailableRatingCredit } from "@/generated/models/ApiAvailableRatingCredit";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 export default function GroupCardActionStats({
   matter,
   membersCount,

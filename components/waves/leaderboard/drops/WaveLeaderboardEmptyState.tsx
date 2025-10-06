@@ -1,7 +1,7 @@
 import React from "react";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { useWave } from "../../../../hooks/useWave";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useWave } from "@/hooks/useWave";
 
 interface WaveLeaderboardEmptyStateProps {
   readonly wave: ApiWave;

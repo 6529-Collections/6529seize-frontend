@@ -2,10 +2,10 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import UserPageHeaderEditName from '../../../../../components/user/user-page-header/name/UserPageHeaderEditName';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
+import UserPageHeaderEditName from '@/components/user/user-page-header/name/UserPageHeaderEditName';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({
@@ -23,7 +23,7 @@ jest.mock('react-use', () => ({
   },
 }));
 
-jest.mock('../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
   commonApiFetch: jest.fn().mockResolvedValue({ available: true, message: 'Available' }),
 }));
@@ -103,7 +103,7 @@ describe('UserPageHeaderEditName', () => {
   });
 
   it('enables save button when username changes and is available', async () => {
-    const { commonApiFetch } = require('../../../../../services/api/common-api');
+    const { commonApiFetch } = require('@/services/api/common-api');
     commonApiFetch.mockResolvedValue({ available: true, message: 'Available' });
     
     renderComponent();
@@ -119,7 +119,7 @@ describe('UserPageHeaderEditName', () => {
   });
 
   it('calls onClose when form is submitted successfully', async () => {
-    const { commonApiPost, commonApiFetch } = require('../../../../../services/api/common-api');
+    const { commonApiPost, commonApiFetch } = require('@/services/api/common-api');
     commonApiFetch.mockResolvedValue({ available: true, message: 'Available' });
     commonApiPost.mockResolvedValue({ handle: 'newusername' });
     
@@ -144,7 +144,7 @@ describe('UserPageHeaderEditName', () => {
   });
 
   it('shows error toast when authentication fails', async () => {
-    const { commonApiFetch } = require('../../../../../services/api/common-api');
+    const { commonApiFetch } = require('@/services/api/common-api');
     commonApiFetch.mockResolvedValue({ available: true, message: 'Available' });
     mockAuthContext.requestAuth.mockResolvedValueOnce({ success: false });
     
@@ -171,7 +171,7 @@ describe('UserPageHeaderEditName', () => {
   });
 
   it('handles API error during profile update', async () => {
-    const { commonApiPost, commonApiFetch } = require('../../../../../services/api/common-api');
+    const { commonApiPost, commonApiFetch } = require('@/services/api/common-api');
     commonApiFetch.mockResolvedValue({ available: true, message: 'Available' });
     
     // Mock a successful response instead since the component doesn't properly handle mutateAsync errors

@@ -1,13 +1,13 @@
 import { isAddress } from "viem";
 import { commonApiPost } from "../api/common-api";
-import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRefreshTokenRequest";
-import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
+import { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemRefreshTokenRequest";
+import { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import {
   TokenRefreshError,
   TokenRefreshCancelledError,
   TokenRefreshNetworkError,
   TokenRefreshServerError,
-} from "../../errors/authentication";
+} from "@/errors/authentication";
 
 /**
  * Validates input parameters for token refresh operation

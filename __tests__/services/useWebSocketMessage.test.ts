@@ -1,9 +1,9 @@
 import { renderHook } from '@testing-library/react';
-import { useWebSocketMessage, useWebSocketMessages, useWebsocketStatus } from '../../services/websocket/useWebSocketMessage';
-import { WebSocketStatus } from '../../services/websocket/WebSocketTypes';
+import { useWebSocketMessage, useWebSocketMessages, useWebsocketStatus } from '@/services/websocket/useWebSocketMessage';
+import { WebSocketStatus } from '@/services/websocket/WebSocketTypes';
 
-jest.mock('../../services/websocket/useWebSocket', () => ({ useWebSocket: jest.fn() }));
-const { useWebSocket } = require('../../services/websocket/useWebSocket');
+jest.mock('@/services/websocket/useWebSocket', () => ({ useWebSocket: jest.fn() }));
+const { useWebSocket } = require('@/services/websocket/useWebSocket');
 
 describe('useWebSocketMessage', () => {
   const subscribe = jest.fn();

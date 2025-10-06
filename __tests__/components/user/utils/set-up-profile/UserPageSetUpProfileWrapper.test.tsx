@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react';
-import UserPageSetUpProfileWrapper from '../../../../../components/user/utils/set-up-profile/UserPageSetUpProfileWrapper';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
-import { ApiProfileClassification } from '../../../../../generated/models/ApiProfileClassification';
+import UserPageSetUpProfileWrapper from '@/components/user/utils/set-up-profile/UserPageSetUpProfileWrapper';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
 
-jest.mock('../../../../../components/user/utils/set-up-profile/UserPageSetUpProfile', () => ({
+jest.mock('@/components/user/utils/set-up-profile/UserPageSetUpProfile', () => ({
   __esModule: true,
   default: () => <div data-testid="setup" />,
 }));
 
-jest.mock('../../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-const { useSeizeConnectContext } = require('../../../../../components/auth/SeizeConnectContext');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
 
 describe('UserPageSetUpProfileWrapper', () => {
   const baseProfile: ApiIdentity = {

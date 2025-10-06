@@ -1,24 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveMyVotes from '../../../../../components/brain/my-stream/votes/MyStreamWaveMyVotes';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { useWaveDropsLeaderboard } from '../../../../../hooks/useWaveDropsLeaderboard';
+import MyStreamWaveMyVotes from '@/components/brain/my-stream/votes/MyStreamWaveMyVotes';
+import { AuthContext } from '@/components/auth/Auth';
+import { useWaveDropsLeaderboard } from '@/hooks/useWaveDropsLeaderboard';
 
 let intersectionCb: () => void = () => {};
 
-jest.mock('../../../../../hooks/useWaveDropsLeaderboard');
-jest.mock('../../../../../hooks/useIntersectionObserver', () => ({
+jest.mock('@/hooks/useWaveDropsLeaderboard');
+jest.mock('@/hooks/useIntersectionObserver', () => ({
   useIntersectionObserver: (cb: any) => {
     intersectionCb = cb;
     return { current: null };
   },
 }));
-jest.mock('../../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ myVotesViewStyle: {} }),
 }));
-jest.mock('../../../../../components/brain/my-stream/votes/MyStreamWaveMyVote', () => (p: any) => <div data-testid="vote">{p.drop.id}</div>);
-jest.mock('../../../../../components/brain/my-stream/votes/MyStreamWaveMyVotesReset', () => () => <div data-testid="reset" />);
-jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardLoadingBar', () => ({ WaveLeaderboardLoadingBar: () => <div data-testid="loading" /> }));
+jest.mock('@/components/brain/my-stream/votes/MyStreamWaveMyVote', () => (p: any) => <div data-testid="vote">{p.drop.id}</div>);
+jest.mock('@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset', () => () => <div data-testid="reset" />);
+jest.mock('@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar', () => ({ WaveLeaderboardLoadingBar: () => <div data-testid="loading" /> }));
 
 const useWaveDropsLeaderboardMock = useWaveDropsLeaderboard as jest.Mock;
 

@@ -1,8 +1,8 @@
-import { prefetchAuthenticatedNotifications } from '../../helpers/stream.helpers';
+import { prefetchAuthenticatedNotifications } from '@/helpers/stream.helpers';
 
 jest.mock('jwt-decode', () => ({ jwtDecode: () => ({ sub: 'wallet' }) }));
-jest.mock('../../helpers/server.helpers', () => ({ getUserProfile: jest.fn(() => Promise.resolve({ handle: 'alice' })) }));
-jest.mock('../../services/api/common-api', () => ({ commonApiFetch: jest.fn(() => Promise.resolve([])) }));
+jest.mock('@/helpers/server.helpers', () => ({ getUserProfile: jest.fn(() => Promise.resolve({ handle: 'alice' })) }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn(() => Promise.resolve([])) }));
 
 const createClient = () => ({ prefetchInfiniteQuery: jest.fn(), prefetchQuery: jest.fn() });
 
@@ -21,7 +21,7 @@ describe('prefetchAuthenticatedNotifications', () => {
 
   it('calls getUserProfile with provided headers', async () => {
     const queryClient = createClient();
-    const { getUserProfile } = require('../../helpers/server.helpers');
+    const { getUserProfile } = require('@/helpers/server.helpers');
     await prefetchAuthenticatedNotifications({
       queryClient: queryClient as any,
       headers: { Authorization: 'Bearer t' },
@@ -32,7 +32,7 @@ describe('prefetchAuthenticatedNotifications', () => {
 
   it('does not prefetch when handle missing', async () => {
     const queryClient = createClient();
-    const helpers = require('../../helpers/server.helpers');
+    const helpers = require('@/helpers/server.helpers');
     helpers.getUserProfile.mockResolvedValueOnce({ handle: null });
     await prefetchAuthenticatedNotifications({
       queryClient: queryClient as any,

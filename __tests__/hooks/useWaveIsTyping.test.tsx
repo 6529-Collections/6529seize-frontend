@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveIsTyping } from '../../hooks/useWaveIsTyping';
-import { WsMessageType } from '../../helpers/Types';
+import { useWaveIsTyping } from '@/hooks/useWaveIsTyping';
+import { WsMessageType } from '@/helpers/Types';
 
 const listeners: any[] = [];
 
-jest.mock('../../hooks/useWaveWebSocket', () => ({
+jest.mock('@/hooks/useWaveWebSocket', () => ({
   useWaveWebSocket: () => ({
     socket: {
       addEventListener: (_: string, cb: any) => listeners.push(cb),

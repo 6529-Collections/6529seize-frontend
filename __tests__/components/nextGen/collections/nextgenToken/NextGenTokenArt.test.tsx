@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenTokenArt from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenArt';
+import NextGenTokenArt from '@/components/nextGen/collections/nextgenToken/NextGenTokenArt';
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');
@@ -17,7 +17,7 @@ jest.mock('react-bootstrap', () => {
   return RB;
 });
 
-jest.mock('../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage', () => ({
+jest.mock('@/components/nextGen/collections/nextgenToken/NextGenTokenImage', () => ({
   NextGenTokenImage: ({ onClick }: any) => (
     <img data-testid="token-image" onClick={onClick} />
   ),
@@ -25,7 +25,7 @@ jest.mock('../../../../../components/nextGen/collections/nextgenToken/NextGenTok
   get8KUrl: jest.fn((id:number)=>`https://test/8k/${id}`)
 }));
 
-jest.mock('../../../../../components/nextGen/collections/nextgenToken/NextGenZoomableImage', () => ({
+jest.mock('@/components/nextGen/collections/nextgenToken/NextGenZoomableImage', () => ({
   __esModule: true,
   default: (props:any) => {
     const React = require('react');
@@ -34,15 +34,15 @@ jest.mock('../../../../../components/nextGen/collections/nextgenToken/NextGenZoo
   }
 }));
 
-jest.mock('../../../../../components/nextGen/collections/nextgenToken/Lightbulb', () => (props:any) => <span data-testid={`light-${props.mode}`} onClick={props.onClick}/>);
+jest.mock('@/components/nextGen/collections/nextgenToken/Lightbulb', () => (props:any) => <span data-testid={`light-${props.mode}`} onClick={props.onClick}/>);
 
-jest.mock('../../../../../components/nextGen/collections/nextgenToken/NextGenTokenDownload', () => ({
+jest.mock('@/components/nextGen/collections/nextgenToken/NextGenTokenDownload', () => ({
   NextGenTokenDownloadDropdownItem: (props:any) => <div data-testid={`download-${props.resolution}`}/>,
   Resolution: { '0.5K':'0.5K', Thumbnail:'Thumbnail', '2K':'2K', '16K':'16K' }
 }));
 
-jest.mock('../../../../../hooks/isMobileDevice', () => ({ __esModule: true, default: jest.fn(()=>false) }));
-jest.mock('../../../../../hooks/isMobileScreen', () => ({ __esModule: true, default: jest.fn(()=>false) }));
+jest.mock('@/hooks/isMobileDevice', () => ({ __esModule: true, default: jest.fn(()=>false) }));
+jest.mock('@/hooks/isMobileScreen', () => ({ __esModule: true, default: jest.fn(()=>false) }));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: (props:any) => <svg data-testid={props.icon.iconName} onClick={props.onClick} />

@@ -1,6 +1,5 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import Museum1of1ArtPage from "@/app/museum/1-of-1-art/page";
+import { render, screen } from "@testing-library/react";
 
 // Mock the Header component since it's dynamically imported
 jest.mock("@/components/header/Header", () => {
@@ -85,16 +84,6 @@ describe("Museum1of1ArtPage", () => {
       (meta) => meta.getAttribute("name") === "twitter:site"
     );
     expect(twitterSite?.getAttribute("content")).toBe("@om100m");
-  });
-
-  it("includes viewport meta tag for responsive design", () => {
-    renderComponent();
-
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
-    expect(viewportMeta).toBeInTheDocument();
-    expect(viewportMeta?.getAttribute("content")).toBe(
-      "width=device-width, initial-scale=1"
-    );
   });
 
   it("renders the main page structure", () => {

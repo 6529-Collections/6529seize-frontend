@@ -5,8 +5,8 @@ import styles from "./CookiesBanner.module.scss";
 import { useCookieConsent } from "./CookieConsentContext";
 import Link from "next/link";
 import Image from "next/image";
-import useDeviceInfo from "../../hooks/useDeviceInfo";
-import useIsMobileDevice from "../../hooks/isMobileDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 export default function CookiesBanner() {
   const { isApp } = useDeviceInfo();

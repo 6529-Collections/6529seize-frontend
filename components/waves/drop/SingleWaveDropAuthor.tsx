@@ -1,11 +1,11 @@
 import React from "react";
-import { ApiDrop } from "../../../generated/models/ObjectSerializer";
+import { ApiDrop } from "@/generated/models/ObjectSerializer";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../user/utils/UserCICAndLevel";
-import { cicToType } from "../../../helpers/Helpers";
-import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
+} from "@/components/user/utils/UserCICAndLevel";
+import { cicToType } from "@/helpers/Helpers";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;

@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { CreateDropContentFiles } from '../../../components/waves/CreateDropContentFiles';
+import { CreateDropContentFiles } from '@/components/waves/CreateDropContentFiles';
 
-jest.mock('../../../components/waves/FilePreview', () => ({ __esModule: true, default: (props: any) => (
+jest.mock('@/components/waves/FilePreview', () => ({ __esModule: true, default: (props: any) => (
   <div data-testid="preview">
     {props.files.map((f: any) => (
       <button key={f.file.name} onClick={() => props.removeFile(f.file)}>{f.file.name}</button>

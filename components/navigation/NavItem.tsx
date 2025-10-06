@@ -7,13 +7,13 @@ import { useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
 import { motion } from "framer-motion";
 import { useAuth } from "../auth/Auth";
-import { useTitle } from "../../contexts/TitleContext";
-import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
-import { useUnreadIndicator } from "../../hooks/useUnreadIndicator";
+import { useTitle } from "@/contexts/TitleContext";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { isNavItemActive } from "./isNavItemActive";
-import { useWaveData } from "../../hooks/useWaveData";
-import { useWave } from "../../hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
+import { useWave } from "@/hooks/useWave";
 
 interface Props {
   readonly item: NavItemData;

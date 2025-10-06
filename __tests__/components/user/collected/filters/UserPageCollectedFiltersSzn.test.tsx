@@ -1,11 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import UserPageCollectedFiltersSzn from '../../../../../components/user/collected/filters/UserPageCollectedFiltersSzn';
-import { MEMES_SEASON } from '../../../../../enums';
+import UserPageCollectedFiltersSzn from '@/components/user/collected/filters/UserPageCollectedFiltersSzn';
+import { MEMES_SEASON } from '@/enums';
 
 let capturedProps: any = null;
 
-jest.mock('../../../../../components/utils/select/dropdown/CommonDropdown', () => (props: any) => {
+jest.mock('@/components/utils/select/dropdown/CommonDropdown', () => (props: any) => {
   capturedProps = props;
   return <div data-testid="dropdown" />;
 });

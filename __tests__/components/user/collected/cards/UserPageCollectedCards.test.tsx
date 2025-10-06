@@ -1,21 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import UserPageCollectedCards from "../../../../../components/user/collected/cards/UserPageCollectedCards";
+import UserPageCollectedCards from "@/components/user/collected/cards/UserPageCollectedCards";
 import {
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
-} from "../../../../../entities/IProfile";
-import { SortDirection } from "../../../../../entities/ISort";
+} from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
 
-jest.mock("../../../../../components/user/collected/cards/UserPageCollectedCard", () => (props: any) => (
+jest.mock("@/components/user/collected/cards/UserPageCollectedCard", () => (props: any) => (
   <div data-testid="card" data-show-data-row={props.showDataRow}>
     {props.card.token_id}
   </div>
 ));
 
 const paginationProps: any = {};
-jest.mock("../../../../../components/utils/table/paginator/CommonTablePagination", () => (props: any) => {
+jest.mock("@/components/utils/table/paginator/CommonTablePagination", () => (props: any) => {
   Object.assign(paginationProps, props);
   return (
     <div data-testid="pagination">
@@ -24,7 +24,7 @@ jest.mock("../../../../../components/utils/table/paginator/CommonTablePagination
   );
 });
 
-jest.mock("../../../../../components/user/collected/cards/UserPageCollectedCardsNoCards", () => (props: any) => (
+jest.mock("@/components/user/collected/cards/UserPageCollectedCardsNoCards", () => (props: any) => (
   <div data-testid="no-cards">{String(props.filters.collection)}</div>
 ));
 

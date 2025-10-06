@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import GroupCardVoteAllInputs from '../../../../../../../components/groups/page/list/card/vote-all/GroupCardVoteAllInputs';
-import { ApiRateMatter } from '../../../../../../../generated/models/ApiRateMatter';
+import GroupCardVoteAllInputs from '@/components/groups/page/list/card/vote-all/GroupCardVoteAllInputs';
+import { ApiRateMatter } from '@/generated/models/ApiRateMatter';
 
-jest.mock('../../../../../../../components/groups/page/list/card/utils/GroupCardActionNumberInput', () => (props: any) => (
+jest.mock('@/components/groups/page/list/card/utils/GroupCardActionNumberInput', () => (props: any) => (
   <div data-testid="number-input">{JSON.stringify(props)}</div>
 ));
 
-jest.mock('../../../../../../../components/utils/input/rep-category/RepCategorySearch', () => ({
+jest.mock('@/components/utils/input/rep-category/RepCategorySearch', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="rep-search">{JSON.stringify(props)}</div>,
   RepCategorySearchSize: { SM: 'SM' },

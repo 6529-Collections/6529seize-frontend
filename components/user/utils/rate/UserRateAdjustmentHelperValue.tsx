@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 enum VALUE_STATE {
   POSITIVE = "POSITIVE",

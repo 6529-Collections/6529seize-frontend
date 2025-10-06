@@ -1,32 +1,32 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ParticipationDropFooter from '../../../../../components/waves/drops/participation/ParticipationDropFooter';
-import { ExtendedDrop } from '../../../../../helpers/waves/drop.helpers';
+import ParticipationDropFooter from '@/components/waves/drops/participation/ParticipationDropFooter';
+import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
 
 jest.mock('date-fns', () => ({ format: jest.fn(() => 'DATE') }));
 
 const useDropInteractionRules = jest.fn();
-jest.mock('../../../../../hooks/drops/useDropInteractionRules', () => ({
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({
   useDropInteractionRules: (...args: any[]) => useDropInteractionRules(...args),
 }));
 
 const useIsMobileScreen = jest.fn();
-jest.mock('../../../../../hooks/isMobileScreen', () => ({
+jest.mock('@/hooks/isMobileScreen', () => ({
   __esModule: true,
   default: (...args: any[]) => useIsMobileScreen(...args),
 }));
 
-jest.mock('../../../../../components/voting', () => ({
+jest.mock('@/components/voting', () => ({
   VotingModal: (p: any) => <div data-testid="modal">{p.isOpen ? 'open' : 'closed'}</div>,
   MobileVotingModal: (p: any) => <div data-testid="mobile-modal">{p.isOpen ? 'open' : 'closed'}</div>,
 }));
 
-jest.mock('../../../../../components/voting/VotingModalButton', () => (props: any) => (
+jest.mock('@/components/voting/VotingModalButton', () => (props: any) => (
   <button data-testid="vote-btn" onClick={props.onClick}>vote</button>
 ));
 
-jest.mock('../../../../../components/waves/drops/participation/ParticipationDropRatings', () => ({
+jest.mock('@/components/waves/drops/participation/ParticipationDropRatings', () => ({
   ParticipationDropRatings: (props: any) => (
     <div data-testid="ratings">{props.rank}</div>
   )

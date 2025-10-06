@@ -1,8 +1,8 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useOptimizedVideo } from '../../hooks/useOptimizedVideo';
-import { isVideoUrl, getVideoConversions, checkVideoAvailability } from '../../helpers/video.helpers';
+import { useOptimizedVideo } from '@/hooks/useOptimizedVideo';
+import { isVideoUrl, getVideoConversions, checkVideoAvailability } from '@/helpers/video.helpers';
 
-jest.mock('../../helpers/video.helpers');
+jest.mock('@/helpers/video.helpers');
 const mockIsVideoUrl = isVideoUrl as jest.Mock;
 const mockGetConversions = getVideoConversions as jest.Mock;
 const mockCheckAvail = checkVideoAvailability as jest.Mock;

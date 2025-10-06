@@ -3,7 +3,7 @@ import React from 'react';
 
 const directMessagesListMock = jest.fn();
 
-jest.mock('../../../../components/brain/direct-messages/DirectMessagesList', () => ({
+jest.mock('@/components/brain/direct-messages/DirectMessagesList', () => ({
   __esModule: true,
   default: (props: any) => {
     directMessagesListMock(props);
@@ -12,11 +12,11 @@ jest.mock('../../../../components/brain/direct-messages/DirectMessagesList', () 
 }));
 
 const useLayoutMock = jest.fn();
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => useLayoutMock(),
 }));
 
-import BrainMobileMessages from '../../../../components/brain/mobile/BrainMobileMessages';
+import BrainMobileMessages from '@/components/brain/mobile/BrainMobileMessages';
 
 describe('BrainMobileMessages', () => {
   beforeEach(() => {

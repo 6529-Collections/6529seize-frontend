@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CreateWaveDatesConfig } from "../../../../types/waves.types";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
+import { CreateWaveDatesConfig } from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import StartDates from "./StartDates";
 import Decisions from "./Decisions";
 import RollingEndDate from "./RollingEndDate";

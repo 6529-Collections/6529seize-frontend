@@ -1,13 +1,13 @@
 // Mock the useIntersectionObserver hook first
 const mockUseIntersectionObserver = jest.fn();
-jest.mock('../../../../../../hooks/scroll/useIntersectionObserver', () => ({
+jest.mock('@/hooks/scroll/useIntersectionObserver', () => ({
   __esModule: true,
   useIntersectionObserver: mockUseIntersectionObserver,
 }));
 
 import { renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
-import { useSlideshowAutoplay } from '../../../../../../components/nextGen/collections/collectionParts/hooks/useSlideshowAutoplay';
+import { useSlideshowAutoplay } from '@/components/nextGen/collections/collectionParts/hooks/useSlideshowAutoplay';
 
 describe('useSlideshowAutoplay', () => {
   // Mock ref object

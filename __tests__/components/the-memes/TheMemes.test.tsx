@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { printVolumeTypeDropdown, SortButton } from '../../../components/the-memes/TheMemes';
-import { VolumeType, } from '../../../entities/INFT';
-import { MemesSort } from '../../../enums';
+import { printVolumeTypeDropdown, SortButton } from '@/components/the-memes/TheMemes';
+import { VolumeType, } from '@/entities/INFT';
+import { MemesSort } from '@/enums';
 
 jest.mock('@headlessui/react', () => ({
   Menu: (p: any) => <div data-testid="dropdown" {...p} />,
@@ -15,7 +15,7 @@ jest.mock('@headlessui/react', () => ({
   },
 }));
 
-jest.mock('../../../components/the-memes/TheMemes.module.scss', () => ({
+jest.mock('@/components/the-memes/TheMemes.module.scss', () => ({
   sort: 'sort',
   disabled: 'disabled',
   volumeDropdown: 'volumeDropdown',

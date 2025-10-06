@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import HeaderMobileMenu from '../../../components/header/HeaderMobileMenu';
+import HeaderMobileMenu from '@/components/header/HeaderMobileMenu';
 
 // Mock dependencies
 jest.mock('next/link', () => ({ 
@@ -7,7 +7,7 @@ jest.mock('next/link', () => ({
   default: ({ href, children }: any) => <a href={href}>{children}</a> 
 }));
 
-jest.mock('../../../components/header/HeaderLogo', () => ({
+jest.mock('@/components/header/HeaderLogo', () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="header-logo" data-small={props.isSmall} data-capacitor={props.isCapacitor} data-mobile={props.isMobile}>
@@ -16,19 +16,19 @@ jest.mock('../../../components/header/HeaderLogo', () => ({
   )
 }));
 
-jest.mock('../../../components/header/user/HeaderUser', () => ({
+jest.mock('@/components/header/user/HeaderUser', () => ({
   __esModule: true,
   default: () => <div data-testid="header-user">User</div>
 }));
 
-jest.mock('../../../components/header/share/HeaderQRScanner', () => ({
+jest.mock('@/components/header/share/HeaderQRScanner', () => ({
   __esModule: true,
   default: ({ onScanSuccess }: any) => (
     <button data-testid="qr-scanner" onClick={onScanSuccess}>QR Scanner</button>
   )
 }));
 
-jest.mock('../../../components/header/HeaderMobileUtils', () => ({
+jest.mock('@/components/header/HeaderMobileUtils', () => ({
   printMobileHr: () => <hr data-testid="mobile-hr" />,
   printMobileSubheader: (name: string) => (
     <h3 data-testid="mobile-subheader">{name}</h3>

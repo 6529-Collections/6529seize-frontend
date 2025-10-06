@@ -1,11 +1,11 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import WaveGroups from '../../../../components/waves/groups/WaveGroups';
-import { ApiWaveType } from '../../../../generated/models/ApiWaveType';
+import WaveGroups from '@/components/waves/groups/WaveGroups';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 // Capture props passed to the mocked WaveGroup component
 const captured: any[] = [];
-jest.mock('../../../../components/waves/specs/groups/group/WaveGroup', () => {
+jest.mock('@/components/waves/specs/groups/group/WaveGroup', () => {
   const real = jest.requireActual('../../../../components/waves/specs/groups/group/WaveGroup');
   return {
     __esModule: true,

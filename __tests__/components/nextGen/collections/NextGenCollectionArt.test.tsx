@@ -1,17 +1,17 @@
 import { render, screen } from "@testing-library/react";
-import NextGenCollectionArt from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionArt";
-import { NextGenCollection } from "../../../../entities/INextgen";
+import NextGenCollectionArt from "@/components/nextGen/collections/collectionParts/NextGenCollectionArt";
+import { NextGenCollection } from "@/entities/INextgen";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }));
-jest.mock("../../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(() => Promise.resolve([])),
 }));
 
-jest.mock("../../../../components/nextGen/collections/NextGenTokenList", () => (props: any) => {
+jest.mock("@/components/nextGen/collections/NextGenTokenList", () => (props: any) => {
   props.setTotalResults(5);
   return <div data-testid="token-list" {...props}/>;
 });

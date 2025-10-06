@@ -1,11 +1,11 @@
 "use client"
 
 import FeedWrapper from "../feed/FeedWrapper";
-import { TypedFeedItem } from "../../../types/feed.types";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropInteractionParams } from "../../waves/drops/Drop";
-import { useSetStreamHasNewItems } from "../../../contexts/TitleContext";
+import { TypedFeedItem } from "@/types/feed.types";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { useSetStreamHasNewItems } from "@/contexts/TitleContext";
 import { useMemo } from "react";
 
 interface MyStreamProps {

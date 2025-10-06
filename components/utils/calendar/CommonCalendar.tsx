@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { generateCalendar } from "../../../helpers/calendar/calendar.helpers";
+import { generateCalendar } from "@/helpers/calendar/calendar.helpers";
 import CommonCalendarDay from "./CommonCalendarDay";
 
 const MONTHS = [

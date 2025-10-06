@@ -4,15 +4,15 @@
  * and ensure authentication vulnerabilities are properly addressed
  */
 
-import { validateRoleForAuthentication } from '../../utils/role-validation';
+import { validateRoleForAuthentication } from '@/utils/role-validation';
 import { 
   MissingActiveProfileError, 
   InvalidRoleStateError 
-} from '../../errors/authentication';
-import { ApiProfileProxy } from '../../generated/models/ApiProfileProxy';
+} from '@/errors/authentication';
+import { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
 
 // Mock logger to prevent console output during tests
-jest.mock('../../utils/error-sanitizer', () => ({
+jest.mock('@/utils/error-sanitizer', () => ({
   logErrorSecurely: jest.fn(),
   sanitizeErrorForUser: jest.fn((error) => error.message || 'Unknown error')
 }));

@@ -3,9 +3,9 @@
 import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { MEMES_CONTRACT } from "../../constants";
-import { NFT, NFTHistory } from "../../entities/INFT";
-import { fetchAllPages } from "../../services/6529api";
+import { MEMES_CONTRACT } from "@/constants";
+import { NFT, NFTHistory } from "@/entities/INFT";
+import { fetchAllPages } from "@/services/6529api";
 import Timeline from "../timeline/Timeline";
 
 export function MemePageTimeline(props: {

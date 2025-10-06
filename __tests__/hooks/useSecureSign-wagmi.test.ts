@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useSecureSign } from '../../hooks/useSecureSign';
+import { useSecureSign } from '@/hooks/useSecureSign';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useSignMessage } from 'wagmi';
 import { UserRejectedRequestError } from 'viem';

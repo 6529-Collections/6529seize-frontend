@@ -3,7 +3,7 @@ import { type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { removeBaseEndpoint } from "../../helpers/Helpers";
+import { removeBaseEndpoint } from "@/helpers/Helpers";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 
 export interface OpenGraphPreviewData {

@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { SingleWaveDropHeader } from '../../../../components/waves/drop/SingleWaveDropHeader';
+import { SingleWaveDropHeader } from '@/components/waves/drop/SingleWaveDropHeader';
 
-jest.mock('../../../../components/waves/drop/SingleWaveDropTabs', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropTabs', () => ({
   SingleWaveDropTabs: (props: any) => (
     <div data-testid="tabs" data-active={props.activeTab} onClick={() => props.setActiveTab('clicked')} />
   )
 }));
 
-jest.mock('../../../../components/waves/drop/SingleWaveDropClose', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropClose', () => ({
   SingleWaveDropClose: (props: any) => (
     <button data-testid="close" onClick={props.onClose}>x</button>
   )

@@ -1,7 +1,7 @@
 import { RefObject } from "react";
-import { MEMES_SEASON } from "../../../../enums";
-import { CommonSelectItem } from "../../../utils/select/CommonSelect";
-import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
+import { MEMES_SEASON } from "@/enums";
+import { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 
 type SelectedType = MEMES_SEASON | null;
 
@@ -27,6 +27,7 @@ export default function UserPageCollectedFiltersSzn({
     [MEMES_SEASON.SZN10]: "SZN 10",
     [MEMES_SEASON.SZN11]: "SZN 11",
     [MEMES_SEASON.SZN12]: "SZN 12",
+    [MEMES_SEASON.SZN13]: "SZN 13",
   };
 
   const items: CommonSelectItem<SelectedType>[] = [

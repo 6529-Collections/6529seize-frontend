@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import FinalizeSnapshotsTableSnapshotTooltipTableRow from '../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableSnapshotTooltipTableRow';
+import FinalizeSnapshotsTableSnapshotTooltipTableRow from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableSnapshotTooltipTableRow';
 
 describe('FinalizeSnapshotsTableSnapshotTooltipTableRow', () => {
   it('displays provided name and value', () => {

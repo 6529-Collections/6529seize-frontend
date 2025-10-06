@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEnsName, useReadContract } from "wagmi";
-import { NextGenCollection } from "../../../entities/INextgen";
-import DotLoader from "../../dotLoader/DotLoader";
+import { NextGenCollection } from "@/entities/INextgen";
+import DotLoader from "@/components/dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import styles from "./NextGen.module.scss";
 
@@ -14,12 +14,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 import { mainnet } from "viem/chains";
-import { areEqualAddresses } from "../../../helpers/Helpers";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { useIdentity } from "../../../hooks/useIdentity";
-import Address from "../../address/Address";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import { useCookieConsent } from "../../cookies/CookieConsentContext";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useIdentity } from "@/hooks/useIdentity";
+import Address from "@/components/address/Address";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
 
 interface Props {
@@ -188,7 +188,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                     <Link
                       href={tokenMetadataUrl}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon
                         className={styles.copyIcon}
@@ -206,7 +206,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       <Link
                         href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         data-tooltip-id={`opensea-${props.token_id}`}
                       >
                         <Image

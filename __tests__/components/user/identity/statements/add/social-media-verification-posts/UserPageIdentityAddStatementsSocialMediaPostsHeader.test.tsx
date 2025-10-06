@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import UserPageIdentityAddStatementsSocialMediaPostsHeader from '../../../../../../../components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPostsHeader';
+import UserPageIdentityAddStatementsSocialMediaPostsHeader from '@/components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPostsHeader';
 
 describe('UserPageIdentityAddStatementsSocialMediaPostsHeader', () => {
   it('calls onClose when button clicked', () => {

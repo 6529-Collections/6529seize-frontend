@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { WaveWinnerItemSmall } from '../../../../components/waves/winners/WaveWinnerItemSmall';
+import { WaveWinnerItemSmall } from '@/components/waves/winners/WaveWinnerItemSmall';
 
-jest.mock('../../../../hooks/useWave', () => ({ useWave: jest.fn(() => ({ isMemesWave: true })) }));
-jest.mock('../../../../components/waves/winners/MemesWaveWinnerDropSmall', () => ({
+jest.mock('@/hooks/useWave', () => ({ useWave: jest.fn(() => ({ isMemesWave: true })) }));
+jest.mock('@/components/waves/winners/MemesWaveWinnerDropSmall', () => ({
   MemesWaveWinnerDropSmall: () => <div data-testid="memes" />,
 }));
-jest.mock('../../../../components/waves/winners/DefaultWaveWinnerDropSmall', () => ({
+jest.mock('@/components/waves/winners/DefaultWaveWinnerDropSmall', () => ({
   DefaultWaveWinnerDropSmall: () => <div data-testid="default" />,
 }));
 
@@ -19,7 +19,7 @@ describe('WaveWinnerItemSmall', () => {
   });
 
   it('renders default component otherwise', () => {
-    const { useWave } = require('../../../../hooks/useWave');
+    const { useWave } = require('@/hooks/useWave');
     (useWave as jest.Mock).mockReturnValue({ isMemesWave: false });
     render(<WaveWinnerItemSmall drop={drop} wave={wave} onDropClick={jest.fn()} />);
     expect(screen.getByTestId('default')).toBeInTheDocument();

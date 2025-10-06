@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
-import { ApiRateMatter } from "../../../../../generated/models/ApiRateMatter";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 
 export default function GroupCardActionWrapper({
   loading,

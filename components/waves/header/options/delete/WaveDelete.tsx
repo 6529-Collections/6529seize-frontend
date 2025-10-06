@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ApiWave } from "../../../../../generated/models/ApiWave";
-import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
+import { ApiWave } from "@/generated/models/ApiWave";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import WaveDeleteModal from "./WaveDeleteModal";
 
 export default function WaveDelete({ wave }: { readonly wave: ApiWave }) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatCountdown } from "../utils/timeFormatters";
+import { formatCountdown } from "@/utils/timeFormatters";
 
 /**
  * Hook that provides auto-updating countdown text

@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import PdfViewer from '../../../components/pdfViewer/PdfViewer';
+import PdfViewer from '@/components/pdfViewer/PdfViewer';
 
-jest.mock('../../../hooks/isMobileScreen', () => ({ __esModule: true, default: jest.fn() }));
+jest.mock('@/hooks/isMobileScreen', () => ({ __esModule: true, default: jest.fn() }));
 
-const useIsMobileScreen = require('../../../hooks/isMobileScreen').default;
+const useIsMobileScreen = require('@/hooks/isMobileScreen').default;
 
 describe('PdfViewer', () => {
   it('renders a link on mobile', () => {

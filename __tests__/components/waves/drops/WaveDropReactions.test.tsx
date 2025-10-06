@@ -1,33 +1,33 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import WaveDropReactions from "../../../../components/waves/drops/WaveDropReactions";
-import { useEmoji } from "../../../../contexts/EmojiContext";
-import * as commonApi from "../../../../services/api/common-api"; // Import directly to mock methods
+import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
+import { useEmoji } from "@/contexts/EmojiContext";
+import * as commonApi from "@/services/api/common-api"; // Import directly to mock methods
 
-jest.mock("../../../../contexts/wave/MyStreamContext", () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
     applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
   })),
 }));
 
 // Mock useEmoji with sample emojiMap and findNativeEmoji
-jest.mock("../../../../contexts/EmojiContext", () => ({
+jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(),
 }));
 
 // Mock formatLargeNumber for predictable output (optional)
-jest.mock("../../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   formatLargeNumber: (num: number) => `${num}`,
 }));
 
-jest.mock("../../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
 }));
 
 describe("WaveDropReactions", () => {
   const getMyStreamMock = () =>
-    (require("../../../../contexts/wave/MyStreamContext") as {
+    (require("@/contexts/wave/MyStreamContext") as {
       useMyStream: jest.Mock;
     }).useMyStream;
 

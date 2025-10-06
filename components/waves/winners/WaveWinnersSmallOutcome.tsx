@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { Tooltip } from "react-tooltip";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useDropOutcomes } from "../../../hooks/drops/useDropOutcomes";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropOutcomes } from "@/hooks/drops/useDropOutcomes";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface WaveWinnersSmallOutcomeProps {
   readonly drop: ExtendedDrop;

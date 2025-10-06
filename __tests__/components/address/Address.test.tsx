@@ -1,18 +1,18 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Address from '../../../components/address/Address';
+import Address from '@/components/address/Address';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any) => <img {...p} /> }));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any) => <svg {...p} /> }));
 
-jest.mock('../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   numberWithCommas: (n:number) => String(n),
   parseEmojis: (s:string) => s,
 }));
 
-jest.mock('../../../components/address/WalletAddress', () => ({
+jest.mock('@/components/address/WalletAddress', () => ({
   WalletAddress: (props: any) => <div data-testid="wallet" {...props}>{props.display}</div>
 }));
 

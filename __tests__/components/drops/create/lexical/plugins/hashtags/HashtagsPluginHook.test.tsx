@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useHashtagLookupService } from '../../../../../../../components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
-jest.mock('../../../../../../../helpers/AllowlistToolHelpers', () => ({
+import { useHashtagLookupService } from '@/components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   isEthereumAddress: () => true,
   __esModule: true,
 }));

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 import SingleWaveDropVoteSubmit, {
   SingleWaveDropVoteSubmitHandles,

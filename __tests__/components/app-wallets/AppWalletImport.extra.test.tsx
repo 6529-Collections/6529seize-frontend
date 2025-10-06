@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AppWalletImport from '../../../components/app-wallets/AppWalletImport';
-import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
-import { useAuth } from '../../../components/auth/Auth';
+import AppWalletImport from '@/components/app-wallets/AppWalletImport';
+import { useAppWallets } from '@/components/app-wallets/AppWalletsContext';
+import { useAuth } from '@/components/auth/Auth';
 import { ethers } from 'ethers';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props:any) => <img {...props} /> }));
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }:any) => <a href={href}>{children}</a> }));
 const push = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
-jest.mock('../../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
-jest.mock('../../../components/app-wallets/AppWalletsContext');
-jest.mock('../../../components/auth/Auth');
+jest.mock('@/components/app-wallets/AppWalletsContext');
+jest.mock('@/components/auth/Auth');
 jest.mock('ethers', () => ({ ethers: { Wallet: jest.fn() } }));
-jest.mock('../../../components/app-wallets/AppWalletModal', () => ({
+jest.mock('@/components/app-wallets/AppWalletModal', () => ({
   CreateAppWalletModal: (props:any) => <div data-testid="modal" onClick={() => props.onHide(true)}>{props.show ? 'open' : 'closed'}</div>
 }));
 

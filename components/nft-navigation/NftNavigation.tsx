@@ -5,7 +5,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { enterArtFullScreen, fullScreenSupported } from "../../helpers/Helpers";
+import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
 
 export default function NftNavigation(
   props: Readonly<{

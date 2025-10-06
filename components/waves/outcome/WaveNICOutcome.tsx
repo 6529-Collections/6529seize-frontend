@@ -1,8 +1,8 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
-import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard } from "@fortawesome/free-regular-svg-icons";

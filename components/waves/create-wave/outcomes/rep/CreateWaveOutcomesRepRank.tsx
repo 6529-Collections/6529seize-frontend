@@ -6,10 +6,10 @@ import {
   CreateWaveOutcomeConfigWinnersConfig,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
-} from "../../../../../types/waves.types";
-import RepCategorySearch from "../../../../utils/input/rep-category/RepCategorySearch";
+} from "@/types/waves.types";
+import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesRepRank({
   onOutcome,

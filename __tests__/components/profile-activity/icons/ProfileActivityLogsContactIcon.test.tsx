@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import ProfileActivityLogsContactIcon from '../../../../components/profile-activity/icons/ProfileActivityLogsContactIcon';
+import ProfileActivityLogsContactIcon from '@/components/profile-activity/icons/ProfileActivityLogsContactIcon';
 
 describe('ProfileActivityLogsContactIcon', () => {
   it('renders svg element', () => {

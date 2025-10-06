@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { EmojiNode } from '../../../../../../components/drops/create/lexical/nodes/EmojiNode';
+import { EmojiNode } from '@/components/drops/create/lexical/nodes/EmojiNode';
 
 jest.mock('lexical', () => ({
   DecoratorNode: class MockDecoratorNode {
@@ -11,11 +11,11 @@ jest.mock('lexical', () => ({
   }
 }));
 
-jest.mock('../../../../../../contexts/EmojiContext', () => ({
+jest.mock('@/contexts/EmojiContext', () => ({
   useEmoji: jest.fn()
 }));
 
-const { useEmoji } = require('../../../../../../contexts/EmojiContext');
+const { useEmoji } = require('@/contexts/EmojiContext');
 
 describe('EmojiNode', () => {
   it('exports and imports JSON correctly', () => {

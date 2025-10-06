@@ -1,32 +1,32 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ApiWaveType } from '../../../../generated/models/ApiWaveType';
-import { Mode, SidebarTab } from '../../../../components/brain/right-sidebar/BrainRightSidebar';
-import { WaveContent } from '../../../../components/brain/right-sidebar/WaveContent';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { Mode, SidebarTab } from '@/components/brain/right-sidebar/BrainRightSidebar';
+import { WaveContent } from '@/components/brain/right-sidebar/WaveContent';
 
 const useWaveTimers = jest.fn();
 
-jest.mock('../../../../hooks/useWaveTimers', () => ({ useWaveTimers: (...args: any[]) => useWaveTimers(...args) }));
+jest.mock('@/hooks/useWaveTimers', () => ({ useWaveTimers: (...args: any[]) => useWaveTimers(...args) }));
 
-jest.mock('../../../../components/waves/header/WaveHeader', () => ({
+jest.mock('@/components/waves/header/WaveHeader', () => ({
   __esModule: true,
   default: () => <div data-testid="header">header</div>,
   WaveHeaderPinnedSide: { LEFT: 'LEFT' }
 }));
 
-jest.mock('../../../../components/common/TabToggleWithOverflow', () => ({
+jest.mock('@/components/common/TabToggleWithOverflow', () => ({
   __esModule: true,
   TabToggleWithOverflow: ({ options, activeKey }: any) => (
     <div data-testid="tabs">{activeKey}-{options.length}</div>
   )
 }));
 
-jest.mock('../../../../components/waves/winners/WaveWinnersSmall', () => ({ __esModule: true, WaveWinnersSmall: () => <div>winners</div> }));
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboard', () => ({ __esModule: true, WaveSmallLeaderboard: () => <div>leaderboard</div> }));
-jest.mock('../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters', () => ({ __esModule: true, WaveLeaderboardRightSidebarVoters: () => <div>voters</div> }));
-jest.mock('../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs', () => ({ __esModule: true, WaveLeaderboardRightSidebarActivityLogs: () => <div>logs</div> }));
-jest.mock('../../../../components/brain/right-sidebar/BrainRightSidebarContent', () => ({ __esModule: true, default: () => <div>content</div> }));
-jest.mock('../../../../components/brain/right-sidebar/BrainRightSidebarFollowers', () => ({ __esModule: true, default: () => <div>followers</div> }));
+jest.mock('@/components/waves/winners/WaveWinnersSmall', () => ({ __esModule: true, WaveWinnersSmall: () => <div>winners</div> }));
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboard', () => ({ __esModule: true, WaveSmallLeaderboard: () => <div>leaderboard</div> }));
+jest.mock('@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters', () => ({ __esModule: true, WaveLeaderboardRightSidebarVoters: () => <div>voters</div> }));
+jest.mock('@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs', () => ({ __esModule: true, WaveLeaderboardRightSidebarActivityLogs: () => <div>logs</div> }));
+jest.mock('@/components/brain/right-sidebar/BrainRightSidebarContent', () => ({ __esModule: true, default: () => <div>content</div> }));
+jest.mock('@/components/brain/right-sidebar/BrainRightSidebarFollowers', () => ({ __esModule: true, default: () => <div>followers</div> }));
 
 describe('WaveContent', () => {
   const wave = { wave: { type: ApiWaveType.Chat }, name: 'Wave' } as any;

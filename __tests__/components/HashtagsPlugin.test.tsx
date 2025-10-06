@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import HashtagsPlugin from "../../components/drops/create/lexical/plugins/hashtags/HashtagsPlugin";
+import HashtagsPlugin from "@/components/drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 
 jest.mock("@lexical/react/LexicalComposerContext", () => ({ useLexicalComposerContext: () => [{}] }));
 

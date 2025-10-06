@@ -1,16 +1,16 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import AppUserConnect from '../../../components/header/AppUserConnect';
+import AppUserConnect from '@/components/header/AppUserConnect';
 import React from 'react';
 
-jest.mock('../../../components/header/share/HeaderQRScanner', () => () => (
+jest.mock('@/components/header/share/HeaderQRScanner', () => () => (
   <div data-testid="scanner" />
 ));
 
-jest.mock('../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-const { useSeizeConnectContext } = require('../../../components/auth/SeizeConnectContext');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
 
 function setup(address: string | undefined) {
   const seizeConnect = jest.fn();

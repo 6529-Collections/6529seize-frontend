@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
-import UserProfileTooltipWrapper from "../../../../utils/tooltip/UserProfileTooltipWrapper";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveWinnersDropHeaderAuthorHandleProps {
   readonly winner: ApiWaveDecisionWinner;

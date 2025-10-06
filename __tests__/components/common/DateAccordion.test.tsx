@@ -12,7 +12,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="icon" />,
 }));
 
-import DateAccordion from '../../../components/common/DateAccordion';
+import DateAccordion from '@/components/common/DateAccordion';
 
 describe('DateAccordion', () => {
   it('shows collapsed content when not expanded and triggers toggle', () => {

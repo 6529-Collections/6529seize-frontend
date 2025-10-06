@@ -2,8 +2,8 @@
 
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { AuthContext } from "../../../../../auth/Auth";
-import { ApiGroupFull } from "../../../../../../generated/models/ApiGroupFull";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AnimatePresence, motion } from "framer-motion";
 import GroupCardDelete from "./delete/GroupCardDelete";
 

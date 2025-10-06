@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { TimeCountdown } from '../../components/waves/leaderboard/time/TimeCountdown';
+import { TimeCountdown } from '@/components/waves/leaderboard/time/TimeCountdown';
 
 const base = { days:0, hours:1, minutes:2, seconds:3 };
 

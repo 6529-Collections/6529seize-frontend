@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateDropDesktopFooter from '../../../../../components/drops/create/utils/CreateDropDesktopFooter';
-import { CreateDropType } from '../../../../../components/drops/create/types';
+import CreateDropDesktopFooter from '@/components/drops/create/utils/CreateDropDesktopFooter';
+import { CreateDropType } from '@/components/drops/create/types';
 
 describe('CreateDropDesktopFooter', () => {
   it('renders button text based on drop type', () => {

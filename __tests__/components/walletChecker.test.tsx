@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import WalletChecker from "../../components/delegation/walletChecker/WalletChecker";
-import { fetchUrl } from "../../services/6529api";
+import WalletChecker from "@/components/delegation/walletChecker/WalletChecker";
+import { fetchUrl } from "@/services/6529api";
 
 jest.mock("react-bootstrap", () => ({
   __esModule: true,
@@ -29,7 +29,7 @@ jest.mock("wagmi", () => ({
   useEnsAddress: () => ({ data: undefined, isLoading: false }),
 }));
 
-jest.mock("../../services/6529api");
+jest.mock("@/services/6529api");
 
 const mockFetchUrl = fetchUrl as jest.Mock;
 

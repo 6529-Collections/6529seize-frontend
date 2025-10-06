@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import ConsolidationMappingTool from '../../../components/mapping-tools/ConsolidationMappingTool';
+import ConsolidationMappingTool from '@/components/mapping-tools/ConsolidationMappingTool';
 
-jest.mock('../../../services/6529api', () => ({ fetchAllPages: jest.fn(() => Promise.resolve([])) }));
+jest.mock('@/services/6529api', () => ({ fetchAllPages: jest.fn(() => Promise.resolve([])) }));
 
 jest.mock('csv-parser', () => () => ({ on: () => {}, write: () => {}, end: () => {} }));
 

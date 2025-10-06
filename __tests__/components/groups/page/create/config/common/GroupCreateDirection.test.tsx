@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateDirection from '../../../../../../../components/groups/page/create/config/common/GroupCreateDirection';
-import { ApiGroupFilterDirection } from '../../../../../../../generated/models/ApiGroupFilterDirection';
+import GroupCreateDirection from '@/components/groups/page/create/config/common/GroupCreateDirection';
+import { ApiGroupFilterDirection } from '@/generated/models/ApiGroupFilterDirection';
 
 describe('GroupCreateDirection', () => {
   it('renders direction tabs', () => {

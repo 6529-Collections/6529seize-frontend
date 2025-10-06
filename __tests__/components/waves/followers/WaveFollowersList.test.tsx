@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import WaveFollowersList from '../../../../components/waves/followers/WaveFollowersList';
-import { useWaveFollowers } from '../../../../hooks/useWaveFollowers';
+import WaveFollowersList from '@/components/waves/followers/WaveFollowersList';
+import { useWaveFollowers } from '@/hooks/useWaveFollowers';
 
-jest.mock('../../../../hooks/useWaveFollowers');
+jest.mock('@/hooks/useWaveFollowers');
 let mockProps: any;
-jest.mock('../../../../components/utils/followers/FollowersListWrapper', () => (props: any) => {
+jest.mock('@/components/utils/followers/FollowersListWrapper', () => (props: any) => {
   mockProps = props;
   return <div data-testid="wrapper" />;
 });

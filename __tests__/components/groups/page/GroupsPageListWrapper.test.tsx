@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import React from "react";
-import GroupsPageListWrapper from "../../../../components/groups/page/GroupsPageListWrapper";
-import { AuthContext } from "../../../../components/auth/Auth";
+import GroupsPageListWrapper from "@/components/groups/page/GroupsPageListWrapper";
+import { AuthContext } from "@/components/auth/Auth";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -12,7 +12,7 @@ jest.mock("next/navigation", () => ({
 
 let listProps: any;
 jest.mock(
-  "../../../../components/groups/page/list/GroupsList",
+  "@/components/groups/page/list/GroupsList",
   () => (props: any) => {
     listProps = props;
     return <div data-testid="list" />;

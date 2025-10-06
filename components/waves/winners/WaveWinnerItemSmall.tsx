@@ -1,7 +1,7 @@
 import React, { memo } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { useWave } from "../../../hooks/useWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useWave } from "@/hooks/useWave";
 import { MemesWaveWinnerDropSmall } from "./MemesWaveWinnerDropSmall";
 import { DefaultWaveWinnerDropSmall } from "./DefaultWaveWinnerDropSmall";
 

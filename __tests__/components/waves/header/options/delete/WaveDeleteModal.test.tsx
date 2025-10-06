@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveDeleteModal from '../../../../../../components/waves/header/options/delete/WaveDeleteModal';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-jest.mock("../../../../../../services/api/common-api", () => ({ commonApiDelete: jest.fn() }));
-import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import WaveDeleteModal from '@/components/waves/header/options/delete/WaveDeleteModal';
+import { AuthContext } from '@/components/auth/Auth';
+jest.mock("@/services/api/common-api", () => ({ commonApiDelete: jest.fn() }));
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 

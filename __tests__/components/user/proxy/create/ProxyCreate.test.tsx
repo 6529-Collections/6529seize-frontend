@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProxyCreate from '../../../../../components/user/proxy/create/ProxyCreate';
-import { ProxyMode } from '../../../../../components/user/proxy/UserPageProxy';
+import ProxyCreate from '@/components/user/proxy/create/ProxyCreate';
+import { ProxyMode } from '@/components/user/proxy/UserPageProxy';
 import { useMutation } from '@tanstack/react-query';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 let onTargetSelect: any;
 let onActionCreated: any;
 
-jest.mock('../../../../../components/user/proxy/create/target/ProxyCreateTargetSearch', () => (props: any) => {
+jest.mock('@/components/user/proxy/create/target/ProxyCreateTargetSearch', () => (props: any) => {
   onTargetSelect = props.onTargetSelect;
   return <button onClick={() => props.onTargetSelect({ profile_id: '1', handle: 'bob' })}>select-target</button>;
 });
 
-jest.mock('../../../../../components/user/proxy/proxy/create-action/ProxyCreateAction', () => (props: any) => {
+jest.mock('@/components/user/proxy/proxy/create-action/ProxyCreateAction', () => (props: any) => {
   onActionCreated = props.onActionCreated;
   return <button onClick={props.onActionCreated}>action</button>;
 });

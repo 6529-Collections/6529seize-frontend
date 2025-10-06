@@ -1,5 +1,5 @@
-import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
-import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
+import { formatLargeNumber } from "@/helpers/Helpers";
+import { CreateWaveOutcomeConfig } from "@/types/waves.types";
 
 export default function CreateWaveOutcomesRowCICApprove({
   outcome,

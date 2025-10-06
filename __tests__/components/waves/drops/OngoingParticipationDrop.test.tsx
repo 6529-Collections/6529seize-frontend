@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import OngoingParticipationDrop from '../../../../components/waves/drops/participation/OngoingParticipationDrop';
-import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
+import OngoingParticipationDrop from '@/components/waves/drops/participation/OngoingParticipationDrop';
+import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
 
 // Mock hooks and child components
 const useIsMobileDevice = jest.fn();
-jest.mock('../../../../hooks/isMobileDevice', () => ({ __esModule: true, default: (...args: any[]) => useIsMobileDevice(...args) }));
+jest.mock('@/hooks/isMobileDevice', () => ({ __esModule: true, default: (...args: any[]) => useIsMobileDevice(...args) }));
 
-jest.mock('../../../../components/waves/drops/WaveDropActions', () => (props: any) => (
+jest.mock('@/components/waves/drops/WaveDropActions', () => (props: any) => (
   <div data-testid="actions" onClick={props.onReply}></div>
 ));
 
 let longPressCb: () => void;
 
-jest.mock('../../../../components/waves/drops/participation/ParticipationDropContent', () => (props: any) => {
+jest.mock('@/components/waves/drops/participation/ParticipationDropContent', () => (props: any) => {
   longPressCb = props.onLongPress;
   return (
     <button data-testid="content" onClick={() => longPressCb()}></button>
@@ -22,16 +22,16 @@ jest.mock('../../../../components/waves/drops/participation/ParticipationDropCon
 });
 
 let mobileMenuProps: any;
-jest.mock('../../../../components/waves/drops/WaveDropMobileMenu', () => (props: any) => {
+jest.mock('@/components/waves/drops/WaveDropMobileMenu', () => (props: any) => {
   mobileMenuProps = props;
   return <div data-testid="mobile-menu" data-open={props.isOpen}></div>;
 });
 
-jest.mock('../../../../components/waves/drops/participation/ParticipationDropHeader', () => () => <div />);
-jest.mock('../../../../components/waves/drops/participation/ParticipationDropMetadata', () => () => <div />);
-jest.mock('../../../../components/waves/drops/participation/ParticipationDropFooter', () => () => <div />);
-jest.mock('../../../../components/waves/drops/participation/ParticipationDropContainer', () => (props: any) => <div>{props.children}</div>);
-jest.mock('../../../../components/waves/drops/WaveDropAuthorPfp', () => () => <div />);
+jest.mock('@/components/waves/drops/participation/ParticipationDropHeader', () => () => <div />);
+jest.mock('@/components/waves/drops/participation/ParticipationDropMetadata', () => () => <div />);
+jest.mock('@/components/waves/drops/participation/ParticipationDropFooter', () => () => <div />);
+jest.mock('@/components/waves/drops/participation/ParticipationDropContainer', () => (props: any) => <div>{props.children}</div>);
+jest.mock('@/components/waves/drops/WaveDropAuthorPfp', () => () => <div />);
 
 const drop: ExtendedDrop = {
   id: 'd1',

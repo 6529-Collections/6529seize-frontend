@@ -6,13 +6,13 @@ import {
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { commonApiFetch } from "../services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   getDefaultQueryRetry,
   WAVE_LOGS_PARAMS,
-} from "../components/react-query-wrapper/utils/query-utils";
-import { ApiWaveLog } from "../generated/models/ApiWaveLog";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+} from "@/components/react-query-wrapper/utils/query-utils";
+import { ApiWaveLog } from "@/generated/models/ApiWaveLog";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveActivityLogsProps {
   readonly waveId: string;

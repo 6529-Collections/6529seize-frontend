@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { TypedFeedItem } from "../../../types/feed.types";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import { DropInteractionParams } from "../../waves/drops/Drop";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { TypedFeedItem } from "@/types/feed.types";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import FeedItems from "./FeedItems";
 import { FeedScrollContainer } from "./FeedScrollContainer";
 import { useLayout } from "../my-stream/layout/LayoutContext";

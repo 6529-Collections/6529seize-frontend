@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomeTypes from '../../../../../components/waves/create-wave/outcomes/CreateWaveOutcomeTypes';
-import { CreateWaveOutcomeType } from '../../../../../types/waves.types';
+import CreateWaveOutcomeTypes from '@/components/waves/create-wave/outcomes/CreateWaveOutcomeTypes';
+import { CreateWaveOutcomeType } from '@/types/waves.types';
 
-jest.mock('../../../../../components/waves/create-wave/outcomes/CreateWaveOutcomeTypesItem', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/outcomes/CreateWaveOutcomeTypesItem', () => (props: any) => (
   <button data-testid="item" onClick={() => props.setOutcomeType(props.outcomeType)}>{props.label}</button>
 ));
 

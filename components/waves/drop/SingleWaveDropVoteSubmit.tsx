@@ -9,13 +9,13 @@ import {
   useRef,
 } from "react";
 import mojs from "@mojs/core";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import styles from "./VoteButton.module.scss";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../services/api/common-api";
-import { DropRateChangeRequest } from "../../../entities/IDrop";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { AuthContext } from "../../auth/Auth";
+import { commonApiPost } from "@/services/api/common-api";
+import { DropRateChangeRequest } from "@/entities/IDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { AuthContext } from "@/components/auth/Auth";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 type ThemeColors = {

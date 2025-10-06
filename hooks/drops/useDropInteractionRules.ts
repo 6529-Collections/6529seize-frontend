@@ -1,11 +1,11 @@
 "use client";
 
 import { useContext } from "react";
-import { AuthContext } from "../../components/auth/Auth";
-import { ApiDrop } from "../../generated/models/ApiDrop";
-import { ApiDropType } from "../../generated/models/ApiDropType";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropVoteState } from "./types";
-import { Time } from "../../helpers/time";
+import { Time } from "@/helpers/time";
 
 interface DropInteractionRules {
   canShowVote: boolean; // determines if voting UI should be visible

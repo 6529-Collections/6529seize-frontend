@@ -1,7 +1,7 @@
 import { idStringToDisplay } from "@/helpers/Helpers";
-import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../constants";
-import { NextGenToken } from "../entities/INextgen";
-import { commonApiFetch } from "../services/api/common-api";
+import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants";
+import { NextGenToken } from "@/entities/INextgen";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export const fetchGradientName = async (
   id: string

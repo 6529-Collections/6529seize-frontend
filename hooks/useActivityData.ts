@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
-} from "../components/nextGen/nextgen_contracts";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../constants";
-import { DBResponse } from "../entities/IDBResponse";
-import { Transaction } from "../entities/ITransaction";
-import { fetchUrl } from "../services/6529api";
+} from "@/components/nextGen/nextgen_contracts";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { Transaction } from "@/entities/ITransaction";
+import { fetchUrl } from "@/services/6529api";
 
 export enum TypeFilter {
   ALL = "All",

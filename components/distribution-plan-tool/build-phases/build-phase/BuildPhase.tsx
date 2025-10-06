@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { BuildPhasesPhase } from "../BuildPhases";
 import {
   DistributionPlanToolStep,
-} from "../../DistributionPlanToolContext";
-import StepHeader from "../../common/StepHeader";
+} from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import StepHeader from "@/components/distribution-plan-tool/common/StepHeader";
 import BuildPhaseForm from "./form/BuildPhaseForm";
-import DistributionPlanStepWrapper from "../../common/DistributionPlanStepWrapper";
-import DistributionPlanNextStepBtn from "../../common/DistributionPlanNextStepBtn";
+import DistributionPlanStepWrapper from "@/components/distribution-plan-tool/common/DistributionPlanStepWrapper";
+import DistributionPlanNextStepBtn from "@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn";
 import BuildPhaseTable from "./table/BuildPhaseTable";
-import DistributionPlanEmptyTablePlaceholder from "../../common/DistributionPlanEmptyTablePlaceholder";
+import DistributionPlanEmptyTablePlaceholder from "@/components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder";
 
 export default function BuildPhase({
   selectedPhase,

@@ -1,4 +1,4 @@
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import styles from "./Header.module.scss";
 
 export default function HeaderPlaceholder() {

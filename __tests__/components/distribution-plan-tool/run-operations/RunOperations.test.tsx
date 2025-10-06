@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import RunOperations from '../../../../components/distribution-plan-tool/run-operations/RunOperations';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistRunStatus } from '../../../../components/allowlist-tool/allowlist-tool.types';
+import RunOperations from '@/components/distribution-plan-tool/run-operations/RunOperations';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistRunStatus } from '@/components/allowlist-tool/allowlist-tool.types';
 
 jest.mock('react-use', () => ({ useInterval: jest.fn() }));
-jest.mock('../../../../services/distribution-plan-api', () => ({ distributionPlanApiFetch: jest.fn() }));
+jest.mock('@/services/distribution-plan-api', () => ({ distributionPlanApiFetch: jest.fn() }));
 
 const useInterval = require('react-use').useInterval as jest.Mock;
 
@@ -50,7 +50,7 @@ describe('RunOperations', () => {
   });
 
   it('fetches updated run via interval callback', async () => {
-    const api = require('../../../../services/distribution-plan-api');
+    const api = require('@/services/distribution-plan-api');
     const setState = jest.fn();
     api.distributionPlanApiFetch.mockResolvedValue({ success: true, data: { activeRun: { status: AllowlistRunStatus.FAILED } } });
 

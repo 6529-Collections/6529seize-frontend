@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
-import UserPageIdentityActivityLog from '../../../../../components/user/identity/activity/UserPageIdentityActivityLog';
+import UserPageIdentityActivityLog from '@/components/user/identity/activity/UserPageIdentityActivityLog';
 
-jest.mock('../../../../../components/profile-activity/ProfileActivityLogs', () => (props: any) => (
+jest.mock('@/components/profile-activity/ProfileActivityLogs', () => (props: any) => (
   <div data-testid="activity" data-props={JSON.stringify(props)} />
 ));
 
-jest.mock('../../../../../components/profile-activity/ProfileName', () => ({
+jest.mock('@/components/profile-activity/ProfileName', () => ({
   __esModule: true,
   ProfileNameType: { POSSESSION: 'POSSESSION', DEFAULT: 'DEFAULT' },
   default: (props: any) => <span data-testid="name">{props.type}</span>,
 }));
 
-jest.mock('../../../../../components/user/utils/UserTableHeaderWrapper', () => (props: any) => (
+jest.mock('@/components/user/utils/UserTableHeaderWrapper', () => (props: any) => (
   <div data-testid="wrapper">{props.children}</div>
 ));
 

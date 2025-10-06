@@ -1,12 +1,12 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { DistributionPlanToolContext } from "../../../DistributionPlanToolContext";
-import { BuildPhasesPhase } from "../../BuildPhases";
-import DistributionPlanAddOperationBtn from "../../../common/DistributionPlanAddOperationBtn";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
-} from "../../../../allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+} from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import BuildPhaseFormConfigModal from "./BuildPhaseFormConfigModal";
 import { Tooltip } from "react-tooltip";
 

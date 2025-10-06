@@ -1,10 +1,10 @@
 import { keepPreviousData } from "@tanstack/query-core";
 import { useQuery } from "@tanstack/react-query";
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
-import { commonApiFetch } from "../../../../../services/api/common-api";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { commonApiFetch } from "@/services/api/common-api";
 import GroupCard from "./GroupCard";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import ChatItemHrefButtons from "../../../../waves/ChatItemHrefButtons";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 
 export default function GroupCardChat({
   href,

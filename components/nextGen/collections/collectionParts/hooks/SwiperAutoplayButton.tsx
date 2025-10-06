@@ -4,7 +4,7 @@ import { faPauseCircle, faPlayCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useSwiper } from "swiper/react";
-import useCapacitor from "../../../../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 
 interface SwiperAutoplayButtonProps {
   readonly isInViewport: boolean;

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ApiWave } from "../../../../generated/models/ObjectSerializer";
+import { ApiWave } from "@/generated/models/ObjectSerializer";
 import MemesArtSubmissionModal from "../MemesArtSubmissionModal";
-import { SubmissionStatus, useWave } from "../../../../hooks/useWave";
+import { SubmissionStatus, useWave } from "@/hooks/useWave";
 
 interface MobileMemesArtSubmissionBtnProps {
   readonly wave: ApiWave;

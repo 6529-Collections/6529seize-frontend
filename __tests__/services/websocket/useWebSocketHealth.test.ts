@@ -1,11 +1,11 @@
 import { act, renderHook } from '@testing-library/react';
-import { useWebSocketHealth } from '../../../services/websocket/useWebSocketHealth';
-import { WebSocketStatus } from '../../../services/websocket/WebSocketTypes';
-import { useWebSocket } from '../../../services/websocket/useWebSocket';
-import { getAuthJwt, WALLET_AUTH_COOKIE } from '../../../services/auth/auth.utils';
+import { useWebSocketHealth } from '@/services/websocket/useWebSocketHealth';
+import { WebSocketStatus } from '@/services/websocket/WebSocketTypes';
+import { useWebSocket } from '@/services/websocket/useWebSocket';
+import { getAuthJwt, WALLET_AUTH_COOKIE } from '@/services/auth/auth.utils';
 
-jest.mock('../../../services/websocket/useWebSocket');
-jest.mock('../../../services/auth/auth.utils', () => ({
+jest.mock('@/services/websocket/useWebSocket');
+jest.mock('@/services/auth/auth.utils', () => ({
   getAuthJwt: jest.fn(),
   WALLET_AUTH_COOKIE: 'wallet-auth',
 }));

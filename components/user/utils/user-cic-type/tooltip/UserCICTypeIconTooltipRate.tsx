@@ -1,7 +1,7 @@
 import { RateMatter } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserPageIdentityHeaderCICRate from "../../../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
-import UserPageRateWrapper from "../../rate/UserPageRateWrapper";
+import UserPageIdentityHeaderCICRate from "@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate";
+import UserPageRateWrapper from "@/components/user/utils/rate/UserPageRateWrapper";
 
 export default function UserCICTypeIconTooltipRate({
   profile,

@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import CommonProfileLink from '../../../../components/user/utils/CommonProfileLink';
-import { USER_PAGE_TAB_IDS } from '../../../../components/user/layout/userTabs.config';
+import CommonProfileLink from '@/components/user/utils/CommonProfileLink';
+import { USER_PAGE_TAB_IDS } from '@/components/user/layout/userTabs.config';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
-jest.mock('../../../../helpers/Helpers', () => ({ getProfileTargetRoute: jest.fn(() => '/target') }));
+jest.mock('@/helpers/Helpers', () => ({ getProfileTargetRoute: jest.fn(() => '/target') }));
 jest.mock('next/navigation', () => ({ usePathname: () => '/testuser/collected' }));
 
-const { getProfileTargetRoute } = require('../../../../helpers/Helpers');
+const { getProfileTargetRoute } = require('@/helpers/Helpers');
 
 describe('CommonProfileLink', () => {
   it('disables link for current user', () => {

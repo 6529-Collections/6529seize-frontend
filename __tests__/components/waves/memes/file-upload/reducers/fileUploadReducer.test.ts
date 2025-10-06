@@ -1,4 +1,4 @@
-import { fileUploaderReducer, initialFileUploaderState } from '../../../../../../components/waves/memes/file-upload/reducers/fileUploadReducer';
+import { fileUploaderReducer, initialFileUploaderState } from '@/components/waves/memes/file-upload/reducers/fileUploadReducer';
 
 const sampleFile = new File(['a'], 'a.txt', { type: 'text/plain' });
 

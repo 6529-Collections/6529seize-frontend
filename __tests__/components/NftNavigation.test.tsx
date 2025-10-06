@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import NftNavigation from '../../components/nft-navigation/NftNavigation';
-import { enterArtFullScreen, fullScreenSupported } from '../../helpers/Helpers';
+import NftNavigation from '@/components/nft-navigation/NftNavigation';
+import { enterArtFullScreen, fullScreenSupported } from '@/helpers/Helpers';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, className, ...props }: any) => <a href={href} className={className} {...props}>{children}</a> }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (props: any) => <svg data-testid="icon" onClick={props.onClick} /> }));
 
-jest.mock('../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   enterArtFullScreen: jest.fn(),
   fullScreenSupported: jest.fn(),
 }));

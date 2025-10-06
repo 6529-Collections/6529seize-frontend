@@ -1,4 +1,4 @@
-import { groupSlice, setActiveGroupId, selectActiveGroupId } from '../../store/groupSlice';
+import { groupSlice, setActiveGroupId, selectActiveGroupId } from '@/store/groupSlice';
 import { HYDRATE } from 'next-redux-wrapper';
 
 describe('groupSlice', () => {

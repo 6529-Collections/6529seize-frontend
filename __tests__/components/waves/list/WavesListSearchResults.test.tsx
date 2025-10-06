@@ -1,19 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import React from "react";
-import WavesListSearchResults from '../../../../components/waves/list/WavesListSearchResults';
-import { useWaves } from '../../../../hooks/useWaves';
-import { ApiWave } from '../../../../generated/models/ApiWave';
-import { ApiWaveType } from '../../../../generated/models/ApiWaveType';
+import WavesListSearchResults from '@/components/waves/list/WavesListSearchResults';
+import { useWaves } from '@/hooks/useWaves';
+import { ApiWave } from '@/generated/models/ApiWave';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 // Mock dependencies
-jest.mock('../../../../hooks/useWaves');
-jest.mock('../../../../components/waves/list/WaveItem', () => {
+jest.mock('@/hooks/useWaves');
+jest.mock('@/components/waves/list/WaveItem', () => {
   return function MockWaveItem({ wave }: any) {
     return <div data-testid={`wave-item-${wave.id}`}>{wave.name}</div>;
   };
 });
 
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => {
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => {
   const MockCircleLoader = function MockCircleLoader() {
     return <div data-testid="circle-loader">Loading...</div>;
   };
@@ -33,7 +33,7 @@ jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', (
   };
 });
 
-jest.mock('../../../../components/utils/CommonIntersectionElement', () => {
+jest.mock('@/components/utils/CommonIntersectionElement', () => {
   return function MockCommonIntersectionElement({ onIntersection }: any) {
     // Simulate intersection for testing
     React.useEffect(() => {

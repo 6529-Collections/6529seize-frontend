@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
-import { ApiProfileClassification } from '../../../../../generated/models/ApiProfileClassification';
-import { CLASSIFICATIONS } from '../../../../../entities/IProfile';
-import UserPageHeaderName from '../../../../../components/user/user-page-header/name/UserPageHeaderName';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
+import { CLASSIFICATIONS } from '@/entities/IProfile';
+import UserPageHeaderName from '@/components/user/user-page-header/name/UserPageHeaderName';
 
-jest.mock('../../../../../components/user/user-page-header/name/UserPageHeaderNameWrapper', () => ({
+jest.mock('@/components/user/user-page-header/name/UserPageHeaderNameWrapper', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="name-wrapper">{props.children}</div>,
 }));
 
-jest.mock('../../../../../components/user/user-page-header/name/classification/UserPageClassificationWrapper', () => ({
+jest.mock('@/components/user/user-page-header/name/classification/UserPageClassificationWrapper', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="classification">{props.children}</div>,
 }));
 
-jest.mock('../../../../../components/user/utils/user-cic-type/UserCICTypeIconWrapper', () => ({
+jest.mock('@/components/user/utils/user-cic-type/UserCICTypeIconWrapper', () => ({
   __esModule: true,
   default: () => <div data-testid="cic-icon" />,
 }));

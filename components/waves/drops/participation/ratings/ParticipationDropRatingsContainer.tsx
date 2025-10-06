@@ -1,4 +1,4 @@
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { getThemeColors } from "./ParticipationDropRatingsTheme";
 import { RatingsData } from "./types";
 import ParticipationDropRatingsTotalSection from "./ParticipationDropRatingsTotalSection";

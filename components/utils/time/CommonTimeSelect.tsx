@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Time } from "../../../helpers/time";
+import { Time } from "@/helpers/time";
 import CommonInput from "../input/CommonInput";
 import { CommonSelectItem } from "../select/CommonSelect";
 import CommonDropdown from "../select/dropdown/CommonDropdown";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 enum TimeMode {
   MINUTES = "MINUTES",
