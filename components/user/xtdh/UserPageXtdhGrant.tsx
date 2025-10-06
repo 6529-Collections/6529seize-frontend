@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import type {
   ContractOverview,
@@ -17,6 +17,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { ApiCreateTdhGrant } from "@/generated/models/ApiCreateTdhGrant";
 import { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
 import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageXtdhGrant() {
   const [contract, setContract] = useState<ContractOverview | null>(null);
@@ -26,6 +27,7 @@ export default function UserPageXtdhGrant() {
   const { requestAuth, setToast } = useContext(AuthContext);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const createGrantMutation = useMutation({
     mutationFn: async (payload: ApiCreateTdhGrant) =>
@@ -91,18 +93,18 @@ export default function UserPageXtdhGrant() {
       target_tokens: selection.allSelected
         ? []
         : selection.tokenIdsRaw.map((tokenId) => tokenId.toString()),
-      valid_to: validUntil ? Math.floor(validUntil.getTime() / 1000) : 0,
+      valid_to: validUntil ? Math.floor(validUntil.getTime() / 1000) : null,
       tdh_rate: amount,
       is_irrevocable: false,
     };
 
     try {
       await createGrantMutation.mutateAsync(payload);
+      await queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
       const message = "Grant submitted. You will see it once processed.";
       setSubmitSuccess(message);
       setToast({ type: "success", message });
     } catch (error) {
-      console.error(error);
       const message =
         error instanceof Error ? error.message : "Failed to submit the grant.";
       setSubmitError(message);
@@ -115,6 +117,7 @@ export default function UserPageXtdhGrant() {
     validUntil,
     requestAuth,
     createGrantMutation,
+    queryClient,
     setToast,
   ]);
 

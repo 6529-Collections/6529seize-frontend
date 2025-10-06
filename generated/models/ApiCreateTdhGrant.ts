@@ -20,7 +20,7 @@ export class ApiCreateTdhGrant {
     * List of token numbers. Each element can also be a span in form of start-end. Leave empty if all tokens are targets.
     */
     'target_tokens': Array<string>;
-    'valid_to': number;
+    'valid_to': number | null;
     'tdh_rate': number;
     /**
     * If true then the grant must be covered with lock contracts

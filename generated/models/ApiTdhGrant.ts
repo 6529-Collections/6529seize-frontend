@@ -26,7 +26,7 @@ export class ApiTdhGrant {
     'target_tokens': Array<string>;
     'created_at': number;
     'valid_from': number | null;
-    'valid_to': number;
+    'valid_to': number | null;
     'tdh_rate': number;
     'error_details': string | null;
     'status': ApiTdhGrantStatus;

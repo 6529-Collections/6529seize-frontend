@@ -4109,6 +4109,7 @@ components:
         valid_to:
           type: number
           format: int64
+          nullable: true
         tdh_rate:
           type: number
           format: int64
@@ -5975,6 +5976,7 @@ components:
         valid_to:
           type: number
           format: int64
+          nullable: true
         tdh_rate:
           type: number
           format: int64
