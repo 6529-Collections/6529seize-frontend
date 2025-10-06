@@ -306,7 +306,8 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="tw-flex tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+          className="tw-flex tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          style={{ WebkitOverflowScrolling: "touch" }}>
           {notificationsContent}
         </div>
       </div>
