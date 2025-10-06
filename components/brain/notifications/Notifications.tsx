@@ -1,6 +1,13 @@
 "use client";
 
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { UIEventHandler } from "react";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { AuthContext } from "@/components/auth/Auth";
@@ -117,7 +124,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     }
   }, [reload, refetch, markAllAsRead, searchParams, pathname, router]);
 
-  const triggerFetchOlder = () => {
+  const triggerFetchOlder = useCallback(() => {
     if (isFetchingNextPage) {
       return;
     }
@@ -130,7 +137,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     }
     isPrependingRef.current = true;
     fetchNextPage();
-  };
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   useLayoutEffect(() => {
     const scrollElement = scrollContainerRef.current;
@@ -231,29 +238,37 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     };
   }, [items, showLoader, showNoItems]);
 
-  const handleScroll: UIEventHandler<HTMLDivElement> = (event) => {
-    const container = event.currentTarget;
-    const distanceFromBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
-    const isNearBottom =
-      distanceFromBottom <= STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX;
+  const handleScroll: UIEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      const container = event.currentTarget;
+      const distanceFromBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight;
+      const isNearBottom =
+        distanceFromBottom <= STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX;
 
-    if (isNearBottom) {
-      isPinnedToBottomRef.current = true;
-    } else if (distanceFromBottom > STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX) {
-      isPinnedToBottomRef.current = false;
-    }
-
-    if (!shouldEnableInfiniteScroll) {
-      return;
-    }
-
-    if (container.scrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX) {
-      if (!isFetchingNextPage && hasNextPage) {
-        triggerFetchOlder();
+      if (isNearBottom) {
+        isPinnedToBottomRef.current = true;
+      } else if (distanceFromBottom > STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX) {
+        isPinnedToBottomRef.current = false;
       }
-    }
-  };
+
+      if (!shouldEnableInfiniteScroll) {
+        return;
+      }
+
+      if (container.scrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX) {
+        if (!isFetchingNextPage && hasNextPage) {
+          triggerFetchOlder();
+        }
+      }
+    },
+    [
+      shouldEnableInfiniteScroll,
+      isFetchingNextPage,
+      hasNextPage,
+      triggerFetchOlder,
+    ]
+  );
 
   let notificationsContent = null;
   if (showLoader) {
