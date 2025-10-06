@@ -93,8 +93,7 @@ export function createAppWalletConnector(
       try {
         // Check if we're in Capacitor for more lenient validation
         const isCapacitor =
-          typeof globalThis.window !== "undefined" &&
-          globalThis.window?.Capacitor?.isNativePlatform?.();
+          !!globalThis.window?.Capacitor?.isNativePlatform?.();
 
         // Validate password by decrypting address hash
         const decryptedAddress = await decryptData(
