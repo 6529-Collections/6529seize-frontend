@@ -72,6 +72,7 @@ export type NftPickerProps = {
   readonly placeholder?: string;
   readonly className?: string;
   readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
+  readonly variant?: "card" | "flat";
 };
 
 export type ParseError = {

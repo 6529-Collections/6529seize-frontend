@@ -130,14 +130,14 @@ export default function UserPageXtdhGrant() {
         validUntil={validUntil}
       />
 
-      <UserPageXtdhGrantValidity value={validUntil} onChange={setValidUntil} />
-
-      <UserPageXtdhGrantAmount amount={amount} onAmountChange={setAmount} />
-
       <UserPageXtdhGrantSelection
         onSelectionChange={setSelection}
         onContractChange={setContract}
       />
+
+      <UserPageXtdhGrantAmount amount={amount} onAmountChange={setAmount} />
+
+      <UserPageXtdhGrantValidity value={validUntil} onChange={setValidUntil} />
 
       <UserPageXtdhGrantSubmit
         contract={contract}

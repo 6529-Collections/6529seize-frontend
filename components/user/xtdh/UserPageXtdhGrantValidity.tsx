@@ -86,11 +86,9 @@ export default function UserPageXtdhGrantValidity({
   }, [minTimestamp, selectedDate]);
 
   return (
-    <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-2xl tw-p-4 tw-space-y-4">
+    <div className="tw-flex tw-flex-col tw-gap-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-        <h3 className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-m-0">
-          Validity
-        </h3>
+        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">Validity</h3>
         <label className="tw-inline-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-200">
           <input
             type="checkbox"

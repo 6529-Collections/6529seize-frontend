@@ -91,11 +91,11 @@ export default function UserPageXtdhGrantSummary({
   validUntil,
 }: Readonly<UserPageXtdhGrantSummaryProps>) {
   return (
-    <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-2xl tw-p-4 tw-space-y-2">
-      <p className="tw-text-sm tw-text-iron-300 tw-m-0">
+    <div className="tw-flex tw-flex-col tw-gap-1">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         {getSelectionSummary({ contract, selection, amount })}
       </p>
-      <p className="tw-text-xs tw-text-iron-400 tw-m-0">{getValiditySummary(validUntil)}</p>
+      <p className="tw-m-0 tw-text-xs tw-text-iron-400">{getValiditySummary(validUntil)}</p>
     </div>
   );
 }

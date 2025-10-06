@@ -85,10 +85,10 @@ export default function UserPageXtdhGrantSubmit({
         }}
         disabled={disabled}
         className={clsx(
-          "tw-w-full tw-rounded-lg tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out",
+          "tw-w-full tw-rounded-lg tw-border tw-border-transparent tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out tw-shadow-sm",
           disabled
-            ? "tw-cursor-not-allowed tw-bg-iron-800 tw-text-iron-400"
-            : "tw-bg-primary-500 tw-text-black hover:tw-bg-primary-400"
+            ? "tw-cursor-not-allowed tw-bg-iron-700 tw-text-iron-200 tw-shadow-none tw-border-iron-600"
+            : "tw-bg-primary-500 tw-text-black hover:tw-bg-primary-400 hover:tw-border-primary-300"
         )}>
         {isSubmitting ? "Submitting..." : "Submit grant"}
       </button>

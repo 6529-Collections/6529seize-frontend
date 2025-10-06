@@ -83,6 +83,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     placeholder = "Search by collection name or paste contract address…",
     className,
     renderTokenExtra,
+    variant = "card",
   } = props;
   const valueChain = value?.chain;
   const defaultChain = defaultValue?.chain;
@@ -685,8 +686,25 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     ? `nft-suggestion-${activeIndex}`
     : undefined;
 
+  const wrapperClassName = clsx(
+    variant === "card"
+      ? "tw-@container tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+      : "tw-@container tw-flex tw-flex-col tw-gap-4",
+    className
+  );
+
+  const collectionInputClassName =
+    variant === "card"
+      ? "tw-w-full tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-[0.625rem] tw-text-sm tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+      : "tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400";
+
+  const tokenInputClassName =
+    variant === "card"
+      ? "tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 tw-transition disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900 disabled:tw-text-iron-600 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-500"
+      : "tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900 disabled:tw-text-iron-600";
+
   return (
-    <div className={clsx("tw-@container tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4", className)}>
+    <div className={wrapperClassName}>
       <div className="tw-flex tw-flex-col tw-gap-2">
         <label htmlFor={collectionInputId} className="tw-text-sm tw-font-semibold tw-text-iron-200">
           Select collection
@@ -704,7 +722,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
             aria-expanded={isOpen}
             aria-controls="nft-picker-suggest-list"
             aria-activedescendant={activeSuggestionId}
-            className="tw-w-full tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-[0.625rem] tw-text-sm tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+            className={collectionInputClassName}
           />
           {suggestionList.length > 0 && (
             <NftSuggestList
@@ -745,7 +763,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                   onKeyDown={handleTokenInputKeyDown}
                   placeholder={tokenInputPlaceholder}
                   disabled={tokenInputDisabled}
-                  className="tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 tw-transition disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900 disabled:tw-text-iron-600 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-500"
+                  className={tokenInputClassName}
                   aria-label="Add token IDs or ranges"
                   aria-describedby={helperMessageId}
                 />

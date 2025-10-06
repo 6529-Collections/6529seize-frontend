@@ -103,7 +103,16 @@ export default function UserPageXtdh({
       </div>
 
       {activeFilter === "granted" ? (
-        <UserPageXtdhGranted canGrant={canGrant} />
+        <UserPageXtdhGranted
+          canGrant={canGrant}
+          grantor={
+            profile.query ??
+            profile.handle ??
+            profile.primary_wallet ??
+            profile.consolidation_key
+          }
+          isSelf={canGrant}
+        />
       ) : (
         <UserPageXtdhReceived />
       )}

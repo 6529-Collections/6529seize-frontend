@@ -30,7 +30,20 @@ const formatAmount = (value: number) =>
     maximumFractionDigits: 6,
   }).format(value);
 
-export default function UserPageXtdhGrantedList() {
+export interface UserPageXtdhGrantedListProps {
+  readonly grantor: string;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly isSelf?: boolean;
+}
+
+export default function UserPageXtdhGrantedList({
+  grantor,
+  page = 1,
+  pageSize = 25,
+  isSelf = false,
+}: Readonly<UserPageXtdhGrantedListProps>) {
+  const enabled = Boolean(grantor);
   const {
     data,
     isLoading,
@@ -38,9 +51,17 @@ export default function UserPageXtdhGrantedList() {
     error,
     refetch,
   } = useQuery({
-    queryKey: [QueryKey.TDH_GRANTS],
+    queryKey: [QueryKey.TDH_GRANTS, grantor, page, pageSize],
     queryFn: async () =>
-      await commonApiFetch<ApiTdhGrantsPage>({ endpoint: "tdh-grants" }),
+      await commonApiFetch<ApiTdhGrantsPage>({
+        endpoint: "tdh-grants",
+        params: {
+          grantor,
+          page,
+          page_size: pageSize,
+        },
+      }),
+    enabled,
     staleTime: 30_000,
   });
 
@@ -48,7 +69,13 @@ export default function UserPageXtdhGrantedList() {
 
   let content: ReactNode;
 
-  if (isLoading) {
+  if (!enabled) {
+    content = (
+      <p className="tw-text-sm tw-text-iron-300 tw-m-0">
+        Unable to load TDH grants for this profile.
+      </p>
+    );
+  } else if (isLoading) {
     content = (
       <p className="tw-text-sm tw-text-iron-300 tw-m-0">Loading granted xTDH…</p>
     );
@@ -73,7 +100,9 @@ export default function UserPageXtdhGrantedList() {
   } else if (grants.length === 0) {
     content = (
       <p className="tw-text-sm tw-text-iron-300 tw-m-0">
-        No TDH grants found for your account yet.
+        {isSelf
+          ? "You haven't granted any xTDH yet."
+          : "This identity hasn't granted any xTDH yet."}
       </p>
     );
   } else {
@@ -114,20 +143,10 @@ export default function UserPageXtdhGrantedList() {
 
   return (
     <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-2xl tw-p-4 tw-space-y-4">
-      <div className="tw-flex tw-items-center tw-justify-between">
+      <div className="tw-flex tw-items-center">
         <h2 className="tw-text-base tw-font-semibold tw-text-iron-100 tw-m-0">
           Granted xTDH
         </h2>
-        {!isLoading && grants.length > 0 && (
-          <button
-            type="button"
-            onClick={() => {
-              void refetch();
-            }}
-            className="tw-text-xs tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200">
-            Refresh
-          </button>
-        )}
       </div>
       {content}
     </div>

@@ -5,16 +5,20 @@ import UserPageXtdhGrantedList from "./UserPageXtdhGrantedList";
 
 export default function UserPageXtdhGranted({
   canGrant,
+  grantor,
+  isSelf,
 }: {
   readonly canGrant: boolean;
+  readonly grantor: string;
+  readonly isSelf: boolean;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-8">
-      <UserPageXtdhGrantedList />
+      <UserPageXtdhGrantedList grantor={grantor} isSelf={isSelf} />
 
       {canGrant && (
         <section className="tw-flex tw-flex-col tw-gap-4 tw-mt-6 tw-pt-6 tw-border-t tw-border-iron-700">
-          <header>
+          <header className="tw-pl-4 tw-pr-4 lg:tw-pl-6 lg:tw-pr-6">
             <h2 className="tw-text-base tw-font-semibold tw-text-iron-100 tw-m-0">
               Create New Grant
             </h2>
